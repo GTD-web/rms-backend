@@ -1,72 +1,46 @@
 services:
-  resource-server:
-    restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - APP_NAME=resource-service
-    image: 192.168.10.64:4999/resource/resource-server:${TAG:-latest}
-    command: npm run start -- resource-service
-    ports:
-      - '5001:5001'
-    environment:
-      NODE_ENV: production
-      TZ: UTC
-      POSTGRES_HOST: resource-postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: resource-server
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: tech7admin!
-      JWT_SECRET: 13hjkabsud23l13asbizx
-      JWT_EXPIRES_IN: 24h
-      GMAIL_USER: noti.lumir.space@gmail.com
-      GMAIL_APP_PASSWORD: zlwmvrkqhhmrjmno
-      REDIS_HOST: resource-redis
-      REDIS_PORT: 6379
-      NATS_URL: nats://nats:4222
-      APP_NAME: resource-service
-    depends_on:
-      - resource-postgres
-      # - nats
-    networks:
-      - resource-network
+    resource-server:
+        restart: always
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                - APP_NAME=resource-service
+        image: 192.168.10.64:4999/resource/resource-server:${TAG:-latest}
+        command: npm run start -- resource-service
+        ports:
+            - '5001:5001'
+        environment:
+            NODE_ENV: production
+            TZ: UTC
+            APP_NAME: resource-service
+            APP_PORT: 5001
+            POSTGRES_HOST: attendance-postgres
+            POSTGRES_PORT: 5432
+            POSTGRES_DB: resource-server
+            POSTGRES_USER: admin
+            POSTGRES_PASSWORD: tech7admin!
+            JWT_SECRET: 13hjkabsud23l13asbizx
+            JWT_EXPIRES_IN: 24h
+            GMAIL_USER: noti.lumir.space@gmail.com
+            GMAIL_APP_PASSWORD: zlwmvrkqhhmrjmno
+            REDIS_HOST: attendance-redis
+            REDIS_PORT: 6379
+            NATS_URL: nats://nats:4222
+        # depends_on:
 
-  resource-postgres:
-    image: postgres:latest
-    restart: always
-    # ports:
-    #   - '5432:5432'
-    environment:
-      TZ: UTC
-      POSTGRES_DB: resource-server
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: tech7admin!
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - backend-attendance-management_app_network
-      - resource-network
-
-  # nats:
-  #   container_name: nats
-  #   ports:
-  #     - '4222:4222'
-  #   image: nats:2.2.2-alpine
-  #   restart: always
-  #   environment:
-  #     TZ: UTC
-  #   networks:
-  #     - backend-attendance-management_app_network
+        # - nats
+        networks:
+            - backend-attendance-management_app_network
+            - resource-network
 
 volumes:
-  redis_data:
-  postgres_data:
-  files:
+    redis_data:
+    postgres_data:
+    files:
 
 networks:
-  backend-attendance-management_app_network:
-    external: true
-  resource-network:
-    driver: bridge
+    backend-attendance-management_app_network:
+        external: true
+    resource-network:
+        driver: bridge

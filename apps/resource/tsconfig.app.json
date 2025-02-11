@@ -3,6 +3,7 @@
     "compilerOptions": {
         "declaration": false,
         "outDir": "../../dist/apps/resource",
+        "baseUrl": "./",
         "paths": {
             "@libs/*": ["../../libs/*"],
             "@resource/*": ["src/*"]
@@ -10,5 +11,4 @@
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
-
 }
