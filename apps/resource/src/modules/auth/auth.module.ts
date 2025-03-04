@@ -1,37 +1,41 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthController } from './controllers/auth.controller';
-import { AuthService } from './services/auth.service';
-import { JwtAuthProvider } from './providers/jwt-auth.provider';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { UserModule } from '../user/user.module';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { JwtAuthService } from './application/services/jwt-auth.service';
+import { SsoAuthService } from './application/services/sso-auth.service';
+import { AuthController } from './infrastructure/adapters/in/web/auth.controller';
+import { UserRepository } from './infrastructure/adapters/out/user.repository';
+import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
+import { User, Employee } from '@libs/entities';
+import { UserService } from './application/services/user.service';
+import { UserController } from './infrastructure/adapters/in/web/user.controller';
 
 @Module({
-    imports: [
-        PassportModule,
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                secret: configService.get('JWT_SECRET'),
-                signOptions: {
-                    expiresIn: configService.get('JWT_EXPIRES_IN', '1h'),
-                },
-            }),
-            inject: [ConfigService],
-        }),
-        UserModule,
-    ],
-    controllers: [AuthController],
+    imports: [PassportModule, TypeOrmModule.forFeature([User, Employee])],
     providers: [
-        AuthService,
         JwtStrategy,
         {
-            provide: 'IAuthProvider',
-            useClass: JwtAuthProvider,
+            provide: 'AuthService',
+            useClass: process.env.USE_SSO === 'true' ? SsoAuthService : JwtAuthService,
+        },
+        UserService,
+        UserRepository,
+        {
+            provide: 'UserRepositoryPort',
+            useClass: UserRepository,
         },
     ],
-    exports: [AuthService],
+    controllers: [AuthController, UserController],
+    exports: [
+        JwtStrategy,
+        {
+            provide: 'AuthService',
+            useClass: process.env.USE_SSO === 'true' ? SsoAuthService : JwtAuthService,
+        },
+        UserService,
+    ],
 })
 export class AuthModule {}

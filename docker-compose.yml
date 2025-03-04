@@ -12,7 +12,7 @@ services:
             - '5001:5001'
         environment:
             NODE_ENV: production
-            TZ: UTC
+            TZ: Asia/Seoul
             APP_NAME: resource-service
             APP_PORT: 5001
             POSTGRES_HOST: attendance-postgres
@@ -27,6 +27,8 @@ services:
             REDIS_HOST: attendance-redis
             REDIS_PORT: 6379
             NATS_URL: nats://nats:4222
+            WEB_PUSH_PUBLIC_KEY: BH87CE8fWmQUBVd9G8MrVDxifUV9nqz4iN5gssoSdZijAAwLiJuWpqktclMrWFIAaxlJ5wdw3ayGhx2dbS4y5BI
+            WEB_PUSH_PRIVATE_KEY: 1Oitw9QsHXJG7gFiFlaXc3n98Q2KVDNo7Jn-Kj7WU4U
         # depends_on:
 
         # - nats

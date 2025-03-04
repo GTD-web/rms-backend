@@ -5,7 +5,7 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@8.15.4
 
 # A wildcard is used to ensure both package.json AND pnpm-lock.yaml are copied
 COPY package*.json pnpm-lock.yaml ./

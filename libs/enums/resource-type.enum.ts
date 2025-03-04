@@ -1,0 +1,5 @@
+export enum ResourceType {
+  MEETING_ROOM = 'MEETING_ROOM',
+  VEHICLE = 'VEHICLE',
+  ACCOMMODATION = 'ACCOMMODATION',
+} 

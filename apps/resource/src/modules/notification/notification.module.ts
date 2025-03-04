@@ -1,17 +1,46 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Notification } from './domain/entities/notification.entity';
-import { PushSubscription } from './domain/entities/push-subscription.entity';
-import { NotificationService } from './application/services/notification.service';
-import { NotificationController } from './presentation/controllers/notification.controller';
-import { NotificationRepository } from './infrastructure/repositories/notification.repository';
-import { PushSubscriptionRepository } from './infrastructure/repositories/push-subscription.repository';
-import { WebPushAdapter } from './infrastructure/adapters/web-push.adapter';
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { Notification } from "@libs/entities/notification.entity";
+import { NotificationRepository } from "./infrastructure/adapters/out/persistence/notification.repository";
+import { NotificationController } from "./infrastructure/adapters/in/web/controllers/notification.controller";
+import { NotificationService } from "./application/services/notification.service";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { WEB_PUSH_CONFIG } from "@libs/configs/env.config";
+import { AdapterService } from "./application/services/adapter.service";
+// import { WebPushAdapter } from "./infrastructure/adapters/out/device/web-push.adapter";
+import { FCMAdapter } from "./infrastructure/adapters/out/device/fcm-push.adapter";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Notification, PushSubscription])],
+    imports: [
+      TypeOrmModule.forFeature([Notification]),
+      ConfigModule.forFeature(WEB_PUSH_CONFIG),
+    ],
+    providers: [
+      ConfigService,
+      NotificationService,
+      AdapterService,
+      {
+        provide: 'NotificationRepositoryPort',
+        useClass: NotificationRepository,
+      },
+      {
+        provide: 'PushNotificationServicePort',
+        useClass: FCMAdapter,
+      },
+
+    ],
     controllers: [NotificationController],
-    providers: [NotificationService, NotificationRepository, PushSubscriptionRepository, WebPushAdapter],
-    exports: [NotificationService],
+    exports: [
+        NotificationService,
+        AdapterService,
+        {
+            provide: 'NotificationRepositoryPort',
+            useClass: NotificationRepository,
+        },
+        {
+            provide: 'PushNotificationServicePort',
+            useClass: FCMAdapter,
+        },
+    ],
 })
-export class NotificationModule {}
+ export class NotificationModule {}
