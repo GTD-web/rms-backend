@@ -53,35 +53,4 @@ export class UserRepository implements UserRepositoryPort {
         });
         return updated;
     }
-
-    // async findByEmail(email: string, repositoryOptions?: RepositoryOptions): Promise<User | null> {
-    //     const repository = repositoryOptions?.queryRunner
-    //         ? repositoryOptions.queryRunner.manager.getRepository(User)
-    //         : this.repository;
-    //     const entity = await repository.findOne({
-    //         where: { email },
-    //     });
-    //     return entity ? this.toDomain(entity) : null;
-    // }
-
-    // async findByUserId(userId: string, repositoryOptions?: RepositoryOptions): Promise<User | null> {
-    //     const repository = repositoryOptions?.queryRunner
-    //         ? repositoryOptions.queryRunner.manager.getRepository(UserEntity)
-    //         : this.repository;
-    //     const entity = await repository.findOne({
-    //         where: { userId },
-    //     });
-    //     return entity ? this.toDomain(entity) : null;
-    // }
-
-    // async findByEmployeeId(employeeId: string, repositoryOptions?: RepositoryOptions): Promise<User | null> {
-    //     const repository = repositoryOptions?.queryRunner
-    //         ? repositoryOptions.queryRunner.manager.getRepository(UserEntity)
-    //         : this.repository;
-    //     const entity = await repository.findOne({
-    //         where: { employeeId },
-    //     });
-    //     console.log('entity', entity);
-    //     return entity ? this.toDomain(entity) : null;
-    // }
 }

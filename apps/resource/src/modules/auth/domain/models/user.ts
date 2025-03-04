@@ -6,6 +6,7 @@ export interface UserProps {
     userId?: string;
     employeeId: string;
     email: string;
+    mobile: string;
     password: string;
     accessToken?: string;
     expiredAt?: string;
@@ -41,6 +42,10 @@ export class User {
 
     get email(): string {
         return this.props.email;
+    }
+
+    get mobile(): string {
+        return this.props.mobile;
     }
 
     get password(): string {

@@ -5,10 +5,10 @@ import { LoginDto } from '../dto/login.dto';
 import { User } from '@resource/modules/auth/domain/models/user';
 import { DateUtil } from '@libs/utils/date.util';
 import { LoginResponseDto } from '../dto/login-response.dto';
-import { UserMapper } from '../mappers/user.mapper';
-import { UserService } from './user.service';
+import { UserService } from '../services/user.service';
+
 @Injectable()
-export class JwtAuthService implements AuthService {
+export class JwtAuthUsecase implements AuthService {
     constructor(
         private jwtService: JwtService,
         private readonly userService: UserService,

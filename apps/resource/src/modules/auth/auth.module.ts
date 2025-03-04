@@ -1,25 +1,23 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { JwtAuthService } from './application/services/jwt-auth.service';
-import { SsoAuthService } from './application/services/sso-auth.service';
+import { JwtAuthUsecase } from './application/usecases/jwt-auth.usecase';
+import { SsoAuthUsecase } from './application/usecases/sso-auth.usecase';
 import { AuthController } from './infrastructure/adapters/in/web/auth.controller';
 import { UserRepository } from './infrastructure/adapters/out/user.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { User, Employee } from '@libs/entities';
 import { UserService } from './application/services/user.service';
 import { UserController } from './infrastructure/adapters/in/web/user.controller';
-
+import { UserUsecase } from './application/usecases/user.usecase';
 @Module({
     imports: [PassportModule, TypeOrmModule.forFeature([User, Employee])],
     providers: [
         JwtStrategy,
         {
             provide: 'AuthService',
-            useClass: process.env.USE_SSO === 'true' ? SsoAuthService : JwtAuthService,
+            useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
         },
         UserService,
         UserRepository,
@@ -27,15 +25,17 @@ import { UserController } from './infrastructure/adapters/in/web/user.controller
             provide: 'UserRepositoryPort',
             useClass: UserRepository,
         },
+        UserUsecase,
     ],
     controllers: [AuthController, UserController],
     exports: [
         JwtStrategy,
         {
             provide: 'AuthService',
-            useClass: process.env.USE_SSO === 'true' ? SsoAuthService : JwtAuthService,
+            useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
         },
         UserService,
+        UserUsecase,
     ],
 })
 export class AuthModule {}

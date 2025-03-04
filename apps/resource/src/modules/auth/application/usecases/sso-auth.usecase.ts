@@ -5,7 +5,7 @@ import { LoginDto } from '@resource/modules/auth/application/dto/login.dto';
 import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-response.dto';
 
 @Injectable()
-export class SsoAuthService implements AuthService {
+export class SsoAuthUsecase implements AuthService {
     async validateUser(email: string, password: string): Promise<User> {
         // SSO API를 통해 사용자 인증
         return null;

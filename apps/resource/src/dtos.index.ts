@@ -3,6 +3,7 @@
 // Auth Module DTOs
 export { LoginDto } from './modules/auth/application/dto/login.dto';
 export { LoginResponseDto } from './modules/auth/application/dto/login-response.dto';
+export { UserResponseDto } from './modules/auth/application/dto/user-response.dto';
 
 // Common
 export { CreateResourceDto } from './modules/resource/common/application/dtos/create-resource.dto';
