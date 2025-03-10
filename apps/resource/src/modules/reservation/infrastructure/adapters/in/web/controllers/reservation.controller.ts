@@ -37,8 +37,11 @@ export class ReservationController {
         description: '예약 생성 성공',
         type: CreateReservationResponseDto,
     })
-    async create(@Body() createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
-        return this.reservationUsecase.makeReservation(createDto);
+    async create(
+        @User() user: UserEntity,
+        @Body() createDto: CreateReservationDto,
+    ): Promise<CreateReservationResponseDto> {
+        return this.reservationUsecase.makeReservation(user, createDto);
     }
 
     @ApiTags('sprint0.1')

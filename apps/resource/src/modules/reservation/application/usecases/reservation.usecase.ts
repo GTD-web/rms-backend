@@ -21,7 +21,7 @@ import {
     UpdateReservationTitleDto,
 } from '../dtos/update-reservation.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
-
+import { User } from '@libs/entities';
 @Injectable()
 export class ReservationUsecase {
     constructor(
@@ -30,7 +30,7 @@ export class ReservationUsecase {
         private readonly dataSource: DataSource,
     ) {}
 
-    async makeReservation(createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
+    async makeReservation(user: User, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
         const conflicts = await this.reservationService.findConflictingReservations(
             createDto.resourceId,
             DateUtil.parse(createDto.startDate).format(),
@@ -64,16 +64,24 @@ export class ReservationUsecase {
 
             // 참가자 정보 저장
             await Promise.all([
-                ...createDto.reserverIds.map((employeeId) =>
-                    this.participantService.save(
-                        {
-                            reservationId: savedReservation.reservationId!,
-                            employeeId,
-                            type: ParticipantsType.RESERVER,
-                        } as ReservationParticipant,
-                        { queryRunner },
-                    ),
+                this.participantService.save(
+                    {
+                        reservationId: savedReservation.reservationId!,
+                        employeeId: user.employeeId,
+                        type: ParticipantsType.RESERVER,
+                    } as ReservationParticipant,
+                    { queryRunner },
                 ),
+                // ...createDto.reserverIds.map((employeeId) =>
+                //     this.participantService.save(
+                //         {
+                //             reservationId: savedReservation.reservationId!,
+                //             employeeId,
+                //             type: ParticipantsType.RESERVER,
+                //         } as ReservationParticipant,
+                //         { queryRunner },
+                //     ),
+                // ),
                 ...createDto.participantIds.map((employeeId) =>
                     this.participantService.save(
                         {

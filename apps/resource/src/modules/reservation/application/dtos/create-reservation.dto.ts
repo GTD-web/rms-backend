@@ -41,10 +41,10 @@ export class CreateReservationDto {
     @IsOptional()
     notifyMinutesBeforeStart?: number[];
 
-    @ApiProperty({ type: [String] })
-    @IsArray()
-    @IsString({ each: true })
-    reserverIds: string[];
+    // @ApiProperty({ type: [String] })
+    // @IsArray()
+    // @IsString({ each: true })
+    // reserverIds: string[];
 
     @ApiProperty({ type: [String] })
     @IsArray()
