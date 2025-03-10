@@ -16,6 +16,14 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
 
     SwaggerModule.setup('api-docs', app, document, {
         jsonDocumentUrl: '/api-docs-json',
+        customJs: [
+            'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
+        ],
+        customCssUrl: [
+            'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
+            'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.css',
+        ],
 
         swaggerOptions: {
             tagsSorter: (a: string, b: string) => {
@@ -30,17 +38,6 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
             docExpansion: 'none',
 
             persistAuthorization: true,
-
-            customSiteTitle: 'RMS API Docs',
-            customfavIcon: '/favicon.ico',
-            customJs: [
-                'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
-                'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
-            ],
-            customCssUrl: [
-                'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
-                'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.css',
-            ],
         },
     });
 }
