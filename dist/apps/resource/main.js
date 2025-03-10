@@ -22147,6 +22147,74 @@ Object.defineProperty(exports, "FileResponseDto", ({ enumerable: true, get: func
 
 /***/ }),
 
+/***/ "./apps/resource/src/main.ts":
+/*!***********************************!*\
+  !*** ./apps/resource/src/main.ts ***!
+  \***********************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
+const app_module_1 = __webpack_require__(/*! @resource/app.module */ "./apps/resource/src/app.module.ts");
+const swagger_1 = __webpack_require__(/*! @libs/swagger/swagger */ "./libs/swagger/swagger.ts");
+const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
+const dtos = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
+const response_interceptor_1 = __webpack_require__(/*! @libs/interceptors/response.interceptor */ "./libs/interceptors/response.interceptor.ts");
+const error_interceptor_1 = __webpack_require__(/*! @libs/interceptors/error.interceptor */ "./libs/interceptors/error.interceptor.ts");
+const jwt_auth_guard_1 = __webpack_require__(/*! @libs/guards/jwt-auth.guard */ "./libs/guards/jwt-auth.guard.ts");
+const core_2 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
+const path_1 = __webpack_require__(/*! path */ "path");
+const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
+const role_guard_1 = __webpack_require__(/*! @libs/guards/role.guard */ "./libs/guards/role.guard.ts");
+const request_interceptor_1 = __webpack_require__(/*! @libs/interceptors/request.interceptor */ "./libs/interceptors/request.interceptor.ts");
+const express = __webpack_require__(/*! express */ "./node_modules/.pnpm/express@4.21.2/node_modules/express/index.js");
+let app;
+async function bootstrap() {
+    const server = express();
+    app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
+    app.enableCors({
+        origin: '*',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        credentials: true,
+    });
+    app.setGlobalPrefix('api');
+    app.useGlobalGuards(new jwt_auth_guard_1.JwtAuthGuard(app.get(core_2.Reflector)), new role_guard_1.RolesGuard(app.get(core_2.Reflector)));
+    app.useGlobalInterceptors(new request_interceptor_1.RequestInterceptor(), new response_interceptor_1.ResponseInterceptor(), new error_interceptor_1.ErrorInterceptor());
+    const uploadPath = (0, path_1.join)(process.cwd(), 'uploads');
+    app.useStaticAssets(uploadPath, {
+        prefix: '/uploads',
+        index: false,
+        fallthrough: false,
+    });
+    (0, swagger_1.setupSwagger)(app, Object.values(dtos));
+    if (process.env.NODE_ENV !== 'production') {
+        await app.listen(env_config_1.ENV.APP_PORT || 3000);
+    }
+    return app.getHttpAdapter().getInstance();
+}
+module.exports = async (req, res) => {
+    try {
+        if (!app) {
+            const server = await bootstrap();
+            return server(req, res);
+        }
+        const instance = app.getHttpAdapter().getInstance();
+        return instance(req, res);
+    }
+    catch (error) {
+        console.error('Error handling request:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+if (process.env.NODE_ENV !== 'production') {
+    bootstrap();
+}
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/mockdata.seed.ts":
 /*!********************************************!*\
   !*** ./apps/resource/src/mockdata.seed.ts ***!
@@ -33219,68 +33287,11 @@ module.exports = /*#__PURE__*/JSON.parse('{"100":"Continue","101":"Switching Pro
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry needs to be wrapped in an IIFE because it needs to be in strict mode.
-(() => {
-"use strict";
-var exports = __webpack_exports__;
-/*!***********************************!*\
-  !*** ./apps/resource/src/main.ts ***!
-  \***********************************/
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.handler = void 0;
-const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-const app_module_1 = __webpack_require__(/*! @resource/app.module */ "./apps/resource/src/app.module.ts");
-const swagger_1 = __webpack_require__(/*! @libs/swagger/swagger */ "./libs/swagger/swagger.ts");
-const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
-const dtos = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
-const response_interceptor_1 = __webpack_require__(/*! @libs/interceptors/response.interceptor */ "./libs/interceptors/response.interceptor.ts");
-const error_interceptor_1 = __webpack_require__(/*! @libs/interceptors/error.interceptor */ "./libs/interceptors/error.interceptor.ts");
-const jwt_auth_guard_1 = __webpack_require__(/*! @libs/guards/jwt-auth.guard */ "./libs/guards/jwt-auth.guard.ts");
-const core_2 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-const path_1 = __webpack_require__(/*! path */ "path");
-const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
-const role_guard_1 = __webpack_require__(/*! @libs/guards/role.guard */ "./libs/guards/role.guard.ts");
-const request_interceptor_1 = __webpack_require__(/*! @libs/interceptors/request.interceptor */ "./libs/interceptors/request.interceptor.ts");
-const express = __webpack_require__(/*! express */ "./node_modules/.pnpm/express@4.21.2/node_modules/express/index.js");
-let app;
-async function bootstrap() {
-    const server = express();
-    app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
-    app.enableCors({
-        origin: '*',
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-        credentials: true,
-    });
-    app.setGlobalPrefix('api');
-    app.useGlobalGuards(new jwt_auth_guard_1.JwtAuthGuard(app.get(core_2.Reflector)), new role_guard_1.RolesGuard(app.get(core_2.Reflector)));
-    app.useGlobalInterceptors(new request_interceptor_1.RequestInterceptor(), new response_interceptor_1.ResponseInterceptor(), new error_interceptor_1.ErrorInterceptor());
-    const uploadPath = (0, path_1.join)(process.cwd(), 'uploads');
-    app.useStaticAssets(uploadPath, {
-        prefix: '/uploads',
-        index: false,
-        fallthrough: false,
-    });
-    (0, swagger_1.setupSwagger)(app, Object.values(dtos));
-    if (process.env.NODE_ENV !== 'production') {
-        await app.listen(env_config_1.ENV.APP_PORT || 3000);
-    }
-    return app.getHttpAdapter().getInstance();
-}
-const handler = async (req, res) => {
-    if (!app) {
-        const server = await bootstrap();
-        return server(req, res);
-    }
-    return app.getHttpAdapter().getInstance()(req, res);
-};
-exports.handler = handler;
-if (process.env.NODE_ENV !== 'production') {
-    bootstrap();
-}
-
-})();
-
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__("./apps/resource/src/main.ts");
+/******/ 	
 /******/ })()
 ;

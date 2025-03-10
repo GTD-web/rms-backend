@@ -47,12 +47,18 @@ async function bootstrap() {
 }
 
 // Vercel serverless function handler
-export const handler = async (req: any, res: any) => {
-    if (!app) {
-        const server = await bootstrap();
-        return server(req, res);
+module.exports = async (req: any, res: any) => {
+    try {
+        if (!app) {
+            const server = await bootstrap();
+            return server(req, res);
+        }
+        const instance = app.getHttpAdapter().getInstance();
+        return instance(req, res);
+    } catch (error) {
+        console.error('Error handling request:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-    return app.getHttpAdapter().getInstance()(req, res);
 };
 
 // Start the application in development
