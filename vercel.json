@@ -8,6 +8,14 @@
     ],
     "routes": [
         {
+            "src": "/api-docs/(.*)",
+            "dest": "dist/apps/resource/main.js"
+        },
+        {
+            "src": "/swagger/(.*)",
+            "dest": "dist/apps/resource/main.js"
+        },
+        {
             "src": "/(.*)",
             "dest": "dist/apps/resource/main.js"
         }
