@@ -19,7 +19,8 @@ const server: Express = express();
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
     app.enableCors({
-        origin: true,
+        origin: '*',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
     app.setGlobalPrefix('api');
@@ -35,7 +36,10 @@ async function bootstrap() {
     });
 
     setupSwagger(app, Object.values(dtos));
-    await app.listen(ENV.APP_PORT || 3000);
+
+    if (process.env.NODE_ENV !== 'production') {
+        await app.listen(ENV.APP_PORT || 3000);
+    }
 }
 bootstrap();
 

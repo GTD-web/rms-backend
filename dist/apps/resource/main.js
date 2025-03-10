@@ -33247,7 +33247,8 @@ const server = express();
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
     app.enableCors({
-        origin: true,
+        origin: '*',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
     app.setGlobalPrefix('api');
@@ -33260,7 +33261,9 @@ async function bootstrap() {
         fallthrough: false,
     });
     (0, swagger_1.setupSwagger)(app, Object.values(dtos));
-    await app.listen(env_config_1.ENV.APP_PORT || 3000);
+    if (process.env.NODE_ENV !== 'production') {
+        await app.listen(env_config_1.ENV.APP_PORT || 3000);
+    }
 }
 bootstrap();
 exports["default"] = server;
