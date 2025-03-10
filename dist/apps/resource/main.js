@@ -33231,26 +33231,26 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports["default"] = handler;
 const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-const app_module_1 = __webpack_require__(/*! @resource/app.module */ "./apps/resource/src/app.module.ts");
-const swagger_1 = __webpack_require__(/*! @libs/swagger/swagger */ "./libs/swagger/swagger.ts");
-const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
-const dtos = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
-const response_interceptor_1 = __webpack_require__(/*! @libs/interceptors/response.interceptor */ "./libs/interceptors/response.interceptor.ts");
-const error_interceptor_1 = __webpack_require__(/*! @libs/interceptors/error.interceptor */ "./libs/interceptors/error.interceptor.ts");
-const jwt_auth_guard_1 = __webpack_require__(/*! @libs/guards/jwt-auth.guard */ "./libs/guards/jwt-auth.guard.ts");
+const app_module_1 = __webpack_require__(/*! ./app.module */ "./apps/resource/src/app.module.ts");
+const swagger_1 = __webpack_require__(/*! ../../../libs/swagger/swagger */ "./libs/swagger/swagger.ts");
+const env_config_1 = __webpack_require__(/*! ../../../libs/configs/env.config */ "./libs/configs/env.config.ts");
+const dtos = __webpack_require__(/*! ./dtos.index */ "./apps/resource/src/dtos.index.ts");
+const response_interceptor_1 = __webpack_require__(/*! ../../../libs/interceptors/response.interceptor */ "./libs/interceptors/response.interceptor.ts");
+const error_interceptor_1 = __webpack_require__(/*! ../../../libs/interceptors/error.interceptor */ "./libs/interceptors/error.interceptor.ts");
+const jwt_auth_guard_1 = __webpack_require__(/*! ../../../libs/guards/jwt-auth.guard */ "./libs/guards/jwt-auth.guard.ts");
 const core_2 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const path_1 = __webpack_require__(/*! path */ "path");
 const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
-const role_guard_1 = __webpack_require__(/*! @libs/guards/role.guard */ "./libs/guards/role.guard.ts");
-const request_interceptor_1 = __webpack_require__(/*! @libs/interceptors/request.interceptor */ "./libs/interceptors/request.interceptor.ts");
+const role_guard_1 = __webpack_require__(/*! ../../../libs/guards/role.guard */ "./libs/guards/role.guard.ts");
+const request_interceptor_1 = __webpack_require__(/*! ../../../libs/interceptors/request.interceptor */ "./libs/interceptors/request.interceptor.ts");
 const express = __webpack_require__(/*! express */ "./node_modules/.pnpm/express@4.21.2/node_modules/express/index.js");
-let cachedServer = null;
+let app;
 async function bootstrap() {
-    if (cachedServer) {
-        return cachedServer;
+    if (app) {
+        return app.getHttpAdapter().getInstance();
     }
     const server = express();
-    const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
+    app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
     app.enableCors({
         origin: '*',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -33267,11 +33267,10 @@ async function bootstrap() {
     });
     (0, swagger_1.setupSwagger)(app, Object.values(dtos));
     await app.init();
-    cachedServer = server;
     if (process.env.NODE_ENV !== 'production') {
         await app.listen(env_config_1.ENV.APP_PORT || 3000);
     }
-    return server;
+    return app.getHttpAdapter().getInstance();
 }
 if (process.env.NODE_ENV !== 'production') {
     bootstrap();

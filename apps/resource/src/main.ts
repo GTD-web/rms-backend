@@ -1,28 +1,28 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '@resource/app.module';
-import { setupSwagger } from '@libs/swagger/swagger';
-import { ENV } from '@libs/configs/env.config';
-import * as dtos from '@resource/dtos.index';
-import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
-import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
-import { JwtAuthGuard } from '@libs/guards/jwt-auth.guard';
+import { AppModule } from './app.module';
+import { setupSwagger } from '../../../libs/swagger/swagger';
+import { ENV } from '../../../libs/configs/env.config';
+import * as dtos from './dtos.index';
+import { ResponseInterceptor } from '../../../libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '../../../libs/interceptors/error.interceptor';
+import { JwtAuthGuard } from '../../../libs/guards/jwt-auth.guard';
 import { Reflector } from '@nestjs/core';
 import { join } from 'path';
 import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
-import { RolesGuard } from '@libs/guards/role.guard';
-import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
+import { RolesGuard } from '../../../libs/guards/role.guard';
+import { RequestInterceptor } from '../../../libs/interceptors/request.interceptor';
 import * as express from 'express';
-import { Express } from 'express';
+import { Request, Response } from 'express';
 
-let cachedServer: Express = null;
+let app: NestExpressApplication;
 
-async function bootstrap(): Promise<Express> {
-    if (cachedServer) {
-        return cachedServer;
+async function bootstrap(): Promise<express.Application> {
+    if (app) {
+        return app.getHttpAdapter().getInstance();
     }
 
     const server = express();
-    const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
+    app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
 
     app.enableCors({
         origin: '*',
@@ -44,13 +44,12 @@ async function bootstrap(): Promise<Express> {
     setupSwagger(app, Object.values(dtos));
 
     await app.init();
-    cachedServer = server;
 
     if (process.env.NODE_ENV !== 'production') {
         await app.listen(ENV.APP_PORT || 3000);
     }
 
-    return server;
+    return app.getHttpAdapter().getInstance();
 }
 
 // Start the application in development
@@ -59,7 +58,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Export the Express app for Vercel
-export default async function handler(req: any, res: any) {
+export default async function handler(req: Request, res: Response) {
     try {
         const server = await bootstrap();
         return server(req, res);
