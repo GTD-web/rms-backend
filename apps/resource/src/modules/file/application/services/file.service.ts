@@ -35,7 +35,7 @@ export class FileService {
         const file = await this.findFileById(fileId);
         if (!file) throw new NotFoundException('File not found');
 
-        await this.fileStorage.deleteFile(file.filePath);
+        await this.fileStorage.deleteFile(file);
         await this.fileRepository.delete(fileId);
     }
 }

@@ -35,7 +35,7 @@ const reservation_module_1 = __webpack_require__(138);
 const app_service_1 = __webpack_require__(152);
 const notification_module_1 = __webpack_require__(154);
 const file_module_1 = __webpack_require__(161);
-const app_controller_1 = __webpack_require__(174);
+const app_controller_1 = __webpack_require__(172);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -8924,18 +8924,15 @@ const file_controller_1 = __webpack_require__(167);
 const typeorm_1 = __webpack_require__(5);
 const entities_1 = __webpack_require__(8);
 const file_repository_1 = __webpack_require__(169);
-const local_storage_adapter_1 = __webpack_require__(170);
 const config_1 = __webpack_require__(4);
 const env_config_1 = __webpack_require__(30);
+const s3_stroage_adapter_1 = __webpack_require__(170);
 let FileModule = class FileModule {
 };
 exports.FileModule = FileModule;
 exports.FileModule = FileModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            typeorm_1.TypeOrmModule.forFeature([entities_1.File]),
-            config_1.ConfigModule.forFeature(env_config_1.APP_CONFIG),
-        ],
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.File]), config_1.ConfigModule.forFeature(env_config_1.APP_CONFIG)],
         controllers: [file_controller_1.FileController],
         providers: [
             config_1.ConfigService,
@@ -8946,7 +8943,7 @@ exports.FileModule = FileModule = __decorate([
             },
             {
                 provide: 'FileStoragePort',
-                useClass: local_storage_adapter_1.LocalStorageAdapter,
+                useClass: s3_stroage_adapter_1.S3StorageAdapter,
             },
         ],
         exports: [file_service_1.FileService],
@@ -9002,7 +8999,7 @@ let FileService = class FileService {
         const file = await this.findFileById(fileId);
         if (!file)
             throw new common_1.NotFoundException('File not found');
-        await this.fileStorage.deleteFile(file.filePath);
+        await this.fileStorage.deleteFile(file);
         await this.fileRepository.delete(fileId);
     }
 };
@@ -9254,71 +9251,78 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.LocalStorageAdapter = void 0;
-const date_util_1 = __webpack_require__(36);
+exports.S3StorageAdapter = void 0;
 const common_1 = __webpack_require__(3);
-const fs_1 = __webpack_require__(171);
-const path_1 = __webpack_require__(172);
-const util_1 = __webpack_require__(173);
-const fs_2 = __webpack_require__(171);
+const config_1 = __webpack_require__(4);
+const client_s3_1 = __webpack_require__(171);
+const date_util_1 = __webpack_require__(36);
 const file_1 = __webpack_require__(166);
-const unlinkAsync = (0, util_1.promisify)(fs_1.unlink);
-let LocalStorageAdapter = class LocalStorageAdapter {
-    constructor() {
-        this.uploadDir = (0, path_1.join)(__dirname, '..', '..', '..');
-        const uploadDir = (0, path_1.join)(__dirname, '..', '..', '..', 'uploads');
-        if (!(0, fs_2.existsSync)(uploadDir)) {
-            (0, fs_2.mkdirSync)(uploadDir, { recursive: true });
-        }
+let S3StorageAdapter = class S3StorageAdapter {
+    constructor(configService) {
+        this.configService = configService;
+        this.bucketName = this.configService.get('S3_BUCKET_NAME');
+        this.s3Client = new client_s3_1.S3Client({
+            region: this.configService.get('S3_REGION'),
+            endpoint: this.configService.get('S3_ENDPOINT'),
+            credentials: {
+                accessKeyId: this.configService.get('S3_ACCESS_KEY'),
+                secretAccessKey: this.configService.get('S3_SECRET_KEY'),
+            },
+            forcePathStyle: true,
+        });
     }
     async uploadFile(file, options) {
-        const filename = `${date_util_1.DateUtil.now().format('YYYYMMDDHHmmss')}-${file.originalname}`;
-        const filePath = (0, path_1.join)(this.uploadDir, '/uploads', filename);
-        const newFile = new file_1.File({
-            fileName: file.originalname,
-            filePath: `/uploads/${filename}`,
-        });
-        return new Promise((resolve, reject) => {
-            const writeStream = (0, fs_1.createWriteStream)(filePath);
-            writeStream.write(file.buffer);
-            writeStream.end();
-            writeStream.on('finish', () => resolve(newFile));
-            writeStream.on('error', reject);
-        });
+        const fileExtension = file.originalname.split('.').pop();
+        const fileName = `${date_util_1.DateUtil.now().format('YYYYMMDDHHmmss')}.${fileExtension}`;
+        try {
+            await this.s3Client.send(new client_s3_1.PutObjectCommand({
+                Bucket: this.bucketName,
+                Key: fileName,
+                Body: file.buffer,
+                ContentType: file.mimetype,
+            }));
+            const newFile = new file_1.File({
+                fileName: fileName,
+                filePath: this.getFileUrl(fileName),
+            });
+            return newFile;
+        }
+        catch (error) {
+            throw new Error(`Failed to upload file to S3: ${error.message}`);
+        }
     }
-    async deleteFile(filePath) {
-        const fullPath = (0, path_1.join)(this.uploadDir, filePath);
-        await unlinkAsync(fullPath);
+    async deleteFile(file) {
+        try {
+            await this.s3Client.send(new client_s3_1.DeleteObjectCommand({
+                Bucket: this.bucketName,
+                Key: file.fileName,
+            }));
+        }
+        catch (error) {
+            throw new Error(`Failed to delete file from S3: ${error.message}`);
+        }
+    }
+    getFileUrl(fileKey) {
+        return `${this.configService.get('S3_ENDPOINT').replace('s3', 'object/public')}/${this.bucketName}/${fileKey}`;
     }
 };
-exports.LocalStorageAdapter = LocalStorageAdapter;
-exports.LocalStorageAdapter = LocalStorageAdapter = __decorate([
+exports.S3StorageAdapter = S3StorageAdapter;
+exports.S3StorageAdapter = S3StorageAdapter = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
-], LocalStorageAdapter);
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
+], S3StorageAdapter);
 
 
 /***/ }),
 /* 171 */
 /***/ ((module) => {
 
-module.exports = require("fs");
+module.exports = require("@aws-sdk/client-s3");
 
 /***/ }),
 /* 172 */
-/***/ ((module) => {
-
-module.exports = require("path");
-
-/***/ }),
-/* 173 */
-/***/ ((module) => {
-
-module.exports = require("util");
-
-/***/ }),
-/* 174 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9354,7 +9358,7 @@ exports.AppController = AppController = __decorate([
 
 
 /***/ }),
-/* 175 */
+/* 173 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -9392,7 +9396,7 @@ function setupSwagger(app, dtos) {
 
 
 /***/ }),
-/* 176 */
+/* 174 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9405,7 +9409,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResponseInterceptor = void 0;
 const common_1 = __webpack_require__(3);
-const operators_1 = __webpack_require__(177);
+const operators_1 = __webpack_require__(175);
 let ResponseInterceptor = class ResponseInterceptor {
     intercept(context, next) {
         return next.handle().pipe((0, operators_1.map)((data) => {
@@ -9440,13 +9444,13 @@ exports.ResponseInterceptor = ResponseInterceptor = __decorate([
 
 
 /***/ }),
-/* 177 */
+/* 175 */
 /***/ ((module) => {
 
 module.exports = require("rxjs/operators");
 
 /***/ }),
-/* 178 */
+/* 176 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9459,8 +9463,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ErrorInterceptor = void 0;
 const common_1 = __webpack_require__(3);
-const rxjs_1 = __webpack_require__(179);
-const operators_1 = __webpack_require__(177);
+const rxjs_1 = __webpack_require__(177);
+const operators_1 = __webpack_require__(175);
 let ErrorInterceptor = class ErrorInterceptor {
     intercept(context, next) {
         return next.handle().pipe((0, operators_1.catchError)(error => {
@@ -9487,13 +9491,13 @@ exports.ErrorInterceptor = ErrorInterceptor = __decorate([
 
 
 /***/ }),
-/* 179 */
+/* 177 */
 /***/ ((module) => {
 
 module.exports = require("rxjs");
 
 /***/ }),
-/* 180 */
+/* 178 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9537,7 +9541,13 @@ exports.JwtAuthGuard = JwtAuthGuard = __decorate([
 
 
 /***/ }),
-/* 181 */
+/* 179 */
+/***/ ((module) => {
+
+module.exports = require("path");
+
+/***/ }),
+/* 180 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9580,7 +9590,7 @@ exports.RolesGuard = RolesGuard = __decorate([
 
 
 /***/ }),
-/* 182 */
+/* 181 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9593,7 +9603,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RequestInterceptor = void 0;
 const common_1 = __webpack_require__(3);
-const operators_1 = __webpack_require__(177);
+const operators_1 = __webpack_require__(175);
 let RequestInterceptor = class RequestInterceptor {
     intercept(context, next) {
         const request = context.switchToHttp().getRequest();
@@ -9656,16 +9666,16 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(1);
 const app_module_1 = __webpack_require__(2);
-const swagger_1 = __webpack_require__(175);
+const swagger_1 = __webpack_require__(173);
 const env_config_1 = __webpack_require__(30);
 const dtos = __webpack_require__(72);
-const response_interceptor_1 = __webpack_require__(176);
-const error_interceptor_1 = __webpack_require__(178);
-const jwt_auth_guard_1 = __webpack_require__(180);
+const response_interceptor_1 = __webpack_require__(174);
+const error_interceptor_1 = __webpack_require__(176);
+const jwt_auth_guard_1 = __webpack_require__(178);
 const core_2 = __webpack_require__(1);
-const path_1 = __webpack_require__(172);
-const role_guard_1 = __webpack_require__(181);
-const request_interceptor_1 = __webpack_require__(182);
+const path_1 = __webpack_require__(179);
+const role_guard_1 = __webpack_require__(180);
+const request_interceptor_1 = __webpack_require__(181);
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({

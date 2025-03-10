@@ -7,13 +7,10 @@ import { FileRepository } from './infrastructure/adapters/out/persistence/file.r
 import { LocalStorageAdapter } from './infrastructure/adapters/out/storage/local-storage.adapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_CONFIG } from '@libs/configs/env.config';
-
+import { S3StorageAdapter } from './infrastructure/adapters/out/storage/s3-stroage.adapter';
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([File]),
-        ConfigModule.forFeature(APP_CONFIG),
-    ],
-    controllers: [FileController],  
+    imports: [TypeOrmModule.forFeature([File]), ConfigModule.forFeature(APP_CONFIG)],
+    controllers: [FileController],
     providers: [
         ConfigService,
         FileService,
@@ -23,9 +20,9 @@ import { APP_CONFIG } from '@libs/configs/env.config';
         },
         {
             provide: 'FileStoragePort',
-            useClass: LocalStorageAdapter,
+            useClass: S3StorageAdapter,
         },
     ],
     exports: [FileService],
 })
-export class FileModule {}  
+export class FileModule {}

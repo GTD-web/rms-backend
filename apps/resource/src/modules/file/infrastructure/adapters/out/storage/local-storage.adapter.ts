@@ -37,8 +37,8 @@ export class LocalStorageAdapter implements FileStoragePort {
         });
     }
 
-    async deleteFile(filePath: string): Promise<void> {
-        const fullPath = join(this.uploadDir, filePath);
+    async deleteFile(file: File): Promise<void> {
+        const fullPath = join(this.uploadDir, file.filePath);
         await unlinkAsync(fullPath);
     }
 }
