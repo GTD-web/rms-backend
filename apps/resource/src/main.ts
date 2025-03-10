@@ -8,11 +8,16 @@ import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 import { JwtAuthGuard } from '@libs/guards/jwt-auth.guard';
 import { Reflector } from '@nestjs/core';
 import { join } from 'path';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 import { RolesGuard } from '@libs/guards/role.guard';
 import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
+import * as express from 'express';
+import { Express } from 'express';
+
+const server: Express = express();
+
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
     app.enableCors({
         origin: true,
         credentials: true,
@@ -33,3 +38,5 @@ async function bootstrap() {
     await app.listen(ENV.APP_PORT || 3000);
 }
 bootstrap();
+
+export default server; // ✅ Vercel에서 실행될 핸들러 추가
