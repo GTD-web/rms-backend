@@ -35,6 +35,7 @@ const reservation_module_1 = __webpack_require__(138);
 const app_service_1 = __webpack_require__(152);
 const notification_module_1 = __webpack_require__(154);
 const file_module_1 = __webpack_require__(161);
+const app_controller_1 = __webpack_require__(174);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -62,10 +63,8 @@ exports.AppModule = AppModule = __decorate([
             notification_module_1.NotificationModule,
             file_module_1.FileModule,
         ],
-        controllers: [],
-        providers: [
-            app_service_1.AppService,
-        ],
+        controllers: [app_controller_1.AppController],
+        providers: [app_service_1.AppService],
     })
 ], AppModule);
 
@@ -9320,6 +9319,42 @@ module.exports = require("util");
 
 /***/ }),
 /* 174 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppController = void 0;
+const common_1 = __webpack_require__(3);
+const public_decorator_1 = __webpack_require__(51);
+let AppController = class AppController {
+    getHello() {
+        return 'Hello World';
+    }
+};
+exports.AppController = AppController;
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", String)
+], AppController.prototype, "getHello", null);
+exports.AppController = AppController = __decorate([
+    (0, common_1.Controller)('')
+], AppController);
+
+
+/***/ }),
+/* 175 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -9357,7 +9392,7 @@ function setupSwagger(app, dtos) {
 
 
 /***/ }),
-/* 175 */
+/* 176 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9370,7 +9405,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResponseInterceptor = void 0;
 const common_1 = __webpack_require__(3);
-const operators_1 = __webpack_require__(176);
+const operators_1 = __webpack_require__(177);
 let ResponseInterceptor = class ResponseInterceptor {
     intercept(context, next) {
         return next.handle().pipe((0, operators_1.map)((data) => {
@@ -9405,13 +9440,13 @@ exports.ResponseInterceptor = ResponseInterceptor = __decorate([
 
 
 /***/ }),
-/* 176 */
+/* 177 */
 /***/ ((module) => {
 
 module.exports = require("rxjs/operators");
 
 /***/ }),
-/* 177 */
+/* 178 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9424,8 +9459,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ErrorInterceptor = void 0;
 const common_1 = __webpack_require__(3);
-const rxjs_1 = __webpack_require__(178);
-const operators_1 = __webpack_require__(176);
+const rxjs_1 = __webpack_require__(179);
+const operators_1 = __webpack_require__(177);
 let ErrorInterceptor = class ErrorInterceptor {
     intercept(context, next) {
         return next.handle().pipe((0, operators_1.catchError)(error => {
@@ -9452,13 +9487,13 @@ exports.ErrorInterceptor = ErrorInterceptor = __decorate([
 
 
 /***/ }),
-/* 178 */
+/* 179 */
 /***/ ((module) => {
 
 module.exports = require("rxjs");
 
 /***/ }),
-/* 179 */
+/* 180 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9502,7 +9537,7 @@ exports.JwtAuthGuard = JwtAuthGuard = __decorate([
 
 
 /***/ }),
-/* 180 */
+/* 181 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9545,7 +9580,7 @@ exports.RolesGuard = RolesGuard = __decorate([
 
 
 /***/ }),
-/* 181 */
+/* 182 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9558,7 +9593,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RequestInterceptor = void 0;
 const common_1 = __webpack_require__(3);
-const operators_1 = __webpack_require__(176);
+const operators_1 = __webpack_require__(177);
 let RequestInterceptor = class RequestInterceptor {
     intercept(context, next) {
         const request = context.switchToHttp().getRequest();
@@ -9621,16 +9656,16 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(1);
 const app_module_1 = __webpack_require__(2);
-const swagger_1 = __webpack_require__(174);
+const swagger_1 = __webpack_require__(175);
 const env_config_1 = __webpack_require__(30);
 const dtos = __webpack_require__(72);
-const response_interceptor_1 = __webpack_require__(175);
-const error_interceptor_1 = __webpack_require__(177);
-const jwt_auth_guard_1 = __webpack_require__(179);
+const response_interceptor_1 = __webpack_require__(176);
+const error_interceptor_1 = __webpack_require__(178);
+const jwt_auth_guard_1 = __webpack_require__(180);
 const core_2 = __webpack_require__(1);
 const path_1 = __webpack_require__(172);
-const role_guard_1 = __webpack_require__(180);
-const request_interceptor_1 = __webpack_require__(181);
+const role_guard_1 = __webpack_require__(181);
+const request_interceptor_1 = __webpack_require__(182);
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({

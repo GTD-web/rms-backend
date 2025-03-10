@@ -6,48 +6,51 @@ import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 
 @Entity('reservations')
 export class Reservation {
-  @PrimaryColumn('uuid', {
-    generated: 'uuid',
-  })
-  reservationId: string;
+    @PrimaryColumn('uuid', {
+        generated: 'uuid',
+    })
+    reservationId: string;
 
-  @Column()
-  resourceId: string;
+    @Column()
+    resourceId: string;
 
-  @Column()
-  title: string;
+    @Column()
+    title: string;
 
-  @Column({ nullable: true })
-  description: string;
+    @Column({ nullable: true })
+    description: string;
 
-  @Column()
-  startDate: string;
+    @Column()
+    startDate: string;
 
-  @Column()
-  endDate: string;
+    @Column()
+    endDate: string;
 
-  @Column({
-    type: 'enum',
-    enum: ReservationStatus
-  })
-  status: ReservationStatus;
+    @Column({
+        type: 'enum',
+        enum: ReservationStatus,
+    })
+    status: ReservationStatus;
 
-  @Column({ default: false })
-  isAllDay: boolean;
+    @Column({ nullable: true })
+    rejectReason: string;
 
-  @Column({ default: false })
-  notifyBeforeStart: boolean;
+    @Column({ default: false })
+    isAllDay: boolean;
 
-  @Column('jsonb', { nullable: true })
-  notifyMinutesBeforeStart: number[];
+    @Column({ default: false })
+    notifyBeforeStart: boolean;
 
-  @ManyToOne(() => Resource)
-  @JoinColumn({ name: 'resourceId' })
-  resource: Resource;
+    @Column('jsonb', { nullable: true })
+    notifyMinutesBeforeStart: number[];
 
-  @OneToMany(() => ReservationParticipant, participant => participant.reservation)
-  participants: ReservationParticipant[];
+    @ManyToOne(() => Resource)
+    @JoinColumn({ name: 'resourceId' })
+    resource: Resource;
 
-  @OneToMany(() => Schedule, schedule => schedule.reservation)
-  schedules: Schedule[];
-} 
+    @OneToMany(() => ReservationParticipant, (participant) => participant.reservation)
+    participants: ReservationParticipant[];
+
+    @OneToMany(() => Schedule, (schedule) => schedule.reservation)
+    schedules: Schedule[];
+}

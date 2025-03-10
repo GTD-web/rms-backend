@@ -1,13 +1,17 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
-import { ReservationResponseDto } from '../dtos/reservation-response.dto';
+import {
+    CreateReservationResponseDto,
+    ReservationResponseDto,
+    ReservationWithRelationsResponseDto,
+    ReservationWithResourceResponseDto,
+} from '../dtos/reservation-response.dto';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
-import { DataSource, FindOptionsWhere, LessThan, MoreThan } from 'typeorm';
+import { DataSource, FindOptionsWhere, LessThan, MoreThan, In, Between } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { ReservationService } from '../services/reservation.service';
 import { ParticipantService } from '../services/participant.service';
 import { ReservationParticipant, Reservation } from '@libs/entities';
-import { CreateReservationResponseDto } from '../dtos/create-reservation-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     UpdateReservationCcReceipientDto,
@@ -17,7 +21,7 @@ import {
     UpdateReservationTitleDto,
 } from '../dtos/update-reservation.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
-import { ReturnVehicleDto } from '@resource/modules/resource/common/application/dtos/return-vehicle.dto';
+
 @Injectable()
 export class ReservationUsecase {
     constructor(
@@ -94,22 +98,49 @@ export class ReservationUsecase {
         }
     }
 
-    async findReservationDetail(reservationId: string): Promise<ReservationResponseDto> {
+    async findReservationDetail(reservationId: string): Promise<ReservationWithRelationsResponseDto> {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['participants', 'resource'],
+            relations: [
+                'resource',
+                'resource.vehicleInfo',
+                'resource.meetingRoomInfo',
+                'resource.accommodationInfo',
+                'participants',
+                'participants.employee',
+            ],
         });
 
-        const reservationResponseDto = new ReservationResponseDto(reservation);
+        const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
 
         return reservationResponseDto;
     }
 
-    async findMyReservationList(employeeId: string): Promise<ReservationResponseDto[]> {
+    async findMyReservationList(
+        employeeId: string,
+        startDate?: string,
+        resourceType?: ResourceType,
+    ): Promise<ReservationWithRelationsResponseDto[]> {
+        const where: FindOptionsWhere<Reservation> = { participants: { employeeId, type: ParticipantsType.RESERVER } };
+        if (startDate) {
+            where.startDate = Between(startDate + ' 00:00:00', startDate + ' 23:59:59');
+        }
+        if (resourceType) {
+            where.resource = {
+                type: resourceType as ResourceType,
+            };
+        }
         const reservations = await this.reservationService.findAll({
-            where: { participants: { employeeId, type: ParticipantsType.RESERVER } },
+            where,
         });
-        return reservations.map((reservation) => new ReservationResponseDto(reservation));
+
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: In(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['resource', 'participants', 'participants.employee'],
+        });
+        return reservationWithParticipants.map((reservation) => new ReservationWithRelationsResponseDto(reservation));
     }
 
     async findReservationList(
@@ -117,12 +148,19 @@ export class ReservationUsecase {
         endDate?: string,
         resourceType?: ResourceType,
         resourceId?: string,
-    ): Promise<ReservationResponseDto[]> {
+        status?: string[],
+    ): Promise<ReservationWithResourceResponseDto[]> {
         if (startDate && endDate && startDate > endDate) {
             throw new BadRequestException('Start date must be before end date');
         }
+        if (status && status.filter((s) => ReservationStatus[s]).length === 0) {
+            throw new BadRequestException('Invalid status');
+        }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where: FindOptionsWhere<Reservation> = {};
+        if (status && status.length > 0) {
+            where.status = In(status);
+        }
         if (resourceType) {
             where.resource = {
                 type: resourceType as ResourceType,
@@ -154,9 +192,11 @@ export class ReservationUsecase {
             };
         }
 
-        const reservations = await this.reservationService.findAll({ where });
+        const reservations = await this.reservationService.findAll({ where, relations: ['resource'] });
 
-        const reservationResponseDtos = reservations.map((reservation) => new ReservationResponseDto(reservation));
+        const reservationResponseDtos = reservations.map(
+            (reservation) => new ReservationWithResourceResponseDto(reservation),
+        );
         return reservationResponseDtos;
     }
 
@@ -184,14 +224,28 @@ export class ReservationUsecase {
         return new ReservationResponseDto(updatedReservation);
     }
 
-    async updateStatus(reservationId: string, updateDto: UpdateReservationStatusDto): Promise<ReservationResponseDto> {
+    async updateStatus(
+        reservationId: string,
+        updateDto: UpdateReservationStatusDto,
+        employeeId: string,
+        isAdmin: boolean,
+    ): Promise<ReservationResponseDto> {
         const reservation = await this.reservationService.findOne({ where: { reservationId } });
         if (!reservation) {
             throw new NotFoundException('Reservation not found');
         }
 
-        const updatedReservation = await this.reservationService.update(reservationId, updateDto);
-        return new ReservationResponseDto(updatedReservation);
+        const reserver = await this.participantService.findOne({
+            where: { reservationId, type: ParticipantsType.RESERVER },
+        });
+        const isMyReservation = reserver?.employeeId === employeeId;
+
+        if (isMyReservation || isAdmin) {
+            const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+            return new ReservationResponseDto(updatedReservation);
+        }
+
+        throw new ForbiddenException('You are not authorized to update this reservation');
     }
 
     async updateParticipants(
@@ -251,118 +305,4 @@ export class ReservationUsecase {
         });
         return new ReservationResponseDto(updatedReservation);
     }
-
-    // async update(id: string, updateDto: UpdateReservationDto): Promise<ReservationResponseDto> {
-    //     const reservation = await this.findOne(id);
-
-    //     const queryRunner = this.dataSource.createQueryRunner();
-    //     await queryRunner.connect();
-    //     await queryRunner.startTransaction();
-
-    //     try {
-    //         if (updateDto.startDate || updateDto.endDate) {
-    //             const startDate = updateDto.startDate || reservation.startDate;
-    //             const endDate = updateDto.endDate || reservation.endDate;
-
-    //             // 기존 Schedule 삭제
-    //             await this.scheduleRepository.deleteByReservationId(id, { queryRunner });
-
-    //             // 새로운 Schedule 생성
-    //             const scheduleDates = ScheduleUtils.createScheduleDates(startDate, endDate);
-    //             await Promise.all(
-    //                 scheduleDates.map((scheduleDate) => {
-    //                     const schedule = new Schedule({
-    //                         reservationId: id,
-    //                         ...scheduleDate,
-    //                     });
-    //                     return this.scheduleRepository.save(schedule, { queryRunner });
-    //                 }),
-    //             );
-    //         }
-
-    //         if (updateDto.startDate || updateDto.endDate) {
-    //             const conflicts = await this.reservationRepository.findConflictingReservations(
-    //                 reservation.resourceId,
-    //                 DateUtil.parse(updateDto.startDate || reservation.startDate).format(),
-    //                 DateUtil.parse(updateDto.endDate || reservation.endDate).format(),
-    //                 id,
-    //             );
-
-    //             if (conflicts.length > 0) {
-    //                 throw new BadRequestException('Reservation time conflict');
-    //             }
-    //         }
-
-    //         const updatedReservation = await this.reservationRepository.update(
-    //             id,
-    //             {
-    //                 ...reservation,
-    //                 ...updateDto,
-    //             },
-    //             { queryRunner },
-    //         );
-
-    //         // 예약자 정보 업데이트
-    //         if (updateDto.reserverIds) {
-    //             await this.participantRepository.deleteByReservationId(id, { queryRunner });
-    //             await Promise.all(
-    //                 updateDto.reserverIds.map((employeeId) => {
-    //                     const reserver = new ReservationParticipant({
-    //                         reservationId: id,
-    //                         employeeId,
-    //                         type: ParticipantsType.RESERVER,
-    //                     });
-    //                     return this.participantRepository.save(reserver, { queryRunner });
-    //                 }),
-    //             );
-    //         }
-
-    //         if (updateDto.participantIds) {
-    //             await this.participantRepository.deleteByReservationId(id, { queryRunner });
-    //             await Promise.all(
-    //                 updateDto.participantIds.map((employeeId) => {
-    //                     const participant = new ReservationParticipant({
-    //                         reservationId: id,
-    //                         employeeId,
-    //                         type: ParticipantsType.PARTICIPANT,
-    //                     });
-    //                     return this.participantRepository.save(participant, { queryRunner });
-    //                 }),
-    //             );
-    //         }
-
-    //         if (updateDto.ccReceipientIds) {
-    //             await this.participantRepository.deleteByReservationId(id, { queryRunner });
-    //             await Promise.all(
-    //                 updateDto.ccReceipientIds.map((employeeId) => {
-    //                     const ccReceipient = new ReservationParticipant({
-    //                         reservationId: id,
-    //                         employeeId,
-    //                         type: ParticipantsType.CC_RECEIPIENT,
-    //                     });
-    //                     return this.participantRepository.save(ccReceipient, { queryRunner });
-    //                 }),
-    //             );
-    //         }
-
-    //         await queryRunner.commitTransaction();
-    //         return updatedReservation;
-    //     } catch (error) {
-    //         await queryRunner.rollbackTransaction();
-    //         throw error;
-    //     } finally {
-    //         await queryRunner.release();
-    //     }
-    // }
-
-    // async updateStatus(id: string, status: ReservationStatus): Promise<ReservationResponseDto> {
-    //     const existingReservation = await this.reservationRepository.findById(id);
-    //     if (!existingReservation) {
-    //         throw new NotFoundException('Reservation not found');
-    //     }
-
-    //     existingReservation.updateStatus(status);
-    //     const updatedReservation = await this.reservationRepository.update(id, existingReservation);
-    //     return updatedReservation;
-    // }
 }

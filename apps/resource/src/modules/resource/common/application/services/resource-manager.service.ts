@@ -1,5 +1,7 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ResourceManagerRepositoryPort } from '@resource/modules/resource/common/domain/ports/resource-manager.repository.port';
+import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
+import { ResourceManager } from '@libs/entities/resource-manager.entity';
 
 @Injectable()
 export class ResourceManagerService {
@@ -8,17 +10,16 @@ export class ResourceManagerService {
         private readonly resourceManagerRepository: ResourceManagerRepositoryPort,
     ) {}
 
-    // async create(createDto: { resourceId: string; employeeId: string }, repositoryOptions?: RepositoryOptions): Promise<ResourceManager> {
-    //   const resourceManager = new ResourceManager({
-    //     resourceId: createDto.resourceId,
-    //     employeeId: createDto.employeeId,
-    //   });
-    //   return this.resourceManagerRepository.save(resourceManager, repositoryOptions);
-    // }
+    async save(
+        resourceManager: Partial<ResourceManager>,
+        repositoryOptions?: RepositoryOptions,
+    ): Promise<ResourceManager> {
+        return this.resourceManagerRepository.save(resourceManager, repositoryOptions);
+    }
 
-    // async findByResourceId(resourceId: string, repositoryOptions?: RepositoryOptions): Promise<ResourceManager[]> {
-    //   return this.resourceManagerRepository.findByResourceId(resourceId, repositoryOptions);
-    // }
+    async findOne(repositoryOptions?: RepositoryOptions): Promise<ResourceManager> {
+        return this.resourceManagerRepository.findOne(repositoryOptions);
+    }
 
     // async updateManagers(resourceId: string, newManagerIds: string[], repositoryOptions?: RepositoryOptions): Promise<void> {
     //   const currentManagers = await this.findByResourceId(resourceId, repositoryOptions);

@@ -6,16 +6,28 @@ export { LoginResponseDto } from './modules/auth/application/dto/login-response.
 export { UserResponseDto } from './modules/auth/application/dto/user-response.dto';
 
 // Common
-export { CreateResourceDto } from './modules/resource/common/application/dtos/create-resource.dto';
-export { CreateResourceGroupDto } from './modules/resource/common/application/dtos/create-resource-group.dto';
-export { CreateResourceManagerDto } from './modules/resource/common/application/dtos/create-resource-manager.dto';
-export { UpdateResourceDto } from './modules/resource/common/application/dtos/update-resource.dto';
-export { UpdateResourceGroupDto } from './modules/resource/common/application/dtos/update-resource-group.dto';
-export { CreateResourceRequestDto } from './modules/resource/common/application/dtos/create-resource-request.dto';
-export { UpdateResourceRequestDto } from './modules/resource/common/application/dtos/update-resource-request.dto';
-export { ResourceResponseDto } from './modules/resource/common/application/dtos/resource-response.dto';
-export { ResourceManagerResponseDto } from './modules/resource/common/application/dtos/resource-manager-response.dto';
-export { ResourceGroupResponseDto } from './modules/resource/common/application/dtos/resource-group-response.dto';
+export {
+    CreateResourceDto,
+    CreateResourceGroupDto,
+    CreateResourceManagerDto,
+    CreateResourceInfoDto,
+} from './modules/resource/common/application/dtos/create-resource.dto';
+export {
+    UpdateResourceDto,
+    UpdateResourceGroupDto,
+    UpdateResourceInfoDto,
+    ReturnVehicleDto,
+} from './modules/resource/common/application/dtos/update-resource.dto';
+export {
+    ResourceResponseDto,
+    ResourceSelectResponseDto,
+    ResourceWithReservationsResponseDto,
+    ResourceGroupResponseDto,
+    ChildResourceGroupResponseDto,
+    ResourceGroupWithResourcesResponseDto,
+    ResourceGroupWithResourcesAndReservationsResponseDto,
+    ResourceManagerResponseDto,
+} from './modules/resource/common/application/dtos/resource-response.dto';
 
 // Vehicle
 export { CreateVehicleInfoDto } from './modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
@@ -46,7 +58,6 @@ export { EmplyeesByDepartmentResponseDto } from './modules/employee/application/
 
 // Reservation Module DTOs (향후 추가될 수 있음)
 export { CreateReservationDto } from './modules/reservation/application/dtos/create-reservation.dto';
-export { CreateReservationResponseDto } from './modules/reservation/application/dtos/create-reservation-response.dto';
 export {
     UpdateReservationTitleDto,
     UpdateReservationTimeDto,
@@ -54,7 +65,12 @@ export {
     UpdateReservationParticipantsDto,
     UpdateReservationCcReceipientDto,
 } from './modules/reservation/application/dtos/update-reservation.dto';
-export { ReservationResponseDto } from './modules/reservation/application/dtos/reservation-response.dto';
+export {
+    CreateReservationResponseDto,
+    ReservationResponseDto,
+    ReservationWithResourceResponseDto,
+    ReservationWithRelationsResponseDto,
+} from './modules/reservation/application/dtos/reservation-response.dto';
 
 // File Module DTOs
 export { FileResponseDto } from './modules/file/application/dtos/file-response.dto';

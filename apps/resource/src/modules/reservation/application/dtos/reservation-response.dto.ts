@@ -1,41 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { Reservation } from '@libs/entities';
 import { ParticipantsType } from '@libs/enums/reservation-type.enum';
-import { ResourceResponseDto } from '@resource/dtos.index';
-export class ReservationParticipantResponseDto {
-    @ApiProperty()
-    participantId: string;
-
-    @ApiProperty()
-    employeeId: string;
-
-    @ApiProperty()
-    type: string;
-}
-
-export class ScheduleResponseDto {
-    @ApiProperty()
-    scheduleId: string;
-
-    @ApiProperty()
-    year: string;
-
-    @ApiProperty()
-    month: string;
-
-    @ApiProperty()
-    day: string;
-
-    @ApiProperty()
-    startDateTime: string;
-
-    @ApiProperty()
-    endDateTime: string;
-}
+import { EmployeeResponseDto, ResourceResponseDto } from '@resource/dtos.index';
 
 export class ReservationResponseDto {
     constructor(reservation: Reservation) {
+        console.log(reservation);
         this.reservationId = reservation.reservationId;
         this.resourceId = reservation.resourceId;
         this.title = reservation.title;
@@ -46,14 +17,6 @@ export class ReservationResponseDto {
         this.isAllDay = reservation.isAllDay;
         this.notifyBeforeStart = reservation.notifyBeforeStart;
         this.notifyMinutesBeforeStart = reservation.notifyMinutesBeforeStart;
-        this.reservers = reservation.participants?.filter(
-            (participant) => participant.type === ParticipantsType.RESERVER,
-        );
-        this.participants = reservation.participants?.filter(
-            (participant) => participant.type === ParticipantsType.PARTICIPANT,
-        );
-        this.schedules = reservation.schedules;
-        this.resource = reservation.resource;
     }
 
     @ApiProperty()
@@ -74,7 +37,7 @@ export class ReservationResponseDto {
     @ApiProperty({ required: false })
     endDate?: string;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ enum: ReservationStatus, required: false })
     status?: ReservationStatus;
 
     @ApiProperty({ required: false })
@@ -85,8 +48,45 @@ export class ReservationResponseDto {
 
     @ApiProperty({ required: false, type: [Number] })
     notifyMinutesBeforeStart?: number[];
+}
 
-    @ApiProperty({ required: false })
+export class ReservationParticipantResponseDto {
+    @ApiProperty()
+    participantId: string;
+
+    @ApiProperty()
+    employeeId: string;
+
+    @ApiProperty()
+    type: string;
+
+    @ApiProperty({ type: () => EmployeeResponseDto, required: false })
+    employee?: EmployeeResponseDto;
+}
+
+export class ReservationWithResourceResponseDto extends ReservationResponseDto {
+    constructor(reservation: Reservation) {
+        super(reservation);
+        this.resource = reservation.resource;
+    }
+
+    @ApiProperty({ type: () => ResourceResponseDto, required: false })
+    resource?: ResourceResponseDto;
+}
+
+export class ReservationWithRelationsResponseDto extends ReservationResponseDto {
+    constructor(reservation: Reservation) {
+        super(reservation);
+        this.resource = reservation.resource;
+        this.reservers = reservation.participants?.filter(
+            (participant) => participant.type === ParticipantsType.RESERVER,
+        );
+        this.participants = reservation.participants?.filter(
+            (participant) => participant.type === ParticipantsType.PARTICIPANT,
+        );
+    }
+
+    @ApiProperty({ type: () => ResourceResponseDto, required: false })
     resource?: ResourceResponseDto;
 
     @ApiProperty({ type: [ReservationParticipantResponseDto], required: false })
@@ -94,7 +94,9 @@ export class ReservationResponseDto {
 
     @ApiProperty({ type: [ReservationParticipantResponseDto], required: false })
     participants?: ReservationParticipantResponseDto[];
+}
 
-    @ApiProperty({ type: [ScheduleResponseDto], required: false })
-    schedules?: ScheduleResponseDto[];
+export class CreateReservationResponseDto {
+    @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+    reservationId: string;
 }

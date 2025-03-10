@@ -5,6 +5,8 @@ import { MeetingRoomInfo } from './meeting-room-info.entity';
 import { AccommodationInfo } from './accommodation-info.entity';
 import { Reservation } from './reservation.entity';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { ResourceManager } from './resource-manager.entity';
+
 export interface ResourceLocation {
     address: string;
     detailAddress?: string;
@@ -62,4 +64,7 @@ export class Resource {
 
     @OneToMany(() => Reservation, (reservation) => reservation.resource)
     reservations: Reservation[];
+
+    @OneToMany(() => ResourceManager, (resourceManager) => resourceManager.resource)
+    resourceManagers: ResourceManager[];
 }

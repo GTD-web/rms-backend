@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ResourceGroupResponseDto } from '../dtos/resource-group-response.dto';
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
 import { IsNull, Not } from 'typeorm';
 import { ReservationService } from '@resource/modules/reservation/application/services/reservation.service';
+import { ResourceGroupResponseDto } from '../dtos/resource-response.dto';
 @Injectable()
 export class ResourceGroupUsecase {
     constructor(

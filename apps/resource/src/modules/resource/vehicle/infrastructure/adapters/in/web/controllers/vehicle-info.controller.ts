@@ -12,71 +12,31 @@ import { VehicleInfoResponseDto } from '@resource/modules/resource/vehicle/appli
 export class VehicleInfoController {
     constructor(private readonly vehicleInfoService: VehicleInfoService) {}
 
-    private toResponseDto(vehicleInfo: any): VehicleInfoResponseDto {
-        return {
-            vehicleInfoId: vehicleInfo.vehicleInfoId,
-            resourceId: vehicleInfo.resourceId,
-            insuranceName: vehicleInfo.insuranceName,
-            insuranceNumber: vehicleInfo.insuranceNumber,
-            totalMileage: vehicleInfo.totalMileage,
-            leftMileage: vehicleInfo.leftMileage,
-            parkingLocationImages: vehicleInfo.parkingLocationImages,
-            odometerImages: vehicleInfo.odometerImages,
-        };
+    @ApiTags('sprint0.3-')
+    @Get()
+    @ApiOperation({ summary: '차량 정보 조회' })
+    @ApiDataResponse({
+        status: 200,
+        description: '차량 정보를 성공적으로 조회했습니다.',
+        type: VehicleInfoResponseDto,
+    })
+    async findByResourceId(@Param('resourceId') resourceId: string): Promise<VehicleInfoResponseDto> {
+        return; //this.toResponseDto(vehicleInfo);
     }
 
-    // @Post()
-    // @ApiOperation({ summary: '차량 정보 등록' })
-    // @ApiDataResponse({
-    //     status: 201,
-    //     description: '차량 정보가 성공적으로 등록되었습니다.',
-    //     type: VehicleInfoResponseDto,
-    // })
-    // async create(
-    //     @Param('resourceId') resourceId: string,
-    //     @Body() createVehicleInfoDto: CreateVehicleInfoDto,
-    // ): Promise<VehicleInfoResponseDto> {
-    //     const vehicleInfo = await this.vehicleInfoService.create({
-    //         ...createVehicleInfoDto,
-    //         resourceId,
-    //     });
-    //     return this.toResponseDto(vehicleInfo);
-    // }
-
-    // @Get()
-    // @ApiOperation({ summary: '차량 정보 조회' })
-    // @ApiDataResponse({
-    //     status: 200,
-    //     description: '차량 정보를 성공적으로 조회했습니다.',
-    //     type: VehicleInfoResponseDto,
-    // })
-    // async findByResourceId(@Param('resourceId') resourceId: string): Promise<VehicleInfoResponseDto> {
-    //     const vehicleInfo = await this.vehicleInfoService.findByResourceId(resourceId);
-    //     return this.toResponseDto(vehicleInfo);
-    // }
-
-    // @Patch()
-    // @ApiOperation({ summary: '차량 정보 수정' })
-    // @ApiDataResponse({
-    //     status: 200,
-    //     description: '차량 정보가 성공적으로 수정되었습니다.',
-    //     type: VehicleInfoResponseDto,
-    // })
-    // async update(
-    //     @Param('resourceId') resourceId: string,
-    //     @Body() updateVehicleInfoDto: UpdateVehicleInfoDto,
-    // ): Promise<VehicleInfoResponseDto> {
-    //     const vehicleInfo = await this.vehicleInfoService.update(resourceId, updateVehicleInfoDto);
-    //     return this.toResponseDto(vehicleInfo);
-    // }
-
-    // @Delete()
-    // @ApiOperation({ summary: '차량 정보 삭제' })
-    // @ApiDataResponse({
-    //     status: 200,
-    //     description: '차량 정보가 성공적으로 삭제되었습니다.',
-    // })
-    // async remove(@Param('resourceId') resourceId: string): Promise<void> {
-    //     await this.vehicleInfoService.remove(resourceId);
-    // }
+    @ApiTags('sprint0.3-')
+    @Patch()
+    @ApiOperation({ summary: '차량 정보 수정' })
+    @ApiDataResponse({
+        status: 200,
+        description: '차량 정보가 성공적으로 수정되었습니다.',
+        type: VehicleInfoResponseDto,
+    })
+    async update(
+        @Param('resourceId') resourceId: string,
+        @Body() updateVehicleInfoDto: UpdateVehicleInfoDto,
+    ): Promise<VehicleInfoResponseDto> {
+        const vehicleInfo = await this.vehicleInfoService.update(resourceId, updateVehicleInfoDto);
+        return; //this.toResponseDto(vehicleInfo);
+    }
 }

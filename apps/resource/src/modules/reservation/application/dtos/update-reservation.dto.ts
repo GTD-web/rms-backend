@@ -31,6 +31,11 @@ export class UpdateReservationStatusDto {
     @ApiProperty({ enum: ReservationStatus })
     @IsEnum(ReservationStatus)
     status: ReservationStatus;
+
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    rejectReason?: string;
 }
 
 // 예약 참가자 변경

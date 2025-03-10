@@ -22,6 +22,7 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { FileModule } from './modules/file/file.module';
+import { AppController } from './app.controller';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -45,10 +46,7 @@ import { FileModule } from './modules/file/file.module';
         NotificationModule,
         FileModule,
     ],
-    controllers: [],
-    providers: [        
-        AppService,
-    ],
+    controllers: [AppController],
+    providers: [AppService],
 })
-export class AppModule {
-}
+export class AppModule {}

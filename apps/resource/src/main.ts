@@ -10,7 +10,7 @@ import { Reflector } from '@nestjs/core';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { RolesGuard } from '@libs/guards/role.guard';
-
+import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     app.enableCors({
@@ -20,14 +20,11 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
     app.useGlobalGuards(new JwtAuthGuard(app.get(Reflector)), new RolesGuard(app.get(Reflector)));
     // 전역 인터셉터 등록
-    app.useGlobalInterceptors(
-        new ResponseInterceptor(),
-        new ErrorInterceptor(),
-    );
+    app.useGlobalInterceptors(new RequestInterceptor(), new ResponseInterceptor(), new ErrorInterceptor());
     // 파일 업로드 설정
     const uploadPath = join(process.cwd(), 'uploads');
     app.useStaticAssets(uploadPath, {
-        prefix: '/uploads',  
+        prefix: '/uploads',
         index: false,
         fallthrough: false,
     });

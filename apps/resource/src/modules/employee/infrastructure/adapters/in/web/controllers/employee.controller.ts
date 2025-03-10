@@ -42,7 +42,7 @@ export class EmployeeController {
     @ApiTags('sprint0.1')
     @Get('department')
     @Roles(Role.USER)
-    @ApiOperation({ summary: '부서별 직원 목록 조회 #참석자 설정 모달' })
+    @ApiOperation({ summary: '부서별 직원 목록 조회 #사용자/참석자설정/모달' })
     @ApiDataResponse({
         status: 200,
         description: '부서별 직원 목록을 성공적으로 조회했습니다.',
