@@ -23,6 +23,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { FileModule } from './modules/file/file.module';
 import { AppController } from './app.controller';
+
 @Module({
     imports: [
         ConfigModule.forRoot({

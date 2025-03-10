@@ -8379,17 +8379,19 @@ exports.jwtConfig = jwtConfig;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.typeOrmConfig = void 0;
 const entities_1 = __webpack_require__(/*! ../entities */ "./libs/entities/index.ts");
-const typeOrmConfig = (configService) => ({
-    type: 'postgres',
-    host: configService.get('database.host'),
-    port: configService.get('database.port'),
-    username: configService.get('database.username'),
-    password: configService.get('database.password'),
-    database: configService.get('database.database'),
-    entities: entities_1.Entities,
-    synchronize: configService.get('NODE_ENV') !== 'production',
-    logging: configService.get('NODE_ENV') !== 'production',
-});
+const typeOrmConfig = (configService) => {
+    return {
+        type: 'postgres',
+        host: configService.get('database.host'),
+        port: configService.get('database.port'),
+        username: configService.get('database.username'),
+        password: configService.get('database.password'),
+        database: configService.get('database.database'),
+        entities: entities_1.Entities,
+        schema: 'public',
+        logging: configService.get('NODE_ENV') !== 'production',
+    };
+};
 exports.typeOrmConfig = typeOrmConfig;
 
 
