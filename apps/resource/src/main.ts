@@ -14,10 +14,12 @@ import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
 import * as express from 'express';
 import { Express } from 'express';
 
-const server: Express = express();
+let app: NestExpressApplication;
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
+    const server = express();
+    app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
+
     app.enableCors({
         origin: '*',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -40,7 +42,20 @@ async function bootstrap() {
     if (process.env.NODE_ENV !== 'production') {
         await app.listen(ENV.APP_PORT || 3000);
     }
-}
-bootstrap();
 
-export default server; // ✅ Vercel에서 실행될 핸들러 추가
+    return app.getHttpAdapter().getInstance();
+}
+
+// Vercel serverless function handler
+export const handler = async (req: any, res: any) => {
+    if (!app) {
+        const server = await bootstrap();
+        return server(req, res);
+    }
+    return app.getHttpAdapter().getInstance()(req, res);
+};
+
+// Start the application in development
+if (process.env.NODE_ENV !== 'production') {
+    bootstrap();
+}

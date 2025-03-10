@@ -33229,6 +33229,7 @@ var exports = __webpack_exports__;
   \***********************************/
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.handler = void 0;
 const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const app_module_1 = __webpack_require__(/*! @resource/app.module */ "./apps/resource/src/app.module.ts");
 const swagger_1 = __webpack_require__(/*! @libs/swagger/swagger */ "./libs/swagger/swagger.ts");
@@ -33243,9 +33244,10 @@ const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "
 const role_guard_1 = __webpack_require__(/*! @libs/guards/role.guard */ "./libs/guards/role.guard.ts");
 const request_interceptor_1 = __webpack_require__(/*! @libs/interceptors/request.interceptor */ "./libs/interceptors/request.interceptor.ts");
 const express = __webpack_require__(/*! express */ "./node_modules/.pnpm/express@4.21.2/node_modules/express/index.js");
-const server = express();
+let app;
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
+    const server = express();
+    app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
     app.enableCors({
         origin: '*',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -33264,9 +33266,19 @@ async function bootstrap() {
     if (process.env.NODE_ENV !== 'production') {
         await app.listen(env_config_1.ENV.APP_PORT || 3000);
     }
+    return app.getHttpAdapter().getInstance();
 }
-bootstrap();
-exports["default"] = server;
+const handler = async (req, res) => {
+    if (!app) {
+        const server = await bootstrap();
+        return server(req, res);
+    }
+    return app.getHttpAdapter().getInstance()(req, res);
+};
+exports.handler = handler;
+if (process.env.NODE_ENV !== 'production') {
+    bootstrap();
+}
 
 })();
 
