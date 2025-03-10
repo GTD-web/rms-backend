@@ -14,11 +14,15 @@ import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
 import * as express from 'express';
 import { Express } from 'express';
 
-let app: NestExpressApplication;
+let cachedServer: Express = null;
 
-async function bootstrap() {
+async function bootstrap(): Promise<Express> {
+    if (cachedServer) {
+        return cachedServer;
+    }
+
     const server = express();
-    app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
 
     app.enableCors({
         origin: '*',
@@ -39,29 +43,28 @@ async function bootstrap() {
 
     setupSwagger(app, Object.values(dtos));
 
+    await app.init();
+    cachedServer = server;
+
     if (process.env.NODE_ENV !== 'production') {
         await app.listen(ENV.APP_PORT || 3000);
     }
 
-    return app.getHttpAdapter().getInstance();
+    return server;
 }
-
-// Vercel serverless function handler
-module.exports = async (req: any, res: any) => {
-    try {
-        if (!app) {
-            const server = await bootstrap();
-            return server(req, res);
-        }
-        const instance = app.getHttpAdapter().getInstance();
-        return instance(req, res);
-    } catch (error) {
-        console.error('Error handling request:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-};
 
 // Start the application in development
 if (process.env.NODE_ENV !== 'production') {
     bootstrap();
+}
+
+// Export the Express app for Vercel
+export default async function handler(req: any, res: any) {
+    try {
+        const server = await bootstrap();
+        return server(req, res);
+    } catch (error) {
+        console.error('Error handling request:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 }
