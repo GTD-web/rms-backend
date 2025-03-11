@@ -4,28 +4,29 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { VehicleInfoService } from '@resource/modules/resource/vehicle/application/services/vehicle-info.service';
 import { CreateVehicleInfoDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 import { UpdateVehicleInfoDto } from '@resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
-import { VehicleInfoResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-info-response.dto';
+import { VehicleInfoResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-response.dto';
+import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
 
 @ApiTags('차량 정보')
-@Controller('resources/:resourceId/vehicle-info')
+@Controller('vehicle-info')
 @ApiBearerAuth()
 export class VehicleInfoController {
-    constructor(private readonly vehicleInfoService: VehicleInfoService) {}
+    constructor(private readonly vehicleInfoUsecase: VehicleInfoUsecase) {}
 
-    @ApiTags('sprint0.3-')
-    @Get()
+    @ApiTags('sprint0.3')
+    @Get(':vehicleInfoId')
     @ApiOperation({ summary: '차량 정보 조회' })
     @ApiDataResponse({
         status: 200,
         description: '차량 정보를 성공적으로 조회했습니다.',
         type: VehicleInfoResponseDto,
     })
-    async findByResourceId(@Param('resourceId') resourceId: string): Promise<VehicleInfoResponseDto> {
-        return; //this.toResponseDto(vehicleInfo);
+    async findVehicleInfo(@Param('vehicleInfoId') vehicleInfoId: string): Promise<VehicleInfoResponseDto> {
+        return this.vehicleInfoUsecase.findVehicleInfo(vehicleInfoId);
     }
 
-    @ApiTags('sprint0.3-')
-    @Patch()
+    @ApiTags('sprint0.3')
+    @Patch(':vehicleInfoId')
     @ApiOperation({ summary: '차량 정보 수정' })
     @ApiDataResponse({
         status: 200,
@@ -33,10 +34,9 @@ export class VehicleInfoController {
         type: VehicleInfoResponseDto,
     })
     async update(
-        @Param('resourceId') resourceId: string,
+        @Param('vehicleInfoId') vehicleInfoId: string,
         @Body() updateVehicleInfoDto: UpdateVehicleInfoDto,
     ): Promise<VehicleInfoResponseDto> {
-        const vehicleInfo = await this.vehicleInfoService.update(resourceId, updateVehicleInfoDto);
-        return; //this.toResponseDto(vehicleInfo);
+        return this.vehicleInfoUsecase.updateVehicleInfo(vehicleInfoId, updateVehicleInfoDto);
     }
 }

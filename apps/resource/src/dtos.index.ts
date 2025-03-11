@@ -34,15 +34,18 @@ export {
 } from './modules/resource/common/application/dtos/resource-response.dto';
 
 // Vehicle
+export {
+    VehicleInfoResponseDto,
+    ConsumableResponseDto,
+    MaintenanceResponseDto,
+} from './modules/resource/vehicle/application/dtos/vehicle-response.dto';
+
 export { CreateVehicleInfoDto } from './modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 export { CreateConsumableDto } from './modules/resource/vehicle/application/dtos/create-consumable.dto';
 export { CreateMaintenanceDto } from './modules/resource/vehicle/application/dtos/create-maintenance.dto';
 export { UpdateVehicleInfoDto } from './modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
 export { UpdateConsumableDto } from './modules/resource/vehicle/application/dtos/update-consumable.dto';
 export { UpdateMaintenanceDto } from './modules/resource/vehicle/application/dtos/update-maintenance.dto';
-export { VehicleInfoResponseDto } from './modules/resource/vehicle/application/dtos/vehicle-info-response.dto';
-export { ConsumableResponseDto } from './modules/resource/vehicle/application/dtos/consumable-response.dto';
-export { MaintenanceResponseDto } from './modules/resource/vehicle/application/dtos/maintenance-response.dto';
 
 // Meeting Room
 export { CreateMeetingRoomInfoDto } from './modules/resource/meeting-room/application/dtos/create-meeting-room-info.dto';

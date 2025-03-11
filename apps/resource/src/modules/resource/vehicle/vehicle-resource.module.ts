@@ -11,42 +11,33 @@ import { VehicleInfoRepository } from './infrastructure/adapters/out/persistence
 import { ConsumableRepository } from './infrastructure/adapters/out/persistence/consumable.repository';
 import { MaintenanceRepository } from './infrastructure/adapters/out/persistence/maintenance.repository';
 import { VehicleInfoController } from './infrastructure/adapters/in/web/controllers/vehicle-info.controller';
+import { VehicleInfoUsecase } from './application/usecases/vehicle-info.usecase';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance]),
-  ],
-  providers: [
-    VehicleResourceHandler,
-    VehicleInfoService,
-    ConsumableService,
-    MaintenanceService,
-    VehicleInfoRepository,
-    {
-      provide: 'VehicleInfoRepositoryPort',
-      useExisting: VehicleInfoRepository,
-    },
-    ConsumableRepository,
-    {
-      provide: 'ConsumableRepositoryPort',
-      useExisting: ConsumableRepository,
-    },
-    MaintenanceRepository,
-    {
-      provide: 'MaintenanceRepositoryPort',
-      useExisting: MaintenanceRepository,
-    },
-  ],
-  controllers: [
-    VehicleInfoController,
-    ConsumableController,
-    MaintenanceController,
-  ],
-  exports: [
-    VehicleResourceHandler,
-    VehicleInfoService,
-    ConsumableService,
-    MaintenanceService,
-  ],
+    imports: [TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance])],
+    providers: [
+        VehicleResourceHandler,
+        VehicleInfoService,
+        ConsumableService,
+        MaintenanceService,
+        VehicleInfoUsecase,
+        VehicleInfoRepository,
+        {
+            provide: 'VehicleInfoRepositoryPort',
+            useExisting: VehicleInfoRepository,
+        },
+        ConsumableRepository,
+        {
+            provide: 'ConsumableRepositoryPort',
+            useExisting: ConsumableRepository,
+        },
+        MaintenanceRepository,
+        {
+            provide: 'MaintenanceRepositoryPort',
+            useExisting: MaintenanceRepository,
+        },
+    ],
+    controllers: [VehicleInfoController, ConsumableController, MaintenanceController],
+    exports: [VehicleResourceHandler, VehicleInfoService, ConsumableService, MaintenanceService, VehicleInfoUsecase],
 })
-export class VehicleResourceModule {} 
+export class VehicleResourceModule {}

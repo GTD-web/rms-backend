@@ -4,7 +4,7 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { MaintenanceService } from '@resource/modules/resource/vehicle/application/services/maintenance.service';
 import { CreateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/create-maintenance.dto';
 import { UpdateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/update-maintenance.dto';
-import { MaintenanceResponseDto } from '@resource/modules/resource/vehicle/application/dtos/maintenance-response.dto';
+import { MaintenanceResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-response.dto';
 
 @ApiTags('정비 이력')
 @Controller('maintenances')
@@ -25,25 +25,25 @@ export class MaintenanceController {
     }
 
     @ApiTags('sprint0.3-')
-    @Get(':maintenanceId')
-    @ApiOperation({ summary: '정비 이력 조회' })
+    @Get('')
+    @ApiOperation({ summary: '정비 이력 목록 조회' })
     @ApiDataResponse({
-        description: '정비 이력을 조회했습니다.',
-        type: MaintenanceResponseDto,
+        description: '정비 이력 목록을 조회했습니다.',
+        type: [MaintenanceResponseDto],
     })
-    async findOne(@Param('maintenanceId') maintenanceId: string): Promise<MaintenanceResponseDto> {
+    async findAll(): Promise<MaintenanceResponseDto[]> {
         // const maintenance = await this.maintenanceService.findById(maintenanceId);
         return null;
     }
 
     @ApiTags('sprint0.3-')
-    @Get('consumable/:consumableId')
-    @ApiOperation({ summary: '소모품별 정비 이력 목록 조회' })
+    @Get(':maintenanceId')
+    @ApiOperation({ summary: '정비 상세 이력 조회' })
     @ApiDataResponse({
-        description: '소모품의 정비 이력 목록을 조회했습니다.',
-        type: [MaintenanceResponseDto],
+        description: '정비 상세 이력을 조회했습니다.',
+        type: MaintenanceResponseDto,
     })
-    async findByConsumable(@Param('consumableId') consumableId: string): Promise<MaintenanceResponseDto[]> {
+    async findOne(@Param('maintenanceId') maintenanceId: string): Promise<MaintenanceResponseDto> {
         // const maintenances = await this.maintenanceService.findByConsumableId(consumableId);
         return null;
     }

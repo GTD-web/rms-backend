@@ -19,31 +19,12 @@ export class VehicleResourceHandler implements ResourceTypeHandler {
         typeInfo: CreateVehicleInfoDto,
         repositoryOptions?: RepositoryOptions,
     ): Promise<void> {
-        // const vehicleInfo = new VehicleInfo({
-        //     ...typeInfo,
-        //     resourceId: resource.resourceId,
-        // });
-        // await this.vehicleInfoRepository.save(vehicleInfo, repositoryOptions);
-    }
-
-    async getTypeInfo(resourceId: string, repositoryOptions?: RepositoryOptions): Promise<any> {
-        // return this.vehicleInfoRepository.findByResourceId(resourceId, repositoryOptions);
-    }
-
-    async updateTypeInfo(
-        resource: Resource,
-        typeInfo: Partial<CreateVehicleInfoDto>,
-        repositoryOptions?: RepositoryOptions,
-    ): Promise<void> {
-        // await this.vehicleInfoRepository.update(resource.resourceId, typeInfo, repositoryOptions);
-    }
-
-    async deleteTypeInfo(resourceId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
-        // await this.vehicleInfoRepository.delete(resourceId, repositoryOptions);
-    }
-
-    async validateTypeData(typeInfo: any, repositoryOptions?: RepositoryOptions): Promise<boolean> {
-        // 모든 필드가 optional이므로 추가 검증 불필요
-        return true;
+        await this.vehicleInfoRepository.save(
+            {
+                resourceId: resource.resourceId,
+                ...typeInfo,
+            } as VehicleInfo,
+            repositoryOptions,
+        );
     }
 }

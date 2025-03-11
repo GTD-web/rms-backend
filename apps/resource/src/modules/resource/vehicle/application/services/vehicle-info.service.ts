@@ -21,10 +21,10 @@ export class VehicleInfoService {
     }
 
     async update(
-        vehicleId: string,
+        vehicleInfoId: string,
         updateData: UpdateVehicleInfoDto,
         repositoryOptions?: RepositoryOptions,
     ): Promise<VehicleInfo> {
-        return this.vehicleInfoRepository.update(vehicleId, updateData, repositoryOptions);
+        return this.vehicleInfoRepository.update(vehicleInfoId, updateData, repositoryOptions);
     }
 }

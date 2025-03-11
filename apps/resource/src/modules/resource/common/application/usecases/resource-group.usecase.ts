@@ -23,6 +23,9 @@ export class ResourceGroupUsecase {
             where: {
                 parentResourceGroupId: IsNull(),
             },
+            order: {
+                order: 'ASC',
+            },
         });
         return resourceGroups;
     }
@@ -34,6 +37,9 @@ export class ResourceGroupUsecase {
                 ...(type && { type }),
             },
             relations: ['children'],
+            order: {
+                order: 'ASC',
+            },
         });
         const resourceGroupsResponse = await Promise.all(
             resourceGroups.map(async (resourceGroup) => ({
@@ -47,6 +53,9 @@ export class ResourceGroupUsecase {
                             await this.resourceService.findAll({
                                 where: {
                                     resourceGroupId: child.resourceGroupId,
+                                },
+                                order: {
+                                    order: 'ASC',
                                 },
                             })
                         ).map((resource) => ({
@@ -64,14 +73,13 @@ export class ResourceGroupUsecase {
     }
 
     async createResourceGroup(createResourceGroupDto: CreateResourceGroupDto): Promise<ResourceGroupResponseDto> {
-        // 순서 계싼
         const resourceGroups = await this.resourceGroupService.findAll({
             where: {
                 parentResourceGroupId: createResourceGroupDto.parentResourceGroupId,
             },
         });
         const resourceGroupOrder = resourceGroups.length;
-        console.log(resourceGroupOrder);
+
         const resourceGroup = await this.resourceGroupService.save({
             ...createResourceGroupDto,
             order: resourceGroupOrder,

@@ -1,5 +1,5 @@
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
-import { VehicleInfoResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-info-response.dto';
+import { VehicleInfoResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-response.dto';
 import { MeetingRoomInfoResponseDto } from '@resource/modules/resource/meeting-room/application/dtos/meeting-room-info-response.dto';
 import { AccommodationInfoResponseDto } from '@resource/modules/resource/accommodation/application/dtos/accommodation-info-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
@@ -34,6 +34,7 @@ export class ResourceResponseDto {
         this.unavailableReason = resource.unavailableReason;
         this.notifyParticipantChange = resource.notifyParticipantChange;
         this.notifyReservationChange = resource.notifyReservationChange;
+        this.order = resource.order;
         this.managers = resource.resourceManagers;
 
         if (resource.vehicleInfo) {
@@ -78,6 +79,9 @@ export class ResourceResponseDto {
     @ApiProperty()
     notifyReservationChange?: boolean;
 
+    @ApiProperty()
+    order: number;
+
     @ApiProperty({
         required: false,
         oneOf: [
@@ -107,6 +111,9 @@ export class ResourceSelectResponseDto {
 
     @ApiProperty()
     resourceGroupId?: string;
+
+    @ApiProperty()
+    order: number;
 }
 
 export class ResourceWithReservationsResponseDto extends ResourceResponseDto {

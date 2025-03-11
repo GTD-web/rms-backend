@@ -100,6 +100,8 @@ export class ResourceUsecase {
             relations: [
                 'resourceGroup',
                 'vehicleInfo',
+                'vehicleInfo.consumables',
+                'vehicleInfo.consumables.maintenances',
                 'meetingRoomInfo',
                 'accommodationInfo',
                 'resourceManagers',
