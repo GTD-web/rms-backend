@@ -8,14 +8,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WEB_PUSH_CONFIG } from '@libs/configs/env.config';
 import { AdapterService } from './application/services/adapter.service';
 import { WebPushAdapter } from './infrastructure/adapters/out/device/web-push.adapter';
-// import { FCMAdapter } from "./infrastructure/adapters/out/device/fcm-push.adapter";
-
+import { AuthModule } from '@resource/modules/auth/auth.module';
+import { NotificationUsecase } from './application/usecases/notification.usecase';
 @Module({
-    imports: [TypeOrmModule.forFeature([Notification]), ConfigModule.forFeature(WEB_PUSH_CONFIG)],
+    imports: [TypeOrmModule.forFeature([Notification]), ConfigModule.forFeature(WEB_PUSH_CONFIG), AuthModule],
     providers: [
         ConfigService,
         NotificationService,
         AdapterService,
+        NotificationUsecase,
         {
             provide: 'NotificationRepositoryPort',
             useClass: NotificationRepository,

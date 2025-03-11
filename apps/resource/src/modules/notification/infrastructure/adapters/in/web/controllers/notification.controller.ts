@@ -7,35 +7,50 @@ import { User as UserEntity } from '@libs/entities';
 import { AdapterService } from '@resource/modules/notification/application/services/adapter.service';
 import { Public } from '@libs/decorators/public.decorator';
 import { WebPushSubscription } from '@resource/modules/notification/infrastructure/adapters/out/device/web-push.adapter';
+import { NotificationUsecase } from '@resource/modules/notification/application/usecases/notification.usecase';
+import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+
 @ApiTags('알림')
 @Controller('notifications')
 @Public()
 @ApiBearerAuth()
 export class NotificationController {
     constructor(
-        private readonly notificationService: NotificationService,
+        private readonly notificationUsecase: NotificationUsecase,
         private readonly adapterService: AdapterService,
     ) {}
 
     @ApiTags('sprint0.3-')
     @Post('subscribe')
     @ApiOperation({ summary: '웹 푸시 구독' })
-    async subscribe(@Body() subscription: WebPushSubscription) {
-        await this.adapterService.subscribe(subscription);
+    @ApiDataResponse({
+        status: 200,
+        description: '웹 푸시 구독 성공',
+    })
+    async subscribe(@User() user: UserEntity, @Body() subscription: WebPushSubscription): Promise<void> {
+        await this.notificationUsecase.subscribe(user, subscription);
     }
 
     @ApiTags('sprint0.3-')
     @Post('unsubscribe')
     @ApiOperation({ summary: '웹 푸시 구독 취소' })
-    async unsubscribe(@Body() subscription: PushSubscription) {
-        // await this.notificationService.unsubscribe(user.userId, subscription);
+    @ApiDataResponse({
+        status: 200,
+        description: '웹 푸시 구독 취소 성공',
+    })
+    async unsubscribe(@User() user: UserEntity) {
+        await this.notificationUsecase.unsubscribe(user);
     }
 
     @ApiTags('sprint0.3-')
     @Post('send')
     @ApiOperation({ summary: '웹 푸시 알림 전송' })
-    async send(@Body() subscription: WebPushSubscription) {
-        await this.adapterService.send(subscription);
+    @ApiDataResponse({
+        status: 200,
+        description: '웹 푸시 알림 전송 성공',
+    })
+    async send() {
+        await this.adapterService.send();
     }
 
     @ApiTags('sprint0.3-')

@@ -1,6 +1,7 @@
 import { Employee } from '@libs/entities';
 import { Role } from '@libs/enums/role-type.enum';
 import * as bcrypt from 'bcrypt';
+import { WebPushSubscription } from '@resource/modules/notification/infrastructure/adapters/out/device/web-push.adapter';
 
 export interface UserProps {
     userId?: string;
@@ -10,7 +11,7 @@ export interface UserProps {
     password: string;
     accessToken?: string;
     expiredAt?: string;
-    subscription?: string;
+    subscription?: WebPushSubscription;
     roles?: Role[];
     name?: string;
     employeeNumber?: string;
@@ -60,7 +61,7 @@ export class User {
         return this.props.expiredAt;
     }
 
-    get subscription(): string {
+    get subscription(): WebPushSubscription {
         return this.props.subscription;
     }
 
@@ -101,6 +102,10 @@ export class User {
         if (!this.props.roles.includes(role)) {
             this.props.roles.push(role);
         }
+    }
+
+    updateSubscription(subscription: WebPushSubscription): void {
+        this.props.subscription = subscription;
     }
 
     removeRole(role: Role): void {

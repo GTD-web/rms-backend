@@ -8,6 +8,8 @@ import {
     WebPushPayload,
     WebPushSendResult,
 } from '@resource/modules/notification/infrastructure/adapters/out/device/web-push.adapter';
+import { UserService } from '@resource/modules/auth/application/services/user.service';
+import { Not, IsNull } from 'typeorm';
 
 @Injectable()
 export class AdapterService {
@@ -20,28 +22,23 @@ export class AdapterService {
             WebPushPayload,
             WebPushSendResult
         >,
+        private readonly userService: UserService,
     ) {}
 
-    async subscribe(subscription: WebPushSubscription): Promise<void> {
-        console.log('subscription', subscription);
-    }
-
-    async unsubscribe(userId: string, subscription: PushSubscription): Promise<void> {
-        // await this.notificationRepository.unsubscribe(userId, subscription);
-    }
-
-    async send(subscription: WebPushSubscription): Promise<void> {
-        console.log('send', subscription);
+    async send(): Promise<void> {
+        const usersWithSubscription = await this.userService.findAll({
+            where: {
+                subscription: Not(IsNull()),
+            },
+        });
+        console.log('send');
+        const subscriptions = usersWithSubscription.map((user) => user.subscription);
         await this.pushNotificationService.sendNotification(
-            [subscription],
+            subscriptions,
             new WebPushPayload({
                 title: 'test title',
                 body: 'test body',
             }),
         );
-    }
-
-    async resend(id: string): Promise<void> {
-        // await this.notificationRepository.resend(id);
     }
 }

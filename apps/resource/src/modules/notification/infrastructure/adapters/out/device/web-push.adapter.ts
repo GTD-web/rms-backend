@@ -47,8 +47,6 @@ export class WebPushAdapter implements PushNotificationPort<WebPushSubscription,
         );
     }
 
-    async initialize(): Promise<void> {}
-
     async sendNotification(
         subscriptions: WebPushSubscription | WebPushSubscription[],
         payload: WebPushPayload,
@@ -64,9 +62,5 @@ export class WebPushAdapter implements PushNotificationPort<WebPushSubscription,
         console.log('sendResults', sendResults);
 
         return new WebPushSendResult(true, 'success', 'success');
-    }
-
-    validateSubscription(subscription: WebPushSubscription): boolean {
-        return true;
     }
 }
