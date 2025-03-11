@@ -24,7 +24,7 @@ import { ResourceUsecase } from './common/application/usecases/resource.usecase'
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Resource, ResourceGroup, ResourceManager, User, Employee]),
+        TypeOrmModule.forFeature([Resource, ResourceGroup, ResourceManager, Employee, User]),
         VehicleResourceModule,
         MeetingRoomResourceModule,
         AccommodationResourceModule,
@@ -35,20 +35,17 @@ import { ResourceUsecase } from './common/application/usecases/resource.usecase'
         ResourceService,
         ResourceGroupService,
         ResourceManagerService,
-        ResourceRepository,
         {
             provide: 'ResourceRepositoryPort',
             useClass: ResourceRepository,
         },
-        ResourceGroupRepository,
         {
             provide: 'ResourceGroupRepositoryPort',
-            useExisting: ResourceGroupRepository,
+            useClass: ResourceGroupRepository,
         },
-        ResourceManagerRepository,
         {
             provide: 'ResourceManagerRepositoryPort',
-            useExisting: ResourceManagerRepository,
+            useClass: ResourceManagerRepository,
         },
         {
             provide: 'ResourceTypeHandlers',

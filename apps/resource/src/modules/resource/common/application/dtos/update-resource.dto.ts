@@ -1,11 +1,7 @@
-import { IsString, IsOptional, IsBoolean, IsArray, IsEnum, ValidateNested } from 'class-validator';
-import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { IsString, IsOptional, IsBoolean, IsArray, ValidateNested, IsNumber } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { UpdateVehicleInfoDto } from '@resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
-import { UpdateMeetingRoomInfoDto } from '@resource/modules/resource/meeting-room/application/dtos/update-meeting-room-info.dto';
-import { UpdateAccommodationInfoDto } from '@resource/modules/resource/accommodation/application/dtos/update-accommodation-info.dto';
 import { CreateResourceManagerDto, ResourceLocation } from './create-resource.dto';
-import { ResourceType } from '@libs/enums/resource-type.enum';
 
 export class UpdateResourceGroupDto {
     @ApiProperty({ required: false })
@@ -13,20 +9,10 @@ export class UpdateResourceGroupDto {
     @IsOptional()
     title?: string;
 
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    description?: string;
-
-    @ApiProperty({ required: false, enum: ResourceType })
-    @IsEnum(ResourceType)
-    @IsOptional()
-    type?: ResourceType;
-
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    parentResourceGroupId?: string;
+    // @ApiProperty({ required: false })
+    // @IsString()
+    // @IsOptional()
+    // description?: string;
 }
 
 export class UpdateResourceDto {
@@ -48,6 +34,16 @@ export class UpdateResourceDto {
     @IsArray()
     @IsOptional()
     images?: string[];
+
+    @ApiProperty({ required: false })
+    @IsBoolean()
+    @IsOptional()
+    isAvailable?: boolean;
+
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    unavailableReason?: string;
 
     @ApiProperty({ required: false })
     @IsBoolean()
@@ -97,4 +93,36 @@ export class ReturnVehicleDto {
     @IsArray()
     @IsString({ each: true })
     odometerImages: string[];
+}
+
+export class NewOrderResourceDto {
+    @ApiProperty()
+    @IsString()
+    resourceId: string;
+
+    @ApiProperty()
+    @IsNumber()
+    newOrder: number;
+}
+
+export class UpdateResourceOrdersDto {
+    @ApiProperty({ type: [NewOrderResourceDto] })
+    @IsArray()
+    orders: NewOrderResourceDto[];
+}
+
+export class NewOrderResourceGroupDto {
+    @ApiProperty()
+    @IsString()
+    resourceGroupId: string;
+
+    @ApiProperty()
+    @IsNumber()
+    newOrder: number;
+}
+
+export class UpdateResourceGroupOrdersDto {
+    @ApiProperty({ type: [NewOrderResourceGroupDto] })
+    @IsArray()
+    orders: NewOrderResourceGroupDto[];
 }

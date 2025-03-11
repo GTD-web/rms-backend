@@ -14,6 +14,7 @@ import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     ReturnVehicleDto,
     UpdateResourceInfoDto,
+    UpdateResourceOrdersDto,
 } from '@resource/modules/resource/common/application/dtos/update-resource.dto';
 import { VehicleInfoService } from '@resource/modules/resource/vehicle/application/services/vehicle-info.service';
 import { Resource } from '@libs/entities/resource.entity';
@@ -51,11 +52,21 @@ export class ResourceUsecase {
                 type: type,
                 parentResourceGroupId: Not(IsNull()),
             },
+            order: {
+                order: 'ASC',
+            },
         });
 
         const resourceGroupsWithResources = await Promise.all(
             resourceGroups.map(async (resourceGroup) => {
-                const resources = await this.resourceService.findByResourceGroupId(resourceGroup.resourceGroupId);
+                const resources = await this.resourceService.findAll({
+                    where: {
+                        resourceGroupId: resourceGroup.resourceGroupId,
+                    },
+                    order: {
+                        order: 'ASC',
+                    },
+                });
 
                 const resourcesWithReservations = await Promise.all(
                     resources.map(async (resource) => {
@@ -155,7 +166,9 @@ export class ResourceUsecase {
         }
 
         // 1. 그룹 존재 확인
-        const group = await this.resourceGroupService.findOne(resource.resourceGroupId);
+        const group = await this.resourceGroupService.findOne({
+            where: { resourceGroupId: resource.resourceGroupId },
+        });
 
         if (!group) {
             throw new NotFoundException('Resource group not found');
@@ -166,8 +179,19 @@ export class ResourceUsecase {
         await queryRunner.startTransaction();
 
         try {
+            // 자원 순서 계산
+            const resources = await this.resourceService.findAll({
+                where: {
+                    resourceGroupId: group.resourceGroupId,
+                    // deletedAt: IsNull(),
+                },
+            });
+            const resourceOrder = resources.length;
+
             // 3. 기본 자원 정보 저장
-            const savedResource = await this.resourceService.save(resource as Resource, { queryRunner });
+            const savedResource = await this.resourceService.save({ ...resource, order: resourceOrder } as Resource, {
+                queryRunner,
+            });
 
             // 4. 타입별 정보 저장
             const handler = this.typeHandlers.get(group.type);
@@ -205,128 +229,135 @@ export class ResourceUsecase {
         }
     }
 
-    // async updateResource(resourceId: string, updateRequest: UpdateResourceInfoDto): Promise<ResourceResponseDto> {
-    //     const resource = await this.reservationService.findOne({
-    //         where: {
-    //             resourceId: resourceId,
-    //         },
-    //         relations: ['resourceGroup'],
-    //     });
-    //     if (!resource) {
-    //         throw new NotFoundException('Resource not found');
-    //     }
+    async updateResource(resourceId: string, updateRequest: UpdateResourceInfoDto): Promise<ResourceResponseDto> {
+        const resource = await this.resourceService.findOne({
+            where: {
+                resourceId: resourceId,
+            },
+            relations: ['resourceGroup'],
+        });
+        console.log(resource);
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
 
-    //     const queryRunner = this.dataSource.createQueryRunner();
-    //     await queryRunner.connect();
-    //     await queryRunner.startTransaction();
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
-    //     try {
-    //         // 1. 기본 자원 정보 업데이트
-    //         if (updateRequest.resource) {
-    //             await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
-    //         }
+        try {
+            // 1. 기본 자원 정보 업데이트
+            if (updateRequest.resource) {
+                await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
+            }
 
-    //         // // 2. 타입별 정보 업데이트
-    //         // if (updateRequest.typeInfo) {
-    //         //     const group = await this.resourceGroupService.findOne(resource.resourceGroupId);
-    //         //     const handler = this.typeHandlers.get(group.type);
-    //         //     if (!handler) {
-    //         //         throw new BadRequestException(`Unsupported resource type: ${group.type}`);
-    //         //     }
-    //         //     await handler.updateTypeInfo(resource, updateRequest.typeInfo, { queryRunner });
-    //         // }
+            // 2. 자원 관리자 정보 업데이트
+            if (updateRequest.managers) {
+                const currentManagers = await this.resourceManagerService.findAll({
+                    where: {
+                        resourceId: resourceId,
+                    },
+                });
+                const currentManagerIds = currentManagers.map((m) => m.employeeId);
+                const newManagerIds = updateRequest.managers.map((m) => m.employeeId);
 
-    //         // 3. 자원 관리자 정보 업데이트
-    //         if (updateRequest.managers) {
-    //             const currentManagers = await this.resourceManagerService.find({
-    //                 where: {
-    //                     resourceId: resourceId,
-    //                 },
-    //             });
-    //             const currentManagerIds = currentManagers.map((m) => m.employeeId);
-    //             const newManagerIds = updateRequest.managers.map((m) => m.employeeId);
+                // 제거된 관리자들의 role 업데이트
+                const removedManagerIds = currentManagerIds.filter((id) => !newManagerIds.includes(id));
+                await Promise.all(
+                    removedManagerIds.map(async (employeeId) => {
+                        const otherResources = await this.resourceManagerService.findAll({
+                            where: {
+                                employeeId: employeeId,
+                            },
+                        });
+                        if (otherResources.length === 1) {
+                            await this.userService.removeRole(employeeId, Role.RESOURCE_ADMIN, { queryRunner });
+                        }
+                    }),
+                );
 
-    //             // 제거된 관리자들의 role 업데이트
-    //             const removedManagerIds = currentManagerIds.filter((id) => !newManagerIds.includes(id));
-    //             await Promise.all(
-    //                 removedManagerIds.map(async (employeeId) => {
-    //                     const otherResources = await this.resourceManagerRepository.findByEmployeeId(employeeId);
-    //                     if (otherResources.length === 1) {
-    //                         await this.userService.removeRole(employeeId, Role.RESOURCE_ADMIN, { queryRunner });
-    //                     }
-    //                 }),
-    //             );
+                // 새로운 관리자들의 role 업데이트
+                const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
+                await Promise.all(
+                    addedManagerIds.map((employeeId) =>
+                        this.userService.addRole(employeeId, Role.RESOURCE_ADMIN, { queryRunner }),
+                    ),
+                );
 
-    //             // 새로운 관리자들의 role 업데이트
-    //             const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
-    //             await Promise.all(
-    //                 addedManagerIds.map((employeeId) =>
-    //                     this.userService.addRole(employeeId, Role.RESOURCE_ADMIN, { queryRunner }),
-    //                 ),
-    //             );
+                await this.resourceManagerService.updateManagers(resourceId, newManagerIds, { queryRunner });
+            }
 
-    //             await this.resourceManagerService.updateManagers(resourceId, newManagerIds, { queryRunner });
-    //         }
+            await queryRunner.commitTransaction();
 
-    //         await queryRunner.commitTransaction();
+            return this.findResourceDetail(resourceId);
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw new InternalServerErrorException('Failed to update resource');
+        } finally {
+            await queryRunner.release();
+        }
+    }
+    async reorderResources(updateResourceOrdersDto: UpdateResourceOrdersDto): Promise<void> {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
-    //         return this.findOne(resourceId);
-    //     } catch (err) {
-    //         await queryRunner.rollbackTransaction();
-    //         throw new InternalServerErrorException('Failed to update resource');
-    //     } finally {
-    //         await queryRunner.release();
-    //     }
-    // }
+        try {
+            await Promise.all(
+                updateResourceOrdersDto.orders.map(async (order) => {
+                    await this.resourceService.update(order.resourceId, { order: order.newOrder }, { queryRunner });
+                }),
+            );
 
-    // async delete(resourceId: string): Promise<void> {
-    //     const resource = await this.resourceRepository.findOne({
-    //         where: {
-    //             resourceId: resourceId,
-    //         },
-    //         relations: ['resourceGroup'],
-    //     });
-    //     if (!resource) {
-    //         throw new NotFoundException('Resource not found');
-    //     }
+            await queryRunner.commitTransaction();
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw new InternalServerErrorException('Failed to reorder resources');
+        } finally {
+            await queryRunner.release();
+        }
+    }
 
-    //     const handler = this.typeHandlers.get(resource.type);
-    //     if (!handler) {
-    //         throw new BadRequestException(`Unsupported resource type: ${resource.type}`);
-    //     }
+    async deleteResource(resourceId: string): Promise<void> {
+        const resource = await this.resourceService.findOne({
+            where: {
+                resourceId: resourceId,
+            },
+            relations: ['resourceGroup'],
+        });
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
-    //     const queryRunner = this.dataSource.createQueryRunner();
-    //     await queryRunner.connect();
-    //     await queryRunner.startTransaction();
+        try {
+            await this.resourceService.softDelete(resourceId, { queryRunner });
 
-    //     try {
-    //         // 1. 타입별 정보 삭제
-    //         await handler.deleteTypeInfo(resourceId, { queryRunner });
+            // 자원 순서 재계산
+            const resources = await this.resourceService.findAll({
+                where: {
+                    resourceId: Not(resourceId),
+                    resourceGroupId: resource.resourceGroupId,
+                    deletedAt: IsNull(),
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+            console.log(resources);
+            for (let i = 0; i < resources.length; i++) {
+                await this.resourceService.update(resources[i].resourceId, { order: i }, { queryRunner });
+            }
 
-    //         const resourceManagers = await this.resourceManagerRepository.findByResourceId(resourceId);
-
-    //         // 2. 자원 관리자 정보 삭제
-    //         await this.resourceManagerRepository.deleteByResourceId(resourceId, { queryRunner });
-
-    //         // 3. 자원 관리자 해제
-    //         for (const resourceManager of resourceManagers) {
-    //             const otherResources = await this.resourceManagerRepository.findByEmployeeId(
-    //                 resourceManager.employeeId,
-    //             );
-    //             if (otherResources.length === 0) {
-    //                 await this.userService.removeRole(resourceManager.employeeId, Role.RESOURCE_ADMIN);
-    //             }
-    //         }
-
-    //         // 3. 공통 자원 정보 삭제
-    //         await this.resourceRepository.delete(resourceId, { queryRunner });
-
-    //         await queryRunner.commitTransaction();
-    //     } catch (err) {
-    //         await queryRunner.rollbackTransaction();
-    //         throw new InternalServerErrorException('Failed to delete resource');
-    //     } finally {
-    //         await queryRunner.release();
-    //     }
-    // }
+            await queryRunner.commitTransaction();
+        } catch (err) {
+            console.error(err);
+            await queryRunner.rollbackTransaction();
+            throw new InternalServerErrorException('Failed to delete resource');
+        } finally {
+            await queryRunner.release();
+        }
+    }
 }

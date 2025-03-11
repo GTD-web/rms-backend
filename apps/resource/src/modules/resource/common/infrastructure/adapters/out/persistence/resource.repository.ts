@@ -70,4 +70,11 @@ export class ResourceRepository implements ResourceRepositoryPort {
             : this.repository;
         await repository.delete({ resourceId: id });
     }
+
+    async softDelete(id: string, repositoryOptions?: RepositoryOptions): Promise<void> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(ResourceEntity)
+            : this.repository;
+        await repository.softDelete({ resourceId: id });
+    }
 }

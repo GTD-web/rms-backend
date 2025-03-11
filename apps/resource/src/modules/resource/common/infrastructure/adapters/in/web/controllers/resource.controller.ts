@@ -7,7 +7,10 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceUsecase } from '@resource/modules/resource/common/application/usecases/resource.usecase';
 import { ResourceGroupWithResourcesAndReservationsResponseDto } from '@resource/modules/resource/common/application/dtos/resource-response.dto';
-import { ReturnVehicleDto } from '@resource/modules/resource/common/application/dtos/update-resource.dto';
+import {
+    ReturnVehicleDto,
+    UpdateResourceOrdersDto,
+} from '@resource/modules/resource/common/application/dtos/update-resource.dto';
 
 @ApiTags('자원')
 @Controller('resources')
@@ -69,21 +72,21 @@ export class ResourceController {
         return this.resourceUsecase.findResourceDetail(resourceId);
     }
 
-    @ApiTags('sprint0.3-')
-    @Get('group/:resourceGroupId')
-    @ApiOperation({ summary: '그룹 별 자원 조회' })
+    @ApiTags('sprint0.3')
+    @Patch('order')
+    @Roles(Role.SYSTEM_ADMIN)
+    @ApiOperation({ summary: '자원 순서 변경' })
     @ApiDataResponse({
         status: 200,
-        description: '그룹 별 자원을 성공적으로 조회했습니다.',
-        type: ResourceResponseDto,
+        description: '자원 순서가 성공적으로 변경되었습니다.',
     })
-    async findByResourceGroupId(@Param('resourceGroupId') resourceGroupId: string): Promise<ResourceResponseDto[]> {
-        // return this.resourceUsecase.findByResourceGroupId(resourceGroupId);
-        return [];
+    async reorder(@Body() updateResourceOrdersDto: UpdateResourceOrdersDto): Promise<void> {
+        return this.resourceUsecase.reorderResources(updateResourceOrdersDto);
     }
 
-    @ApiTags('sprint0.3-')
+    @ApiTags('sprint0.3')
     @Patch(':resourceId')
+    @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 수정' })
     @ApiDataResponse({
         status: 200,
@@ -94,17 +97,19 @@ export class ResourceController {
         @Param('resourceId') resourceId: string,
         @Body() updateResourceInfoDto: UpdateResourceInfoDto,
     ): Promise<ResourceResponseDto> {
-        return; // this.resourceUsecase.updateResource(resourceId, updateResourceInfoDto);
+        console.log(updateResourceInfoDto);
+        return this.resourceUsecase.updateResource(resourceId, updateResourceInfoDto);
     }
 
-    @ApiTags('sprint0.3-')
+    @ApiTags('sprint0.3')
     @Delete(':resourceId')
+    @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 삭제' })
     @ApiDataResponse({
         status: 200,
         description: '자원이 성공적으로 삭제되었습니다.',
     })
     async remove(@Param('resourceId') resourceId: string): Promise<void> {
-        return; // this.resourceUsecase.delete(resourceId);
+        return this.resourceUsecase.deleteResource(resourceId);
     }
 }

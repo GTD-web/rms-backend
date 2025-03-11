@@ -4,33 +4,36 @@ import { ResourceType } from '../enums/resource-type.enum';
 
 @Entity('resource_groups')
 export class ResourceGroup {
-  @PrimaryColumn('uuid', {
-    generated: 'uuid',
-  })
-  resourceGroupId: string;
+    @PrimaryColumn('uuid', {
+        generated: 'uuid',
+    })
+    resourceGroupId: string;
 
-  @Column()
-  title: string;
+    @Column()
+    title: string;
 
-  @Column({ nullable: true })
-  description: string;
+    @Column({ nullable: true })
+    description: string;
 
-  @Column({ nullable: true })
-  parentResourceGroupId: string;
+    @Column({ nullable: true })
+    parentResourceGroupId: string;
 
-  @Column({
-    type: 'enum',
-    enum: ResourceType
-  })
-  type: ResourceType;
+    @Column({
+        type: 'enum',
+        enum: ResourceType,
+    })
+    type: ResourceType;
 
-  @OneToMany(() => Resource, resource => resource.resourceGroup)
-  resources: Resource[];
+    @Column({ default: 0 })
+    order: number;
 
-  @ManyToOne(() => ResourceGroup, resourceGroup => resourceGroup.children)
-  @JoinColumn({ name: 'parentResourceGroupId' })
-  parent: ResourceGroup;
+    @OneToMany(() => Resource, (resource) => resource.resourceGroup)
+    resources: Resource[];
 
-  @OneToMany(() => ResourceGroup, resourceGroup => resourceGroup.parent)
-  children: ResourceGroup[];
-} 
+    @ManyToOne(() => ResourceGroup, (resourceGroup) => resourceGroup.children)
+    @JoinColumn({ name: 'parentResourceGroupId' })
+    parent: ResourceGroup;
+
+    @OneToMany(() => ResourceGroup, (resourceGroup) => resourceGroup.parent)
+    children: ResourceGroup[];
+}

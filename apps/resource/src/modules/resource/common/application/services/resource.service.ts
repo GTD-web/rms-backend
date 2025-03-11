@@ -20,26 +20,8 @@ export class ResourceService {
         return resource;
     }
 
-    async findAll(): Promise<Resource[]> {
-        const resources = await this.resourceRepository.find();
-        return resources;
-    }
-
-    async findOneByResourceId(resourceId: string): Promise<Resource> {
-        const resource = await this.resourceRepository.findOne({
-            where: {
-                resourceId: resourceId,
-            },
-        });
-        return resource;
-    }
-
-    async findByResourceGroupId(resourceGroupId: string): Promise<Resource[]> {
-        const resources = await this.resourceRepository.find({
-            where: {
-                resourceGroupId: resourceGroupId,
-            },
-        });
+    async findAll(repositoryOptions?: RepositoryOptions): Promise<Resource[]> {
+        const resources = await this.resourceRepository.find(repositoryOptions);
         return resources;
     }
 
@@ -50,5 +32,14 @@ export class ResourceService {
     ): Promise<Resource> {
         const updatedResource = await this.resourceRepository.update(resourceId, resource, repositoryOptions);
         return updatedResource;
+    }
+
+    async delete(resourceId: string): Promise<void> {
+        await this.resourceRepository.delete(resourceId);
+    }
+
+    async softDelete(resourceId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
+        const result = await this.resourceRepository.softDelete(resourceId, repositoryOptions);
+        console.log(result);
     }
 }

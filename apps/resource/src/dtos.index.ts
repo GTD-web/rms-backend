@@ -16,6 +16,10 @@ export {
     UpdateResourceDto,
     UpdateResourceGroupDto,
     UpdateResourceInfoDto,
+    UpdateResourceGroupOrdersDto,
+    UpdateResourceOrdersDto,
+    NewOrderResourceDto,
+    NewOrderResourceGroupDto,
     ReturnVehicleDto,
 } from './modules/resource/common/application/dtos/update-resource.dto';
 export {

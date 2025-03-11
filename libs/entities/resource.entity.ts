@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, OneToOne, JoinColumn, OneToMany, DeleteDateColumn } from 'typeorm';
 import { ResourceGroup } from './resource-group.entity';
 import { VehicleInfo } from './vehicle-info.entity';
 import { MeetingRoomInfo } from './meeting-room-info.entity';
@@ -48,6 +48,12 @@ export class Resource {
 
     @Column({ type: 'enum', enum: ResourceType })
     type: ResourceType;
+
+    @Column({ default: 0 })
+    order: number;
+
+    @DeleteDateColumn()
+    deletedAt: Date;
 
     @ManyToOne(() => ResourceGroup)
     @JoinColumn({ name: 'resourceGroupId' })

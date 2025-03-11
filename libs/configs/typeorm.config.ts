@@ -12,7 +12,12 @@ export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOption
         database: configService.get('database.database'),
         entities: Entities,
         schema: 'public',
-        // synchronize: configService.get('NODE_ENV') !== 'production',
-        logging: configService.get('NODE_ENV') !== 'production',
+        synchronize: configService.get('NODE_ENV') === 'local',
+        logging: configService.get('NODE_ENV') === 'local',
+        migrationsRun: configService.get('database.port') === 6543,
+        ssl: configService.get('database.port') === 6543,
+        extra: {
+            ssl: configService.get('database.port') === 6543 ? { rejectUnauthorized: false } : null,
+        },
     };
 };

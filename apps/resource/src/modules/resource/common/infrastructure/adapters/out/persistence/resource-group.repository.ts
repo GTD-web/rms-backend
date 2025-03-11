@@ -26,7 +26,7 @@ export class ResourceGroupRepository implements ResourceGroupRepositoryPort {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(ResourceGroupEntity)
             : this.repository;
-        return repository.findOne({ where: repositoryOptions?.where });
+        return repository.findOne({ where: repositoryOptions?.where, relations: repositoryOptions?.relations });
     }
 
     async find(repositoryOptions?: RepositoryOptions): Promise<ResourceGroupEntity[]> {

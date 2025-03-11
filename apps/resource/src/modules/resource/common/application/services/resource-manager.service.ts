@@ -21,30 +21,34 @@ export class ResourceManagerService {
         return this.resourceManagerRepository.findOne(repositoryOptions);
     }
 
-    // async updateManagers(resourceId: string, newManagerIds: string[], repositoryOptions?: RepositoryOptions): Promise<void> {
-    //   const currentManagers = await this.findByResourceId(resourceId, repositoryOptions);
-    //   const currentManagerIds = currentManagers.map(m => m.employeeId);
+    async findAll(repositoryOptions?: RepositoryOptions): Promise<ResourceManager[]> {
+        return this.resourceManagerRepository.find(repositoryOptions);
+    }
 
-    //   // 삭제될 관리자 처리
-    //   const managersToRemove = currentManagers.filter(
-    //     manager => !newManagerIds.includes(manager.employeeId)
-    //   );
-    //   await Promise.all(
-    //     managersToRemove.map(manager =>
-    //       this.resourceManagerRepository.delete(manager.resourceManagerId, repositoryOptions)
-    //     )
-    //   );
+    async updateManagers(
+        resourceId: string,
+        newManagerIds: string[],
+        repositoryOptions?: RepositoryOptions,
+    ): Promise<void> {
+        const currentManagers = await this.findAll({
+            where: {
+                resourceId: resourceId,
+            },
+        });
+        const currentManagerIds = currentManagers.map((m) => m.employeeId);
 
-    //   // 새로 추가될 관리자 처리
-    //   const managersToAdd = newManagerIds.filter(
-    //     employeeId => !currentManagerIds.includes(employeeId)
-    //   );
-    //   await Promise.all(
-    //     managersToAdd.map(employeeId =>
-    //       this.create({ resourceId, employeeId }, repositoryOptions)
-    //     )
-    //   );
-    // }
+        // 삭제될 관리자 처리
+        const managersToRemove = currentManagers.filter((manager) => !newManagerIds.includes(manager.employeeId));
+        await Promise.all(
+            managersToRemove.map((manager) =>
+                this.resourceManagerRepository.delete(manager.resourceManagerId, repositoryOptions),
+            ),
+        );
+
+        // 새로 추가될 관리자 처리
+        const managersToAdd = newManagerIds.filter((employeeId) => !currentManagerIds.includes(employeeId));
+        await Promise.all(managersToAdd.map((employeeId) => this.save({ resourceId, employeeId }, repositoryOptions)));
+    }
 
     // async remove(resourceManagerId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
     //   await this.resourceManagerRepository.delete(resourceManagerId, repositoryOptions);

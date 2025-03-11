@@ -7,4 +7,5 @@ export interface ResourceRepositoryPort {
     find(repositoryOptions?: RepositoryOptions): Promise<Resource[]>;
     update(id: string, resource: Partial<Resource>, repositoryOptions?: RepositoryOptions): Promise<Resource>;
     delete(id: string, repositoryOptions?: RepositoryOptions): Promise<void>;
+    softDelete(id: string, repositoryOptions?: RepositoryOptions): Promise<void>;
 }

@@ -127,6 +127,9 @@ export class ResourceGroupResponseDto {
     @ApiProperty({ enum: ResourceType })
     type: ResourceType;
 
+    @ApiProperty()
+    order: number;
+
     @ApiProperty({ required: false })
     parentResourceGroupId?: string;
 }
