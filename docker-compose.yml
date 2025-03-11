@@ -27,8 +27,8 @@ services:
             REDIS_HOST: attendance-redis
             REDIS_PORT: 6379
             NATS_URL: nats://nats:4222
-            WEB_PUSH_PUBLIC_KEY: BH87CE8fWmQUBVd9G8MrVDxifUV9nqz4iN5gssoSdZijAAwLiJuWpqktclMrWFIAaxlJ5wdw3ayGhx2dbS4y5BI
-            WEB_PUSH_PRIVATE_KEY: 1Oitw9QsHXJG7gFiFlaXc3n98Q2KVDNo7Jn-Kj7WU4U
+            WEB_PUSH_PUBLIC_KEY: BIjDkj2RVRCmukBgreTh-TeXZpZ7EhR10nLXr6lumCndXkM9D8QvCnGvvR2U0ZcYNEEhlUxdD_srRB9jY2Nlp04
+            WEB_PUSH_PRIVATE_KEY: K3IKvIlZuci9qjpfGufuGIvkgsFV0ivW9rR-FPZ-QHA
         # depends_on:
 
         # - nats
