@@ -12,7 +12,6 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 
 @ApiTags('알림')
 @Controller('notifications')
-@Public()
 @ApiBearerAuth()
 export class NotificationController {
     constructor(
