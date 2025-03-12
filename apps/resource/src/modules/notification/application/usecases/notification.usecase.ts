@@ -1,9 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AdapterService } from '../services/adapter.service';
 import { NotificationService } from '../services/notification.service';
-import { WebPushSubscription } from '../../infrastructure/adapters/out/device/web-push.adapter';
 import { User } from '@libs/entities';
 import { UserService } from '@resource/modules/auth/application/services/user.service';
+import {
+    PushNotificationSubscription,
+    PushNotificationPayload,
+    PushNotificationSendResult,
+} from '@resource/modules/notification/domain/ports/push-notification.port';
+
 @Injectable()
 export class NotificationUsecase {
     constructor(
@@ -12,7 +17,7 @@ export class NotificationUsecase {
         private readonly userService: UserService,
     ) {}
 
-    async subscribe(user: User, subscription: WebPushSubscription): Promise<void> {
+    async subscribe(user: User, subscription: PushNotificationSubscription): Promise<void> {
         const userDomain = await this.userService.findByUserId(user.userId);
         userDomain.updateSubscription(subscription);
         await this.userService.update(userDomain);

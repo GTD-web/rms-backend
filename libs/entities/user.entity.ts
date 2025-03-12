@@ -1,7 +1,7 @@
 import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { Employee } from './employee.entity';
 import { Role } from '@libs/enums/role-type.enum';
-import { WebPushSubscription } from '@resource/modules/notification/infrastructure/adapters/out/device/web-push.adapter';
+import { PushNotificationSubscription } from '@resource/modules/notification/domain/ports/push-notification.port';
 
 @Entity('users')
 export class User {
@@ -29,7 +29,7 @@ export class User {
     expiredAt: string;
 
     @Column({ type: 'jsonb', nullable: true, comment: '웹푸시 알림 관련 구독 정보' })
-    subscription: WebPushSubscription;
+    subscription: PushNotificationSubscription;
 
     @Column({ type: 'enum', enum: Role, array: true, default: [Role.USER], comment: '사용자 역할' })
     roles: Role[];

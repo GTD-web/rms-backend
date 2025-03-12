@@ -6,9 +6,13 @@ import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { AdapterService } from '@resource/modules/notification/application/services/adapter.service';
 import { Public } from '@libs/decorators/public.decorator';
-import { WebPushSubscription } from '@resource/modules/notification/infrastructure/adapters/out/device/web-push.adapter';
 import { NotificationUsecase } from '@resource/modules/notification/application/usecases/notification.usecase';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import {
+    PushNotificationSubscription,
+    PushNotificationPayload,
+    PushNotificationSendResult,
+} from '@resource/modules/notification/domain/ports/push-notification.port';
 
 @ApiTags('알림')
 @Controller('notifications')
@@ -26,7 +30,7 @@ export class NotificationController {
         status: 200,
         description: '웹 푸시 구독 성공',
     })
-    async subscribe(@User() user: UserEntity, @Body() subscription: WebPushSubscription): Promise<void> {
+    async subscribe(@User() user: UserEntity, @Body() subscription: PushNotificationSubscription): Promise<void> {
         await this.notificationUsecase.subscribe(user, subscription);
     }
 

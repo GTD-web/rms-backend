@@ -1,7 +1,7 @@
 import { Employee } from '@libs/entities';
 import { Role } from '@libs/enums/role-type.enum';
 import * as bcrypt from 'bcrypt';
-import { WebPushSubscription } from '@resource/modules/notification/infrastructure/adapters/out/device/web-push.adapter';
+import { PushNotificationSubscription } from '@resource/modules/notification/domain/ports/push-notification.port';
 
 export interface UserProps {
     userId?: string;
@@ -11,7 +11,7 @@ export interface UserProps {
     password: string;
     accessToken?: string;
     expiredAt?: string;
-    subscription?: WebPushSubscription;
+    subscription?: PushNotificationSubscription;
     roles?: Role[];
     name?: string;
     employeeNumber?: string;
@@ -61,7 +61,7 @@ export class User {
         return this.props.expiredAt;
     }
 
-    get subscription(): WebPushSubscription {
+    get subscription(): PushNotificationSubscription {
         return this.props.subscription;
     }
 
@@ -104,7 +104,7 @@ export class User {
         }
     }
 
-    updateSubscription(subscription: WebPushSubscription): void {
+    updateSubscription(subscription: PushNotificationSubscription): void {
         this.props.subscription = subscription;
     }
 

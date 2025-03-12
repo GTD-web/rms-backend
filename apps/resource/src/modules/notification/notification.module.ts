@@ -5,13 +5,20 @@ import { NotificationRepository } from './infrastructure/adapters/out/persistenc
 import { NotificationController } from './infrastructure/adapters/in/web/controllers/notification.controller';
 import { NotificationService } from './application/services/notification.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { WEB_PUSH_CONFIG } from '@libs/configs/env.config';
+import { WEB_PUSH_CONFIG, FIREBASE_CONFIG } from '@libs/configs/env.config';
 import { AdapterService } from './application/services/adapter.service';
 import { WebPushAdapter } from './infrastructure/adapters/out/device/web-push.adapter';
 import { AuthModule } from '@resource/modules/auth/auth.module';
 import { NotificationUsecase } from './application/usecases/notification.usecase';
+import { FCMAdapter } from './infrastructure/adapters/out/device/fcm-push.adapter';
+
 @Module({
-    imports: [TypeOrmModule.forFeature([Notification]), ConfigModule.forFeature(WEB_PUSH_CONFIG), AuthModule],
+    imports: [
+        TypeOrmModule.forFeature([Notification]),
+        ConfigModule.forFeature(WEB_PUSH_CONFIG),
+        ConfigModule.forFeature(FIREBASE_CONFIG),
+        AuthModule,
+    ],
     providers: [
         ConfigService,
         NotificationService,
@@ -23,7 +30,8 @@ import { NotificationUsecase } from './application/usecases/notification.usecase
         },
         {
             provide: 'PushNotificationServicePort',
-            useClass: WebPushAdapter,
+            // useClass: WebPushAdapter,
+            useClass: FCMAdapter,
         },
     ],
     controllers: [NotificationController],
@@ -36,7 +44,8 @@ import { NotificationUsecase } from './application/usecases/notification.usecase
         },
         {
             provide: 'PushNotificationServicePort',
-            useClass: WebPushAdapter,
+            // useClass: WebPushAdapter,
+            useClass: FCMAdapter,
         },
     ],
 })
