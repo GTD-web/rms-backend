@@ -11,6 +11,8 @@ import {
     ReturnVehicleDto,
     UpdateResourceOrdersDto,
 } from '@resource/modules/resource/common/application/dtos/update-resource.dto';
+import { User } from '@libs/decorators/user.decorator';
+import { User as UserEntity } from '@libs/entities';
 
 @ApiTags('자원')
 @Controller('resources')
@@ -31,11 +33,12 @@ export class ResourceController {
     @ApiQuery({ name: 'startDate' })
     @ApiQuery({ name: 'endDate' })
     async findResourcesByTypeAndDateWithReservations(
+        @User() user: UserEntity,
         @Query('type') type: ResourceType,
         @Query('startDate') startDate: string,
         @Query('endDate') endDate: string,
     ): Promise<ResourceGroupWithResourcesAndReservationsResponseDto[]> {
-        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate);
+        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
     }
 
     @ApiTags('sprint0.1')

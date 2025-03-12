@@ -23,6 +23,7 @@ import { ResourceTypeHandler } from '@resource/modules/resource/common/domain/po
 import { ResourceManagerService } from '../services/resource-manager.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { UserService } from '@resource/modules/auth/application/services/user.service';
+import { User as UserEntity } from '@libs/entities';
 
 @Injectable()
 export class ResourceUsecase {
@@ -42,6 +43,7 @@ export class ResourceUsecase {
         type: ResourceType,
         startDate: string,
         endDate: string,
+        user: UserEntity,
     ): Promise<ResourceGroupWithResourcesResponseDto[]> {
         if (startDate && endDate && startDate > endDate) {
             throw new BadRequestException('Start date must be before end date');
@@ -70,20 +72,37 @@ export class ResourceUsecase {
 
                 const resourcesWithReservations = await Promise.all(
                     resources.map(async (resource) => {
+                        const reservations = await this.reservationService.findAll({
+                            where: {
+                                resourceId: resource.resourceId,
+                                startDate: LessThan(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
+                                endDate: MoreThan(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
+                            },
+                            relations: ['participants'],
+                            order: {
+                                startDate: 'ASC',
+                            },
+                        });
+
+                        const reservationResponseDtos = reservations.map((reservation) => {
+                            const isMine = reservation.participants.some(
+                                (participant) => participant.employeeId === user.employeeId,
+                            );
+                            delete reservation.participants;
+                            return {
+                                ...reservation,
+                                isMine: isMine,
+                            };
+                        });
+
                         return {
                             ...resource,
                             resourceId: resource.resourceId,
-                            reservations: await this.reservationService.findAll({
-                                where: {
-                                    resourceId: resource.resourceId,
-                                    startDate: LessThan(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
-                                    endDate: MoreThan(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
-                                },
-                            }),
+                            reservations: reservationResponseDtos,
                         };
                     }),
                 );
-
+                console.log(resourcesWithReservations);
                 return {
                     ...resourceGroup,
                     resources: resourcesWithReservations,

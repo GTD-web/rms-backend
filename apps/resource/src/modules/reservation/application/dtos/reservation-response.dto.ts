@@ -48,6 +48,9 @@ export class ReservationResponseDto {
 
     @ApiProperty({ required: false, type: [Number] })
     notifyMinutesBeforeStart?: number[];
+
+    @ApiProperty({ required: false })
+    isMine?: boolean;
 }
 
 export class ReservationParticipantResponseDto {
