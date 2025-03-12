@@ -11,12 +11,14 @@ import { WebPushAdapter } from './infrastructure/adapters/out/device/web-push.ad
 import { AuthModule } from '@resource/modules/auth/auth.module';
 import { NotificationUsecase } from './application/usecases/notification.usecase';
 import { FCMAdapter } from './infrastructure/adapters/out/device/fcm-push.adapter';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([Notification]),
         ConfigModule.forFeature(WEB_PUSH_CONFIG),
         ConfigModule.forFeature(FIREBASE_CONFIG),
+        ScheduleModule.forRoot(),
         AuthModule,
     ],
     providers: [

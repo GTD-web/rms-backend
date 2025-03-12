@@ -8,7 +8,7 @@ import {
     PushNotificationPayload,
     PushNotificationSendResult,
 } from '@resource/modules/notification/domain/ports/push-notification.port';
-
+import { Cron, CronExpression } from '@nestjs/schedule';
 @Injectable()
 export class NotificationUsecase {
     constructor(
@@ -28,4 +28,11 @@ export class NotificationUsecase {
         userDomain.updateSubscription(null);
         await this.userService.update(userDomain);
     }
+
+    // @Cron(CronExpression.EVERY_MINUTE)
+    // async handleCron() {
+    //     console.log('Cron job executed');
+    //     await this.adapterService.send();
+    //     console.log('Cron job finished');
+    // }
 }

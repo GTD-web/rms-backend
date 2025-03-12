@@ -6,26 +6,26 @@ import {
     PushNotificationPayload,
     PushNotificationSendResult,
 } from '@resource/modules/notification/domain/ports/push-notification.port';
-import * as admin from 'firebase-admin';
+import { credential } from 'firebase-admin';
+import { initializeApp, cert, getApp } from 'firebase-admin/app';
+import { getMessaging } from 'firebase-admin/messaging';
 // FCM SDK import
 
 @Injectable()
 export class FCMAdapter implements PushNotificationPort {
     constructor(private readonly configService: ConfigService) {
-        if (!admin.apps.length) {
-            try {
-                admin.initializeApp({
-                    credential: admin.credential.cert({
-                        clientEmail: this.configService.get('firebase.clientEmail'),
-                        privateKey: this.configService.get('firebase.privateKey').replace(/\\n/g, '\n'),
-                        projectId: this.configService.get('firebase.projectId'),
-                    }),
-                });
-                console.log('Firebase Admin initialized successfully');
-            } catch (error) {
-                console.error('Firebase initialization error:', error);
-                throw error;
-            }
+        try {
+            initializeApp({
+                credential: cert({
+                    clientEmail: this.configService.get('firebase.clientEmail'),
+                    privateKey: this.configService.get('firebase.privateKey').replace(/\\n/g, '\n'),
+                    projectId: this.configService.get('firebase.projectId'),
+                }),
+            });
+            console.log('Firebase Admin initialized successfully');
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            throw error;
         }
     }
 
@@ -49,8 +49,7 @@ export class FCMAdapter implements PushNotificationPort {
             console.log('FCM Token:', subscription.fcm.token);
             console.log('Sending FCM message:', JSON.stringify(message, null, 2));
 
-            const response = await admin
-                .messaging()
+            const response = await getMessaging()
                 .send(message)
                 .then((response) => {
                     console.log('FCM send successful. Message ID:', response);

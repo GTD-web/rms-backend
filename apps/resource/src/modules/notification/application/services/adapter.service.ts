@@ -20,14 +20,15 @@ export class AdapterService {
             where: {
                 subscription: Not(IsNull()),
             },
+            relations: ['employee'],
         });
         console.log('send');
-        const subscriptions = usersWithSubscription.map((user) => user.subscription);
+        const subscriptions = usersWithSubscription;
         await Promise.all(
-            subscriptions.map(async (subscription) => {
-                await this.pushNotificationService.sendNotification(subscription, {
-                    title: 'test title',
-                    body: 'test body',
+            subscriptions.map(async (user) => {
+                await this.pushNotificationService.sendNotification(user.subscription, {
+                    title: user.name + '님 알림',
+                    body: user.email,
                 });
             }),
         );
