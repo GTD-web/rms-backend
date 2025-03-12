@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsBoolean, IsOptional, IsArray, IsEnum, IsDateString } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, IsArray, IsEnum, IsDateString, Matches } from 'class-validator';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 
 // 예약 제목 변경
@@ -12,12 +12,24 @@ export class UpdateReservationTitleDto {
 
 // 예약 시간 변경
 export class UpdateReservationTimeDto {
-    @ApiProperty()
+    @ApiProperty({
+        example: '2025-01-01 00:00:00',
+        description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    })
     @IsDateString()
+    @Matches(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD HH:mm:ss 형식이어야 합니다.',
+    })
     startDate: string;
 
-    @ApiProperty()
+    @ApiProperty({
+        example: '2025-01-01 00:00:00',
+        description: '예약 종료 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    })
     @IsDateString()
+    @Matches(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD HH:mm:ss 형식이어야 합니다.',
+    })
     endDate: string;
 
     @ApiProperty({ required: false })

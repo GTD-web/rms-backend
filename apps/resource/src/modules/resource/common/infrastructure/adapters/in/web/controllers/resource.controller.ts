@@ -100,7 +100,6 @@ export class ResourceController {
         @Param('resourceId') resourceId: string,
         @Body() updateResourceInfoDto: UpdateResourceInfoDto,
     ): Promise<ResourceResponseDto> {
-        console.log(updateResourceInfoDto);
         return this.resourceUsecase.updateResource(resourceId, updateResourceInfoDto);
     }
 

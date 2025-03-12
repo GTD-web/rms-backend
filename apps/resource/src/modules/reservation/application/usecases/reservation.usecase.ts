@@ -49,18 +49,6 @@ export class ReservationUsecase {
             const reservation = this.reservationService.create(createDto);
 
             const savedReservation = await this.reservationService.save(reservation, { queryRunner });
-            // Schedule 생성
-            // const scheduleDates = ScheduleUtils.createScheduleDates(createDto.startDate, createDto.endDate);
-            // console.log(scheduleDates);
-            // const savedSchedules = await Promise.all(
-            //     scheduleDates.map((scheduleDate) => {
-            //         const schedule = new Schedule({
-            //             reservationId: savedReservation.reservationId!,
-            //             ...scheduleDate,
-            //         });
-            //         return this.scheduleRepository.save(schedule, { queryRunner });
-            //     }),
-            // );
 
             // 참가자 정보 저장
             await Promise.all([
@@ -72,16 +60,6 @@ export class ReservationUsecase {
                     } as ReservationParticipant,
                     { queryRunner },
                 ),
-                // ...createDto.reserverIds.map((employeeId) =>
-                //     this.participantService.save(
-                //         {
-                //             reservationId: savedReservation.reservationId!,
-                //             employeeId,
-                //             type: ParticipantsType.RESERVER,
-                //         } as ReservationParticipant,
-                //         { queryRunner },
-                //     ),
-                // ),
                 ...createDto.participantIds.map((employeeId) =>
                     this.participantService.save(
                         {

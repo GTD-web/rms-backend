@@ -16,7 +16,6 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>
     intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
         return next.handle().pipe(
             map((data): ApiResponse<T> => {
-                console.log(data);
                 // FilterResult 타입의 페이지네이션 데이터인 경우
                 if (this.isFilterResult(data)) {
                     return {

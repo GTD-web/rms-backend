@@ -39,7 +39,6 @@ export class ResourceService {
     }
 
     async softDelete(resourceId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
-        const result = await this.resourceRepository.softDelete(resourceId, repositoryOptions);
-        console.log(result);
+        await this.resourceRepository.softDelete(resourceId, repositoryOptions);
     }
 }

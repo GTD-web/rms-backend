@@ -102,7 +102,7 @@ export class ResourceUsecase {
                         };
                     }),
                 );
-                console.log(resourcesWithReservations);
+
                 return {
                     ...resourceGroup,
                     resources: resourcesWithReservations,
@@ -257,7 +257,7 @@ export class ResourceUsecase {
             },
             relations: ['resourceGroup'],
         });
-        console.log(resource);
+
         if (!resource) {
             throw new NotFoundException('Resource not found');
         }
@@ -367,7 +367,7 @@ export class ResourceUsecase {
                     order: 'ASC',
                 },
             });
-            console.log(resources);
+
             for (let i = 0; i < resources.length; i++) {
                 await this.resourceService.update(resources[i].resourceId, { order: i }, { queryRunner });
             }

@@ -6,7 +6,6 @@ import { EmployeeResponseDto, ResourceResponseDto } from '@resource/dtos.index';
 
 export class ReservationResponseDto {
     constructor(reservation: Reservation) {
-        console.log(reservation);
         this.reservationId = reservation.reservationId;
         this.resourceId = reservation.resourceId;
         this.title = reservation.title;
