@@ -4,6 +4,7 @@ import { Notification } from '@libs/entities/notification.entity';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateNotificationDto } from '@resource/modules/notification/application/dto/create-notification.dto';
 
 @Injectable()
 export class NotificationRepository implements NotificationRepositoryPort {
@@ -11,11 +12,14 @@ export class NotificationRepository implements NotificationRepositoryPort {
         @InjectRepository(Notification)
         private readonly notificationRepository: Repository<Notification>,
     ) {}
-    async save(notification: Notification, options?: RepositoryOptions<Notification>): Promise<Notification> {
+    async save(
+        createNotificationDto: CreateNotificationDto,
+        options?: RepositoryOptions<Notification>,
+    ): Promise<Notification> {
         const repository = options
             ? options.queryRunner.manager.getRepository(Notification)
             : this.notificationRepository;
-        return repository.save(notification);
+        return repository.save(createNotificationDto);
     }
 
     async findById(notificationId: string, options?: RepositoryOptions<Notification>): Promise<Notification | null> {

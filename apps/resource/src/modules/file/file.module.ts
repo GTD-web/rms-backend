@@ -20,12 +20,7 @@ import { S3StorageAdapter } from './infrastructure/adapters/out/storage/s3-stroa
         },
         {
             provide: 'FileStoragePort',
-            useFactory: (configService: ConfigService) => {
-                const StorageAdapter =
-                    configService.get('storage.type') === 'local' ? LocalStorageAdapter : S3StorageAdapter;
-                return new StorageAdapter(configService);
-            },
-            inject: [ConfigService],
+            useClass: S3StorageAdapter,
         },
     ],
     exports: [FileService],

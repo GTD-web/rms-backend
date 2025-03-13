@@ -1,15 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
+import {
+    FCM,
+    WebPush,
+    PushNotificationSubscription,
+} from '@resource/modules/notification/domain/ports/push-notification.port';
 
-export class PushSubscriptionDto {
-  @ApiProperty()
-  endpoint: string;
+export class FCMDto implements FCM {
+    @ApiProperty()
+    token: string;
+}
 
-  @ApiProperty()
-  expirationTime: number | null;
+export class WebPushDto implements WebPush {
+    @ApiProperty()
+    endpoint: string;
 
-  @ApiProperty({ type: 'object' })
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
-} 
+    @ApiProperty()
+    keys: {
+        p256dh: string;
+        auth: string;
+    };
+}
+
+export class PushSubscriptionDto implements PushNotificationSubscription {
+    @ApiProperty({ type: FCMDto })
+    fcm: FCMDto;
+
+    @ApiProperty({ type: WebPushDto })
+    webPush: WebPushDto;
+}

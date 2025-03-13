@@ -1,40 +1,39 @@
-import { PrimaryColumn, Column, OneToMany, Entity } from "typeorm";
-import { EmployeeNotification } from "./employee-notification.entity";
-import { NotificationType } from "@libs/enums/notification-type.enum";
-import { ResourceType } from "@libs/enums/resource-type.enum";
+import { PrimaryColumn, Column, OneToMany, Entity } from 'typeorm';
+import { EmployeeNotification } from './employee-notification.entity';
+import { NotificationType } from '@libs/enums/notification-type.enum';
+import { ResourceType } from '@libs/enums/resource-type.enum';
 
 @Entity('notifications')
 export class Notification {
-  @PrimaryColumn('uuid', {
-    generated: 'uuid',
-  })
-  notificationId: string;
+    @PrimaryColumn('uuid', {
+        generated: 'uuid',
+    })
+    notificationId: string;
 
-  @Column()
-  title: string;
+    @Column()
+    title: string;
 
-  @Column()
-  body: string;
+    @Column({ nullable: true })
+    body: string;
 
-  @Column({
-    type: 'enum',
-    enum: NotificationType
-  })
-  notificationType: NotificationType;
+    @Column()
+    resourceName: string;
 
-  @Column({
-    type: 'enum',
-    enum: ResourceType
-  })
-  resourceType: ResourceType;
+    @Column({ nullable: true })
+    reservationDate: string;
 
-  @Column()
-  isRead: boolean;
+    @Column({
+        type: 'enum',
+        enum: NotificationType,
+    })
+    notificationType: NotificationType;
 
-  @Column()
-  createdAt: Date;
+    @Column({ default: false })
+    isRead: boolean;
 
-  @OneToMany(() => EmployeeNotification, notification => notification.notification)
-  employees: EmployeeNotification[];
+    @Column()
+    createdAt: string;
+
+    @OneToMany(() => EmployeeNotification, (notification) => notification.notification)
+    employees: EmployeeNotification[];
 }
-

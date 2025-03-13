@@ -13,6 +13,7 @@ import {
     PushNotificationPayload,
     PushNotificationSendResult,
 } from '@resource/modules/notification/domain/ports/push-notification.port';
+import { PushSubscriptionDto } from '@resource/modules/notification/application/dto/push-subscription.dto';
 
 @ApiTags('알림')
 @Controller('notifications')
@@ -30,7 +31,7 @@ export class NotificationController {
         status: 200,
         description: '웹 푸시 구독 성공',
     })
-    async subscribe(@User() user: UserEntity, @Body() subscription: PushNotificationSubscription): Promise<void> {
+    async subscribe(@User() user: UserEntity, @Body() subscription: PushSubscriptionDto): Promise<void> {
         await this.notificationUsecase.subscribe(user, subscription);
     }
 

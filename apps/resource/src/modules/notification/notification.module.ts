@@ -12,10 +12,13 @@ import { AuthModule } from '@resource/modules/auth/auth.module';
 import { NotificationUsecase } from './application/usecases/notification.usecase';
 import { FCMAdapter } from './infrastructure/adapters/out/device/fcm-push.adapter';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EmployeeNotificationService } from './application/services/employee-notification.service';
+import { EmployeeNotificationRepository } from './infrastructure/adapters/out/persistence/employee-notification.repository';
+import { EmployeeNotification } from '@libs/entities';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Notification]),
+        TypeOrmModule.forFeature([Notification, EmployeeNotification]),
         ConfigModule.forFeature(WEB_PUSH_CONFIG),
         ConfigModule.forFeature(FIREBASE_CONFIG),
         ScheduleModule.forRoot(),
@@ -25,10 +28,15 @@ import { ScheduleModule } from '@nestjs/schedule';
         ConfigService,
         NotificationService,
         AdapterService,
+        EmployeeNotificationService,
         NotificationUsecase,
         {
             provide: 'NotificationRepositoryPort',
             useClass: NotificationRepository,
+        },
+        {
+            provide: 'EmployeeNotificationRepositoryPort',
+            useClass: EmployeeNotificationRepository,
         },
         {
             provide: 'PushNotificationServicePort',
@@ -40,9 +48,15 @@ import { ScheduleModule } from '@nestjs/schedule';
     exports: [
         NotificationService,
         AdapterService,
+        EmployeeNotificationService,
+        NotificationUsecase,
         {
             provide: 'NotificationRepositoryPort',
             useClass: NotificationRepository,
+        },
+        {
+            provide: 'EmployeeNotificationRepositoryPort',
+            useClass: EmployeeNotificationRepository,
         },
         {
             provide: 'PushNotificationServicePort',

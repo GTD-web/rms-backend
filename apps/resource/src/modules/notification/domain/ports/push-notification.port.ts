@@ -1,8 +1,8 @@
-interface FCM {
+export interface FCM {
     token: string;
 }
 
-interface WebPush {
+export interface WebPush {
     endpoint: string;
     keys: {
         auth: string;
