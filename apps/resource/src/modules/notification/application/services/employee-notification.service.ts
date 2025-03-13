@@ -3,6 +3,7 @@ import { CreateEmployeeNotificationDto } from '@resource/modules/notification/ap
 import { EmployeeNotification } from '@libs/entities';
 import { EmployeeNotificationRepository } from '../../infrastructure/adapters/out/persistence/employee-notification.repository';
 import { EmployeeNotificationRepositoryPort } from '../../domain/ports/employee-notification.repository.port';
+import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 
 @Injectable()
 export class EmployeeNotificationService {
@@ -11,7 +12,10 @@ export class EmployeeNotificationService {
         private readonly employeeNotificationRepository: EmployeeNotificationRepositoryPort,
     ) {}
 
-    async save(createEmployeeNotificationDto: CreateEmployeeNotificationDto): Promise<EmployeeNotification> {
-        return await this.employeeNotificationRepository.save(createEmployeeNotificationDto);
+    async save(
+        createEmployeeNotificationDto: CreateEmployeeNotificationDto,
+        repositoryOptions?: RepositoryOptions,
+    ): Promise<EmployeeNotification> {
+        return await this.employeeNotificationRepository.save(createEmployeeNotificationDto, repositoryOptions);
     }
 }

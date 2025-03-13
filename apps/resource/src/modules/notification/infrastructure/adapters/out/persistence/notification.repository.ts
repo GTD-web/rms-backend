@@ -16,14 +16,14 @@ export class NotificationRepository implements NotificationRepositoryPort {
         createNotificationDto: CreateNotificationDto,
         options?: RepositoryOptions<Notification>,
     ): Promise<Notification> {
-        const repository = options
+        const repository = options?.queryRunner
             ? options.queryRunner.manager.getRepository(Notification)
             : this.notificationRepository;
         return repository.save(createNotificationDto);
     }
 
     async findById(notificationId: string, options?: RepositoryOptions<Notification>): Promise<Notification | null> {
-        const repository = options
+        const repository = options?.queryRunner
             ? options.queryRunner.manager.getRepository(Notification)
             : this.notificationRepository;
         return repository.findOne({
@@ -32,7 +32,7 @@ export class NotificationRepository implements NotificationRepositoryPort {
         });
     }
     async findByEmployeeId(employeeId: string, options?: RepositoryOptions<Notification>): Promise<Notification[]> {
-        const repository = options
+        const repository = options?.queryRunner
             ? options.queryRunner.manager.getRepository(Notification)
             : this.notificationRepository;
         return repository.find({
@@ -41,27 +41,27 @@ export class NotificationRepository implements NotificationRepositoryPort {
         });
     }
     async update(notification: Notification, options?: RepositoryOptions<Notification>): Promise<Notification> {
-        const repository = options
+        const repository = options?.queryRunner
             ? options.queryRunner.manager.getRepository(Notification)
             : this.notificationRepository;
         return repository.save(notification);
     }
     async delete(notificationId: string, options?: RepositoryOptions<Notification>): Promise<void> {
-        const repository = options
+        const repository = options?.queryRunner
             ? options.queryRunner.manager.getRepository(Notification)
             : this.notificationRepository;
         await repository.delete(notificationId);
     }
 
     async markAsRead(notificationId: string, options?: RepositoryOptions<Notification>): Promise<void> {
-        const repository = options
+        const repository = options?.queryRunner
             ? options.queryRunner.manager.getRepository(Notification)
             : this.notificationRepository;
         await repository.update(notificationId, { isRead: true });
     }
 
     async markAllAsRead(employeeId: string, options?: RepositoryOptions<Notification>): Promise<void> {
-        const repository = options
+        const repository = options?.queryRunner
             ? options.queryRunner.manager.getRepository(Notification)
             : this.notificationRepository;
         await repository.update({ employees: { employeeId } }, { isRead: true });

@@ -3,14 +3,18 @@ import { NotificationRepositoryPort } from '@resource/modules/notification/domai
 import { Notification, Resource, Reservation } from '@libs/entities';
 
 import { CreateNotificationDto } from '../dto/create-notification.dto';
+import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 @Injectable()
 export class NotificationService {
     constructor(
         @Inject('NotificationRepositoryPort')
         private readonly notificationRepository: NotificationRepositoryPort,
     ) {}
-    async save(createNotificationDto: CreateNotificationDto): Promise<Notification> {
-        return await this.notificationRepository.save(createNotificationDto);
+    async save(
+        createNotificationDto: CreateNotificationDto,
+        repositoryOptions?: RepositoryOptions,
+    ): Promise<Notification> {
+        return await this.notificationRepository.save(createNotificationDto, repositoryOptions);
     }
 
     async findAllByEmployeeId(employeeId: string): Promise<Notification[]> {

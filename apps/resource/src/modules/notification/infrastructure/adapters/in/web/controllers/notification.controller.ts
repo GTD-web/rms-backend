@@ -14,6 +14,7 @@ import {
     PushNotificationSendResult,
 } from '@resource/modules/notification/domain/ports/push-notification.port';
 import { PushSubscriptionDto } from '@resource/modules/notification/application/dto/push-subscription.dto';
+import { Notification } from '@libs/entities';
 
 @ApiTags('알림')
 @Controller('notifications')
@@ -53,8 +54,8 @@ export class NotificationController {
         status: 200,
         description: '웹 푸시 알림 전송 성공',
     })
-    async send() {
-        await this.adapterService.send();
+    async send(@Param('employeeId') employeeId: string, @Body() notification: Notification) {
+        await this.adapterService.send(employeeId, notification);
     }
 
     @ApiTags('sprint0.3-')

@@ -29,7 +29,7 @@ export class CreateNotificationDto {
     resourceName: string;
 
     @ApiProperty()
-    reservationTitle?: string;
+    reservationDate?: string;
 
     @ApiProperty()
     createdAt?: string;

@@ -15,22 +15,14 @@ export class AdapterService {
         private readonly userService: UserService,
     ) {}
 
-    async send(): Promise<void> {
-        const usersWithSubscription = await this.userService.findAll({
-            where: {
-                subscription: Not(IsNull()),
-            },
-            relations: ['employee'],
+    async send(employeeId: string, notification: Notification): Promise<void> {
+        const user = await this.userService.findByEmployeeId(employeeId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        await this.pushNotificationService.sendNotification(user.subscription, {
+            title: notification.title,
+            body: notification.body,
         });
-        console.log('send');
-        const subscriptions = usersWithSubscription;
-        await Promise.all(
-            subscriptions.map(async (user) => {
-                await this.pushNotificationService.sendNotification(user.subscription, {
-                    title: user.name + '님 알림',
-                    body: user.email,
-                });
-            }),
-        );
     }
 }

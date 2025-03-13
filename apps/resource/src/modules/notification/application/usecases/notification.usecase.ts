@@ -11,6 +11,7 @@ import { DateUtil } from '@libs/utils/date.util';
 import { EmployeeNotificationService } from '../services/employee-notification.service';
 import { Notification } from '@libs/entities';
 import { CronJob } from 'cron';
+import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 
 @Injectable()
 export class NotificationUsecase {
@@ -36,147 +37,97 @@ export class NotificationUsecase {
 
     async createNotification(
         notificationType: NotificationType,
-        CreateNotificationContentDto: CreateNotificationContentDto,
-        employeeId: string,
+        createNotificationContentDto: CreateNotificationContentDto,
+        notiTarget: string[],
+        repositoryOptions?: RepositoryOptions,
     ): Promise<void> {
-        let notification: Notification;
+        let createNotificationDto: CreateNotificationDto = {
+            title: '',
+            body: '',
+            notificationType: notificationType,
+            reservationDate: createNotificationContentDto.reservationDate,
+            resourceName: createNotificationContentDto.resourceName,
+            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
+        };
 
         switch (notificationType) {
             case NotificationType.RESERVATION_REMINDER:
-                await this.createReservationUpcomingNotification(CreateNotificationContentDto, employeeId);
+                this.createReservationUpcomingNotification(createNotificationContentDto, notiTarget);
                 return;
             case NotificationType.RESERVATION_CREATED:
-                notification = await this.createReservationConfirmedNotification(CreateNotificationContentDto);
+                createNotificationDto.title = `[예약 확정] ${createNotificationContentDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationContentDto.reservationDate}`;
                 break;
             case NotificationType.RESERVATION_REJECTED:
-                notification = await this.createReservationCancelledNotification(CreateNotificationContentDto);
+                createNotificationDto.title = `[예약 거절] ${createNotificationContentDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationContentDto.reservationDate}`;
                 break;
             case NotificationType.RESERVATION_CANCELLED:
-                notification = await this.createReservationRejectedNotification(CreateNotificationContentDto);
+                createNotificationDto.title = `[예약 취소] ${createNotificationContentDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationContentDto.reservationDate}`;
                 break;
             case NotificationType.PARTICIPANT_CHANGED:
-                notification = await this.createParticipantChangedNotification(CreateNotificationContentDto);
+                createNotificationDto.title = `[참가자 변경] ${createNotificationContentDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationContentDto.reservationDate}`;
                 break;
             case NotificationType.CONSUMABLE_CHANGING:
-                notification = await this.createSuppliesReplacementNotification(CreateNotificationContentDto);
+                createNotificationDto.title = `[교체 주기 알림] ${createNotificationContentDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationContentDto.resourceName}`;
                 break;
         }
+
+        await this.notificationProcess(createNotificationDto, notiTarget, repositoryOptions);
     }
 
     private async notificationProcess(
-        notificationType: NotificationType,
         createNotificationDto: CreateNotificationDto,
-        employeeId: string,
+        notiTarget: string[],
+        repositoryOptions?: RepositoryOptions,
     ) {
-        const notification = await this.notificationService.save(createNotificationDto);
+        const notification = await this.notificationService.save(createNotificationDto, repositoryOptions);
+        console.log(notification);
         // employee 와 연결 필요
-        const employeeNotification = await this.employeeNotificationService.save({
-            employeeId: employeeId,
-            notificationId: notification.notificationId,
-        });
-
-        await this.adapterService.send();
-    }
-
-    private async createReservationConfirmedNotification(
-        CreateNotificationContentDto: CreateNotificationContentDto,
-    ): Promise<Notification> {
-        const createNotificationDto = {
-            title: `[예약 확정] ${CreateNotificationContentDto.reservationTitle}`,
-            body: `${CreateNotificationContentDto.reservationDate}`,
-            notificationType: NotificationType.RESERVATION_CREATED,
-            resourceName: CreateNotificationContentDto.resourceName,
-            reservationDate: CreateNotificationContentDto.reservationDate,
-            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
-        };
-
-        return await this.notificationService.save(createNotificationDto);
-    }
-
-    private async createReservationCancelledNotification(
-        CreateNotificationContentDto: CreateNotificationContentDto,
-    ): Promise<Notification> {
-        const createNotificationDto = {
-            title: `[예약 취소] ${CreateNotificationContentDto.reservationTitle}`,
-            body: `${CreateNotificationContentDto.reservationDate}`,
-            notificationType: NotificationType.RESERVATION_CANCELLED,
-            resourceName: CreateNotificationContentDto.resourceName,
-            reservationDate: CreateNotificationContentDto.reservationDate,
-            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
-        };
-        return await this.notificationService.save(createNotificationDto);
-    }
-
-    private async createReservationRejectedNotification(
-        CreateNotificationContentDto: CreateNotificationContentDto,
-    ): Promise<Notification> {
-        const createNotificationDto = {
-            title: `[예약 거절] ${CreateNotificationContentDto.reservationTitle}`,
-            body: `${CreateNotificationContentDto.reservationDate}`,
-            notificationType: NotificationType.RESERVATION_REJECTED,
-            resourceName: CreateNotificationContentDto.resourceName,
-            reservationDate: CreateNotificationContentDto.reservationDate,
-            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
-        };
-        return await this.notificationService.save(createNotificationDto);
+        for (const employeeId of notiTarget) {
+            const employeeNotification = await this.employeeNotificationService.save(
+                {
+                    employeeId: employeeId,
+                    notificationId: notification.notificationId,
+                },
+                repositoryOptions,
+            );
+            console.log(employeeNotification);
+            await this.adapterService.send(employeeId, notification);
+        }
     }
 
     private async createReservationUpcomingNotification(
-        CreateNotificationContentDto: CreateNotificationContentDto,
-        employeeId: string,
+        createNotificationContentDto: CreateNotificationContentDto,
+        notiTarget: string[],
     ): Promise<void> {
-        const jobName = `upcoming-${CreateNotificationContentDto.reservationTitle}`;
-        const date = new Date(CreateNotificationContentDto.reservationDate);
-        date.setMinutes(date.getMinutes() - CreateNotificationContentDto.beforeMinutes);
+        const jobName = `upcoming-${DateUtil.now().format('YYYYMMDDHHmmssSSS')}-${createNotificationContentDto.beforeMinutes}`;
+        const notificationDate = new Date(createNotificationContentDto.reservationDate);
+        notificationDate.setMinutes(notificationDate.getMinutes() - createNotificationContentDto.beforeMinutes);
 
-        const job = new CronJob(date, async () => {
+        // 과거 시간 체크
+        if (notificationDate.getTime() <= Date.now()) {
+            console.log(`Notification time ${notificationDate} is in the past, skipping cron job creation`);
+            return;
+        }
+
+        const job = new CronJob(notificationDate, async () => {
             const createNotificationDto = {
-                title: `예약 시간이 ${CreateNotificationContentDto.beforeMinutes}분 남았습니다.`,
-                body: `${CreateNotificationContentDto.resourceName}`,
+                title: `예약 시간이 ${createNotificationContentDto.beforeMinutes}분 남았습니다.`,
+                body: `${createNotificationContentDto.resourceName}`,
                 notificationType: NotificationType.RESERVATION_REMINDER,
-                resourceName: CreateNotificationContentDto.resourceName,
-                reservationDate: CreateNotificationContentDto.reservationDate,
+                reservationDate: createNotificationContentDto.reservationDate,
+                resourceName: createNotificationContentDto.resourceName,
                 createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
             };
-
-            const notification = await this.notificationService.save(createNotificationDto);
-
-            await this.employeeNotificationService.save({
-                employeeId: employeeId,
-                notificationId: notification.notificationId,
-            });
-
-            await this.adapterService.send();
+            await this.notificationProcess(createNotificationDto, notiTarget);
         });
 
         this.schedulerRegistry.addCronJob(jobName, job as any);
+        console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
         job.start();
-    }
-
-    private async createParticipantChangedNotification(
-        CreateNotificationContentDto: CreateNotificationContentDto,
-    ): Promise<Notification> {
-        const createNotificationDto = {
-            title: `[참가자 변경] ${CreateNotificationContentDto.reservationTitle}`,
-            body: `${CreateNotificationContentDto.reservationDate}`,
-            notificationType: NotificationType.PARTICIPANT_CHANGED,
-            resourceName: CreateNotificationContentDto.resourceName,
-            reservationDate: CreateNotificationContentDto.reservationDate,
-            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
-        };
-        return await this.notificationService.save(createNotificationDto);
-    }
-
-    private async createSuppliesReplacementNotification(
-        CreateNotificationContentDto: CreateNotificationContentDto,
-    ): Promise<Notification> {
-        const createNotificationDto = {
-            title: `[교체 주기 알림] ${CreateNotificationContentDto.consumableName}`,
-            body: `${CreateNotificationContentDto.resourceName}`,
-            notificationType: NotificationType.CONSUMABLE_CHANGING,
-            resourceName: CreateNotificationContentDto.resourceName,
-            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
-        };
-        return await this.notificationService.save(createNotificationDto);
     }
 }

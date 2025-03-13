@@ -22,12 +22,16 @@ import {
 } from '../dtos/update-reservation.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { User } from '@libs/entities';
+import { NotificationUsecase } from '@resource/modules/notification/application/usecases/notification.usecase';
+import { NotificationType } from '@libs/enums/notification-type.enum';
+
 @Injectable()
 export class ReservationUsecase {
     constructor(
         private readonly reservationService: ReservationService,
         private readonly participantService: ParticipantService,
         private readonly dataSource: DataSource,
+        private readonly notificationUsecase: NotificationUsecase,
     ) {}
 
     async makeReservation(user: User, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
@@ -73,6 +77,37 @@ export class ReservationUsecase {
             ]);
 
             await queryRunner.commitTransaction();
+
+            const reservationWithResource = await this.reservationService.findOne({
+                where: { reservationId: savedReservation.reservationId! },
+                relations: ['resource'],
+            });
+            console.log(reservationWithResource);
+            if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
+                const notiTarget = [...createDto.participantIds, user.employeeId];
+                await this.notificationUsecase.createNotification(
+                    NotificationType.RESERVATION_CREATED,
+                    {
+                        reservationDate: reservationWithResource.startDate,
+                        reservationTitle: reservationWithResource.title,
+                        resourceName: reservationWithResource.resource.name,
+                    },
+                    notiTarget,
+                );
+                for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
+                    this.notificationUsecase.createNotification(
+                        NotificationType.RESERVATION_REMINDER,
+                        {
+                            reservationDate: reservationWithResource.startDate,
+                            reservationTitle: reservationWithResource.title,
+                            resourceName: reservationWithResource.resource.name,
+                            beforeMinutes: beforeMinutes,
+                        },
+                        notiTarget,
+                    );
+                }
+            }
+
             return {
                 reservationId: savedReservation.reservationId,
             };

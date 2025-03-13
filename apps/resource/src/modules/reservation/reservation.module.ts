@@ -7,8 +7,10 @@ import { ReservationRepository } from './infrastructure/adapters/out/persistence
 import { ReservationParticipantRepository } from './infrastructure/adapters/out/persistence/reservation-participant.repository';
 import { ParticipantService } from './application/services/participant.service';
 import { ReservationUsecase } from './application/usecases/reservation.usecase';
+import { NotificationModule } from '../notification/notification.module';
+
 @Module({
-    imports: [TypeOrmModule.forFeature([Reservation, ReservationParticipant, Schedule])],
+    imports: [TypeOrmModule.forFeature([Reservation, ReservationParticipant, Schedule]), NotificationModule],
     providers: [
         ReservationService,
         ParticipantService,
