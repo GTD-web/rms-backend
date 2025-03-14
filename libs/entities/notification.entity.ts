@@ -3,6 +3,17 @@ import { EmployeeNotification } from './employee-notification.entity';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 
+export interface NotificationData {
+    reservationId?: string;
+    reservationTitle?: string;
+    reservationDate?: string;
+    beforeMinutes?: number;
+    resourceId?: string;
+    resourceName?: string;
+    resourceType?: ResourceType;
+    consumableName?: string;
+}
+
 @Entity('notifications')
 export class Notification {
     @PrimaryColumn('uuid', {
@@ -16,20 +27,18 @@ export class Notification {
     @Column({ nullable: true })
     body: string;
 
-    @Column()
-    resourceName: string;
-
-    @Column({ nullable: true })
-    reservationDate: string;
-
     @Column({
         type: 'enum',
         enum: NotificationType,
+        nullable: true,
     })
     notificationType: NotificationType;
 
-    @Column({ default: false })
-    isRead: boolean;
+    @Column('jsonb', { nullable: true })
+    notificationData: NotificationData;
+
+    @Column({ default: true })
+    isSent: boolean;
 
     @Column()
     createdAt: string;

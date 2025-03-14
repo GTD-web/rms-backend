@@ -18,4 +18,24 @@ export class EmployeeNotificationService {
     ): Promise<EmployeeNotification> {
         return await this.employeeNotificationRepository.save(createEmployeeNotificationDto, repositoryOptions);
     }
+
+    async findOne(repositoryOptions?: RepositoryOptions): Promise<EmployeeNotification> {
+        return await this.employeeNotificationRepository.findOne(repositoryOptions);
+    }
+
+    async findAll(repositoryOptions?: RepositoryOptions): Promise<EmployeeNotification[]> {
+        return await this.employeeNotificationRepository.findAll(repositoryOptions);
+    }
+
+    async update(
+        employeeNotificationId: string,
+        updateEmployeeNotificationDto: Partial<EmployeeNotification>,
+        repositoryOptions?: RepositoryOptions,
+    ): Promise<EmployeeNotification> {
+        return await this.employeeNotificationRepository.update(
+            employeeNotificationId,
+            updateEmployeeNotificationDto,
+            repositoryOptions,
+        );
+    }
 }

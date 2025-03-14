@@ -12,9 +12,10 @@ import { ConsumableRepository } from './infrastructure/adapters/out/persistence/
 import { MaintenanceRepository } from './infrastructure/adapters/out/persistence/maintenance.repository';
 import { VehicleInfoController } from './infrastructure/adapters/in/web/controllers/vehicle-info.controller';
 import { VehicleInfoUsecase } from './application/usecases/vehicle-info.usecase';
+import { NotificationModule } from '@resource/modules/notification/notification.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance])],
+    imports: [TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance]), NotificationModule],
     providers: [
         VehicleResourceHandler,
         VehicleInfoService,

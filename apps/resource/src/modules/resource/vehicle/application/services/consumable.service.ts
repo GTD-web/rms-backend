@@ -2,6 +2,7 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ConsumableRepositoryPort } from '@resource/modules/resource/vehicle/domain/ports/consumable.repository.port';
 import { Consumable } from '@libs/entities';
 import { CreateConsumableDto } from '../dtos/create-consumable.dto';
+import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 
 @Injectable()
 export class ConsumableService {
@@ -10,15 +11,17 @@ export class ConsumableService {
         private readonly consumableRepository: ConsumableRepositoryPort,
     ) {}
 
-    // async create(createDto: CreateConsumableDto & { vehicleId: string }) {
-    //   const consumable = new Consumable({
-    //     vehicleId: createDto.vehicleId,
-    //     name: createDto.name,
-    //     replaceCycle: createDto.replaceCycle,
-    //     notifyReplacementCycle: createDto.notifyReplacementCycle,
-    //   });
-    //   return this.consumableRepository.save(consumable);
-    // }
+    async findAll(repositoryOptions?: RepositoryOptions): Promise<Consumable[]> {
+        return this.consumableRepository.findAll(repositoryOptions);
+    }
+
+    async findOne(repositoryOptions?: RepositoryOptions): Promise<Consumable | null> {
+        return this.consumableRepository.findOne(repositoryOptions);
+    }
+
+    async save(consumable: Consumable, repositoryOptions?: RepositoryOptions): Promise<Consumable> {
+        return this.consumableRepository.save(consumable, repositoryOptions);
+    }
 
     // async findById(id: string) {
     //   const consumable = await this.consumableRepository.findById(id);

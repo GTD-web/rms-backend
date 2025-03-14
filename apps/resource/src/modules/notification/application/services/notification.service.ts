@@ -17,6 +17,14 @@ export class NotificationService {
         return await this.notificationRepository.save(createNotificationDto, repositoryOptions);
     }
 
+    async findAll(options?: RepositoryOptions): Promise<Notification[]> {
+        return await this.notificationRepository.findAll(options);
+    }
+
+    async update(notificationId: string, updateNotificationDto: Partial<Notification>): Promise<Notification> {
+        return await this.notificationRepository.update(notificationId, updateNotificationDto);
+    }
+
     async findAllByEmployeeId(employeeId: string): Promise<Notification[]> {
         // return this.notificationRepository.findAllByEmployeeId(employeeId);
         return [];

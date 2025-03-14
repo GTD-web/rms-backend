@@ -21,20 +21,29 @@ export class ConsumableRepository implements ConsumableRepositoryPort {
         return savedEntity;
     }
 
-    async findById(id: string, repositoryOptions?: RepositoryOptions): Promise<Consumable | null> {
+    async findAll(repositoryOptions?: RepositoryOptions): Promise<Consumable[]> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(ConsumableEntity)
             : this.repository;
-        const entity = await repository.findOne({ where: { consumableId: id } });
-        return entity ? entity : null;
+        const entities = await repository.find({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+            order: repositoryOptions?.order,
+            skip: repositoryOptions?.skip,
+            take: repositoryOptions?.take,
+        });
+        return entities;
     }
 
-    async findByVehicleId(vehicleId: string, repositoryOptions?: RepositoryOptions): Promise<Consumable[]> {
+    async findOne(repositoryOptions?: RepositoryOptions): Promise<Consumable | null> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(ConsumableEntity)
             : this.repository;
-        const entities = await repository.find({ where: { vehicleId } });
-        return entities;
+        const entity = await repository.findOne({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+        });
+        return entity ? entity : null;
     }
 
     async update(
@@ -46,7 +55,7 @@ export class ConsumableRepository implements ConsumableRepositoryPort {
             ? repositoryOptions.queryRunner.manager.getRepository(ConsumableEntity)
             : this.repository;
         await repository.update({ consumableId: id }, consumable);
-        const updated = await this.findById(id, repositoryOptions);
+        const updated = await this.findOne({ where: { consumableId: id }, relations: repositoryOptions?.relations });
         if (!updated) throw new NotFoundException('Consumable not found');
         return updated;
     }

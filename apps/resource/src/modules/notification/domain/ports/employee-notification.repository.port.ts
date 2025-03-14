@@ -7,4 +7,11 @@ export interface EmployeeNotificationRepositoryPort {
         createEmployeeNotificationDto: CreateEmployeeNotificationDto,
         repositoryOptions?: RepositoryOptions,
     ): Promise<EmployeeNotification>;
+    findOne(repositoryOptions?: RepositoryOptions): Promise<EmployeeNotification>;
+    findAll(repositoryOptions?: RepositoryOptions): Promise<EmployeeNotification[]>;
+    update(
+        employeeNotificationId: string,
+        updateEmployeeNotificationDto: Partial<EmployeeNotification>,
+        repositoryOptions?: RepositoryOptions,
+    ): Promise<EmployeeNotification>;
 }

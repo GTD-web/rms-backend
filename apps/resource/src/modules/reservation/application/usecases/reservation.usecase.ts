@@ -82,25 +82,30 @@ export class ReservationUsecase {
                 where: { reservationId: savedReservation.reservationId! },
                 relations: ['resource'],
             });
-            console.log(reservationWithResource);
+
             if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
                 const notiTarget = [...createDto.participantIds, user.employeeId];
                 await this.notificationUsecase.createNotification(
-                    NotificationType.RESERVATION_CREATED,
+                    NotificationType.RESERVATION_STATUS_CONFIRMED,
                     {
-                        reservationDate: reservationWithResource.startDate,
+                        reservationId: reservationWithResource.reservationId,
                         reservationTitle: reservationWithResource.title,
+                        reservationDate: reservationWithResource.startDate,
+                        resourceId: reservationWithResource.resource.resourceId,
                         resourceName: reservationWithResource.resource.name,
+                        resourceType: reservationWithResource.resource.type,
                     },
                     notiTarget,
                 );
                 for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
                     this.notificationUsecase.createNotification(
-                        NotificationType.RESERVATION_REMINDER,
+                        NotificationType.RESERVATION_DATE_UPCOMING,
                         {
-                            reservationDate: reservationWithResource.startDate,
+                            reservationId: reservationWithResource.reservationId,
                             reservationTitle: reservationWithResource.title,
+                            resourceId: reservationWithResource.resource.resourceId,
                             resourceName: reservationWithResource.resource.name,
+                            resourceType: reservationWithResource.resource.type,
                             beforeMinutes: beforeMinutes,
                         },
                         notiTarget,
@@ -251,18 +256,52 @@ export class ReservationUsecase {
         employeeId: string,
         isAdmin: boolean,
     ): Promise<ReservationResponseDto> {
-        const reservation = await this.reservationService.findOne({ where: { reservationId } });
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['resource'],
+        });
         if (!reservation) {
             throw new NotFoundException('Reservation not found');
         }
 
-        const reserver = await this.participantService.findOne({
-            where: { reservationId, type: ParticipantsType.RESERVER },
+        const reserver = await this.participantService.findAll({
+            where: { reservationId },
         });
-        const isMyReservation = reserver?.employeeId === employeeId;
+        const isMyReservation = reserver.some((participant) => participant.employeeId === employeeId);
 
         if (isMyReservation || isAdmin) {
             const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+
+            if (reservation.resource.notifyReservationChange) {
+                const notiTarget = reserver.map((participant) => participant.employeeId);
+
+                let notificationType: NotificationType;
+                switch (updateDto.status) {
+                    case ReservationStatus.CONFIRMED:
+                        notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
+                        break;
+                    case ReservationStatus.CANCELLED:
+                        notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
+                        break;
+                    // case ReservationStatus.REJECTED:
+                    //     notificationType = NotificationType.RESERVATION_REJECTED;
+                    //     break;
+                }
+
+                await this.notificationUsecase.createNotification(
+                    notificationType,
+                    {
+                        reservationId: reservation.reservationId,
+                        reservationTitle: reservation.title,
+                        reservationDate: reservation.startDate,
+                        resourceId: reservation.resource.resourceId,
+                        resourceName: reservation.resource.name,
+                        resourceType: reservation.resource.type,
+                    },
+                    notiTarget,
+                );
+            }
+
             return new ReservationResponseDto(updatedReservation);
         }
 
@@ -292,8 +331,26 @@ export class ReservationUsecase {
 
         const updatedReservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['participants'],
+            relations: ['participants', 'resource'],
         });
+
+        if (updatedReservation.resource.notifyParticipantChange) {
+            const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+
+            await this.notificationUsecase.createNotification(
+                NotificationType.RESERVATION_PARTICIPANT_CHANGED,
+                {
+                    reservationId: updatedReservation.reservationId,
+                    reservationTitle: updatedReservation.title,
+                    reservationDate: updatedReservation.startDate,
+                    resourceId: updatedReservation.resource.resourceId,
+                    resourceName: updatedReservation.resource.name,
+                    resourceType: updatedReservation.resource.type,
+                },
+                notiTarget,
+            );
+        }
+
         return new ReservationResponseDto(updatedReservation);
     }
 

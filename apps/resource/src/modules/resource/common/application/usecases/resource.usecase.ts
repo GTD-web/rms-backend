@@ -24,6 +24,7 @@ import { ResourceManagerService } from '../services/resource-manager.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { UserService } from '@resource/modules/auth/application/services/user.service';
 import { User as UserEntity } from '@libs/entities';
+import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
 
 @Injectable()
 export class ResourceUsecase {
@@ -33,6 +34,7 @@ export class ResourceUsecase {
         private readonly resourceGroupService: ResourceGroupService,
         private readonly reservationService: ReservationService,
         private readonly vehicleInfoService: VehicleInfoService,
+        private readonly vehicleInfoUsecase: VehicleInfoUsecase,
         private readonly userService: UserService,
         private readonly dataSource: DataSource,
         @Inject('ResourceTypeHandlers')
@@ -155,7 +157,7 @@ export class ResourceUsecase {
                 throw new NotFoundException('Vehicle info not found');
             }
 
-            await this.vehicleInfoService.update(
+            await this.vehicleInfoUsecase.updateVehicleInfo(
                 vehicleInfo.vehicleInfoId,
                 {
                     leftMileage: updateDto.leftMileage,

@@ -81,3 +81,11 @@ export {
 
 // File Module DTOs
 export { FileResponseDto } from './modules/file/application/dtos/file-response.dto';
+
+// Notification Module DTOs
+export {
+    CreateNotificationDto,
+    SendNotificationDto,
+} from './modules/notification/application/dto/create-notification.dto';
+export { PushSubscriptionDto } from './modules/notification/application/dto/push-subscription.dto';
+export { ResponseNotificationDto } from './modules/notification/application/dto/response-notification.dto';

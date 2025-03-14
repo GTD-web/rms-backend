@@ -15,6 +15,9 @@ export class EmployeeNotification {
     @Column()
     notificationId: string;
 
+    @Column({ default: false })
+    isRead: boolean;
+
     @ManyToOne(() => Notification)
     @JoinColumn({ name: 'notificationId' })
     notification: Notification;
