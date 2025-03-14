@@ -4,8 +4,9 @@ import { Repository } from 'typeorm';
 import { Maintenance as MaintenanceEntity } from '@libs/entities';
 import { Maintenance } from '@libs/entities';
 import { MaintenanceRepositoryPort } from '@resource/modules/resource/vehicle/domain/ports/maintenance.repository.port';
-import { UpdateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/update-maintenance.dto';
+import { UpdateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
+import { CreateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 
 @Injectable()
 export class MaintenanceRepository implements MaintenanceRepositoryPort {
@@ -14,40 +15,50 @@ export class MaintenanceRepository implements MaintenanceRepositoryPort {
         private readonly repository: Repository<MaintenanceEntity>,
     ) {}
 
-    async save(maintenance: Maintenance, repositoryOptions?: RepositoryOptions): Promise<Maintenance> {
-        const repository = repositoryOptions?.queryRunner
-            ? repositoryOptions.queryRunner.manager.getRepository(MaintenanceEntity)
-            : this.repository;
-        const savedEntity = await repository.save(maintenance);
-        return savedEntity;
-    }
-
-    async findById(id: string, repositoryOptions?: RepositoryOptions): Promise<Maintenance | null> {
-        const repository = repositoryOptions?.queryRunner
-            ? repositoryOptions.queryRunner.manager.getRepository(MaintenanceEntity)
-            : this.repository;
-        const entity = await repository.findOne({ where: { maintenanceId: id } });
-        return entity ? entity : null;
-    }
-
-    async findByConsumableId(consumableId: string, repositoryOptions?: RepositoryOptions): Promise<Maintenance[]> {
-        const repository = repositoryOptions?.queryRunner
-            ? repositoryOptions.queryRunner.manager.getRepository(MaintenanceEntity)
-            : this.repository;
-        const entities = await repository.find({ where: { consumableId } });
-        return entities;
-    }
-
-    async update(
-        id: string,
-        maintenance: UpdateMaintenanceDto,
+    async save(
+        createMaintenanceDto: CreateMaintenanceDto,
         repositoryOptions?: RepositoryOptions,
     ): Promise<Maintenance> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(MaintenanceEntity)
             : this.repository;
-        await repository.update({ maintenanceId: id }, maintenance);
-        const updated = await this.findById(id, repositoryOptions);
+        const savedEntity = await repository.save(createMaintenanceDto);
+        return savedEntity;
+    }
+
+    async findAll(repositoryOptions?: RepositoryOptions): Promise<Maintenance[]> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(MaintenanceEntity)
+            : this.repository;
+        return repository.find({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+            order: repositoryOptions?.order,
+            skip: repositoryOptions?.skip,
+            take: repositoryOptions?.take,
+        });
+    }
+
+    async findOne(repositoryOptions?: RepositoryOptions): Promise<Maintenance | null> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(MaintenanceEntity)
+            : this.repository;
+        return repository.findOne({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+        });
+    }
+
+    async update(
+        id: string,
+        updateMaintenanceDto: UpdateMaintenanceDto,
+        repositoryOptions?: RepositoryOptions,
+    ): Promise<Maintenance> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(MaintenanceEntity)
+            : this.repository;
+        await repository.update({ maintenanceId: id }, updateMaintenanceDto);
+        const updated = await this.findOne({ where: { maintenanceId: id }, relations: repositoryOptions?.relations });
         if (!updated) throw new NotFoundException('Maintenance not found');
         return updated;
     }

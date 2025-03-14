@@ -1,7 +1,7 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ConsumableRepositoryPort } from '@resource/modules/resource/vehicle/domain/ports/consumable.repository.port';
 import { Consumable } from '@libs/entities';
-import { CreateConsumableDto } from '../dtos/create-consumable.dto';
+import { CreateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 
 @Injectable()
@@ -11,6 +11,10 @@ export class ConsumableService {
         private readonly consumableRepository: ConsumableRepositoryPort,
     ) {}
 
+    async save(createConsumableDto: CreateConsumableDto, repositoryOptions?: RepositoryOptions): Promise<Consumable> {
+        return this.consumableRepository.save(createConsumableDto, repositoryOptions);
+    }
+
     async findAll(repositoryOptions?: RepositoryOptions): Promise<Consumable[]> {
         return this.consumableRepository.findAll(repositoryOptions);
     }
@@ -19,31 +23,15 @@ export class ConsumableService {
         return this.consumableRepository.findOne(repositoryOptions);
     }
 
-    async save(consumable: Consumable, repositoryOptions?: RepositoryOptions): Promise<Consumable> {
-        return this.consumableRepository.save(consumable, repositoryOptions);
+    async update(
+        id: string,
+        updateData: Partial<CreateConsumableDto>,
+        repositoryOptions?: RepositoryOptions,
+    ): Promise<Consumable> {
+        return this.consumableRepository.update(id, updateData, repositoryOptions);
     }
 
-    // async findById(id: string) {
-    //   const consumable = await this.consumableRepository.findById(id);
-    //   if (!consumable) {
-    //     throw new NotFoundException('Consumable not found');
-    //   }
-    //   return consumable;
-    // }
-
-    // async findByVehicleId(vehicleId: string) {
-    //   return this.consumableRepository.findByVehicleId(vehicleId);
-    // }
-
-    // async update(id: string, updateData: Partial<CreateConsumableDto>) {
-    //   const consumable = await this.findById(id);
-    //   return this.consumableRepository.update(id, {
-    //     ...consumable,
-    //     ...updateData,
-    //   });
-    // }
-
-    // async remove(id: string) {
-    //   await this.consumableRepository.delete(id);
-    // }
+    async delete(id: string, repositoryOptions?: RepositoryOptions): Promise<void> {
+        return this.consumableRepository.delete(id, repositoryOptions);
+    }
 }

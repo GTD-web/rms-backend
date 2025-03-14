@@ -1,11 +1,16 @@
 import { Maintenance } from '@libs/entities';
-import { UpdateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/update-maintenance.dto';
+import { UpdateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
+import { CreateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 
 export interface MaintenanceRepositoryPort {
-    save(maintenance: Maintenance, repositoryOptions?: RepositoryOptions): Promise<Maintenance>;
-    findById(id: string, repositoryOptions?: RepositoryOptions): Promise<Maintenance | null>;
-    findByConsumableId(consumableId: string, repositoryOptions?: RepositoryOptions): Promise<Maintenance[]>;
-    update(id: string, maintenance: UpdateMaintenanceDto, repositoryOptions?: RepositoryOptions): Promise<Maintenance>;
+    save(createMaintenanceDto: CreateMaintenanceDto, repositoryOptions?: RepositoryOptions): Promise<Maintenance>;
+    findAll(repositoryOptions?: RepositoryOptions): Promise<Maintenance[]>;
+    findOne(repositoryOptions?: RepositoryOptions): Promise<Maintenance | null>;
+    update(
+        id: string,
+        updateMaintenanceDto: UpdateMaintenanceDto,
+        repositoryOptions?: RepositoryOptions,
+    ): Promise<Maintenance>;
     delete(id: string, repositoryOptions?: RepositoryOptions): Promise<void>;
 }

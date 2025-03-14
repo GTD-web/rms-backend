@@ -5,7 +5,7 @@ import { Consumable as ConsumableEntity } from '@libs/entities';
 import { Consumable } from '@libs/entities';
 import { ConsumableRepositoryPort } from '@resource/modules/resource/vehicle/domain/ports/consumable.repository.port';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
-
+import { CreateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 @Injectable()
 export class ConsumableRepository implements ConsumableRepositoryPort {
     constructor(
@@ -13,11 +13,11 @@ export class ConsumableRepository implements ConsumableRepositoryPort {
         private readonly repository: Repository<ConsumableEntity>,
     ) {}
 
-    async save(consumable: Consumable, repositoryOptions?: RepositoryOptions): Promise<Consumable> {
+    async save(createConsumableDto: CreateConsumableDto, repositoryOptions?: RepositoryOptions): Promise<Consumable> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(ConsumableEntity)
             : this.repository;
-        const savedEntity = await repository.save(consumable);
+        const savedEntity = await repository.save(createConsumableDto);
         return savedEntity;
     }
 

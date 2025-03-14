@@ -5,25 +5,19 @@ export class MaintenanceResponseDto {
     maintenanceId: string;
 
     @ApiProperty()
-    resourceId: string;
+    consumableId: string;
 
     @ApiProperty()
-    title: string;
-
-    @ApiProperty({ required: false })
-    description?: string;
+    date: string;
 
     @ApiProperty()
-    cost: number;
+    mileage: string;
 
     @ApiProperty()
-    maintenanceDate: Date;
-
-    @ApiProperty({ required: false })
-    maintenanceShop?: string;
+    cost: string;
 
     @ApiProperty()
-    mileage: number;
+    images: string[];
 }
 
 export class ConsumableResponseDto {
@@ -36,20 +30,11 @@ export class ConsumableResponseDto {
     @ApiProperty()
     name: string;
 
-    @ApiProperty({ required: false })
-    description?: string;
+    @ApiProperty()
+    replaceCycle: string;
 
     @ApiProperty()
-    cost: number;
-
-    @ApiProperty()
-    replacementDate: Date;
-
-    @ApiProperty()
-    mileage: number;
-
-    @ApiProperty({ required: false })
-    nextReplacementDate?: Date;
+    notifyReplacementCycle: boolean;
 
     @ApiProperty({ type: [MaintenanceResponseDto], required: false })
     maintenances?: MaintenanceResponseDto[];

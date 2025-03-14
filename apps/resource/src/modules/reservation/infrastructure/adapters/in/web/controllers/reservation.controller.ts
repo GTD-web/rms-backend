@@ -62,6 +62,21 @@ export class ReservationController {
     }
 
     @ApiTags('sprint0.1')
+    @Get('me/current')
+    @ApiOperation({ summary: '내 예약 현재 예약 조회 #사용자/자원예약/이용중 ' })
+    @ApiDataResponse({
+        description: '내 예약 현재 예약 조회 성공',
+        type: ReservationWithRelationsResponseDto,
+    })
+    @ApiQuery({ name: 'resourceType', enum: ResourceType, example: ResourceType.MEETING_ROOM })
+    async findMyCurrentReservation(
+        @User() user: UserEntity,
+        @Query('resourceType') resourceType: ResourceType,
+    ): Promise<ReservationWithRelationsResponseDto> {
+        return this.reservationUsecase.findMyCurrentReservation(user.employeeId, resourceType);
+    }
+
+    @ApiTags('sprint0.1')
     @Get(':reservationId')
     @ApiOperation({ summary: '예약 조회 #사용자/예약상세페이지' })
     @ApiDataResponse({

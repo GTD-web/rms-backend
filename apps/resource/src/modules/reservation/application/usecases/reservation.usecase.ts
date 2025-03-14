@@ -169,6 +169,24 @@ export class ReservationUsecase {
         return reservationWithParticipants.map((reservation) => new ReservationWithRelationsResponseDto(reservation));
     }
 
+    async findMyCurrentReservation(
+        employeeId: string,
+        resourceType: ResourceType,
+    ): Promise<ReservationWithRelationsResponseDto> {
+        const now = DateUtil.now().format();
+
+        const where: FindOptionsWhere<Reservation> = {
+            participants: { employeeId, type: ParticipantsType.RESERVER },
+            status: ReservationStatus.CONFIRMED,
+            resource: { type: resourceType as ResourceType },
+            startDate: LessThan(now),
+            endDate: MoreThan(now),
+        };
+
+        const reservation = await this.reservationService.findOne({ where, relations: ['resource'] });
+        return reservation ? new ReservationWithRelationsResponseDto(reservation) : null;
+    }
+
     async findReservationList(
         startDate?: string,
         endDate?: string,
@@ -184,6 +202,7 @@ export class ReservationUsecase {
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where: FindOptionsWhere<Reservation> = {};
+        console.log(startDate, endDate, resourceType, resourceId, status);
         if (status && status.length > 0) {
             where.status = In(status);
         }
@@ -219,7 +238,7 @@ export class ReservationUsecase {
         }
 
         const reservations = await this.reservationService.findAll({ where, relations: ['resource'] });
-
+        console.log(reservations.length);
         const reservationResponseDtos = reservations.map(
             (reservation) => new ReservationWithResourceResponseDto(reservation),
         );

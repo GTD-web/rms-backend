@@ -13,6 +13,8 @@ import { MaintenanceRepository } from './infrastructure/adapters/out/persistence
 import { VehicleInfoController } from './infrastructure/adapters/in/web/controllers/vehicle-info.controller';
 import { VehicleInfoUsecase } from './application/usecases/vehicle-info.usecase';
 import { NotificationModule } from '@resource/modules/notification/notification.module';
+import { ConsumableUsecase } from './application/usecases/consumable.usecase';
+import { MaintenanceUsecase } from './application/usecases/maintenance.usecase';
 
 @Module({
     imports: [TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance]), NotificationModule],
@@ -22,6 +24,8 @@ import { NotificationModule } from '@resource/modules/notification/notification.
         ConsumableService,
         MaintenanceService,
         VehicleInfoUsecase,
+        ConsumableUsecase,
+        MaintenanceUsecase,
         VehicleInfoRepository,
         {
             provide: 'VehicleInfoRepositoryPort',
@@ -39,6 +43,14 @@ import { NotificationModule } from '@resource/modules/notification/notification.
         },
     ],
     controllers: [VehicleInfoController, ConsumableController, MaintenanceController],
-    exports: [VehicleResourceHandler, VehicleInfoService, ConsumableService, MaintenanceService, VehicleInfoUsecase],
+    exports: [
+        VehicleResourceHandler,
+        VehicleInfoService,
+        ConsumableService,
+        MaintenanceService,
+        VehicleInfoUsecase,
+        ConsumableUsecase,
+        MaintenanceUsecase,
+    ],
 })
 export class VehicleResourceModule {}

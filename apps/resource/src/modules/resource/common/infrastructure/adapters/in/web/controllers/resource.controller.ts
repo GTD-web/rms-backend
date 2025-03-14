@@ -30,8 +30,8 @@ export class ResourceController {
         type: [ResourceGroupWithResourcesAndReservationsResponseDto],
     })
     @ApiQuery({ name: 'type', enum: ResourceType })
-    @ApiQuery({ name: 'startDate' })
-    @ApiQuery({ name: 'endDate' })
+    @ApiQuery({ name: 'startDate', example: '2025-01-01 or 2025-01-01 00:00:00' })
+    @ApiQuery({ name: 'endDate', example: '2025-01-01 or 2025-01-01 00:00:00' })
     async findResourcesByTypeAndDateWithReservations(
         @User() user: UserEntity,
         @Query('type') type: ResourceType,

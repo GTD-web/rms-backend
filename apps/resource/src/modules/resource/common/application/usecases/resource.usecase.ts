@@ -25,6 +25,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { UserService } from '@resource/modules/auth/application/services/user.service';
 import { User as UserEntity } from '@libs/entities';
 import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 
 @Injectable()
 export class ResourceUsecase {
@@ -79,6 +80,7 @@ export class ResourceUsecase {
                                 resourceId: resource.resourceId,
                                 startDate: LessThan(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
                                 endDate: MoreThan(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
+                                status: ReservationStatus.CONFIRMED,
                             },
                             relations: ['participants'],
                             order: {
