@@ -7621,7 +7621,7 @@ let FCMAdapter = class FCMAdapter {
         }
     }
     async sendNotification(subscription, payload) {
-        if (!subscription.fcm?.token) {
+        if (!subscription?.fcm?.token) {
             throw new Error('FCM token is missing');
         }
         const message = {

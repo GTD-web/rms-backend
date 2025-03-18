@@ -33,7 +33,7 @@ export class FCMAdapter implements PushNotificationPort {
         subscription: PushNotificationSubscription,
         payload: PushNotificationPayload,
     ): Promise<PushNotificationSendResult> {
-        if (!subscription.fcm?.token) {
+        if (!subscription?.fcm?.token) {
             throw new Error('FCM token is missing');
         }
 
