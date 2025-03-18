@@ -3,7 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { FileStoragePort, FileUploadOptions } from '@resource/modules/file/domain/ports/file-storage.port';
 import { DateUtil } from '@libs/utils/date.util';
-import { File } from '@resource/modules/file/domain/models/file';
+import { File } from '@libs/entities';
+
 @Injectable()
 export class S3StorageAdapter implements FileStoragePort {
     private readonly s3Client: S3Client;
@@ -37,10 +38,10 @@ export class S3StorageAdapter implements FileStoragePort {
                 }),
             );
 
-            const newFile = new File({
+            const newFile = {
                 fileName: fileName,
                 filePath: this.getFileUrl(fileName),
-            });
+            } as File;
 
             return newFile;
         } catch (error) {

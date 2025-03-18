@@ -1,9 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { FileRepositoryPort } from '../../domain/ports/file.repository.port';
 import { FileStoragePort } from '../../domain/ports/file-storage.port';
-import { File } from '../../domain/models/file';
 import { ConfigService } from '@nestjs/config';
-import { FileMapper } from '../mappers/file.mapper';
+import { File } from '@libs/entities';
 
 @Injectable()
 export class FileService {
@@ -17,12 +16,12 @@ export class FileService {
 
     async findFileById(fileId: string): Promise<File> {
         const file = await this.fileRepository.findById(fileId);
-        return FileMapper.toDomain(file);
+        return file;
     }
 
     async saveFile(file: File): Promise<File> {
-        const savedFile = await this.fileRepository.save(FileMapper.toEntity(file));
-        return FileMapper.toDomain(savedFile);
+        const savedFile = await this.fileRepository.save(file);
+        return savedFile;
     }
 
     async uploadFile(file: Express.Multer.File): Promise<File> {

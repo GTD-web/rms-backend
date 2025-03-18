@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { File as FileEntity } from '@libs/entities';
-import { File as FileDomain } from '@resource/modules/file/domain/models/file';
 import { FileRepositoryPort } from '@resource/modules/file/domain/ports/file.repository.port';
 
 @Injectable()

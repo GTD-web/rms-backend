@@ -5,8 +5,8 @@ import { createWriteStream, unlink } from 'fs';
 import { join } from 'path';
 import { promisify } from 'util';
 import { existsSync, mkdirSync } from 'fs';
-import { File } from '@resource/modules/file/domain/models/file';
-import { FileMapper } from '@resource/modules/file/application/mappers/file.mapper';
+import { File } from '@libs/entities';
+
 const unlinkAsync = promisify(unlink);
 
 @Injectable()
@@ -23,10 +23,10 @@ export class LocalStorageAdapter implements FileStoragePort {
         const filename = `${DateUtil.now().format('YYYYMMDDHHmmss')}-${file.originalname}`;
         const filePath = join(this.uploadDir, '/uploads', filename);
 
-        const newFile = new File({
+        const newFile = {
             fileName: file.originalname,
             filePath: `/uploads/${filename}`,
-        });
+        } as File;
 
         return new Promise((resolve, reject) => {
             const writeStream = createWriteStream(filePath);

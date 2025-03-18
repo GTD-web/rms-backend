@@ -1,4 +1,4 @@
-import { File } from '../models/file';
+import { File } from '@libs/entities';
 
 export interface FileUploadOptions {
     filename?: string;
