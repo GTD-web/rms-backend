@@ -7621,8 +7621,8 @@ let FCMAdapter = class FCMAdapter {
         }
     }
     async sendNotification(subscription, payload) {
-        if (!subscription?.fcm?.token) {
-            throw new Error('FCM token is missing');
+        if (!subscription || !subscription.fcm || !subscription.fcm.token) {
+            throw new common_1.BadRequestException('FCM token is missing');
         }
         const message = {
             token: subscription.fcm.token,
@@ -7632,8 +7632,6 @@ let FCMAdapter = class FCMAdapter {
             },
         };
         try {
-            console.log('FCM Token:', subscription.fcm.token);
-            console.log('Sending FCM message:', JSON.stringify(message, null, 2));
             const response = await (0, messaging_1.getMessaging)()
                 .send(message)
                 .then((response) => {

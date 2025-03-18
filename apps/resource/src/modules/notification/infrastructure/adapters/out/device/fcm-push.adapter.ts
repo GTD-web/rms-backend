@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
     PushNotificationPort,
@@ -33,8 +33,8 @@ export class FCMAdapter implements PushNotificationPort {
         subscription: PushNotificationSubscription,
         payload: PushNotificationPayload,
     ): Promise<PushNotificationSendResult> {
-        if (!subscription?.fcm?.token) {
-            throw new Error('FCM token is missing');
+        if (!subscription || !subscription.fcm || !subscription.fcm.token) {
+            throw new BadRequestException('FCM token is missing');
         }
 
         const message = {
@@ -46,9 +46,6 @@ export class FCMAdapter implements PushNotificationPort {
         };
 
         try {
-            console.log('FCM Token:', subscription.fcm.token);
-            console.log('Sending FCM message:', JSON.stringify(message, null, 2));
-
             const response = await getMessaging()
                 .send(message)
                 .then((response) => {
