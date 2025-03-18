@@ -24,6 +24,7 @@ import { RepositoryOptions } from '@libs/interfaces/repository-option.interface'
 import { User } from '@libs/entities';
 import { NotificationUsecase } from '@resource/modules/notification/application/usecases/notification.usecase';
 import { NotificationType } from '@libs/enums/notification-type.enum';
+import { error } from 'console';
 
 @Injectable()
 export class ReservationUsecase {
@@ -78,39 +79,44 @@ export class ReservationUsecase {
 
             await queryRunner.commitTransaction();
 
-            const reservationWithResource = await this.reservationService.findOne({
-                where: { reservationId: savedReservation.reservationId! },
-                relations: ['resource'],
-            });
+            try {
+                const reservationWithResource = await this.reservationService.findOne({
+                    where: { reservationId: savedReservation.reservationId! },
+                    relations: ['resource'],
+                });
 
-            if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
-                const notiTarget = [...createDto.participantIds, user.employeeId];
-                await this.notificationUsecase.createNotification(
-                    NotificationType.RESERVATION_STATUS_CONFIRMED,
-                    {
-                        reservationId: reservationWithResource.reservationId,
-                        reservationTitle: reservationWithResource.title,
-                        reservationDate: reservationWithResource.startDate,
-                        resourceId: reservationWithResource.resource.resourceId,
-                        resourceName: reservationWithResource.resource.name,
-                        resourceType: reservationWithResource.resource.type,
-                    },
-                    notiTarget,
-                );
-                for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
-                    this.notificationUsecase.createNotification(
-                        NotificationType.RESERVATION_DATE_UPCOMING,
+                if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
+                    const notiTarget = [...createDto.participantIds, user.employeeId];
+                    await this.notificationUsecase.createNotification(
+                        NotificationType.RESERVATION_STATUS_CONFIRMED,
                         {
                             reservationId: reservationWithResource.reservationId,
                             reservationTitle: reservationWithResource.title,
+                            reservationDate: reservationWithResource.startDate,
                             resourceId: reservationWithResource.resource.resourceId,
                             resourceName: reservationWithResource.resource.name,
                             resourceType: reservationWithResource.resource.type,
-                            beforeMinutes: beforeMinutes,
                         },
                         notiTarget,
                     );
+                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
+                        this.notificationUsecase.createNotification(
+                            NotificationType.RESERVATION_DATE_UPCOMING,
+                            {
+                                reservationId: reservationWithResource.reservationId,
+                                reservationTitle: reservationWithResource.title,
+                                resourceId: reservationWithResource.resource.resourceId,
+                                resourceName: reservationWithResource.resource.name,
+                                resourceType: reservationWithResource.resource.type,
+                                beforeMinutes: beforeMinutes,
+                            },
+                            notiTarget,
+                        );
+                    }
                 }
+            } catch (error) {
+                console.log(error);
+                console.log('Notification creation failed');
             }
 
             return {

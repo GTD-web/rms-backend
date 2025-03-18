@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-    employeesSeedData,
-    resourceGroupsSeedData,
-    resourcesSeedData,
-    subResourceGroupsSeedData,
-} from './mockdata.seed';
+import { employeesSeedData, resourceGroupsSeedData } from './mockdata.seed';
 import { Not, Repository } from 'typeorm';
 import {
     ResourceGroup as ResourceGroupEntity,
@@ -79,40 +74,40 @@ export class AppService {
         }
     }
 
-    async seedSubResourceGroup() {
-        const resourceGroups = await this.resourceGroupRepository.find({
-            where: { parentResourceGroupId: IsNull() },
-            relations: ['children'],
-        });
-        if (resourceGroups.length > 0) {
-            if (resourceGroups[0].children.length === 0) {
-                for (const data of subResourceGroupsSeedData) {
-                    const parentResourceGroup = resourceGroups.find((group) => group.type === data.type);
-                    const resourceGroup = {
-                        ...data,
-                        parentResourceGroupId: parentResourceGroup.resourceGroupId,
-                    };
-                    await this.resourceGroupRepository.save(resourceGroup);
-                }
-            }
-        }
-    }
+    // async seedSubResourceGroup() {
+    //     const resourceGroups = await this.resourceGroupRepository.find({
+    //         where: { parentResourceGroupId: IsNull() },
+    //         relations: ['children'],
+    //     });
+    //     if (resourceGroups.length > 0) {
+    //         if (resourceGroups[0].children.length === 0) {
+    //             for (const data of subResourceGroupsSeedData) {
+    //                 const parentResourceGroup = resourceGroups.find((group) => group.type === data.type);
+    //                 const resourceGroup = {
+    //                     ...data,
+    //                     parentResourceGroupId: parentResourceGroup.resourceGroupId,
+    //                 };
+    //                 await this.resourceGroupRepository.save(resourceGroup);
+    //             }
+    //         }
+    //     }
+    // }
 
-    async seedResource() {
-        const resources = await this.resourceRepository.find();
-        if (resources.length === 0) {
-            const resourceGroups = await this.resourceGroupRepository.find({
-                where: { parentResourceGroupId: IsNull() },
-            });
-            for (const resource of resourcesSeedData) {
-                const parentResourceGroup = resourceGroups.find((group) => group.type === resource.type);
-                await this.resourceRepository.save({
-                    ...resource,
-                    resourceGroupId: parentResourceGroup.resourceGroupId,
-                });
-            }
-        }
-    }
+    // async seedResource() {
+    //     const resources = await this.resourceRepository.find();
+    //     if (resources.length === 0) {
+    //         const resourceGroups = await this.resourceGroupRepository.find({
+    //             where: { parentResourceGroupId: IsNull() },
+    //         });
+    //         for (const resource of resourcesSeedData) {
+    //             const parentResourceGroup = resourceGroups.find((group) => group.type === resource.type);
+    //             await this.resourceRepository.save({
+    //                 ...resource,
+    //                 resourceGroupId: parentResourceGroup.resourceGroupId,
+    //             });
+    //         }
+    //     }
+    // }
 
     async clear() {
         // 1. 먼저 하위 자원 그룹 삭제 (parentResourceGroupId가 있는 그룹)

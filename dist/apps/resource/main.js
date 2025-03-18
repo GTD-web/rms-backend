@@ -8701,30 +8701,36 @@ let ReservationUsecase = class ReservationUsecase {
                 }, { queryRunner })),
             ]);
             await queryRunner.commitTransaction();
-            const reservationWithResource = await this.reservationService.findOne({
-                where: { reservationId: savedReservation.reservationId },
-                relations: ['resource'],
-            });
-            if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
-                const notiTarget = [...createDto.participantIds, user.employeeId];
-                await this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, {
-                    reservationId: reservationWithResource.reservationId,
-                    reservationTitle: reservationWithResource.title,
-                    reservationDate: reservationWithResource.startDate,
-                    resourceId: reservationWithResource.resource.resourceId,
-                    resourceName: reservationWithResource.resource.name,
-                    resourceType: reservationWithResource.resource.type,
-                }, notiTarget);
-                for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
-                    this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+            try {
+                const reservationWithResource = await this.reservationService.findOne({
+                    where: { reservationId: savedReservation.reservationId },
+                    relations: ['resource'],
+                });
+                if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                    const notiTarget = [...createDto.participantIds, user.employeeId];
+                    await this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, {
                         reservationId: reservationWithResource.reservationId,
                         reservationTitle: reservationWithResource.title,
+                        reservationDate: reservationWithResource.startDate,
                         resourceId: reservationWithResource.resource.resourceId,
                         resourceName: reservationWithResource.resource.name,
                         resourceType: reservationWithResource.resource.type,
-                        beforeMinutes: beforeMinutes,
                     }, notiTarget);
+                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
+                        this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+                            reservationId: reservationWithResource.reservationId,
+                            reservationTitle: reservationWithResource.title,
+                            resourceId: reservationWithResource.resource.resourceId,
+                            resourceName: reservationWithResource.resource.name,
+                            resourceType: reservationWithResource.resource.type,
+                            beforeMinutes: beforeMinutes,
+                        }, notiTarget);
+                    }
                 }
+            }
+            catch (error) {
+                console.log(error);
+                console.log('Notification creation failed');
             }
             return {
                 reservationId: savedReservation.reservationId,
