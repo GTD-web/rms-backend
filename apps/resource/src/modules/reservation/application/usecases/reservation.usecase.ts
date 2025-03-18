@@ -298,33 +298,38 @@ export class ReservationUsecase {
             const updatedReservation = await this.reservationService.update(reservationId, updateDto);
 
             if (reservation.resource.notifyReservationChange) {
-                const notiTarget = reserver.map((participant) => participant.employeeId);
+                try {
+                    const notiTarget = reserver.map((participant) => participant.employeeId);
 
-                let notificationType: NotificationType;
-                switch (updateDto.status) {
-                    case ReservationStatus.CONFIRMED:
-                        notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
-                        break;
-                    case ReservationStatus.CANCELLED:
-                        notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
-                        break;
-                    // case ReservationStatus.REJECTED:
-                    //     notificationType = NotificationType.RESERVATION_REJECTED;
-                    //     break;
+                    let notificationType: NotificationType;
+                    switch (updateDto.status) {
+                        case ReservationStatus.CONFIRMED:
+                            notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
+                            break;
+                        case ReservationStatus.CANCELLED:
+                            notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
+                            break;
+                        // case ReservationStatus.REJECTED:
+                        //     notificationType = NotificationType.RESERVATION_REJECTED;
+                        //     break;
+                    }
+
+                    await this.notificationUsecase.createNotification(
+                        notificationType,
+                        {
+                            reservationId: reservation.reservationId,
+                            reservationTitle: reservation.title,
+                            reservationDate: reservation.startDate,
+                            resourceId: reservation.resource.resourceId,
+                            resourceName: reservation.resource.name,
+                            resourceType: reservation.resource.type,
+                        },
+                        notiTarget,
+                    );
+                } catch (error) {
+                    console.log(error);
+                    console.log('Notification creation failed in updateStatus');
                 }
-
-                await this.notificationUsecase.createNotification(
-                    notificationType,
-                    {
-                        reservationId: reservation.reservationId,
-                        reservationTitle: reservation.title,
-                        reservationDate: reservation.startDate,
-                        resourceId: reservation.resource.resourceId,
-                        resourceName: reservation.resource.name,
-                        resourceType: reservation.resource.type,
-                    },
-                    notiTarget,
-                );
             }
 
             return new ReservationResponseDto(updatedReservation);
@@ -360,20 +365,25 @@ export class ReservationUsecase {
         });
 
         if (updatedReservation.resource.notifyParticipantChange) {
-            const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+            try {
+                const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
 
-            await this.notificationUsecase.createNotification(
-                NotificationType.RESERVATION_PARTICIPANT_CHANGED,
-                {
-                    reservationId: updatedReservation.reservationId,
-                    reservationTitle: updatedReservation.title,
-                    reservationDate: updatedReservation.startDate,
-                    resourceId: updatedReservation.resource.resourceId,
-                    resourceName: updatedReservation.resource.name,
-                    resourceType: updatedReservation.resource.type,
-                },
-                notiTarget,
-            );
+                await this.notificationUsecase.createNotification(
+                    NotificationType.RESERVATION_PARTICIPANT_CHANGED,
+                    {
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
+                        reservationDate: updatedReservation.startDate,
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
+                    },
+                    notiTarget,
+                );
+            } catch (error) {
+                console.log(error);
+                console.log('Notification creation failed in updateParticipants');
+            }
         }
 
         return new ReservationResponseDto(updatedReservation);

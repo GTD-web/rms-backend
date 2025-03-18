@@ -73,19 +73,24 @@ export class VehicleInfoUsecase {
             const isReplace =
                 Math.floor(afterTotalMileage / replaceCycle) > Math.floor(previousTotalMileage / replaceCycle);
             if (isReplace) {
-                const notiTarget = afterVehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
+                try {
+                    const notiTarget = afterVehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
 
-                await this.notificationUsecase.createNotification(
-                    NotificationType.RESOURCE_CONSUMABLE_REPLACING,
-                    {
-                        resourceId: afterVehicleInfo.resource.resourceId,
-                        resourceName: afterVehicleInfo.resource.name,
-                        resourceType: afterVehicleInfo.resource.type,
-                        consumableName: consumable.name,
-                    },
-                    notiTarget,
-                    repositoryOptions,
-                );
+                    await this.notificationUsecase.createNotification(
+                        NotificationType.RESOURCE_CONSUMABLE_REPLACING,
+                        {
+                            resourceId: afterVehicleInfo.resource.resourceId,
+                            resourceName: afterVehicleInfo.resource.name,
+                            resourceType: afterVehicleInfo.resource.type,
+                            consumableName: consumable.name,
+                        },
+                        notiTarget,
+                        repositoryOptions,
+                    );
+                } catch (error) {
+                    console.log(error);
+                    console.log('Notification creation failed in updateVehicleInfo');
+                }
             }
         }
 
