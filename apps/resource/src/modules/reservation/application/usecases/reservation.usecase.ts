@@ -35,21 +35,21 @@ export class ReservationUsecase {
     ) {}
 
     async makeReservation(user: User, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
-        const conflicts = await this.reservationService.findConflictingReservations(
-            createDto.resourceId,
-            DateUtil.parse(createDto.startDate).format(),
-            DateUtil.parse(createDto.endDate).format(),
-        );
-
-        if (conflicts.length > 0) {
-            throw new BadRequestException('Reservation time conflict');
-        }
-
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
 
         try {
+            const conflicts = await this.reservationService.findConflictingReservations(
+                createDto.resourceId,
+                DateUtil.parse(createDto.startDate).format(),
+                DateUtil.parse(createDto.endDate).format(),
+            );
+
+            if (conflicts.length > 0) {
+                throw new BadRequestException('Reservation time conflict');
+            }
+
             const reservation = this.reservationService.create(createDto);
 
             const savedReservation = await this.reservationService.save(reservation, { queryRunner });

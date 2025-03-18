@@ -8678,14 +8678,14 @@ let ReservationUsecase = class ReservationUsecase {
         this.notificationUsecase = notificationUsecase;
     }
     async makeReservation(user, createDto) {
-        const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.parse(createDto.startDate).format(), date_util_1.DateUtil.parse(createDto.endDate).format());
-        if (conflicts.length > 0) {
-            throw new common_1.BadRequestException('Reservation time conflict');
-        }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.parse(createDto.startDate).format(), date_util_1.DateUtil.parse(createDto.endDate).format());
+            if (conflicts.length > 0) {
+                throw new common_1.BadRequestException('Reservation time conflict');
+            }
             const reservation = this.reservationService.create(createDto);
             const savedReservation = await this.reservationService.save(reservation, { queryRunner });
             await Promise.all([
@@ -9476,39 +9476,6 @@ let AppService = class AppService {
             }
         }
     }
-    async seedSubResourceGroup() {
-        const resourceGroups = await this.resourceGroupRepository.find({
-            where: { parentResourceGroupId: (0, typeorm_3.IsNull)() },
-            relations: ['children'],
-        });
-        if (resourceGroups.length > 0) {
-            if (resourceGroups[0].children.length === 0) {
-                for (const data of mockdata_seed_1.subResourceGroupsSeedData) {
-                    const parentResourceGroup = resourceGroups.find((group) => group.type === data.type);
-                    const resourceGroup = {
-                        ...data,
-                        parentResourceGroupId: parentResourceGroup.resourceGroupId,
-                    };
-                    await this.resourceGroupRepository.save(resourceGroup);
-                }
-            }
-        }
-    }
-    async seedResource() {
-        const resources = await this.resourceRepository.find();
-        if (resources.length === 0) {
-            const resourceGroups = await this.resourceGroupRepository.find({
-                where: { parentResourceGroupId: (0, typeorm_3.IsNull)() },
-            });
-            for (const resource of mockdata_seed_1.resourcesSeedData) {
-                const parentResourceGroup = resourceGroups.find((group) => group.type === resource.type);
-                await this.resourceRepository.save({
-                    ...resource,
-                    resourceGroupId: parentResourceGroup.resourceGroupId,
-                });
-            }
-        }
-    }
     async clear() {
         await this.resourceGroupRepository.delete({
             parentResourceGroupId: (0, typeorm_1.Not)((0, typeorm_3.IsNull)()),
@@ -9537,19 +9504,10 @@ exports.AppService = AppService = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.resourcesSeedData = exports.subResourceGroupsSeedData = exports.resourceGroupsSeedData = exports.employeesSeedData = void 0;
+exports.resourceGroupsSeedData = exports.employeesSeedData = void 0;
 const resource_type_enum_1 = __webpack_require__(18);
 const role_type_enum_1 = __webpack_require__(28);
 exports.employeesSeedData = [
-    {
-        name: '관리자',
-        employeeNumber: '00000',
-        position: '관리자',
-        department: '관리자',
-        email: 'admin@lumir.space',
-        password: '1234',
-        roles: [role_type_enum_1.Role.USER, role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN],
-    },
     {
         name: '김종식',
         employeeNumber: '23027',
@@ -9557,6 +9515,7 @@ exports.employeesSeedData = [
         department: 'Web파트',
         email: 'kim.jongsik@lumir.space',
         password: '1234',
+        roles: [role_type_enum_1.Role.USER],
     },
     {
         name: '우창욱',
@@ -9565,6 +9524,7 @@ exports.employeesSeedData = [
         department: 'Web파트',
         email: 'woo.changuk@lumir.space',
         password: '1234',
+        roles: [role_type_enum_1.Role.USER],
     },
     {
         name: '김민수',
@@ -9573,6 +9533,7 @@ exports.employeesSeedData = [
         department: 'Web파트',
         email: 'kim.minsu@lumir.space',
         password: '1234',
+        roles: [role_type_enum_1.Role.USER],
     },
     {
         name: '김규현',
@@ -9581,6 +9542,7 @@ exports.employeesSeedData = [
         department: 'Web파트',
         email: 'kim.kyuhyun@lumir.space',
         password: '1234',
+        roles: [role_type_enum_1.Role.USER],
     },
     {
         name: '김성훈',
@@ -9589,6 +9551,7 @@ exports.employeesSeedData = [
         department: 'Web파트',
         email: 'kim.seonghun@lumir.space',
         password: '1234',
+        roles: [role_type_enum_1.Role.USER],
     },
     {
         name: '조민경',
@@ -9597,6 +9560,7 @@ exports.employeesSeedData = [
         department: 'Web파트',
         email: 'jo.minkyeong@lumir.space',
         password: '1234',
+        roles: [role_type_enum_1.Role.USER],
     },
     {
         name: '이화영',
@@ -9605,6 +9569,7 @@ exports.employeesSeedData = [
         department: 'Web파트',
         email: 'lee.hwayoung@lumir.space',
         password: '1234',
+        roles: [role_type_enum_1.Role.USER],
     },
     {
         name: '황성빈',
@@ -9613,14 +9578,7 @@ exports.employeesSeedData = [
         department: 'Web파트',
         email: 'hwang.sungbin@lumir.space',
         password: '1234',
-    },
-    {
-        name: '전영미',
-        employeeNumber: '20029',
-        position: '이사',
-        department: '경영지원실',
-        email: 'jeon.youngmi@lumir.space',
-        password: '1234',
+        roles: [role_type_enum_1.Role.USER],
     },
     {
         name: '박태연',
@@ -9629,478 +9587,7 @@ exports.employeesSeedData = [
         department: '경영지원실',
         email: 'park.taeyeon@lumir.space',
         password: '1234',
-    },
-    {
-        name: '정재일',
-        employeeNumber: '23012',
-        position: '책임매니저',
-        department: '경영지원실',
-        email: 'jung.jaeil@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '박승현',
-        employeeNumber: '24044',
-        position: '책임매니저',
-        department: '경영지원실',
-        email: 'park.david@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '우은진',
-        employeeNumber: '22020',
-        position: '선임매니저',
-        department: '경영지원실',
-        email: 'woo.eunjin@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '이서연',
-        employeeNumber: '22042',
-        position: '선임매니저',
-        department: '경영지원실',
-        email: 'lee.seoyeon@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김민영',
-        employeeNumber: '23006',
-        position: '선임매니저',
-        department: '경영지원실',
-        email: 'kim.minyoung@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김민찬',
-        employeeNumber: '23032',
-        position: '매니저',
-        department: '경영지원실',
-        email: 'kim.minchan@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '조아라',
-        employeeNumber: '24047',
-        position: '매니저',
-        department: '경영지원실',
-        email: 'cho.ahra@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '강남규',
-        employeeNumber: '17007',
-        position: '책임연구원',
-        department: '전자1파트',
-        email: 'kang.nk@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '정석화',
-        employeeNumber: '22025',
-        position: '책임연구원',
-        department: '전자1파트',
-        email: 'jung.suckhwa@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '정양희',
-        employeeNumber: '20035',
-        position: '책임연구원',
-        department: '전자1파트',
-        email: 'jeong.yanghee@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '정성훈',
-        employeeNumber: '21008',
-        position: '책임연구원',
-        department: '전자1파트',
-        email: 'jeong.sunghoon@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '이준',
-        employeeNumber: '21013',
-        position: '책임연구원',
-        department: '전자1파트',
-        email: 'lee.jun@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '조수형',
-        employeeNumber: '19003',
-        position: '책임연구원',
-        department: '전자1파트',
-        email: 'cho.sh@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '정영식',
-        employeeNumber: '24041',
-        position: '책임연구원',
-        department: '전자1파트',
-        email: 'jeung.youngsic@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김기표',
-        employeeNumber: '23025',
-        position: '선임연구원',
-        department: '전자1파트',
-        email: 'kim.kipyo@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '하태식',
-        employeeNumber: '23022',
-        position: '연구원',
-        department: '전자1파트',
-        email: 'ha.taesik@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '최은지',
-        employeeNumber: '23034',
-        position: '연구원',
-        department: '전자1파트',
-        email: 'choi.eunji@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '서상준',
-        employeeNumber: '22038',
-        position: '책임연구원',
-        department: '전자2파트',
-        email: 'seo.sangjun@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '이승기',
-        employeeNumber: '23048',
-        position: '책임연구원',
-        department: '전자2파트',
-        email: 'lee.seungky@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '전구영',
-        employeeNumber: '23010',
-        position: '책임연구원',
-        department: '전자2파트',
-        email: 'jeon.kuyoung@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '천윤범',
-        employeeNumber: '25004',
-        position: '책임연구원',
-        department: '전자2파트',
-        email: 'chun.yoonbum@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '정승헌',
-        employeeNumber: '24005',
-        position: '연구원',
-        department: '전자2파트',
-        email: 'jeong.seungheon@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '이준형',
-        employeeNumber: '24046',
-        position: '연구원',
-        department: '전자2파트',
-        email: 'lee.junhyeong@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김경민',
-        employeeNumber: '23028',
-        position: '책임연구원',
-        department: 'RF파트',
-        email: 'kim.kyoungmin@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '홍연창',
-        employeeNumber: '25006',
-        position: '책임연구원',
-        department: 'RF파트',
-        email: 'hong.yonchang@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '유경준',
-        employeeNumber: '25007',
-        position: '책임연구원',
-        department: 'RF파트',
-        email: 'yu.gyeongjun@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '신승규',
-        employeeNumber: '25003',
-        position: '책임연구원',
-        department: 'RF파트',
-        email: 'shin.seunggyu@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '박평식1',
-        employeeNumber: '24006',
-        position: '선임연구원',
-        department: 'RF파트',
-        email: 'park.pyungsik1@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '박영배',
-        employeeNumber: '24045',
-        position: '선임연구원',
-        department: 'RF파트',
-        email: 'park.youngbae@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '담현규',
-        employeeNumber: '25005',
-        position: '선임연구원',
-        department: 'RF파트',
-        email: 'dam.hyounkyou@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김은정',
-        employeeNumber: '23036',
-        position: '연구원',
-        department: 'RF파트',
-        email: 'kim.eunjeong@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '박창서',
-        employeeNumber: '19002',
-        position: '책임연구원',
-        department: '안테나파트',
-        email: 'park.cs@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김익환',
-        employeeNumber: '24038',
-        position: '선임연구원',
-        department: '안테나파트',
-        email: 'kim.ikhwan@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '고영훈',
-        employeeNumber: '22002',
-        position: '책임연구원',
-        department: '기구파트',
-        email: 'ko.younghun@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '박동조',
-        employeeNumber: '23045',
-        position: '선임연구원',
-        department: '기구파트',
-        email: 'park.dongjo@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '구석현',
-        employeeNumber: '24020',
-        position: '선임연구원',
-        department: '기구파트',
-        email: 'koo.sukhyun@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '손진우',
-        employeeNumber: '22040',
-        position: '선임연구원',
-        department: '기구파트',
-        email: 'son.jinwoo@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김동현1',
-        employeeNumber: '23035',
-        position: '연구원',
-        department: '기구파트',
-        email: 'kim.donghyun1@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '박일수',
-        employeeNumber: '24031',
-        position: '책임연구원',
-        department: '지상운용파트',
-        email: 'park.ilsoo@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김형기',
-        employeeNumber: '22011',
-        position: '연구원',
-        department: '지상운용파트',
-        email: 'kim.hyunggi@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '박정조',
-        employeeNumber: '22014',
-        position: '연구원',
-        department: '지상운용파트',
-        email: 'park.jeongjo@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김일진',
-        employeeNumber: '22035',
-        position: '책임연구원',
-        department: 'SAR시스템파트',
-        email: 'kim.iljin@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '이해림',
-        employeeNumber: '24003',
-        position: '연구원',
-        department: 'SAR시스템파트',
-        email: 'lee.haerim@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '민정호',
-        employeeNumber: '24026',
-        position: '연구원',
-        department: '영상분석파트',
-        email: 'min.jeongho@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '손성빈',
-        employeeNumber: '24032',
-        position: '연구원',
-        department: '영상분석파트',
-        email: 'son.sungbin@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김형진',
-        employeeNumber: '24043',
-        position: '책임연구원',
-        department: '추진파트',
-        email: 'kim.hyungjin@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김기용',
-        employeeNumber: '24004',
-        position: '책임제조원',
-        department: '제조파트',
-        email: 'kim.kiyong@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김동현',
-        employeeNumber: '22005',
-        position: '선임제조원',
-        department: '제조파트',
-        email: 'kim.donghyun@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '안광헌',
-        employeeNumber: '25001',
-        position: '선임제조원',
-        department: '제조파트',
-        email: 'an.gwangheon@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '원동주',
-        employeeNumber: '24035',
-        position: '연구원',
-        department: '제조파트',
-        email: 'won.dongju@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '채민수',
-        employeeNumber: '22037',
-        position: '제조원',
-        department: '제조파트',
-        email: 'chae.minsu1@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '남명조',
-        employeeNumber: '24042',
-        position: '제조원',
-        department: '제조파트',
-        email: 'nam.myungjo@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '최동원',
-        employeeNumber: '25002',
-        position: '제조원',
-        department: '제조파트',
-        email: 'choi.dongwon@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '박재훈',
-        employeeNumber: '25008',
-        position: '선임연구원',
-        department: 'QA파트',
-        email: 'park.jaehun@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '서유민1',
-        employeeNumber: '24010',
-        position: '연구원',
-        department: 'QA파트',
-        email: 'seo.yumin1@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '윤성영',
-        employeeNumber: '23050',
-        position: '연구원',
-        department: 'QA파트',
-        email: 'youn.sungyoung@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '이우림',
-        employeeNumber: '20032',
-        position: '연구원',
-        department: 'QA파트',
-        email: 'lee.woolim@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '강민기',
-        employeeNumber: '24028',
-        position: '연구원',
-        department: 'PA파트',
-        email: 'kang.minki@lumir.space',
-        password: '1234',
-    },
-    {
-        name: '김성훈1',
-        employeeNumber: '24034',
-        position: '연구원',
-        department: 'PA파트',
-        email: 'kim.seonghun1@lumir.space',
-        password: '1234',
+        roles: [role_type_enum_1.Role.USER, role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN],
     },
 ];
 exports.resourceGroupsSeedData = [
@@ -10118,137 +9605,6 @@ exports.resourceGroupsSeedData = [
         title: '숙소',
         description: '숙소',
         type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-    },
-];
-exports.subResourceGroupsSeedData = [
-    {
-        title: '11층 회의실',
-        description: '11층 회의실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-    },
-    {
-        title: '5층 회의실',
-        description: '5층 회의실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-    },
-    {
-        title: '법인 차량',
-        description: '법인 차량',
-        type: resource_type_enum_1.ResourceType.VEHICLE,
-    },
-    {
-        title: '대전 숙소',
-        description: '대전 숙소',
-        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-    },
-    {
-        title: '사천 숙소',
-        description: '사천 숙소',
-        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-    },
-];
-exports.resourcesSeedData = [
-    {
-        name: '11층 대회의실',
-        description: '11층 대회의실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '11층 중회의실',
-        description: '11층 중회의실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '11층 소회의실',
-        description: '11층 소회의실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '대표이사실',
-        description: '대표이사실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '5층 중회의실',
-        description: '5층 중회의실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '5층 소회의실',
-        description: '5층 소회의실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '5층 오대수이사실',
-        description: '5층 오대수이사실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '럭셔리모텔1',
-        description: '럭셔리모텔1',
-        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '럭셔리모텔2',
-        description: '럭셔리모텔2',
-        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '럭셔리모텔3',
-        description: '럭셔리모텔3',
-        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '럭셔리모텔4',
-        description: '럭셔리모텔4',
-        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '럭셔리모텔5',
-        description: '럭셔리모텔5',
-        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '럭셔리모텔6',
-        description: '럭셔리모텔6',
-        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '싼타페(25어5677)',
-        description: '싼타페(25어5677)',
-        type: resource_type_enum_1.ResourceType.VEHICLE,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '스타렉스(75누7885)',
-        description: '스타렉스(75누7885)',
-        type: resource_type_enum_1.ResourceType.VEHICLE,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '셀토스(126서1152)',
-        description: '셀토스(126서1152)',
-        type: resource_type_enum_1.ResourceType.VEHICLE,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
-    },
-    {
-        name: '카니발(116너5351)',
-        description: '카니발(116너5351)',
-        type: resource_type_enum_1.ResourceType.VEHICLE,
-        images: ['https://www.lumir-inc.com/assets/imgs/renewal/introduce/overview/%EC%82%BC%EC%A1%B1%EC%98%A4.png'],
     },
 ];
 
