@@ -48,6 +48,10 @@ export class VehicleInfoUsecase {
             },
             relations: ['consumables'],
         });
+        if (!previousVehicleInfo) {
+            throw new NotFoundException('Vehicle info not found');
+        }
+
         const previousTotalMileage = Number(previousVehicleInfo.totalMileage);
 
         // 실제 업데이트

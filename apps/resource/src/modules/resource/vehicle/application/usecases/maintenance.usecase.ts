@@ -35,6 +35,7 @@ export class MaintenanceUsecase {
     }
 
     async delete(maintenanceId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
-        return this.maintenanceService.delete(maintenanceId, repositoryOptions);
+        return await this.maintenanceService.delete(maintenanceId, repositoryOptions);
     }
 }
+1;

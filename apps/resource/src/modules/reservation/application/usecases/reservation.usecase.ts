@@ -42,21 +42,25 @@ export class ReservationUsecase {
     ) {}
 
     async makeReservation(user: User, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
+        const conflicts = await this.reservationService.findConflictingReservations(
+            createDto.resourceId,
+            DateUtil.parse(createDto.startDate).format(),
+            DateUtil.parse(createDto.endDate).format(),
+        );
+
+        if (conflicts.length > 0) {
+            throw new BadRequestException('Reservation time conflict');
+        }
+
+        if (createDto.startDate > createDto.endDate) {
+            throw new BadRequestException('Start date must be before end date');
+        }
+
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
 
         try {
-            const conflicts = await this.reservationService.findConflictingReservations(
-                createDto.resourceId,
-                DateUtil.parse(createDto.startDate).format(),
-                DateUtil.parse(createDto.endDate).format(),
-            );
-
-            if (conflicts.length > 0) {
-                throw new BadRequestException('Reservation time conflict');
-            }
-
             const reservation = this.reservationService.create(createDto);
 
             const savedReservation = await this.reservationService.save(reservation, { queryRunner });
@@ -359,7 +363,7 @@ export class ReservationUsecase {
             return new ReservationResponseDto(updatedReservation);
         }
 
-        throw new ForbiddenException('You are not authorized to update this reservation');
+        throw new UnauthorizedException('You are not authorized to update this reservation');
     }
 
     async updateParticipants(

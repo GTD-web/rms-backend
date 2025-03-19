@@ -29,6 +29,6 @@ export class ConsumableUsecase {
     }
 
     async delete(id: string, repositoryOptions?: RepositoryOptions): Promise<void> {
-        return this.consumableService.delete(id, repositoryOptions);
+        return await this.consumableService.delete(id, repositoryOptions);
     }
 }

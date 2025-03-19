@@ -141,26 +141,26 @@ export class ResourceUsecase {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
+        //자원 위치 정보 수정
+        const resource = await this.resourceService.findOne({
+            where: { resourceId: resourceId },
+            relations: ['vehicleInfo'],
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        // 차량 주행거리정보, 차량 주차위치 이미지 저장
+        const vehicleInfo = await this.vehicleInfoService.findOne({
+            where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
+        });
+        if (!vehicleInfo) {
+            throw new NotFoundException('Vehicle info not found');
+        }
 
         try {
-            //자원 위치 정보 수정
-            const resource = await this.resourceService.findOne({
-                where: { resourceId: resourceId },
-                relations: ['vehicleInfo'],
-            });
-            if (!resource) {
-                throw new NotFoundException('Resource not found');
-            }
-
             await this.resourceService.update(resourceId, { location: updateDto.location }, { queryRunner });
-
-            // 차량 주행거리정보, 차량 주차위치 이미지 저장
-            const vehicleInfo = await this.vehicleInfoService.findOne({
-                where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
-            });
-            if (!vehicleInfo) {
-                throw new NotFoundException('Vehicle info not found');
-            }
 
             await this.vehicleInfoUsecase.updateVehicleInfo(
                 vehicleInfo.vehicleInfoId,

@@ -8,4 +8,5 @@ export interface RepositoryOptions<T = any> {
     order?: { [P in keyof T]?: 'ASC' | 'DESC' };
     skip?: number;
     take?: number;
+    withDeleted?: boolean;
 }
