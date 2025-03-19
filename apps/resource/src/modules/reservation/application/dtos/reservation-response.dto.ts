@@ -2,7 +2,7 @@ import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { Reservation } from '@libs/entities';
 import { ParticipantsType } from '@libs/enums/reservation-type.enum';
-import { EmployeeResponseDto, ResourceResponseDto } from '@resource/dtos.index';
+import { EmployeeResponseDto, ResourceResponseDto, UserResponseDto } from '@resource/dtos.index';
 
 export class ReservationResponseDto {
     constructor(reservation: Reservation) {
@@ -96,6 +96,9 @@ export class ReservationWithRelationsResponseDto extends ReservationResponseDto 
 
     @ApiProperty({ type: [ReservationParticipantResponseDto], required: false })
     participants?: ReservationParticipantResponseDto[];
+
+    @ApiProperty({ required: false })
+    isMine?: boolean;
 }
 
 export class CreateReservationResponseDto {

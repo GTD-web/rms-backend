@@ -131,6 +131,9 @@ export class ResourceUsecase {
                 'resourceManagers.employee',
             ],
         });
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
         return new ResourceResponseDto(resource);
     }
 

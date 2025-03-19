@@ -83,8 +83,11 @@ export class ReservationController {
         description: '예약 조회 성공',
         type: ReservationWithRelationsResponseDto,
     })
-    async findOne(@Param('reservationId') reservationId: string): Promise<ReservationWithRelationsResponseDto> {
-        return this.reservationUsecase.findReservationDetail(reservationId);
+    async findOne(
+        @User() user: UserEntity,
+        @Param('reservationId') reservationId: string,
+    ): Promise<ReservationWithRelationsResponseDto> {
+        return this.reservationUsecase.findReservationDetail(user, reservationId);
     }
 
     @ApiTags('sprint0.1', 'sprint0.3')

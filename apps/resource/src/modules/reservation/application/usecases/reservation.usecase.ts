@@ -136,7 +136,7 @@ export class ReservationUsecase {
         }
     }
 
-    async findReservationDetail(reservationId: string): Promise<ReservationWithRelationsResponseDto> {
+    async findReservationDetail(user: User, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: [
@@ -149,7 +149,14 @@ export class ReservationUsecase {
             ],
         });
 
+        if (!reservation) {
+            throw new NotFoundException('Reservation not found');
+        }
+
         const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
+        reservationResponseDto.isMine = reservationResponseDto.reservers.some(
+            (reserver) => reserver.employeeId === user.employeeId,
+        );
 
         return reservationResponseDto;
     }
