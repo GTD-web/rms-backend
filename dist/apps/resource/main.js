@@ -4199,7 +4199,7 @@ let ReservationController = class ReservationController {
     }
     async updateParticipants(user, reservationId, updateDto) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateParticipants(user, reservationId, updateDto);
+        return this.reservationUsecase.updateParticipants(reservationId, updateDto);
     }
     async updateCcReceipient(user, reservationId, updateDto) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);

@@ -190,7 +190,7 @@ export class ReservationController {
         @Body() updateDto: UpdateReservationParticipantsDto,
     ): Promise<ReservationResponseDto> {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateParticipants(user, reservationId, updateDto);
+        return this.reservationUsecase.updateParticipants(reservationId, updateDto);
     }
 
     @ApiTags('sprint0.1')
