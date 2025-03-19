@@ -3,7 +3,7 @@ import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
 import { IsNull, Not } from 'typeorm';
 import { ReservationService } from '@resource/modules/reservation/application/services/reservation.service';
-import { ResourceGroupResponseDto } from '../dtos/resource-response.dto';
+import { ResourceGroupResponseDto, ResourceGroupWithResourcesResponseDto } from '../dtos/resource-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { UpdateResourceGroupOrdersDto, UpdateResourceGroupDto } from '../dtos/update-resource.dto';
 import { DataSource } from 'typeorm';
@@ -30,7 +30,7 @@ export class ResourceGroupUsecase {
         return resourceGroups;
     }
 
-    async findResourceGroupsWithResourceData(type?: ResourceType): Promise<ResourceGroupResponseDto[]> {
+    async findResourceGroupsWithResourceData(type?: ResourceType): Promise<ResourceGroupWithResourcesResponseDto[]> {
         const resourceGroups = await this.resourceGroupService.findAll({
             where: {
                 parentResourceGroupId: IsNull(),
@@ -64,6 +64,7 @@ export class ResourceGroupUsecase {
                             isAvailable: resource.isAvailable,
                             unavailableReason: resource.unavailableReason,
                             resourceGroupId: child.resourceGroupId,
+                            order: resource.order,
                         })),
                     })),
                 ),

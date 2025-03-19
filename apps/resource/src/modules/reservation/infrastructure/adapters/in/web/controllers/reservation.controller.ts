@@ -132,9 +132,11 @@ export class ReservationController {
         type: ReservationResponseDto,
     })
     async updateTitle(
+        @User() user: UserEntity,
         @Param('reservationId') reservationId: string,
         @Body() updateDto: UpdateReservationTitleDto,
     ): Promise<ReservationResponseDto> {
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateTitle(reservationId, updateDto);
     }
 
@@ -146,9 +148,11 @@ export class ReservationController {
         type: ReservationResponseDto,
     })
     async update(
+        @User() user: UserEntity,
         @Param('reservationId') reservationId: string,
         @Body() updateDto: UpdateReservationTimeDto,
     ): Promise<ReservationResponseDto> {
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateTime(reservationId, updateDto);
     }
 
@@ -164,6 +168,7 @@ export class ReservationController {
         @Param('reservationId') reservationId: string,
         @Body() updateDto: UpdateReservationStatusDto,
     ): Promise<ReservationResponseDto> {
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateStatus(
             reservationId,
             updateDto,
@@ -180,10 +185,12 @@ export class ReservationController {
         type: ReservationResponseDto,
     })
     async updateParticipants(
+        @User() user: UserEntity,
         @Param('reservationId') reservationId: string,
         @Body() updateDto: UpdateReservationParticipantsDto,
     ): Promise<ReservationResponseDto> {
-        return this.reservationUsecase.updateParticipants(reservationId, updateDto);
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
+        return this.reservationUsecase.updateParticipants(user, reservationId, updateDto);
     }
 
     @ApiTags('sprint0.1')
@@ -194,9 +201,11 @@ export class ReservationController {
         type: ReservationResponseDto,
     })
     async updateCcReceipient(
+        @User() user: UserEntity,
         @Param('reservationId') reservationId: string,
         @Body() updateDto: UpdateReservationCcReceipientDto,
     ): Promise<ReservationResponseDto> {
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateCcReceipient(reservationId, updateDto);
     }
 }

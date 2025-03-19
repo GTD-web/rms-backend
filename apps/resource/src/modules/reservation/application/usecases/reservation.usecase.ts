@@ -244,11 +244,22 @@ export class ReservationUsecase {
         }
 
         const reservations = await this.reservationService.findAll({ where, relations: ['resource'] });
-        console.log(reservations.length);
+
         const reservationResponseDtos = reservations.map(
             (reservation) => new ReservationWithResourceResponseDto(reservation),
         );
         return reservationResponseDtos;
+    }
+
+    async checkReservationAccess(reservationId: string, employeeId: string): Promise<boolean> {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId, participants: { employeeId, type: ParticipantsType.RESERVER } },
+            relations: ['participants'],
+        });
+        if (!reservation) {
+            throw new NotFoundException('No Access to Reservation');
+        }
+        return true;
     }
 
     async updateTitle(
@@ -343,7 +354,9 @@ export class ReservationUsecase {
         updateDto: UpdateReservationParticipantsDto,
     ): Promise<ReservationResponseDto> {
         // 기존 참가자 조회
-        const participants = await this.participantService.findAll({ where: { reservationId } });
+        const participants = await this.participantService.findAll({
+            where: { reservationId, type: ParticipantsType.PARTICIPANT },
+        });
 
         // 기존 참가자 삭제
         await Promise.all(participants.map((participant) => this.participantService.delete(participant.participantId)));

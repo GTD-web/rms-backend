@@ -14,10 +14,16 @@ export class WebPushDto implements WebPush {
     @ApiProperty()
     endpoint: string;
 
-    @ApiProperty()
+    @ApiProperty({
+        type: 'object',
+        properties: {
+            auth: { type: 'string' },
+            p256dh: { type: 'string' },
+        },
+    })
     keys: {
-        p256dh: string;
         auth: string;
+        p256dh: string;
     };
 }
 
