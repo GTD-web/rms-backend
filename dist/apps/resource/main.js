@@ -3986,7 +3986,7 @@ let ReservationUsecase = class ReservationUsecase {
             relations: ['participants'],
         });
         if (!reservation) {
-            throw new common_1.NotFoundException('No Access to Reservation');
+            throw new common_1.UnauthorizedException('No Access to Reservation');
         }
         return true;
     }

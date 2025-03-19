@@ -1,4 +1,10 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+    Injectable,
+    BadRequestException,
+    NotFoundException,
+    ForbiddenException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
 import {
     CreateReservationResponseDto,
@@ -257,7 +263,7 @@ export class ReservationUsecase {
             relations: ['participants'],
         });
         if (!reservation) {
-            throw new NotFoundException('No Access to Reservation');
+            throw new UnauthorizedException('No Access to Reservation');
         }
         return true;
     }
