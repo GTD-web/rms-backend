@@ -136,7 +136,11 @@ export class NotificationUsecase {
                 break;
             default:
                 for (const employeeId of notiTarget) {
-                    await this.adapterService.send(employeeId, notification);
+                    try {
+                        await this.adapterService.send(employeeId, notification);
+                    } catch (error) {
+                        console.error(`Failed to send notification to employee ${employeeId}: ${error}`);
+                    }
                 }
                 break;
         }
