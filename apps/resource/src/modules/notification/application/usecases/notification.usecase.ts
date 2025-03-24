@@ -194,4 +194,8 @@ export class NotificationUsecase {
         console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
         job.start();
     }
+
+    async sendTestNotification(payload) {
+        await this.adapterService.sendTestNotification(payload);
+    }
 }

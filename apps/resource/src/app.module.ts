@@ -23,6 +23,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { FileModule } from './modules/file/file.module';
 import { AppController } from './app.controller';
+import { ApiDocService } from '@libs/utils/api-doc.service';
+import { DbDocService } from '@libs/utils/db-doc.service';
 
 @Module({
     imports: [
@@ -48,6 +50,6 @@ import { AppController } from './app.controller';
         FileModule,
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [AppService, ApiDocService, DbDocService],
 })
 export class AppModule {}

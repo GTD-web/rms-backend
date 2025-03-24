@@ -5,17 +5,17 @@ import { ParticipantsType } from '@libs/enums/reservation-type.enum';
 import { EmployeeResponseDto, ResourceResponseDto, UserResponseDto } from '@resource/dtos.index';
 
 export class ReservationResponseDto {
-    constructor(reservation: Reservation) {
-        this.reservationId = reservation.reservationId;
-        this.resourceId = reservation.resourceId;
-        this.title = reservation.title;
-        this.description = reservation.description;
-        this.startDate = reservation.startDate;
-        this.endDate = reservation.endDate;
-        this.status = reservation.status;
-        this.isAllDay = reservation.isAllDay;
-        this.notifyBeforeStart = reservation.notifyBeforeStart;
-        this.notifyMinutesBeforeStart = reservation.notifyMinutesBeforeStart;
+    constructor(reservation?: Reservation) {
+        this.reservationId = reservation?.reservationId;
+        this.resourceId = reservation?.resourceId;
+        this.title = reservation?.title;
+        this.description = reservation?.description;
+        this.startDate = reservation?.startDate;
+        this.endDate = reservation?.endDate;
+        this.status = reservation?.status;
+        this.isAllDay = reservation?.isAllDay;
+        this.notifyBeforeStart = reservation?.notifyBeforeStart;
+        this.notifyMinutesBeforeStart = reservation?.notifyMinutesBeforeStart;
     }
 
     @ApiProperty()
@@ -67,9 +67,9 @@ export class ReservationParticipantResponseDto {
 }
 
 export class ReservationWithResourceResponseDto extends ReservationResponseDto {
-    constructor(reservation: Reservation) {
+    constructor(reservation?: Reservation) {
         super(reservation);
-        this.resource = reservation.resource;
+        this.resource = reservation?.resource;
     }
 
     @ApiProperty({ type: () => ResourceResponseDto, required: false })
@@ -77,13 +77,13 @@ export class ReservationWithResourceResponseDto extends ReservationResponseDto {
 }
 
 export class ReservationWithRelationsResponseDto extends ReservationResponseDto {
-    constructor(reservation: Reservation) {
+    constructor(reservation?: Reservation) {
         super(reservation);
-        this.resource = reservation.resource;
-        this.reservers = reservation.participants?.filter(
+        this.resource = reservation?.resource;
+        this.reservers = reservation?.participants?.filter(
             (participant) => participant.type === ParticipantsType.RESERVER,
         );
-        this.participants = reservation.participants?.filter(
+        this.participants = reservation?.participants?.filter(
             (participant) => participant.type === ParticipantsType.PARTICIPANT,
         );
     }
@@ -99,6 +99,67 @@ export class ReservationWithRelationsResponseDto extends ReservationResponseDto 
 
     @ApiProperty({ required: false })
     isMine?: boolean;
+
+    getPropertiesAndTypes() {
+        return {
+            reservationId: {
+                type: String,
+                required: true,
+            },
+            resourceId: {
+                type: String,
+                required: false,
+            },
+            title: {
+                type: String,
+                required: false,
+            },
+            description: {
+                type: String,
+                required: false,
+            },
+            startDate: {
+                type: String,
+                required: false,
+            },
+            endDate: {
+                type: String,
+                required: false,
+            },
+            status: {
+                type: String,
+                required: false,
+            },
+            isAllDay: {
+                type: Boolean,
+                required: false,
+            },
+            notifyBeforeStart: {
+                type: Boolean,
+                required: false,
+            },
+            notifyMinutesBeforeStart: {
+                type: [Number],
+                required: false,
+            },
+            isMine: {
+                type: Boolean,
+                required: false,
+            },
+            resource: {
+                type: ResourceResponseDto,
+                required: false,
+            },
+            reservers: {
+                type: [ReservationParticipantResponseDto],
+                required: false,
+            },
+            participants: {
+                type: [ReservationParticipantResponseDto],
+                required: false,
+            },
+        };
+    }
 }
 
 export class CreateReservationResponseDto {

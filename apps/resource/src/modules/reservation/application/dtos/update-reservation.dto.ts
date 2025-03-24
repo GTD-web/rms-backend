@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsOptional, IsArray, IsEnum, IsDateString, Matches } from 'class-validator';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
-
+import { Reservation } from '@libs/entities/reservation.entity';
 // 예약 제목 변경
 export class UpdateReservationTitleDto {
     @ApiProperty({ required: false })
@@ -12,6 +12,11 @@ export class UpdateReservationTitleDto {
 
 // 예약 시간 변경
 export class UpdateReservationTimeDto {
+    constructor(reservation?: Reservation) {
+        this.startDate = reservation?.startDate;
+        this.endDate = reservation?.endDate;
+        this.isAllDay = reservation?.isAllDay;
+    }
     @ApiProperty({
         example: '2025-01-01 00:00:00',
         description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
@@ -36,6 +41,13 @@ export class UpdateReservationTimeDto {
     @IsBoolean()
     @IsOptional()
     isAllDay?: boolean;
+
+    getPropertiesAndTypes() {
+        return Object.getOwnPropertyNames(this).map((property) => ({
+            property,
+            type: Reflect.getMetadata('design:type', this, property),
+        }));
+    }
 }
 
 // 예약 상태 변경

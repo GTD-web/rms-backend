@@ -34,15 +34,15 @@ export class CreateVehicleInfoDto {
 }
 
 export class CreateConsumableDto {
-    @ApiProperty()
+    @ApiProperty({ description: '소모품 이름' })
     @IsString()
     name: string;
 
-    @ApiProperty()
+    @ApiProperty({ description: '소모품 교체 주기' })
     @IsString()
     replaceCycle: string;
 
-    @ApiProperty({ default: true })
+    @ApiProperty({ default: true, description: '소모품 교체 알림 주기' })
     @IsBoolean()
     notifyReplacementCycle: boolean;
 

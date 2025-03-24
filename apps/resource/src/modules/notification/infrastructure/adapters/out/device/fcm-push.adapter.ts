@@ -44,6 +44,44 @@ export class FCMAdapter implements PushNotificationPort {
                     title: payload.title,
                     body: payload.body,
                 },
+                data: {
+                    title: payload.title,
+                    body: payload.body,
+                },
+            };
+
+            const response = await getMessaging()
+                .send(message)
+                .then((response) => {
+                    console.log('FCM send successful. Message ID:', response);
+                    return { success: true, message: response, error: null };
+                })
+                .catch((error) => {
+                    console.error('FCM send error:', {
+                        code: error.code,
+                        message: error.message,
+                        details: error.details,
+                        stack: error.stack,
+                    });
+                    return { success: false, message: 'failed', error: error.message };
+                });
+            return response;
+        } catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
+            return { success: false, message: 'failed', error: error.message };
+        }
+    }
+
+    async sendTestNotification(payload) {
+        try {
+            const message = {
+                token: 'fpSdNjZmEqg01gRPCMaMo2:APA91bGSHETZL8tMlENn7vg1MUJaHEtO-tKZZQCsFsFFkZk7YAEDWrze6Uc0J9U8UtgHi8_r-dRqPj8bzwJp7o04jf63eJnabmF8OlfKzPbBsMsquc-tv98',
+                ...payload,
             };
 
             const response = await getMessaging()

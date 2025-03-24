@@ -1,4 +1,4 @@
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Post, Patch, Param, Body, Delete, Query } from '@nestjs/common';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
@@ -10,6 +10,7 @@ import { ResponseNotificationDto } from '@resource/modules/notification/applicat
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { SendNotificationDto } from '@resource/modules/notification/application/dto/create-notification.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { FCMAdapter } from '@resource/modules/notification/infrastructure/adapters/out/device/fcm-push.adapter';
 
 @ApiTags('알림')
 @Controller('notifications')
@@ -73,12 +74,25 @@ export class NotificationController {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
     }
 
-    // @ApiTags('sprint0.3-')
-    // @Patch(':notificationId/unread')
-    // @ApiOperation({ summary: '알람 읽지 않음 처리' })
-    // async markAsUnread(@Param('notificationId') notificationId: string) {
-    //     // await this.notificationService.markAsUnread(id);
-    // }
+    @ApiTags('a.test')
+    @Post('send/test')
+    @ApiOperation({ summary: '알람 테스트 전송' })
+    @ApiDataResponse({
+        status: 200,
+        description: '알람 테스트 전송 성공',
+    })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
+                data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
+            },
+        },
+    })
+    async sendTest(@Body() sendNotificationDto: { notification: { title: string; body: string }; target: string[] }) {
+        await this.notificationUsecase.sendTestNotification(sendNotificationDto);
+    }
 
     // @ApiTags('sprint0.3-')
     // @Patch(':employeeId/readAll')

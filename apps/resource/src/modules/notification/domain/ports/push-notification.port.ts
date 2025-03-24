@@ -31,4 +31,5 @@ export interface PushNotificationPort {
         subscription: PushNotificationSubscription,
         payload: PushNotificationPayload,
     ): Promise<PushNotificationSendResult>;
+    sendTestNotification(payload: any): Promise<any>;
 }

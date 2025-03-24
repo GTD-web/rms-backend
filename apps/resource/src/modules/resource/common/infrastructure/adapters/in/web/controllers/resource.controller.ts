@@ -45,9 +45,13 @@ export class ResourceController {
     @Patch(':resourceId/return-vehicle')
     @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })
     @ApiDataResponse({
+        status: 200,
         description: '차량 반납 성공',
     })
-    async returnVehicle(@Param('resourceId') resourceId: string, @Body() returnDto: ReturnVehicleDto): Promise<void> {
+    async returnVehicle(
+        @Param('resourceId') resourceId: string,
+        @Body() returnDto: ReturnVehicleDto,
+    ): Promise<boolean> {
         return this.resourceUsecase.returnVehicle(resourceId, returnDto);
     }
 

@@ -22,26 +22,26 @@ export class ResourceManagerResponseDto {
 }
 
 export class ResourceResponseDto {
-    constructor(resource: Resource) {
-        this.resourceId = resource.resourceId;
-        this.resourceGroupId = resource.resourceGroupId;
-        this.name = resource.name;
-        this.description = resource.description;
-        this.location = resource.location;
-        this.images = resource.images;
-        this.type = resource.type;
-        this.isAvailable = resource.isAvailable;
-        this.unavailableReason = resource.unavailableReason;
-        this.notifyParticipantChange = resource.notifyParticipantChange;
-        this.notifyReservationChange = resource.notifyReservationChange;
-        this.order = resource.order;
-        this.managers = resource.resourceManagers;
+    constructor(resource?: Resource) {
+        this.resourceId = resource?.resourceId;
+        this.resourceGroupId = resource?.resourceGroupId;
+        this.name = resource?.name;
+        this.description = resource?.description;
+        this.location = resource?.location;
+        this.images = resource?.images;
+        this.type = resource?.type;
+        this.isAvailable = resource?.isAvailable;
+        this.unavailableReason = resource?.unavailableReason;
+        this.notifyParticipantChange = resource?.notifyParticipantChange;
+        this.notifyReservationChange = resource?.notifyReservationChange;
+        this.order = resource?.order;
+        this.managers = resource?.resourceManagers;
 
-        if (resource.vehicleInfo) {
+        if (resource?.vehicleInfo) {
             this.typeInfo = resource.vehicleInfo as unknown as VehicleInfoResponseDto;
-        } else if (resource.meetingRoomInfo) {
+        } else if (resource?.meetingRoomInfo) {
             this.typeInfo = resource.meetingRoomInfo as unknown as MeetingRoomInfoResponseDto;
-        } else if (resource.accommodationInfo) {
+        } else if (resource?.accommodationInfo) {
             this.typeInfo = resource.accommodationInfo as unknown as AccommodationInfoResponseDto;
         }
     }

@@ -137,7 +137,7 @@ export class ResourceUsecase {
         return new ResourceResponseDto(resource);
     }
 
-    async returnVehicle(resourceId: string, updateDto: ReturnVehicleDto): Promise<void> {
+    async returnVehicle(resourceId: string, updateDto: ReturnVehicleDto): Promise<boolean> {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -174,6 +174,8 @@ export class ResourceUsecase {
             );
 
             await queryRunner.commitTransaction();
+
+            return true;
         } catch (err) {
             await queryRunner.rollbackTransaction();
             throw new InternalServerErrorException('Failed to return vehicle');

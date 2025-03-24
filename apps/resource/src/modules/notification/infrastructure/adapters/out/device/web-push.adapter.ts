@@ -30,4 +30,8 @@ export class WebPushAdapter implements PushNotificationPort {
             error: 'success',
         };
     }
+
+    async sendTestNotification(payload: any): Promise<any> {
+        return;
+    }
 }

@@ -27,13 +27,13 @@ export class ConsumableResponseDto {
     @ApiProperty()
     resourceId: string;
 
-    @ApiProperty()
+    @ApiProperty({ description: '소모품 이름' })
     name: string;
 
-    @ApiProperty()
+    @ApiProperty({ description: '소모품 교체 주기' })
     replaceCycle: string;
 
-    @ApiProperty()
+    @ApiProperty({ description: '소모품 교체 알림 주기' })
     notifyReplacementCycle: boolean;
 
     @ApiProperty({ type: [MaintenanceResponseDto], required: false })

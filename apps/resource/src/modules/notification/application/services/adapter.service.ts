@@ -25,4 +25,8 @@ export class AdapterService {
             body: notification.body,
         });
     }
+
+    async sendTestNotification(payload) {
+        await this.pushNotificationService.sendTestNotification(payload);
+    }
 }
