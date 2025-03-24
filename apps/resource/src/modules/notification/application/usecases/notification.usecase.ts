@@ -195,7 +195,7 @@ export class NotificationUsecase {
         job.start();
     }
 
-    async sendTestNotification(payload) {
-        await this.adapterService.sendTestNotification(payload);
+    async sendTestNotification(user: User, payload: any) {
+        await this.adapterService.sendTestNotification(user, payload);
     }
 }

@@ -7,6 +7,7 @@ import {
     PushNotificationSendResult,
 } from '@resource/modules/notification/domain/ports/push-notification.port';
 import * as webPush from 'web-push';
+import { User } from '@libs/entities/user.entity';
 
 @Injectable()
 export class WebPushAdapter implements PushNotificationPort {
@@ -31,7 +32,7 @@ export class WebPushAdapter implements PushNotificationPort {
         };
     }
 
-    async sendTestNotification(payload: any): Promise<any> {
+    async sendTestNotification(subscription: PushNotificationSubscription, payload: any): Promise<any> {
         return;
     }
 }

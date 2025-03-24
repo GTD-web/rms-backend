@@ -9,7 +9,7 @@ import {
 import { credential } from 'firebase-admin';
 import { initializeApp, cert, getApp } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
-// FCM SDK import
+import { User } from '@libs/entities/user.entity';
 
 @Injectable()
 export class FCMAdapter implements PushNotificationPort {
@@ -77,10 +77,10 @@ export class FCMAdapter implements PushNotificationPort {
         }
     }
 
-    async sendTestNotification(payload) {
+    async sendTestNotification(subscription: PushNotificationSubscription, payload: any) {
         try {
             const message = {
-                token: 'fpSdNjZmEqg01gRPCMaMo2:APA91bGSHETZL8tMlENn7vg1MUJaHEtO-tKZZQCsFsFFkZk7YAEDWrze6Uc0J9U8UtgHi8_r-dRqPj8bzwJp7o04jf63eJnabmF8OlfKzPbBsMsquc-tv98',
+                token: subscription.fcm.token,
                 ...payload,
             };
 

@@ -4,6 +4,7 @@ import { PushNotificationPort } from '@resource/modules/notification/domain/port
 import { Notification } from '@libs/entities/notification.entity';
 import { UserService } from '@resource/modules/auth/application/services/user.service';
 import { Not, IsNull } from 'typeorm';
+import { User } from '@libs/entities/user.entity';
 
 @Injectable()
 export class AdapterService {
@@ -26,7 +27,9 @@ export class AdapterService {
         });
     }
 
-    async sendTestNotification(payload) {
-        await this.pushNotificationService.sendTestNotification(payload);
+    async sendTestNotification(user: User, payload: any) {
+        console.log(user, payload);
+        const subscription = await this.userService.findByEmployeeId(user.employeeId);
+        await this.pushNotificationService.sendTestNotification(subscription.subscription, payload);
     }
 }

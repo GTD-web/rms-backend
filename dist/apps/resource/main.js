@@ -2527,8 +2527,10 @@ let AdapterService = class AdapterService {
             body: notification.body,
         });
     }
-    async sendTestNotification(payload) {
-        await this.pushNotificationService.sendTestNotification(payload);
+    async sendTestNotification(user, payload) {
+        console.log(user, payload);
+        const subscription = await this.userService.findByEmployeeId(user.employeeId);
+        await this.pushNotificationService.sendTestNotification(subscription.subscription, payload);
     }
 };
 exports.AdapterService = AdapterService;
@@ -2834,8 +2836,8 @@ let NotificationUsecase = class NotificationUsecase {
         console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
         job.start();
     }
-    async sendTestNotification(payload) {
-        await this.adapterService.sendTestNotification(payload);
+    async sendTestNotification(user, payload) {
+        await this.adapterService.sendTestNotification(user, payload);
     }
 };
 exports.NotificationUsecase = NotificationUsecase;
@@ -2902,7 +2904,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationController = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -2933,8 +2935,8 @@ let NotificationController = class NotificationController {
     async markAsRead(user, notificationId) {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
     }
-    async sendTest(sendNotificationDto) {
-        await this.notificationUsecase.sendTestNotification(sendNotificationDto);
+    async sendTest(user, sendNotificationDto) {
+        await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
     }
 };
 exports.NotificationController = NotificationController;
@@ -3019,9 +3021,10 @@ __decorate([
             },
         },
     }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, Object]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "sendTest", null);
 exports.NotificationController = NotificationController = __decorate([
@@ -3118,10 +3121,10 @@ let FCMAdapter = class FCMAdapter {
             return { success: false, message: 'failed', error: error.message };
         }
     }
-    async sendTestNotification(payload) {
+    async sendTestNotification(subscription, payload) {
         try {
             const message = {
-                token: 'fpSdNjZmEqg01gRPCMaMo2:APA91bGSHETZL8tMlENn7vg1MUJaHEtO-tKZZQCsFsFFkZk7YAEDWrze6Uc0J9U8UtgHi8_r-dRqPj8bzwJp7o04jf63eJnabmF8OlfKzPbBsMsquc-tv98',
+                token: subscription.fcm.token,
                 ...payload,
             };
             const response = await (0, messaging_1.getMessaging)()

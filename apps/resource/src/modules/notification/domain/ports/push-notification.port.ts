@@ -1,3 +1,5 @@
+import { User } from '@libs/entities/user.entity';
+
 export interface FCM {
     token: string;
 }
@@ -31,5 +33,5 @@ export interface PushNotificationPort {
         subscription: PushNotificationSubscription,
         payload: PushNotificationPayload,
     ): Promise<PushNotificationSendResult>;
-    sendTestNotification(payload: any): Promise<any>;
+    sendTestNotification(subscription: PushNotificationSubscription, payload: any): Promise<any>;
 }

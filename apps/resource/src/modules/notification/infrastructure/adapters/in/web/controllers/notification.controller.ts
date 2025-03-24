@@ -90,8 +90,11 @@ export class NotificationController {
             },
         },
     })
-    async sendTest(@Body() sendNotificationDto: { notification: { title: string; body: string }; target: string[] }) {
-        await this.notificationUsecase.sendTestNotification(sendNotificationDto);
+    async sendTest(
+        @User() user: UserEntity,
+        @Body() sendNotificationDto: { notification: { title: string; body: string }; target: string[] },
+    ) {
+        await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
     }
 
     // @ApiTags('sprint0.3-')
