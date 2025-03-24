@@ -28,9 +28,7 @@ export class DbDocService {
 
     async generateDbDocumentation(): Promise<void> {
         const doc = this.generateMarkdown();
-        const outputPath = path.join(
-            'C:/Users/USER/Desktop/projects/RMS-documents/docs/개발/06_database-design_test.md',
-        );
+        const outputPath = path.join('C:/Users/USER/Desktop/projects/RMS-documents/docs/개발/02_database-design.md');
         const outputDir = path.dirname(outputPath);
 
         // Create directory if it doesn't exist
@@ -40,7 +38,7 @@ export class DbDocService {
     }
 
     private generateMarkdown(): string {
-        let markdown = '# 데이터베이스 설계 문서_test\n\n';
+        let markdown = '# 데이터베이스 설계 문서\n\n';
         markdown += "import { MermaidDiagram } from '@site/src/components/MermaidDiagram';\n\n";
 
         // 1. ERD 다이어그램
