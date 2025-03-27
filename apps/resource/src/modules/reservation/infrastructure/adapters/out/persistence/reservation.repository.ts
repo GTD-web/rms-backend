@@ -24,10 +24,7 @@ export class ReservationRepository implements ReservationRepositoryPort {
         reservation.isAllDay = createDto.isAllDay;
         reservation.notifyBeforeStart = createDto.notifyBeforeStart;
         reservation.notifyMinutesBeforeStart = createDto.notifyMinutesBeforeStart;
-        reservation.status =
-            createDto.resourceType === ResourceType.ACCOMMODATION
-                ? ReservationStatus.PENDING
-                : ReservationStatus.CONFIRMED;
+        reservation.status = ReservationStatus.CONFIRMED;
         return reservation;
     }
 
