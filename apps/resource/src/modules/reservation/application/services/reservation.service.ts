@@ -50,8 +50,8 @@ export class ReservationService {
         return this.findAll({
             where: {
                 resourceId,
-                startDate: MoreThanOrEqual(startDate),
-                endDate: LessThanOrEqual(endDate),
+                startDate: LessThanOrEqual(endDate),
+                endDate: MoreThanOrEqual(startDate),
             },
         });
     }

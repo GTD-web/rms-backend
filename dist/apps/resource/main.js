@@ -1839,20 +1839,30 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SsoAuthUsecase = void 0;
 const common_1 = __webpack_require__(3);
+const user_service_1 = __webpack_require__(41);
 let SsoAuthUsecase = class SsoAuthUsecase {
+    constructor(userService) {
+        this.userService = userService;
+    }
     async validateUser(email, password) {
         return null;
     }
     async login(loginDto) {
+        const user = await this.validateUser(loginDto.email, loginDto.password);
         return null;
     }
 };
 exports.SsoAuthUsecase = SsoAuthUsecase;
 exports.SsoAuthUsecase = SsoAuthUsecase = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
 ], SsoAuthUsecase);
 
 
@@ -5332,8 +5342,8 @@ let ReservationService = class ReservationService {
         return this.findAll({
             where: {
                 resourceId,
-                startDate: (0, typeorm_1.MoreThanOrEqual)(startDate),
-                endDate: (0, typeorm_1.LessThanOrEqual)(endDate),
+                startDate: (0, typeorm_1.LessThanOrEqual)(endDate),
+                endDate: (0, typeorm_1.MoreThanOrEqual)(startDate),
             },
         });
     }
