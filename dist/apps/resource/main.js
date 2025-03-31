@@ -21,9 +21,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
 let AppController = class AppController {
     getVersion() {
+        console.log('DateUtil.now', date_util_1.DateUtil.now().format());
+        console.log('DateUtil.parse', date_util_1.DateUtil.parse('2025-03-30 10:00:00').format());
         return '1.0.0';
     }
 };
