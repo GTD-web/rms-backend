@@ -47,7 +47,8 @@ export class ReservationUsecase {
             DateUtil.parse(createDto.startDate).format(),
             DateUtil.parse(createDto.endDate).format(),
         );
-
+        console.log('conflicts', conflicts);
+        console.log('conflicts.length', conflicts.length);
         if (conflicts.length > 0) {
             throw new BadRequestException('Reservation time conflict');
         }
