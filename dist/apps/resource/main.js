@@ -11262,34 +11262,46 @@ class DateUtilWrapper {
     toMinutes() {
         return this.date.hour() * 60 + this.date.minute();
     }
+    hour(hours) {
+        return new DateUtilWrapper(this.date.hour(hours));
+    }
+    minute(minutes) {
+        return new DateUtilWrapper(this.date.minute(minutes));
+    }
+    second(seconds) {
+        return new DateUtilWrapper(this.date.second(seconds));
+    }
 }
 class DateUtil {
     static now() {
-        return new DateUtilWrapper(dayjs().tz());
+        return new DateUtilWrapper(dayjs().tz('Asia/Seoul'));
+    }
+    static date(date) {
+        return new DateUtilWrapper(dayjs(date).tz('Asia/Seoul'));
     }
     static format(date, format = 'YYYY-MM-DD HH:mm:ss') {
-        return dayjs(date).tz().format(format);
+        return this.date(date).format(format);
     }
     static parse(dateString) {
-        return new DateUtilWrapper(dayjs(dateString).tz());
+        return this.date(dateString);
     }
     static addDays(date, days) {
-        return dayjs(date).tz().add(days, 'day');
+        return this.date(date).addDays(days);
     }
     static addMinutes(date, minutes) {
-        return dayjs(date).tz().add(minutes, 'minute');
+        return this.date(date).addMinutes(minutes);
     }
     static toISOString(date) {
-        return dayjs(date).tz().toISOString();
+        return this.date(date).toISOString();
     }
     static toMinutes(date) {
-        const d = dayjs(date).tz();
-        return d.hour() * 60 + d.minute();
+        const d = this.date(date);
+        return d.toMinutes();
     }
     static fromMinutes(minutes) {
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
-        return new DateUtilWrapper(dayjs().tz().hour(hours).minute(mins).second(0));
+        return this.now().hour(hours).minute(mins).second(0);
     }
 }
 exports.DateUtil = DateUtil;

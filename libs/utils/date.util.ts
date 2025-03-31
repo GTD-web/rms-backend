@@ -10,62 +10,78 @@ dayjs.extend(timezone);
 dayjs.tz.setDefault('Asia/Seoul');
 
 class DateUtilWrapper {
-  constructor(private date: dayjs.Dayjs) {}
+    constructor(private date: dayjs.Dayjs) {}
 
-  format(format = 'YYYY-MM-DD HH:mm:ss') {
-    return this.date.format(format);
-  }
+    format(format = 'YYYY-MM-DD HH:mm:ss') {
+        return this.date.format(format);
+    }
 
-  addDays(days: number) {
-    return new DateUtilWrapper(this.date.add(days, 'day'));
-  }
+    addDays(days: number) {
+        return new DateUtilWrapper(this.date.add(days, 'day'));
+    }
 
-  addMinutes(minutes: number) {
-    return new DateUtilWrapper(this.date.add(minutes, 'minute'));
-  }
+    addMinutes(minutes: number) {
+        return new DateUtilWrapper(this.date.add(minutes, 'minute'));
+    }
 
-  toISOString() {
-    return this.date.toISOString();
-  }
+    toISOString() {
+        return this.date.toISOString();
+    }
 
-  toMinutes() {
-    return this.date.hour() * 60 + this.date.minute();
-  }
+    toMinutes() {
+        return this.date.hour() * 60 + this.date.minute();
+    }
+
+    hour(hours: number) {
+        return new DateUtilWrapper(this.date.hour(hours));
+    }
+
+    minute(minutes: number) {
+        return new DateUtilWrapper(this.date.minute(minutes));
+    }
+
+    second(seconds: number) {
+        return new DateUtilWrapper(this.date.second(seconds));
+    }
 }
 
 export class DateUtil {
-  static now() {
-    return new DateUtilWrapper(dayjs().tz());
-  }
+    static now() {
+        return new DateUtilWrapper(dayjs().tz('Asia/Seoul'));
+    }
 
-  static format(date: Date | string | number, format = 'YYYY-MM-DD HH:mm:ss') {
-    return dayjs(date).tz().format(format);
-  }
+    static date(date: Date | string | number) {
+        return new DateUtilWrapper(dayjs(date).tz('Asia/Seoul'));
+    }
 
-  static parse(dateString: string) {
-    return new DateUtilWrapper(dayjs(dateString).tz());
-  }
+    static format(date: Date | string | number, format = 'YYYY-MM-DD HH:mm:ss') {
+        return this.date(date).format(format);
+    }
 
-  static addDays(date: Date | string | number, days: number) {
-    return dayjs(date).tz().add(days, 'day');
-  }
+    static parse(dateString: string) {
+        return this.date(dateString);
+    }
 
-  static addMinutes(date: Date | string | number, minutes: number) {
-    return dayjs(date).tz().add(minutes, 'minute');
-  }
+    static addDays(date: Date | string | number, days: number) {
+        return this.date(date).addDays(days);
+    }
 
-  static toISOString(date: Date | string | number) {
-    return dayjs(date).tz().toISOString();
-  }
+    static addMinutes(date: Date | string | number, minutes: number) {
+        return this.date(date).addMinutes(minutes);
+    }
 
-  static toMinutes(date: Date | string | number) {
-    const d = dayjs(date).tz();
-    return d.hour() * 60 + d.minute();
-  }
+    static toISOString(date: Date | string | number) {
+        return this.date(date).toISOString();
+    }
 
-  static fromMinutes(minutes: number) {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return new DateUtilWrapper(dayjs().tz().hour(hours).minute(mins).second(0));
-  }
-} 
+    static toMinutes(date: Date | string | number) {
+        const d = this.date(date);
+        return d.toMinutes();
+    }
+
+    static fromMinutes(minutes: number) {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return this.now().hour(hours).minute(mins).second(0);
+    }
+}
