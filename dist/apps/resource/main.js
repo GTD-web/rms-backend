@@ -11247,7 +11247,6 @@ const utc = __webpack_require__(/*! dayjs/plugin/utc */ "dayjs/plugin/utc");
 const timezone = __webpack_require__(/*! dayjs/plugin/timezone */ "dayjs/plugin/timezone");
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.tz.setDefault('Asia/Seoul');
 class DateUtilWrapper {
     constructor(date) {
         this.date = date;
@@ -11282,7 +11281,7 @@ class DateUtil {
         return new DateUtilWrapper(dayjs().tz('Asia/Seoul'));
     }
     static date(date) {
-        return new DateUtilWrapper(dayjs(date).tz('Asia/Seoul'));
+        return new DateUtilWrapper(dayjs(date).tz());
     }
     static format(date, format = 'YYYY-MM-DD HH:mm:ss') {
         return this.date(date).format(format);
