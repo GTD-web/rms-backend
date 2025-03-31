@@ -39,7 +39,10 @@ export class ReservationUsecase {
         private readonly participantService: ParticipantService,
         private readonly dataSource: DataSource,
         private readonly notificationUsecase: NotificationUsecase,
-    ) {}
+    ) {
+        console.log('DateUtil.now', DateUtil.now().format());
+        console.log('DateUtil.parse', DateUtil.parse('2025-03-30 10:00:00').format());
+    }
 
     async makeReservation(user: User, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
         const conflicts = await this.reservationService.findConflictingReservations(

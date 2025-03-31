@@ -4004,6 +4004,8 @@ let ReservationUsecase = class ReservationUsecase {
         this.participantService = participantService;
         this.dataSource = dataSource;
         this.notificationUsecase = notificationUsecase;
+        console.log('DateUtil.now', date_util_1.DateUtil.now().format());
+        console.log('DateUtil.parse', date_util_1.DateUtil.parse('2025-03-30 10:00:00').format());
     }
     async makeReservation(user, createDto) {
         const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.parse(createDto.startDate).format(), date_util_1.DateUtil.parse(createDto.endDate).format());
