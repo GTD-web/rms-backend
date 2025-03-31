@@ -3945,7 +3945,10 @@ let ReservationService = class ReservationService {
         return updatedReservation;
     }
     async findConflictingReservations(resourceId, startDate, endDate) {
-        return this.findAll({
+        console.log('resourceId', resourceId);
+        console.log('startDate', startDate);
+        console.log('endDate', endDate);
+        const data = await this.findAll({
             where: {
                 resourceId,
                 startDate: (0, typeorm_1.LessThanOrEqual)(endDate),
@@ -3953,6 +3956,8 @@ let ReservationService = class ReservationService {
                 status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
             },
         });
+        console.log('data', data);
+        return data;
     }
 };
 exports.ReservationService = ReservationService;
