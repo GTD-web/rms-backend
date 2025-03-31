@@ -5,6 +5,7 @@ import { ReservationResponseDto } from '../dtos/reservation-response.dto';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 
 @Injectable()
 export class ReservationService {
@@ -52,6 +53,7 @@ export class ReservationService {
                 resourceId,
                 startDate: LessThanOrEqual(endDate),
                 endDate: MoreThanOrEqual(startDate),
+                status: ReservationStatus.CONFIRMED,
             },
         });
     }

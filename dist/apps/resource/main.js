@@ -5314,6 +5314,7 @@ exports.ReservationService = void 0;
 const common_1 = __webpack_require__(3);
 const reservation_repository_port_1 = __webpack_require__(101);
 const typeorm_1 = __webpack_require__(10);
+const reservation_type_enum_1 = __webpack_require__(26);
 let ReservationService = class ReservationService {
     constructor(reservationRepository) {
         this.reservationRepository = reservationRepository;
@@ -5344,6 +5345,7 @@ let ReservationService = class ReservationService {
                 resourceId,
                 startDate: (0, typeorm_1.LessThanOrEqual)(endDate),
                 endDate: (0, typeorm_1.MoreThanOrEqual)(startDate),
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
             },
         });
     }
