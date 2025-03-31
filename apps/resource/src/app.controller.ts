@@ -4,9 +4,9 @@ import { Public } from '@libs/decorators/public.decorator';
 
 @Controller('')
 export class AppController {
-    // @Public()
-    // @Get()
-    // getHello(): string {
-    //     return 'Hello World';
-    // }
+    @Public()
+    @Get('version')
+    getVersion(): string {
+        return '1.0.0';
+    }
 }
