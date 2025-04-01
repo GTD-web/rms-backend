@@ -154,11 +154,6 @@ let AppService = class AppService {
         this.jwtService = jwtService;
     }
     async onModuleInit() {
-        await this.clear();
-        await this.seedEmployee();
-        await this.seedResourceGroup();
-        await this.seedSubResourceGroup();
-        await this.seedResource();
     }
     async seedEmployee() {
         const employees = await this.employeeRepository.find();
@@ -3592,14 +3587,15 @@ const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const reservation_type_enum_2 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 class ReservationResponseDto {
     constructor(reservation) {
         this.reservationId = reservation?.reservationId;
         this.resourceId = reservation?.resourceId;
         this.title = reservation?.title;
         this.description = reservation?.description;
-        this.startDate = reservation?.startDate;
-        this.endDate = reservation?.endDate;
+        this.startDate = date_util_1.DateUtil.format(reservation?.startDate);
+        this.endDate = date_util_1.DateUtil.format(reservation?.endDate);
         this.status = reservation?.status;
         this.isAllDay = reservation?.isAllDay;
         this.notifyBeforeStart = reservation?.notifyBeforeStart;
@@ -3799,6 +3795,7 @@ exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipants
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 class UpdateReservationTitleDto {
 }
 exports.UpdateReservationTitleDto = UpdateReservationTitleDto;
@@ -3810,8 +3807,8 @@ __decorate([
 ], UpdateReservationTitleDto.prototype, "title", void 0);
 class UpdateReservationTimeDto {
     constructor(reservation) {
-        this.startDate = reservation?.startDate;
-        this.endDate = reservation?.endDate;
+        this.startDate = date_util_1.DateUtil.format(reservation?.startDate);
+        this.endDate = date_util_1.DateUtil.format(reservation?.endDate);
         this.isAllDay = reservation?.isAllDay;
     }
     getPropertiesAndTypes() {
@@ -4047,7 +4044,7 @@ let ReservationUsecase = class ReservationUsecase {
         this.notificationUsecase = notificationUsecase;
     }
     async makeReservation(user, createDto) {
-        const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.parse(createDto.startDate).format(), date_util_1.DateUtil.parse(createDto.endDate).format());
+        const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.date(createDto.startDate).toDate(), date_util_1.DateUtil.date(createDto.endDate).toDate());
         if (conflicts.length > 0) {
             throw new common_1.BadRequestException('Reservation time conflict');
         }
@@ -4083,7 +4080,7 @@ let ReservationUsecase = class ReservationUsecase {
                     await this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, {
                         reservationId: reservationWithResource.reservationId,
                         reservationTitle: reservationWithResource.title,
-                        reservationDate: reservationWithResource.startDate,
+                        reservationDate: date_util_1.DateUtil.format(reservationWithResource.startDate),
                         resourceId: reservationWithResource.resource.resourceId,
                         resourceName: reservationWithResource.resource.name,
                         resourceType: reservationWithResource.resource.type,
@@ -4138,7 +4135,7 @@ let ReservationUsecase = class ReservationUsecase {
     async findMyReservationList(employeeId, startDate, resourceType) {
         const where = { participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } };
         if (startDate) {
-            where.startDate = (0, typeorm_1.Between)(startDate + ' 00:00:00', startDate + ' 23:59:59');
+            where.startDate = (0, typeorm_1.Between)(date_util_1.DateUtil.date(startDate + ' 00:00:00').toDate(), date_util_1.DateUtil.date(startDate + ' 23:59:59').toDate());
         }
         if (resourceType) {
             where.resource = {
@@ -4162,8 +4159,8 @@ let ReservationUsecase = class ReservationUsecase {
             participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
             status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
             resource: { type: resourceType },
-            startDate: (0, typeorm_1.LessThan)(now),
-            endDate: (0, typeorm_1.MoreThan)(now),
+            startDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.date(now).toDate()),
+            endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(now).toDate()),
         };
         const reservation = await this.reservationService.findOne({ where, relations: ['resource'] });
         return reservation ? new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation) : null;
@@ -4194,8 +4191,8 @@ let ReservationUsecase = class ReservationUsecase {
         if (startDate && endDate) {
             where = {
                 ...where,
-                startDate: (0, typeorm_1.LessThan)(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
-                endDate: (0, typeorm_1.MoreThan)(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
+                startDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.date(regex.test(endDate) ? endDate : endDate + ' 23:59:59').toDate()),
+                endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(regex.test(startDate) ? startDate : startDate + ' 00:00:00').toDate()),
             };
         }
         if (!startDate && !endDate) {
@@ -4204,8 +4201,8 @@ let ReservationUsecase = class ReservationUsecase {
             const endDate = `${thisMonth}-31 23:59:59`;
             where = {
                 ...where,
-                startDate: (0, typeorm_1.MoreThan)(startDate),
-                endDate: (0, typeorm_1.LessThan)(endDate),
+                startDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(startDate).toDate()),
+                endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.date(endDate).toDate()),
             };
         }
         const reservations = await this.reservationService.findAll({ where, relations: ['resource'] });
@@ -4235,7 +4232,11 @@ let ReservationUsecase = class ReservationUsecase {
         if (!reservation) {
             throw new common_1.NotFoundException('Reservation not found');
         }
-        const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+        const updatedReservation = await this.reservationService.update(reservationId, {
+            ...updateDto,
+            startDate: date_util_1.DateUtil.date(updateDto.startDate).toDate(),
+            endDate: date_util_1.DateUtil.date(updateDto.endDate).toDate(),
+        });
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
     async updateStatus(reservationId, updateDto, employeeId, isAdmin) {
@@ -4267,7 +4268,7 @@ let ReservationUsecase = class ReservationUsecase {
                     await this.notificationUsecase.createNotification(notificationType, {
                         reservationId: reservation.reservationId,
                         reservationTitle: reservation.title,
-                        reservationDate: reservation.startDate,
+                        reservationDate: date_util_1.DateUtil.format(reservation.startDate),
                         resourceId: reservation.resource.resourceId,
                         resourceName: reservation.resource.name,
                         resourceType: reservation.resource.type,
@@ -4302,7 +4303,7 @@ let ReservationUsecase = class ReservationUsecase {
                 await this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED, {
                     reservationId: updatedReservation.reservationId,
                     reservationTitle: updatedReservation.title,
-                    reservationDate: updatedReservation.startDate,
+                    reservationDate: date_util_1.DateUtil.format(updatedReservation.startDate),
                     resourceId: updatedReservation.resource.resourceId,
                     resourceName: updatedReservation.resource.name,
                     resourceType: updatedReservation.resource.type,
@@ -4734,6 +4735,7 @@ const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ReservationRepository = class ReservationRepository {
     constructor(repository) {
         this.repository = repository;
@@ -4743,8 +4745,8 @@ let ReservationRepository = class ReservationRepository {
         reservation.resourceId = createDto.resourceId;
         reservation.title = createDto.title;
         reservation.description = createDto.description;
-        reservation.startDate = createDto.startDate;
-        reservation.endDate = createDto.endDate;
+        reservation.startDate = date_util_1.DateUtil.date(createDto.startDate).toDate();
+        reservation.endDate = date_util_1.DateUtil.date(createDto.endDate).toDate();
         reservation.isAllDay = createDto.isAllDay;
         reservation.notifyBeforeStart = createDto.notifyBeforeStart;
         reservation.notifyMinutesBeforeStart = createDto.notifyMinutesBeforeStart;
@@ -5547,6 +5549,10 @@ __decorate([
     __metadata("design:type", String)
 ], ResourceSelectResponseDto.prototype, "name", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
+    __metadata("design:type", Array)
+], ResourceSelectResponseDto.prototype, "images", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Boolean)
 ], ResourceSelectResponseDto.prototype, "isAvailable", void 0);
@@ -6049,6 +6055,7 @@ let ResourceGroupUsecase = class ResourceGroupUsecase {
                 })).map((resource) => ({
                     resourceId: resource.resourceId,
                     name: resource.name,
+                    images: resource.images,
                     isAvailable: resource.isAvailable,
                     unavailableReason: resource.unavailableReason,
                     resourceGroupId: child.resourceGroupId,
@@ -10057,7 +10064,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Reservation = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
@@ -10087,19 +10094,19 @@ __decorate([
     __metadata("design:type", String)
 ], Reservation.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)({ type: 'timestamp' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], Reservation.prototype, "startDate", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)({ type: 'timestamp' }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], Reservation.prototype, "endDate", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
         enum: reservation_type_enum_1.ReservationStatus,
     }),
-    __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_c = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _c : Object)
 ], Reservation.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
@@ -10120,7 +10127,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.ManyToOne)(() => resource_entity_1.Resource),
     (0, typeorm_1.JoinColumn)({ name: 'resourceId' }),
-    __metadata("design:type", typeof (_b = typeof resource_entity_1.Resource !== "undefined" && resource_entity_1.Resource) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_d = typeof resource_entity_1.Resource !== "undefined" && resource_entity_1.Resource) === "function" ? _d : Object)
 ], Reservation.prototype, "resource", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => reservation_participant_entity_1.ReservationParticipant, (participant) => participant.reservation),
@@ -11284,6 +11291,9 @@ dayjs.extend(timezone);
 class DateUtilWrapper {
     constructor(date) {
         this.date = date;
+    }
+    toDate() {
+        return this.date.toDate();
     }
     format(format = 'YYYY-MM-DD HH:mm:ss') {
         return this.date.format(format);

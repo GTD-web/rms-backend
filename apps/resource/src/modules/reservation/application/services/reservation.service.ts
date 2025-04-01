@@ -47,7 +47,7 @@ export class ReservationService {
         return updatedReservation;
     }
 
-    async findConflictingReservations(resourceId: string, startDate: string, endDate: string): Promise<Reservation[]> {
+    async findConflictingReservations(resourceId: string, startDate: Date, endDate: Date): Promise<Reservation[]> {
         return await this.findAll({
             where: {
                 resourceId,

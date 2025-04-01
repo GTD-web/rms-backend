@@ -44,8 +44,8 @@ export class ReservationUsecase {
     async makeReservation(user: User, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
         const conflicts = await this.reservationService.findConflictingReservations(
             createDto.resourceId,
-            DateUtil.parse(createDto.startDate).format(),
-            DateUtil.parse(createDto.endDate).format(),
+            DateUtil.date(createDto.startDate).toDate(),
+            DateUtil.date(createDto.endDate).toDate(),
         );
 
         if (conflicts.length > 0) {
@@ -102,7 +102,7 @@ export class ReservationUsecase {
                         {
                             reservationId: reservationWithResource.reservationId,
                             reservationTitle: reservationWithResource.title,
-                            reservationDate: reservationWithResource.startDate,
+                            reservationDate: DateUtil.format(reservationWithResource.startDate),
                             resourceId: reservationWithResource.resource.resourceId,
                             resourceName: reservationWithResource.resource.name,
                             resourceType: reservationWithResource.resource.type,
@@ -172,7 +172,10 @@ export class ReservationUsecase {
     ): Promise<ReservationWithRelationsResponseDto[]> {
         const where: FindOptionsWhere<Reservation> = { participants: { employeeId, type: ParticipantsType.RESERVER } };
         if (startDate) {
-            where.startDate = Between(startDate + ' 00:00:00', startDate + ' 23:59:59');
+            where.startDate = Between(
+                DateUtil.date(startDate + ' 00:00:00').toDate(),
+                DateUtil.date(startDate + ' 23:59:59').toDate(),
+            );
         }
         if (resourceType) {
             where.resource = {
@@ -202,8 +205,8 @@ export class ReservationUsecase {
             participants: { employeeId, type: ParticipantsType.RESERVER },
             status: ReservationStatus.CONFIRMED,
             resource: { type: resourceType as ResourceType },
-            startDate: LessThan(now),
-            endDate: MoreThan(now),
+            startDate: LessThan(DateUtil.date(now).toDate()),
+            endDate: MoreThan(DateUtil.date(now).toDate()),
         };
 
         const reservation = await this.reservationService.findOne({ where, relations: ['resource'] });
@@ -244,8 +247,8 @@ export class ReservationUsecase {
             // (예약 시작일 <= 검색 종료일) AND (예약 종료일 >= 검색 시작일)
             where = {
                 ...where,
-                startDate: LessThan(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
-                endDate: MoreThan(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
+                startDate: LessThan(DateUtil.date(regex.test(endDate) ? endDate : endDate + ' 23:59:59').toDate()),
+                endDate: MoreThan(DateUtil.date(regex.test(startDate) ? startDate : startDate + ' 00:00:00').toDate()),
             };
         }
         if (!startDate && !endDate) {
@@ -255,8 +258,8 @@ export class ReservationUsecase {
 
             where = {
                 ...where,
-                startDate: MoreThan(startDate),
-                endDate: LessThan(endDate),
+                startDate: MoreThan(DateUtil.date(startDate).toDate()),
+                endDate: LessThan(DateUtil.date(endDate).toDate()),
             };
         }
 
@@ -299,7 +302,11 @@ export class ReservationUsecase {
             throw new NotFoundException('Reservation not found');
         }
 
-        const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+        const updatedReservation = await this.reservationService.update(reservationId, {
+            ...updateDto,
+            startDate: DateUtil.date(updateDto.startDate).toDate(),
+            endDate: DateUtil.date(updateDto.endDate).toDate(),
+        });
         return new ReservationResponseDto(updatedReservation);
     }
 
@@ -347,7 +354,7 @@ export class ReservationUsecase {
                         {
                             reservationId: reservation.reservationId,
                             reservationTitle: reservation.title,
-                            reservationDate: reservation.startDate,
+                            reservationDate: DateUtil.format(reservation.startDate),
                             resourceId: reservation.resource.resourceId,
                             resourceName: reservation.resource.name,
                             resourceType: reservation.resource.type,
@@ -403,7 +410,7 @@ export class ReservationUsecase {
                     {
                         reservationId: updatedReservation.reservationId,
                         reservationTitle: updatedReservation.title,
-                        reservationDate: updatedReservation.startDate,
+                        reservationDate: DateUtil.format(updatedReservation.startDate),
                         resourceId: updatedReservation.resource.resourceId,
                         resourceName: updatedReservation.resource.name,
                         resourceType: updatedReservation.resource.type,

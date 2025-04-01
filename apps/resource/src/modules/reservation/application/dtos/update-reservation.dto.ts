@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsOptional, IsArray, IsEnum, IsDateString, Matches } from 'class-validator';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { Reservation } from '@libs/entities/reservation.entity';
+import { DateUtil } from '@libs/utils/date.util';
 // 예약 제목 변경
 export class UpdateReservationTitleDto {
     @ApiProperty({ required: false })
@@ -13,8 +14,8 @@ export class UpdateReservationTitleDto {
 // 예약 시간 변경
 export class UpdateReservationTimeDto {
     constructor(reservation?: Reservation) {
-        this.startDate = reservation?.startDate;
-        this.endDate = reservation?.endDate;
+        this.startDate = DateUtil.format(reservation?.startDate);
+        this.endDate = DateUtil.format(reservation?.endDate);
         this.isAllDay = reservation?.isAllDay;
     }
     @ApiProperty({

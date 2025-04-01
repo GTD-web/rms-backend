@@ -3,6 +3,7 @@ import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { Reservation } from '@libs/entities';
 import { ParticipantsType } from '@libs/enums/reservation-type.enum';
 import { EmployeeResponseDto, ResourceResponseDto, UserResponseDto } from '@resource/dtos.index';
+import { DateUtil } from '@libs/utils/date.util';
 
 export class ReservationResponseDto {
     constructor(reservation?: Reservation) {
@@ -10,8 +11,8 @@ export class ReservationResponseDto {
         this.resourceId = reservation?.resourceId;
         this.title = reservation?.title;
         this.description = reservation?.description;
-        this.startDate = reservation?.startDate;
-        this.endDate = reservation?.endDate;
+        this.startDate = DateUtil.format(reservation?.startDate);
+        this.endDate = DateUtil.format(reservation?.endDate);
         this.status = reservation?.status;
         this.isAllDay = reservation?.isAllDay;
         this.notifyBeforeStart = reservation?.notifyBeforeStart;

@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, OneToMany, Exclusion } from 'typeorm';
 import { Resource } from './resource.entity';
 import { ReservationParticipant } from './reservation-participant.entity';
 import { Schedule } from './schedule.entity';
@@ -20,11 +20,11 @@ export class Reservation {
     @Column({ nullable: true })
     description: string;
 
-    @Column()
-    startDate: string;
+    @Column({ type: 'timestamp' })
+    startDate: Date;
 
-    @Column()
-    endDate: string;
+    @Column({ type: 'timestamp' })
+    endDate: Date;
 
     @Column({
         type: 'enum',

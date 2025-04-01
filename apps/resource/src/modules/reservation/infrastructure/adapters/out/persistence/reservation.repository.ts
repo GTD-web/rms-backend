@@ -7,6 +7,7 @@ import { RepositoryOptions } from '@libs/interfaces/repository-option.interface'
 import { CreateReservationDto } from '@resource/modules/reservation/application/dtos/create-reservation.dto';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { DateUtil } from '@libs/utils/date.util';
 @Injectable()
 export class ReservationRepository implements ReservationRepositoryPort {
     constructor(
@@ -19,8 +20,8 @@ export class ReservationRepository implements ReservationRepositoryPort {
         reservation.resourceId = createDto.resourceId;
         reservation.title = createDto.title;
         reservation.description = createDto.description;
-        reservation.startDate = createDto.startDate;
-        reservation.endDate = createDto.endDate;
+        reservation.startDate = DateUtil.date(createDto.startDate).toDate();
+        reservation.endDate = DateUtil.date(createDto.endDate).toDate();
         reservation.isAllDay = createDto.isAllDay;
         reservation.notifyBeforeStart = createDto.notifyBeforeStart;
         reservation.notifyMinutesBeforeStart = createDto.notifyMinutesBeforeStart;

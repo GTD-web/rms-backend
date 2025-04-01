@@ -12,6 +12,10 @@ dayjs.extend(timezone);
 class DateUtilWrapper {
     constructor(private date: dayjs.Dayjs) {}
 
+    toDate() {
+        return this.date.toDate();
+    }
+
     format(format = 'YYYY-MM-DD HH:mm:ss') {
         return this.date.format(format);
     }
