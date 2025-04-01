@@ -154,6 +154,11 @@ let AppService = class AppService {
         this.jwtService = jwtService;
     }
     async onModuleInit() {
+        await this.clear();
+        await this.seedEmployee();
+        await this.seedResourceGroup();
+        await this.seedSubResourceGroup();
+        await this.seedResource();
     }
     async seedEmployee() {
         const employees = await this.employeeRepository.find();
@@ -188,13 +193,49 @@ let AppService = class AppService {
             }
         }
     }
+    async seedSubResourceGroup() {
+        const resourceGroups = await this.resourceGroupRepository.find({
+            where: { parentResourceGroupId: (0, typeorm_3.IsNull)() },
+            relations: ['children'],
+        });
+        if (resourceGroups.length > 0) {
+            if (resourceGroups[0].children.length === 0) {
+                for (const data of mockdata_seed_1.subResourceGroupsSeedData) {
+                    const parentResourceGroup = resourceGroups.find((group) => group.type === data.type);
+                    const resourceGroup = {
+                        ...data,
+                        parentResourceGroupId: parentResourceGroup.resourceGroupId,
+                    };
+                    await this.resourceGroupRepository.save(resourceGroup);
+                }
+            }
+        }
+    }
+    async seedResource() {
+        const resources = await this.resourceRepository.find();
+        if (resources.length === 0) {
+            const resourceGroups = await this.resourceGroupRepository.find({
+                where: { parentResourceGroupId: (0, typeorm_3.IsNull)() },
+            });
+            for (const resource of mockdata_seed_1.resourcesSeedData) {
+                const parentResourceGroup = resourceGroups.find((group) => group.type === resource.type);
+                await this.resourceRepository.save({
+                    ...resource,
+                    resourceGroupId: parentResourceGroup.resourceGroupId,
+                });
+            }
+        }
+    }
     async clear() {
+        await this.resourceRepository.delete({});
         await this.resourceGroupRepository.delete({
             parentResourceGroupId: (0, typeorm_1.Not)((0, typeorm_3.IsNull)()),
         });
         await this.resourceGroupRepository.delete({
             parentResourceGroupId: (0, typeorm_3.IsNull)(),
         });
+        await this.userRepository.update({}, { employeeId: null });
+        await this.employeeRepository.update({}, { userId: null });
         await this.userRepository.delete({});
         await this.employeeRepository.delete({});
     }
@@ -430,9 +471,10 @@ exports.subResourceGroupsSeedData = [
 ];
 exports.resourcesSeedData = [
     {
-        title: '카니발 (12도 3456)',
+        name: '카니발 (12도 3456)',
         description: '법인 차량',
         type: resource_type_enum_1.ResourceType.VEHICLE,
+        images: ['https://lumir-notification.storage.googleapis.com/rms/resource/1234567890.jpg'],
     },
 ];
 

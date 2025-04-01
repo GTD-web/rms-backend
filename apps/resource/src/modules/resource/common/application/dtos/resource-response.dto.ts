@@ -103,6 +103,9 @@ export class ResourceSelectResponseDto {
     @ApiProperty()
     name: string;
 
+    @ApiProperty({ required: false, type: [String] })
+    images?: string[];
+
     @ApiProperty()
     isAvailable?: boolean;
 

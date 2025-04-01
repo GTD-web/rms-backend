@@ -61,6 +61,7 @@ export class ResourceGroupUsecase {
                         ).map((resource) => ({
                             resourceId: resource.resourceId,
                             name: resource.name,
+                            images: resource.images,
                             isAvailable: resource.isAvailable,
                             unavailableReason: resource.unavailableReason,
                             resourceGroupId: child.resourceGroupId,

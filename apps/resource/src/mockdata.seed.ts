@@ -114,8 +114,9 @@ export const subResourceGroupsSeedData = [
 
 export const resourcesSeedData = [
     {
-        title: '카니발 (12도 3456)',
+        name: '카니발 (12도 3456)',
         description: '법인 차량',
         type: ResourceType.VEHICLE,
+        images: ['https://lumir-notification.storage.googleapis.com/rms/resource/1234567890.jpg'],
     },
 ];
