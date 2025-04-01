@@ -25,9 +25,10 @@ const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/uti
 const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
 let AppController = class AppController {
     getVersion() {
-        console.log('DateUtil.now', date_util_1.DateUtil.now().format());
-        console.log('DateUtil.parse', date_util_1.DateUtil.parse('2025-03-30 10:00:00').format());
-        return '1.0.0';
+        return {
+            version: '1.0.0',
+            date: date_util_1.DateUtil.now().format(),
+        };
     }
 };
 exports.AppController = AppController;
@@ -36,7 +37,7 @@ __decorate([
     (0, common_1.Get)('version'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", String)
+    __metadata("design:returntype", Object)
 ], AppController.prototype, "getVersion", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)('')
@@ -3948,10 +3949,7 @@ let ReservationService = class ReservationService {
         return updatedReservation;
     }
     async findConflictingReservations(resourceId, startDate, endDate) {
-        console.log('resourceId', resourceId);
-        console.log('startDate', startDate);
-        console.log('endDate', endDate);
-        const data = await this.findAll({
+        return await this.findAll({
             where: {
                 resourceId,
                 startDate: (0, typeorm_1.LessThanOrEqual)(endDate),
@@ -3959,8 +3957,6 @@ let ReservationService = class ReservationService {
                 status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
             },
         });
-        console.log('data', data);
-        return data;
     }
 };
 exports.ReservationService = ReservationService;
@@ -4007,13 +4003,9 @@ let ReservationUsecase = class ReservationUsecase {
         this.participantService = participantService;
         this.dataSource = dataSource;
         this.notificationUsecase = notificationUsecase;
-        console.log('DateUtil.now', date_util_1.DateUtil.now().format());
-        console.log('DateUtil.parse', date_util_1.DateUtil.parse('2025-03-30 10:00:00').format());
     }
     async makeReservation(user, createDto) {
         const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.parse(createDto.startDate).format(), date_util_1.DateUtil.parse(createDto.endDate).format());
-        console.log('conflicts', conflicts);
-        console.log('conflicts.length', conflicts.length);
         if (conflicts.length > 0) {
             throw new common_1.BadRequestException('Reservation time conflict');
         }

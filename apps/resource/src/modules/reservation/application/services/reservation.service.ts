@@ -48,10 +48,7 @@ export class ReservationService {
     }
 
     async findConflictingReservations(resourceId: string, startDate: string, endDate: string): Promise<Reservation[]> {
-        console.log('resourceId', resourceId);
-        console.log('startDate', startDate);
-        console.log('endDate', endDate);
-        const data = await this.findAll({
+        return await this.findAll({
             where: {
                 resourceId,
                 startDate: LessThanOrEqual(endDate),
@@ -59,8 +56,6 @@ export class ReservationService {
                 status: ReservationStatus.CONFIRMED,
             },
         });
-        console.log('data', data);
-        return data;
     }
 
     // async findByResourceId(

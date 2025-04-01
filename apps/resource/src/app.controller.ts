@@ -6,9 +6,10 @@ import { Public } from '@libs/decorators/public.decorator';
 export class AppController {
     @Public()
     @Get('version')
-    getVersion(): string {
-        console.log('DateUtil.now', DateUtil.now().format());
-        console.log('DateUtil.parse', DateUtil.parse('2025-03-30 10:00:00').format());
-        return '1.0.0';
+    getVersion(): { version: string; date: string } {
+        return {
+            version: '1.0.0',
+            date: DateUtil.now().format(),
+        };
     }
 }

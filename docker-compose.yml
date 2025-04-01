@@ -23,8 +23,8 @@ services:
 
             POSTGRES_PORT: 6543
             POSTGRES_HOST: aws-0-ap-northeast-2.pooler.supabase.com
-            POSTGRES_USER: postgres.sdjojmvjvzszrdekyrnv
-            POSTGRES_PASSWORD: jTQ46ftaJhtkaF4O
+            POSTGRES_USER: postgres.pvwepnpkabixsiglxvff
+            POSTGRES_PASSWORD: zIDDlwP2vOQFYU4W
             POSTGRES_DB: postgres
 
             JWT_SECRET: 13hjkabsud23l13asbizx
