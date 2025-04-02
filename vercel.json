@@ -12,7 +12,7 @@
             "dest": "dist/apps/resource/main.js"
         }
     ],
-    "cron": [
+    "crons": [
         {
             "path": "/api/reservations/cron-job/close",
             "schedule": "0 1,31 * * * *"
