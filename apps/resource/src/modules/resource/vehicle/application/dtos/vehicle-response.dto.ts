@@ -25,7 +25,7 @@ export class ConsumableResponseDto {
     consumableId: string;
 
     @ApiProperty()
-    resourceId: string;
+    vehicleInfoId: string;
 
     @ApiProperty({ description: '소모품 이름' })
     name: string;

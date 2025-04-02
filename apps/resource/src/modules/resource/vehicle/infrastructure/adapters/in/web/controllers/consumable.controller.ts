@@ -20,23 +20,10 @@ export class ConsumableController {
         description: '소모품이 성공적으로 등록되었습니다.',
         type: ConsumableResponseDto,
     })
-    async create(
-        @Param('resourceId') resourceId: string,
-        @Body() createConsumableDto: CreateConsumableDto,
-    ): Promise<ConsumableResponseDto> {
-        const consumable = await this.consumableUsecase.save(createConsumableDto, {
-            where: {
-                vehicleId: resourceId,
-            },
-        });
+    async create(@Body() createConsumableDto: CreateConsumableDto): Promise<ConsumableResponseDto> {
+        const consumable = await this.consumableUsecase.save(createConsumableDto);
 
-        return {
-            consumableId: consumable.consumableId,
-            resourceId: consumable.vehicleId,
-            name: consumable.name,
-            replaceCycle: consumable.replaceCycle,
-            notifyReplacementCycle: consumable.notifyReplacementCycle,
-        };
+        return consumable;
     }
 
     @ApiTags('sprint0.3')
@@ -47,15 +34,15 @@ export class ConsumableController {
         description: '소모품 목록을 성공적으로 조회했습니다.',
         type: [ConsumableResponseDto],
     })
-    async findAll(@Param('resourceId') resourceId: string): Promise<ConsumableResponseDto[]> {
+    async findAll(@Param('vehicleInfoId') vehicleInfoId: string): Promise<ConsumableResponseDto[]> {
         const consumables = await this.consumableUsecase.findAll({
             where: {
-                vehicleId: resourceId,
+                vehicleInfoId: vehicleInfoId,
             },
         });
         return consumables.map((consumable) => ({
             consumableId: consumable.consumableId,
-            resourceId: consumable.vehicleId,
+            vehicleInfoId: consumable.vehicleInfoId,
             name: consumable.name,
             replaceCycle: consumable.replaceCycle,
             notifyReplacementCycle: consumable.notifyReplacementCycle,
@@ -79,7 +66,7 @@ export class ConsumableController {
         });
         return {
             consumableId: consumable.consumableId,
-            resourceId: consumable.vehicleId,
+            vehicleInfoId: consumable.vehicleInfoId,
             name: consumable.name,
             replaceCycle: consumable.replaceCycle,
             notifyReplacementCycle: consumable.notifyReplacementCycle,
@@ -109,7 +96,7 @@ export class ConsumableController {
         const consumable = await this.consumableUsecase.update(consumableId, updateConsumableDto);
         return {
             consumableId: consumable.consumableId,
-            resourceId: consumable.vehicleId,
+            vehicleInfoId: consumable.vehicleInfoId,
             name: consumable.name,
             replaceCycle: consumable.replaceCycle,
             notifyReplacementCycle: consumable.notifyReplacementCycle,

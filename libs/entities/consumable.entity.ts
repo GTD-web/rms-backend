@@ -4,27 +4,27 @@ import { Maintenance } from './maintenance.entity';
 
 @Entity('consumables')
 export class Consumable {
-  @PrimaryColumn('uuid', {
-    generated: 'uuid',
-  })
-  consumableId: string;
+    @PrimaryColumn('uuid', {
+        generated: 'uuid',
+    })
+    consumableId: string;
 
-  @Column()
-  vehicleId: string;
+    @Column()
+    vehicleInfoId: string;
 
-  @Column()
-  name: string;
+    @Column()
+    name: string;
 
-  @Column()
-  replaceCycle: string;
+    @Column()
+    replaceCycle: string;
 
-  @Column({ default: true })
-  notifyReplacementCycle: boolean;
+    @Column({ default: true })
+    notifyReplacementCycle: boolean;
 
-  @ManyToOne(() => VehicleInfo)
-  @JoinColumn({ name: 'vehicleId', referencedColumnName: 'vehicleInfoId' })
-  vehicleInfo: VehicleInfo;
+    @ManyToOne(() => VehicleInfo)
+    @JoinColumn({ name: 'vehicleInfoId', referencedColumnName: 'vehicleInfoId' })
+    vehicleInfo: VehicleInfo;
 
-  @OneToMany(() => Maintenance, maintenance => maintenance.consumable)
-  maintenances: Maintenance[];
-} 
+    @OneToMany(() => Maintenance, (maintenance) => maintenance.consumable)
+    maintenances: Maintenance[];
+}

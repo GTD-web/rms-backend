@@ -50,7 +50,7 @@ export class CreateConsumableDto {
         description: '차량 ID',
         example: 'vehicle-123',
     })
-    vehicleId: string;
+    vehicleInfoId: string;
 }
 
 export class CreateMaintenanceDto {

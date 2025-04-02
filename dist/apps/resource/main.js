@@ -7778,7 +7778,7 @@ __decorate([
         example: 'vehicle-123',
     }),
     __metadata("design:type", String)
-], CreateConsumableDto.prototype, "vehicleId", void 0);
+], CreateConsumableDto.prototype, "vehicleInfoId", void 0);
 class CreateMaintenanceDto {
 }
 exports.CreateMaintenanceDto = CreateMaintenanceDto;
@@ -8017,7 +8017,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
-], ConsumableResponseDto.prototype, "resourceId", void 0);
+], ConsumableResponseDto.prototype, "vehicleInfoId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
     __metadata("design:type", String)
@@ -8561,29 +8561,19 @@ let ConsumableController = class ConsumableController {
     constructor(consumableUsecase) {
         this.consumableUsecase = consumableUsecase;
     }
-    async create(resourceId, createConsumableDto) {
-        const consumable = await this.consumableUsecase.save(createConsumableDto, {
-            where: {
-                vehicleId: resourceId,
-            },
-        });
-        return {
-            consumableId: consumable.consumableId,
-            resourceId: consumable.vehicleId,
-            name: consumable.name,
-            replaceCycle: consumable.replaceCycle,
-            notifyReplacementCycle: consumable.notifyReplacementCycle,
-        };
+    async create(createConsumableDto) {
+        const consumable = await this.consumableUsecase.save(createConsumableDto);
+        return consumable;
     }
-    async findAll(resourceId) {
+    async findAll(vehicleInfoId) {
         const consumables = await this.consumableUsecase.findAll({
             where: {
-                vehicleId: resourceId,
+                vehicleInfoId: vehicleInfoId,
             },
         });
         return consumables.map((consumable) => ({
             consumableId: consumable.consumableId,
-            resourceId: consumable.vehicleId,
+            vehicleInfoId: consumable.vehicleInfoId,
             name: consumable.name,
             replaceCycle: consumable.replaceCycle,
             notifyReplacementCycle: consumable.notifyReplacementCycle,
@@ -8598,7 +8588,7 @@ let ConsumableController = class ConsumableController {
         });
         return {
             consumableId: consumable.consumableId,
-            resourceId: consumable.vehicleId,
+            vehicleInfoId: consumable.vehicleInfoId,
             name: consumable.name,
             replaceCycle: consumable.replaceCycle,
             notifyReplacementCycle: consumable.notifyReplacementCycle,
@@ -8616,7 +8606,7 @@ let ConsumableController = class ConsumableController {
         const consumable = await this.consumableUsecase.update(consumableId, updateConsumableDto);
         return {
             consumableId: consumable.consumableId,
-            resourceId: consumable.vehicleId,
+            vehicleInfoId: consumable.vehicleInfoId,
             name: consumable.name,
             replaceCycle: consumable.replaceCycle,
             notifyReplacementCycle: consumable.notifyReplacementCycle,
@@ -8636,10 +8626,9 @@ __decorate([
         description: '소모품이 성공적으로 등록되었습니다.',
         type: vehicle_response_dto_1.ConsumableResponseDto,
     }),
-    __param(0, (0, common_1.Param)('resourceId')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_b = typeof create_vehicle_info_dto_1.CreateConsumableDto !== "undefined" && create_vehicle_info_dto_1.CreateConsumableDto) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof create_vehicle_info_dto_1.CreateConsumableDto !== "undefined" && create_vehicle_info_dto_1.CreateConsumableDto) === "function" ? _b : Object]),
     __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
 ], ConsumableController.prototype, "create", null);
 __decorate([
@@ -8651,7 +8640,7 @@ __decorate([
         description: '소모품 목록을 성공적으로 조회했습니다.',
         type: [vehicle_response_dto_1.ConsumableResponseDto],
     }),
-    __param(0, (0, common_1.Param)('resourceId')),
+    __param(0, (0, common_1.Param)('vehicleInfoId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
@@ -9728,7 +9717,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Consumable.prototype, "vehicleId", void 0);
+], Consumable.prototype, "vehicleInfoId", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -9743,11 +9732,11 @@ __decorate([
 ], Consumable.prototype, "notifyReplacementCycle", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => vehicle_info_entity_1.VehicleInfo),
-    (0, typeorm_1.JoinColumn)({ name: 'vehicleId', referencedColumnName: 'vehicleInfoId' }),
+    (0, typeorm_1.JoinColumn)({ name: 'vehicleInfoId', referencedColumnName: 'vehicleInfoId' }),
     __metadata("design:type", typeof (_a = typeof vehicle_info_entity_1.VehicleInfo !== "undefined" && vehicle_info_entity_1.VehicleInfo) === "function" ? _a : Object)
 ], Consumable.prototype, "vehicleInfo", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => maintenance_entity_1.Maintenance, maintenance => maintenance.consumable),
+    (0, typeorm_1.OneToMany)(() => maintenance_entity_1.Maintenance, (maintenance) => maintenance.consumable),
     __metadata("design:type", Array)
 ], Consumable.prototype, "maintenances", void 0);
 exports.Consumable = Consumable = __decorate([
