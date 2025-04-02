@@ -8439,22 +8439,48 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceUsecase = void 0;
+const vehicle_info_service_1 = __webpack_require__(/*! ../services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const maintenance_service_1 = __webpack_require__(/*! ../services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let MaintenanceUsecase = class MaintenanceUsecase {
-    constructor(maintenanceService) {
+    constructor(maintenanceService, vehicleInfoService, dataSource) {
         this.maintenanceService = maintenanceService;
+        this.vehicleInfoService = vehicleInfoService;
+        this.dataSource = dataSource;
     }
     async save(user, createMaintenanceDto) {
         const result = await this.checkRole(createMaintenanceDto.consumableId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
-        return this.maintenanceService.save(createMaintenanceDto);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
+            if (createMaintenanceDto.mileage) {
+                const vehicleInfo = await this.vehicleInfoService.findOne({
+                    where: { consumableId: createMaintenanceDto.consumableId },
+                });
+                await this.vehicleInfoService.update(vehicleInfo.vehicleInfoId, {
+                    totalMileage: createMaintenanceDto.mileage,
+                }, { queryRunner });
+            }
+            await queryRunner.commitTransaction();
+            return maintenance;
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async findAll(user, consumableId) {
         const result = await this.checkRole(consumableId, user);
@@ -8474,7 +8500,32 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         const result = await this.checkRole(maintenanceId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
-        return this.maintenanceService.update(maintenanceId, updateMaintenanceDto, repositoryOptions);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const maintenance = await this.maintenanceService.update(maintenanceId, updateMaintenanceDto, {
+                queryRunner,
+                ...repositoryOptions,
+            });
+            if (updateMaintenanceDto.mileage) {
+                const vehicleInfo = await this.vehicleInfoService.findOne({
+                    where: { consumableId: maintenance.consumableId },
+                });
+                await this.vehicleInfoService.update(vehicleInfo.vehicleInfoId, {
+                    totalMileage: updateMaintenanceDto.mileage,
+                }, { queryRunner });
+            }
+            await queryRunner.commitTransaction();
+            return maintenance;
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async delete(user, maintenanceId, repositoryOptions) {
         const result = await this.checkRole(maintenanceId, user);
@@ -8511,7 +8562,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
 exports.MaintenanceUsecase = MaintenanceUsecase;
 exports.MaintenanceUsecase = MaintenanceUsecase = __decorate([
     (0, common_2.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _a : Object, typeof (_b = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object])
 ], MaintenanceUsecase);
 1;
 

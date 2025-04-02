@@ -13,15 +13,44 @@ import { CreateMaintenanceDto } from '../dtos/create-vehicle-info.dto';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { Role } from '@libs/enums/role-type.enum';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class MaintenanceUsecase {
-    constructor(private readonly maintenanceService: MaintenanceService) {}
+    constructor(
+        private readonly maintenanceService: MaintenanceService,
+        private readonly vehicleInfoService: VehicleInfoService,
+        private readonly dataSource: DataSource,
+    ) {}
 
     async save(user: UserEntity, createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
         const result = await this.checkRole(createMaintenanceDto.consumableId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
-        return this.maintenanceService.save(createMaintenanceDto);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
+            if (createMaintenanceDto.mileage) {
+                const vehicleInfo = await this.vehicleInfoService.findOne({
+                    where: { consumableId: createMaintenanceDto.consumableId },
+                });
+                await this.vehicleInfoService.update(
+                    vehicleInfo.vehicleInfoId,
+                    {
+                        totalMileage: createMaintenanceDto.mileage,
+                    },
+                    { queryRunner },
+                );
+            }
+            await queryRunner.commitTransaction();
+            return maintenance;
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        } finally {
+            await queryRunner.release();
+        }
     }
 
     async findAll(user: UserEntity, consumableId: string): Promise<Maintenance[]> {
@@ -46,7 +75,35 @@ export class MaintenanceUsecase {
     ): Promise<Maintenance> {
         const result = await this.checkRole(maintenanceId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
-        return this.maintenanceService.update(maintenanceId, updateMaintenanceDto, repositoryOptions);
+
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const maintenance = await this.maintenanceService.update(maintenanceId, updateMaintenanceDto, {
+                queryRunner,
+                ...repositoryOptions,
+            });
+            if (updateMaintenanceDto.mileage) {
+                const vehicleInfo = await this.vehicleInfoService.findOne({
+                    where: { consumableId: maintenance.consumableId },
+                });
+                await this.vehicleInfoService.update(
+                    vehicleInfo.vehicleInfoId,
+                    {
+                        totalMileage: updateMaintenanceDto.mileage,
+                    },
+                    { queryRunner },
+                );
+            }
+            await queryRunner.commitTransaction();
+            return maintenance;
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        } finally {
+            await queryRunner.release();
+        }
     }
 
     async delete(user: UserEntity, maintenanceId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
