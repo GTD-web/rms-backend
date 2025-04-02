@@ -9,6 +9,7 @@ export interface ReservationRepositoryPort {
     findAll(repositoryOptions?: RepositoryOptions): Promise<Reservation[]>;
     update(id: string, reservation: Partial<Reservation>, repositoryOptions?: RepositoryOptions): Promise<Reservation>;
     delete(id: string, repositoryOptions?: RepositoryOptions): Promise<void>;
+    count(repositoryOptions?: RepositoryOptions): Promise<number>;
 
     // findById(id: string, repositoryOptions?: RepositoryOptions): Promise<Reservation | null>;
     // findByResourceId(resourceId: string, repositoryOptions?: RepositoryOptions): Promise<Reservation[]>;

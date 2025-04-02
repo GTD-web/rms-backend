@@ -81,4 +81,14 @@ export class ReservationRepository implements ReservationRepositoryPort {
             : this.repository;
         await repository.delete(id);
     }
+
+    async count(repositoryOptions?: RepositoryOptions<Reservation>): Promise<number> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(Reservation)
+            : this.repository;
+        const count = await repository.count({
+            where: repositoryOptions?.where,
+        });
+        return count;
+    }
 }

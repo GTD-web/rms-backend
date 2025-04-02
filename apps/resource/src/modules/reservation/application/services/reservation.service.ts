@@ -29,6 +29,11 @@ export class ReservationService {
         return reservations;
     }
 
+    async count(repositoryOptions?: RepositoryOptions): Promise<number> {
+        const count = await this.reservationRepository.count(repositoryOptions);
+        return count;
+    }
+
     async findOne(repositoryOptions?: RepositoryOptions): Promise<Reservation> {
         const reservation = await this.reservationRepository.findOne(repositoryOptions);
         return reservation;

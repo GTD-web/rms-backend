@@ -22,6 +22,9 @@ import {
     ReservationWithResourceResponseDto,
     ReservationWithRelationsResponseDto,
 } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
+import { DateUtil } from '@libs/utils/date.util';
+import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
 @ApiTags('예약')
 @Controller('reservations')
@@ -53,12 +56,16 @@ export class ReservationController {
     })
     @ApiQuery({ name: 'startDate', type: String, required: false, example: '2025-01-01' })
     @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
     async findMyReservationList(
         @User() user: UserEntity,
         @Query('startDate') startDate?: string,
         @Query('resourceType') resourceType?: ResourceType,
-    ): Promise<ReservationWithRelationsResponseDto[]> {
-        return this.reservationUsecase.findMyReservationList(user.employeeId, startDate, resourceType);
+        @Query() query?: PaginationQueryDto,
+    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+        const { page, limit } = query;
+        return this.reservationUsecase.findMyReservationList(user.employeeId, startDate, resourceType, page, limit);
     }
 
     @ApiTags('sprint0.1')
@@ -99,20 +106,25 @@ export class ReservationController {
         description: '예약 리스트 조회 성공',
         type: [ReservationWithResourceResponseDto],
     })
-    @ApiQuery({ name: 'startDate', type: String, required: false, example: '2025-01-01' })
-    @ApiQuery({ name: 'endDate', type: String, required: false, example: '2025-01-01' })
+    @ApiQuery({
+        name: 'startDate',
+        type: String,
+        required: false,
+        example: DateUtil.now().addDays(-20).format('YYYY-MM-DD'),
+    })
+    @ApiQuery({
+        name: 'endDate',
+        type: String,
+        required: false,
+        example: DateUtil.now().addDays(30).format('YYYY-MM-DD'),
+    })
     @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
-    @ApiQuery({ name: 'resourceId', type: String, required: false, example: '1241234-1234-1234-1234-123412341234' })
+    @ApiQuery({ name: 'resourceId', type: String, required: false, example: '78117aaf-a203-43a3-bb38-51ec91ca935a' })
     @ApiQuery({
         name: 'status',
         enum: ReservationStatus,
+        description: `Available values : ${Object.values(ReservationStatus).join(', ')}`,
         isArray: true,
-        required: false,
-        example: [ReservationStatus.CONFIRMED],
-    })
-    @ApiQuery({
-        name: 'ReservationStatus',
-        enum: ReservationStatus,
         required: false,
         example: [ReservationStatus.CONFIRMED],
     })
