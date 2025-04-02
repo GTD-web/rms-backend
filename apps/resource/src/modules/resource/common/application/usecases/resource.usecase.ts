@@ -42,6 +42,24 @@ export class ResourceUsecase {
         private readonly typeHandlers: Map<ResourceType, ResourceTypeHandler>,
     ) {}
 
+    async findResources(type: ResourceType): Promise<ResourceResponseDto[]> {
+        let relations: string[] = [];
+        if (type === ResourceType.VEHICLE) {
+            relations = ['vehicleInfo', 'vehicleInfo.consumables'];
+        } else if (type === ResourceType.MEETING_ROOM) {
+            relations = ['meetingRoomInfo'];
+        } else if (type === ResourceType.ACCOMMODATION) {
+            relations = ['accommodationInfo'];
+        }
+        const resources = await this.resourceService.findAll({
+            where: {
+                type: type,
+            },
+            relations: relations,
+        });
+        return resources.map((resource) => new ResourceResponseDto(resource));
+    }
+
     async findResourcesByTypeAndDateWithReservations(
         type: ResourceType,
         startDate: string,

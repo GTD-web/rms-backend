@@ -6231,10 +6231,12 @@ var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_response_dto_1 = __webpack_require__(/*! ../dtos/resource-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/resource-response.dto.ts");
 const resource_service_1 = __webpack_require__(/*! ../services/resource.service */ "./apps/resource/src/modules/resource/common/application/services/resource.service.ts");
 const resource_group_service_1 = __webpack_require__(/*! ../services/resource-group.service */ "./apps/resource/src/modules/resource/common/application/services/resource-group.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const reservation_service_1 = __webpack_require__(/*! @resource/modules/reservation/application/services/reservation.service */ "./apps/resource/src/modules/reservation/application/services/reservation.service.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 const resource_manager_service_1 = __webpack_require__(/*! ../services/resource-manager.service */ "./apps/resource/src/modules/resource/common/application/services/resource-manager.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
@@ -6252,6 +6254,25 @@ let ResourceUsecase = class ResourceUsecase {
         this.userService = userService;
         this.dataSource = dataSource;
         this.typeHandlers = typeHandlers;
+    }
+    async findResources(type) {
+        let relations = [];
+        if (type === resource_type_enum_1.ResourceType.VEHICLE) {
+            relations = ['vehicleInfo', 'vehicleInfo.consumables'];
+        }
+        else if (type === resource_type_enum_1.ResourceType.MEETING_ROOM) {
+            relations = ['meetingRoomInfo'];
+        }
+        else if (type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+            relations = ['accommodationInfo'];
+        }
+        const resources = await this.resourceService.findAll({
+            where: {
+                type: type,
+            },
+            relations: relations,
+        });
+        return resources.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
     }
     async findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user) {
         if (startDate && endDate && startDate > endDate) {
@@ -6782,7 +6803,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -6800,6 +6821,9 @@ const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/in
 let ResourceController = class ResourceController {
     constructor(resourceUsecase) {
         this.resourceUsecase = resourceUsecase;
+    }
+    async findAll(type) {
+        return this.resourceUsecase.findResources(type);
     }
     async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate) {
         return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
@@ -6825,8 +6849,23 @@ let ResourceController = class ResourceController {
 };
 exports.ResourceController = ResourceController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
+    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '자원 목록 조회 #관리자/자원관리/자원리스트' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 목록을 성공적으로 조회했습니다.',
+        type: [dtos_index_1.ResourceResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'type', enum: resource_type_enum_1.ResourceType }),
+    __param(0, (0, common_1.Query)('type')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _b : Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], ResourceController.prototype, "findAll", null);
+__decorate([
+    (0, swagger_1.ApiTags)('sprint0.1'),
+    (0, common_1.Get)('reservations'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '자원 별 예약 목록 조회 #사용자/자원예약/리스트 #사용자/세부예약내역' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -6842,8 +6881,8 @@ __decorate([
     __param(2, (0, common_1.Query)('startDate')),
     __param(3, (0, common_1.Query)('endDate')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object, String, String]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+    __metadata("design:paramtypes", [typeof (_d = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _d : Object, typeof (_e = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _e : Object, String, String]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], ResourceController.prototype, "findResourcesByTypeAndDateWithReservations", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
@@ -6856,8 +6895,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_e = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _e : Object]),
-    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+    __metadata("design:paramtypes", [String, typeof (_g = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], ResourceController.prototype, "returnVehicle", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -6870,8 +6909,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof dtos_index_1.CreateResourceInfoDto !== "undefined" && dtos_index_1.CreateResourceInfoDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+    __metadata("design:paramtypes", [typeof (_j = typeof dtos_index_1.CreateResourceInfoDto !== "undefined" && dtos_index_1.CreateResourceInfoDto) === "function" ? _j : Object]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], ResourceController.prototype, "createWithInfos", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -6885,7 +6924,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ResourceController.prototype, "findOne", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -6898,8 +6937,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:paramtypes", [typeof (_m = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], ResourceController.prototype, "reorder", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -6914,8 +6953,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_m = typeof dtos_index_1.UpdateResourceInfoDto !== "undefined" && dtos_index_1.UpdateResourceInfoDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [String, typeof (_p = typeof dtos_index_1.UpdateResourceInfoDto !== "undefined" && dtos_index_1.UpdateResourceInfoDto) === "function" ? _p : Object]),
+    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
 ], ResourceController.prototype, "update", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -6929,7 +6968,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
+    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
 ], ResourceController.prototype, "remove", null);
 exports.ResourceController = ResourceController = __decorate([
     (0, swagger_1.ApiTags)('자원'),

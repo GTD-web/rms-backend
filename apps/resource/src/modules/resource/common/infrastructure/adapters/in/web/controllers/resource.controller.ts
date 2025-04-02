@@ -20,8 +20,21 @@ import { User as UserEntity } from '@libs/entities';
 export class ResourceController {
     constructor(private readonly resourceUsecase: ResourceUsecase) {}
 
-    @ApiTags('sprint0.1')
+    @ApiTags('sprint0.3')
     @Get()
+    @ApiOperation({ summary: '자원 목록 조회 #관리자/자원관리/자원리스트' })
+    @ApiDataResponse({
+        status: 200,
+        description: '자원 목록을 성공적으로 조회했습니다.',
+        type: [ResourceResponseDto],
+    })
+    @ApiQuery({ name: 'type', enum: ResourceType })
+    async findAll(@Query('type') type: ResourceType): Promise<ResourceResponseDto[]> {
+        return this.resourceUsecase.findResources(type);
+    }
+
+    @ApiTags('sprint0.1')
+    @Get('reservations')
     @Roles(Role.USER)
     @ApiOperation({ summary: '자원 별 예약 목록 조회 #사용자/자원예약/리스트 #사용자/세부예약내역' })
     @ApiDataResponse({
