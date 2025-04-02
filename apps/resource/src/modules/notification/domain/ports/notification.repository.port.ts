@@ -14,6 +14,7 @@ export interface NotificationRepositoryPort {
         options?: RepositoryOptions<Notification>,
     ): Promise<Notification>;
     delete(notificationId: string, options?: RepositoryOptions<Notification>): Promise<void>;
+    count(options?: RepositoryOptions<Notification>): Promise<number>;
 
     // markAsRead(notificationId: string, options?: RepositoryOptions<Notification>): Promise<void>;
     // markAllAsRead(employeeId: string, options?: RepositoryOptions<Notification>): Promise<void>;

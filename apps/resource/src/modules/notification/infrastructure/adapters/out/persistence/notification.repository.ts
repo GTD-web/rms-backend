@@ -63,6 +63,15 @@ export class NotificationRepository implements NotificationRepositoryPort {
         await repository.delete(notificationId);
     }
 
+    async count(options?: RepositoryOptions<Notification>): Promise<number> {
+        const repository = options?.queryRunner
+            ? options.queryRunner.manager.getRepository(Notification)
+            : this.notificationRepository;
+        return await repository.count({
+            where: options?.where,
+        });
+    }
+
     // async markAsRead(notificationId: string, options?: RepositoryOptions<Notification>): Promise<void> {
     //     const repository = options?.queryRunner
     //         ? options.queryRunner.manager.getRepository(Notification)

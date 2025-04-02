@@ -14,6 +14,8 @@ import { CronJob } from 'cron';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { ResponseNotificationDto } from '../dto/response-notification.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
 @Injectable()
 export class NotificationUsecase {
@@ -65,25 +67,47 @@ export class NotificationUsecase {
         });
     }
 
-    async findMyNotifications(employeeId: string): Promise<ResponseNotificationDto[]> {
-        const notifications = await this.notificationService.findAll({
+    async findMyNotifications(
+        employeeId: string,
+        query?: PaginationQueryDto,
+    ): Promise<PaginationData<ResponseNotificationDto>> {
+        const options: RepositoryOptions = {
             where: {
                 employees: { employeeId },
                 isSent: true,
             },
+        };
+        if (query) {
+            options.skip = query.getOffset();
+            options.take = query.limit;
+        }
+
+        const notifications = await this.notificationService.findAll({
+            ...options,
             relations: ['employees'],
         });
-        return notifications.map((notification) => {
-            return {
-                notificationId: notification.notificationId,
-                title: notification.title,
-                body: notification.body,
-                notificationData: notification.notificationData,
-                notificationType: notification.notificationType,
-                createdAt: notification.createdAt,
-                isRead: notification.employees.find((employee) => employee.employeeId === employeeId).isRead,
-            };
+        const total = await this.notificationService.count({
+            where: options.where,
         });
+        return {
+            items: notifications.map((notification) => {
+                return {
+                    notificationId: notification.notificationId,
+                    title: notification.title,
+                    body: notification.body,
+                    notificationData: notification.notificationData,
+                    notificationType: notification.notificationType,
+                    createdAt: notification.createdAt,
+                    isRead: notification.employees.find((employee) => employee.employeeId === employeeId).isRead,
+                };
+            }),
+            meta: {
+                total,
+                page: query.page,
+                limit: query.limit,
+                hasNext: query.page * query.limit < total,
+            },
+        };
     }
 
     async createNotification(

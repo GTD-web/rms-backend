@@ -6,41 +6,12 @@ import {
     ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
-    ApiProperty,
     ApiUnauthorizedResponse,
     getSchemaPath,
 } from '@nestjs/swagger';
-import { PaginationMeta } from '../interfaces/api-response.interface';
-
-// 기본 응답 DTO
-export class BaseResponseDto<T> {
-    @ApiProperty({ example: true, type: 'except' })
-    success: boolean;
-
-    @ApiProperty({ required: true, description: '응답 데이터', type: 'except' })
-    data: T;
-
-    @ApiProperty({ required: false, example: '성공적으로 처리되었습니다.', description: '성공 메시지', type: 'except' })
-    message?: string;
-}
-
-// 페이지네이션 응답 DTO
-export class PaginatedResponseDto<T> extends BaseResponseDto<T[]> {
-    @ApiProperty()
-    meta: PaginationMeta;
-}
-
-// 에러 응답 DTO
-export class ErrorResponseDto {
-    @ApiProperty({ example: false, type: 'except' })
-    success: boolean;
-
-    @ApiProperty({ example: 400, type: 'except' })
-    statusCode: number;
-
-    @ApiProperty({ example: '잘못된 요청입니다.', type: 'except' })
-    message: string;
-}
+import { PaginationData, PaginationMetaDto } from '../dtos/paginate-response.dto';
+import { ErrorResponseDto, BaseResponseDto } from '../dtos/response.dto';
+import * as dto from '../dtos/response.dto';
 
 // 공통 에러 응답 데코레이터
 const ApiCommonErrors = () =>
@@ -63,17 +34,23 @@ export const ApiDataResponse = (options: {
     const schema = options.type
         ? {
               allOf: [
-                  { $ref: getSchemaPath(options.isPaginated ? PaginatedResponseDto : BaseResponseDto) },
+                  {
+                      $ref: getSchemaPath(BaseResponseDto),
+                  },
                   {
                       properties: {
                           data:
                               options.isPaginated || Array.isArray(options.type)
                                   ? {
-                                        type: 'array',
-                                        items: {
-                                            $ref: getSchemaPath(
-                                                Array.isArray(options.type) ? options.type[0] : options.type,
-                                            ),
+                                        type: 'object',
+                                        properties: {
+                                            items: {
+                                                type: 'array',
+                                                items: { $ref: getSchemaPath(options.type[0]) },
+                                            },
+                                            meta: {
+                                                $ref: getSchemaPath(PaginationMetaDto),
+                                            },
                                         },
                                     }
                                   : {

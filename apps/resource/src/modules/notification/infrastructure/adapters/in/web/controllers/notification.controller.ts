@@ -1,5 +1,5 @@
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Post, Patch, Param, Body, Delete, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Patch, Param, Body, Query } from '@nestjs/common';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { NotificationUsecase } from '@resource/modules/notification/application/usecases/notification.usecase';
@@ -7,10 +7,9 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 
 import { PushSubscriptionDto } from '@resource/modules/notification/application/dto/push-subscription.dto';
 import { ResponseNotificationDto } from '@resource/modules/notification/application/dto/response-notification.dto';
-import { NotificationType } from '@libs/enums/notification-type.enum';
 import { SendNotificationDto } from '@resource/modules/notification/application/dto/create-notification.dto';
-import { ResourceType } from '@libs/enums/resource-type.enum';
-import { FCMAdapter } from '@resource/modules/notification/infrastructure/adapters/out/device/fcm-push.adapter';
+import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
 @ApiTags('알림')
 @Controller('notifications')
@@ -62,9 +61,23 @@ export class NotificationController {
         status: 200,
         description: '알람 목록 조회 성공',
         type: [ResponseNotificationDto],
+        isPaginated: true,
     })
-    async findAllByEmployeeId(@User('employeeId') employeeId: string): Promise<ResponseNotificationDto[]> {
-        return await this.notificationUsecase.findMyNotifications(employeeId);
+    @ApiQuery({
+        name: 'page',
+        type: Number,
+        required: false,
+    })
+    @ApiQuery({
+        name: 'limit',
+        type: Number,
+        required: false,
+    })
+    async findAllByEmployeeId(
+        @User('employeeId') employeeId: string,
+        @Query() query: PaginationQueryDto,
+    ): Promise<PaginationData<ResponseNotificationDto>> {
+        return await this.notificationUsecase.findMyNotifications(employeeId, query);
     }
 
     @ApiTags('sprint0.3')
@@ -74,28 +87,28 @@ export class NotificationController {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
     }
 
-    @ApiTags('a.test')
-    @Post('send/test')
-    @ApiOperation({ summary: '알람 테스트 전송' })
-    @ApiDataResponse({
-        status: 200,
-        description: '알람 테스트 전송 성공',
-    })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-                data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-            },
-        },
-    })
-    async sendTest(
-        @User() user: UserEntity,
-        @Body() sendNotificationDto: { notification: { title: string; body: string }; target: string[] },
-    ) {
-        await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
-    }
+    // @ApiTags('a.test')
+    // @Post('send/test')
+    // @ApiOperation({ summary: '알람 테스트 전송' })
+    // @ApiDataResponse({
+    //     status: 200,
+    //     description: '알람 테스트 전송 성공',
+    // })
+    // @ApiBody({
+    //     schema: {
+    //         type: 'object',
+    //         properties: {
+    //             notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
+    //             data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
+    //         },
+    //     },
+    // })
+    // async sendTest(
+    //     @User() user: UserEntity,
+    //     @Body() sendNotificationDto: { notification: { title: string; body: string }; target: string[] },
+    // ) {
+    //     await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
+    // }
 
     // @ApiTags('sprint0.3-')
     // @Patch(':employeeId/readAll')

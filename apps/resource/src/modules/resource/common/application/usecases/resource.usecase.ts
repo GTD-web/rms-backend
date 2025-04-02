@@ -131,10 +131,11 @@ export class ResourceUsecase {
                 'resourceManagers.employee',
             ],
         });
+        console.log('resource', resource);
         if (!resource) {
             throw new NotFoundException('Resource not found');
         }
-        return new ResourceResponseDto(resource);
+        return resource;
     }
 
     async returnVehicle(resourceId: string, updateDto: ReturnVehicleDto): Promise<boolean> {

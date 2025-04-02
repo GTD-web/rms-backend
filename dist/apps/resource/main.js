@@ -2712,6 +2712,9 @@ let NotificationService = class NotificationService {
     }
     async delete(id) {
     }
+    async count(options) {
+        return await this.notificationRepository.count(options);
+    }
 };
 exports.NotificationService = NotificationService;
 exports.NotificationService = NotificationService = __decorate([
@@ -2795,25 +2798,43 @@ let NotificationUsecase = class NotificationUsecase {
             isRead: true,
         });
     }
-    async findMyNotifications(employeeId) {
-        const notifications = await this.notificationService.findAll({
+    async findMyNotifications(employeeId, query) {
+        const options = {
             where: {
                 employees: { employeeId },
                 isSent: true,
             },
+        };
+        if (query) {
+            options.skip = query.getOffset();
+            options.take = query.limit;
+        }
+        const notifications = await this.notificationService.findAll({
+            ...options,
             relations: ['employees'],
         });
-        return notifications.map((notification) => {
-            return {
-                notificationId: notification.notificationId,
-                title: notification.title,
-                body: notification.body,
-                notificationData: notification.notificationData,
-                notificationType: notification.notificationType,
-                createdAt: notification.createdAt,
-                isRead: notification.employees.find((employee) => employee.employeeId === employeeId).isRead,
-            };
+        const total = await this.notificationService.count({
+            where: options.where,
         });
+        return {
+            items: notifications.map((notification) => {
+                return {
+                    notificationId: notification.notificationId,
+                    title: notification.title,
+                    body: notification.body,
+                    notificationData: notification.notificationData,
+                    notificationType: notification.notificationType,
+                    createdAt: notification.createdAt,
+                    isRead: notification.employees.find((employee) => employee.employeeId === employeeId).isRead,
+                };
+            }),
+            meta: {
+                total,
+                page: query.page,
+                limit: query.limit,
+                hasNext: query.page * query.limit < total,
+            },
+        };
     }
     async createNotification(notificationType, createNotificationDatatDto, notiTarget, repositoryOptions) {
         const createNotificationDto = {
@@ -2981,6 +3002,7 @@ const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-r
 const push_subscription_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/push-subscription.dto */ "./apps/resource/src/modules/notification/application/dto/push-subscription.dto.ts");
 const response_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/response-notification.dto */ "./apps/resource/src/modules/notification/application/dto/response-notification.dto.ts");
 const create_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/create-notification.dto */ "./apps/resource/src/modules/notification/application/dto/create-notification.dto.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
 let NotificationController = class NotificationController {
     constructor(notificationUsecase) {
         this.notificationUsecase = notificationUsecase;
@@ -2994,14 +3016,11 @@ let NotificationController = class NotificationController {
     async send(sendNotificationDto) {
         await this.notificationUsecase.createNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
     }
-    async findAllByEmployeeId(employeeId) {
-        return await this.notificationUsecase.findMyNotifications(employeeId);
+    async findAllByEmployeeId(employeeId, query) {
+        return await this.notificationUsecase.findMyNotifications(employeeId, query);
     }
     async markAsRead(user, notificationId) {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
-    }
-    async sendTest(user, sendNotificationDto) {
-        await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
     }
 };
 exports.NotificationController = NotificationController;
@@ -3053,11 +3072,23 @@ __decorate([
         status: 200,
         description: '알람 목록 조회 성공',
         type: [response_notification_dto_1.ResponseNotificationDto],
+        isPaginated: true,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'page',
+        type: Number,
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'limit',
+        type: Number,
+        required: false,
     }),
     __param(0, (0, user_decorator_1.User)('employeeId')),
+    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [String, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], NotificationController.prototype, "findAllByEmployeeId", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -3066,32 +3097,9 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('notificationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _h : Object, String]),
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAsRead", null);
-__decorate([
-    (0, swagger_1.ApiTags)('a.test'),
-    (0, common_1.Post)('send/test'),
-    (0, swagger_1.ApiOperation)({ summary: '알람 테스트 전송' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '알람 테스트 전송 성공',
-    }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-                data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-            },
-        },
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, Object]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "sendTest", null);
 exports.NotificationController = NotificationController = __decorate([
     (0, swagger_1.ApiTags)('알림'),
     (0, common_1.Controller)('notifications'),
@@ -3371,6 +3379,14 @@ let NotificationRepository = class NotificationRepository {
             ? options.queryRunner.manager.getRepository(notification_entity_1.Notification)
             : this.notificationRepository;
         await repository.delete(notificationId);
+    }
+    async count(options) {
+        const repository = options?.queryRunner
+            ? options.queryRunner.manager.getRepository(notification_entity_1.Notification)
+            : this.notificationRepository;
+        return await repository.count({
+            where: options?.where,
+        });
     }
 };
 exports.NotificationRepository = NotificationRepository;
@@ -6173,7 +6189,6 @@ var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const resource_response_dto_1 = __webpack_require__(/*! ../dtos/resource-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/resource-response.dto.ts");
 const resource_service_1 = __webpack_require__(/*! ../services/resource.service */ "./apps/resource/src/modules/resource/common/application/services/resource.service.ts");
 const resource_group_service_1 = __webpack_require__(/*! ../services/resource-group.service */ "./apps/resource/src/modules/resource/common/application/services/resource-group.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
@@ -6267,10 +6282,11 @@ let ResourceUsecase = class ResourceUsecase {
                 'resourceManagers.employee',
             ],
         });
+        console.log('resource', resource);
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
         }
-        return new resource_response_dto_1.ResourceResponseDto(resource);
+        return resource;
     }
     async returnVehicle(resourceId, updateDto) {
         const queryRunner = this.dataSource.createQueryRunner();
@@ -9273,7 +9289,6 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
-        synchronize: configService.get('NODE_ENV') === 'local',
         logging: configService.get('NODE_ENV') === 'local',
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
@@ -9291,74 +9306,36 @@ exports.typeOrmConfig = typeOrmConfig;
 /*!****************************************************!*\
   !*** ./libs/decorators/api-responses.decorator.ts ***!
   \****************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ApiDataResponse = exports.ErrorResponseDto = exports.PaginatedResponseDto = exports.BaseResponseDto = void 0;
+exports.ApiDataResponse = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_response_interface_1 = __webpack_require__(/*! ../interfaces/api-response.interface */ "./libs/interfaces/api-response.interface.ts");
-class BaseResponseDto {
-}
-exports.BaseResponseDto = BaseResponseDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: true, type: 'except' }),
-    __metadata("design:type", Boolean)
-], BaseResponseDto.prototype, "success", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: true, description: '응답 데이터', type: 'except' }),
-    __metadata("design:type", Object)
-], BaseResponseDto.prototype, "data", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false, example: '성공적으로 처리되었습니다.', description: '성공 메시지', type: 'except' }),
-    __metadata("design:type", String)
-], BaseResponseDto.prototype, "message", void 0);
-class PaginatedResponseDto extends BaseResponseDto {
-}
-exports.PaginatedResponseDto = PaginatedResponseDto;
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", typeof (_a = typeof api_response_interface_1.PaginationMeta !== "undefined" && api_response_interface_1.PaginationMeta) === "function" ? _a : Object)
-], PaginatedResponseDto.prototype, "meta", void 0);
-class ErrorResponseDto {
-}
-exports.ErrorResponseDto = ErrorResponseDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: false, type: 'except' }),
-    __metadata("design:type", Boolean)
-], ErrorResponseDto.prototype, "success", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 400, type: 'except' }),
-    __metadata("design:type", Number)
-], ErrorResponseDto.prototype, "statusCode", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: '잘못된 요청입니다.', type: 'except' }),
-    __metadata("design:type", String)
-], ErrorResponseDto.prototype, "message", void 0);
-const ApiCommonErrors = () => (0, common_1.applyDecorators)((0, swagger_1.ApiBadRequestResponse)({ description: '잘못된 요청입니다.', type: ErrorResponseDto }), (0, swagger_1.ApiUnauthorizedResponse)({ description: '인증되지 않은 요청입니다.' }), (0, swagger_1.ApiForbiddenResponse)({ description: '권한이 없습니다.' }), (0, swagger_1.ApiNotFoundResponse)({ description: '리소스를 찾을 수 없습니다.' }), (0, swagger_1.ApiConflictResponse)({ description: '중복된 리소스입니다.' }), (0, swagger_1.ApiInternalServerErrorResponse)({ description: '서버 에러가 발생했습니다.' }));
+const paginate_response_dto_1 = __webpack_require__(/*! ../dtos/paginate-response.dto */ "./libs/dtos/paginate-response.dto.ts");
+const response_dto_1 = __webpack_require__(/*! ../dtos/response.dto */ "./libs/dtos/response.dto.ts");
+const ApiCommonErrors = () => (0, common_1.applyDecorators)((0, swagger_1.ApiBadRequestResponse)({ description: '잘못된 요청입니다.', type: response_dto_1.ErrorResponseDto }), (0, swagger_1.ApiUnauthorizedResponse)({ description: '인증되지 않은 요청입니다.' }), (0, swagger_1.ApiForbiddenResponse)({ description: '권한이 없습니다.' }), (0, swagger_1.ApiNotFoundResponse)({ description: '리소스를 찾을 수 없습니다.' }), (0, swagger_1.ApiConflictResponse)({ description: '중복된 리소스입니다.' }), (0, swagger_1.ApiInternalServerErrorResponse)({ description: '서버 에러가 발생했습니다.' }));
 const ApiDataResponse = (options) => {
     const schema = options.type
         ? {
             allOf: [
-                { $ref: (0, swagger_1.getSchemaPath)(options.isPaginated ? PaginatedResponseDto : BaseResponseDto) },
+                {
+                    $ref: (0, swagger_1.getSchemaPath)(response_dto_1.BaseResponseDto),
+                },
                 {
                     properties: {
                         data: options.isPaginated || Array.isArray(options.type)
                             ? {
-                                type: 'array',
-                                items: {
-                                    $ref: (0, swagger_1.getSchemaPath)(Array.isArray(options.type) ? options.type[0] : options.type),
+                                type: 'object',
+                                properties: {
+                                    items: {
+                                        type: 'array',
+                                        items: { $ref: (0, swagger_1.getSchemaPath)(options.type[0]) },
+                                    },
+                                    meta: {
+                                        $ref: (0, swagger_1.getSchemaPath)(paginate_response_dto_1.PaginationMetaDto),
+                                    },
                                 },
                             }
                             : {
@@ -9434,6 +9411,197 @@ exports.User = (0, common_1.createParamDecorator)((data, ctx) => {
     const user = request.user;
     return data ? user?.[data] : user;
 });
+
+
+/***/ }),
+
+/***/ "./libs/dtos/paginate-query.dto.ts":
+/*!*****************************************!*\
+  !*** ./libs/dtos/paginate-query.dto.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PaginationQueryDto = void 0;
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class PaginationQueryDto {
+    constructor() {
+        this.page = 1;
+        this.limit = 20;
+    }
+    getOffset() {
+        return (this.page - 1) * this.limit;
+    }
+}
+exports.PaginationQueryDto = PaginationQueryDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '페이지 번호 (1부터 시작)',
+        type: Number,
+        default: 1,
+        minimum: 1,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], PaginationQueryDto.prototype, "page", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '한 페이지당 항목 수',
+        type: Number,
+        default: 20,
+        minimum: 1,
+        maximum: 100,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(100),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], PaginationQueryDto.prototype, "limit", void 0);
+
+
+/***/ }),
+
+/***/ "./libs/dtos/paginate-response.dto.ts":
+/*!********************************************!*\
+  !*** ./libs/dtos/paginate-response.dto.ts ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PaginationData = exports.PaginationMetaDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class PaginationMetaDto {
+}
+exports.PaginationMetaDto = PaginationMetaDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '전체 아이템 수',
+        type: Number,
+        example: 100,
+    }),
+    __metadata("design:type", Number)
+], PaginationMetaDto.prototype, "total", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '현재 페이지 번호',
+        type: Number,
+        example: 1,
+    }),
+    __metadata("design:type", Number)
+], PaginationMetaDto.prototype, "page", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '페이지당 아이템 수',
+        type: Number,
+        example: 20,
+    }),
+    __metadata("design:type", Number)
+], PaginationMetaDto.prototype, "limit", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '다음 페이지 존재 여부',
+        type: Boolean,
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], PaginationMetaDto.prototype, "hasNext", void 0);
+class PaginationData {
+}
+exports.PaginationData = PaginationData;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '결과 아이템 배열',
+        isArray: true,
+    }),
+    __metadata("design:type", Array)
+], PaginationData.prototype, "items", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '페이지네이션 메타데이터',
+        type: PaginationMetaDto,
+    }),
+    __metadata("design:type", PaginationMetaDto)
+], PaginationData.prototype, "meta", void 0);
+
+
+/***/ }),
+
+/***/ "./libs/dtos/response.dto.ts":
+/*!***********************************!*\
+  !*** ./libs/dtos/response.dto.ts ***!
+  \***********************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ErrorResponseDto = exports.BaseResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class BaseResponseDto {
+}
+exports.BaseResponseDto = BaseResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: true, type: 'except' }),
+    __metadata("design:type", Boolean)
+], BaseResponseDto.prototype, "success", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: true, description: '응답 데이터', type: 'except' }),
+    __metadata("design:type", Object)
+], BaseResponseDto.prototype, "data", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, example: '성공적으로 처리되었습니다.', description: '성공 메시지', type: 'except' }),
+    __metadata("design:type", String)
+], BaseResponseDto.prototype, "message", void 0);
+class ErrorResponseDto {
+}
+exports.ErrorResponseDto = ErrorResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false, type: 'except' }),
+    __metadata("design:type", Boolean)
+], ErrorResponseDto.prototype, "success", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 400, type: 'except' }),
+    __metadata("design:type", Number)
+], ErrorResponseDto.prototype, "statusCode", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '잘못된 요청입니다.', type: 'except' }),
+    __metadata("design:type", String)
+], ErrorResponseDto.prototype, "message", void 0);
 
 
 /***/ }),
@@ -10904,18 +11072,6 @@ const operators_1 = __webpack_require__(/*! rxjs/operators */ "rxjs/operators");
 let ResponseInterceptor = class ResponseInterceptor {
     intercept(context, next) {
         return next.handle().pipe((0, operators_1.map)((data) => {
-            if (this.isFilterResult(data)) {
-                return {
-                    success: true,
-                    data: data.items,
-                    meta: {
-                        total: data.total,
-                        page: data.page,
-                        limit: data.limit,
-                        hasNext: data.hasNext,
-                    },
-                };
-            }
             return {
                 success: true,
                 data: data,
@@ -10923,26 +11079,11 @@ let ResponseInterceptor = class ResponseInterceptor {
             };
         }));
     }
-    isFilterResult(data) {
-        return data && Array.isArray(data.items) && typeof data.total === 'number';
-    }
 };
 exports.ResponseInterceptor = ResponseInterceptor;
 exports.ResponseInterceptor = ResponseInterceptor = __decorate([
     (0, common_1.Injectable)()
 ], ResponseInterceptor);
-
-
-/***/ }),
-
-/***/ "./libs/interfaces/api-response.interface.ts":
-/*!***************************************************!*\
-  !*** ./libs/interfaces/api-response.interface.ts ***!
-  \***************************************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
@@ -10957,7 +11098,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.setupSwagger = setupSwagger;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const response_dto_1 = __webpack_require__(/*! ../dtos/response.dto */ "./libs/dtos/response.dto.ts");
+const paginate_response_dto_1 = __webpack_require__(/*! ../dtos/paginate-response.dto */ "./libs/dtos/paginate-response.dto.ts");
 function setupSwagger(app, dtos) {
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Resource Management API')
@@ -10966,7 +11108,7 @@ function setupSwagger(app, dtos) {
         .addBearerAuth()
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config, {
-        extraModels: [api_responses_decorator_1.BaseResponseDto, api_responses_decorator_1.PaginatedResponseDto, ...dtos],
+        extraModels: [response_dto_1.BaseResponseDto, paginate_response_dto_1.PaginationData, ...dtos],
     });
     swagger_1.SwaggerModule.setup('api-docs', app, document, {
         jsonDocumentUrl: '/api-docs-json',

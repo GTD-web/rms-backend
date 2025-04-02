@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { BaseResponseDto, PaginatedResponseDto } from '@libs/decorators/api-responses.decorator';
+import { BaseResponseDto } from '../dtos/response.dto';
+import { PaginationData } from '../dtos/paginate-response.dto';
 
 export function setupSwagger(app: INestApplication, dtos: any[]) {
     const config = new DocumentBuilder()
@@ -11,7 +12,7 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
         .build();
 
     const document = SwaggerModule.createDocument(app, config, {
-        extraModels: [BaseResponseDto, PaginatedResponseDto, ...dtos],
+        extraModels: [BaseResponseDto, PaginationData, ...dtos],
     });
 
     SwaggerModule.setup('api-docs', app, document, {

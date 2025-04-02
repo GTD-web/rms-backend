@@ -50,4 +50,8 @@ export class NotificationService {
     async delete(id: string): Promise<void> {
         // await this.notificationRepository.delete(id);
     }
+
+    async count(options?: RepositoryOptions): Promise<number> {
+        return await this.notificationRepository.count(options);
+    }
 }
