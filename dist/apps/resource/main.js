@@ -6345,9 +6345,23 @@ let ResourceUsecase = class ResourceUsecase {
                 'resourceManagers.employee',
             ],
         });
-        console.log('resource', resource);
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
+        }
+        if (resource.vehicleInfo && resource.vehicleInfo.consumables) {
+            const mileage = Number(resource.vehicleInfo.totalMileage);
+            resource.vehicleInfo.consumables.forEach((consumable) => {
+                const replaceCycle = Number(consumable.replaceCycle);
+                if (consumable.maintenances && consumable.maintenances.length > 0) {
+                    consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
+                        return {
+                            ...maintenance,
+                            mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                            maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                        };
+                    });
+                }
+            });
         }
         return resource;
     }
@@ -8046,6 +8060,14 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Array)
 ], MaintenanceResponseDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], MaintenanceResponseDto.prototype, "mileageFromLastMaintenance", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], MaintenanceResponseDto.prototype, "maintanceRequired", void 0);
 class ConsumableResponseDto {
 }
 exports.ConsumableResponseDto = ConsumableResponseDto;
@@ -8247,7 +8269,7 @@ let MaintenanceService = class MaintenanceService {
         return this.maintenanceRepository.save(createMaintenanceDto, repositoryOptions);
     }
     async findAll(repositoryOptions) {
-        return this.maintenanceRepository.findAll(repositoryOptions);
+        return await this.maintenanceRepository.findAll(repositoryOptions);
     }
     async findOne(repositoryOptions) {
         return this.maintenanceRepository.findOne(repositoryOptions);
@@ -8438,7 +8460,9 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         const result = await this.checkRole(consumableId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
-        return this.maintenanceService.findAll({ where: { consumableId } });
+        return this.maintenanceService.findAll({
+            where: { consumableId },
+        });
     }
     async findOne(user, maintenanceId) {
         const result = await this.checkRole(maintenanceId, user);

@@ -27,7 +27,9 @@ export class MaintenanceUsecase {
     async findAll(user: UserEntity, consumableId: string): Promise<Maintenance[]> {
         const result = await this.checkRole(consumableId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
-        return this.maintenanceService.findAll({ where: { consumableId } });
+        return this.maintenanceService.findAll({
+            where: { consumableId },
+        });
     }
 
     async findOne(user: UserEntity, maintenanceId: string): Promise<Maintenance> {

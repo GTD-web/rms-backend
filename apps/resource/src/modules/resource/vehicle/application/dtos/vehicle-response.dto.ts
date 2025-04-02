@@ -18,6 +18,12 @@ export class MaintenanceResponseDto {
 
     @ApiProperty()
     images: string[];
+
+    @ApiProperty()
+    mileageFromLastMaintenance?: number;
+
+    @ApiProperty()
+    maintanceRequired?: boolean;
 }
 
 export class ConsumableResponseDto {

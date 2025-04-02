@@ -149,10 +149,29 @@ export class ResourceUsecase {
                 'resourceManagers.employee',
             ],
         });
-        console.log('resource', resource);
+
         if (!resource) {
             throw new NotFoundException('Resource not found');
         }
+
+        // 관리자 페이지 내 자원 상세 페이지에서 사용하는 정비기록 관련 계산 필드 추가
+        if (resource.vehicleInfo && resource.vehicleInfo.consumables) {
+            const mileage = Number(resource.vehicleInfo.totalMileage);
+            resource.vehicleInfo.consumables.forEach((consumable) => {
+                const replaceCycle = Number(consumable.replaceCycle);
+                if (consumable.maintenances && consumable.maintenances.length > 0) {
+                    // 각 maintenance에 계산 필드 추가
+                    consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
+                        return {
+                            ...maintenance,
+                            mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                            maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                        };
+                    });
+                }
+            });
+        }
+
         return resource;
     }
 

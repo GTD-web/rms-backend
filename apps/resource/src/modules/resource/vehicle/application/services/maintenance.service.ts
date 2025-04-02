@@ -20,7 +20,7 @@ export class MaintenanceService {
     }
 
     async findAll(repositoryOptions?: RepositoryOptions): Promise<Maintenance[]> {
-        return this.maintenanceRepository.findAll(repositoryOptions);
+        return await this.maintenanceRepository.findAll(repositoryOptions);
     }
 
     async findOne(repositoryOptions?: RepositoryOptions): Promise<Maintenance | null> {
