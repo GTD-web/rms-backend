@@ -8338,24 +8338,58 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ConsumableUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let ConsumableUsecase = class ConsumableUsecase {
     constructor(consumableService) {
         this.consumableService = consumableService;
     }
-    async save(createConsumableDto, repositoryOptions) {
+    async save(user, createConsumableDto, repositoryOptions) {
+        const result = await this.checkRole(createConsumableDto.vehicleInfoId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return this.consumableService.save(createConsumableDto, repositoryOptions);
     }
-    async findAll(repositoryOptions) {
+    async findAll(user, repositoryOptions) {
+        const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return this.consumableService.findAll(repositoryOptions);
     }
-    async findOne(repositoryOptions) {
+    async findOne(user, repositoryOptions) {
+        const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return this.consumableService.findOne(repositoryOptions);
     }
-    async update(id, updateData, repositoryOptions) {
+    async update(user, id, updateData, repositoryOptions) {
+        const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return this.consumableService.update(id, updateData, repositoryOptions);
     }
-    async delete(id, repositoryOptions) {
+    async delete(user, id, repositoryOptions) {
+        const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return await this.consumableService.delete(id, repositoryOptions);
+    }
+    async checkRole(vehicleInfoId, user) {
+        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
+            return true;
+        const result = await this.consumableService.findOne({
+            where: {
+                vehicleInfoId: vehicleInfoId,
+                vehicleInfo: {
+                    resource: {
+                        resourceManagers: {
+                            employeeId: user.employeeId,
+                        },
+                    },
+                },
+            },
+            relations: ['vehicleInfo', 'vehicleInfo.resource', 'vehicleInfo.resource.resourceManagers'],
+        });
+        return !!result;
     }
 };
 exports.ConsumableUsecase = ConsumableUsecase;
@@ -8387,30 +8421,72 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const maintenance_service_1 = __webpack_require__(/*! ../services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let MaintenanceUsecase = class MaintenanceUsecase {
     constructor(maintenanceService) {
         this.maintenanceService = maintenanceService;
     }
-    async save(createMaintenanceDto) {
+    async save(user, createMaintenanceDto) {
+        const result = await this.checkRole(createMaintenanceDto.consumableId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return this.maintenanceService.save(createMaintenanceDto);
     }
-    async findAll(consumableId) {
+    async findAll(user, consumableId) {
+        const result = await this.checkRole(consumableId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return this.maintenanceService.findAll({ where: { consumableId } });
     }
-    async findOne(maintenanceId) {
+    async findOne(user, maintenanceId) {
+        const result = await this.checkRole(maintenanceId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return this.maintenanceService.findOne({ where: { maintenanceId } });
     }
-    async update(maintenanceId, updateMaintenanceDto, repositoryOptions) {
+    async update(user, maintenanceId, updateMaintenanceDto, repositoryOptions) {
+        const result = await this.checkRole(maintenanceId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return this.maintenanceService.update(maintenanceId, updateMaintenanceDto, repositoryOptions);
     }
-    async delete(maintenanceId, repositoryOptions) {
+    async delete(user, maintenanceId, repositoryOptions) {
+        const result = await this.checkRole(maintenanceId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
         return await this.maintenanceService.delete(maintenanceId, repositoryOptions);
+    }
+    async checkRole(consumableId, user) {
+        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
+            return true;
+        const result = await this.maintenanceService.findOne({
+            where: {
+                consumableId: consumableId,
+                consumable: {
+                    vehicleInfo: {
+                        resource: {
+                            resourceManagers: {
+                                employeeId: user.employeeId,
+                            },
+                        },
+                    },
+                },
+            },
+            relations: [
+                'consumable',
+                'consumable.vehicleInfo',
+                'consumable.vehicleInfo.resource',
+                'consumable.vehicleInfo.resource.resourceManagers',
+            ],
+        });
+        return !!result;
     }
 };
 exports.MaintenanceUsecase = MaintenanceUsecase;
 exports.MaintenanceUsecase = MaintenanceUsecase = __decorate([
-    (0, common_1.Injectable)(),
+    (0, common_2.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _a : Object])
 ], MaintenanceUsecase);
 1;
@@ -8586,7 +8662,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ConsumableController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -8596,16 +8672,20 @@ const create_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/reso
 const update_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/update-vehicle-info.dto.ts");
 const vehicle_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/vehicle-response.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/vehicle-response.dto.ts");
 const consumable_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/consumable.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/consumable.usecase.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 let ConsumableController = class ConsumableController {
     constructor(consumableUsecase) {
         this.consumableUsecase = consumableUsecase;
     }
-    async create(createConsumableDto) {
-        const consumable = await this.consumableUsecase.save(createConsumableDto);
+    async create(user, createConsumableDto) {
+        const consumable = await this.consumableUsecase.save(user, createConsumableDto);
         return consumable;
     }
-    async findAll(vehicleInfoId) {
-        const consumables = await this.consumableUsecase.findAll({
+    async findAll(user, vehicleInfoId) {
+        const consumables = await this.consumableUsecase.findAll(user, {
             where: {
                 vehicleInfoId: vehicleInfoId,
             },
@@ -8618,8 +8698,8 @@ let ConsumableController = class ConsumableController {
             notifyReplacementCycle: consumable.notifyReplacementCycle,
         }));
     }
-    async findOne(consumableId) {
-        const consumable = await this.consumableUsecase.findOne({
+    async findOne(user, consumableId) {
+        const consumable = await this.consumableUsecase.findOne(user, {
             where: {
                 consumableId: consumableId,
             },
@@ -8641,8 +8721,8 @@ let ConsumableController = class ConsumableController {
             })),
         };
     }
-    async update(consumableId, updateConsumableDto) {
-        const consumable = await this.consumableUsecase.update(consumableId, updateConsumableDto);
+    async update(consumableId, user, updateConsumableDto) {
+        const consumable = await this.consumableUsecase.update(user, consumableId, updateConsumableDto);
         return {
             consumableId: consumable.consumableId,
             vehicleInfoId: consumable.vehicleInfoId,
@@ -8651,56 +8731,63 @@ let ConsumableController = class ConsumableController {
             notifyReplacementCycle: consumable.notifyReplacementCycle,
         };
     }
-    async remove(consumableId) {
-        await this.consumableUsecase.delete(consumableId);
+    async remove(user, consumableId) {
+        await this.consumableUsecase.delete(user, consumableId);
     }
 };
 exports.ConsumableController = ConsumableController;
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Post)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 등록' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 201,
         description: '소모품이 성공적으로 등록되었습니다.',
         type: vehicle_response_dto_1.ConsumableResponseDto,
     }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof create_vehicle_info_dto_1.CreateConsumableDto !== "undefined" && create_vehicle_info_dto_1.CreateConsumableDto) === "function" ? _b : Object]),
-    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof create_vehicle_info_dto_1.CreateConsumableDto !== "undefined" && create_vehicle_info_dto_1.CreateConsumableDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], ConsumableController.prototype, "create", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
-    (0, common_1.Get)(),
+    (0, common_1.Get)(':vehicleInfoId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
         description: '소모품 목록을 성공적으로 조회했습니다.',
         type: [vehicle_response_dto_1.ConsumableResponseDto],
     }),
-    __param(0, (0, common_1.Param)('vehicleInfoId')),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('vehicleInfoId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, String]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], ConsumableController.prototype, "findAll", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(':consumableId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 상세 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
         description: '소모품을 성공적으로 조회했습니다.',
         type: vehicle_response_dto_1.ConsumableResponseDto,
     }),
-    __param(0, (0, common_1.Param)('consumableId')),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('consumableId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+    __metadata("design:paramtypes", [typeof (_g = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _g : Object, String]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], ConsumableController.prototype, "findOne", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)(':consumableId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -8708,27 +8795,31 @@ __decorate([
         type: vehicle_response_dto_1.ConsumableResponseDto,
     }),
     __param(0, (0, common_1.Param)('consumableId')),
-    __param(1, (0, common_1.Body)()),
+    __param(1, (0, user_decorator_1.User)()),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_f = typeof update_vehicle_info_dto_1.UpdateConsumableDto !== "undefined" && update_vehicle_info_dto_1.UpdateConsumableDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [String, typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, typeof (_k = typeof update_vehicle_info_dto_1.UpdateConsumableDto !== "undefined" && update_vehicle_info_dto_1.UpdateConsumableDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ConsumableController.prototype, "update", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Delete)(':consumableId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
         description: '소모품이 성공적으로 삭제되었습니다.',
     }),
-    __param(0, (0, common_1.Param)('consumableId')),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('consumableId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+    __metadata("design:paramtypes", [typeof (_m = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _m : Object, String]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], ConsumableController.prototype, "remove", null);
 exports.ConsumableController = ConsumableController = __decorate([
     (0, swagger_1.ApiTags)('차량 소모품'),
     (0, common_1.Controller)('consumables'),
+    (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof consumable_usecase_1.ConsumableUsecase !== "undefined" && consumable_usecase_1.ConsumableUsecase) === "function" ? _a : Object])
 ], ConsumableController);
 
@@ -8754,7 +8845,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -8764,70 +8855,81 @@ const create_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/reso
 const update_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/update-vehicle-info.dto.ts");
 const vehicle_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/vehicle-response.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/vehicle-response.dto.ts");
 const maintenance_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/maintenance.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/maintenance.usecase.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let MaintenanceController = class MaintenanceController {
     constructor(maintenanceUsecase) {
         this.maintenanceUsecase = maintenanceUsecase;
     }
-    async create(createMaintenanceDto) {
-        return this.maintenanceUsecase.save(createMaintenanceDto);
+    async create(user, createMaintenanceDto) {
+        return this.maintenanceUsecase.save(user, createMaintenanceDto);
     }
-    async findAll(consumableId) {
-        return this.maintenanceUsecase.findAll(consumableId);
+    async findAll(user, consumableId) {
+        return this.maintenanceUsecase.findAll(user, consumableId);
     }
-    async findOne(maintenanceId) {
-        return this.maintenanceUsecase.findOne(maintenanceId);
+    async findOne(user, maintenanceId) {
+        return this.maintenanceUsecase.findOne(user, maintenanceId);
     }
-    async update(maintenanceId, updateMaintenanceDto) {
-        return this.maintenanceUsecase.update(maintenanceId, updateMaintenanceDto);
+    async update(maintenanceId, updateMaintenanceDto, user) {
+        return this.maintenanceUsecase.update(user, maintenanceId, updateMaintenanceDto);
     }
-    async remove(maintenanceId) {
-        return this.maintenanceUsecase.delete(maintenanceId);
+    async remove(user, maintenanceId) {
+        return this.maintenanceUsecase.delete(user, maintenanceId);
     }
 };
 exports.MaintenanceController = MaintenanceController;
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Post)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 생성' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 201,
         description: '정비 이력이 생성되었습니다.',
         type: vehicle_response_dto_1.MaintenanceResponseDto,
     }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof create_vehicle_info_dto_1.CreateMaintenanceDto !== "undefined" && create_vehicle_info_dto_1.CreateMaintenanceDto) === "function" ? _b : Object]),
-    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof create_vehicle_info_dto_1.CreateMaintenanceDto !== "undefined" && create_vehicle_info_dto_1.CreateMaintenanceDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], MaintenanceController.prototype, "create", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(':consumableId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '정비 이력 목록을 조회했습니다.',
         type: [vehicle_response_dto_1.MaintenanceResponseDto],
     }),
-    __param(0, (0, common_1.Param)('consumableId')),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('consumableId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, String]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], MaintenanceController.prototype, "findAll", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(':maintenanceId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 상세 이력 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '정비 상세 이력을 조회했습니다.',
         type: vehicle_response_dto_1.MaintenanceResponseDto,
     }),
-    __param(0, (0, common_1.Param)('maintenanceId')),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('maintenanceId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+    __metadata("design:paramtypes", [typeof (_g = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _g : Object, String]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], MaintenanceController.prototype, "findOne", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)(':maintenanceId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '정비 이력이 수정되었습니다.',
@@ -8835,25 +8937,29 @@ __decorate([
     }),
     __param(0, (0, common_1.Param)('maintenanceId')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, user_decorator_1.User)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_f = typeof update_vehicle_info_dto_1.UpdateMaintenanceDto !== "undefined" && update_vehicle_info_dto_1.UpdateMaintenanceDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [String, typeof (_j = typeof update_vehicle_info_dto_1.UpdateMaintenanceDto !== "undefined" && update_vehicle_info_dto_1.UpdateMaintenanceDto) === "function" ? _j : Object, typeof (_k = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], MaintenanceController.prototype, "update", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Delete)(':maintenanceId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '정비 이력이 삭제되었습니다.',
     }),
-    __param(0, (0, common_1.Param)('maintenanceId')),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('maintenanceId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+    __metadata("design:paramtypes", [typeof (_m = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _m : Object, String]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], MaintenanceController.prototype, "remove", null);
 exports.MaintenanceController = MaintenanceController = __decorate([
     (0, swagger_1.ApiTags)('정비 이력'),
     (0, common_1.Controller)('maintenances'),
+    (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof maintenance_usecase_1.MaintenanceUsecase !== "undefined" && maintenance_usecase_1.MaintenanceUsecase) === "function" ? _a : Object])
 ], MaintenanceController);
 
@@ -11009,10 +11115,13 @@ let RolesGuard = class RolesGuard {
             context.getHandler(),
             context.getClass(),
         ]);
+        console.log(requiredRoles);
         if (!requiredRoles) {
             return true;
         }
+        console.log('here');
         const { user } = context.switchToHttp().getRequest();
+        console.log(user);
         return requiredRoles.some((role) => user.roles?.includes(role));
     }
 };
