@@ -34,7 +34,7 @@ import { error } from 'console';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { Role } from '@libs/enums/role-type.enum';
 import { CronJob } from 'cron/dist';
-import { SchedulerRegistry } from '@nestjs/schedule';
+import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class ReservationUsecase {
@@ -66,6 +66,19 @@ export class ReservationUsecase {
         });
         for (const reservation of reservations) {
             this.createReservationClosingJob(reservation);
+        }
+    }
+
+    async handleCron() {
+        const now = DateUtil.now().format();
+        const notClosedReservations = await this.reservationService.findAll({
+            where: {
+                status: ReservationStatus.CONFIRMED,
+                endDate: LessThanOrEqual(DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of notClosedReservations) {
+            await this.reservationService.update(reservation.reservationId, { status: ReservationStatus.CLOSED });
         }
     }
 

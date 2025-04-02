@@ -4092,6 +4092,18 @@ let ReservationUsecase = class ReservationUsecase {
             this.createReservationClosingJob(reservation);
         }
     }
+    async handleCron() {
+        const now = date_util_1.DateUtil.now().format();
+        const notClosedReservations = await this.reservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                endDate: (0, typeorm_1.LessThanOrEqual)(date_util_1.DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of notClosedReservations) {
+            await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+        }
+    }
     async makeReservation(user, createDto) {
         const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.date(createDto.startDate).toDate(), date_util_1.DateUtil.date(createDto.endDate).toDate());
         if (conflicts.length > 0) {
@@ -4514,6 +4526,7 @@ const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-
 const reservation_response_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/reservation-response.dto */ "./apps/resource/src/modules/reservation/application/dtos/reservation-response.dto.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
 let ReservationController = class ReservationController {
     constructor(reservationUsecase) {
         this.reservationUsecase = reservationUsecase;
@@ -4552,6 +4565,9 @@ let ReservationController = class ReservationController {
     async updateCcReceipient(user, reservationId, updateDto) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateCcReceipient(reservationId, updateDto);
+    }
+    async closeReservation() {
+        return this.reservationUsecase.handleCron();
     }
 };
 exports.ReservationController = ReservationController;
@@ -4734,6 +4750,14 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_3 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _3 : Object, String, typeof (_4 = typeof dtos_index_1.UpdateReservationCcReceipientDto !== "undefined" && dtos_index_1.UpdateReservationCcReceipientDto) === "function" ? _4 : Object]),
     __metadata("design:returntype", typeof (_5 = typeof Promise !== "undefined" && Promise) === "function" ? _5 : Object)
 ], ReservationController.prototype, "updateCcReceipient", null);
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('cron-job/close'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ReservationController.prototype, "closeReservation", null);
 exports.ReservationController = ReservationController = __decorate([
     (0, swagger_1.ApiTags)('예약'),
     (0, common_1.Controller)('reservations'),
@@ -9618,7 +9642,6 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
-        synchronize: configService.get('NODE_ENV') === 'local',
         logging: configService.get('NODE_ENV') === 'local',
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
@@ -11271,13 +11294,10 @@ let RolesGuard = class RolesGuard {
             context.getHandler(),
             context.getClass(),
         ]);
-        console.log(requiredRoles);
         if (!requiredRoles) {
             return true;
         }
-        console.log('here');
         const { user } = context.switchToHttp().getRequest();
-        console.log(user);
         return requiredRoles.some((role) => user.roles?.includes(role));
     }
 };

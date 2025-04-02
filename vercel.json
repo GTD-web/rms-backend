@@ -11,5 +11,11 @@
             "src": "/(.*)",
             "dest": "dist/apps/resource/main.js"
         }
+    ],
+    "cron": [
+        {
+            "path": "/api/reservations/cron-job/close",
+            "schedule": "0 1,31 * * * *"
+        }
     ]
 }

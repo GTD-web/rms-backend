@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Delete, Body, Param, Patch, Query, ParseArrayPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { CreateReservationDto } from '../../../../../application/dtos/create-reservation.dto';
@@ -25,6 +25,7 @@ import {
 import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { Public } from '@libs/decorators/public.decorator';
 
 @ApiTags('예약')
 @Controller('reservations')
@@ -216,5 +217,12 @@ export class ReservationController {
     ): Promise<ReservationResponseDto> {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateCcReceipient(reservationId, updateDto);
+    }
+
+    @ApiExcludeEndpoint()
+    @Public()
+    @Get('cron-job/close')
+    async closeReservation() {
+        return this.reservationUsecase.handleCron();
     }
 }
