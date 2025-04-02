@@ -15,7 +15,11 @@
     "crons": [
         {
             "path": "/api/reservations/cron-job/close",
-            "schedule": "0 1,31 * * * *"
+            "schedule": "1 * * * *"
+        },
+        {
+            "path": "/api/reservations/cron-job/close",
+            "schedule": "31 * * * *"
         }
     ]
 }
