@@ -2862,6 +2862,10 @@ let NotificationUsecase = class NotificationUsecase {
                 createNotificationDto.title = `[예약 취소] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
                 break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED:
+                createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
             case notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED:
                 createNotificationDto.title = `[참가자 변경] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
@@ -4011,7 +4015,7 @@ let ReservationService = class ReservationService {
         return await this.findAll({
             where: {
                 resourceId,
-                startDate: (0, typeorm_1.LessThanOrEqual)(endDate),
+                startDate: (0, typeorm_1.LessThan)(endDate),
                 endDate: (0, typeorm_1.MoreThanOrEqual)(startDate),
                 status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
             },
@@ -4044,7 +4048,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -4056,12 +4060,37 @@ const reservation_service_1 = __webpack_require__(/*! ../services/reservation.se
 const participant_service_1 = __webpack_require__(/*! ../services/participant.service */ "./apps/resource/src/modules/reservation/application/services/participant.service.ts");
 const notification_usecase_1 = __webpack_require__(/*! @resource/modules/notification/application/usecases/notification.usecase */ "./apps/resource/src/modules/notification/application/usecases/notification.usecase.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const dist_1 = __webpack_require__(/*! cron/dist */ "cron/dist");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
 let ReservationUsecase = class ReservationUsecase {
-    constructor(reservationService, participantService, dataSource, notificationUsecase) {
+    constructor(reservationService, participantService, dataSource, notificationUsecase, schedulerRegistry) {
         this.reservationService = reservationService;
         this.participantService = participantService;
         this.dataSource = dataSource;
         this.notificationUsecase = notificationUsecase;
+        this.schedulerRegistry = schedulerRegistry;
+    }
+    async onModuleInit() {
+        const now = date_util_1.DateUtil.now().format();
+        const notClosedReservations = await this.reservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                endDate: (0, typeorm_1.LessThanOrEqual)(date_util_1.DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of notClosedReservations) {
+            await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+        }
+        const reservations = await this.reservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of reservations) {
+            this.createReservationClosingJob(reservation);
+        }
     }
     async makeReservation(user, createDto) {
         const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.date(createDto.startDate).toDate(), date_util_1.DateUtil.date(createDto.endDate).toDate());
@@ -4096,6 +4125,7 @@ let ReservationUsecase = class ReservationUsecase {
                     relations: ['resource'],
                 });
                 if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                    this.createReservationClosingJob(reservationWithResource);
                     const notiTarget = [...createDto.participantIds, user.employeeId];
                     await this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, {
                         reservationId: reservationWithResource.reservationId,
@@ -4266,18 +4296,6 @@ let ReservationUsecase = class ReservationUsecase {
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
     async updateTime(reservationId, updateDto) {
-        const reservation = await this.reservationService.findOne({ where: { reservationId } });
-        if (!reservation) {
-            throw new common_1.NotFoundException('Reservation not found');
-        }
-        const updatedReservation = await this.reservationService.update(reservationId, {
-            ...updateDto,
-            startDate: date_util_1.DateUtil.date(updateDto.startDate).toDate(),
-            endDate: date_util_1.DateUtil.date(updateDto.endDate).toDate(),
-        });
-        return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
-    }
-    async updateStatus(reservationId, updateDto, employeeId, isAdmin) {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['resource'],
@@ -4285,15 +4303,41 @@ let ReservationUsecase = class ReservationUsecase {
         if (!reservation) {
             throw new common_1.NotFoundException('Reservation not found');
         }
-        const reserver = await this.participantService.findAll({
-            where: { reservationId },
+        this.deleteReservationClosingJob(reservationId);
+        const updatedReservation = await this.reservationService.update(reservationId, {
+            ...updateDto,
+            startDate: date_util_1.DateUtil.date(updateDto.startDate).toDate(),
+            endDate: date_util_1.DateUtil.date(updateDto.endDate).toDate(),
         });
-        const isMyReservation = reserver.some((participant) => participant.employeeId === employeeId);
-        if (isMyReservation || isAdmin) {
+        if (updatedReservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+            this.createReservationClosingJob(updatedReservation);
+        }
+        return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
+    }
+    async updateStatus(reservationId, updateDto, user) {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['resource'],
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException('Reservation not found');
+        }
+        const allowed = user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN) ||
+            (await this.checkReservationAccess(reservationId, user.employeeId));
+        if (allowed) {
+            if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELLED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
+                this.deleteReservationClosingJob(reservationId);
+            }
             const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+            if (updateDto.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                this.createReservationClosingJob(updatedReservation);
+            }
             if (reservation.resource.notifyReservationChange) {
                 try {
-                    const notiTarget = reserver.map((participant) => participant.employeeId);
+                    const reservers = await this.participantService.findAll({
+                        where: { reservationId },
+                    });
+                    const notiTarget = reservers.map((reserver) => reserver.employeeId);
                     let notificationType;
                     switch (updateDto.status) {
                         case reservation_type_enum_1.ReservationStatus.CONFIRMED:
@@ -4301,6 +4345,9 @@ let ReservationUsecase = class ReservationUsecase {
                             break;
                         case reservation_type_enum_1.ReservationStatus.CANCELLED:
                             notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED;
+                            break;
+                        case reservation_type_enum_1.ReservationStatus.REJECTED:
+                            notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED;
                             break;
                     }
                     await this.notificationUsecase.createNotification(notificationType, {
@@ -4368,11 +4415,39 @@ let ReservationUsecase = class ReservationUsecase {
         });
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
+    deleteReservationClosingJob(reservationId) {
+        const jobName = `closing-${reservationId}`;
+        try {
+            if (this.schedulerRegistry.doesExist('cron', jobName)) {
+                this.schedulerRegistry.deleteCronJob(jobName);
+                console.log(`Job ${jobName} deleted successfully`);
+            }
+        }
+        catch (error) {
+            console.log(`Failed to delete job ${jobName}: ${error.message}`);
+        }
+    }
+    async createReservationClosingJob(reservation) {
+        const jobName = `closing-${reservation.reservationId}`;
+        const executeTime = date_util_1.DateUtil.date(reservation.endDate).toDate();
+        if (executeTime.getTime() <= Date.now()) {
+            console.log(`ExecuteTime time ${executeTime} is in the past, skipping cron job creation`);
+            await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+            return;
+        }
+        this.deleteReservationClosingJob(reservation.reservationId);
+        const job = new dist_1.CronJob(executeTime, async () => {
+            await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+        });
+        this.schedulerRegistry.addCronJob(jobName, job);
+        console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
+        job.start();
+    }
 };
 exports.ReservationUsecase = ReservationUsecase;
 exports.ReservationUsecase = ReservationUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _a : Object, typeof (_b = typeof participant_service_1.ParticipantService !== "undefined" && participant_service_1.ParticipantService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object, typeof (_d = typeof notification_usecase_1.NotificationUsecase !== "undefined" && notification_usecase_1.NotificationUsecase) === "function" ? _d : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _a : Object, typeof (_b = typeof participant_service_1.ParticipantService !== "undefined" && participant_service_1.ParticipantService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object, typeof (_d = typeof notification_usecase_1.NotificationUsecase !== "undefined" && notification_usecase_1.NotificationUsecase) === "function" ? _d : Object, typeof (_e = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _e : Object])
 ], ReservationUsecase);
 
 
@@ -4468,8 +4543,7 @@ let ReservationController = class ReservationController {
         return this.reservationUsecase.updateTime(reservationId, updateDto);
     }
     async updateStatus(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateStatus(reservationId, updateDto, user.employeeId, user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN));
+        return this.reservationUsecase.updateStatus(reservationId, updateDto, user);
     }
     async updateParticipants(user, reservationId, updateDto) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
@@ -4784,6 +4858,7 @@ const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ReservationRepository = class ReservationRepository {
     constructor(repository) {
@@ -4799,7 +4874,10 @@ let ReservationRepository = class ReservationRepository {
         reservation.isAllDay = createDto.isAllDay;
         reservation.notifyBeforeStart = createDto.notifyBeforeStart;
         reservation.notifyMinutesBeforeStart = createDto.notifyMinutesBeforeStart;
-        reservation.status = reservation_type_enum_1.ReservationStatus.CONFIRMED;
+        reservation.status =
+            createDto.resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION
+                ? reservation_type_enum_1.ReservationStatus.PENDING
+                : reservation_type_enum_1.ReservationStatus.CONFIRMED;
         return reservation;
     }
     async save(reservation, repositoryOptions) {
@@ -9540,6 +9618,7 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
+        synchronize: configService.get('NODE_ENV') === 'local',
         logging: configService.get('NODE_ENV') === 'local',
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
@@ -11039,6 +11118,7 @@ var NotificationType;
 (function (NotificationType) {
     NotificationType["RESERVATION_STATUS_CONFIRMED"] = "RESERVATION_STATUS_CONFIRMED";
     NotificationType["RESERVATION_STATUS_CANCELLED"] = "RESERVATION_STATUS_CANCELLED";
+    NotificationType["RESERVATION_STATUS_REJECTED"] = "RESERVATION_STATUS_REJECTED";
     NotificationType["RESERVATION_DATE_UPCOMING"] = "RESERVATION_DATE_UPCOMING";
     NotificationType["RESERVATION_PARTICIPANT_CHANGED"] = "RESERVATION_PARTICIPANT_CHANGED";
     NotificationType["RESOURCE_CONSUMABLE_REPLACING"] = "RESOURCE_CONSUMABLE_REPLACING";
@@ -11062,6 +11142,7 @@ var ReservationStatus;
     ReservationStatus["CONFIRMED"] = "CONFIRMED";
     ReservationStatus["CANCELLED"] = "CANCELLED";
     ReservationStatus["REJECTED"] = "REJECTED";
+    ReservationStatus["CLOSED"] = "CLOSED";
 })(ReservationStatus || (exports.ReservationStatus = ReservationStatus = {}));
 var ParticipantsType;
 (function (ParticipantsType) {
@@ -12063,6 +12144,16 @@ module.exports = require("class-validator");
 /***/ ((module) => {
 
 module.exports = require("cron");
+
+/***/ }),
+
+/***/ "cron/dist":
+/*!****************************!*\
+  !*** external "cron/dist" ***!
+  \****************************/
+/***/ ((module) => {
+
+module.exports = require("cron/dist");
 
 /***/ }),
 

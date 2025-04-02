@@ -183,13 +183,7 @@ export class ReservationController {
         @Param('reservationId') reservationId: string,
         @Body() updateDto: UpdateReservationStatusDto,
     ): Promise<ReservationResponseDto> {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateStatus(
-            reservationId,
-            updateDto,
-            user.employeeId,
-            user.roles.includes(Role.RESOURCE_ADMIN),
-        );
+        return this.reservationUsecase.updateStatus(reservationId, updateDto, user);
     }
 
     @ApiTags('sprint0.1')

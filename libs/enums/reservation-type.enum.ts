@@ -3,6 +3,7 @@ export enum ReservationStatus {
     CONFIRMED = 'CONFIRMED', // 예약완료
     CANCELLED = 'CANCELLED', // 예약취소
     REJECTED = 'REJECTED', // 예약반려
+    CLOSED = 'CLOSED', // 예약종료
 }
 
 export enum ParticipantsType {

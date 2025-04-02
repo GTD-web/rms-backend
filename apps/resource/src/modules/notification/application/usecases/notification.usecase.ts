@@ -142,6 +142,10 @@ export class NotificationUsecase {
                 createNotificationDto.title = `[예약 취소] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
                 break;
+            case NotificationType.RESERVATION_STATUS_REJECTED:
+                createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
             case NotificationType.RESERVATION_PARTICIPANT_CHANGED:
                 createNotificationDto.title = `[참가자 변경] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;

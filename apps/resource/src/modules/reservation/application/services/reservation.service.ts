@@ -2,7 +2,7 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ReservationRepositoryPort } from '../../domain/ports/reservation.repository.port';
 import { Reservation } from '@libs/entities';
 import { ReservationResponseDto } from '../dtos/reservation-response.dto';
-import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { LessThan, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
@@ -56,7 +56,7 @@ export class ReservationService {
         return await this.findAll({
             where: {
                 resourceId,
-                startDate: LessThanOrEqual(endDate),
+                startDate: LessThan(endDate),
                 endDate: MoreThanOrEqual(startDate),
                 status: ReservationStatus.CONFIRMED,
             },

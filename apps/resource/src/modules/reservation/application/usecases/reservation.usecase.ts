@@ -13,7 +13,7 @@ import {
     ReservationWithResourceResponseDto,
 } from '../dtos/reservation-response.dto';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
-import { DataSource, FindOptionsWhere, LessThan, MoreThan, In, Between } from 'typeorm';
+import { DataSource, FindOptionsWhere, LessThan, MoreThan, In, Between, LessThanOrEqual } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { ReservationService } from '../services/reservation.service';
 import { ParticipantService } from '../services/participant.service';
@@ -32,6 +32,9 @@ import { NotificationUsecase } from '@resource/modules/notification/application/
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { error } from 'console';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { Role } from '@libs/enums/role-type.enum';
+import { CronJob } from 'cron/dist';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class ReservationUsecase {
@@ -40,7 +43,31 @@ export class ReservationUsecase {
         private readonly participantService: ParticipantService,
         private readonly dataSource: DataSource,
         private readonly notificationUsecase: NotificationUsecase,
+        private readonly schedulerRegistry: SchedulerRegistry,
     ) {}
+
+    async onModuleInit() {
+        const now = DateUtil.now().format();
+        const notClosedReservations = await this.reservationService.findAll({
+            where: {
+                status: ReservationStatus.CONFIRMED,
+                endDate: LessThanOrEqual(DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of notClosedReservations) {
+            await this.reservationService.update(reservation.reservationId, { status: ReservationStatus.CLOSED });
+        }
+
+        const reservations = await this.reservationService.findAll({
+            where: {
+                status: ReservationStatus.CONFIRMED,
+                endDate: MoreThan(DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of reservations) {
+            this.createReservationClosingJob(reservation);
+        }
+    }
 
     async makeReservation(user: User, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
         const conflicts = await this.reservationService.findConflictingReservations(
@@ -97,6 +124,8 @@ export class ReservationUsecase {
                 });
 
                 if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
+                    this.createReservationClosingJob(reservationWithResource);
+
                     const notiTarget = [...createDto.participantIds, user.employeeId];
                     await this.notificationUsecase.createNotification(
                         NotificationType.RESERVATION_STATUS_CONFIRMED,
@@ -321,24 +350,35 @@ export class ReservationUsecase {
     }
 
     async updateTime(reservationId: string, updateDto: UpdateReservationTimeDto): Promise<ReservationResponseDto> {
-        const reservation = await this.reservationService.findOne({ where: { reservationId } });
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['resource'],
+        });
         if (!reservation) {
             throw new NotFoundException('Reservation not found');
         }
+
+        // 기존 Job 삭제
+        this.deleteReservationClosingJob(reservationId);
 
         const updatedReservation = await this.reservationService.update(reservationId, {
             ...updateDto,
             startDate: DateUtil.date(updateDto.startDate).toDate(),
             endDate: DateUtil.date(updateDto.endDate).toDate(),
         });
+
+        // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
+        if (updatedReservation.status === ReservationStatus.CONFIRMED) {
+            this.createReservationClosingJob(updatedReservation);
+        }
+
         return new ReservationResponseDto(updatedReservation);
     }
 
     async updateStatus(
         reservationId: string,
         updateDto: UpdateReservationStatusDto,
-        employeeId: string,
-        isAdmin: boolean,
+        user: User,
     ): Promise<ReservationResponseDto> {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
@@ -348,17 +388,29 @@ export class ReservationUsecase {
             throw new NotFoundException('Reservation not found');
         }
 
-        const reserver = await this.participantService.findAll({
-            where: { reservationId },
-        });
-        const isMyReservation = reserver.some((participant) => participant.employeeId === employeeId);
+        const allowed =
+            user.roles.includes(Role.SYSTEM_ADMIN) ||
+            (await this.checkReservationAccess(reservationId, user.employeeId));
 
-        if (isMyReservation || isAdmin) {
+        if (allowed) {
+            // 상태가 CANCELLED 또는 REJECTED인 경우 Job 삭제
+            if (updateDto.status === ReservationStatus.CANCELLED || updateDto.status === ReservationStatus.REJECTED) {
+                this.deleteReservationClosingJob(reservationId);
+            }
+
             const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+
+            // 상태가 CONFIRMED로 변경된 경우 새로운 Job 생성
+            if (updateDto.status === ReservationStatus.CONFIRMED) {
+                this.createReservationClosingJob(updatedReservation);
+            }
 
             if (reservation.resource.notifyReservationChange) {
                 try {
-                    const notiTarget = reserver.map((participant) => participant.employeeId);
+                    const reservers = await this.participantService.findAll({
+                        where: { reservationId },
+                    });
+                    const notiTarget = reservers.map((reserver) => reserver.employeeId);
 
                     let notificationType: NotificationType;
                     switch (updateDto.status) {
@@ -368,9 +420,9 @@ export class ReservationUsecase {
                         case ReservationStatus.CANCELLED:
                             notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
                             break;
-                        // case ReservationStatus.REJECTED:
-                        //     notificationType = NotificationType.RESERVATION_REJECTED;
-                        //     break;
+                        case ReservationStatus.REJECTED:
+                            notificationType = NotificationType.RESERVATION_STATUS_REJECTED;
+                            break;
                     }
 
                     await this.notificationUsecase.createNotification(
@@ -478,5 +530,41 @@ export class ReservationUsecase {
             relations: ['participants'],
         });
         return new ReservationResponseDto(updatedReservation);
+    }
+
+    // 이 아래에 Job 삭제 메서드 추가
+    private deleteReservationClosingJob(reservationId: string): void {
+        const jobName = `closing-${reservationId}`;
+        try {
+            if (this.schedulerRegistry.doesExist('cron', jobName)) {
+                this.schedulerRegistry.deleteCronJob(jobName);
+                console.log(`Job ${jobName} deleted successfully`);
+            }
+        } catch (error) {
+            console.log(`Failed to delete job ${jobName}: ${error.message}`);
+        }
+    }
+
+    private async createReservationClosingJob(reservation: Reservation): Promise<void> {
+        const jobName = `closing-${reservation.reservationId}`;
+        const executeTime = DateUtil.date(reservation.endDate).toDate();
+
+        // 과거 시간 체크
+        if (executeTime.getTime() <= Date.now()) {
+            console.log(`ExecuteTime time ${executeTime} is in the past, skipping cron job creation`);
+            await this.reservationService.update(reservation.reservationId, { status: ReservationStatus.CLOSED });
+            return;
+        }
+
+        // 기존 Job이 있다면 삭제
+        this.deleteReservationClosingJob(reservation.reservationId);
+
+        const job = new CronJob(executeTime, async () => {
+            await this.reservationService.update(reservation.reservationId, { status: ReservationStatus.CLOSED });
+        });
+
+        this.schedulerRegistry.addCronJob(jobName, job as any);
+        console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
+        job.start();
     }
 }
