@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { FileRepositoryPort } from '../../domain/ports/file.repository.port';
 import { FileStoragePort } from '../../domain/ports/file-storage.port';
 import { ConfigService } from '@nestjs/config';
@@ -19,6 +19,11 @@ export class FileService {
         return file;
     }
 
+    async findFileByFilePath(filePath: string): Promise<File> {
+        const file = await this.fileRepository.findByFilePath(filePath);
+        return file;
+    }
+
     async saveFile(file: File): Promise<File> {
         const savedFile = await this.fileRepository.save(file);
         return savedFile;
@@ -30,11 +35,19 @@ export class FileService {
         return savedFile;
     }
 
-    async deleteFile(fileId: string): Promise<void> {
-        const file = await this.findFileById(fileId);
-        if (!file) throw new NotFoundException('File not found');
+    async deleteFile({ fileId, filePath }: { fileId?: string; filePath?: string }): Promise<void> {
+        let file: File;
+        if (fileId) {
+            file = await this.findFileById(fileId);
+            if (!file) throw new NotFoundException('File not found');
+        } else if (filePath) {
+            file = await this.findFileByFilePath(filePath);
+            if (!file) throw new NotFoundException('File not found');
+        } else {
+            throw new BadRequestException('fileId or filePath is required');
+        }
 
         await this.fileStorage.deleteFile(file);
-        await this.fileRepository.delete(fileId);
+        await this.fileRepository.delete(file.fileId);
     }
 }

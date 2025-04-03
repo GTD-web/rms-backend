@@ -1,7 +1,7 @@
-import { Controller, Post, UseInterceptors, UploadedFile, Delete, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, Delete, Param, UseGuards, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from '@resource/modules/file/application/services/file.service';
-import { ApiTags, ApiConsumes, ApiBody, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiConsumes, ApiBody, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { Public } from '@libs/decorators/public.decorator';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { FileResponseDto } from '@resource/modules/file/application/dtos/file-response.dto';
@@ -34,11 +34,21 @@ export class FileController {
         return this.fileService.uploadFile(file);
     }
 
+    // @ApiTags('sprint0.1')
+    // @Delete(':fileId')
+    // @ApiOperation({ summary: '파일 삭제' })
+    // @ApiDataResponse({ status: 200, description: '파일 삭제 성공' })
+    // async deleteFile(@Param('fileId') fileId: string) {
+    //     await this.fileService.deleteFile(fileId);
+    // }
+
     @ApiTags('sprint0.1')
-    @Delete(':fileId')
+    @Delete('')
     @ApiOperation({ summary: '파일 삭제' })
     @ApiDataResponse({ status: 200, description: '파일 삭제 성공' })
-    async deleteFile(@Param('fileId') fileId: string) {
-        await this.fileService.deleteFile(fileId);
+    @ApiQuery({ name: 'fileId', required: false })
+    @ApiQuery({ name: 'filePath', required: false })
+    async deleteFile(@Query('fileId') fileId?: string, @Query('filePath') filePath?: string) {
+        await this.fileService.deleteFile({ fileId, filePath });
     }
 }

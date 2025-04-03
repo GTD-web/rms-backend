@@ -1994,6 +1994,10 @@ let FileService = class FileService {
         const file = await this.fileRepository.findById(fileId);
         return file;
     }
+    async findFileByFilePath(filePath) {
+        const file = await this.fileRepository.findByFilePath(filePath);
+        return file;
+    }
     async saveFile(file) {
         const savedFile = await this.fileRepository.save(file);
         return savedFile;
@@ -2003,12 +2007,23 @@ let FileService = class FileService {
         const savedFile = await this.saveFile(newFile);
         return savedFile;
     }
-    async deleteFile(fileId) {
-        const file = await this.findFileById(fileId);
-        if (!file)
-            throw new common_1.NotFoundException('File not found');
+    async deleteFile({ fileId, filePath }) {
+        let file;
+        if (fileId) {
+            file = await this.findFileById(fileId);
+            if (!file)
+                throw new common_1.NotFoundException('File not found');
+        }
+        else if (filePath) {
+            file = await this.findFileByFilePath(filePath);
+            if (!file)
+                throw new common_1.NotFoundException('File not found');
+        }
+        else {
+            throw new common_1.BadRequestException('fileId or filePath is required');
+        }
         await this.fileStorage.deleteFile(file);
-        await this.fileRepository.delete(fileId);
+        await this.fileRepository.delete(file.fileId);
     }
 };
 exports.FileService = FileService;
@@ -2132,8 +2147,8 @@ let FileController = class FileController {
     async uploadFile(file) {
         return this.fileService.uploadFile(file);
     }
-    async deleteFile(fileId) {
-        await this.fileService.deleteFile(fileId);
+    async deleteFile(fileId, filePath) {
+        await this.fileService.deleteFile({ fileId, filePath });
     }
 };
 exports.FileController = FileController;
@@ -2162,12 +2177,15 @@ __decorate([
 ], FileController.prototype, "uploadFile", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
-    (0, common_1.Delete)(':fileId'),
+    (0, common_1.Delete)(''),
     (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 삭제 성공' }),
-    __param(0, (0, common_1.Param)('fileId')),
+    (0, swagger_1.ApiQuery)({ name: 'fileId', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'filePath', required: false }),
+    __param(0, (0, common_1.Query)('fileId')),
+    __param(1, (0, common_1.Query)('filePath')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "deleteFile", null);
 exports.FileController = FileController = __decorate([
