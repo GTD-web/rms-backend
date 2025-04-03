@@ -4592,6 +4592,7 @@ exports.ReservationController = ReservationController;
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Post)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 생성' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 생성 성공',
@@ -4606,6 +4607,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Get)('me'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회 #사용자/홈 ' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '내 예약 리스트 조회 성공',
@@ -4641,6 +4643,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Get)(':reservationId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 조회 #사용자/예약상세페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 조회 성공',
@@ -4655,6 +4658,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1', 'sprint0.3'),
     (0, common_1.Get)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({
         summary: '예약 리스트 조회 #사용자/자원캘린더 #사용자/자원예약/예약가능시간확인 #관리자/홈 #관리자/예약관리',
     }),
@@ -4696,6 +4700,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Patch)(':reservationId/title'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 제목 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 제목 수정 성공',
@@ -4711,6 +4716,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Patch)(':reservationId/time'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 시간 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 시간 수정 성공',
@@ -4726,6 +4732,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1', 'sprint0.3'),
     (0, common_1.Patch)(':reservationId/status'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 상태 수정 #사용자/예약상세페이지 #관리자/예약관리/예약상세' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 상태 수정 성공',
@@ -4741,6 +4748,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Patch)(':reservationId/participants'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 참가자 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 참가자 수정 성공',
@@ -4756,6 +4764,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Patch)(':reservationId/cc-receipient'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 수신참조자 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 수신참조자 수정 성공',
@@ -4780,7 +4789,6 @@ exports.ReservationController = ReservationController = __decorate([
     (0, swagger_1.ApiTags)('예약'),
     (0, common_1.Controller)('reservations'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof reservation_usecase_1.ReservationUsecase !== "undefined" && reservation_usecase_1.ReservationUsecase) === "function" ? _a : Object])
 ], ReservationController);
 
@@ -11312,6 +11320,7 @@ let RolesGuard = class RolesGuard {
             context.getHandler(),
             context.getClass(),
         ]);
+        console.log(requiredRoles);
         if (!requiredRoles) {
             return true;
         }

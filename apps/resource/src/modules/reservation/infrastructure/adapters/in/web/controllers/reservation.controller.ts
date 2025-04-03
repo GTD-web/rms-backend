@@ -30,12 +30,12 @@ import { Public } from '@libs/decorators/public.decorator';
 @ApiTags('예약')
 @Controller('reservations')
 @ApiBearerAuth()
-@Roles(Role.USER)
 export class ReservationController {
     constructor(private readonly reservationUsecase: ReservationUsecase) {}
 
     @ApiTags('sprint0.1')
     @Post()
+    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 생성' })
     @ApiDataResponse({
         description: '예약 생성 성공',
@@ -50,6 +50,7 @@ export class ReservationController {
 
     @ApiTags('sprint0.1')
     @Get('me')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '내 예약 리스트 조회 #사용자/홈 ' })
     @ApiDataResponse({
         description: '내 예약 리스트 조회 성공',
@@ -86,6 +87,7 @@ export class ReservationController {
 
     @ApiTags('sprint0.1')
     @Get(':reservationId')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 조회 #사용자/예약상세페이지' })
     @ApiDataResponse({
         description: '예약 조회 성공',
@@ -100,6 +102,7 @@ export class ReservationController {
 
     @ApiTags('sprint0.1', 'sprint0.3')
     @Get()
+    @Roles(Role.USER)
     @ApiOperation({
         summary: '예약 리스트 조회 #사용자/자원캘린더 #사용자/자원예약/예약가능시간확인 #관리자/홈 #관리자/예약관리',
     })
@@ -142,6 +145,7 @@ export class ReservationController {
 
     @ApiTags('sprint0.1')
     @Patch(':reservationId/title')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 제목 수정' })
     @ApiDataResponse({
         description: '예약 제목 수정 성공',
@@ -158,6 +162,7 @@ export class ReservationController {
 
     @ApiTags('sprint0.1')
     @Patch(':reservationId/time')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 시간 수정' })
     @ApiDataResponse({
         description: '예약 시간 수정 성공',
@@ -174,6 +179,7 @@ export class ReservationController {
 
     @ApiTags('sprint0.1', 'sprint0.3')
     @Patch(':reservationId/status')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 상태 수정 #사용자/예약상세페이지 #관리자/예약관리/예약상세' })
     @ApiDataResponse({
         description: '예약 상태 수정 성공',
@@ -189,6 +195,7 @@ export class ReservationController {
 
     @ApiTags('sprint0.1')
     @Patch(':reservationId/participants')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 참가자 수정' })
     @ApiDataResponse({
         description: '예약 참가자 수정 성공',
@@ -205,6 +212,7 @@ export class ReservationController {
 
     @ApiTags('sprint0.1')
     @Patch(':reservationId/cc-receipient')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 수신참조자 수정' })
     @ApiDataResponse({
         description: '예약 수신참조자 수정 성공',
