@@ -934,27 +934,64 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SsoAuthUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const axios_1 = __webpack_require__(/*! axios */ "axios");
 const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
 let SsoAuthUsecase = class SsoAuthUsecase {
-    constructor(userService) {
+    constructor(userService, jwtService) {
         this.userService = userService;
+        this.jwtService = jwtService;
     }
     async validateUser(email, password) {
-        return null;
+        const user = await this.userService.findByEmail(email);
+        if (!user) {
+            const client_id = process.env.SSO_CLIENT_ID;
+            const ssoApiUrl = process.env.SSO_API_URL;
+            const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
+                client_id,
+                email: email,
+                password: password,
+            });
+            console.log(response.data.data);
+            await this.userService.save(response.data.data);
+            return response.data.data;
+        }
+        const isPasswordValid = await user.checkPassword(password);
+        if (!isPasswordValid) {
+            throw new common_1.UnauthorizedException('Invalid password');
+        }
+        return user;
     }
     async login(loginDto) {
         const user = await this.validateUser(loginDto.email, loginDto.password);
-        return null;
+        const payload = {
+            userId: user.userId,
+            employeeId: user.employeeId,
+            roles: user.roles,
+        };
+        const accessToken = this.jwtService.sign(payload);
+        const expiredAt = date_util_1.DateUtil.now().addDays(1).format();
+        user.updateAccessToken(accessToken, expiredAt);
+        await this.userService.update(user);
+        return {
+            accessToken,
+            email: user.email,
+            name: user.name,
+            department: user.department,
+            position: user.position,
+            roles: user.roles,
+        };
     }
 };
 exports.SsoAuthUsecase = SsoAuthUsecase;
 exports.SsoAuthUsecase = SsoAuthUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object])
 ], SsoAuthUsecase);
 
 
@@ -11525,6 +11562,7 @@ function setupSwagger(app, dtos) {
         customJs: [
             'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
+            './uploads/swagger-refresh.js',
         ],
         customCssUrl: [
             'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
