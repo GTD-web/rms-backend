@@ -24,9 +24,9 @@ async function bootstrap() {
     app.useGlobalInterceptors(new RequestInterceptor(), new ResponseInterceptor(), new ErrorInterceptor());
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
-    const uploadPath = join(process.cwd(), 'uploads');
+    const uploadPath = join(process.cwd(), 'public');
     app.useStaticAssets(uploadPath, {
-        prefix: '/uploads',
+        prefix: '/public',
         index: false,
         fallthrough: false,
     });

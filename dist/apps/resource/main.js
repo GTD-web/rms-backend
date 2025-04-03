@@ -12449,9 +12449,9 @@ async function bootstrap() {
     app.useGlobalGuards(new jwt_auth_guard_1.JwtAuthGuard(app.get(core_2.Reflector)), new role_guard_1.RolesGuard(app.get(core_2.Reflector)));
     app.useGlobalInterceptors(new request_interceptor_1.RequestInterceptor(), new response_interceptor_1.ResponseInterceptor(), new error_interceptor_1.ErrorInterceptor());
     app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
-    const uploadPath = (0, path_1.join)(process.cwd(), 'uploads');
+    const uploadPath = (0, path_1.join)(process.cwd(), 'public');
     app.useStaticAssets(uploadPath, {
-        prefix: '/uploads',
+        prefix: '/public',
         index: false,
         fallthrough: false,
     });
