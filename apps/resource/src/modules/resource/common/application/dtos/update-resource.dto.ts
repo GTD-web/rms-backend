@@ -19,6 +19,11 @@ export class UpdateResourceDto {
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
+    resourceGroupId?: string;
+
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
     name?: string;
 
     @ApiProperty({ required: false })
