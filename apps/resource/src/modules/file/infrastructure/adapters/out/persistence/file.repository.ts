@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { File as FileEntity } from '@libs/entities';
 import { FileRepositoryPort } from '@resource/modules/file/domain/ports/file.repository.port';
 
@@ -24,6 +24,11 @@ export class FileRepository implements FileRepositoryPort {
     async findByFilePath(filePath: string): Promise<FileEntity | null> {
         const fileEntity = await this.fileRepository.findOne({ where: { filePath } });
         return fileEntity;
+    }
+
+    async findAllByFilePath(filePath: string[]): Promise<FileEntity[]> {
+        const fileEntities = await this.fileRepository.find({ where: { filePath: In(filePath) } });
+        return fileEntities;
     }
 
     async delete(fileId: string): Promise<void> {

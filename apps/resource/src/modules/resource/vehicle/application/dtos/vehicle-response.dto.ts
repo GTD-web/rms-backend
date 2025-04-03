@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { FileResponseDto } from '@resource/modules/file/application/dtos/file-response.dto';
 
 export class MaintenanceResponseDto {
     @ApiProperty()
@@ -70,6 +71,12 @@ export class VehicleInfoResponseDto {
 
     @ApiProperty()
     odometerImages: string[];
+
+    @ApiProperty({ type: [FileResponseDto], required: false })
+    parkingLocationFiles?: FileResponseDto[];
+
+    @ApiProperty({ type: [FileResponseDto], required: false })
+    odometerFiles?: FileResponseDto[];
 
     @ApiProperty({ type: [ConsumableResponseDto], required: false })
     consumables?: ConsumableResponseDto[];

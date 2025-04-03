@@ -24,6 +24,11 @@ export class FileService {
         return file;
     }
 
+    async findAllFilesByFilePath(filePath: string[]): Promise<File[]> {
+        const files = await this.fileRepository.findAllByFilePath(filePath);
+        return files;
+    }
+
     async saveFile(file: File): Promise<File> {
         const savedFile = await this.fileRepository.save(file);
         return savedFile;

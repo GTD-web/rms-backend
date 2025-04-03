@@ -8,7 +8,7 @@ import {
 import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto } from '../dtos/resource-response.dto';
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
-import { IsNull, Not, MoreThan, LessThan, DataSource } from 'typeorm';
+import { IsNull, Not, MoreThan, LessThan, DataSource, In } from 'typeorm';
 import { ReservationService } from '@resource/modules/reservation/application/services/reservation.service';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
@@ -26,6 +26,7 @@ import { UserService } from '@resource/modules/auth/application/services/user.se
 import { User as UserEntity } from '@libs/entities';
 import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { FileService } from '@resource/modules/file/application/services/file.service';
 
 @Injectable()
 export class ResourceUsecase {
@@ -38,6 +39,7 @@ export class ResourceUsecase {
         private readonly vehicleInfoUsecase: VehicleInfoUsecase,
         private readonly userService: UserService,
         private readonly dataSource: DataSource,
+        private readonly fileService: FileService,
         @Inject('ResourceTypeHandlers')
         private readonly typeHandlers: Map<ResourceType, ResourceTypeHandler>,
     ) {}
@@ -155,21 +157,29 @@ export class ResourceUsecase {
         }
 
         // 관리자 페이지 내 자원 상세 페이지에서 사용하는 정비기록 관련 계산 필드 추가
-        if (resource.vehicleInfo && resource.vehicleInfo.consumables) {
-            const mileage = Number(resource.vehicleInfo.totalMileage);
-            resource.vehicleInfo.consumables.forEach((consumable) => {
-                const replaceCycle = Number(consumable.replaceCycle);
-                if (consumable.maintenances && consumable.maintenances.length > 0) {
-                    // 각 maintenance에 계산 필드 추가
-                    consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
-                        return {
-                            ...maintenance,
-                            mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
-                            maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
-                        };
-                    });
-                }
-            });
+        if (resource.vehicleInfo) {
+            if (resource.vehicleInfo.consumables) {
+                const mileage = Number(resource.vehicleInfo.totalMileage);
+                resource.vehicleInfo.consumables.forEach((consumable) => {
+                    const replaceCycle = Number(consumable.replaceCycle);
+                    if (consumable.maintenances && consumable.maintenances.length > 0) {
+                        // 각 maintenance에 계산 필드 추가
+                        consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
+                            return {
+                                ...maintenance,
+                                mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                                maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                            };
+                        });
+                    }
+                });
+            }
+            resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(
+                resource.vehicleInfo.parkingLocationImages,
+            );
+            resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(
+                resource.vehicleInfo.odometerImages,
+            );
         }
 
         return resource;

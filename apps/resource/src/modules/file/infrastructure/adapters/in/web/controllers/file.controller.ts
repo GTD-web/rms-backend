@@ -34,21 +34,21 @@ export class FileController {
         return this.fileService.uploadFile(file);
     }
 
-    // @ApiTags('sprint0.1')
-    // @Delete(':fileId')
-    // @ApiOperation({ summary: '파일 삭제' })
-    // @ApiDataResponse({ status: 200, description: '파일 삭제 성공' })
-    // async deleteFile(@Param('fileId') fileId: string) {
-    //     await this.fileService.deleteFile(fileId);
-    // }
-
     @ApiTags('sprint0.1')
-    @Delete('')
+    @Delete(':fileId')
     @ApiOperation({ summary: '파일 삭제' })
     @ApiDataResponse({ status: 200, description: '파일 삭제 성공' })
-    @ApiQuery({ name: 'fileId', required: false })
-    @ApiQuery({ name: 'filePath', required: false })
-    async deleteFile(@Query('fileId') fileId?: string, @Query('filePath') filePath?: string) {
-        await this.fileService.deleteFile({ fileId, filePath });
+    async deleteFile(@Param('fileId') fileId: string) {
+        await this.fileService.deleteFile({ fileId });
     }
+
+    // @ApiTags('sprint0.1')
+    // @Delete('')
+    // @ApiOperation({ summary: '파일 삭제' })
+    // @ApiDataResponse({ status: 200, description: '파일 삭제 성공' })
+    // @ApiQuery({ name: 'fileId', required: false })
+    // @ApiQuery({ name: 'filePath', required: false })
+    // async deleteFile(@Query('fileId') fileId?: string, @Query('filePath') filePath?: string) {
+    //     await this.fileService.deleteFile({ fileId, filePath });
+    // }
 }

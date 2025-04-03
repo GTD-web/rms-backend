@@ -21,7 +21,7 @@ import { AuthModule } from '@resource/modules/auth/auth.module';
 import { ResourceGroupUsecase } from './common/application/usecases/resource-group.usecase';
 import { ReservationModule } from '../reservation/reservation.module';
 import { ResourceUsecase } from './common/application/usecases/resource.usecase';
-
+import { FileModule } from '../file/file.module';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Resource, ResourceGroup, ResourceManager, Employee, User]),
@@ -30,6 +30,7 @@ import { ResourceUsecase } from './common/application/usecases/resource.usecase'
         AccommodationResourceModule,
         AuthModule,
         ReservationModule,
+        FileModule,
     ],
     providers: [
         ResourceService,

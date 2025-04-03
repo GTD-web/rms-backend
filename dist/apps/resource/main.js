@@ -1998,6 +1998,10 @@ let FileService = class FileService {
         const file = await this.fileRepository.findByFilePath(filePath);
         return file;
     }
+    async findAllFilesByFilePath(filePath) {
+        const files = await this.fileRepository.findAllByFilePath(filePath);
+        return files;
+    }
     async saveFile(file) {
         const savedFile = await this.fileRepository.save(file);
         return savedFile;
@@ -2147,8 +2151,8 @@ let FileController = class FileController {
     async uploadFile(file) {
         return this.fileService.uploadFile(file);
     }
-    async deleteFile(fileId, filePath) {
-        await this.fileService.deleteFile({ fileId, filePath });
+    async deleteFile(fileId) {
+        await this.fileService.deleteFile({ fileId });
     }
 };
 exports.FileController = FileController;
@@ -2177,15 +2181,12 @@ __decorate([
 ], FileController.prototype, "uploadFile", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.1'),
-    (0, common_1.Delete)(''),
+    (0, common_1.Delete)(':fileId'),
     (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 삭제 성공' }),
-    (0, swagger_1.ApiQuery)({ name: 'fileId', required: false }),
-    (0, swagger_1.ApiQuery)({ name: 'filePath', required: false }),
-    __param(0, (0, common_1.Query)('fileId')),
-    __param(1, (0, common_1.Query)('filePath')),
+    __param(0, (0, common_1.Param)('fileId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "deleteFile", null);
 exports.FileController = FileController = __decorate([
@@ -2240,6 +2241,10 @@ let FileRepository = class FileRepository {
     async findByFilePath(filePath) {
         const fileEntity = await this.fileRepository.findOne({ where: { filePath } });
         return fileEntity;
+    }
+    async findAllByFilePath(filePath) {
+        const fileEntities = await this.fileRepository.find({ where: { filePath: (0, typeorm_2.In)(filePath) } });
+        return fileEntities;
     }
     async delete(fileId) {
         await this.fileRepository.delete({ fileId });
@@ -6361,7 +6366,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -6377,8 +6382,9 @@ const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "
 const user_service_1 = __webpack_require__(/*! @resource/modules/auth/application/services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
 const vehicle_info_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/vehicle-info.usecase.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const file_service_1 = __webpack_require__(/*! @resource/modules/file/application/services/file.service */ "./apps/resource/src/modules/file/application/services/file.service.ts");
 let ResourceUsecase = class ResourceUsecase {
-    constructor(resourceService, resourceManagerService, resourceGroupService, reservationService, vehicleInfoService, vehicleInfoUsecase, userService, dataSource, typeHandlers) {
+    constructor(resourceService, resourceManagerService, resourceGroupService, reservationService, vehicleInfoService, vehicleInfoUsecase, userService, dataSource, fileService, typeHandlers) {
         this.resourceService = resourceService;
         this.resourceManagerService = resourceManagerService;
         this.resourceGroupService = resourceGroupService;
@@ -6387,6 +6393,7 @@ let ResourceUsecase = class ResourceUsecase {
         this.vehicleInfoUsecase = vehicleInfoUsecase;
         this.userService = userService;
         this.dataSource = dataSource;
+        this.fileService = fileService;
         this.typeHandlers = typeHandlers;
     }
     async findResources(type) {
@@ -6482,20 +6489,24 @@ let ResourceUsecase = class ResourceUsecase {
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
         }
-        if (resource.vehicleInfo && resource.vehicleInfo.consumables) {
-            const mileage = Number(resource.vehicleInfo.totalMileage);
-            resource.vehicleInfo.consumables.forEach((consumable) => {
-                const replaceCycle = Number(consumable.replaceCycle);
-                if (consumable.maintenances && consumable.maintenances.length > 0) {
-                    consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
-                        return {
-                            ...maintenance,
-                            mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
-                            maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
-                        };
-                    });
-                }
-            });
+        if (resource.vehicleInfo) {
+            if (resource.vehicleInfo.consumables) {
+                const mileage = Number(resource.vehicleInfo.totalMileage);
+                resource.vehicleInfo.consumables.forEach((consumable) => {
+                    const replaceCycle = Number(consumable.replaceCycle);
+                    if (consumable.maintenances && consumable.maintenances.length > 0) {
+                        consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
+                            return {
+                                ...maintenance,
+                                mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                                maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                            };
+                        });
+                    }
+                });
+            }
+            resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
+            resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.odometerImages);
         }
         return resource;
     }
@@ -6700,8 +6711,8 @@ let ResourceUsecase = class ResourceUsecase {
 exports.ResourceUsecase = ResourceUsecase;
 exports.ResourceUsecase = ResourceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __param(8, (0, common_1.Inject)('ResourceTypeHandlers')),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.ResourceService !== "undefined" && resource_service_1.ResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.ResourceManagerService !== "undefined" && resource_manager_service_1.ResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof resource_group_service_1.ResourceGroupService !== "undefined" && resource_group_service_1.ResourceGroupService) === "function" ? _c : Object, typeof (_d = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _e : Object, typeof (_f = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _f : Object, typeof (_g = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _g : Object, typeof (_h = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _h : Object, typeof (_j = typeof Map !== "undefined" && Map) === "function" ? _j : Object])
+    __param(9, (0, common_1.Inject)('ResourceTypeHandlers')),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.ResourceService !== "undefined" && resource_service_1.ResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.ResourceManagerService !== "undefined" && resource_manager_service_1.ResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof resource_group_service_1.ResourceGroupService !== "undefined" && resource_group_service_1.ResourceGroupService) === "function" ? _c : Object, typeof (_d = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _e : Object, typeof (_f = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _f : Object, typeof (_g = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _g : Object, typeof (_h = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _h : Object, typeof (_j = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _j : Object, typeof (_k = typeof Map !== "undefined" && Map) === "function" ? _k : Object])
 ], ResourceUsecase);
 
 
@@ -7831,6 +7842,7 @@ const auth_module_1 = __webpack_require__(/*! @resource/modules/auth/auth.module
 const resource_group_usecase_1 = __webpack_require__(/*! ./common/application/usecases/resource-group.usecase */ "./apps/resource/src/modules/resource/common/application/usecases/resource-group.usecase.ts");
 const reservation_module_1 = __webpack_require__(/*! ../reservation/reservation.module */ "./apps/resource/src/modules/reservation/reservation.module.ts");
 const resource_usecase_1 = __webpack_require__(/*! ./common/application/usecases/resource.usecase */ "./apps/resource/src/modules/resource/common/application/usecases/resource.usecase.ts");
+const file_module_1 = __webpack_require__(/*! ../file/file.module */ "./apps/resource/src/modules/file/file.module.ts");
 let ResourceModule = class ResourceModule {
 };
 exports.ResourceModule = ResourceModule;
@@ -7843,6 +7855,7 @@ exports.ResourceModule = ResourceModule = __decorate([
             accommodation_resource_module_1.AccommodationResourceModule,
             auth_module_1.AuthModule,
             reservation_module_1.ReservationModule,
+            file_module_1.FileModule,
         ],
         providers: [
             resource_service_1.ResourceService,
@@ -8167,6 +8180,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VehicleInfoResponseDto = exports.ConsumableResponseDto = exports.MaintenanceResponseDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const file_response_dto_1 = __webpack_require__(/*! @resource/modules/file/application/dtos/file-response.dto */ "./apps/resource/src/modules/file/application/dtos/file-response.dto.ts");
 class MaintenanceResponseDto {
 }
 exports.MaintenanceResponseDto = MaintenanceResponseDto;
@@ -8264,6 +8278,14 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Array)
 ], VehicleInfoResponseDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [file_response_dto_1.FileResponseDto], required: false }),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "parkingLocationFiles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [file_response_dto_1.FileResponseDto], required: false }),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "odometerFiles", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [ConsumableResponseDto], required: false }),
     __metadata("design:type", Array)
