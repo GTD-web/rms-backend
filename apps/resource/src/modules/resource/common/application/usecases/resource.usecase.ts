@@ -177,7 +177,7 @@ export class ResourceUsecase {
                     if (consumable.maintenances && consumable.maintenances.length > 0) {
                         console.log('consumable.maintenances', consumable.maintenances);
                         // 각 maintenance에 계산 필드 추가
-                        consumable.maintenances = [consumable.maintenances.pop()].map((maintenance) => {
+                        consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
                             return {
                                 ...maintenance,
                                 mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
