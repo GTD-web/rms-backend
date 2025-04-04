@@ -109,7 +109,7 @@ export class ResourceUsecase {
                                             ? DateUtil.date(endDate).toDate()
                                             : DateUtil.date(endDate + ' 23:59:59').toDate(),
                                     ),
-                                    status: ReservationStatus.CONFIRMED,
+                                    status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
                                 },
                                 relations: ['participants'],
                                 order: {

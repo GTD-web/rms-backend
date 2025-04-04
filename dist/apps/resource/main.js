@@ -6523,7 +6523,7 @@ let ResourceUsecase = class ResourceUsecase {
                             endDate: (0, typeorm_1.LessThanOrEqual)(regex.test(endDate)
                                 ? date_util_1.DateUtil.date(endDate).toDate()
                                 : date_util_1.DateUtil.date(endDate + ' 23:59:59').toDate()),
-                            status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                            status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
                         },
                         relations: ['participants'],
                         order: {
