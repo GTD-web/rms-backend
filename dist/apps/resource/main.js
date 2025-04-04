@@ -8633,7 +8633,6 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         try {
             const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
             if (createMaintenanceDto.mileage) {
-                console.log(maintenance);
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
                     relations: ['vehicleInfo'],
@@ -9716,7 +9715,6 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
-        synchronize: configService.get('NODE_ENV') === 'local',
         logging: configService.get('NODE_ENV') === 'local',
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
