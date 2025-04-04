@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { User } from '@resource/modules/auth/domain/models/user';
+import { User } from '@libs/entities';
 import { UserService } from '../services/user.service';
 import { UserResponseDto } from '@resource/dtos.index';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserUsecase {
@@ -17,9 +18,9 @@ export class UserUsecase {
             userId: user.userId,
             email: user.email,
             mobile: user.mobile,
-            name: user.name,
-            department: user.department,
-            position: user.position,
+            name: user.employee?.name,
+            department: user.employee?.department,
+            position: user.employee?.position,
             roles: user.roles,
         };
     }
@@ -29,7 +30,7 @@ export class UserUsecase {
         if (!user) {
             throw new NotFoundException('User not found');
         }
-        return user.checkPassword(password);
+        return bcrypt.compare(password, user.password);
     }
 
     async changePassword(userId: string, password: string): Promise<void> {
@@ -37,7 +38,7 @@ export class UserUsecase {
         if (!user) {
             throw new NotFoundException('User not found');
         }
-        await user.updatePassword(password);
+        user.password = await bcrypt.hash(password, 10);
         await this.userService.update(user);
     }
 }

@@ -9,7 +9,6 @@ import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto } from '../d
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
 import { IsNull, Not, MoreThan, LessThan, DataSource, In } from 'typeorm';
-import { ReservationService } from '@resource/modules/reservation/application/services/reservation.service';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     ReturnVehicleDto,
@@ -27,6 +26,7 @@ import { User as UserEntity } from '@libs/entities';
 import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { FileService } from '@resource/modules/file/application/services/file.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ResourceUsecase {
@@ -34,14 +34,13 @@ export class ResourceUsecase {
         private readonly resourceService: ResourceService,
         private readonly resourceManagerService: ResourceManagerService,
         private readonly resourceGroupService: ResourceGroupService,
-        private readonly reservationService: ReservationService,
         private readonly vehicleInfoService: VehicleInfoService,
         private readonly vehicleInfoUsecase: VehicleInfoUsecase,
-        private readonly userService: UserService,
         private readonly dataSource: DataSource,
         private readonly fileService: FileService,
         @Inject('ResourceTypeHandlers')
         private readonly typeHandlers: Map<ResourceType, ResourceTypeHandler>,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async findResources(type: ResourceType): Promise<ResourceResponseDto[]> {
@@ -76,65 +75,34 @@ export class ResourceUsecase {
             where: {
                 type: type,
                 parentResourceGroupId: Not(IsNull()),
+                resources: {
+                    reservations: {
+                        startDate: LessThan(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
+                        endDate: MoreThan(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
+                        status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
+                    },
+                },
             },
+            relations: ['resources', 'resources.reservations', 'resources.reservations.participants'],
             order: {
                 order: 'ASC',
             },
         });
 
-        const resourceGroupsWithResources = await Promise.all(
-            resourceGroups.map(async (resourceGroup) => {
-                const resources = await this.resourceService.findAll({
-                    where: {
-                        resourceGroupId: resourceGroup.resourceGroupId,
-                    },
-                    order: {
-                        order: 'ASC',
-                    },
+        resourceGroups.forEach((group) => {
+            if (group.resources) {
+                group.resources.sort((a, b) => a.order - b.order);
+                group.resources.forEach((resource) => {
+                    if (resource.reservations) {
+                        resource.reservations.sort(
+                            (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
+                        );
+                    }
                 });
+            }
+        });
 
-                const resourcesWithReservations = await Promise.all(
-                    resources.map(async (resource) => {
-                        const reservations = await this.reservationService.findAll({
-                            where: {
-                                resourceId: resource.resourceId,
-                                startDate: LessThan(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
-                                endDate: MoreThan(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
-                                status: ReservationStatus.CONFIRMED,
-                            },
-                            relations: ['participants'],
-                            order: {
-                                startDate: 'ASC',
-                            },
-                        });
-
-                        const reservationResponseDtos = reservations.map((reservation) => {
-                            const isMine = reservation.participants.some(
-                                (participant) => participant.employeeId === user.employeeId,
-                            );
-                            delete reservation.participants;
-                            return {
-                                ...reservation,
-                                isMine: isMine,
-                            };
-                        });
-
-                        return {
-                            ...resource,
-                            resourceId: resource.resourceId,
-                            reservations: reservationResponseDtos,
-                        };
-                    }),
-                );
-
-                return {
-                    ...resourceGroup,
-                    resources: resourcesWithReservations,
-                };
-            }),
-        );
-
-        return resourceGroupsWithResources;
+        return resourceGroups;
     }
 
     async findResourceDetail(resourceId: string): Promise<ResourceResponseDto> {
@@ -291,7 +259,11 @@ export class ResourceUsecase {
                     );
                 }),
                 ...managers.map((manager) =>
-                    this.userService.addRole(manager.employeeId, Role.RESOURCE_ADMIN, { queryRunner }),
+                    this.eventEmitter.emit('user.role.add', {
+                        employeeId: manager.employeeId,
+                        role: Role.RESOURCE_ADMIN,
+                        repositoryOptions: { queryRunner },
+                    }),
                 ),
             ]);
 
@@ -349,7 +321,11 @@ export class ResourceUsecase {
                             },
                         });
                         if (otherResources.length === 1) {
-                            await this.userService.removeRole(employeeId, Role.RESOURCE_ADMIN, { queryRunner });
+                            await this.eventEmitter.emit('user.role.remove', {
+                                employeeId: employeeId,
+                                role: Role.RESOURCE_ADMIN,
+                                repositoryOptions: { queryRunner },
+                            });
                         }
                     }),
                 );
@@ -358,7 +334,11 @@ export class ResourceUsecase {
                 const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
                 await Promise.all(
                     addedManagerIds.map((employeeId) =>
-                        this.userService.addRole(employeeId, Role.RESOURCE_ADMIN, { queryRunner }),
+                        this.eventEmitter.emit('user.role.add', {
+                            employeeId: employeeId,
+                            role: Role.RESOURCE_ADMIN,
+                            repositoryOptions: { queryRunner },
+                        }),
                     ),
                 );
 

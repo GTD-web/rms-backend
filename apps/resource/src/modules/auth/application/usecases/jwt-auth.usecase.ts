@@ -2,11 +2,11 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '@resource/modules/auth/domain/ports/auth.service.port';
 import { LoginDto } from '../dto/login.dto';
-import { User } from '@resource/modules/auth/domain/models/user';
+import { User } from '@libs/entities';
 import { DateUtil } from '@libs/utils/date.util';
 import { LoginResponseDto } from '../dto/login-response.dto';
 import { UserService } from '../services/user.service';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class JwtAuthUsecase implements AuthService {
     constructor(
@@ -17,12 +17,12 @@ export class JwtAuthUsecase implements AuthService {
     async validateUser(email: string, password: string): Promise<User> {
         const user = await this.userService.findByEmail(email);
         if (!user) {
-            throw new UnauthorizedException('User not found');
+            throw new UnauthorizedException('존재하지 않는 사용자입니다.');
         }
 
-        const isPasswordValid = await user.checkPassword(password);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new UnauthorizedException('Invalid password');
+            throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
         }
 
         return user;
@@ -40,15 +40,16 @@ export class JwtAuthUsecase implements AuthService {
         const accessToken = this.jwtService.sign(payload);
         const expiredAt = DateUtil.now().addDays(1).format();
 
-        user.updateAccessToken(accessToken, expiredAt);
+        user.accessToken = accessToken;
+        user.expiredAt = expiredAt;
         await this.userService.update(user);
 
         return {
             accessToken,
             email: user.email,
-            name: user.name,
-            department: user.department,
-            position: user.position,
+            name: user.employee?.name,
+            department: user.employee?.department,
+            position: user.employee?.position,
             roles: user.roles,
         };
     }

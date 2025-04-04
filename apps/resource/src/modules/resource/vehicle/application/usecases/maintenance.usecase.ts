@@ -32,11 +32,13 @@ export class MaintenanceUsecase {
         try {
             const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
             if (createMaintenanceDto.mileage) {
-                const vehicleInfo = await this.vehicleInfoService.findOne({
-                    where: { consumableId: createMaintenanceDto.consumableId },
+                const newMaintenance = await this.maintenanceService.findOne({
+                    where: { maintenanceId: maintenance.maintenanceId },
+                    relations: ['consumable', 'consumable.vehicleInfo'],
+                    order: { createdAt: 'DESC' },
                 });
                 await this.vehicleInfoService.update(
-                    vehicleInfo.vehicleInfoId,
+                    newMaintenance.consumable.vehicleInfo.vehicleInfoId,
                     {
                         totalMileage: createMaintenanceDto.mileage,
                     },
@@ -85,11 +87,13 @@ export class MaintenanceUsecase {
                 ...repositoryOptions,
             });
             if (updateMaintenanceDto.mileage) {
-                const vehicleInfo = await this.vehicleInfoService.findOne({
-                    where: { consumableId: maintenance.consumableId },
+                const savedMaintenance = await this.maintenanceService.findOne({
+                    where: { maintenanceId: maintenance.maintenanceId },
+                    relations: ['consumable', 'consumable.vehicleInfo'],
+                    order: { createdAt: 'DESC' },
                 });
                 await this.vehicleInfoService.update(
-                    vehicleInfo.vehicleInfoId,
+                    savedMaintenance.consumable.vehicleInfo.vehicleInfoId,
                     {
                         totalMileage: updateMaintenanceDto.mileage,
                     },

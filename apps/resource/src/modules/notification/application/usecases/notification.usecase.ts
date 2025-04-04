@@ -1,8 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AdapterService } from '../services/adapter.service';
 import { NotificationService } from '../services/notification.service';
 import { User } from '@libs/entities';
-import { UserService } from '@resource/modules/auth/application/services/user.service';
 import { PushNotificationSubscription } from '@resource/modules/notification/domain/ports/push-notification.port';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { NotificationType } from '@libs/enums/notification-type.enum';
@@ -13,18 +12,18 @@ import { Notification } from '@libs/entities';
 import { CronJob } from 'cron';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { ResponseNotificationDto } from '../dto/response-notification.dto';
-import { ResourceType } from '@libs/enums/resource-type.enum';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class NotificationUsecase {
     constructor(
         private readonly adapterService: AdapterService,
         private readonly notificationService: NotificationService,
-        private readonly userService: UserService,
         private readonly employeeNotificationService: EmployeeNotificationService,
         private readonly schedulerRegistry: SchedulerRegistry,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async onModuleInit() {
@@ -41,15 +40,17 @@ export class NotificationUsecase {
     }
 
     async subscribe(user: User, subscription: PushNotificationSubscription): Promise<void> {
-        const userDomain = await this.userService.findByUserId(user.userId);
-        userDomain.updateSubscription(subscription);
-        await this.userService.update(userDomain);
+        this.eventEmitter.emit('user.subscription.update', {
+            userId: user.userId,
+            subscription: subscription,
+        });
     }
 
     async unsubscribe(user: User): Promise<void> {
-        const userDomain = await this.userService.findByUserId(user.userId);
-        userDomain.updateSubscription(null);
-        await this.userService.update(userDomain);
+        this.eventEmitter.emit('user.subscription.update', {
+            userId: user.userId,
+            subscription: null,
+        });
     }
 
     async markAsRead(employeeId: string, notificationId: string): Promise<void> {

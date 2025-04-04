@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 // 프로젝트 내부 라이브러리
 import { typeOrmConfig } from '@libs/configs/typeorm.config';
@@ -32,6 +33,7 @@ import { DbDocService } from '@libs/utils/db-doc.service';
             isGlobal: true,
             load: [databaseConfig, JWT_CONFIG],
         }),
+        EventEmitterModule.forRoot(),
         JwtModule.registerAsync({
             global: true,
             useFactory: jwtConfig,

@@ -1,12 +1,14 @@
 import { AuthService } from '@resource/modules/auth/domain/ports/auth.service.port';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { User } from '@resource/modules/auth/domain/models/user';
+import { User } from '@libs/entities';
 import { LoginDto } from '@resource/modules/auth/application/dto/login.dto';
 import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-response.dto';
 import axios from 'axios';
 import { UserService } from '../services/user.service';
 import { DateUtil } from '@libs/utils/date.util';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+
 @Injectable()
 export class SsoAuthUsecase implements AuthService {
     constructor(
@@ -15,23 +17,33 @@ export class SsoAuthUsecase implements AuthService {
     ) {}
 
     async validateUser(email: string, password: string): Promise<User> {
-        const user = await this.userService.findByEmail(email);
+        let user = await this.userService.findByEmail(email);
         if (!user) {
             const client_id = process.env.SSO_CLIENT_ID;
             const ssoApiUrl = process.env.SSO_API_URL;
-            const response = await axios.post(`${ssoApiUrl}/api/auth/login`, {
-                client_id,
-                email: email,
-                password: password,
-            });
-            console.log(response.data.data);
-            await this.userService.save(response.data.data);
-            return response.data.data;
+            try {
+                const response = await axios.post(`${ssoApiUrl}/api/auth/login`, {
+                    client_id,
+                    email: email,
+                    password: password,
+                });
+
+                const newUser = new User();
+                newUser.email = response.data.data.email;
+                newUser.password = response.data.data.password;
+                newUser.employeeId = response.data.data.employeeId;
+                newUser.roles = response.data.data.roles;
+                newUser.userId = response.data.data.userId;
+                newUser.employee = response.data.data.employee;
+                user = await this.userService.save(newUser);
+            } catch (error) {
+                throw new UnauthorizedException('SSO 로그인 실패');
+            }
         }
 
-        const isPasswordValid = await user.checkPassword(password);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new UnauthorizedException('Invalid password');
+            throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
         }
 
         return user;
@@ -50,15 +62,16 @@ export class SsoAuthUsecase implements AuthService {
         const accessToken = this.jwtService.sign(payload);
         const expiredAt = DateUtil.now().addDays(1).format();
 
-        user.updateAccessToken(accessToken, expiredAt);
+        user.accessToken = accessToken;
+        user.expiredAt = expiredAt;
         await this.userService.update(user);
 
         return {
             accessToken,
             email: user.email,
-            name: user.name,
-            department: user.department,
-            position: user.position,
+            name: user.employee?.name,
+            department: user.employee?.department,
+            position: user.employee?.position,
             roles: user.roles,
         };
     }

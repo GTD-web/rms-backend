@@ -5,14 +5,14 @@ import { Injectable } from '@nestjs/common';
 import { UpdateVehicleInfoDto } from '../dtos/update-vehicle-info.dto';
 import { ConsumableService } from '@resource/modules/resource/vehicle/application/services/consumable.service';
 import { NotificationType } from '@libs/enums/notification-type.enum';
-import { NotificationUsecase } from '@resource/modules/notification/application/usecases/notification.usecase';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
 @Injectable()
 export class VehicleInfoUsecase {
     constructor(
         private readonly vehicleInfoService: VehicleInfoService,
-        private readonly consumableService: ConsumableService,
-        private readonly notificationUsecase: NotificationUsecase,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async findVehicleInfo(vehicleInfoId: string): Promise<VehicleInfoResponseDto> {
@@ -80,9 +80,9 @@ export class VehicleInfoUsecase {
                 try {
                     const notiTarget = afterVehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
 
-                    await this.notificationUsecase.createNotification(
-                        NotificationType.RESOURCE_CONSUMABLE_REPLACING,
-                        {
+                    await this.eventEmitter.emit('create.notification', {
+                        notificationType: NotificationType.RESOURCE_CONSUMABLE_REPLACING,
+                        notificationData: {
                             resourceId: afterVehicleInfo.resource.resourceId,
                             resourceName: afterVehicleInfo.resource.name,
                             resourceType: afterVehicleInfo.resource.type,
@@ -90,7 +90,7 @@ export class VehicleInfoUsecase {
                         },
                         notiTarget,
                         repositoryOptions,
-                    );
+                    });
                 } catch (error) {
                     console.log(error);
                     console.log('Notification creation failed in updateVehicleInfo');

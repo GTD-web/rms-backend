@@ -65,6 +65,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 const typeorm_config_1 = __webpack_require__(/*! @libs/configs/typeorm.config */ "./libs/configs/typeorm.config.ts");
 const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
 const jwt_config_1 = __webpack_require__(/*! @libs/configs/jwt.config */ "./libs/configs/jwt.config.ts");
@@ -89,6 +90,7 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
                 load: [env_config_1.default, env_config_1.JWT_CONFIG],
             }),
+            event_emitter_1.EventEmitterModule.forRoot(),
             jwt_1.JwtModule.registerAsync({
                 global: true,
                 useFactory: jwt_config_1.jwtConfig,
@@ -717,50 +719,103 @@ __decorate([
 
 /***/ }),
 
-/***/ "./apps/resource/src/modules/auth/application/mappers/user.mapper.ts":
-/*!***************************************************************************!*\
-  !*** ./apps/resource/src/modules/auth/application/mappers/user.mapper.ts ***!
-  \***************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ "./apps/resource/src/modules/auth/application/handler/user-event.handler.ts":
+/*!**********************************************************************************!*\
+  !*** ./apps/resource/src/modules/auth/application/handler/user-event.handler.ts ***!
+  \**********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UserMapper = void 0;
-const user_1 = __webpack_require__(/*! @resource/modules/auth/domain/models/user */ "./apps/resource/src/modules/auth/domain/models/user.ts");
-class UserMapper {
-    static toDomain(entity) {
-        return new user_1.User({
-            userId: entity.userId,
-            employeeId: entity.employeeId,
-            email: entity.email,
-            mobile: entity.mobile,
-            password: entity.password,
-            accessToken: entity.accessToken,
-            expiredAt: entity.expiredAt,
-            subscription: entity.subscription,
-            roles: entity.roles,
-            name: entity.employee?.name,
-            employeeNumber: entity.employee?.employeeNumber,
-            department: entity.employee?.department,
-            position: entity.employee?.position,
-        });
+exports.UserEventHandler = void 0;
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+let UserEventHandler = class UserEventHandler {
+    constructor(userService) {
+        this.userService = userService;
     }
-    static toEntity(domain) {
-        const props = domain.toJSON();
-        return {
-            userId: props.userId,
-            employeeId: props.employeeId,
-            email: props.email,
-            mobile: props.mobile,
-            password: props.password,
-            accessToken: props.accessToken,
-            expiredAt: props.expiredAt,
-            subscription: props.subscription,
-            roles: props.roles,
-        };
+    async handleUserRoleAddedEvent(payload) {
+        console.log(`Role ${payload.role} added to user ${payload.employeeId}`);
+        await this.userService.addRole(payload.employeeId, payload.role, payload.repositoryOptions);
     }
-}
-exports.UserMapper = UserMapper;
+    async handleUserRoleRemovedEvent(payload) {
+        console.log(`Role ${payload.role} removed from user ${payload.employeeId}`);
+        await this.userService.removeRole(payload.employeeId, payload.role, payload.repositoryOptions);
+    }
+    async handleUserSubscriptionUpdateEvent(payload) {
+        console.log(`Subscription updated for user ${payload.userId} ${payload.subscription}`);
+        const user = await this.userService.findByUserId(payload.userId);
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        user.subscription = payload.subscription;
+        await this.userService.update(user);
+    }
+    async handleUserGetEvent(payload) {
+        console.log(`User found for employeeId ${payload.employeeId} or userId ${payload.userId}`);
+        if (payload.employeeId) {
+            return await this.userService.findByEmployeeId(payload.employeeId);
+        }
+        if (payload.userId) {
+            return await this.userService.findByUserId(payload.userId);
+        }
+        return null;
+    }
+    async handleUserSubscriptionGetEvent(payload) {
+        console.log(`Subscription removed for user ${payload.employeeId}`);
+        const user = await this.userService.findByEmployeeId(payload.employeeId);
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        return user.subscription;
+    }
+};
+exports.UserEventHandler = UserEventHandler;
+__decorate([
+    (0, event_emitter_1.OnEvent)('add.user.role'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserEventHandler.prototype, "handleUserRoleAddedEvent", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('remove.user.role'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserEventHandler.prototype, "handleUserRoleRemovedEvent", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('update.user.subscription'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserEventHandler.prototype, "handleUserSubscriptionUpdateEvent", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('find.user'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserEventHandler.prototype, "handleUserGetEvent", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('find.user.subscription'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserEventHandler.prototype, "handleUserSubscriptionGetEvent", null);
+exports.UserEventHandler = UserEventHandler = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
+], UserEventHandler);
 
 
 /***/ }),
@@ -789,54 +844,49 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const user_repository_port_1 = __webpack_require__(/*! @resource/modules/auth/domain/ports/user.repository.port */ "./apps/resource/src/modules/auth/domain/ports/user.repository.port.ts");
-const user_mapper_1 = __webpack_require__(/*! ../mappers/user.mapper */ "./apps/resource/src/modules/auth/application/mappers/user.mapper.ts");
 let UserService = class UserService {
     constructor(userRepository) {
         this.userRepository = userRepository;
     }
     async findAll(repositoryOptions) {
         const users = await this.userRepository.find(repositoryOptions);
-        return users.map((user) => user_mapper_1.UserMapper.toDomain(user));
+        return users;
     }
     async findByEmployeeId(employeeId) {
         const user = await this.userRepository.findOne({ where: { employeeId }, relations: ['employee'] });
-        return user ? user_mapper_1.UserMapper.toDomain(user) : null;
+        return user;
     }
     async findByEmail(email) {
         const user = await this.userRepository.findOne({ where: { email }, relations: ['employee'] });
-        return user ? user_mapper_1.UserMapper.toDomain(user) : null;
+        return user;
     }
     async findByUserId(userId) {
         const user = await this.userRepository.findOne({ where: { userId }, relations: ['employee'] });
-        return user ? user_mapper_1.UserMapper.toDomain(user) : null;
+        return user;
     }
     async save(user, repositoryOptions) {
-        const userEntity = user_mapper_1.UserMapper.toEntity(user);
-        const savedUser = await this.userRepository.save(userEntity, repositoryOptions);
-        return user_mapper_1.UserMapper.toDomain(savedUser);
+        const savedUser = await this.userRepository.save(user, repositoryOptions);
+        return savedUser;
     }
     async update(user, repositoryOptions) {
-        const userEntity = user_mapper_1.UserMapper.toEntity(user);
-        const updatedUser = await this.userRepository.update(user.userId, userEntity, repositoryOptions);
-        return user_mapper_1.UserMapper.toDomain(updatedUser);
+        const updatedUser = await this.userRepository.update(user.userId, user, repositoryOptions);
+        return updatedUser;
     }
     async addRole(employeeId, role, repositoryOptions) {
         const user = await this.userRepository.findOne({ where: { employeeId }, relations: ['employee'] });
         if (!user) {
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.NotFoundException('사용자를 찾을 수 없습니다.');
         }
-        const userDomain = user_mapper_1.UserMapper.toDomain(user);
-        userDomain.addRole(role);
-        await this.userRepository.update(user.userId, user_mapper_1.UserMapper.toEntity(userDomain), repositoryOptions);
+        user.roles.push(role);
+        await this.userRepository.update(user.userId, user, repositoryOptions);
     }
     async removeRole(employeeId, role, repositoryOptions) {
         const user = await this.userRepository.findOne({ where: { employeeId }, relations: ['employee'] });
         if (!user) {
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.NotFoundException('사용자를 찾을 수 없습니다.');
         }
-        const userDomain = user_mapper_1.UserMapper.toDomain(user);
-        userDomain.removeRole(role);
-        await this.userRepository.update(user.userId, user_mapper_1.UserMapper.toEntity(userDomain), repositoryOptions);
+        user.roles = user.roles.filter((r) => r !== role);
+        await this.userRepository.update(user.userId, user, repositoryOptions);
     }
 };
 exports.UserService = UserService;
@@ -872,6 +922,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
 let JwtAuthUsecase = class JwtAuthUsecase {
     constructor(jwtService, userService) {
         this.jwtService = jwtService;
@@ -880,11 +931,11 @@ let JwtAuthUsecase = class JwtAuthUsecase {
     async validateUser(email, password) {
         const user = await this.userService.findByEmail(email);
         if (!user) {
-            throw new common_1.UnauthorizedException('User not found');
+            throw new common_1.UnauthorizedException('존재하지 않는 사용자입니다.');
         }
-        const isPasswordValid = await user.checkPassword(password);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new common_1.UnauthorizedException('Invalid password');
+            throw new common_1.UnauthorizedException('비밀번호가 일치하지 않습니다.');
         }
         return user;
     }
@@ -897,14 +948,15 @@ let JwtAuthUsecase = class JwtAuthUsecase {
         };
         const accessToken = this.jwtService.sign(payload);
         const expiredAt = date_util_1.DateUtil.now().addDays(1).format();
-        user.updateAccessToken(accessToken, expiredAt);
+        user.accessToken = accessToken;
+        user.expiredAt = expiredAt;
         await this.userService.update(user);
         return {
             accessToken,
             email: user.email,
-            name: user.name,
-            department: user.department,
-            position: user.position,
+            name: user.employee?.name,
+            department: user.employee?.department,
+            position: user.employee?.position,
             roles: user.roles,
         };
     }
@@ -938,32 +990,44 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SsoAuthUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const axios_1 = __webpack_require__(/*! axios */ "axios");
 const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
+const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
 let SsoAuthUsecase = class SsoAuthUsecase {
     constructor(userService, jwtService) {
         this.userService = userService;
         this.jwtService = jwtService;
     }
     async validateUser(email, password) {
-        const user = await this.userService.findByEmail(email);
+        let user = await this.userService.findByEmail(email);
         if (!user) {
             const client_id = process.env.SSO_CLIENT_ID;
             const ssoApiUrl = process.env.SSO_API_URL;
-            const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
-                client_id,
-                email: email,
-                password: password,
-            });
-            console.log(response.data.data);
-            await this.userService.save(response.data.data);
-            return response.data.data;
+            try {
+                const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
+                    client_id,
+                    email: email,
+                    password: password,
+                });
+                const newUser = new entities_1.User();
+                newUser.email = response.data.data.email;
+                newUser.password = response.data.data.password;
+                newUser.employeeId = response.data.data.employeeId;
+                newUser.roles = response.data.data.roles;
+                newUser.userId = response.data.data.userId;
+                newUser.employee = response.data.data.employee;
+                user = await this.userService.save(newUser);
+            }
+            catch (error) {
+                throw new common_1.UnauthorizedException('SSO 로그인 실패');
+            }
         }
-        const isPasswordValid = await user.checkPassword(password);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new common_1.UnauthorizedException('Invalid password');
+            throw new common_1.UnauthorizedException('비밀번호가 일치하지 않습니다.');
         }
         return user;
     }
@@ -976,14 +1040,15 @@ let SsoAuthUsecase = class SsoAuthUsecase {
         };
         const accessToken = this.jwtService.sign(payload);
         const expiredAt = date_util_1.DateUtil.now().addDays(1).format();
-        user.updateAccessToken(accessToken, expiredAt);
+        user.accessToken = accessToken;
+        user.expiredAt = expiredAt;
         await this.userService.update(user);
         return {
             accessToken,
             email: user.email,
-            name: user.name,
-            department: user.department,
-            position: user.position,
+            name: user.employee?.name,
+            department: user.employee?.department,
+            position: user.employee?.position,
             roles: user.roles,
         };
     }
@@ -1018,6 +1083,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
 let UserUsecase = class UserUsecase {
     constructor(userService) {
         this.userService = userService;
@@ -1031,9 +1097,9 @@ let UserUsecase = class UserUsecase {
             userId: user.userId,
             email: user.email,
             mobile: user.mobile,
-            name: user.name,
-            department: user.department,
-            position: user.position,
+            name: user.employee?.name,
+            department: user.employee?.department,
+            position: user.employee?.position,
             roles: user.roles,
         };
     }
@@ -1042,14 +1108,14 @@ let UserUsecase = class UserUsecase {
         if (!user) {
             throw new common_1.NotFoundException('User not found');
         }
-        return user.checkPassword(password);
+        return bcrypt.compare(password, user.password);
     }
     async changePassword(userId, password) {
         const user = await this.userService.findByUserId(userId);
         if (!user) {
             throw new common_1.NotFoundException('User not found');
         }
-        await user.updatePassword(password);
+        user.password = await bcrypt.hash(password, 10);
         await this.userService.update(user);
     }
 };
@@ -1089,6 +1155,7 @@ const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/in
 const user_service_1 = __webpack_require__(/*! ./application/services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
 const user_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/user.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/user.controller.ts");
 const user_usecase_1 = __webpack_require__(/*! ./application/usecases/user.usecase */ "./apps/resource/src/modules/auth/application/usecases/user.usecase.ts");
+const user_event_handler_1 = __webpack_require__(/*! ./application/handler/user-event.handler */ "./apps/resource/src/modules/auth/application/handler/user-event.handler.ts");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -1108,6 +1175,7 @@ exports.AuthModule = AuthModule = __decorate([
                 useClass: user_repository_1.UserRepository,
             },
             user_usecase_1.UserUsecase,
+            user_event_handler_1.UserEventHandler,
         ],
         controllers: [auth_controller_1.AuthController, user_controller_1.UserController],
         exports: [
@@ -1121,98 +1189,6 @@ exports.AuthModule = AuthModule = __decorate([
         ],
     })
 ], AuthModule);
-
-
-/***/ }),
-
-/***/ "./apps/resource/src/modules/auth/domain/models/user.ts":
-/*!**************************************************************!*\
-  !*** ./apps/resource/src/modules/auth/domain/models/user.ts ***!
-  \**************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.User = void 0;
-const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
-class User {
-    constructor(props) {
-        this.validateProps(props);
-        this.props = props;
-    }
-    validateProps(props) {
-        if (!props.email)
-            throw new Error('Email is required');
-        if (!props.employeeId)
-            throw new Error('Employee ID is required');
-        if (!props.password)
-            throw new Error('Password is required');
-    }
-    get userId() {
-        return this.props.userId;
-    }
-    get employeeId() {
-        return this.props.employeeId;
-    }
-    get email() {
-        return this.props.email;
-    }
-    get mobile() {
-        return this.props.mobile;
-    }
-    get password() {
-        return this.props.password;
-    }
-    get accessToken() {
-        return this.props.accessToken;
-    }
-    get expiredAt() {
-        return this.props.expiredAt;
-    }
-    get subscription() {
-        return this.props.subscription;
-    }
-    get roles() {
-        return this.props.roles;
-    }
-    get name() {
-        return this.props.name;
-    }
-    get employeeNumber() {
-        return this.props.employeeNumber;
-    }
-    get department() {
-        return this.props.department;
-    }
-    get position() {
-        return this.props.position;
-    }
-    async checkPassword(password) {
-        return await bcrypt.compare(password, this.props.password);
-    }
-    async updatePassword(password) {
-        this.props.password = await bcrypt.hash(password, 10);
-    }
-    updateAccessToken(token, expiredAt) {
-        this.props.accessToken = token;
-        this.props.expiredAt = expiredAt;
-    }
-    addRole(role) {
-        if (!this.props.roles.includes(role)) {
-            this.props.roles.push(role);
-        }
-    }
-    updateSubscription(subscription) {
-        this.props.subscription = subscription;
-    }
-    removeRole(role) {
-        this.props.roles = this.props.roles.filter((r) => r !== role);
-    }
-    toJSON() {
-        return { ...this.props };
-    }
-}
-exports.User = User;
 
 
 /***/ }),
@@ -2629,41 +2605,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdapterService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const notification_repository_port_1 = __webpack_require__(/*! @resource/modules/notification/domain/ports/notification.repository.port */ "./apps/resource/src/modules/notification/domain/ports/notification.repository.port.ts");
 const push_notification_port_1 = __webpack_require__(/*! @resource/modules/notification/domain/ports/push-notification.port */ "./apps/resource/src/modules/notification/domain/ports/push-notification.port.ts");
-const user_service_1 = __webpack_require__(/*! @resource/modules/auth/application/services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 let AdapterService = class AdapterService {
-    constructor(notificationRepository, pushNotificationService, userService) {
-        this.notificationRepository = notificationRepository;
+    constructor(pushNotificationService, eventEmitter) {
         this.pushNotificationService = pushNotificationService;
-        this.userService = userService;
+        this.eventEmitter = eventEmitter;
     }
     async send(employeeId, notification) {
-        const user = await this.userService.findByEmployeeId(employeeId);
-        if (!user) {
-            throw new common_1.NotFoundException('User not found');
-        }
-        await this.pushNotificationService.sendNotification(user.subscription, {
+        const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
+            employeeId,
+        });
+        await this.pushNotificationService.sendNotification(subscription, {
             title: notification.title,
             body: notification.body,
         });
     }
     async sendTestNotification(user, payload) {
         console.log(user, payload);
-        const subscription = await this.userService.findByEmployeeId(user.employeeId);
-        await this.pushNotificationService.sendTestNotification(subscription.subscription, payload);
+        const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
+            employeeId: user.employeeId,
+        });
+        await this.pushNotificationService.sendTestNotification(subscription, payload);
     }
 };
 exports.AdapterService = AdapterService;
 exports.AdapterService = AdapterService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)('NotificationRepositoryPort')),
-    __param(1, (0, common_1.Inject)('PushNotificationServicePort')),
-    __metadata("design:paramtypes", [typeof (_a = typeof notification_repository_port_1.NotificationRepositoryPort !== "undefined" && notification_repository_port_1.NotificationRepositoryPort) === "function" ? _a : Object, typeof (_b = typeof push_notification_port_1.PushNotificationPort !== "undefined" && push_notification_port_1.PushNotificationPort) === "function" ? _b : Object, typeof (_c = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _c : Object])
+    __param(0, (0, common_1.Inject)('PushNotificationServicePort')),
+    __metadata("design:paramtypes", [typeof (_a = typeof push_notification_port_1.PushNotificationPort !== "undefined" && push_notification_port_1.PushNotificationPort) === "function" ? _a : Object, typeof (_b = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _b : Object])
 ], AdapterService);
 
 
@@ -2808,19 +2782,19 @@ exports.NotificationUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const adapter_service_1 = __webpack_require__(/*! ../services/adapter.service */ "./apps/resource/src/modules/notification/application/services/adapter.service.ts");
 const notification_service_1 = __webpack_require__(/*! ../services/notification.service */ "./apps/resource/src/modules/notification/application/services/notification.service.ts");
-const user_service_1 = __webpack_require__(/*! @resource/modules/auth/application/services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
 const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const employee_notification_service_1 = __webpack_require__(/*! ../services/employee-notification.service */ "./apps/resource/src/modules/notification/application/services/employee-notification.service.ts");
 const cron_1 = __webpack_require__(/*! cron */ "cron");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 let NotificationUsecase = class NotificationUsecase {
-    constructor(adapterService, notificationService, userService, employeeNotificationService, schedulerRegistry) {
+    constructor(adapterService, notificationService, employeeNotificationService, schedulerRegistry, eventEmitter) {
         this.adapterService = adapterService;
         this.notificationService = notificationService;
-        this.userService = userService;
         this.employeeNotificationService = employeeNotificationService;
         this.schedulerRegistry = schedulerRegistry;
+        this.eventEmitter = eventEmitter;
     }
     async onModuleInit() {
         console.log('before module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
@@ -2835,14 +2809,16 @@ let NotificationUsecase = class NotificationUsecase {
         console.log('after module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
     }
     async subscribe(user, subscription) {
-        const userDomain = await this.userService.findByUserId(user.userId);
-        userDomain.updateSubscription(subscription);
-        await this.userService.update(userDomain);
+        this.eventEmitter.emit('user.subscription.update', {
+            userId: user.userId,
+            subscription: subscription,
+        });
     }
     async unsubscribe(user) {
-        const userDomain = await this.userService.findByUserId(user.userId);
-        userDomain.updateSubscription(null);
-        await this.userService.update(userDomain);
+        this.eventEmitter.emit('user.subscription.update', {
+            userId: user.userId,
+            subscription: null,
+        });
     }
     async markAsRead(employeeId, notificationId) {
         const employeeNotification = await this.employeeNotificationService.findOne({
@@ -2993,7 +2969,7 @@ let NotificationUsecase = class NotificationUsecase {
 exports.NotificationUsecase = NotificationUsecase;
 exports.NotificationUsecase = NotificationUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof adapter_service_1.AdapterService !== "undefined" && adapter_service_1.AdapterService) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _b : Object, typeof (_c = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _c : Object, typeof (_d = typeof employee_notification_service_1.EmployeeNotificationService !== "undefined" && employee_notification_service_1.EmployeeNotificationService) === "function" ? _d : Object, typeof (_e = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _e : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof adapter_service_1.AdapterService !== "undefined" && adapter_service_1.AdapterService) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _b : Object, typeof (_c = typeof employee_notification_service_1.EmployeeNotificationService !== "undefined" && employee_notification_service_1.EmployeeNotificationService) === "function" ? _c : Object, typeof (_d = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _d : Object, typeof (_e = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _e : Object])
 ], NotificationUsecase);
 
 
@@ -4118,17 +4094,17 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const reservation_service_1 = __webpack_require__(/*! ../services/reservation.service */ "./apps/resource/src/modules/reservation/application/services/reservation.service.ts");
 const participant_service_1 = __webpack_require__(/*! ../services/participant.service */ "./apps/resource/src/modules/reservation/application/services/participant.service.ts");
-const notification_usecase_1 = __webpack_require__(/*! @resource/modules/notification/application/usecases/notification.usecase */ "./apps/resource/src/modules/notification/application/usecases/notification.usecase.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const dist_1 = __webpack_require__(/*! cron/dist */ "cron/dist");
 const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 let ReservationUsecase = class ReservationUsecase {
-    constructor(reservationService, participantService, dataSource, notificationUsecase, schedulerRegistry) {
+    constructor(reservationService, participantService, dataSource, eventEmitter, schedulerRegistry) {
         this.reservationService = reservationService;
         this.participantService = participantService;
         this.dataSource = dataSource;
-        this.notificationUsecase = notificationUsecase;
+        this.eventEmitter = eventEmitter;
         this.schedulerRegistry = schedulerRegistry;
     }
     async onModuleInit() {
@@ -4199,23 +4175,31 @@ let ReservationUsecase = class ReservationUsecase {
                 if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
                     this.createReservationClosingJob(reservationWithResource);
                     const notiTarget = [...createDto.participantIds, user.employeeId];
-                    await this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, {
-                        reservationId: reservationWithResource.reservationId,
-                        reservationTitle: reservationWithResource.title,
-                        reservationDate: date_util_1.DateUtil.format(reservationWithResource.startDate),
-                        resourceId: reservationWithResource.resource.resourceId,
-                        resourceName: reservationWithResource.resource.name,
-                        resourceType: reservationWithResource.resource.type,
-                    }, notiTarget);
-                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
-                        this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+                    await this.eventEmitter.emit('send.notification', {
+                        notificationType: notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED,
+                        notificationData: {
                             reservationId: reservationWithResource.reservationId,
                             reservationTitle: reservationWithResource.title,
+                            reservationDate: date_util_1.DateUtil.format(reservationWithResource.startDate),
                             resourceId: reservationWithResource.resource.resourceId,
                             resourceName: reservationWithResource.resource.name,
                             resourceType: reservationWithResource.resource.type,
-                            beforeMinutes: beforeMinutes,
-                        }, notiTarget);
+                        },
+                        notiTarget,
+                    });
+                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
+                        this.eventEmitter.emit('create.notification', {
+                            notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
+                            notificationData: {
+                                reservationId: reservationWithResource.reservationId,
+                                reservationTitle: reservationWithResource.title,
+                                resourceId: reservationWithResource.resource.resourceId,
+                                resourceName: reservationWithResource.resource.name,
+                                resourceType: reservationWithResource.resource.type,
+                                beforeMinutes: beforeMinutes,
+                            },
+                            notiTarget,
+                        });
                     }
                 }
             }
@@ -4422,14 +4406,18 @@ let ReservationUsecase = class ReservationUsecase {
                             notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED;
                             break;
                     }
-                    await this.notificationUsecase.createNotification(notificationType, {
-                        reservationId: reservation.reservationId,
-                        reservationTitle: reservation.title,
-                        reservationDate: date_util_1.DateUtil.format(reservation.startDate),
-                        resourceId: reservation.resource.resourceId,
-                        resourceName: reservation.resource.name,
-                        resourceType: reservation.resource.type,
-                    }, notiTarget);
+                    await this.eventEmitter.emit('create.notification', {
+                        notificationType,
+                        notificationData: {
+                            reservationId: reservation.reservationId,
+                            reservationTitle: reservation.title,
+                            reservationDate: date_util_1.DateUtil.format(reservation.startDate),
+                            resourceId: reservation.resource.resourceId,
+                            resourceName: reservation.resource.name,
+                            resourceType: reservation.resource.type,
+                        },
+                        notiTarget,
+                    });
                 }
                 catch (error) {
                     console.log(error);
@@ -4457,14 +4445,18 @@ let ReservationUsecase = class ReservationUsecase {
         if (updatedReservation.resource.notifyParticipantChange) {
             try {
                 const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
-                await this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED, {
-                    reservationId: updatedReservation.reservationId,
-                    reservationTitle: updatedReservation.title,
-                    reservationDate: date_util_1.DateUtil.format(updatedReservation.startDate),
-                    resourceId: updatedReservation.resource.resourceId,
-                    resourceName: updatedReservation.resource.name,
-                    resourceType: updatedReservation.resource.type,
-                }, notiTarget);
+                await this.eventEmitter.emit('create.notification', {
+                    notificationType: notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED,
+                    notificationData: {
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
+                        reservationDate: date_util_1.DateUtil.format(updatedReservation.startDate),
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
+                    },
+                    notiTarget,
+                });
             }
             catch (error) {
                 console.log(error);
@@ -4519,7 +4511,7 @@ let ReservationUsecase = class ReservationUsecase {
 exports.ReservationUsecase = ReservationUsecase;
 exports.ReservationUsecase = ReservationUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _a : Object, typeof (_b = typeof participant_service_1.ParticipantService !== "undefined" && participant_service_1.ParticipantService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object, typeof (_d = typeof notification_usecase_1.NotificationUsecase !== "undefined" && notification_usecase_1.NotificationUsecase) === "function" ? _d : Object, typeof (_e = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _e : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _a : Object, typeof (_b = typeof participant_service_1.ParticipantService !== "undefined" && participant_service_1.ParticipantService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object, typeof (_d = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _d : Object, typeof (_e = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _e : Object])
 ], ReservationUsecase);
 
 
@@ -5060,13 +5052,12 @@ const reservation_repository_1 = __webpack_require__(/*! ./infrastructure/adapte
 const reservation_participant_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/reservation-participant.repository */ "./apps/resource/src/modules/reservation/infrastructure/adapters/out/persistence/reservation-participant.repository.ts");
 const participant_service_1 = __webpack_require__(/*! ./application/services/participant.service */ "./apps/resource/src/modules/reservation/application/services/participant.service.ts");
 const reservation_usecase_1 = __webpack_require__(/*! ./application/usecases/reservation.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation.usecase.ts");
-const notification_module_1 = __webpack_require__(/*! ../notification/notification.module */ "./apps/resource/src/modules/notification/notification.module.ts");
 let ReservationModule = class ReservationModule {
 };
 exports.ReservationModule = ReservationModule;
 exports.ReservationModule = ReservationModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.Reservation, entities_1.ReservationParticipant, entities_1.Schedule]), notification_module_1.NotificationModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.Reservation, entities_1.ReservationParticipant, entities_1.Schedule])],
         providers: [
             reservation_service_1.ReservationService,
             participant_service_1.ParticipantService,
@@ -6403,7 +6394,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -6411,27 +6402,25 @@ const resource_response_dto_1 = __webpack_require__(/*! ../dtos/resource-respons
 const resource_service_1 = __webpack_require__(/*! ../services/resource.service */ "./apps/resource/src/modules/resource/common/application/services/resource.service.ts");
 const resource_group_service_1 = __webpack_require__(/*! ../services/resource-group.service */ "./apps/resource/src/modules/resource/common/application/services/resource-group.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const reservation_service_1 = __webpack_require__(/*! @resource/modules/reservation/application/services/reservation.service */ "./apps/resource/src/modules/reservation/application/services/reservation.service.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 const resource_manager_service_1 = __webpack_require__(/*! ../services/resource-manager.service */ "./apps/resource/src/modules/resource/common/application/services/resource-manager.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const user_service_1 = __webpack_require__(/*! @resource/modules/auth/application/services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
 const vehicle_info_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/vehicle-info.usecase.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const file_service_1 = __webpack_require__(/*! @resource/modules/file/application/services/file.service */ "./apps/resource/src/modules/file/application/services/file.service.ts");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 let ResourceUsecase = class ResourceUsecase {
-    constructor(resourceService, resourceManagerService, resourceGroupService, reservationService, vehicleInfoService, vehicleInfoUsecase, userService, dataSource, fileService, typeHandlers) {
+    constructor(resourceService, resourceManagerService, resourceGroupService, vehicleInfoService, vehicleInfoUsecase, dataSource, fileService, typeHandlers, eventEmitter) {
         this.resourceService = resourceService;
         this.resourceManagerService = resourceManagerService;
         this.resourceGroupService = resourceGroupService;
-        this.reservationService = reservationService;
         this.vehicleInfoService = vehicleInfoService;
         this.vehicleInfoUsecase = vehicleInfoUsecase;
-        this.userService = userService;
         this.dataSource = dataSource;
         this.fileService = fileService;
         this.typeHandlers = typeHandlers;
+        this.eventEmitter = eventEmitter;
     }
     async findResources(type) {
         let relations = [];
@@ -6461,53 +6450,30 @@ let ResourceUsecase = class ResourceUsecase {
             where: {
                 type: type,
                 parentResourceGroupId: (0, typeorm_1.Not)((0, typeorm_1.IsNull)()),
+                resources: {
+                    reservations: {
+                        startDate: (0, typeorm_1.LessThan)(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
+                        endDate: (0, typeorm_1.MoreThan)(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
+                        status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+                    },
+                },
             },
+            relations: ['resources', 'resources.reservations', 'resources.reservations.participants'],
             order: {
                 order: 'ASC',
             },
         });
-        const resourceGroupsWithResources = await Promise.all(resourceGroups.map(async (resourceGroup) => {
-            const resources = await this.resourceService.findAll({
-                where: {
-                    resourceGroupId: resourceGroup.resourceGroupId,
-                },
-                order: {
-                    order: 'ASC',
-                },
-            });
-            const resourcesWithReservations = await Promise.all(resources.map(async (resource) => {
-                const reservations = await this.reservationService.findAll({
-                    where: {
-                        resourceId: resource.resourceId,
-                        startDate: (0, typeorm_1.LessThan)(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
-                        endDate: (0, typeorm_1.MoreThan)(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
-                        status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
-                    },
-                    relations: ['participants'],
-                    order: {
-                        startDate: 'ASC',
-                    },
+        resourceGroups.forEach((group) => {
+            if (group.resources) {
+                group.resources.sort((a, b) => a.order - b.order);
+                group.resources.forEach((resource) => {
+                    if (resource.reservations) {
+                        resource.reservations.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+                    }
                 });
-                const reservationResponseDtos = reservations.map((reservation) => {
-                    const isMine = reservation.participants.some((participant) => participant.employeeId === user.employeeId);
-                    delete reservation.participants;
-                    return {
-                        ...reservation,
-                        isMine: isMine,
-                    };
-                });
-                return {
-                    ...resource,
-                    resourceId: resource.resourceId,
-                    reservations: reservationResponseDtos,
-                };
-            }));
-            return {
-                ...resourceGroup,
-                resources: resourcesWithReservations,
-            };
-        }));
-        return resourceGroupsWithResources;
+            }
+        });
+        return resourceGroups;
     }
     async findResourceDetail(resourceId) {
         const resource = await this.resourceService.findOne({
@@ -6622,7 +6588,11 @@ let ResourceUsecase = class ResourceUsecase {
                         employeeId: manager.employeeId,
                     }, { queryRunner });
                 }),
-                ...managers.map((manager) => this.userService.addRole(manager.employeeId, role_type_enum_1.Role.RESOURCE_ADMIN, { queryRunner })),
+                ...managers.map((manager) => this.eventEmitter.emit('user.role.add', {
+                    employeeId: manager.employeeId,
+                    role: role_type_enum_1.Role.RESOURCE_ADMIN,
+                    repositoryOptions: { queryRunner },
+                })),
             ]);
             await queryRunner.commitTransaction();
             return true;
@@ -6669,11 +6639,19 @@ let ResourceUsecase = class ResourceUsecase {
                         },
                     });
                     if (otherResources.length === 1) {
-                        await this.userService.removeRole(employeeId, role_type_enum_1.Role.RESOURCE_ADMIN, { queryRunner });
+                        await this.eventEmitter.emit('user.role.remove', {
+                            employeeId: employeeId,
+                            role: role_type_enum_1.Role.RESOURCE_ADMIN,
+                            repositoryOptions: { queryRunner },
+                        });
                     }
                 }));
                 const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
-                await Promise.all(addedManagerIds.map((employeeId) => this.userService.addRole(employeeId, role_type_enum_1.Role.RESOURCE_ADMIN, { queryRunner })));
+                await Promise.all(addedManagerIds.map((employeeId) => this.eventEmitter.emit('user.role.add', {
+                    employeeId: employeeId,
+                    role: role_type_enum_1.Role.RESOURCE_ADMIN,
+                    repositoryOptions: { queryRunner },
+                })));
                 await this.resourceManagerService.updateManagers(resourceId, newManagerIds, { queryRunner });
             }
             await queryRunner.commitTransaction();
@@ -6748,8 +6726,8 @@ let ResourceUsecase = class ResourceUsecase {
 exports.ResourceUsecase = ResourceUsecase;
 exports.ResourceUsecase = ResourceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __param(9, (0, common_1.Inject)('ResourceTypeHandlers')),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.ResourceService !== "undefined" && resource_service_1.ResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.ResourceManagerService !== "undefined" && resource_manager_service_1.ResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof resource_group_service_1.ResourceGroupService !== "undefined" && resource_group_service_1.ResourceGroupService) === "function" ? _c : Object, typeof (_d = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _e : Object, typeof (_f = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _f : Object, typeof (_g = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _g : Object, typeof (_h = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _h : Object, typeof (_j = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _j : Object, typeof (_k = typeof Map !== "undefined" && Map) === "function" ? _k : Object])
+    __param(7, (0, common_1.Inject)('ResourceTypeHandlers')),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.ResourceService !== "undefined" && resource_service_1.ResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.ResourceManagerService !== "undefined" && resource_manager_service_1.ResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof resource_group_service_1.ResourceGroupService !== "undefined" && resource_group_service_1.ResourceGroupService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object, typeof (_g = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _g : Object, typeof (_h = typeof Map !== "undefined" && Map) === "function" ? _h : Object, typeof (_j = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _j : Object])
 ], ResourceUsecase);
 
 
@@ -7875,9 +7853,7 @@ const vehicle_resource_handler_1 = __webpack_require__(/*! ./vehicle/application
 const meeting_room_resource_handler_1 = __webpack_require__(/*! ./meeting-room/application/handlers/meeting-room-resource.handler */ "./apps/resource/src/modules/resource/meeting-room/application/handlers/meeting-room-resource.handler.ts");
 const accommodation_resource_module_1 = __webpack_require__(/*! ./accommodation/accommodation-resource.module */ "./apps/resource/src/modules/resource/accommodation/accommodation-resource.module.ts");
 const accommodation_resource_handler_1 = __webpack_require__(/*! ./accommodation/application/handlers/accommodation-resource.handler */ "./apps/resource/src/modules/resource/accommodation/application/handlers/accommodation-resource.handler.ts");
-const auth_module_1 = __webpack_require__(/*! @resource/modules/auth/auth.module */ "./apps/resource/src/modules/auth/auth.module.ts");
 const resource_group_usecase_1 = __webpack_require__(/*! ./common/application/usecases/resource-group.usecase */ "./apps/resource/src/modules/resource/common/application/usecases/resource-group.usecase.ts");
-const reservation_module_1 = __webpack_require__(/*! ../reservation/reservation.module */ "./apps/resource/src/modules/reservation/reservation.module.ts");
 const resource_usecase_1 = __webpack_require__(/*! ./common/application/usecases/resource.usecase */ "./apps/resource/src/modules/resource/common/application/usecases/resource.usecase.ts");
 const file_module_1 = __webpack_require__(/*! ../file/file.module */ "./apps/resource/src/modules/file/file.module.ts");
 let ResourceModule = class ResourceModule {
@@ -7886,12 +7862,10 @@ exports.ResourceModule = ResourceModule;
 exports.ResourceModule = ResourceModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([entities_1.Resource, entities_1.ResourceGroup, entities_1.ResourceManager, entities_1.Employee, entities_1.User]),
+            typeorm_1.TypeOrmModule.forFeature([entities_1.Resource, entities_1.ResourceGroup, entities_1.ResourceManager]),
             vehicle_resource_module_1.VehicleResourceModule,
             meeting_room_resource_module_1.MeetingRoomResourceModule,
             accommodation_resource_module_1.AccommodationResourceModule,
-            auth_module_1.AuthModule,
-            reservation_module_1.ReservationModule,
             file_module_1.FileModule,
         ],
         providers: [
@@ -8657,10 +8631,12 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         try {
             const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
             if (createMaintenanceDto.mileage) {
-                const vehicleInfo = await this.vehicleInfoService.findOne({
-                    where: { consumableId: createMaintenanceDto.consumableId },
+                const newMaintenance = await this.maintenanceService.findOne({
+                    where: { maintenanceId: maintenance.maintenanceId },
+                    relations: ['consumable', 'consumable.vehicleInfo'],
+                    order: { createdAt: 'DESC' },
                 });
-                await this.vehicleInfoService.update(vehicleInfo.vehicleInfoId, {
+                await this.vehicleInfoService.update(newMaintenance.consumable.vehicleInfo.vehicleInfoId, {
                     totalMileage: createMaintenanceDto.mileage,
                 }, { queryRunner });
             }
@@ -8702,10 +8678,12 @@ let MaintenanceUsecase = class MaintenanceUsecase {
                 ...repositoryOptions,
             });
             if (updateMaintenanceDto.mileage) {
-                const vehicleInfo = await this.vehicleInfoService.findOne({
-                    where: { consumableId: maintenance.consumableId },
+                const savedMaintenance = await this.maintenanceService.findOne({
+                    where: { maintenanceId: maintenance.maintenanceId },
+                    relations: ['consumable', 'consumable.vehicleInfo'],
+                    order: { createdAt: 'DESC' },
                 });
-                await this.vehicleInfoService.update(vehicleInfo.vehicleInfoId, {
+                await this.vehicleInfoService.update(savedMaintenance.consumable.vehicleInfo.vehicleInfoId, {
                     totalMileage: updateMaintenanceDto.mileage,
                 }, { queryRunner });
             }
@@ -8778,20 +8756,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VehicleInfoUsecase = void 0;
 const vehicle_info_service_1 = __webpack_require__(/*! ../services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
-const notification_usecase_1 = __webpack_require__(/*! @resource/modules/notification/application/usecases/notification.usecase */ "./apps/resource/src/modules/notification/application/usecases/notification.usecase.ts");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 let VehicleInfoUsecase = class VehicleInfoUsecase {
-    constructor(vehicleInfoService, consumableService, notificationUsecase) {
+    constructor(vehicleInfoService, eventEmitter) {
         this.vehicleInfoService = vehicleInfoService;
-        this.consumableService = consumableService;
-        this.notificationUsecase = notificationUsecase;
+        this.eventEmitter = eventEmitter;
     }
     async findVehicleInfo(vehicleInfoId) {
         const vehicleInfo = await this.vehicleInfoService.findOne({
@@ -8841,12 +8817,17 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
             if (isReplace) {
                 try {
                     const notiTarget = afterVehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
-                    await this.notificationUsecase.createNotification(notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING, {
-                        resourceId: afterVehicleInfo.resource.resourceId,
-                        resourceName: afterVehicleInfo.resource.name,
-                        resourceType: afterVehicleInfo.resource.type,
-                        consumableName: consumable.name,
-                    }, notiTarget, repositoryOptions);
+                    await this.eventEmitter.emit('create.notification', {
+                        notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING,
+                        notificationData: {
+                            resourceId: afterVehicleInfo.resource.resourceId,
+                            resourceName: afterVehicleInfo.resource.name,
+                            resourceType: afterVehicleInfo.resource.type,
+                            consumableName: consumable.name,
+                        },
+                        notiTarget,
+                        repositoryOptions,
+                    });
                 }
                 catch (error) {
                     console.log(error);
@@ -8869,7 +8850,7 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
 exports.VehicleInfoUsecase = VehicleInfoUsecase;
 exports.VehicleInfoUsecase = VehicleInfoUsecase = __decorate([
     (0, common_2.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.ConsumableService !== "undefined" && consumable_service_1.ConsumableService) === "function" ? _b : Object, typeof (_c = typeof notification_usecase_1.NotificationUsecase !== "undefined" && notification_usecase_1.NotificationUsecase) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _b : Object])
 ], VehicleInfoUsecase);
 
 
@@ -9582,7 +9563,6 @@ const consumable_repository_1 = __webpack_require__(/*! ./infrastructure/adapter
 const maintenance_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/maintenance.repository */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/maintenance.repository.ts");
 const vehicle_info_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/vehicle-info.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/vehicle-info.controller.ts");
 const vehicle_info_usecase_1 = __webpack_require__(/*! ./application/usecases/vehicle-info.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/vehicle-info.usecase.ts");
-const notification_module_1 = __webpack_require__(/*! @resource/modules/notification/notification.module */ "./apps/resource/src/modules/notification/notification.module.ts");
 const consumable_usecase_1 = __webpack_require__(/*! ./application/usecases/consumable.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/consumable.usecase.ts");
 const maintenance_usecase_1 = __webpack_require__(/*! ./application/usecases/maintenance.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/maintenance.usecase.ts");
 let VehicleResourceModule = class VehicleResourceModule {
@@ -9590,7 +9570,7 @@ let VehicleResourceModule = class VehicleResourceModule {
 exports.VehicleResourceModule = VehicleResourceModule;
 exports.VehicleResourceModule = VehicleResourceModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.VehicleInfo, entities_1.Consumable, entities_1.Maintenance]), notification_module_1.NotificationModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.VehicleInfo, entities_1.Consumable, entities_1.Maintenance])],
         providers: [
             vehicle_resource_handler_1.VehicleResourceHandler,
             vehicle_info_service_1.VehicleInfoService,
@@ -12147,6 +12127,16 @@ module.exports = require("@nestjs/config");
 /***/ ((module) => {
 
 module.exports = require("@nestjs/core");
+
+/***/ }),
+
+/***/ "@nestjs/event-emitter":
+/*!****************************************!*\
+  !*** external "@nestjs/event-emitter" ***!
+  \****************************************/
+/***/ ((module) => {
+
+module.exports = require("@nestjs/event-emitter");
 
 /***/ }),
 

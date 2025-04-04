@@ -1,8 +1,7 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ReservationRepositoryPort } from '../../domain/ports/reservation.repository.port';
 import { Reservation } from '@libs/entities';
-import { ReservationResponseDto } from '../dtos/reservation-response.dto';
-import { LessThan, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { LessThan, MoreThanOrEqual } from 'typeorm';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';

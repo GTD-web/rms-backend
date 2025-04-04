@@ -1,4 +1,4 @@
-import { User } from '@resource/modules/auth/domain/models/user';
+import { User } from '@libs/entities';
 import { LoginDto } from '@resource/modules/auth/application/dto/login.dto';
 import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-response.dto';
 

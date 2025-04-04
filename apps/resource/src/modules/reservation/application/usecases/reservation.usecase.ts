@@ -28,13 +28,12 @@ import {
 } from '../dtos/update-reservation.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { User } from '@libs/entities';
-import { NotificationUsecase } from '@resource/modules/notification/application/usecases/notification.usecase';
 import { NotificationType } from '@libs/enums/notification-type.enum';
-import { error } from 'console';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { Role } from '@libs/enums/role-type.enum';
 import { CronJob } from 'cron/dist';
-import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ReservationUsecase {
@@ -42,7 +41,8 @@ export class ReservationUsecase {
         private readonly reservationService: ReservationService,
         private readonly participantService: ParticipantService,
         private readonly dataSource: DataSource,
-        private readonly notificationUsecase: NotificationUsecase,
+        private readonly eventEmitter: EventEmitter2,
+        // private readonly notificationUsecase: NotificationUsecase,
         private readonly schedulerRegistry: SchedulerRegistry,
     ) {}
 
@@ -140,9 +140,9 @@ export class ReservationUsecase {
                     this.createReservationClosingJob(reservationWithResource);
 
                     const notiTarget = [...createDto.participantIds, user.employeeId];
-                    await this.notificationUsecase.createNotification(
-                        NotificationType.RESERVATION_STATUS_CONFIRMED,
-                        {
+                    await this.eventEmitter.emit('send.notification', {
+                        notificationType: NotificationType.RESERVATION_STATUS_CONFIRMED,
+                        notificationData: {
                             reservationId: reservationWithResource.reservationId,
                             reservationTitle: reservationWithResource.title,
                             reservationDate: DateUtil.format(reservationWithResource.startDate),
@@ -151,11 +151,11 @@ export class ReservationUsecase {
                             resourceType: reservationWithResource.resource.type,
                         },
                         notiTarget,
-                    );
+                    });
                     for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
-                        this.notificationUsecase.createNotification(
-                            NotificationType.RESERVATION_DATE_UPCOMING,
-                            {
+                        this.eventEmitter.emit('create.notification', {
+                            notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
+                            notificationData: {
                                 reservationId: reservationWithResource.reservationId,
                                 reservationTitle: reservationWithResource.title,
                                 resourceId: reservationWithResource.resource.resourceId,
@@ -164,7 +164,7 @@ export class ReservationUsecase {
                                 beforeMinutes: beforeMinutes,
                             },
                             notiTarget,
-                        );
+                        });
                     }
                 }
             } catch (error) {
@@ -438,9 +438,9 @@ export class ReservationUsecase {
                             break;
                     }
 
-                    await this.notificationUsecase.createNotification(
+                    await this.eventEmitter.emit('create.notification', {
                         notificationType,
-                        {
+                        notificationData: {
                             reservationId: reservation.reservationId,
                             reservationTitle: reservation.title,
                             reservationDate: DateUtil.format(reservation.startDate),
@@ -449,7 +449,7 @@ export class ReservationUsecase {
                             resourceType: reservation.resource.type,
                         },
                         notiTarget,
-                    );
+                    });
                 } catch (error) {
                     console.log(error);
                     console.log('Notification creation failed in updateStatus');
@@ -494,9 +494,9 @@ export class ReservationUsecase {
             try {
                 const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
 
-                await this.notificationUsecase.createNotification(
-                    NotificationType.RESERVATION_PARTICIPANT_CHANGED,
-                    {
+                await this.eventEmitter.emit('create.notification', {
+                    notificationType: NotificationType.RESERVATION_PARTICIPANT_CHANGED,
+                    notificationData: {
                         reservationId: updatedReservation.reservationId,
                         reservationTitle: updatedReservation.title,
                         reservationDate: DateUtil.format(updatedReservation.startDate),
@@ -505,7 +505,7 @@ export class ReservationUsecase {
                         resourceType: updatedReservation.resource.type,
                     },
                     notiTarget,
-                );
+                });
             } catch (error) {
                 console.log(error);
                 console.log('Notification creation failed in updateParticipants');

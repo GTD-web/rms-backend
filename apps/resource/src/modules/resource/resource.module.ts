@@ -17,19 +17,15 @@ import { VehicleResourceHandler } from './vehicle/application/handlers/vehicle-r
 import { MeetingRoomResourceHandler } from './meeting-room/application/handlers/meeting-room-resource.handler';
 import { AccommodationResourceModule } from './accommodation/accommodation-resource.module';
 import { AccommodationResourceHandler } from './accommodation/application/handlers/accommodation-resource.handler';
-import { AuthModule } from '@resource/modules/auth/auth.module';
 import { ResourceGroupUsecase } from './common/application/usecases/resource-group.usecase';
-import { ReservationModule } from '../reservation/reservation.module';
 import { ResourceUsecase } from './common/application/usecases/resource.usecase';
 import { FileModule } from '../file/file.module';
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Resource, ResourceGroup, ResourceManager, Employee, User]),
+        TypeOrmModule.forFeature([Resource, ResourceGroup, ResourceManager]),
         VehicleResourceModule,
         MeetingRoomResourceModule,
         AccommodationResourceModule,
-        AuthModule,
-        ReservationModule,
         FileModule,
     ],
     providers: [

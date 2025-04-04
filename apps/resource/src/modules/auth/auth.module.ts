@@ -11,6 +11,8 @@ import { User, Employee } from '@libs/entities';
 import { UserService } from './application/services/user.service';
 import { UserController } from './infrastructure/adapters/in/web/user.controller';
 import { UserUsecase } from './application/usecases/user.usecase';
+import { UserEventHandler } from './application/handler/user-event.handler';
+
 @Module({
     imports: [PassportModule, TypeOrmModule.forFeature([User, Employee])],
     providers: [
@@ -26,6 +28,7 @@ import { UserUsecase } from './application/usecases/user.usecase';
             useClass: UserRepository,
         },
         UserUsecase,
+        UserEventHandler,
     ],
     controllers: [AuthController, UserController],
     exports: [
