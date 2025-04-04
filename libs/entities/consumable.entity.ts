@@ -15,7 +15,7 @@ export class Consumable {
     @Column()
     name: string;
 
-    @Column({ nullable: true })
+    @Column({ default: 0 })
     replaceCycle: number;
 
     @Column({ default: true })

@@ -1,72 +1,55 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsArray, IsDate } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsDate, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class UpdateMaintenanceDto {
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
-    title?: string;
-
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    description?: string;
-
-    @ApiProperty({ required: false })
-    @IsNumber()
-    @IsOptional()
-    cost?: number;
-
-    @ApiProperty({ required: false })
-    @Type(() => Date)
-    @IsDate()
-    @IsOptional()
-    maintenanceDate?: Date;
-
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    maintenanceShop?: string;
+    date?: string;
 
     @ApiProperty({ required: false })
     @IsNumber()
     @IsOptional()
     mileage?: number;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsNumber()
+    cost?: number;
+
+    @ApiProperty({ required: false, type: [String] })
+    @IsOptional()
+    @IsArray()
+    images?: string[];
+
+    @ApiProperty({
+        description: '소모품 ID',
+        example: 'consumable-123',
+    })
+    @IsOptional()
+    consumableId?: string;
 }
 
 export class UpdateConsumableDto {
-    @ApiProperty({ required: false })
+    @ApiProperty({ description: '소모품 이름' })
     @IsString()
-    @IsOptional()
-    name?: string;
+    name: string;
 
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    description?: string;
-
-    @ApiProperty({ required: false })
+    @ApiProperty({ description: '소모품 교체 주기' })
     @IsNumber()
-    @IsOptional()
-    cost?: number;
+    replaceCycle: number;
 
-    @ApiProperty({ required: false })
-    @Type(() => Date)
-    @IsDate()
+    @ApiProperty({ default: true, description: '소모품 교체 알림 주기' })
+    @IsBoolean()
     @IsOptional()
-    replacementDate?: Date;
+    notifyReplacementCycle?: boolean;
 
-    @ApiProperty({ required: false })
-    @IsNumber()
-    @IsOptional()
-    mileage?: number;
-
-    @ApiProperty({ required: false })
-    @Type(() => Date)
-    @IsDate()
-    @IsOptional()
-    nextReplacementDate?: Date;
+    @ApiProperty({
+        description: '차량 ID',
+        example: 'vehicle-123',
+    })
+    vehicleInfoId: string;
 }
 
 export class UpdateVehicleInfoDto {

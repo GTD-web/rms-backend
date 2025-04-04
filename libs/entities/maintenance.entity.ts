@@ -14,10 +14,10 @@ export class Maintenance {
     @Column()
     date: string;
 
-    @Column({ nullable: true })
+    @Column({ default: 0 })
     mileage: number;
 
-    @Column({ nullable: true })
+    @Column({ default: 0 })
     cost: number;
 
     @Column({ type: 'json', nullable: true, comment: '정비사진 배열' })

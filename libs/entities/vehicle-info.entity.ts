@@ -12,10 +12,10 @@ export class VehicleInfo {
     @Column()
     resourceId: string;
 
-    @Column({ nullable: true })
+    @Column({ default: 0 })
     leftMileage: number;
 
-    @Column({ nullable: true })
+    @Column({ default: 0 })
     totalMileage: number;
 
     @Column({ nullable: true })

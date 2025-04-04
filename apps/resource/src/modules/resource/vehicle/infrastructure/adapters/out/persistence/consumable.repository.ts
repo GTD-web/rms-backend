@@ -6,6 +6,7 @@ import { Consumable } from '@libs/entities';
 import { ConsumableRepositoryPort } from '@resource/modules/resource/vehicle/domain/ports/consumable.repository.port';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { CreateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
+import { UpdateConsumableDto } from '@resource/dtos.index';
 @Injectable()
 export class ConsumableRepository implements ConsumableRepositoryPort {
     constructor(
@@ -48,7 +49,7 @@ export class ConsumableRepository implements ConsumableRepositoryPort {
 
     async update(
         id: string,
-        consumable: Partial<Consumable>,
+        consumable: UpdateConsumableDto,
         repositoryOptions?: RepositoryOptions,
     ): Promise<Consumable> {
         const repository = repositoryOptions?.queryRunner

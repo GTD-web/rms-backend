@@ -4,6 +4,7 @@ import { RepositoryOptions } from '@libs/interfaces/repository-option.interface'
 import { Consumable, User } from '@libs/entities';
 import { CreateConsumableDto } from '../dtos/create-vehicle-info.dto';
 import { Role } from '@libs/enums/role-type.enum';
+import { UpdateConsumableDto } from '../dtos/update-vehicle-info.dto';
 
 @Injectable()
 export class ConsumableUsecase {
@@ -34,7 +35,7 @@ export class ConsumableUsecase {
     async update(
         user: User,
         id: string,
-        updateData: Partial<CreateConsumableDto>,
+        updateData: UpdateConsumableDto,
         repositoryOptions?: RepositoryOptions,
     ): Promise<Consumable> {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);

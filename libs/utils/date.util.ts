@@ -7,7 +7,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 // 기본 타임존 설정
-// dayjs.tz.setDefault('Asia/Seoul');
+dayjs.tz.setDefault('Asia/Seoul');
 
 class DateUtilWrapper {
     constructor(private date: dayjs.Dayjs) {}
@@ -55,7 +55,7 @@ export class DateUtil {
     }
 
     static date(date: Date | string | number) {
-        return new DateUtilWrapper(dayjs(date).tz());
+        return new DateUtilWrapper(dayjs.tz(date, 'Asia/Seoul'));
     }
 
     static format(date: Date | string | number, format = 'YYYY-MM-DD HH:mm:ss') {

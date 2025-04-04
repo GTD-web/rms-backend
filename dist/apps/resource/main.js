@@ -3939,6 +3939,51 @@ __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/reservation/application/handler/reservation-event.handler.ts":
+/*!************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/reservation/application/handler/reservation-event.handler.ts ***!
+  \************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationEventHandler = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const reservation_service_1 = __webpack_require__(/*! ../services/reservation.service */ "./apps/resource/src/modules/reservation/application/services/reservation.service.ts");
+let ReservationEventHandler = class ReservationEventHandler {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async handleFindReservation(payload) {
+        return await this.reservationService.findAll(payload.repositoryOptions);
+    }
+};
+exports.ReservationEventHandler = ReservationEventHandler;
+__decorate([
+    (0, event_emitter_1.OnEvent)('find.reservation'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ReservationEventHandler.prototype, "handleFindReservation", null);
+exports.ReservationEventHandler = ReservationEventHandler = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _a : Object])
+], ReservationEventHandler);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/reservation/application/services/participant.service.ts":
 /*!*******************************************************************************************!*\
   !*** ./apps/resource/src/modules/reservation/application/services/participant.service.ts ***!
@@ -5052,6 +5097,7 @@ const reservation_repository_1 = __webpack_require__(/*! ./infrastructure/adapte
 const reservation_participant_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/reservation-participant.repository */ "./apps/resource/src/modules/reservation/infrastructure/adapters/out/persistence/reservation-participant.repository.ts");
 const participant_service_1 = __webpack_require__(/*! ./application/services/participant.service */ "./apps/resource/src/modules/reservation/application/services/participant.service.ts");
 const reservation_usecase_1 = __webpack_require__(/*! ./application/usecases/reservation.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation.usecase.ts");
+const reservation_event_handler_1 = __webpack_require__(/*! ./application/handler/reservation-event.handler */ "./apps/resource/src/modules/reservation/application/handler/reservation-event.handler.ts");
 let ReservationModule = class ReservationModule {
 };
 exports.ReservationModule = ReservationModule;
@@ -5070,6 +5116,7 @@ exports.ReservationModule = ReservationModule = __decorate([
                 useClass: reservation_participant_repository_1.ReservationParticipantRepository,
             },
             reservation_usecase_1.ReservationUsecase,
+            reservation_event_handler_1.ReservationEventHandler,
         ],
         controllers: [reservation_controller_1.ReservationController],
         exports: [reservation_service_1.ReservationService],
@@ -6410,6 +6457,7 @@ const vehicle_info_usecase_1 = __webpack_require__(/*! @resource/modules/resourc
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const file_service_1 = __webpack_require__(/*! @resource/modules/file/application/services/file.service */ "./apps/resource/src/modules/file/application/services/file.service.ts");
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ResourceUsecase = class ResourceUsecase {
     constructor(resourceService, resourceManagerService, resourceGroupService, vehicleInfoService, vehicleInfoUsecase, dataSource, fileService, typeHandlers, eventEmitter) {
         this.resourceService = resourceService;
@@ -6442,7 +6490,7 @@ let ResourceUsecase = class ResourceUsecase {
         return resources.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
     }
     async findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user) {
-        if (startDate && endDate && startDate > endDate) {
+        if (!!startDate && !!endDate && startDate > endDate) {
             throw new common_1.BadRequestException('Start date must be before end date');
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
@@ -6450,30 +6498,61 @@ let ResourceUsecase = class ResourceUsecase {
             where: {
                 type: type,
                 parentResourceGroupId: (0, typeorm_1.Not)((0, typeorm_1.IsNull)()),
-                resources: {
-                    reservations: {
-                        startDate: (0, typeorm_1.LessThan)(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
-                        endDate: (0, typeorm_1.MoreThan)(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
-                        status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
-                    },
-                },
             },
-            relations: ['resources', 'resources.reservations', 'resources.reservations.participants'],
             order: {
                 order: 'ASC',
             },
         });
-        resourceGroups.forEach((group) => {
-            if (group.resources) {
-                group.resources.sort((a, b) => a.order - b.order);
-                group.resources.forEach((resource) => {
-                    if (resource.reservations) {
-                        resource.reservations.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-                    }
+        const resourceGroupsWithResources = await Promise.all(resourceGroups.map(async (resourceGroup) => {
+            const resources = await this.resourceService.findAll({
+                where: {
+                    resourceGroupId: resourceGroup.resourceGroupId,
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+            const resourcesWithReservations = await Promise.all(resources.map(async (resource) => {
+                const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
+                    repositoryOptions: {
+                        where: {
+                            resourceId: resource.resourceId,
+                            startDate: (0, typeorm_1.MoreThanOrEqual)(regex.test(startDate)
+                                ? date_util_1.DateUtil.date(startDate).toDate()
+                                : date_util_1.DateUtil.date(startDate + ' 00:00:00').toDate()),
+                            endDate: (0, typeorm_1.LessThanOrEqual)(regex.test(endDate)
+                                ? date_util_1.DateUtil.date(endDate).toDate()
+                                : date_util_1.DateUtil.date(endDate + ' 23:59:59').toDate()),
+                            status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                        },
+                        relations: ['participants'],
+                        order: {
+                            startDate: 'ASC',
+                        },
+                    },
                 });
-            }
-        });
-        return resourceGroups;
+                const reservationResponseDtos = reservations.map((reservation) => {
+                    const isMine = reservation.participants.some((participant) => participant.employeeId === user.employeeId);
+                    delete reservation.participants;
+                    return {
+                        ...reservation,
+                        startDate: date_util_1.DateUtil.date(reservation.startDate).format(),
+                        endDate: date_util_1.DateUtil.date(reservation.endDate).format(),
+                        isMine: isMine,
+                    };
+                });
+                return {
+                    ...resource,
+                    resourceId: resource.resourceId,
+                    reservations: reservationResponseDtos,
+                };
+            }));
+            return {
+                ...resourceGroup,
+                resources: resourcesWithReservations,
+            };
+        }));
+        return resourceGroupsWithResources;
     }
     async findResourceDetail(resourceId) {
         const resource = await this.resourceService.findOne({
@@ -6498,7 +6577,7 @@ let ResourceUsecase = class ResourceUsecase {
                 resource.vehicleInfo.consumables.forEach((consumable) => {
                     const replaceCycle = Number(consumable.replaceCycle);
                     if (consumable.maintenances && consumable.maintenances.length > 0) {
-                        consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
+                        consumable.maintenances = [consumable.maintenances.pop()].map((maintenance) => {
                             return {
                                 ...maintenance,
                                 mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
@@ -6588,7 +6667,7 @@ let ResourceUsecase = class ResourceUsecase {
                         employeeId: manager.employeeId,
                     }, { queryRunner });
                 }),
-                ...managers.map((manager) => this.eventEmitter.emit('user.role.add', {
+                ...managers.map((manager) => this.eventEmitter.emit('add.user.role', {
                     employeeId: manager.employeeId,
                     role: role_type_enum_1.Role.RESOURCE_ADMIN,
                     repositoryOptions: { queryRunner },
@@ -6639,7 +6718,7 @@ let ResourceUsecase = class ResourceUsecase {
                         },
                     });
                     if (otherResources.length === 1) {
-                        await this.eventEmitter.emit('user.role.remove', {
+                        await this.eventEmitter.emit('remove.user.role', {
                             employeeId: employeeId,
                             role: role_type_enum_1.Role.RESOURCE_ADMIN,
                             repositoryOptions: { queryRunner },
@@ -6647,7 +6726,7 @@ let ResourceUsecase = class ResourceUsecase {
                     }
                 }));
                 const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
-                await Promise.all(addedManagerIds.map((employeeId) => this.eventEmitter.emit('user.role.add', {
+                await Promise.all(addedManagerIds.map((employeeId) => this.eventEmitter.emit('add.user.role', {
                     employeeId: employeeId,
                     role: role_type_enum_1.Role.RESOURCE_ADMIN,
                     repositoryOptions: { queryRunner },
@@ -8042,12 +8121,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateVehicleInfoDto = exports.UpdateConsumableDto = exports.UpdateMaintenanceDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
-const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
 class UpdateMaintenanceDto {
 }
 exports.UpdateMaintenanceDto = UpdateMaintenanceDto;
@@ -8056,79 +8133,59 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], UpdateMaintenanceDto.prototype, "title", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], UpdateMaintenanceDto.prototype, "description", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Number)
-], UpdateMaintenanceDto.prototype, "cost", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_transformer_1.Type)(() => Date),
-    (0, class_validator_1.IsDate)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
-], UpdateMaintenanceDto.prototype, "maintenanceDate", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], UpdateMaintenanceDto.prototype, "maintenanceShop", void 0);
+], UpdateMaintenanceDto.prototype, "date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateMaintenanceDto.prototype, "mileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateMaintenanceDto.prototype, "cost", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UpdateMaintenanceDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '소모품 ID',
+        example: 'consumable-123',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateMaintenanceDto.prototype, "consumableId", void 0);
 class UpdateConsumableDto {
 }
 exports.UpdateConsumableDto = UpdateConsumableDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateConsumableDto.prototype, "name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateConsumableDto.prototype, "replaceCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ default: true, description: '소모품 교체 알림 주기' }),
+    (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateConsumableDto.prototype, "notifyReplacementCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '차량 ID',
+        example: 'vehicle-123',
+    }),
     __metadata("design:type", String)
-], UpdateConsumableDto.prototype, "description", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Number)
-], UpdateConsumableDto.prototype, "cost", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_transformer_1.Type)(() => Date),
-    (0, class_validator_1.IsDate)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
-], UpdateConsumableDto.prototype, "replacementDate", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Number)
-], UpdateConsumableDto.prototype, "mileage", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_transformer_1.Type)(() => Date),
-    (0, class_validator_1.IsDate)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
-], UpdateConsumableDto.prototype, "nextReplacementDate", void 0);
+], UpdateConsumableDto.prototype, "vehicleInfoId", void 0);
 class UpdateVehicleInfoDto {
 }
 exports.UpdateVehicleInfoDto = UpdateVehicleInfoDto;
@@ -10118,7 +10175,7 @@ __decorate([
     __metadata("design:type", String)
 ], Consumable.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], Consumable.prototype, "replaceCycle", void 0);
 __decorate([
@@ -10439,11 +10496,11 @@ __decorate([
     __metadata("design:type", String)
 ], Maintenance.prototype, "date", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], Maintenance.prototype, "mileage", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], Maintenance.prototype, "cost", void 0);
 __decorate([
@@ -11162,11 +11219,11 @@ __decorate([
     __metadata("design:type", String)
 ], VehicleInfo.prototype, "resourceId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], VehicleInfo.prototype, "leftMileage", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], VehicleInfo.prototype, "totalMileage", void 0);
 __decorate([
@@ -11860,6 +11917,7 @@ const utc = __webpack_require__(/*! dayjs/plugin/utc */ "dayjs/plugin/utc");
 const timezone = __webpack_require__(/*! dayjs/plugin/timezone */ "dayjs/plugin/timezone");
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.tz.setDefault('Asia/Seoul');
 class DateUtilWrapper {
     constructor(date) {
         this.date = date;
@@ -11897,7 +11955,7 @@ class DateUtil {
         return new DateUtilWrapper(dayjs().tz('Asia/Seoul'));
     }
     static date(date) {
-        return new DateUtilWrapper(dayjs(date).tz());
+        return new DateUtilWrapper(dayjs.tz(date, 'Asia/Seoul'));
     }
     static format(date, format = 'YYYY-MM-DD HH:mm:ss') {
         return this.date(date).format(format);

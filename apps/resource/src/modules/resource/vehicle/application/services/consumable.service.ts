@@ -3,6 +3,7 @@ import { ConsumableRepositoryPort } from '@resource/modules/resource/vehicle/dom
 import { Consumable } from '@libs/entities';
 import { CreateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
+import { UpdateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
 
 @Injectable()
 export class ConsumableService {
@@ -25,7 +26,7 @@ export class ConsumableService {
 
     async update(
         id: string,
-        updateData: Partial<CreateConsumableDto>,
+        updateData: UpdateConsumableDto,
         repositoryOptions?: RepositoryOptions,
     ): Promise<Consumable> {
         return this.consumableRepository.update(id, updateData, repositoryOptions);

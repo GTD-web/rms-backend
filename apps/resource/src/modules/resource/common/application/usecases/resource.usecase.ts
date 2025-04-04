@@ -8,7 +8,7 @@ import {
 import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto } from '../dtos/resource-response.dto';
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
-import { IsNull, Not, MoreThan, LessThan, DataSource, In } from 'typeorm';
+import { IsNull, Not, MoreThan, LessThan, DataSource, In, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     ReturnVehicleDto,
@@ -27,6 +27,7 @@ import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/applicati
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { FileService } from '@resource/modules/file/application/services/file.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { DateUtil } from '@libs/utils/date.util';
 
 @Injectable()
 export class ResourceUsecase {
@@ -67,7 +68,7 @@ export class ResourceUsecase {
         endDate: string,
         user: UserEntity,
     ): Promise<ResourceGroupWithResourcesResponseDto[]> {
-        if (startDate && endDate && startDate > endDate) {
+        if (!!startDate && !!endDate && startDate > endDate) {
             throw new BadRequestException('Start date must be before end date');
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
@@ -75,34 +76,77 @@ export class ResourceUsecase {
             where: {
                 type: type,
                 parentResourceGroupId: Not(IsNull()),
-                resources: {
-                    reservations: {
-                        startDate: LessThan(regex.test(endDate) ? endDate : endDate + ' 23:59:59'),
-                        endDate: MoreThan(regex.test(startDate) ? startDate : startDate + ' 00:00:00'),
-                        status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
-                    },
-                },
             },
-            relations: ['resources', 'resources.reservations', 'resources.reservations.participants'],
             order: {
                 order: 'ASC',
             },
         });
 
-        resourceGroups.forEach((group) => {
-            if (group.resources) {
-                group.resources.sort((a, b) => a.order - b.order);
-                group.resources.forEach((resource) => {
-                    if (resource.reservations) {
-                        resource.reservations.sort(
-                            (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
-                        );
-                    }
+        const resourceGroupsWithResources = await Promise.all(
+            resourceGroups.map(async (resourceGroup) => {
+                const resources = await this.resourceService.findAll({
+                    where: {
+                        resourceGroupId: resourceGroup.resourceGroupId,
+                    },
+                    order: {
+                        order: 'ASC',
+                    },
                 });
-            }
-        });
 
-        return resourceGroups;
+                const resourcesWithReservations = await Promise.all(
+                    resources.map(async (resource) => {
+                        const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
+                            repositoryOptions: {
+                                where: {
+                                    resourceId: resource.resourceId,
+                                    startDate: MoreThanOrEqual(
+                                        regex.test(startDate)
+                                            ? DateUtil.date(startDate).toDate()
+                                            : DateUtil.date(startDate + ' 00:00:00').toDate(),
+                                    ),
+                                    endDate: LessThanOrEqual(
+                                        regex.test(endDate)
+                                            ? DateUtil.date(endDate).toDate()
+                                            : DateUtil.date(endDate + ' 23:59:59').toDate(),
+                                    ),
+                                    status: ReservationStatus.CONFIRMED,
+                                },
+                                relations: ['participants'],
+                                order: {
+                                    startDate: 'ASC',
+                                },
+                            },
+                        });
+
+                        const reservationResponseDtos = reservations.map((reservation) => {
+                            const isMine = reservation.participants.some(
+                                (participant) => participant.employeeId === user.employeeId,
+                            );
+                            delete reservation.participants;
+                            return {
+                                ...reservation,
+                                startDate: DateUtil.date(reservation.startDate).format(),
+                                endDate: DateUtil.date(reservation.endDate).format(),
+                                isMine: isMine,
+                            };
+                        });
+
+                        return {
+                            ...resource,
+                            resourceId: resource.resourceId,
+                            reservations: reservationResponseDtos,
+                        };
+                    }),
+                );
+
+                return {
+                    ...resourceGroup,
+                    resources: resourcesWithReservations,
+                };
+            }),
+        );
+
+        return resourceGroupsWithResources;
     }
 
     async findResourceDetail(resourceId: string): Promise<ResourceResponseDto> {
@@ -132,7 +176,7 @@ export class ResourceUsecase {
                     const replaceCycle = Number(consumable.replaceCycle);
                     if (consumable.maintenances && consumable.maintenances.length > 0) {
                         // 각 maintenance에 계산 필드 추가
-                        consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
+                        consumable.maintenances = [consumable.maintenances.pop()].map((maintenance) => {
                             return {
                                 ...maintenance,
                                 mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
@@ -259,7 +303,7 @@ export class ResourceUsecase {
                     );
                 }),
                 ...managers.map((manager) =>
-                    this.eventEmitter.emit('user.role.add', {
+                    this.eventEmitter.emit('add.user.role', {
                         employeeId: manager.employeeId,
                         role: Role.RESOURCE_ADMIN,
                         repositoryOptions: { queryRunner },
@@ -321,7 +365,7 @@ export class ResourceUsecase {
                             },
                         });
                         if (otherResources.length === 1) {
-                            await this.eventEmitter.emit('user.role.remove', {
+                            await this.eventEmitter.emit('remove.user.role', {
                                 employeeId: employeeId,
                                 role: Role.RESOURCE_ADMIN,
                                 repositoryOptions: { queryRunner },
@@ -334,7 +378,7 @@ export class ResourceUsecase {
                 const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
                 await Promise.all(
                     addedManagerIds.map((employeeId) =>
-                        this.eventEmitter.emit('user.role.add', {
+                        this.eventEmitter.emit('add.user.role', {
                             employeeId: employeeId,
                             role: Role.RESOURCE_ADMIN,
                             repositoryOptions: { queryRunner },
