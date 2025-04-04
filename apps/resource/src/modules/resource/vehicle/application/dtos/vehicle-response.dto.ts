@@ -12,10 +12,10 @@ export class MaintenanceResponseDto {
     date: string;
 
     @ApiProperty()
-    mileage: string;
+    mileage: number;
 
     @ApiProperty()
-    cost: string;
+    cost: number;
 
     @ApiProperty()
     images: string[];
@@ -38,7 +38,7 @@ export class ConsumableResponseDto {
     name: string;
 
     @ApiProperty({ description: '소모품 교체 주기' })
-    replaceCycle: string;
+    replaceCycle: number;
 
     @ApiProperty({ description: '소모품 교체 알림 주기' })
     notifyReplacementCycle: boolean;

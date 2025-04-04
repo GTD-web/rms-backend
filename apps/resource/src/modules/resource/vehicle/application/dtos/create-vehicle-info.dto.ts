@@ -1,16 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsArray, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsBoolean, IsNumber } from 'class-validator';
 
 export class CreateVehicleInfoDto {
     @ApiProperty({ required: false })
     @IsOptional()
-    @IsString()
-    leftMileage?: string;
+    @IsNumber()
+    leftMileage?: number;
 
     @ApiProperty({ required: false })
     @IsOptional()
-    @IsString()
-    totalMileage?: string;
+    @IsNumber()
+    totalMileage?: number;
 
     @ApiProperty({ required: false })
     @IsOptional()
@@ -39,8 +39,8 @@ export class CreateConsumableDto {
     name: string;
 
     @ApiProperty({ description: '소모품 교체 주기' })
-    @IsString()
-    replaceCycle: string;
+    @IsNumber()
+    replaceCycle: number;
 
     @ApiProperty({ default: true, description: '소모품 교체 알림 주기' })
     @IsBoolean()
@@ -59,13 +59,13 @@ export class CreateMaintenanceDto {
     date: string;
 
     @ApiProperty()
-    @IsString()
-    mileage: string;
+    @IsNumber()
+    mileage: number;
 
     @ApiProperty({ required: false })
     @IsOptional()
-    @IsString()
-    cost?: string;
+    @IsNumber()
+    cost?: number;
 
     @ApiProperty({ required: false, type: [String] })
     @IsOptional()

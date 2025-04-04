@@ -5967,13 +5967,13 @@ __decorate([
 ], ReturnVehicleDto.prototype, "location", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], ReturnVehicleDto.prototype, "leftMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], ReturnVehicleDto.prototype, "totalMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -7932,14 +7932,14 @@ exports.CreateVehicleInfoDto = CreateVehicleInfoDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], CreateVehicleInfoDto.prototype, "leftMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], CreateVehicleInfoDto.prototype, "totalMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
@@ -7975,8 +7975,8 @@ __decorate([
 ], CreateConsumableDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], CreateConsumableDto.prototype, "replaceCycle", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ default: true, description: '소모품 교체 알림 주기' }),
@@ -8000,14 +8000,14 @@ __decorate([
 ], CreateMaintenanceDto.prototype, "date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], CreateMaintenanceDto.prototype, "mileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], CreateMaintenanceDto.prototype, "cost", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
@@ -8065,9 +8065,9 @@ __decorate([
 ], UpdateMaintenanceDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], UpdateMaintenanceDto.prototype, "cost", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
@@ -8084,9 +8084,9 @@ __decorate([
 ], UpdateMaintenanceDto.prototype, "maintenanceShop", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], UpdateMaintenanceDto.prototype, "mileage", void 0);
 class UpdateConsumableDto {
 }
@@ -8146,15 +8146,15 @@ __decorate([
 ], UpdateVehicleInfoDto.prototype, "insuranceNumber", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], UpdateVehicleInfoDto.prototype, "totalMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], UpdateVehicleInfoDto.prototype, "leftMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
@@ -8209,11 +8209,11 @@ __decorate([
 ], MaintenanceResponseDto.prototype, "date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], MaintenanceResponseDto.prototype, "mileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], MaintenanceResponseDto.prototype, "cost", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -8244,7 +8244,7 @@ __decorate([
 ], ConsumableResponseDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], ConsumableResponseDto.prototype, "replaceCycle", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 교체 알림 주기' }),
@@ -8606,18 +8606,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceUsecase = void 0;
 const vehicle_info_service_1 = __webpack_require__(/*! ../services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
 const maintenance_service_1 = __webpack_require__(/*! ../services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let MaintenanceUsecase = class MaintenanceUsecase {
-    constructor(maintenanceService, vehicleInfoService, dataSource) {
+    constructor(maintenanceService, consumableService, vehicleInfoService, dataSource) {
         this.maintenanceService = maintenanceService;
+        this.consumableService = consumableService;
         this.vehicleInfoService = vehicleInfoService;
         this.dataSource = dataSource;
     }
@@ -8631,12 +8633,13 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         try {
             const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
             if (createMaintenanceDto.mileage) {
-                const newMaintenance = await this.maintenanceService.findOne({
-                    where: { maintenanceId: maintenance.maintenanceId },
-                    relations: ['consumable', 'consumable.vehicleInfo'],
-                    order: { createdAt: 'DESC' },
+                console.log(maintenance);
+                const consumable = await this.consumableService.findOne({
+                    where: { consumableId: maintenance.consumableId },
+                    relations: ['vehicleInfo'],
                 });
-                await this.vehicleInfoService.update(newMaintenance.consumable.vehicleInfo.vehicleInfoId, {
+                console.log(consumable);
+                await this.vehicleInfoService.update(consumable.vehicleInfo.vehicleInfoId, {
                     totalMileage: createMaintenanceDto.mileage,
                 }, { queryRunner });
             }
@@ -8733,7 +8736,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
 exports.MaintenanceUsecase = MaintenanceUsecase;
 exports.MaintenanceUsecase = MaintenanceUsecase = __decorate([
     (0, common_2.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _a : Object, typeof (_b = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.ConsumableService !== "undefined" && consumable_service_1.ConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object])
 ], MaintenanceUsecase);
 1;
 
@@ -9713,6 +9716,7 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
+        synchronize: configService.get('NODE_ENV') === 'local',
         logging: configService.get('NODE_ENV') === 'local',
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
@@ -10116,8 +10120,8 @@ __decorate([
     __metadata("design:type", String)
 ], Consumable.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
 ], Consumable.prototype, "replaceCycle", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: true }),
@@ -10437,12 +10441,12 @@ __decorate([
     __metadata("design:type", String)
 ], Maintenance.prototype, "date", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
 ], Maintenance.prototype, "mileage", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], Maintenance.prototype, "cost", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'json', nullable: true, comment: '정비사진 배열' }),
@@ -11161,11 +11165,11 @@ __decorate([
 ], VehicleInfo.prototype, "resourceId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], VehicleInfo.prototype, "leftMileage", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], VehicleInfo.prototype, "totalMileage", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
@@ -11184,12 +11188,12 @@ __decorate([
     __metadata("design:type", Array)
 ], VehicleInfo.prototype, "odometerImages", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(() => resource_entity_1.Resource, resource => resource.vehicleInfo),
+    (0, typeorm_1.OneToOne)(() => resource_entity_1.Resource, (resource) => resource.vehicleInfo),
     (0, typeorm_1.JoinColumn)({ name: `resourceId` }),
     __metadata("design:type", typeof (_a = typeof resource_entity_1.Resource !== "undefined" && resource_entity_1.Resource) === "function" ? _a : Object)
 ], VehicleInfo.prototype, "resource", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => consumable_entity_1.Consumable, consumable => consumable.vehicleInfo),
+    (0, typeorm_1.OneToMany)(() => consumable_entity_1.Consumable, (consumable) => consumable.vehicleInfo),
     __metadata("design:type", Array)
 ], VehicleInfo.prototype, "consumables", void 0);
 exports.VehicleInfo = VehicleInfo = __decorate([

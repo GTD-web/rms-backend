@@ -19,6 +19,7 @@ import { DataSource } from 'typeorm';
 export class MaintenanceUsecase {
     constructor(
         private readonly maintenanceService: MaintenanceService,
+        private readonly consumableService: ConsumableService,
         private readonly vehicleInfoService: VehicleInfoService,
         private readonly dataSource: DataSource,
     ) {}
@@ -32,13 +33,13 @@ export class MaintenanceUsecase {
         try {
             const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
             if (createMaintenanceDto.mileage) {
-                const newMaintenance = await this.maintenanceService.findOne({
-                    where: { maintenanceId: maintenance.maintenanceId },
-                    relations: ['consumable', 'consumable.vehicleInfo'],
-                    order: { createdAt: 'DESC' },
+                const consumable = await this.consumableService.findOne({
+                    where: { consumableId: maintenance.consumableId },
+                    relations: ['vehicleInfo'],
                 });
+                console.log(consumable);
                 await this.vehicleInfoService.update(
-                    newMaintenance.consumable.vehicleInfo.vehicleInfoId,
+                    consumable.vehicleInfo.vehicleInfoId,
                     {
                         totalMileage: createMaintenanceDto.mileage,
                     },

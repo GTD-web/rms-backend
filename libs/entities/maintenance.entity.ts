@@ -3,27 +3,27 @@ import { Consumable } from './consumable.entity';
 
 @Entity('maintenances')
 export class Maintenance {
-  @PrimaryColumn('uuid', {
-    generated: 'uuid',
-  })
-  maintenanceId: string;
+    @PrimaryColumn('uuid', {
+        generated: 'uuid',
+    })
+    maintenanceId: string;
 
-  @Column()
-  consumableId: string;
+    @Column()
+    consumableId: string;
 
-  @Column()
-  date: string;
+    @Column()
+    date: string;
 
-  @Column()
-  mileage: string;
+    @Column({ nullable: true })
+    mileage: number;
 
-  @Column({ nullable: true })
-  cost: string;
+    @Column({ nullable: true })
+    cost: number;
 
-  @Column({ type: 'json', nullable: true, comment: '정비사진 배열' })
-  images: string[];
+    @Column({ type: 'json', nullable: true, comment: '정비사진 배열' })
+    images: string[];
 
-  @ManyToOne(() => Consumable)
-  @JoinColumn({ name: 'consumableId' })
-  consumable: Consumable;
-} 
+    @ManyToOne(() => Consumable)
+    @JoinColumn({ name: 'consumableId' })
+    consumable: Consumable;
+}

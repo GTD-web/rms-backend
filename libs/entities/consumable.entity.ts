@@ -15,8 +15,8 @@ export class Consumable {
     @Column()
     name: string;
 
-    @Column()
-    replaceCycle: string;
+    @Column({ nullable: true })
+    replaceCycle: number;
 
     @Column({ default: true })
     notifyReplacementCycle: boolean;

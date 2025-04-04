@@ -82,12 +82,12 @@ export class ReturnVehicleDto {
     location: ResourceLocation;
 
     @ApiProperty()
-    @IsString()
-    leftMileage: string;
+    @IsNumber()
+    leftMileage: number;
 
     @ApiProperty()
-    @IsString()
-    totalMileage: string;
+    @IsNumber()
+    totalMileage: number;
 
     @ApiProperty()
     @IsArray()

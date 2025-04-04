@@ -14,9 +14,9 @@ export class UpdateMaintenanceDto {
     description?: string;
 
     @ApiProperty({ required: false })
-    @IsString()
+    @IsNumber()
     @IsOptional()
-    cost?: string;
+    cost?: number;
 
     @ApiProperty({ required: false })
     @Type(() => Date)
@@ -30,9 +30,9 @@ export class UpdateMaintenanceDto {
     maintenanceShop?: string;
 
     @ApiProperty({ required: false })
-    @IsString()
+    @IsNumber()
     @IsOptional()
-    mileage?: string;
+    mileage?: number;
 }
 
 export class UpdateConsumableDto {
@@ -81,14 +81,14 @@ export class UpdateVehicleInfoDto {
     insuranceNumber?: string;
 
     @ApiProperty({ required: false })
-    @IsString()
+    @IsNumber()
     @IsOptional()
-    totalMileage?: string;
+    totalMileage?: number;
 
     @ApiProperty({ required: false })
-    @IsString()
+    @IsNumber()
     @IsOptional()
-    leftMileage?: string;
+    leftMileage?: number;
 
     @ApiProperty({ required: false })
     @IsArray()
