@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Consumable } from './consumable.entity';
 
 @Entity('maintenances')
@@ -22,6 +22,12 @@ export class Maintenance {
 
     @Column({ type: 'json', nullable: true, comment: '정비사진 배열' })
     images: string[];
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 
     @ManyToOne(() => Consumable)
     @JoinColumn({ name: 'consumableId' })

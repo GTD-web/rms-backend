@@ -175,6 +175,7 @@ export class ResourceUsecase {
                 resource.vehicleInfo.consumables.forEach((consumable) => {
                     const replaceCycle = Number(consumable.replaceCycle);
                     if (consumable.maintenances && consumable.maintenances.length > 0) {
+                        console.log('consumable.maintenances', consumable.maintenances);
                         // 각 maintenance에 계산 필드 추가
                         consumable.maintenances = [consumable.maintenances.pop()].map((maintenance) => {
                             return {

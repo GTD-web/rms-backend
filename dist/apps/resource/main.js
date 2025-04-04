@@ -6577,6 +6577,7 @@ let ResourceUsecase = class ResourceUsecase {
                 resource.vehicleInfo.consumables.forEach((consumable) => {
                     const replaceCycle = Number(consumable.replaceCycle);
                     if (consumable.maintenances && consumable.maintenances.length > 0) {
+                        console.log('consumable.maintenances', consumable.maintenances);
                         consumable.maintenances = [consumable.maintenances.pop()].map((maintenance) => {
                             return {
                                 ...maintenance,
@@ -10473,7 +10474,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Maintenance = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
@@ -10508,9 +10509,17 @@ __decorate([
     __metadata("design:type", Array)
 ], Maintenance.prototype, "images", void 0);
 __decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], Maintenance.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], Maintenance.prototype, "updatedAt", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(() => consumable_entity_1.Consumable),
     (0, typeorm_1.JoinColumn)({ name: 'consumableId' }),
-    __metadata("design:type", typeof (_a = typeof consumable_entity_1.Consumable !== "undefined" && consumable_entity_1.Consumable) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_c = typeof consumable_entity_1.Consumable !== "undefined" && consumable_entity_1.Consumable) === "function" ? _c : Object)
 ], Maintenance.prototype, "consumable", void 0);
 exports.Maintenance = Maintenance = __decorate([
     (0, typeorm_1.Entity)('maintenances')
