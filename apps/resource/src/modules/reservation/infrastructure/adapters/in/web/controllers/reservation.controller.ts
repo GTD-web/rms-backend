@@ -139,7 +139,7 @@ export class ReservationController {
         @Query('resourceId') resourceId?: string,
         @Query('status', new ParseArrayPipe({ optional: true, separator: ',' }))
         status?: string[],
-    ): Promise<ReservationWithResourceResponseDto[]> {
+    ): Promise<ReservationWithRelationsResponseDto[]> {
         return this.reservationUsecase.findReservationList(startDate, endDate, resourceType, resourceId, status);
     }
 

@@ -285,7 +285,7 @@ export class ReservationUsecase {
         resourceType?: ResourceType,
         resourceId?: string,
         status?: string[],
-    ): Promise<ReservationWithResourceResponseDto[]> {
+    ): Promise<ReservationWithRelationsResponseDto[]> {
         if (startDate && endDate && startDate > endDate) {
             throw new BadRequestException('Start date must be before end date');
         }
@@ -333,9 +333,8 @@ export class ReservationUsecase {
             where,
             relations: ['resource', 'participants', 'participants.employee'],
         });
-
         const reservationResponseDtos = reservations.map(
-            (reservation) => new ReservationWithResourceResponseDto(reservation),
+            (reservation) => new ReservationWithRelationsResponseDto(reservation),
         );
         return reservationResponseDtos;
     }

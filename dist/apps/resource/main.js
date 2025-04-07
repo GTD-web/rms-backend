@@ -1841,7 +1841,6 @@ let EmployeeService = class EmployeeService {
     }
     create(employee) {
         const employeeEntity = new entities_1.Employee();
-        employeeEntity.employeeId = employee._id;
         employeeEntity.name = employee.name;
         employeeEntity.employeeNumber = employee.employee_number;
         employeeEntity.department = employee.department;
@@ -4500,8 +4499,11 @@ let ReservationUsecase = class ReservationUsecase {
                 endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.date(endDate).toDate()),
             };
         }
-        const reservations = await this.reservationService.findAll({ where, relations: ['resource'] });
-        const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithResourceResponseDto(reservation));
+        const reservations = await this.reservationService.findAll({
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+        });
+        const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation));
         return reservationResponseDtos;
     }
     async checkReservationAccess(reservationId, employeeId) {
