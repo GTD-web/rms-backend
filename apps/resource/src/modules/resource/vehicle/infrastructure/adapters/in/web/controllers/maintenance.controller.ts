@@ -34,7 +34,7 @@ export class MaintenanceController {
     }
 
     @ApiTags('sprint0.3')
-    @Get(':consumableId')
+    @Get('vehicle/:vehicleInfoId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 이력 목록 조회' })
     @ApiDataResponse({
@@ -43,9 +43,9 @@ export class MaintenanceController {
     })
     async findAll(
         @User() user: UserEntity,
-        @Param('consumableId') consumableId: string,
+        @Param('vehicleInfoId') vehicleInfoId: string,
     ): Promise<MaintenanceResponseDto[]> {
-        return this.maintenanceUsecase.findAll(user, consumableId);
+        return this.maintenanceUsecase.findAllByVehicleInfoId(user, vehicleInfoId);
     }
 
     @ApiTags('sprint0.3')

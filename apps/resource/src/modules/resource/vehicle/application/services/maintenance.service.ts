@@ -1,10 +1,10 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { MaintenanceRepositoryPort } from '@resource/modules/resource/vehicle/domain/ports/maintenance.repository.port';
-import { Maintenance } from '@libs/entities';
+import { Maintenance, User } from '@libs/entities';
 import { CreateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 import { UpdateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
-
+import { Role } from '@libs/enums/role-type.enum';
 @Injectable()
 export class MaintenanceService {
     constructor(
@@ -37,5 +37,21 @@ export class MaintenanceService {
 
     async delete(id: string, repositoryOptions?: RepositoryOptions): Promise<void> {
         return this.maintenanceRepository.delete(id, repositoryOptions);
+    }
+
+    async checkRole(maintenanceId: string, user: User): Promise<boolean> {
+        if (user.roles.includes(Role.SYSTEM_ADMIN)) return true;
+        const maintenance = await this.findOne({
+            where: { maintenanceId },
+            relations: [
+                'consumable',
+                'consumable.vehicleInfo',
+                'consumable.vehicleInfo.resource',
+                'consumable.vehicleInfo.resource.resourceManagers',
+            ],
+        });
+        return maintenance.consumable.vehicleInfo.resource.resourceManagers.some(
+            (manager) => manager.employeeId === user.employeeId,
+        );
     }
 }

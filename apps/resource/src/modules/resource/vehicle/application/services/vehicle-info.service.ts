@@ -4,6 +4,8 @@ import { VehicleInfo } from '@libs/entities';
 import { CreateVehicleInfoDto } from '../dtos/create-vehicle-info.dto';
 import { UpdateVehicleInfoDto } from '../dtos/update-vehicle-info.dto';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
+import { User } from '@libs/entities';
+import { Role } from '@libs/enums/role-type.enum';
 
 @Injectable()
 export class VehicleInfoService {
@@ -26,5 +28,14 @@ export class VehicleInfoService {
         repositoryOptions?: RepositoryOptions,
     ): Promise<VehicleInfo> {
         return this.vehicleInfoRepository.update(vehicleInfoId, updateData, repositoryOptions);
+    }
+
+    async checkRole(vehicleInfoId: string, user: User): Promise<boolean> {
+        if (user.roles.includes(Role.SYSTEM_ADMIN)) return true;
+        const vehicleInfo = await this.findOne({
+            where: { vehicleInfoId },
+            relations: ['resource', 'resource.resourceManagers'],
+        });
+        return vehicleInfo.resource.resourceManagers.some((manager) => manager.employeeId === user.employeeId);
     }
 }

@@ -8,6 +8,12 @@ export class MaintenanceResponseDto {
     @ApiProperty()
     consumableId: string;
 
+    @ApiProperty({ required: false })
+    resourceName?: string;
+
+    @ApiProperty({ required: false })
+    consumableName?: string;
+
     @ApiProperty()
     date: string;
 

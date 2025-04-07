@@ -25,7 +25,7 @@ export class MaintenanceUsecase {
     ) {}
 
     async save(user: UserEntity, createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
-        const result = await this.checkRole(createMaintenanceDto.consumableId, user);
+        const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -56,18 +56,50 @@ export class MaintenanceUsecase {
         }
     }
 
+    async findAllByVehicleInfoId(user: UserEntity, vehicleInfoId: string): Promise<MaintenanceResponseDto[]> {
+        const result = await this.vehicleInfoService.checkRole(vehicleInfoId, user);
+        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        const vehicleInfo = await this.vehicleInfoService.findOne({
+            where: { vehicleInfoId },
+            relations: ['resource', 'consumables', 'consumables.maintenances'],
+        });
+        return vehicleInfo.consumables
+            .map((consumable) =>
+                consumable.maintenances.map((maintenance) => ({
+                    consumableName: consumable.name,
+                    resourceName: vehicleInfo.resource.name,
+                    ...maintenance,
+                })),
+            )
+            .flat();
+    }
+
     async findAll(user: UserEntity, consumableId: string): Promise<Maintenance[]> {
-        const result = await this.checkRole(consumableId, user);
+        const result = await this.consumableService.checkRole(consumableId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
         return this.maintenanceService.findAll({
             where: { consumableId },
         });
     }
 
-    async findOne(user: UserEntity, maintenanceId: string): Promise<Maintenance> {
-        const result = await this.checkRole(maintenanceId, user);
+    async findOne(user: UserEntity, maintenanceId: string): Promise<MaintenanceResponseDto> {
+        const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
-        return this.maintenanceService.findOne({ where: { maintenanceId } });
+        const maintenance = await this.maintenanceService.findOne({
+            where: { maintenanceId },
+            relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
+        });
+        console.log(maintenance);
+        return {
+            maintenanceId: maintenance.maintenanceId,
+            consumableId: maintenance.consumableId,
+            date: maintenance.date,
+            mileage: maintenance.mileage,
+            cost: maintenance.cost,
+            images: maintenance.images,
+            consumableName: maintenance.consumable.name,
+            resourceName: maintenance.consumable.vehicleInfo.resource.name,
+        };
     }
 
     async update(
@@ -76,7 +108,7 @@ export class MaintenanceUsecase {
         updateMaintenanceDto: UpdateMaintenanceDto,
         repositoryOptions?: RepositoryOptions,
     ): Promise<Maintenance> {
-        const result = await this.checkRole(maintenanceId, user);
+        const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -112,34 +144,8 @@ export class MaintenanceUsecase {
     }
 
     async delete(user: UserEntity, maintenanceId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
-        const result = await this.checkRole(maintenanceId, user);
+        const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
         return await this.maintenanceService.delete(maintenanceId, repositoryOptions);
     }
-
-    async checkRole(consumableId: string, user: UserEntity): Promise<boolean> {
-        if (user.roles.includes(Role.SYSTEM_ADMIN)) return true;
-        const result = await this.maintenanceService.findOne({
-            where: {
-                consumableId: consumableId,
-                consumable: {
-                    vehicleInfo: {
-                        resource: {
-                            resourceManagers: {
-                                employeeId: user.employeeId,
-                            },
-                        },
-                    },
-                },
-            },
-            relations: [
-                'consumable',
-                'consumable.vehicleInfo',
-                'consumable.vehicleInfo.resource',
-                'consumable.vehicleInfo.resource.resourceManagers',
-            ],
-        });
-        return !!result;
-    }
 }
-1;

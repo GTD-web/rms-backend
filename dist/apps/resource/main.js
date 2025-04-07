@@ -8390,6 +8390,14 @@ __decorate([
     __metadata("design:type", String)
 ], MaintenanceResponseDto.prototype, "consumableId", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], MaintenanceResponseDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], MaintenanceResponseDto.prototype, "consumableName", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], MaintenanceResponseDto.prototype, "date", void 0);
@@ -8560,6 +8568,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ConsumableService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const consumable_repository_port_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/domain/ports/consumable.repository.port */ "./apps/resource/src/modules/resource/vehicle/domain/ports/consumable.repository.port.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let ConsumableService = class ConsumableService {
     constructor(consumableRepository) {
         this.consumableRepository = consumableRepository;
@@ -8578,6 +8587,15 @@ let ConsumableService = class ConsumableService {
     }
     async delete(id, repositoryOptions) {
         return this.consumableRepository.delete(id, repositoryOptions);
+    }
+    async checkRole(consumableId, user) {
+        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
+            return true;
+        const consumable = await this.findOne({
+            where: { consumableId },
+            relations: ['vehicleInfo', 'vehicleInfo.resource', 'vehicleInfo.resource.resourceManagers'],
+        });
+        return consumable.vehicleInfo.resource.resourceManagers.some((manager) => manager.employeeId === user.employeeId);
     }
 };
 exports.ConsumableService = ConsumableService;
@@ -8614,6 +8632,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const maintenance_repository_port_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/domain/ports/maintenance.repository.port */ "./apps/resource/src/modules/resource/vehicle/domain/ports/maintenance.repository.port.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let MaintenanceService = class MaintenanceService {
     constructor(maintenanceRepository) {
         this.maintenanceRepository = maintenanceRepository;
@@ -8632,6 +8651,20 @@ let MaintenanceService = class MaintenanceService {
     }
     async delete(id, repositoryOptions) {
         return this.maintenanceRepository.delete(id, repositoryOptions);
+    }
+    async checkRole(maintenanceId, user) {
+        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
+            return true;
+        const maintenance = await this.findOne({
+            where: { maintenanceId },
+            relations: [
+                'consumable',
+                'consumable.vehicleInfo',
+                'consumable.vehicleInfo.resource',
+                'consumable.vehicleInfo.resource.resourceManagers',
+            ],
+        });
+        return maintenance.consumable.vehicleInfo.resource.resourceManagers.some((manager) => manager.employeeId === user.employeeId);
     }
 };
 exports.MaintenanceService = MaintenanceService;
@@ -8668,6 +8701,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VehicleInfoService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const vehicle_info_repository_port_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/domain/ports/vehicle-info.repository.port */ "./apps/resource/src/modules/resource/vehicle/domain/ports/vehicle-info.repository.port.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let VehicleInfoService = class VehicleInfoService {
     constructor(vehicleInfoRepository) {
         this.vehicleInfoRepository = vehicleInfoRepository;
@@ -8680,6 +8714,15 @@ let VehicleInfoService = class VehicleInfoService {
     }
     async update(vehicleInfoId, updateData, repositoryOptions) {
         return this.vehicleInfoRepository.update(vehicleInfoId, updateData, repositoryOptions);
+    }
+    async checkRole(vehicleInfoId, user) {
+        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
+            return true;
+        const vehicleInfo = await this.findOne({
+            where: { vehicleInfoId },
+            relations: ['resource', 'resource.resourceManagers'],
+        });
+        return vehicleInfo.resource.resourceManagers.some((manager) => manager.employeeId === user.employeeId);
     }
 };
 exports.VehicleInfoService = VehicleInfoService;
@@ -8800,7 +8843,6 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
 const maintenance_service_1 = __webpack_require__(/*! ../services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let MaintenanceUsecase = class MaintenanceUsecase {
     constructor(maintenanceService, consumableService, vehicleInfoService, dataSource) {
@@ -8810,7 +8852,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         this.dataSource = dataSource;
     }
     async save(user, createMaintenanceDto) {
-        const result = await this.checkRole(createMaintenanceDto.consumableId, user);
+        const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
         const queryRunner = this.dataSource.createQueryRunner();
@@ -8839,8 +8881,24 @@ let MaintenanceUsecase = class MaintenanceUsecase {
             await queryRunner.release();
         }
     }
+    async findAllByVehicleInfoId(user, vehicleInfoId) {
+        const result = await this.vehicleInfoService.checkRole(vehicleInfoId, user);
+        if (!result)
+            throw new common_1.ForbiddenException('권한이 없습니다.');
+        const vehicleInfo = await this.vehicleInfoService.findOne({
+            where: { vehicleInfoId },
+            relations: ['resource', 'consumables', 'consumables.maintenances'],
+        });
+        return vehicleInfo.consumables
+            .map((consumable) => consumable.maintenances.map((maintenance) => ({
+            consumableName: consumable.name,
+            resourceName: vehicleInfo.resource.name,
+            ...maintenance,
+        })))
+            .flat();
+    }
     async findAll(user, consumableId) {
-        const result = await this.checkRole(consumableId, user);
+        const result = await this.consumableService.checkRole(consumableId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
         return this.maintenanceService.findAll({
@@ -8848,13 +8906,27 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         });
     }
     async findOne(user, maintenanceId) {
-        const result = await this.checkRole(maintenanceId, user);
+        const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
-        return this.maintenanceService.findOne({ where: { maintenanceId } });
+        const maintenance = await this.maintenanceService.findOne({
+            where: { maintenanceId },
+            relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
+        });
+        console.log(maintenance);
+        return {
+            maintenanceId: maintenance.maintenanceId,
+            consumableId: maintenance.consumableId,
+            date: maintenance.date,
+            mileage: maintenance.mileage,
+            cost: maintenance.cost,
+            images: maintenance.images,
+            consumableName: maintenance.consumable.name,
+            resourceName: maintenance.consumable.vehicleInfo.resource.name,
+        };
     }
     async update(user, maintenanceId, updateMaintenanceDto, repositoryOptions) {
-        const result = await this.checkRole(maintenanceId, user);
+        const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
         const queryRunner = this.dataSource.createQueryRunner();
@@ -8887,35 +8959,10 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         }
     }
     async delete(user, maintenanceId, repositoryOptions) {
-        const result = await this.checkRole(maintenanceId, user);
+        const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
         return await this.maintenanceService.delete(maintenanceId, repositoryOptions);
-    }
-    async checkRole(consumableId, user) {
-        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
-            return true;
-        const result = await this.maintenanceService.findOne({
-            where: {
-                consumableId: consumableId,
-                consumable: {
-                    vehicleInfo: {
-                        resource: {
-                            resourceManagers: {
-                                employeeId: user.employeeId,
-                            },
-                        },
-                    },
-                },
-            },
-            relations: [
-                'consumable',
-                'consumable.vehicleInfo',
-                'consumable.vehicleInfo.resource',
-                'consumable.vehicleInfo.resource.resourceManagers',
-            ],
-        });
-        return !!result;
     }
 };
 exports.MaintenanceUsecase = MaintenanceUsecase;
@@ -8923,7 +8970,6 @@ exports.MaintenanceUsecase = MaintenanceUsecase = __decorate([
     (0, common_2.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.ConsumableService !== "undefined" && consumable_service_1.ConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object])
 ], MaintenanceUsecase);
-1;
 
 
 /***/ }),
@@ -9303,8 +9349,8 @@ let MaintenanceController = class MaintenanceController {
     async create(user, createMaintenanceDto) {
         return this.maintenanceUsecase.save(user, createMaintenanceDto);
     }
-    async findAll(user, consumableId) {
-        return this.maintenanceUsecase.findAll(user, consumableId);
+    async findAll(user, vehicleInfoId) {
+        return this.maintenanceUsecase.findAllByVehicleInfoId(user, vehicleInfoId);
     }
     async findOne(user, maintenanceId) {
         return this.maintenanceUsecase.findOne(user, maintenanceId);
@@ -9335,7 +9381,7 @@ __decorate([
 ], MaintenanceController.prototype, "create", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
-    (0, common_1.Get)(':consumableId'),
+    (0, common_1.Get)('vehicle/:vehicleInfoId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -9343,7 +9389,7 @@ __decorate([
         type: [vehicle_response_dto_1.MaintenanceResponseDto],
     }),
     __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('consumableId')),
+    __param(1, (0, common_1.Param)('vehicleInfoId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, String]),
     __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
