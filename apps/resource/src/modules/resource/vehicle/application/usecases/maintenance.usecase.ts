@@ -65,11 +65,13 @@ export class MaintenanceUsecase {
         });
         return vehicleInfo.consumables
             .map((consumable) =>
-                consumable.maintenances.map((maintenance) => ({
-                    consumableName: consumable.name,
-                    resourceName: vehicleInfo.resource.name,
-                    ...maintenance,
-                })),
+                consumable.maintenances
+                    .map((maintenance) => ({
+                        consumableName: consumable.name,
+                        resourceName: vehicleInfo.resource.name,
+                        ...maintenance,
+                    }))
+                    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
             )
             .flat();
     }
@@ -89,7 +91,6 @@ export class MaintenanceUsecase {
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
         });
-        console.log(maintenance);
         return {
             maintenanceId: maintenance.maintenanceId,
             consumableId: maintenance.consumableId,

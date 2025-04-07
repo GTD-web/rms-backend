@@ -8890,11 +8890,13 @@ let MaintenanceUsecase = class MaintenanceUsecase {
             relations: ['resource', 'consumables', 'consumables.maintenances'],
         });
         return vehicleInfo.consumables
-            .map((consumable) => consumable.maintenances.map((maintenance) => ({
+            .map((consumable) => consumable.maintenances
+            .map((maintenance) => ({
             consumableName: consumable.name,
             resourceName: vehicleInfo.resource.name,
             ...maintenance,
-        })))
+        }))
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
             .flat();
     }
     async findAll(user, consumableId) {
@@ -8913,7 +8915,6 @@ let MaintenanceUsecase = class MaintenanceUsecase {
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
         });
-        console.log(maintenance);
         return {
             maintenanceId: maintenance.maintenanceId,
             consumableId: maintenance.consumableId,
