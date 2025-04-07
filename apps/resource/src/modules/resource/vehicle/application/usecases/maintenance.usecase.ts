@@ -13,7 +13,7 @@ import { CreateMaintenanceDto } from '../dtos/create-vehicle-info.dto';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { Role } from '@libs/enums/role-type.enum';
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
 @Injectable()
@@ -65,9 +65,19 @@ export class MaintenanceUsecase {
     ): Promise<PaginationData<MaintenanceResponseDto>> {
         const result = await this.vehicleInfoService.checkRole(vehicleInfoId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
-        const options: RepositoryOptions = {
+
+        const vehicleInfo = await this.vehicleInfoService.findOne({
             where: { vehicleInfoId },
             relations: ['resource', 'consumables', 'consumables.maintenances'],
+        });
+        const options: RepositoryOptions = {
+            where: {
+                maintenanceId: In(
+                    vehicleInfo.consumables.flatMap((consumable) =>
+                        consumable.maintenances.map((maintenance) => maintenance.maintenanceId),
+                    ),
+                ),
+            },
         };
         const count = await this.maintenanceService.count(options);
 
@@ -75,20 +85,22 @@ export class MaintenanceUsecase {
             options.skip = (page - 1) * limit;
             options.take = limit;
         }
+        options.relations = ['consumable'];
+        options.order = { createdAt: 'DESC' };
+        const maintenances = await this.maintenanceService.findAll(options);
 
-        const vehicleInfo = await this.vehicleInfoService.findOne(options);
         return {
-            items: vehicleInfo.consumables
-                .map((consumable) =>
-                    consumable.maintenances
-                        .map((maintenance) => ({
-                            consumableName: consumable.name,
-                            resourceName: vehicleInfo.resource.name,
-                            ...maintenance,
-                        }))
-                        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
-                )
-                .flat(),
+            items: maintenances.map((maintenance) => ({
+                maintenanceId: maintenance.maintenanceId,
+                consumableId: maintenance.consumableId,
+                date: maintenance.date,
+                mileage: maintenance.mileage,
+                cost: maintenance.cost,
+                images: maintenance.images,
+                consumableName: maintenance.consumable.name,
+                resourceName: vehicleInfo.resource.name,
+            })),
+
             meta: {
                 total: count,
                 page,

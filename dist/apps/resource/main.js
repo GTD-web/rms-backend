@@ -8888,26 +8888,34 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         const result = await this.vehicleInfoService.checkRole(vehicleInfoId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
-        const options = {
+        const vehicleInfo = await this.vehicleInfoService.findOne({
             where: { vehicleInfoId },
             relations: ['resource', 'consumables', 'consumables.maintenances'],
+        });
+        const options = {
+            where: {
+                maintenanceId: (0, typeorm_1.In)(vehicleInfo.consumables.flatMap((consumable) => consumable.maintenances.map((maintenance) => maintenance.maintenanceId))),
+            },
         };
         const count = await this.maintenanceService.count(options);
         if (page && limit) {
             options.skip = (page - 1) * limit;
             options.take = limit;
         }
-        const vehicleInfo = await this.vehicleInfoService.findOne(options);
+        options.relations = ['consumable'];
+        options.order = { createdAt: 'DESC' };
+        const maintenances = await this.maintenanceService.findAll(options);
         return {
-            items: vehicleInfo.consumables
-                .map((consumable) => consumable.maintenances
-                .map((maintenance) => ({
-                consumableName: consumable.name,
+            items: maintenances.map((maintenance) => ({
+                maintenanceId: maintenance.maintenanceId,
+                consumableId: maintenance.consumableId,
+                date: maintenance.date,
+                mileage: maintenance.mileage,
+                cost: maintenance.cost,
+                images: maintenance.images,
+                consumableName: maintenance.consumable.name,
                 resourceName: vehicleInfo.resource.name,
-                ...maintenance,
-            }))
-                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
-                .flat(),
+            })),
             meta: {
                 total: count,
                 page,
