@@ -1629,6 +1629,95 @@ __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts":
+/*!******************************************************************************************!*\
+  !*** ./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts ***!
+  \******************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MMSEmployeeResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class MMSEmployeeResponseDto {
+    constructor(employee) {
+        this._id = employee._id;
+        this.employee_number = employee.employee_number;
+        this.name = employee.name;
+        this.email = employee.email;
+        this.phone_number = employee.phone_number;
+        this.date_of_birth = employee.date_of_birth;
+        this.gender = employee.gender;
+        this.hire_date = employee.hire_date;
+        this.status = employee.status;
+        this.department = employee.department?.department_name;
+        this.position = employee.position?.position_title;
+        this.rank = employee.rank?.rank_name;
+    }
+}
+exports.MMSEmployeeResponseDto = MMSEmployeeResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직원 ID', example: '67d116b591e5366c327915d2' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '사번', example: '24020' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "employee_number", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이름', example: '구석현' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이메일', example: 'koo.sukhyun@lumir.space' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '전화번호', example: '010-1234-5678' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "phone_number", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '생년월일', example: '1980-07-04T00:00:00.000Z' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], MMSEmployeeResponseDto.prototype, "date_of_birth", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '성별', example: 'MALE' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "gender", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '입사일', example: '2024-05-21T00:00:00.000Z' }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], MMSEmployeeResponseDto.prototype, "hire_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '재직 상태', example: '재직중' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서', example: '대표이사' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직위', example: '대표이사' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "position", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직급', example: '대표이사' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "rank", void 0);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/employee/application/dtos/update-employee.dto.ts":
 /*!************************************************************************************!*\
   !*** ./apps/resource/src/modules/employee/application/dtos/update-employee.dto.ts ***!
@@ -1704,6 +1793,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_repository_port_1 = __webpack_require__(/*! @resource/modules/employee/domain/ports/employee.repository.port */ "./apps/resource/src/modules/employee/domain/ports/employee.repository.port.ts");
+const axios_1 = __webpack_require__(/*! axios */ "axios");
+const mms_employee_response_dto_1 = __webpack_require__(/*! ../dtos/mms-employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 let EmployeeService = class EmployeeService {
     constructor(employeeRepository) {
         this.employeeRepository = employeeRepository;
@@ -1721,6 +1813,40 @@ let EmployeeService = class EmployeeService {
             department,
             employees,
         }));
+    }
+    async getEmployees() {
+        const employees = await axios_1.default.get(`${process.env.METADATA_MANAGER_URL}/api/employees?detailed=true`);
+        const result = [];
+        employees.data.forEach((employee) => {
+            console.log(employee);
+            result.push(new mms_employee_response_dto_1.MMSEmployeeResponseDto(employee));
+        });
+        return result;
+    }
+    async syncEmployees() {
+        const employees = await this.getEmployees();
+        for (const employee of employees) {
+            const user = await this.employeeRepository.findByEmployeeNumber(employee.employee_number);
+            if (user) {
+                user.name = employee.name;
+                user.employeeNumber = employee.employee_number;
+                user.department = employee.department;
+                user.position = employee.rank;
+                await this.employeeRepository.save(user);
+            }
+            else {
+                await this.employeeRepository.save(this.create(employee));
+            }
+        }
+    }
+    create(employee) {
+        const employeeEntity = new entities_1.Employee();
+        employeeEntity.employeeId = employee._id;
+        employeeEntity.name = employee.name;
+        employeeEntity.employeeNumber = employee.employee_number;
+        employeeEntity.department = employee.department;
+        employeeEntity.position = employee.rank;
+        return employeeEntity;
     }
 };
 exports.EmployeeService = EmployeeService;

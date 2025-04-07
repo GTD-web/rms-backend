@@ -329,7 +329,10 @@ export class ReservationUsecase {
             };
         }
 
-        const reservations = await this.reservationService.findAll({ where, relations: ['resource'] });
+        const reservations = await this.reservationService.findAll({
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+        });
 
         const reservationResponseDtos = reservations.map(
             (reservation) => new ReservationWithResourceResponseDto(reservation),
