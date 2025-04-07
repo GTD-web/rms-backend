@@ -39,6 +39,10 @@ export class MaintenanceService {
         return this.maintenanceRepository.delete(id, repositoryOptions);
     }
 
+    async count(repositoryOptions?: RepositoryOptions): Promise<number> {
+        return this.maintenanceRepository.count(repositoryOptions);
+    }
+
     async checkRole(maintenanceId: string, user: User): Promise<boolean> {
         if (user.roles.includes(Role.SYSTEM_ADMIN)) return true;
         const maintenance = await this.findOne({

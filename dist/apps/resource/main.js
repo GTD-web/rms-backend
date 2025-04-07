@@ -8652,6 +8652,9 @@ let MaintenanceService = class MaintenanceService {
     async delete(id, repositoryOptions) {
         return this.maintenanceRepository.delete(id, repositoryOptions);
     }
+    async count(repositoryOptions) {
+        return this.maintenanceRepository.count(repositoryOptions);
+    }
     async checkRole(maintenanceId, user) {
         if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
             return true;
@@ -8881,23 +8884,37 @@ let MaintenanceUsecase = class MaintenanceUsecase {
             await queryRunner.release();
         }
     }
-    async findAllByVehicleInfoId(user, vehicleInfoId) {
+    async findAllByVehicleInfoId(user, vehicleInfoId, page, limit) {
         const result = await this.vehicleInfoService.checkRole(vehicleInfoId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
-        const vehicleInfo = await this.vehicleInfoService.findOne({
+        const options = {
             where: { vehicleInfoId },
             relations: ['resource', 'consumables', 'consumables.maintenances'],
-        });
-        return vehicleInfo.consumables
-            .map((consumable) => consumable.maintenances
-            .map((maintenance) => ({
-            consumableName: consumable.name,
-            resourceName: vehicleInfo.resource.name,
-            ...maintenance,
-        }))
-            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
-            .flat();
+        };
+        const count = await this.maintenanceService.count(options);
+        if (page && limit) {
+            options.skip = (page - 1) * limit;
+            options.take = limit;
+        }
+        const vehicleInfo = await this.vehicleInfoService.findOne(options);
+        return {
+            items: vehicleInfo.consumables
+                .map((consumable) => consumable.maintenances
+                .map((maintenance) => ({
+                consumableName: consumable.name,
+                resourceName: vehicleInfo.resource.name,
+                ...maintenance,
+            }))
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
+                .flat(),
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
     }
     async findAll(user, consumableId) {
         const result = await this.consumableService.checkRole(consumableId, user);
@@ -9329,7 +9346,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -9343,6 +9360,7 @@ const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
 let MaintenanceController = class MaintenanceController {
     constructor(maintenanceUsecase) {
         this.maintenanceUsecase = maintenanceUsecase;
@@ -9350,8 +9368,9 @@ let MaintenanceController = class MaintenanceController {
     async create(user, createMaintenanceDto) {
         return this.maintenanceUsecase.save(user, createMaintenanceDto);
     }
-    async findAll(user, vehicleInfoId) {
-        return this.maintenanceUsecase.findAllByVehicleInfoId(user, vehicleInfoId);
+    async findAll(user, vehicleInfoId, query) {
+        const { page, limit } = query;
+        return this.maintenanceUsecase.findAllByVehicleInfoId(user, vehicleInfoId, page, limit);
     }
     async findOne(user, maintenanceId) {
         return this.maintenanceUsecase.findOne(user, maintenanceId);
@@ -9389,11 +9408,14 @@ __decorate([
         description: '정비 이력 목록을 조회했습니다.',
         type: [vehicle_response_dto_1.MaintenanceResponseDto],
     }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('vehicleInfoId')),
+    __param(2, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, String]),
-    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, String, typeof (_f = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], MaintenanceController.prototype, "findAll", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -9407,8 +9429,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('maintenanceId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _g : Object, String]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+    __metadata("design:paramtypes", [typeof (_h = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _h : Object, String]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], MaintenanceController.prototype, "findOne", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -9423,8 +9445,8 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, user_decorator_1.User)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_j = typeof update_vehicle_info_dto_1.UpdateMaintenanceDto !== "undefined" && update_vehicle_info_dto_1.UpdateMaintenanceDto) === "function" ? _j : Object, typeof (_k = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:paramtypes", [String, typeof (_k = typeof update_vehicle_info_dto_1.UpdateMaintenanceDto !== "undefined" && update_vehicle_info_dto_1.UpdateMaintenanceDto) === "function" ? _k : Object, typeof (_l = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], MaintenanceController.prototype, "update", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -9437,8 +9459,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('maintenanceId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_m = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _m : Object, String]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [typeof (_o = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _o : Object, String]),
+    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], MaintenanceController.prototype, "remove", null);
 exports.MaintenanceController = MaintenanceController = __decorate([
     (0, swagger_1.ApiTags)('정비 이력'),
@@ -9689,6 +9711,12 @@ let MaintenanceRepository = class MaintenanceRepository {
             ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Maintenance)
             : this.repository;
         await repository.delete({ maintenanceId: id });
+    }
+    async count(repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Maintenance)
+            : this.repository;
+        return repository.count({ where: repositoryOptions?.where });
     }
 };
 exports.MaintenanceRepository = MaintenanceRepository;

@@ -13,4 +13,5 @@ export interface MaintenanceRepositoryPort {
         repositoryOptions?: RepositoryOptions,
     ): Promise<Maintenance>;
     delete(id: string, repositoryOptions?: RepositoryOptions): Promise<void>;
+    count(repositoryOptions?: RepositoryOptions): Promise<number>;
 }

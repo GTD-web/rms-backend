@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Patch } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Body, Param, Patch, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { MaintenanceService } from '@resource/modules/resource/vehicle/application/services/maintenance.service';
 import { CreateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
@@ -10,6 +10,8 @@ import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
+import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
 @ApiTags('정비 이력')
 @Controller('maintenances')
@@ -41,11 +43,15 @@ export class MaintenanceController {
         description: '정비 이력 목록을 조회했습니다.',
         type: [MaintenanceResponseDto],
     })
+    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
     async findAll(
         @User() user: UserEntity,
         @Param('vehicleInfoId') vehicleInfoId: string,
-    ): Promise<MaintenanceResponseDto[]> {
-        return this.maintenanceUsecase.findAllByVehicleInfoId(user, vehicleInfoId);
+        @Query() query: PaginationQueryDto,
+    ): Promise<PaginationData<MaintenanceResponseDto>> {
+        const { page, limit } = query;
+        return this.maintenanceUsecase.findAllByVehicleInfoId(user, vehicleInfoId, page, limit);
     }
 
     @ApiTags('sprint0.3')

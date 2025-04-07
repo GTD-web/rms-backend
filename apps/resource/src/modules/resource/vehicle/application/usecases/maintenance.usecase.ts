@@ -14,6 +14,7 @@ import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { Role } from '@libs/enums/role-type.enum';
 import { DataSource } from 'typeorm';
+import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
 @Injectable()
 export class MaintenanceUsecase {
@@ -56,24 +57,45 @@ export class MaintenanceUsecase {
         }
     }
 
-    async findAllByVehicleInfoId(user: UserEntity, vehicleInfoId: string): Promise<MaintenanceResponseDto[]> {
+    async findAllByVehicleInfoId(
+        user: UserEntity,
+        vehicleInfoId: string,
+        page: number,
+        limit: number,
+    ): Promise<PaginationData<MaintenanceResponseDto>> {
         const result = await this.vehicleInfoService.checkRole(vehicleInfoId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
-        const vehicleInfo = await this.vehicleInfoService.findOne({
+        const options: RepositoryOptions = {
             where: { vehicleInfoId },
             relations: ['resource', 'consumables', 'consumables.maintenances'],
-        });
-        return vehicleInfo.consumables
-            .map((consumable) =>
-                consumable.maintenances
-                    .map((maintenance) => ({
-                        consumableName: consumable.name,
-                        resourceName: vehicleInfo.resource.name,
-                        ...maintenance,
-                    }))
-                    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
-            )
-            .flat();
+        };
+        const count = await this.maintenanceService.count(options);
+
+        if (page && limit) {
+            options.skip = (page - 1) * limit;
+            options.take = limit;
+        }
+
+        const vehicleInfo = await this.vehicleInfoService.findOne(options);
+        return {
+            items: vehicleInfo.consumables
+                .map((consumable) =>
+                    consumable.maintenances
+                        .map((maintenance) => ({
+                            consumableName: consumable.name,
+                            resourceName: vehicleInfo.resource.name,
+                            ...maintenance,
+                        }))
+                        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+                )
+                .flat(),
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
     }
 
     async findAll(user: UserEntity, consumableId: string): Promise<Maintenance[]> {

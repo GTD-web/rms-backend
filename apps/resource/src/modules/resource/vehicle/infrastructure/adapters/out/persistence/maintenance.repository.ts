@@ -69,4 +69,11 @@ export class MaintenanceRepository implements MaintenanceRepositoryPort {
             : this.repository;
         await repository.delete({ maintenanceId: id });
     }
+
+    async count(repositoryOptions?: RepositoryOptions): Promise<number> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(MaintenanceEntity)
+            : this.repository;
+        return repository.count({ where: repositoryOptions?.where });
+    }
 }
