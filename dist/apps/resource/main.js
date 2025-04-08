@@ -8658,13 +8658,21 @@ __decorate([
     __metadata("design:type", Array)
 ], MaintenanceResponseDto.prototype, "images", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Number)
 ], MaintenanceResponseDto.prototype, "mileageFromLastMaintenance", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Boolean)
 ], MaintenanceResponseDto.prototype, "maintanceRequired", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Number)
+], MaintenanceResponseDto.prototype, "previousMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], MaintenanceResponseDto.prototype, "isLatest", void 0);
 class ConsumableResponseDto {
 }
 exports.ConsumableResponseDto = ConsumableResponseDto;
@@ -9150,7 +9158,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         options.order = { createdAt: 'DESC' };
         const maintenances = await this.maintenanceService.findAll(options);
         return {
-            items: maintenances.map((maintenance) => ({
+            items: maintenances.map((maintenance, index, array) => ({
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,
                 date: maintenance.date,
@@ -9159,6 +9167,8 @@ let MaintenanceUsecase = class MaintenanceUsecase {
                 images: maintenance.images,
                 consumableName: maintenance.consumable.name,
                 resourceName: vehicleInfo.resource.name,
+                previousMileage: index !== array.length - 1 ? array[index + 1].mileage : 0,
+                isLatest: index === 0,
             })),
             meta: {
                 total: count,
@@ -9184,6 +9194,15 @@ let MaintenanceUsecase = class MaintenanceUsecase {
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
         });
+        const previousMaintenance = await this.maintenanceService.findOne({
+            where: { consumableId: maintenance.consumableId, createdAt: (0, typeorm_1.LessThan)(maintenance.createdAt) },
+            order: { createdAt: 'DESC' },
+        });
+        maintenance.createdAt.setTime(maintenance.createdAt.getTime() + 1);
+        const nextMaintenance = await this.maintenanceService.findOne({
+            where: { consumableId: maintenance.consumableId, createdAt: (0, typeorm_1.MoreThan)(maintenance.createdAt) },
+            order: { createdAt: 'ASC' },
+        });
         return {
             maintenanceId: maintenance.maintenanceId,
             consumableId: maintenance.consumableId,
@@ -9193,6 +9212,8 @@ let MaintenanceUsecase = class MaintenanceUsecase {
             images: maintenance.images,
             consumableName: maintenance.consumable.name,
             resourceName: maintenance.consumable.vehicleInfo.resource.name,
+            previousMileage: previousMaintenance ? previousMaintenance.mileage : 0,
+            isLatest: !nextMaintenance,
         };
     }
     async update(user, maintenanceId, updateMaintenanceDto, repositoryOptions) {

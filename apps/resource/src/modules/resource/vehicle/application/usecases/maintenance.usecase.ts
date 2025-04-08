@@ -13,7 +13,7 @@ import { CreateMaintenanceDto } from '../dtos/create-vehicle-info.dto';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { Role } from '@libs/enums/role-type.enum';
-import { DataSource, In } from 'typeorm';
+import { DataSource, In, LessThan, MoreThan } from 'typeorm';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
 @Injectable()
@@ -90,7 +90,7 @@ export class MaintenanceUsecase {
         const maintenances = await this.maintenanceService.findAll(options);
 
         return {
-            items: maintenances.map((maintenance) => ({
+            items: maintenances.map((maintenance, index, array) => ({
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,
                 date: maintenance.date,
@@ -99,6 +99,8 @@ export class MaintenanceUsecase {
                 images: maintenance.images,
                 consumableName: maintenance.consumable.name,
                 resourceName: vehicleInfo.resource.name,
+                previousMileage: index !== array.length - 1 ? array[index + 1].mileage : 0,
+                isLatest: index === 0,
             })),
 
             meta: {
@@ -125,6 +127,17 @@ export class MaintenanceUsecase {
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
         });
+        const previousMaintenance = await this.maintenanceService.findOne({
+            where: { consumableId: maintenance.consumableId, createdAt: LessThan(maintenance.createdAt) },
+            order: { createdAt: 'DESC' },
+        });
+
+        maintenance.createdAt.setTime(maintenance.createdAt.getTime() + 1);
+        const nextMaintenance = await this.maintenanceService.findOne({
+            where: { consumableId: maintenance.consumableId, createdAt: MoreThan(maintenance.createdAt) },
+            order: { createdAt: 'ASC' },
+        });
+
         return {
             maintenanceId: maintenance.maintenanceId,
             consumableId: maintenance.consumableId,
@@ -134,6 +147,8 @@ export class MaintenanceUsecase {
             images: maintenance.images,
             consumableName: maintenance.consumable.name,
             resourceName: maintenance.consumable.vehicleInfo.resource.name,
+            previousMileage: previousMaintenance ? previousMaintenance.mileage : 0,
+            isLatest: !nextMaintenance,
         };
     }
 

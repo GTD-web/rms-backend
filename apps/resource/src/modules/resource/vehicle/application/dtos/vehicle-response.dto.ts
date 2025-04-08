@@ -26,11 +26,17 @@ export class MaintenanceResponseDto {
     @ApiProperty()
     images: string[];
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     mileageFromLastMaintenance?: number;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     maintanceRequired?: boolean;
+
+    @ApiProperty({ required: false })
+    previousMileage?: number;
+
+    @ApiProperty({ required: false })
+    isLatest?: boolean;
 }
 
 export class ConsumableResponseDto {
