@@ -3399,7 +3399,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationController = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -3430,6 +3430,9 @@ let NotificationController = class NotificationController {
     }
     async markAsRead(user, notificationId) {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
+    }
+    async sendTest(user, sendNotificationDto) {
+        await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
     }
 };
 exports.NotificationController = NotificationController;
@@ -3509,6 +3512,29 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAsRead", null);
+__decorate([
+    (0, swagger_1.ApiTags)('a.test'),
+    (0, common_1.Post)('send/test'),
+    (0, swagger_1.ApiOperation)({ summary: '알람 테스트 전송' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '알람 테스트 전송 성공',
+    }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
+                data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
+            },
+        },
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _k : Object, Object]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "sendTest", null);
 exports.NotificationController = NotificationController = __decorate([
     (0, swagger_1.ApiTags)('알림'),
     (0, common_1.Controller)('notifications'),

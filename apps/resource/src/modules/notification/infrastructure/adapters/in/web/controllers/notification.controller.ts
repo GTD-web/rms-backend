@@ -1,4 +1,4 @@
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Post, Patch, Param, Body, Query } from '@nestjs/common';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
@@ -87,28 +87,28 @@ export class NotificationController {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
     }
 
-    // @ApiTags('a.test')
-    // @Post('send/test')
-    // @ApiOperation({ summary: '알람 테스트 전송' })
-    // @ApiDataResponse({
-    //     status: 200,
-    //     description: '알람 테스트 전송 성공',
-    // })
-    // @ApiBody({
-    //     schema: {
-    //         type: 'object',
-    //         properties: {
-    //             notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-    //             data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-    //         },
-    //     },
-    // })
-    // async sendTest(
-    //     @User() user: UserEntity,
-    //     @Body() sendNotificationDto: { notification: { title: string; body: string }; target: string[] },
-    // ) {
-    //     await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
-    // }
+    @ApiTags('a.test')
+    @Post('send/test')
+    @ApiOperation({ summary: '알람 테스트 전송' })
+    @ApiDataResponse({
+        status: 200,
+        description: '알람 테스트 전송 성공',
+    })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
+                data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
+            },
+        },
+    })
+    async sendTest(
+        @User() user: UserEntity,
+        @Body() sendNotificationDto: { notification: { title: string; body: string }; target: string[] },
+    ) {
+        await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
+    }
 
     // @ApiTags('sprint0.3-')
     // @Patch(':employeeId/readAll')
