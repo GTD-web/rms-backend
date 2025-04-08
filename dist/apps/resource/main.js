@@ -986,7 +986,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SsoAuthUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -996,33 +996,55 @@ const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./ap
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
 const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let SsoAuthUsecase = class SsoAuthUsecase {
-    constructor(userService, jwtService) {
+    constructor(userService, jwtService, eventEmitter, dataSource) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.eventEmitter = eventEmitter;
+        this.dataSource = dataSource;
     }
     async validateUser(email, password) {
         let user = await this.userService.findByEmail(email);
         if (!user) {
             const client_id = process.env.SSO_CLIENT_ID;
             const ssoApiUrl = process.env.SSO_API_URL;
+            const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
+                client_id,
+                email: email,
+                password: password,
+            });
+            const queryRunner = this.dataSource.createQueryRunner();
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
             try {
-                const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
-                    client_id,
-                    email: email,
-                    password: password,
-                });
+                const data = response.data.data;
                 const newUser = new entities_1.User();
-                newUser.email = response.data.data.email;
-                newUser.password = response.data.data.password;
-                newUser.employeeId = response.data.data.employeeId;
-                newUser.roles = response.data.data.roles;
-                newUser.userId = response.data.data.userId;
-                newUser.employee = response.data.data.employee;
-                user = await this.userService.save(newUser);
+                newUser.email = data.email;
+                newUser.password = data.password;
+                newUser.mobile = data.phoneNumber;
+                user = await this.userService.save(newUser, { queryRunner });
+                const [result] = await this.eventEmitter.emitAsync('find.employee', {
+                    employeeNumber: data.employeeNumber,
+                    queryRunner,
+                });
+                if (result) {
+                    user.employee = result;
+                    await this.userService.update(user, { queryRunner });
+                }
+                else {
+                    throw new common_1.UnauthorizedException('SSO 로그인 실패');
+                }
+                await queryRunner.commitTransaction();
             }
             catch (error) {
+                console.log(error);
+                await queryRunner.rollbackTransaction();
                 throw new common_1.UnauthorizedException('SSO 로그인 실패');
+            }
+            finally {
+                await queryRunner.release();
             }
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -1033,6 +1055,14 @@ let SsoAuthUsecase = class SsoAuthUsecase {
     }
     async login(loginDto) {
         const user = await this.validateUser(loginDto.email, loginDto.password);
+        if (!user.employee.userId) {
+            await this.eventEmitter.emitAsync('update.employee', {
+                employee: {
+                    employeeId: user.employee.employeeId,
+                    user: user,
+                },
+            });
+        }
         const payload = {
             userId: user.userId,
             employeeId: user.employeeId,
@@ -1056,7 +1086,7 @@ let SsoAuthUsecase = class SsoAuthUsecase {
 exports.SsoAuthUsecase = SsoAuthUsecase;
 exports.SsoAuthUsecase = SsoAuthUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object, typeof (_c = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object])
 ], SsoAuthUsecase);
 
 
@@ -1769,6 +1799,61 @@ __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/employee/application/handler/employee-event.handler.ts":
+/*!******************************************************************************************!*\
+  !*** ./apps/resource/src/modules/employee/application/handler/employee-event.handler.ts ***!
+  \******************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeEventHandler = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const employee_usecase_1 = __webpack_require__(/*! ../usecases/employee.usecase */ "./apps/resource/src/modules/employee/application/usecases/employee.usecase.ts");
+let EmployeeEventHandler = class EmployeeEventHandler {
+    constructor(employeeUseCase) {
+        this.employeeUseCase = employeeUseCase;
+    }
+    async handleFindEmployee(payload) {
+        console.log('payload', payload);
+        return await this.employeeUseCase.findEmployee(payload.employeeNumber, { queryRunner: payload.queryRunner });
+    }
+    async handleUpdateEmployee(payload) {
+        return await this.employeeUseCase.updateEmployee(payload.employee, { queryRunner: payload.queryRunner });
+    }
+};
+exports.EmployeeEventHandler = EmployeeEventHandler;
+__decorate([
+    (0, event_emitter_1.OnEvent)('find.employee'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], EmployeeEventHandler.prototype, "handleFindEmployee", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('update.employee'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], EmployeeEventHandler.prototype, "handleUpdateEmployee", null);
+exports.EmployeeEventHandler = EmployeeEventHandler = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_usecase_1.EmployeeUseCase !== "undefined" && employee_usecase_1.EmployeeUseCase) === "function" ? _a : Object])
+], EmployeeEventHandler);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/employee/application/services/employee.service.ts":
 /*!*************************************************************************************!*\
   !*** ./apps/resource/src/modules/employee/application/services/employee.service.ts ***!
@@ -1793,15 +1878,82 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_repository_port_1 = __webpack_require__(/*! @resource/modules/employee/domain/ports/employee.repository.port */ "./apps/resource/src/modules/employee/domain/ports/employee.repository.port.ts");
-const axios_1 = __webpack_require__(/*! axios */ "axios");
-const mms_employee_response_dto_1 = __webpack_require__(/*! ../dtos/mms-employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 let EmployeeService = class EmployeeService {
     constructor(employeeRepository) {
         this.employeeRepository = employeeRepository;
     }
-    async findAllEmplyeesByDepartment(repositoryOptions) {
-        const employees = await this.employeeRepository.findAll();
+    create(employee) {
+        const employeeEntity = new entities_1.Employee();
+        employeeEntity.name = employee.name;
+        employeeEntity.employeeNumber = employee.employee_number;
+        employeeEntity.department = employee.department;
+        employeeEntity.position = employee.rank;
+        return employeeEntity;
+    }
+    async save(employee, repositoryOptions) {
+        return this.employeeRepository.save(employee, repositoryOptions);
+    }
+    async findAll() {
+        return this.employeeRepository.findAll();
+    }
+    async findByEmployeeNumber(employeeNumber) {
+        return this.employeeRepository.findByEmployeeNumber(employeeNumber);
+    }
+    async update(employee, repositoryOptions) {
+        return this.employeeRepository.update(employee.employeeId, employee, repositoryOptions);
+    }
+};
+exports.EmployeeService = EmployeeService;
+exports.EmployeeService = EmployeeService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)('EmployeeRepositoryPort')),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_repository_port_1.EmployeeRepositoryPort !== "undefined" && employee_repository_port_1.EmployeeRepositoryPort) === "function" ? _a : Object])
+], EmployeeService);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/employee/application/usecases/employee.usecase.ts":
+/*!*************************************************************************************!*\
+  !*** ./apps/resource/src/modules/employee/application/usecases/employee.usecase.ts ***!
+  \*************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeUseCase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_service_1 = __webpack_require__(/*! ../services/employee.service */ "./apps/resource/src/modules/employee/application/services/employee.service.ts");
+const mms_employee_response_dto_1 = __webpack_require__(/*! ../dtos/mms-employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts");
+const axios_1 = __webpack_require__(/*! axios */ "axios");
+let EmployeeUseCase = class EmployeeUseCase {
+    constructor(employeeService) {
+        this.employeeService = employeeService;
+    }
+    async findEmployee(employeeNumber, repositoryOptions) {
+        let employee = await this.employeeService.findByEmployeeNumber(employeeNumber);
+        if (!employee) {
+            await this.syncEmployee(employeeNumber);
+            employee = await this.employeeService.findByEmployeeNumber(employeeNumber);
+            if (!employee) {
+                throw new common_1.NotFoundException('존재하지 않는 사용자입니다.');
+            }
+        }
+        return employee;
+    }
+    async findAllEmplyeesByDepartment() {
+        const employees = await this.employeeService.findAll();
         const departments = new Map();
         employees.forEach((employee) => {
             if (!departments.has(employee.department)) {
@@ -1814,46 +1966,67 @@ let EmployeeService = class EmployeeService {
             employees,
         }));
     }
+    async updateEmployee(employee, repositoryOptions) {
+        return await this.employeeService.update(employee, repositoryOptions);
+    }
+    async getEmployee(employeeNumber) {
+        const employee = await axios_1.default.get(`${process.env.METADATA_MANAGER_URL}/api/employees?employeeNumber=${employeeNumber}&detailed=true`);
+        return new mms_employee_response_dto_1.MMSEmployeeResponseDto(employee.data);
+    }
     async getEmployees() {
         const employees = await axios_1.default.get(`${process.env.METADATA_MANAGER_URL}/api/employees?detailed=true`);
         const result = [];
         employees.data.forEach((employee) => {
-            console.log(employee);
             result.push(new mms_employee_response_dto_1.MMSEmployeeResponseDto(employee));
         });
         return result;
     }
-    async syncEmployees() {
-        const employees = await this.getEmployees();
-        for (const employee of employees) {
-            const user = await this.employeeRepository.findByEmployeeNumber(employee.employee_number);
+    async syncEmployee(employeeNumber) {
+        const employee = await this.getEmployee(employeeNumber);
+        const user = await this.employeeService.findByEmployeeNumber(employee.employee_number);
+        try {
             if (user) {
                 user.name = employee.name;
                 user.employeeNumber = employee.employee_number;
                 user.department = employee.department;
                 user.position = employee.rank;
-                await this.employeeRepository.save(user);
+                await this.employeeService.save(user);
             }
             else {
-                await this.employeeRepository.save(this.create(employee));
+                await this.employeeService.save(this.employeeService.create(employee));
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+    async syncEmployees() {
+        const employees = await this.getEmployees();
+        for (const employee of employees) {
+            const user = await this.employeeService.findByEmployeeNumber(employee.employee_number);
+            try {
+                if (user) {
+                    user.name = employee.name;
+                    user.employeeNumber = employee.employee_number;
+                    user.department = employee.department;
+                    user.position = employee.rank;
+                    await this.employeeService.save(user);
+                }
+                else {
+                    await this.employeeService.save(this.employeeService.create(employee));
+                }
+            }
+            catch (error) {
+                console.log(error);
             }
         }
     }
-    create(employee) {
-        const employeeEntity = new entities_1.Employee();
-        employeeEntity.name = employee.name;
-        employeeEntity.employeeNumber = employee.employee_number;
-        employeeEntity.department = employee.department;
-        employeeEntity.position = employee.rank;
-        return employeeEntity;
-    }
 };
-exports.EmployeeService = EmployeeService;
-exports.EmployeeService = EmployeeService = __decorate([
+exports.EmployeeUseCase = EmployeeUseCase;
+exports.EmployeeUseCase = EmployeeUseCase = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)('EmployeeRepositoryPort')),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_repository_port_1.EmployeeRepositoryPort !== "undefined" && employee_repository_port_1.EmployeeRepositoryPort) === "function" ? _a : Object])
-], EmployeeService);
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+], EmployeeUseCase);
 
 
 /***/ }),
@@ -1891,23 +2064,25 @@ const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/in
 const employee_service_1 = __webpack_require__(/*! ./application/services/employee.service */ "./apps/resource/src/modules/employee/application/services/employee.service.ts");
 const employee_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/employee.controller */ "./apps/resource/src/modules/employee/infrastructure/adapters/in/web/controllers/employee.controller.ts");
 const employee_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/employee.repository */ "./apps/resource/src/modules/employee/infrastructure/adapters/out/persistence/employee.repository.ts");
+const employee_usecase_1 = __webpack_require__(/*! ./application/usecases/employee.usecase */ "./apps/resource/src/modules/employee/application/usecases/employee.usecase.ts");
+const employee_event_handler_1 = __webpack_require__(/*! ./application/handler/employee-event.handler */ "./apps/resource/src/modules/employee/application/handler/employee-event.handler.ts");
 let EmployeeModule = class EmployeeModule {
 };
 exports.EmployeeModule = EmployeeModule;
 exports.EmployeeModule = EmployeeModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            typeorm_1.TypeOrmModule.forFeature([entities_1.Employee]),
-        ],
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.Employee])],
         providers: [
             employee_service_1.EmployeeService,
             {
                 provide: 'EmployeeRepositoryPort',
                 useClass: employee_repository_1.EmployeeRepository,
             },
+            employee_usecase_1.EmployeeUseCase,
+            employee_event_handler_1.EmployeeEventHandler,
         ],
         controllers: [employee_controller_1.EmployeeController],
-        exports: [employee_service_1.EmployeeService],
+        exports: [employee_service_1.EmployeeService, employee_usecase_1.EmployeeUseCase],
     })
 ], EmployeeModule);
 
@@ -1930,22 +2105,48 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const employee_service_1 = __webpack_require__(/*! @resource/modules/employee/application/services/employee.service */ "./apps/resource/src/modules/employee/application/services/employee.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
 const employees_by_department_response_dto_1 = __webpack_require__(/*! @resource/modules/employee/application/dtos/employees-by-department-response.dto */ "./apps/resource/src/modules/employee/application/dtos/employees-by-department-response.dto.ts");
+const employee_usecase_1 = __webpack_require__(/*! @resource/modules/employee/application/usecases/employee.usecase */ "./apps/resource/src/modules/employee/application/usecases/employee.usecase.ts");
 let EmployeeController = class EmployeeController {
-    constructor(employeeService) {
-        this.employeeService = employeeService;
+    constructor(employeeUseCase) {
+        this.employeeUseCase = employeeUseCase;
     }
     async findAllEmplyeesByDepartment() {
-        return this.employeeService.findAllEmplyeesByDepartment();
+        return this.employeeUseCase.findAllEmplyeesByDepartment();
+    }
+    async syncEmployees() {
+        return await this.employeeUseCase.syncEmployees();
+    }
+    async webhookCreate(body) {
+        console.log('created employee', body);
+        await this.employeeUseCase.syncEmployees();
+    }
+    async webhookUpdate(body) {
+        console.log('updated employee', body);
+        await this.employeeUseCase.syncEmployees();
+    }
+    async webhookPositionChanged(body) {
+        console.log('position changed', body);
+        await this.employeeUseCase.syncEmployees();
+    }
+    async webhookDepartmentChanged(body) {
+        console.log('department changed', body);
+        await this.employeeUseCase.syncEmployees();
+    }
+    async webhookDelete(body) {
+        console.log('deleted employee', body);
+        await this.employeeUseCase.syncEmployees();
     }
 };
 exports.EmployeeController = EmployeeController;
@@ -1963,11 +2164,52 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
 ], EmployeeController.prototype, "findAllEmplyeesByDepartment", null);
+__decorate([
+    (0, common_1.Get)('sync'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EmployeeController.prototype, "syncEmployees", null);
+__decorate([
+    (0, common_1.Post)('webhook/create'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeController.prototype, "webhookCreate", null);
+__decorate([
+    (0, common_1.Post)('webhook/update'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeController.prototype, "webhookUpdate", null);
+__decorate([
+    (0, common_1.Post)('webhook/position_changed'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeController.prototype, "webhookPositionChanged", null);
+__decorate([
+    (0, common_1.Post)('webhook/department_changed'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeController.prototype, "webhookDepartmentChanged", null);
+__decorate([
+    (0, common_1.Post)('webhook/delete'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeController.prototype, "webhookDelete", null);
 exports.EmployeeController = EmployeeController = __decorate([
     (0, swagger_1.ApiTags)('직원'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('employees'),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_usecase_1.EmployeeUseCase !== "undefined" && employee_usecase_1.EmployeeUseCase) === "function" ? _a : Object])
 ], EmployeeController);
 
 
@@ -2044,7 +2286,9 @@ let EmployeeRepository = class EmployeeRepository {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Employee)
             : this.repository;
+        console.log(employeeNumber);
         const entity = await repository.findOne({ where: { employeeNumber } });
+        console.log('entity', entity);
         return entity ? entity : null;
     }
 };

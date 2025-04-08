@@ -1,6 +1,6 @@
 import { AuthService } from '@resource/modules/auth/domain/ports/auth.service.port';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { User } from '@libs/entities';
+import { Employee, User } from '@libs/entities';
 import { LoginDto } from '@resource/modules/auth/application/dto/login.dto';
 import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-response.dto';
 import axios from 'axios';
@@ -8,12 +8,17 @@ import { UserService } from '../services/user.service';
 import { DateUtil } from '@libs/utils/date.util';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { SsoResponseDto } from '../dto/sso-response.dto';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class SsoAuthUsecase implements AuthService {
     constructor(
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
+        private readonly eventEmitter: EventEmitter2,
+        private readonly dataSource: DataSource,
     ) {}
 
     async validateUser(email: string, password: string): Promise<User> {
@@ -21,23 +26,40 @@ export class SsoAuthUsecase implements AuthService {
         if (!user) {
             const client_id = process.env.SSO_CLIENT_ID;
             const ssoApiUrl = process.env.SSO_API_URL;
-            try {
-                const response = await axios.post(`${ssoApiUrl}/api/auth/login`, {
-                    client_id,
-                    email: email,
-                    password: password,
-                });
+            const response = await axios.post(`${ssoApiUrl}/api/auth/login`, {
+                client_id,
+                email: email,
+                password: password,
+            });
 
+            const queryRunner = this.dataSource.createQueryRunner();
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+            try {
+                const data: SsoResponseDto = response.data.data;
                 const newUser = new User();
-                newUser.email = response.data.data.email;
-                newUser.password = response.data.data.password;
-                newUser.employeeId = response.data.data.employeeId;
-                newUser.roles = response.data.data.roles;
-                newUser.userId = response.data.data.userId;
-                newUser.employee = response.data.data.employee;
-                user = await this.userService.save(newUser);
+                newUser.email = data.email;
+                newUser.password = data.password;
+                newUser.mobile = data.phoneNumber;
+                user = await this.userService.save(newUser, { queryRunner });
+
+                const [result]: Employee[] = await this.eventEmitter.emitAsync('find.employee', {
+                    employeeNumber: data.employeeNumber,
+                    queryRunner,
+                });
+                if (result) {
+                    user.employee = result;
+                    await this.userService.update(user, { queryRunner });
+                } else {
+                    throw new UnauthorizedException('SSO 로그인 실패');
+                }
+                await queryRunner.commitTransaction();
             } catch (error) {
+                console.log(error);
+                await queryRunner.rollbackTransaction();
                 throw new UnauthorizedException('SSO 로그인 실패');
+            } finally {
+                await queryRunner.release();
             }
         }
 
@@ -52,7 +74,15 @@ export class SsoAuthUsecase implements AuthService {
     async login(loginDto: LoginDto): Promise<LoginResponseDto> {
         const user = await this.validateUser(loginDto.email, loginDto.password);
 
-        // SSO 서버에서 토큰을 받아옴
+        if (!user.employee.userId) {
+            await this.eventEmitter.emitAsync('update.employee', {
+                employee: {
+                    employeeId: user.employee.employeeId,
+                    user: user,
+                },
+            });
+        }
+
         const payload = {
             userId: user.userId,
             employeeId: user.employeeId,

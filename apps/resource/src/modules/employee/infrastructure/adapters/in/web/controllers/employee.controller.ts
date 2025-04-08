@@ -5,12 +5,13 @@ import { EmployeeService } from '@resource/modules/employee/application/services
 import { Role } from '@libs/enums/role-type.enum';
 import { Roles } from '@libs/decorators/role.decorator';
 import { EmplyeesByDepartmentResponseDto } from '@resource/modules/employee/application/dtos/employees-by-department-response.dto';
+import { EmployeeUseCase } from '@resource/modules/employee/application/usecases/employee.usecase';
 
 @ApiTags('직원')
 @ApiBearerAuth()
 @Controller('employees')
 export class EmployeeController {
-    constructor(private readonly employeeService: EmployeeService) {}
+    constructor(private readonly employeeUseCase: EmployeeUseCase) {}
 
     @ApiTags('sprint0.1')
     @Get('department')
@@ -22,6 +23,41 @@ export class EmployeeController {
         type: [EmplyeesByDepartmentResponseDto],
     })
     async findAllEmplyeesByDepartment(): Promise<EmplyeesByDepartmentResponseDto[]> {
-        return this.employeeService.findAllEmplyeesByDepartment();
+        return this.employeeUseCase.findAllEmplyeesByDepartment();
+    }
+
+    @Get('sync')
+    async syncEmployees() {
+        return await this.employeeUseCase.syncEmployees();
+    }
+
+    @Post('webhook/create')
+    async webhookCreate(@Body() body: any) {
+        console.log('created employee', body);
+        await this.employeeUseCase.syncEmployees();
+    }
+
+    @Post('webhook/update')
+    async webhookUpdate(@Body() body: any) {
+        console.log('updated employee', body);
+        await this.employeeUseCase.syncEmployees();
+    }
+
+    @Post('webhook/position_changed')
+    async webhookPositionChanged(@Body() body: any) {
+        console.log('position changed', body);
+        await this.employeeUseCase.syncEmployees();
+    }
+
+    @Post('webhook/department_changed')
+    async webhookDepartmentChanged(@Body() body: any) {
+        console.log('department changed', body);
+        await this.employeeUseCase.syncEmployees();
+    }
+
+    @Post('webhook/delete')
+    async webhookDelete(@Body() body: any) {
+        console.log('deleted employee', body);
+        await this.employeeUseCase.syncEmployees();
     }
 }
