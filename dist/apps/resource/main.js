@@ -259,7 +259,7 @@ exports.AppService = AppService = __decorate([
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ReturnVehicleDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = void 0;
+exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login.dto */ "./apps/resource/src/modules/auth/application/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login-response.dto */ "./apps/resource/src/modules/auth/application/dto/login-response.dto.ts");
@@ -343,6 +343,8 @@ var push_subscription_dto_1 = __webpack_require__(/*! ./modules/notification/app
 Object.defineProperty(exports, "PushSubscriptionDto", ({ enumerable: true, get: function () { return push_subscription_dto_1.PushSubscriptionDto; } }));
 var response_notification_dto_1 = __webpack_require__(/*! ./modules/notification/application/dto/response-notification.dto */ "./apps/resource/src/modules/notification/application/dto/response-notification.dto.ts");
 Object.defineProperty(exports, "ResponseNotificationDto", ({ enumerable: true, get: function () { return response_notification_dto_1.ResponseNotificationDto; } }));
+var response_notification_dto_2 = __webpack_require__(/*! ./modules/notification/application/dto/response-notification.dto */ "./apps/resource/src/modules/notification/application/dto/response-notification.dto.ts");
+Object.defineProperty(exports, "NotificationDataDto", ({ enumerable: true, get: function () { return response_notification_dto_2.NotificationDataDto; } }));
 
 
 /***/ }),
@@ -2916,10 +2918,45 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ResponseNotificationDto = void 0;
+exports.ResponseNotificationDto = exports.NotificationDataDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
-const notification_entity_1 = __webpack_require__(/*! @libs/entities/notification.entity */ "./libs/entities/notification.entity.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+class NotificationDataDto {
+}
+exports.NotificationDataDto = NotificationDataDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], NotificationDataDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "consumableName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "reservationTitle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "reservationDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], NotificationDataDto.prototype, "beforeMinutes", void 0);
 class ResponseNotificationDto {
 }
 exports.ResponseNotificationDto = ResponseNotificationDto;
@@ -2936,15 +2973,15 @@ __decorate([
     __metadata("design:type", String)
 ], ResponseNotificationDto.prototype, "body", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", typeof (_a = typeof notification_entity_1.NotificationData !== "undefined" && notification_entity_1.NotificationData) === "function" ? _a : Object)
+    (0, swagger_1.ApiProperty)({ type: NotificationDataDto }),
+    __metadata("design:type", NotificationDataDto)
 ], ResponseNotificationDto.prototype, "notificationData", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], ResponseNotificationDto.prototype, "createdAt", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ enum: notification_type_enum_1.NotificationType }),
     __metadata("design:type", typeof (_b = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _b : Object)
 ], ResponseNotificationDto.prototype, "notificationType", void 0);
 __decorate([

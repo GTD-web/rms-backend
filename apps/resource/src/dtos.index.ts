@@ -92,3 +92,4 @@ export {
 } from './modules/notification/application/dto/create-notification.dto';
 export { PushSubscriptionDto } from './modules/notification/application/dto/push-subscription.dto';
 export { ResponseNotificationDto } from './modules/notification/application/dto/response-notification.dto';
+export { NotificationDataDto } from './modules/notification/application/dto/response-notification.dto';

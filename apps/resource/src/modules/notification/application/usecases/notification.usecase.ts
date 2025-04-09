@@ -11,7 +11,7 @@ import { EmployeeNotificationService } from '../services/employee-notification.s
 import { Notification } from '@libs/entities';
 import { CronJob } from 'cron';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
-import { ResponseNotificationDto } from '../dto/response-notification.dto';
+import { NotificationDataDto, ResponseNotificationDto } from '../dto/response-notification.dto';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -96,7 +96,7 @@ export class NotificationUsecase {
                     notificationId: notification.notificationId,
                     title: notification.title,
                     body: notification.body,
-                    notificationData: notification.notificationData,
+                    notificationData: notification.notificationData as NotificationDataDto,
                     notificationType: notification.notificationType,
                     createdAt: notification.createdAt,
                     isRead: notification.employees.find((employee) => employee.employeeId === employeeId).isRead,
