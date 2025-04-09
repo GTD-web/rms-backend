@@ -773,7 +773,7 @@ let UserEventHandler = class UserEventHandler {
         return null;
     }
     async handleUserSubscriptionGetEvent(payload) {
-        console.log(`Subscription removed for user ${payload.employeeId}`);
+        console.log(`Find subscription for user ${payload.employeeId}`);
         const user = await this.userService.findByEmployeeId(payload.employeeId);
         if (!user) {
             throw new common_1.NotFoundException('User not found');
@@ -2995,7 +2995,6 @@ let AdapterService = class AdapterService {
         });
     }
     async sendTestNotification(user, payload) {
-        console.log(user, payload);
         const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
             employeeId: user.employeeId,
         });

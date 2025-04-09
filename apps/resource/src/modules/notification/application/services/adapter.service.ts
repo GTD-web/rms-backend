@@ -24,7 +24,6 @@ export class AdapterService {
     }
 
     async sendTestNotification(user: User, payload: any) {
-        console.log(user, payload);
         const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
             employeeId: user.employeeId,
         });

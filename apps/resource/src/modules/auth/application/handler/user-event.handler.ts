@@ -58,7 +58,7 @@ export class UserEventHandler {
 
     @OnEvent('find.user.subscription')
     async handleUserSubscriptionGetEvent(payload: { employeeId: string }) {
-        console.log(`Subscription removed for user ${payload.employeeId}`);
+        console.log(`Find subscription for user ${payload.employeeId}`);
         // 구독 정보 제거 이벤트에 대한 처리 로직
         const user = await this.userService.findByEmployeeId(payload.employeeId);
         if (!user) {
