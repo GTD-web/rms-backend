@@ -2,31 +2,48 @@ import { ApiProperty } from '@nestjs/swagger';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { NotificationData } from '@libs/entities/notification.entity';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { IsString, IsOptional, IsNumber, IsEnum } from 'class-validator';
 
 export class NotificationDataDto implements NotificationData {
-    @ApiProperty()
-    resourceId: string;
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    resourceId?: string;
 
-    @ApiProperty()
-    resourceName: string;
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    resourceName?: string;
 
-    @ApiProperty()
-    resourceType: ResourceType;
+    @ApiProperty({ enum: ResourceType, required: false })
+    @IsEnum(ResourceType)
+    @IsOptional()
+    resourceType?: ResourceType;
 
-    @ApiProperty()
-    consumableName: string;
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    consumableName?: string;
 
-    @ApiProperty()
-    reservationId: string;
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    reservationId?: string;
 
-    @ApiProperty()
-    reservationTitle: string;
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    reservationTitle?: string;
 
-    @ApiProperty()
-    reservationDate: string;
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    reservationDate?: string;
 
-    @ApiProperty()
-    beforeMinutes: number;
+    @ApiProperty({ required: false })
+    @IsNumber()
+    @IsOptional()
+    beforeMinutes?: number;
 }
 
 export class ResponseNotificationDto {
