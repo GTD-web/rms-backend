@@ -3178,13 +3178,13 @@ let NotificationUsecase = class NotificationUsecase {
         console.log('after module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
     }
     async subscribe(user, subscription) {
-        this.eventEmitter.emit('user.subscription.update', {
+        this.eventEmitter.emit('update.user.subscription', {
             userId: user.userId,
             subscription: subscription,
         });
     }
     async unsubscribe(user) {
-        this.eventEmitter.emit('user.subscription.update', {
+        this.eventEmitter.emit('update.user.subscription', {
             userId: user.userId,
             subscription: null,
         });

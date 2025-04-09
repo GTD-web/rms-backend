@@ -40,14 +40,14 @@ export class NotificationUsecase {
     }
 
     async subscribe(user: User, subscription: PushNotificationSubscription): Promise<void> {
-        this.eventEmitter.emit('user.subscription.update', {
+        this.eventEmitter.emit('update.user.subscription', {
             userId: user.userId,
             subscription: subscription,
         });
     }
 
     async unsubscribe(user: User): Promise<void> {
-        this.eventEmitter.emit('user.subscription.update', {
+        this.eventEmitter.emit('update.user.subscription', {
             userId: user.userId,
             subscription: null,
         });
