@@ -28,6 +28,7 @@ import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { FileService } from '@resource/modules/file/application/services/file.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DateUtil } from '@libs/utils/date.util';
+import { NotificationType } from '@libs/enums/notification-type.enum';
 
 @Injectable()
 export class ResourceUsecase {
@@ -198,14 +199,14 @@ export class ResourceUsecase {
         return resource;
     }
 
-    async returnVehicle(resourceId: string, updateDto: ReturnVehicleDto): Promise<boolean> {
+    async returnVehicle(user: UserEntity, resourceId: string, updateDto: ReturnVehicleDto): Promise<boolean> {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         //자원 위치 정보 수정
         const resource = await this.resourceService.findOne({
             where: { resourceId: resourceId },
-            relations: ['vehicleInfo'],
+            relations: ['vehicleInfo', 'resourceManagers'],
         });
 
         if (!resource) {
@@ -233,6 +234,17 @@ export class ResourceUsecase {
                 },
                 { queryRunner },
             );
+
+            const notiTarget = [...resource.resourceManagers.map((manager) => manager.employeeId), user.employeeId];
+            this.eventEmitter.emit('create.notification', {
+                notificationType: NotificationType.RESOURCE_VEHICLE_RETURNED,
+                notificationData: {
+                    resourceId: resource.resourceId,
+                    resourceName: resource.name,
+                    resourceType: resource.type,
+                },
+                notiTarget,
+            });
 
             await queryRunner.commitTransaction();
 

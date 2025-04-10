@@ -62,10 +62,11 @@ export class ResourceController {
         description: '차량 반납 성공',
     })
     async returnVehicle(
+        @User() user: UserEntity,
         @Param('resourceId') resourceId: string,
         @Body() returnDto: ReturnVehicleDto,
     ): Promise<boolean> {
-        return this.resourceUsecase.returnVehicle(resourceId, returnDto);
+        return this.resourceUsecase.returnVehicle(user, resourceId, returnDto);
     }
 
     @ApiTags('sprint0.3')

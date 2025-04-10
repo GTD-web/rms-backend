@@ -6909,6 +6909,7 @@ const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-
 const file_service_1 = __webpack_require__(/*! @resource/modules/file/application/services/file.service */ "./apps/resource/src/modules/file/application/services/file.service.ts");
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 let ResourceUsecase = class ResourceUsecase {
     constructor(resourceService, resourceManagerService, resourceGroupService, vehicleInfoService, vehicleInfoUsecase, dataSource, fileService, typeHandlers, eventEmitter) {
         this.resourceService = resourceService;
@@ -7044,13 +7045,13 @@ let ResourceUsecase = class ResourceUsecase {
         }
         return resource;
     }
-    async returnVehicle(resourceId, updateDto) {
+    async returnVehicle(user, resourceId, updateDto) {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         const resource = await this.resourceService.findOne({
             where: { resourceId: resourceId },
-            relations: ['vehicleInfo'],
+            relations: ['vehicleInfo', 'resourceManagers'],
         });
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
@@ -7069,6 +7070,16 @@ let ResourceUsecase = class ResourceUsecase {
                 parkingLocationImages: updateDto.parkingLocationImages,
                 odometerImages: updateDto.odometerImages,
             }, { queryRunner });
+            const notiTarget = [...resource.resourceManagers.map((manager) => manager.employeeId), user.employeeId];
+            this.eventEmitter.emit('create.notification', {
+                notificationType: notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED,
+                notificationData: {
+                    resourceId: resource.resourceId,
+                    resourceName: resource.name,
+                    resourceType: resource.type,
+                },
+                notiTarget,
+            });
             await queryRunner.commitTransaction();
             return true;
         }
@@ -7508,7 +7519,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -7533,8 +7544,8 @@ let ResourceController = class ResourceController {
     async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate) {
         return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
     }
-    async returnVehicle(resourceId, returnDto) {
-        return this.resourceUsecase.returnVehicle(resourceId, returnDto);
+    async returnVehicle(user, resourceId, returnDto) {
+        return this.resourceUsecase.returnVehicle(user, resourceId, returnDto);
     }
     async createWithInfos(createResourceInfo) {
         return this.resourceUsecase.createResourceWithInfos(createResourceInfo);
@@ -7597,11 +7608,12 @@ __decorate([
         status: 200,
         description: '차량 반납 성공',
     }),
-    __param(0, (0, common_1.Param)('resourceId')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('resourceId')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_g = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+    __metadata("design:paramtypes", [typeof (_g = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _g : Object, String, typeof (_h = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], ResourceController.prototype, "returnVehicle", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -7614,8 +7626,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof dtos_index_1.CreateResourceInfoDto !== "undefined" && dtos_index_1.CreateResourceInfoDto) === "function" ? _j : Object]),
-    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+    __metadata("design:paramtypes", [typeof (_k = typeof dtos_index_1.CreateResourceInfoDto !== "undefined" && dtos_index_1.CreateResourceInfoDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ResourceController.prototype, "createWithInfos", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -7629,7 +7641,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], ResourceController.prototype, "findOne", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -7642,8 +7654,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_m = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [typeof (_o = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _o : Object]),
+    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], ResourceController.prototype, "reorder", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -7658,8 +7670,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_p = typeof dtos_index_1.UpdateResourceInfoDto !== "undefined" && dtos_index_1.UpdateResourceInfoDto) === "function" ? _p : Object]),
-    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
+    __metadata("design:paramtypes", [String, typeof (_q = typeof dtos_index_1.UpdateResourceInfoDto !== "undefined" && dtos_index_1.UpdateResourceInfoDto) === "function" ? _q : Object]),
+    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
 ], ResourceController.prototype, "update", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
@@ -7673,7 +7685,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
 ], ResourceController.prototype, "remove", null);
 exports.ResourceController = ResourceController = __decorate([
     (0, swagger_1.ApiTags)('자원'),
@@ -11839,6 +11851,7 @@ var NotificationType;
     NotificationType["RESERVATION_DATE_UPCOMING"] = "RESERVATION_DATE_UPCOMING";
     NotificationType["RESERVATION_PARTICIPANT_CHANGED"] = "RESERVATION_PARTICIPANT_CHANGED";
     NotificationType["RESOURCE_CONSUMABLE_REPLACING"] = "RESOURCE_CONSUMABLE_REPLACING";
+    NotificationType["RESOURCE_VEHICLE_RETURNED"] = "RESOURCE_VEHICLE_RETURNED";
 })(NotificationType || (exports.NotificationType = NotificationType = {}));
 
 
