@@ -9354,9 +9354,11 @@ let MaintenanceUsecase = class MaintenanceUsecase {
                     relations: ['consumable', 'consumable.vehicleInfo'],
                     order: { createdAt: 'DESC' },
                 });
-                await this.vehicleInfoService.update(savedMaintenance.consumable.vehicleInfo.vehicleInfoId, {
-                    totalMileage: updateMaintenanceDto.mileage,
-                }, { queryRunner });
+                if (savedMaintenance.consumable.vehicleInfo.totalMileage < updateMaintenanceDto.mileage) {
+                    await this.vehicleInfoService.update(savedMaintenance.consumable.vehicleInfo.vehicleInfoId, {
+                        totalMileage: updateMaintenanceDto.mileage,
+                    }, { queryRunner });
+                }
             }
             await queryRunner.commitTransaction();
             return maintenance;
