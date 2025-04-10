@@ -3210,6 +3210,7 @@ const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/uti
 const employee_notification_service_1 = __webpack_require__(/*! ../services/employee-notification.service */ "./apps/resource/src/modules/notification/application/services/employee-notification.service.ts");
 const cron_1 = __webpack_require__(/*! cron */ "cron");
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let NotificationUsecase = class NotificationUsecase {
     constructor(adapterService, notificationService, employeeNotificationService, schedulerRegistry, eventEmitter) {
         this.adapterService = adapterService;
@@ -3220,13 +3221,19 @@ let NotificationUsecase = class NotificationUsecase {
     }
     async onModuleInit() {
         console.log('before module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
-        const notifications = await this.notificationService.findAll({
+        const upcomingNotifications = await this.notificationService.findAll({
             where: { isSent: false },
             relations: ['employees'],
         });
-        for (const notification of notifications) {
+        for (const notification of upcomingNotifications) {
             const notiTarget = notification.employees.map((employee) => employee.employeeId);
             await this.createReservationUpcomingNotification(notification, notiTarget);
+        }
+        const sentNotifications = await this.notificationService.findAll({
+            where: { createdAt: (0, typeorm_1.MoreThanOrEqual)(date_util_1.DateUtil.now().addDays(-3)) },
+        });
+        for (const notification of sentNotifications) {
+            await this.markAsReadAfter3Days(notification);
         }
         console.log('after module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
     }
@@ -3332,6 +3339,10 @@ let NotificationUsecase = class NotificationUsecase {
                 createNotificationDto.title = `[교체 주기 알림] ${createNotificationDatatDto.consumableName}`;
                 createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
                 break;
+            case notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED:
+                createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
+                createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                break;
         }
         const notification = await this.notificationProcess(createNotificationDto, notiTarget, repositoryOptions);
         switch (notificationType) {
@@ -3349,6 +3360,7 @@ let NotificationUsecase = class NotificationUsecase {
                 }
                 break;
         }
+        await this.markAsReadAfter3Days(notification);
     }
     async notificationProcess(createNotificationDto, notiTarget, repositoryOptions) {
         const notification = await this.notificationService.save(createNotificationDto, repositoryOptions);
@@ -3382,6 +3394,23 @@ let NotificationUsecase = class NotificationUsecase {
         });
         this.schedulerRegistry.addCronJob(jobName, job);
         console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
+        job.start();
+    }
+    async markAsReadAfter3Days(notification) {
+        const parsedDate = date_util_1.DateUtil.parse(notification.createdAt).addDays(3).toDate();
+        const notificationDate = new Date(parsedDate);
+        const jobName = `mark-as-read-${notification.notificationId}-${date_util_1.DateUtil.now().format('YYYYMMDDHHmmssSSS')}`;
+        const job = new cron_1.CronJob(notificationDate, async () => {
+            const employeeNotifications = await this.employeeNotificationService.findAll({
+                where: { notificationId: notification.notificationId },
+            });
+            for (const employeeNotification of employeeNotifications) {
+                await this.employeeNotificationService.update(employeeNotification.employeeNotificationId, {
+                    isRead: true,
+                });
+            }
+        });
+        this.schedulerRegistry.addCronJob(jobName, job);
         job.start();
     }
     async sendTestNotification(user, payload) {

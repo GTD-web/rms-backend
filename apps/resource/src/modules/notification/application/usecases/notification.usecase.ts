@@ -15,6 +15,7 @@ import { NotificationDataDto, ResponseNotificationDto } from '../dto/response-no
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { LessThan, MoreThanOrEqual } from 'typeorm';
 
 @Injectable()
 export class NotificationUsecase {
@@ -28,13 +29,19 @@ export class NotificationUsecase {
 
     async onModuleInit() {
         console.log('before module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
-        const notifications = await this.notificationService.findAll({
+        const upcomingNotifications = await this.notificationService.findAll({
             where: { isSent: false },
             relations: ['employees'],
         });
-        for (const notification of notifications) {
+        for (const notification of upcomingNotifications) {
             const notiTarget = notification.employees.map((employee) => employee.employeeId);
             await this.createReservationUpcomingNotification(notification, notiTarget);
+        }
+        const sentNotifications = await this.notificationService.findAll({
+            where: { createdAt: MoreThanOrEqual(DateUtil.now().addDays(-3)) },
+        });
+        for (const notification of sentNotifications) {
+            await this.markAsReadAfter3Days(notification);
         }
         console.log('after module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
     }
@@ -155,6 +162,10 @@ export class NotificationUsecase {
                 createNotificationDto.title = `[교체 주기 알림] ${createNotificationDatatDto.consumableName}`;
                 createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
                 break;
+            case NotificationType.RESOURCE_VEHICLE_RETURNED:
+                createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
+                createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                break;
         }
 
         const notification = await this.notificationProcess(createNotificationDto, notiTarget, repositoryOptions);
@@ -173,6 +184,7 @@ export class NotificationUsecase {
                 }
                 break;
         }
+        await this.markAsReadAfter3Days(notification);
     }
 
     private async notificationProcess(
@@ -221,6 +233,24 @@ export class NotificationUsecase {
 
         this.schedulerRegistry.addCronJob(jobName, job as any);
         console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
+        job.start();
+    }
+
+    async markAsReadAfter3Days(notification: Notification): Promise<void> {
+        const parsedDate = DateUtil.parse(notification.createdAt).addDays(3).toDate();
+        const notificationDate = new Date(parsedDate);
+        const jobName = `mark-as-read-${notification.notificationId}-${DateUtil.now().format('YYYYMMDDHHmmssSSS')}`;
+        const job = new CronJob(notificationDate, async () => {
+            const employeeNotifications = await this.employeeNotificationService.findAll({
+                where: { notificationId: notification.notificationId },
+            });
+            for (const employeeNotification of employeeNotifications) {
+                await this.employeeNotificationService.update(employeeNotification.employeeNotificationId, {
+                    isRead: true,
+                });
+            }
+        });
+        this.schedulerRegistry.addCronJob(jobName, job as any);
         job.start();
     }
 
