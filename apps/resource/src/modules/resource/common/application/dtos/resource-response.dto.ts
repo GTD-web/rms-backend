@@ -7,6 +7,7 @@ import { ResourceLocation } from './create-resource.dto';
 import { ReservationResponseDto } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
 import { EmployeeResponseDto } from '@resource/modules/employee/application/dtos/employee-response.dto';
 import { Resource } from '@libs/entities/resource.entity';
+import { FileResponseDto } from '@resource/modules/file/application/dtos/file-response.dto';
 export class ResourceManagerResponseDto {
     @ApiProperty()
     resourceManagerId: string;
@@ -63,6 +64,9 @@ export class ResourceResponseDto {
 
     @ApiProperty({ required: false, type: [String] })
     images?: string[];
+
+    @ApiProperty({ required: false, type: [FileResponseDto] })
+    imageFiles?: FileResponseDto[];
 
     @ApiProperty({ enum: ResourceType })
     type?: ResourceType;

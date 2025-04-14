@@ -6174,6 +6174,7 @@ const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.e
 const create_resource_dto_1 = __webpack_require__(/*! ./create-resource.dto */ "./apps/resource/src/modules/resource/common/application/dtos/create-resource.dto.ts");
 const reservation_response_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/reservation-response.dto */ "./apps/resource/src/modules/reservation/application/dtos/reservation-response.dto.ts");
 const employee_response_dto_1 = __webpack_require__(/*! @resource/modules/employee/application/dtos/employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/employee-response.dto.ts");
+const file_response_dto_1 = __webpack_require__(/*! @resource/modules/file/application/dtos/file-response.dto */ "./apps/resource/src/modules/file/application/dtos/file-response.dto.ts");
 class ResourceManagerResponseDto {
 }
 exports.ResourceManagerResponseDto = ResourceManagerResponseDto;
@@ -6244,6 +6245,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
     __metadata("design:type", Array)
 ], ResourceResponseDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [file_response_dto_1.FileResponseDto] }),
+    __metadata("design:type", Array)
+], ResourceResponseDto.prototype, "imageFiles", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
     __metadata("design:type", typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object)
@@ -7052,6 +7057,7 @@ let ResourceUsecase = class ResourceUsecase {
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
         }
+        resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
         if (resource.vehicleInfo) {
             if (resource.vehicleInfo.consumables) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);

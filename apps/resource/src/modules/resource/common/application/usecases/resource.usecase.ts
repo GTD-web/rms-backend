@@ -168,6 +168,7 @@ export class ResourceUsecase {
         if (!resource) {
             throw new NotFoundException('Resource not found');
         }
+        resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
 
         // 관리자 페이지 내 자원 상세 페이지에서 사용하는 정비기록 관련 계산 필드 추가
         if (resource.vehicleInfo) {
