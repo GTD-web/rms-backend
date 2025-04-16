@@ -879,8 +879,10 @@ let UserService = class UserService {
         if (!user) {
             throw new common_1.NotFoundException('사용자를 찾을 수 없습니다.');
         }
-        user.roles.push(role);
-        await this.userRepository.update(user.userId, user, repositoryOptions);
+        if (!user.roles.includes(role)) {
+            user.roles.push(role);
+            await this.userRepository.update(user.userId, user, repositoryOptions);
+        }
     }
     async removeRole(employeeId, role, repositoryOptions) {
         const user = await this.userRepository.findOne({ where: { employeeId }, relations: ['employee'] });
