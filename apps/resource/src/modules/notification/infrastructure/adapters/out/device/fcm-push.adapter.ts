@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
     PushNotificationPort,
@@ -6,10 +6,8 @@ import {
     PushNotificationPayload,
     PushNotificationSendResult,
 } from '@resource/modules/notification/domain/ports/push-notification.port';
-import { credential } from 'firebase-admin';
-import { initializeApp, cert, getApp } from 'firebase-admin/app';
+import { initializeApp, cert } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
-import { User } from '@libs/entities/user.entity';
 
 @Injectable()
 export class FCMAdapter implements PushNotificationPort {

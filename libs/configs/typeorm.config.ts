@@ -13,7 +13,7 @@ export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOption
         entities: Entities,
         schema: 'public',
         // synchronize: configService.get('NODE_ENV') === 'local',
-        logging: configService.get('NODE_ENV') === 'local',
+        // logging: configService.get('NODE_ENV') === 'local',
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
         extra: {

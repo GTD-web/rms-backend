@@ -132,7 +132,6 @@ export class NotificationUsecase {
             createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
             isSent: true,
         };
-
         switch (notificationType) {
             case NotificationType.RESERVATION_DATE_UPCOMING:
                 createNotificationDto.title = `예약 시간이 ${createNotificationDatatDto.beforeMinutes}분 남았습니다.`;

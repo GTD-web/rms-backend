@@ -83,26 +83,33 @@ export class SsoAuthUsecase implements AuthService {
             });
         }
 
-        const payload = {
-            userId: user.userId,
-            employeeId: user.employeeId,
-            roles: user.roles,
-        };
-
-        const accessToken = this.jwtService.sign(payload);
-        const expiredAt = DateUtil.now().addDays(1).format();
-
-        user.accessToken = accessToken;
-        user.expiredAt = expiredAt;
-        await this.userService.update(user);
-
-        return {
-            accessToken,
+        const result = {
+            accessToken: null,
             email: user.email,
             name: user.employee?.name,
             department: user.employee?.department,
             position: user.employee?.position,
             roles: user.roles,
         };
+        if (user.accessToken && user.expiredAt && DateUtil.now().format() < user.expiredAt) {
+            result.accessToken = user.accessToken;
+        } else {
+            const payload = {
+                userId: user.userId,
+                employeeId: user.employeeId,
+                roles: user.roles,
+            };
+
+            const accessToken = this.jwtService.sign(payload);
+            const expiredAt = DateUtil.now().addDays(1).format();
+
+            user.accessToken = accessToken;
+            user.expiredAt = expiredAt;
+            await this.userService.update(user);
+
+            result.accessToken = accessToken;
+        }
+
+        return result;
     }
 }

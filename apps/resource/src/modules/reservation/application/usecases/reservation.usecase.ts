@@ -90,7 +90,7 @@ export class ReservationUsecase {
         );
 
         if (conflicts.length > 0) {
-            throw new BadRequestException('Reservation time conflict');
+            throw new BadRequestException('Reservation time conflict - check in logic');
         }
 
         if (createDto.startDate > createDto.endDate) {
@@ -138,9 +138,8 @@ export class ReservationUsecase {
 
                 if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
                     this.createReservationClosingJob(reservationWithResource);
-
                     const notiTarget = [...createDto.participantIds, user.employeeId];
-                    await this.eventEmitter.emit('send.notification', {
+                    this.eventEmitter.emit('create.notification', {
                         notificationType: NotificationType.RESERVATION_STATUS_CONFIRMED,
                         notificationData: {
                             reservationId: reservationWithResource.reservationId,
@@ -440,7 +439,7 @@ export class ReservationUsecase {
                             break;
                     }
 
-                    await this.eventEmitter.emit('create.notification', {
+                    this.eventEmitter.emit('create.notification', {
                         notificationType,
                         notificationData: {
                             reservationId: reservation.reservationId,
@@ -496,7 +495,7 @@ export class ReservationUsecase {
             try {
                 const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
 
-                await this.eventEmitter.emit('create.notification', {
+                this.eventEmitter.emit('create.notification', {
                     notificationType: NotificationType.RESERVATION_PARTICIPANT_CHANGED,
                     notificationData: {
                         reservationId: updatedReservation.reservationId,
@@ -562,6 +561,7 @@ export class ReservationUsecase {
 
     private async createReservationClosingJob(reservation: Reservation): Promise<void> {
         const jobName = `closing-${reservation.reservationId}`;
+        console.log('createReservationClosingJob', jobName);
         const executeTime = DateUtil.date(reservation.endDate).toDate();
 
         // 과거 시간 체크
@@ -579,7 +579,6 @@ export class ReservationUsecase {
         });
 
         this.schedulerRegistry.addCronJob(jobName, job as any);
-        console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
         job.start();
     }
 }

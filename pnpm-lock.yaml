@@ -151,6 +151,9 @@ devDependencies:
   jest:
     specifier: ^29.5.0
     version: 29.7.0(@types/node@20.17.19)(ts-node@10.9.2)
+  k6:
+    specifier: 0.0.0
+    version: 0.0.0
   prettier:
     specifier: ^3.0.0
     version: 3.5.1
@@ -6103,6 +6106,10 @@ packages:
       jwa: 2.0.0
       safe-buffer: 5.2.1
     dev: false
+
+  /k6@0.0.0:
+    resolution: {integrity: sha512-GAQSWayS2+LjbH5bkRi+pMPYyP1JSp7o+4j58ANZ762N/RH/SdlAT3CHHztnn8s/xgg8kYNM24Gd2IPo9b5W+g==}
+    dev: true
 
   /keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}

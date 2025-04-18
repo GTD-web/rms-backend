@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reservation } from '@libs/entities';
@@ -36,8 +36,16 @@ export class ReservationRepository implements ReservationRepositoryPort {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(Reservation)
             : this.repository;
-        const saved = await repository.save(reservation);
-        return saved;
+        try {
+            const saved = await repository.save(reservation);
+            return saved;
+        } catch (error) {
+            if (error.constraint === 'no_time_overlap') {
+                console.warn(DateUtil.now().toISOString(), reservation.startDate, reservation.endDate);
+                throw new BadRequestException('Reservation time conflict - check in database');
+            }
+            throw error;
+        }
     }
 
     async findOne(repositoryOptions?: RepositoryOptions<Reservation>): Promise<Reservation | null> {

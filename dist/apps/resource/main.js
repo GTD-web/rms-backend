@@ -1067,24 +1067,31 @@ let SsoAuthUsecase = class SsoAuthUsecase {
                 },
             });
         }
-        const payload = {
-            userId: user.userId,
-            employeeId: user.employeeId,
-            roles: user.roles,
-        };
-        const accessToken = this.jwtService.sign(payload);
-        const expiredAt = date_util_1.DateUtil.now().addDays(1).format();
-        user.accessToken = accessToken;
-        user.expiredAt = expiredAt;
-        await this.userService.update(user);
-        return {
-            accessToken,
+        const result = {
+            accessToken: null,
             email: user.email,
             name: user.employee?.name,
             department: user.employee?.department,
             position: user.employee?.position,
             roles: user.roles,
         };
+        if (user.accessToken && user.expiredAt && date_util_1.DateUtil.now().format() < user.expiredAt) {
+            result.accessToken = user.accessToken;
+        }
+        else {
+            const payload = {
+                userId: user.userId,
+                employeeId: user.employeeId,
+                roles: user.roles,
+            };
+            const accessToken = this.jwtService.sign(payload);
+            const expiredAt = date_util_1.DateUtil.now().addDays(1).format();
+            user.accessToken = accessToken;
+            user.expiredAt = expiredAt;
+            await this.userService.update(user);
+            result.accessToken = accessToken;
+        }
+        return result;
     }
 };
 exports.SsoAuthUsecase = SsoAuthUsecase;
@@ -3011,6 +3018,51 @@ __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/notification/application/handler/notification-event.handler.ts":
+/*!**************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/notification/application/handler/notification-event.handler.ts ***!
+  \**************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationEventHandler = void 0;
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const notification_usecase_1 = __webpack_require__(/*! ../usecases/notification.usecase */ "./apps/resource/src/modules/notification/application/usecases/notification.usecase.ts");
+let NotificationEventHandler = class NotificationEventHandler {
+    constructor(notificationUsecase) {
+        this.notificationUsecase = notificationUsecase;
+    }
+    async handleCreateNotificationEvent(payload) {
+        await this.notificationUsecase.createNotification(payload.notificationType, payload.notificationData, payload.notiTarget, payload.repositoryOptions);
+    }
+};
+exports.NotificationEventHandler = NotificationEventHandler;
+__decorate([
+    (0, event_emitter_1.OnEvent)('create.notification'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], NotificationEventHandler.prototype, "handleCreateNotificationEvent", null);
+exports.NotificationEventHandler = NotificationEventHandler = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_usecase_1.NotificationUsecase !== "undefined" && notification_usecase_1.NotificationUsecase) === "function" ? _a : Object])
+], NotificationEventHandler);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/notification/application/services/adapter.service.ts":
 /*!****************************************************************************************!*\
   !*** ./apps/resource/src/modules/notification/application/services/adapter.service.ts ***!
@@ -3949,6 +4001,7 @@ const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule
 const employee_notification_service_1 = __webpack_require__(/*! ./application/services/employee-notification.service */ "./apps/resource/src/modules/notification/application/services/employee-notification.service.ts");
 const employee_notification_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/employee-notification.repository */ "./apps/resource/src/modules/notification/infrastructure/adapters/out/persistence/employee-notification.repository.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const notification_event_handler_1 = __webpack_require__(/*! ./application/handler/notification-event.handler */ "./apps/resource/src/modules/notification/application/handler/notification-event.handler.ts");
 let NotificationModule = class NotificationModule {
 };
 exports.NotificationModule = NotificationModule;
@@ -3979,6 +4032,7 @@ exports.NotificationModule = NotificationModule = __decorate([
                 provide: 'PushNotificationServicePort',
                 useClass: fcm_push_adapter_1.FCMAdapter,
             },
+            notification_event_handler_1.NotificationEventHandler,
         ],
         controllers: [notification_controller_1.NotificationController],
         exports: [
@@ -4667,7 +4721,7 @@ let ReservationUsecase = class ReservationUsecase {
     async makeReservation(user, createDto) {
         const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.date(createDto.startDate).toDate(), date_util_1.DateUtil.date(createDto.endDate).toDate());
         if (conflicts.length > 0) {
-            throw new common_1.BadRequestException('Reservation time conflict');
+            throw new common_1.BadRequestException('Reservation time conflict - check in logic');
         }
         if (createDto.startDate > createDto.endDate) {
             throw new common_1.BadRequestException('Start date must be before end date');
@@ -4699,7 +4753,7 @@ let ReservationUsecase = class ReservationUsecase {
                 if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
                     this.createReservationClosingJob(reservationWithResource);
                     const notiTarget = [...createDto.participantIds, user.employeeId];
-                    await this.eventEmitter.emit('send.notification', {
+                    this.eventEmitter.emit('create.notification', {
                         notificationType: notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED,
                         notificationData: {
                             reservationId: reservationWithResource.reservationId,
@@ -4933,7 +4987,7 @@ let ReservationUsecase = class ReservationUsecase {
                             notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED;
                             break;
                     }
-                    await this.eventEmitter.emit('create.notification', {
+                    this.eventEmitter.emit('create.notification', {
                         notificationType,
                         notificationData: {
                             reservationId: reservation.reservationId,
@@ -4972,7 +5026,7 @@ let ReservationUsecase = class ReservationUsecase {
         if (updatedReservation.resource.notifyParticipantChange) {
             try {
                 const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
-                await this.eventEmitter.emit('create.notification', {
+                this.eventEmitter.emit('create.notification', {
                     notificationType: notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED,
                     notificationData: {
                         reservationId: updatedReservation.reservationId,
@@ -5020,6 +5074,7 @@ let ReservationUsecase = class ReservationUsecase {
     }
     async createReservationClosingJob(reservation) {
         const jobName = `closing-${reservation.reservationId}`;
+        console.log('createReservationClosingJob', jobName);
         const executeTime = date_util_1.DateUtil.date(reservation.endDate).toDate();
         if (executeTime.getTime() <= Date.now()) {
             console.log(`ExecuteTime time ${executeTime} is in the past, skipping cron job creation`);
@@ -5031,7 +5086,6 @@ let ReservationUsecase = class ReservationUsecase {
             await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
         });
         this.schedulerRegistry.addCronJob(jobName, job);
-        console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
         job.start();
     }
 };
@@ -5495,8 +5549,17 @@ let ReservationRepository = class ReservationRepository {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Reservation)
             : this.repository;
-        const saved = await repository.save(reservation);
-        return saved;
+        try {
+            const saved = await repository.save(reservation);
+            return saved;
+        }
+        catch (error) {
+            if (error.constraint === 'no_time_overlap') {
+                console.warn(date_util_1.DateUtil.now().toISOString(), reservation.startDate, reservation.endDate);
+                throw new common_1.BadRequestException('Reservation time conflict - check in database');
+            }
+            throw error;
+        }
     }
     async findOne(repositoryOptions) {
         const repository = repositoryOptions?.queryRunner
@@ -10379,7 +10442,6 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
-        logging: configService.get('NODE_ENV') === 'local',
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
         extra: {
@@ -12124,13 +12186,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RequestInterceptor = void 0;
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const operators_1 = __webpack_require__(/*! rxjs/operators */ "rxjs/operators");
 let RequestInterceptor = class RequestInterceptor {
     intercept(context, next) {
         const request = context.switchToHttp().getRequest();
         const { method, url, body, query, params } = request;
-        console.log(`[Request] ${method} ${url}`);
+        const now = Date.now();
+        console.log(`[Request] ${date_util_1.DateUtil.now().toISOString()} ${method} ${url}`);
         if (Object.keys(body).length > 0) {
             console.log('Body:', body);
         }
@@ -12140,7 +12204,6 @@ let RequestInterceptor = class RequestInterceptor {
         if (Object.keys(params).length > 0) {
             console.log('Params:', params);
         }
-        const now = Date.now();
         return next.handle().pipe((0, operators_1.tap)(() => {
             console.log(`[Response Time] ${Date.now() - now}ms`);
         }));

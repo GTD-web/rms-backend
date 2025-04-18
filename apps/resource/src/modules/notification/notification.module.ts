@@ -15,6 +15,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EmployeeNotificationService } from './application/services/employee-notification.service';
 import { EmployeeNotificationRepository } from './infrastructure/adapters/out/persistence/employee-notification.repository';
 import { EmployeeNotification } from '@libs/entities';
+import { NotificationEventHandler } from './application/handler/notification-event.handler';
 
 @Module({
     imports: [
@@ -43,6 +44,7 @@ import { EmployeeNotification } from '@libs/entities';
             // useClass: WebPushAdapter,
             useClass: FCMAdapter,
         },
+        NotificationEventHandler,
     ],
     controllers: [NotificationController],
     exports: [

@@ -1,3 +1,4 @@
+import { DateUtil } from '@libs/utils/date.util';
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -7,8 +8,8 @@ export class RequestInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         const request = context.switchToHttp().getRequest();
         const { method, url, body, query, params } = request;
-
-        console.log(`[Request] ${method} ${url}`);
+        const now = Date.now();
+        console.log(`[Request] ${DateUtil.now().toISOString()} ${method} ${url}`);
         if (Object.keys(body).length > 0) {
             console.log('Body:', body);
         }
@@ -19,7 +20,6 @@ export class RequestInterceptor implements NestInterceptor {
             console.log('Params:', params);
         }
 
-        const now = Date.now();
         return next.handle().pipe(
             tap(() => {
                 console.log(`[Response Time] ${Date.now() - now}ms`);
