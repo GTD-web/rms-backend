@@ -11,6 +11,7 @@ export class ReservationResponseDto {
         this.resourceId = reservation?.resourceId;
         this.title = reservation?.title;
         this.description = reservation?.description;
+        this.rejectReason = reservation?.rejectReason;
         this.startDate = DateUtil.format(reservation?.startDate);
         this.endDate = DateUtil.format(reservation?.endDate);
         this.status = reservation?.status;
@@ -36,6 +37,9 @@ export class ReservationResponseDto {
 
     @ApiProperty({ required: false })
     endDate?: string;
+
+    @ApiProperty({ required: false })
+    rejectReason?: string;
 
     @ApiProperty({ enum: ReservationStatus, required: false })
     status?: ReservationStatus;

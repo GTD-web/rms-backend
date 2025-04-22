@@ -439,7 +439,7 @@ export class ResourceUsecase {
             where: {
                 resourceId: resourceId,
             },
-            relations: ['resourceGroup'],
+            relations: ['resourceGroup', 'resourceManagers'],
         });
         if (!resource) {
             throw new NotFoundException('Resource not found');
@@ -449,6 +449,17 @@ export class ResourceUsecase {
         await queryRunner.startTransaction();
 
         try {
+            await this.resourceService.update(resourceId, { resourceGroupId: null }, { queryRunner });
+
+            // TODO : 기획 확인 후 자원 관리자 역할 제거 이벤트 추가
+            // for (const manager of resource.resourceManagers) {
+            //     await this.eventEmitter.emitAsync('remove.user.role', {
+            //         employeeId: manager.employeeId,
+            //         role: Role.RESOURCE_ADMIN,
+            //         repositoryOptions: { queryRunner },
+            //     });
+            // }
+
             await this.resourceService.softDelete(resourceId, { queryRunner });
 
             // 자원 순서 재계산

@@ -4183,6 +4183,7 @@ class ReservationResponseDto {
         this.resourceId = reservation?.resourceId;
         this.title = reservation?.title;
         this.description = reservation?.description;
+        this.rejectReason = reservation?.rejectReason;
         this.startDate = date_util_1.DateUtil.format(reservation?.startDate);
         this.endDate = date_util_1.DateUtil.format(reservation?.endDate);
         this.status = reservation?.status;
@@ -4216,6 +4217,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", String)
 ], ReservationResponseDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "rejectReason", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: reservation_type_enum_1.ReservationStatus, required: false }),
     __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _a : Object)
@@ -7330,7 +7335,7 @@ let ResourceUsecase = class ResourceUsecase {
             where: {
                 resourceId: resourceId,
             },
-            relations: ['resourceGroup'],
+            relations: ['resourceGroup', 'resourceManagers'],
         });
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
@@ -7339,6 +7344,7 @@ let ResourceUsecase = class ResourceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            await this.resourceService.update(resourceId, { resourceGroupId: null }, { queryRunner });
             await this.resourceService.softDelete(resourceId, { queryRunner });
             const resources = await this.resourceService.findAll({
                 where: {
