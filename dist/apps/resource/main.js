@@ -4936,7 +4936,7 @@ let ReservationUsecase = class ReservationUsecase {
             throw new common_1.NotFoundException('Reservation not found');
         }
         if (reservation.status !== reservation_type_enum_1.ReservationStatus.PENDING) {
-            throw new common_1.BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
+            throw new common_1.BadRequestException(`Cannot update title of reservation in ${reservation.status} status`);
         }
         const updatedReservation = await this.reservationService.update(reservationId, updateDto, repositoryOptions);
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
