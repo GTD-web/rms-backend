@@ -6742,6 +6742,9 @@ let ResourceManagerService = class ResourceManagerService {
         const managersToAdd = newManagerIds.filter((employeeId) => !currentManagerIds.includes(employeeId));
         await Promise.all(managersToAdd.map((employeeId) => this.save({ resourceId, employeeId }, repositoryOptions)));
     }
+    async remove(resourceManagerId, repositoryOptions) {
+        await this.resourceManagerRepository.delete(resourceManagerId, repositoryOptions);
+    }
 };
 exports.ResourceManagerService = ResourceManagerService;
 exports.ResourceManagerService = ResourceManagerService = __decorate([
@@ -7361,6 +7364,9 @@ let ResourceUsecase = class ResourceUsecase {
         await queryRunner.startTransaction();
         try {
             await this.resourceService.update(resourceId, { resourceGroupId: null }, { queryRunner });
+            for (const manager of resource.resourceManagers) {
+                await this.resourceManagerService.remove(manager.resourceManagerId, { queryRunner });
+            }
             await this.resourceService.softDelete(resourceId, { queryRunner });
             const resources = await this.resourceService.findAll({
                 where: {

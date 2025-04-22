@@ -465,14 +465,9 @@ export class ResourceUsecase {
         try {
             await this.resourceService.update(resourceId, { resourceGroupId: null }, { queryRunner });
 
-            // TODO : 기획 확인 후 자원 관리자 역할 제거 이벤트 추가
-            // for (const manager of resource.resourceManagers) {
-            //     await this.eventEmitter.emitAsync('remove.user.role', {
-            //         employeeId: manager.employeeId,
-            //         role: Role.RESOURCE_ADMIN,
-            //         repositoryOptions: { queryRunner },
-            //     });
-            // }
+            for (const manager of resource.resourceManagers) {
+                await this.resourceManagerService.remove(manager.resourceManagerId, { queryRunner });
+            }
 
             await this.resourceService.softDelete(resourceId, { queryRunner });
 

@@ -50,7 +50,7 @@ export class ResourceManagerService {
         await Promise.all(managersToAdd.map((employeeId) => this.save({ resourceId, employeeId }, repositoryOptions)));
     }
 
-    // async remove(resourceManagerId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
-    //   await this.resourceManagerRepository.delete(resourceManagerId, repositoryOptions);
-    // }
+    async remove(resourceManagerId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
+        await this.resourceManagerRepository.delete(resourceManagerId, repositoryOptions);
+    }
 }
