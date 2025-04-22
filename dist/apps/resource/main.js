@@ -4677,6 +4677,7 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const reservation_service_1 = __webpack_require__(/*! ../services/reservation.service */ "./apps/resource/src/modules/reservation/application/services/reservation.service.ts");
 const participant_service_1 = __webpack_require__(/*! ../services/participant.service */ "./apps/resource/src/modules/reservation/application/services/participant.service.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const dist_1 = __webpack_require__(/*! cron/dist */ "cron/dist");
@@ -4934,6 +4935,9 @@ let ReservationUsecase = class ReservationUsecase {
         if (!reservation) {
             throw new common_1.NotFoundException('Reservation not found');
         }
+        if (reservation.status !== reservation_type_enum_1.ReservationStatus.PENDING) {
+            throw new common_1.BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
+        }
         const updatedReservation = await this.reservationService.update(reservationId, updateDto, repositoryOptions);
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
@@ -4944,6 +4948,15 @@ let ReservationUsecase = class ReservationUsecase {
         });
         if (!reservation) {
             throw new common_1.NotFoundException('Reservation not found');
+        }
+        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
+            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
+            reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
+            throw new common_1.BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
+        }
+        if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED &&
+            reservation.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+            throw new common_1.BadRequestException('Cannot update time of confirmed accommodation reservation');
         }
         this.deleteReservationClosingJob(reservationId);
         const updatedReservation = await this.reservationService.update(reservationId, {
@@ -5015,6 +5028,18 @@ let ReservationUsecase = class ReservationUsecase {
         throw new common_1.UnauthorizedException('You are not authorized to update this reservation');
     }
     async updateParticipants(reservationId, updateDto) {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['resource'],
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException('Reservation not found');
+        }
+        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
+            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
+            reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
+            throw new common_1.BadRequestException(`Cannot update participants of reservation in ${reservation.status} status`);
+        }
         const participants = await this.participantService.findAll({
             where: { reservationId, type: reservation_type_enum_1.ParticipantsType.PARTICIPANT },
         });
@@ -6999,7 +7024,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -7017,13 +7042,15 @@ const file_service_1 = __webpack_require__(/*! @resource/modules/file/applicatio
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const maintenance_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
 let ResourceUsecase = class ResourceUsecase {
-    constructor(resourceService, resourceManagerService, resourceGroupService, vehicleInfoService, vehicleInfoUsecase, dataSource, fileService, typeHandlers, eventEmitter) {
+    constructor(resourceService, resourceManagerService, resourceGroupService, vehicleInfoService, vehicleInfoUsecase, maintenanceService, dataSource, fileService, typeHandlers, eventEmitter) {
         this.resourceService = resourceService;
         this.resourceManagerService = resourceManagerService;
         this.resourceGroupService = resourceGroupService;
         this.vehicleInfoService = vehicleInfoService;
         this.vehicleInfoUsecase = vehicleInfoUsecase;
+        this.maintenanceService = maintenanceService;
         this.dataSource = dataSource;
         this.fileService = fileService;
         this.typeHandlers = typeHandlers;
@@ -7136,7 +7163,6 @@ let ResourceUsecase = class ResourceUsecase {
                 'resourceGroup',
                 'vehicleInfo',
                 'vehicleInfo.consumables',
-                'vehicleInfo.consumables.maintenances',
                 'meetingRoomInfo',
                 'accommodationInfo',
                 'resourceManagers',
@@ -7150,18 +7176,20 @@ let ResourceUsecase = class ResourceUsecase {
         if (resource.vehicleInfo) {
             if (resource.vehicleInfo.consumables) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
-                resource.vehicleInfo.consumables.forEach((consumable) => {
+                resource.vehicleInfo.consumables.forEach(async (consumable) => {
                     const replaceCycle = Number(consumable.replaceCycle);
-                    if (consumable.maintenances && consumable.maintenances.length > 0) {
-                        console.log('consumable.maintenances', consumable.maintenances);
-                        consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
-                            return {
-                                ...maintenance,
-                                mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
-                                maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
-                            };
-                        });
-                    }
+                    const latestMaintenance = await this.maintenanceService.findOne({
+                        where: { consumableId: consumable.consumableId },
+                        order: { date: 'DESC' },
+                    });
+                    console.log('latestMaintenance', latestMaintenance);
+                    consumable.maintenances = [latestMaintenance].map((maintenance) => {
+                        return {
+                            ...maintenance,
+                            mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                            maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                        };
+                    });
                 });
             }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
@@ -7396,8 +7424,8 @@ let ResourceUsecase = class ResourceUsecase {
 exports.ResourceUsecase = ResourceUsecase;
 exports.ResourceUsecase = ResourceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __param(7, (0, common_1.Inject)('ResourceTypeHandlers')),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.ResourceService !== "undefined" && resource_service_1.ResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.ResourceManagerService !== "undefined" && resource_manager_service_1.ResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof resource_group_service_1.ResourceGroupService !== "undefined" && resource_group_service_1.ResourceGroupService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object, typeof (_g = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _g : Object, typeof (_h = typeof Map !== "undefined" && Map) === "function" ? _h : Object, typeof (_j = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _j : Object])
+    __param(8, (0, common_1.Inject)('ResourceTypeHandlers')),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.ResourceService !== "undefined" && resource_service_1.ResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.ResourceManagerService !== "undefined" && resource_manager_service_1.ResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof resource_group_service_1.ResourceGroupService !== "undefined" && resource_group_service_1.ResourceGroupService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _e : Object, typeof (_f = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object, typeof (_h = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _h : Object, typeof (_j = typeof Map !== "undefined" && Map) === "function" ? _j : Object, typeof (_k = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _k : Object])
 ], ResourceUsecase);
 
 
@@ -9329,6 +9357,12 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
+        const sameDateMaintenance = await this.maintenanceService.findOne({
+            where: { consumableId: createMaintenanceDto.consumableId, date: createMaintenanceDto.date },
+        });
+        if (sameDateMaintenance) {
+            throw new common_1.BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+        }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -9340,9 +9374,11 @@ let MaintenanceUsecase = class MaintenanceUsecase {
                     relations: ['vehicleInfo'],
                 });
                 console.log(consumable);
-                await this.vehicleInfoService.update(consumable.vehicleInfo.vehicleInfoId, {
-                    totalMileage: createMaintenanceDto.mileage,
-                }, { queryRunner });
+                if (consumable.vehicleInfo.totalMileage < createMaintenanceDto.mileage) {
+                    await this.vehicleInfoService.update(consumable.vehicleInfo.vehicleInfoId, {
+                        totalMileage: createMaintenanceDto.mileage,
+                    }, { queryRunner });
+                }
             }
             await queryRunner.commitTransaction();
             return maintenance;
@@ -9439,6 +9475,12 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
+        const sameDateMaintenance = await this.maintenanceService.findOne({
+            where: { consumableId: updateMaintenanceDto.consumableId, date: updateMaintenanceDto.date },
+        });
+        if (sameDateMaintenance) {
+            throw new common_1.BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+        }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -10188,6 +10230,7 @@ let MaintenanceRepository = class MaintenanceRepository {
         return repository.findOne({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
+            order: repositoryOptions?.order,
         });
     }
     async update(id, updateMaintenanceDto, repositoryOptions) {
@@ -11671,7 +11714,7 @@ __decorate([
     __metadata("design:type", String)
 ], Resource.prototype, "resourceGroupId", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], Resource.prototype, "name", void 0);
 __decorate([

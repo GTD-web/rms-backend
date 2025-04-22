@@ -22,7 +22,7 @@ export class Resource {
     @Column('uuid', { nullable: true })
     resourceGroupId: string;
 
-    @Column()
+    @Column({ unique: true })
     name: string;
 
     @Column({ nullable: true })

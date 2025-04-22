@@ -359,6 +359,10 @@ export class ReservationUsecase {
             throw new NotFoundException('Reservation not found');
         }
 
+        if (reservation.status !== ReservationStatus.PENDING) {
+            throw new BadRequestException(`Cannot update title of reservation in ${reservation.status} status`);
+        }
+
         const updatedReservation = await this.reservationService.update(reservationId, updateDto, repositoryOptions);
         return new ReservationResponseDto(updatedReservation);
     }
@@ -372,6 +376,20 @@ export class ReservationUsecase {
             throw new NotFoundException('Reservation not found');
         }
 
+        if (
+            reservation.status === ReservationStatus.CLOSED ||
+            reservation.status === ReservationStatus.CANCELLED ||
+            reservation.status === ReservationStatus.REJECTED
+        ) {
+            throw new BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
+        }
+
+        if (
+            reservation.status === ReservationStatus.CONFIRMED &&
+            reservation.resource.type === ResourceType.ACCOMMODATION
+        ) {
+            throw new BadRequestException('Cannot update time of confirmed accommodation reservation');
+        }
         // 기존 Job 삭제
         this.deleteReservationClosingJob(reservationId);
 
@@ -467,6 +485,23 @@ export class ReservationUsecase {
         reservationId: string,
         updateDto: UpdateReservationParticipantsDto,
     ): Promise<ReservationResponseDto> {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['resource'],
+        });
+
+        if (!reservation) {
+            throw new NotFoundException('Reservation not found');
+        }
+
+        if (
+            reservation.status === ReservationStatus.CLOSED ||
+            reservation.status === ReservationStatus.CANCELLED ||
+            reservation.status === ReservationStatus.REJECTED
+        ) {
+            throw new BadRequestException(`Cannot update participants of reservation in ${reservation.status} status`);
+        }
+
         // 기존 참가자 조회
         const participants = await this.participantService.findAll({
             where: { reservationId, type: ParticipantsType.PARTICIPANT },

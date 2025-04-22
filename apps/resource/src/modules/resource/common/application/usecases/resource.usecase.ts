@@ -29,6 +29,7 @@ import { FileService } from '@resource/modules/file/application/services/file.se
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DateUtil } from '@libs/utils/date.util';
 import { NotificationType } from '@libs/enums/notification-type.enum';
+import { MaintenanceService } from '@resource/modules/resource/vehicle/application/services/maintenance.service';
 
 @Injectable()
 export class ResourceUsecase {
@@ -38,6 +39,7 @@ export class ResourceUsecase {
         private readonly resourceGroupService: ResourceGroupService,
         private readonly vehicleInfoService: VehicleInfoService,
         private readonly vehicleInfoUsecase: VehicleInfoUsecase,
+        private readonly maintenanceService: MaintenanceService,
         private readonly dataSource: DataSource,
         private readonly fileService: FileService,
         @Inject('ResourceTypeHandlers')
@@ -171,7 +173,7 @@ export class ResourceUsecase {
                 'resourceGroup',
                 'vehicleInfo',
                 'vehicleInfo.consumables',
-                'vehicleInfo.consumables.maintenances',
+                // 'vehicleInfo.consumables.maintenances',
                 'meetingRoomInfo',
                 'accommodationInfo',
                 'resourceManagers',
@@ -188,19 +190,21 @@ export class ResourceUsecase {
         if (resource.vehicleInfo) {
             if (resource.vehicleInfo.consumables) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
-                resource.vehicleInfo.consumables.forEach((consumable) => {
+                resource.vehicleInfo.consumables.forEach(async (consumable) => {
                     const replaceCycle = Number(consumable.replaceCycle);
-                    if (consumable.maintenances && consumable.maintenances.length > 0) {
-                        console.log('consumable.maintenances', consumable.maintenances);
-                        // 각 maintenance에 계산 필드 추가
-                        consumable.maintenances = [consumable.maintenances[0]].map((maintenance) => {
-                            return {
-                                ...maintenance,
-                                mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
-                                maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
-                            };
-                        });
-                    }
+                    const latestMaintenance = await this.maintenanceService.findOne({
+                        where: { consumableId: consumable.consumableId },
+                        order: { date: 'DESC' },
+                    });
+                    console.log('latestMaintenance', latestMaintenance);
+
+                    consumable.maintenances = [latestMaintenance].map((maintenance) => {
+                        return {
+                            ...maintenance,
+                            mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                            maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                        };
+                    });
                 });
             }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(

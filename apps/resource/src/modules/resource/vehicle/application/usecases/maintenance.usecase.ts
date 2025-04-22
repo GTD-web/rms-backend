@@ -1,18 +1,14 @@
 import { VehicleInfoService } from '../services/vehicle-info.service';
-import { MaintenanceResponseDto, VehicleInfoResponseDto } from '../dtos/vehicle-response.dto';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { MaintenanceResponseDto } from '../dtos/vehicle-response.dto';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import { UpdateMaintenanceDto, UpdateVehicleInfoDto } from '../dtos/update-vehicle-info.dto';
+import { UpdateMaintenanceDto } from '../dtos/update-vehicle-info.dto';
 import { ConsumableService } from '@resource/modules/resource/vehicle/application/services/consumable.service';
-import { NotificationType } from '@libs/enums/notification-type.enum';
-import { NotificationUsecase } from '@resource/modules/notification/application/usecases/notification.usecase';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { MaintenanceService } from '../services/maintenance.service';
 import { Maintenance } from '@libs/entities';
 import { CreateMaintenanceDto } from '../dtos/create-vehicle-info.dto';
-import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
-import { Role } from '@libs/enums/role-type.enum';
 import { DataSource, In, LessThan, MoreThan } from 'typeorm';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
@@ -28,6 +24,14 @@ export class MaintenanceUsecase {
     async save(user: UserEntity, createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
+
+        const sameDateMaintenance = await this.maintenanceService.findOne({
+            where: { consumableId: createMaintenanceDto.consumableId, date: createMaintenanceDto.date },
+        });
+        if (sameDateMaintenance) {
+            throw new BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+        }
+
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -39,13 +43,15 @@ export class MaintenanceUsecase {
                     relations: ['vehicleInfo'],
                 });
                 console.log(consumable);
-                await this.vehicleInfoService.update(
-                    consumable.vehicleInfo.vehicleInfoId,
-                    {
-                        totalMileage: createMaintenanceDto.mileage,
-                    },
-                    { queryRunner },
-                );
+                if (consumable.vehicleInfo.totalMileage < createMaintenanceDto.mileage) {
+                    await this.vehicleInfoService.update(
+                        consumable.vehicleInfo.vehicleInfoId,
+                        {
+                            totalMileage: createMaintenanceDto.mileage,
+                        },
+                        { queryRunner },
+                    );
+                }
             }
             await queryRunner.commitTransaction();
             return maintenance;
@@ -160,6 +166,13 @@ export class MaintenanceUsecase {
     ): Promise<Maintenance> {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
+
+        const sameDateMaintenance = await this.maintenanceService.findOne({
+            where: { consumableId: updateMaintenanceDto.consumableId, date: updateMaintenanceDto.date },
+        });
+        if (sameDateMaintenance) {
+            throw new BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+        }
 
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();

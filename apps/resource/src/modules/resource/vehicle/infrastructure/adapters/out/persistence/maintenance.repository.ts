@@ -46,6 +46,7 @@ export class MaintenanceRepository implements MaintenanceRepositoryPort {
         return repository.findOne({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
+            order: repositoryOptions?.order,
         });
     }
 
