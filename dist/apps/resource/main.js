@@ -11199,11 +11199,11 @@ __decorate([
     __metadata("design:type", Array)
 ], Maintenance.prototype, "images", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)(),
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp with time zone' }),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], Maintenance.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)(),
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp with time zone' }),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], Maintenance.prototype, "updatedAt", void 0);
 __decorate([
@@ -11444,11 +11444,11 @@ __decorate([
     __metadata("design:type", String)
 ], Reservation.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp' }),
+    (0, typeorm_1.Column)({ type: 'timestamp with time zone' }),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], Reservation.prototype, "startDate", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp' }),
+    (0, typeorm_1.Column)({ type: 'timestamp with time zone' }),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], Reservation.prototype, "endDate", void 0);
 __decorate([
@@ -11705,7 +11705,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Resource.prototype, "order", void 0);
 __decorate([
-    (0, typeorm_1.DeleteDateColumn)(),
+    (0, typeorm_1.DeleteDateColumn)({ type: 'timestamp with time zone' }),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], Resource.prototype, "deletedAt", void 0);
 __decorate([

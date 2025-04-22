@@ -20,10 +20,10 @@ export class Reservation {
     @Column({ nullable: true })
     description: string;
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'timestamp with time zone' })
     startDate: Date;
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'timestamp with time zone' })
     endDate: Date;
 
     @Column({

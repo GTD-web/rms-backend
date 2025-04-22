@@ -52,7 +52,7 @@ export class Resource {
     @Column({ default: 0 })
     order: number;
 
-    @DeleteDateColumn()
+    @DeleteDateColumn({ type: 'timestamp with time zone' })
     deletedAt: Date;
 
     @ManyToOne(() => ResourceGroup)

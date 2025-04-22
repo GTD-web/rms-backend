@@ -23,10 +23,10 @@ export class Maintenance {
     @Column({ type: 'json', nullable: true, comment: '정비사진 배열' })
     images: string[];
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamp with time zone' })
     createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
 
     @ManyToOne(() => Consumable)
