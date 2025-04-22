@@ -7050,6 +7050,12 @@ let ResourceUsecase = class ResourceUsecase {
             throw new common_1.BadRequestException('Start date must be before end date');
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+        const startDateObj = regex.test(startDate)
+            ? date_util_1.DateUtil.date(startDate).toDate()
+            : date_util_1.DateUtil.date(startDate + ' 00:00:00').toDate();
+        const endDateObj = regex.test(endDate)
+            ? date_util_1.DateUtil.date(endDate).toDate()
+            : date_util_1.DateUtil.date(endDate + ' 23:59:59').toDate();
         const resourceGroups = await this.resourceGroupService.findAll({
             where: {
                 type: type,
@@ -7069,18 +7075,28 @@ let ResourceUsecase = class ResourceUsecase {
                 },
             });
             const resourcesWithReservations = await Promise.all(resources.map(async (resource) => {
+                const where = {
+                    resourceId: resource.resourceId,
+                    status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+                };
+                const whereArray = [
+                    {
+                        ...where,
+                        startDate: (0, typeorm_1.MoreThanOrEqual)(startDateObj),
+                        endDate: (0, typeorm_1.LessThanOrEqual)(endDateObj),
+                    },
+                    {
+                        ...where,
+                        startDate: (0, typeorm_1.Between)(startDateObj, endDateObj),
+                    },
+                    {
+                        ...where,
+                        endDate: (0, typeorm_1.Between)(startDateObj, endDateObj),
+                    },
+                ];
                 const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
                     repositoryOptions: {
-                        where: {
-                            resourceId: resource.resourceId,
-                            startDate: (0, typeorm_1.MoreThanOrEqual)(regex.test(startDate)
-                                ? date_util_1.DateUtil.date(startDate).toDate()
-                                : date_util_1.DateUtil.date(startDate + ' 00:00:00').toDate()),
-                            endDate: (0, typeorm_1.LessThanOrEqual)(regex.test(endDate)
-                                ? date_util_1.DateUtil.date(endDate).toDate()
-                                : date_util_1.DateUtil.date(endDate + ' 23:59:59').toDate()),
-                            status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
-                        },
+                        where: whereArray,
                         relations: ['participants'],
                         order: {
                             startDate: 'ASC',
