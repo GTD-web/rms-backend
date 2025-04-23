@@ -39,7 +39,10 @@ export class MaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
+            const maintenance = await this.maintenanceService.save(
+                { ...createMaintenanceDto, maintananceBy: user.employee.employeeId },
+                { queryRunner },
+            );
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },

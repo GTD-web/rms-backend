@@ -27,13 +27,12 @@ import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { Public } from '@libs/decorators/public.decorator';
 
-@ApiTags('예약')
+@ApiTags('2. 예약')
 @Controller('reservations')
 @ApiBearerAuth()
 export class ReservationController {
     constructor(private readonly reservationUsecase: ReservationUsecase) {}
 
-    @ApiTags('sprint0.1')
     @Post()
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 생성' })
@@ -48,7 +47,6 @@ export class ReservationController {
         return this.reservationUsecase.makeReservation(user, createDto);
     }
 
-    @ApiTags('sprint0.1')
     @Get('me')
     @Roles(Role.USER)
     @ApiOperation({ summary: '내 예약 리스트 조회 #사용자/홈 ' })
@@ -70,7 +68,6 @@ export class ReservationController {
         return this.reservationUsecase.findMyReservationList(user.employeeId, startDate, resourceType, page, limit);
     }
 
-    @ApiTags('sprint0.1')
     @Get('me/current')
     @ApiOperation({ summary: '내 예약 현재 예약 조회 #사용자/자원예약/이용중 ' })
     @ApiDataResponse({
@@ -85,7 +82,6 @@ export class ReservationController {
         return this.reservationUsecase.findMyCurrentReservation(user.employeeId, resourceType);
     }
 
-    @ApiTags('sprint0.1')
     @Get(':reservationId')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 조회 #사용자/예약상세페이지' })
@@ -100,7 +96,6 @@ export class ReservationController {
         return this.reservationUsecase.findReservationDetail(user, reservationId);
     }
 
-    @ApiTags('sprint0.1', 'sprint0.3')
     @Get()
     @Roles(Role.USER)
     @ApiOperation({
@@ -143,7 +138,6 @@ export class ReservationController {
         return this.reservationUsecase.findReservationList(startDate, endDate, resourceType, resourceId, status);
     }
 
-    @ApiTags('sprint0.1')
     @Patch(':reservationId/title')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 제목 수정' })
@@ -160,7 +154,6 @@ export class ReservationController {
         return this.reservationUsecase.updateTitle(reservationId, updateDto);
     }
 
-    @ApiTags('sprint0.1')
     @Patch(':reservationId/time')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 시간 수정' })
@@ -177,7 +170,6 @@ export class ReservationController {
         return this.reservationUsecase.updateTime(reservationId, updateDto);
     }
 
-    @ApiTags('sprint0.1', 'sprint0.3')
     @Patch(':reservationId/status')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 상태 수정 #사용자/예약상세페이지 #관리자/예약관리/예약상세' })
@@ -193,7 +185,6 @@ export class ReservationController {
         return this.reservationUsecase.updateStatus(reservationId, updateDto, user);
     }
 
-    @ApiTags('sprint0.1')
     @Patch(':reservationId/participants')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 참가자 수정' })
@@ -210,7 +201,6 @@ export class ReservationController {
         return this.reservationUsecase.updateParticipants(reservationId, updateDto);
     }
 
-    @ApiTags('sprint0.1')
     @Patch(':reservationId/cc-receipient')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 수신참조자 수정' })

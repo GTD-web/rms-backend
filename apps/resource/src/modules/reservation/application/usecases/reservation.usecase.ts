@@ -387,7 +387,7 @@ export class ReservationUsecase {
 
         if (
             reservation.status === ReservationStatus.CLOSED ||
-            reservation.status === ReservationStatus.CANCELLED ||
+            reservation.status === ReservationStatus.CANCELED ||
             reservation.status === ReservationStatus.REJECTED
         ) {
             throw new BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
@@ -436,7 +436,7 @@ export class ReservationUsecase {
 
         if (allowed) {
             // 상태가 CANCELLED 또는 REJECTED인 경우 Job 삭제
-            if (updateDto.status === ReservationStatus.CANCELLED || updateDto.status === ReservationStatus.REJECTED) {
+            if (updateDto.status === ReservationStatus.CANCELED || updateDto.status === ReservationStatus.REJECTED) {
                 this.deleteReservationClosingJob(reservationId);
             }
 
@@ -459,7 +459,7 @@ export class ReservationUsecase {
                         case ReservationStatus.CONFIRMED:
                             notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
                             break;
-                        case ReservationStatus.CANCELLED:
+                        case ReservationStatus.CANCELED:
                             notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
                             break;
                         case ReservationStatus.REJECTED:
@@ -507,7 +507,7 @@ export class ReservationUsecase {
 
         if (
             reservation.status === ReservationStatus.CLOSED ||
-            reservation.status === ReservationStatus.CANCELLED ||
+            reservation.status === ReservationStatus.CANCELED ||
             reservation.status === ReservationStatus.REJECTED
         ) {
             throw new BadRequestException(`Cannot update participants of reservation in ${reservation.status} status`);

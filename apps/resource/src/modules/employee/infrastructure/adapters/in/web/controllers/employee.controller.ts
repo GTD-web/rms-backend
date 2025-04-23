@@ -13,7 +13,6 @@ import { EmployeeUseCase } from '@resource/modules/employee/application/usecases
 export class EmployeeController {
     constructor(private readonly employeeUseCase: EmployeeUseCase) {}
 
-    @ApiTags('sprint0.1')
     @Get('department')
     @Roles(Role.USER)
     @ApiOperation({ summary: '부서별 직원 목록 조회 #사용자/참석자설정/모달' })

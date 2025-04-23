@@ -13,13 +13,12 @@ import { Role } from '@libs/enums/role-type.enum';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
-@ApiTags('정비 이력')
+@ApiTags('4. 차량 정비 이력')
 @Controller('maintenances')
 @ApiBearerAuth()
 export class MaintenanceController {
     constructor(private readonly maintenanceUsecase: MaintenanceUsecase) {}
 
-    @ApiTags('sprint0.3')
     @Post()
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 이력 생성' })
@@ -35,7 +34,6 @@ export class MaintenanceController {
         return this.maintenanceUsecase.save(user, createMaintenanceDto);
     }
 
-    @ApiTags('sprint0.3')
     @Get('vehicle/:vehicleInfoId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 이력 목록 조회' })
@@ -54,7 +52,6 @@ export class MaintenanceController {
         return this.maintenanceUsecase.findAllByVehicleInfoId(user, vehicleInfoId, page, limit);
     }
 
-    @ApiTags('sprint0.3')
     @Get(':maintenanceId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 상세 이력 조회' })
@@ -69,7 +66,6 @@ export class MaintenanceController {
         return this.maintenanceUsecase.findOne(user, maintenanceId);
     }
 
-    @ApiTags('sprint0.3')
     @Patch(':maintenanceId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 이력 수정' })
@@ -85,7 +81,6 @@ export class MaintenanceController {
         return this.maintenanceUsecase.update(user, maintenanceId, updateMaintenanceDto);
     }
 
-    @ApiTags('sprint0.3')
     @Delete(':maintenanceId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 이력 삭제' })

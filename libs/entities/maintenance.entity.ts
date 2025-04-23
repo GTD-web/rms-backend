@@ -23,6 +23,9 @@ export class Maintenance {
     @Column({ type: 'json', nullable: true, comment: '정비사진 배열' })
     images: string[];
 
+    @Column({ nullable: true })
+    maintananceBy: string;
+
     @CreateDateColumn({ type: 'timestamp with time zone' })
     createdAt: Date;
 

@@ -17,7 +17,6 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 export class NotificationController {
     constructor(private readonly notificationUsecase: NotificationUsecase) {}
 
-    @ApiTags('sprint0.3')
     @Post('subscribe')
     @ApiOperation({ summary: '웹 푸시 구독' })
     @ApiDataResponse({
@@ -28,7 +27,6 @@ export class NotificationController {
         await this.notificationUsecase.subscribe(user, subscription);
     }
 
-    @ApiTags('sprint0.3')
     @Post('unsubscribe')
     @ApiOperation({ summary: '웹 푸시 구독 취소' })
     @ApiDataResponse({
@@ -39,7 +37,6 @@ export class NotificationController {
         await this.notificationUsecase.unsubscribe(user);
     }
 
-    @ApiTags('sprint0.3')
     @Post('send')
     @ApiOperation({ summary: '웹 푸시 알림 전송' })
     @ApiDataResponse({
@@ -54,7 +51,6 @@ export class NotificationController {
         );
     }
 
-    @ApiTags('sprint0.3')
     @Get()
     @ApiOperation({ summary: '알람 목록 조회' })
     @ApiDataResponse({
@@ -80,14 +76,13 @@ export class NotificationController {
         return await this.notificationUsecase.findMyNotifications(employeeId, query);
     }
 
-    @ApiTags('sprint0.3')
     @Patch(':notificationId/read')
     @ApiOperation({ summary: '알람 읽음 처리' })
     async markAsRead(@User() user: UserEntity, @Param('notificationId') notificationId: string) {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
     }
 
-    @ApiTags('a.test')
+    @ApiTags('알림테스트')
     @Post('send/test')
     @ApiOperation({ summary: '알람 테스트 전송' })
     @ApiDataResponse({
@@ -110,7 +105,6 @@ export class NotificationController {
         await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
     }
 
-    // @ApiTags('sprint0.3-')
     // @Patch(':employeeId/readAll')
     // @ApiOperation({ summary: '모든 알람 읽음 처리' })
     // async markAllAsRead(@Param('employeeId') employeeId: string) {

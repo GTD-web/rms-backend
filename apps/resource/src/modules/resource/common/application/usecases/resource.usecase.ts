@@ -8,7 +8,19 @@ import {
 import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto } from '../dtos/resource-response.dto';
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
-import { IsNull, Not, MoreThan, LessThan, DataSource, In, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
+import {
+    IsNull,
+    Not,
+    MoreThan,
+    LessThan,
+    DataSource,
+    In,
+    MoreThanOrEqual,
+    LessThanOrEqual,
+    Between,
+    TypeORMError,
+    DriverOptionNotSetError,
+} from 'typeorm';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     ReturnVehicleDto,
@@ -292,6 +304,19 @@ export class ResourceUsecase {
             throw new BadRequestException('Managers are required');
         }
 
+        if (managers.length > 1) {
+            throw new BadRequestException('Only one manager is allowed');
+        }
+
+        const manager = await this.resourceManagerService.findOne({
+            where: { employeeId: managers[0].employeeId },
+            relations: ['employee', 'employee.user'],
+        });
+
+        if (!manager.employee.user.roles.includes(Role.RESOURCE_ADMIN)) {
+            throw new BadRequestException('The manager is not a resource admin');
+        }
+
         // 1. 그룹 존재 확인
         const group = await this.resourceGroupService.findOne({
             where: { resourceGroupId: resource.resourceGroupId },
@@ -339,13 +364,13 @@ export class ResourceUsecase {
                         { queryRunner },
                     );
                 }),
-                ...managers.map((manager) =>
-                    this.eventEmitter.emit('add.user.role', {
-                        employeeId: manager.employeeId,
-                        role: Role.RESOURCE_ADMIN,
-                        repositoryOptions: { queryRunner },
-                    }),
-                ),
+                // ...managers.map((manager) =>
+                //     this.eventEmitter.emit('add.user.role', {
+                //         employeeId: manager.employeeId,
+                //         role: Role.RESOURCE_ADMIN,
+                //         repositoryOptions: { queryRunner },
+                //     }),
+                // ),
             ]);
 
             await queryRunner.commitTransaction();
@@ -372,6 +397,23 @@ export class ResourceUsecase {
             throw new NotFoundException('Resource not found');
         }
 
+        if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 1) {
+            throw new BadRequestException('Only one manager is allowed');
+        }
+
+        if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 0) {
+            const managerId = updateRequest.managers[0].employeeId;
+            const manager = await this.resourceManagerService.findOne({
+                where: {
+                    employeeId: managerId,
+                },
+                relations: ['employee', 'employee.user'],
+            });
+            if (!manager.employee.user.roles.includes(Role.RESOURCE_ADMIN)) {
+                throw new BadRequestException('The manager is not a resource admin');
+            }
+        }
+
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -384,44 +426,44 @@ export class ResourceUsecase {
 
             // 2. 자원 관리자 정보 업데이트
             if (updateRequest.managers) {
-                const currentManagers = await this.resourceManagerService.findAll({
-                    where: {
-                        resourceId: resourceId,
-                    },
-                });
-                const currentManagerIds = currentManagers.map((m) => m.employeeId);
+                // const currentManagers = await this.resourceManagerService.findAll({
+                //     where: {
+                //         resourceId: resourceId,
+                //     },
+                // });
+                // const currentManagerIds = currentManagers.map((m) => m.employeeId);
                 const newManagerIds = updateRequest.managers.map((m) => m.employeeId);
 
                 // 제거된 관리자들의 role 업데이트
-                const removedManagerIds = currentManagerIds.filter((id) => !newManagerIds.includes(id));
-                await Promise.all(
-                    removedManagerIds.map(async (employeeId) => {
-                        const otherResources = await this.resourceManagerService.findAll({
-                            where: {
-                                employeeId: employeeId,
-                            },
-                        });
-                        if (otherResources.length === 1) {
-                            await this.eventEmitter.emit('remove.user.role', {
-                                employeeId: employeeId,
-                                role: Role.RESOURCE_ADMIN,
-                                repositoryOptions: { queryRunner },
-                            });
-                        }
-                    }),
-                );
+                // const removedManagerIds = currentManagerIds.filter((id) => !newManagerIds.includes(id));
+                // await Promise.all(
+                //     removedManagerIds.map(async (employeeId) => {
+                //         const otherResources = await this.resourceManagerService.findAll({
+                //             where: {
+                //                 employeeId: employeeId,
+                //             },
+                //         });
+                //         if (otherResources.length === 1) {
+                //             await this.eventEmitter.emit('remove.user.role', {
+                //                 employeeId: employeeId,
+                //                 role: Role.RESOURCE_ADMIN,
+                //                 repositoryOptions: { queryRunner },
+                //             });
+                //         }
+                //     }),
+                // );
 
-                // 새로운 관리자들의 role 업데이트
-                const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
-                await Promise.all(
-                    addedManagerIds.map((employeeId) =>
-                        this.eventEmitter.emit('add.user.role', {
-                            employeeId: employeeId,
-                            role: Role.RESOURCE_ADMIN,
-                            repositoryOptions: { queryRunner },
-                        }),
-                    ),
-                );
+                // // 새로운 관리자들의 role 업데이트
+                // const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
+                // await Promise.all(
+                //     addedManagerIds.map((employeeId) =>
+                //         this.eventEmitter.emit('add.user.role', {
+                //             employeeId: employeeId,
+                //             role: Role.RESOURCE_ADMIN,
+                //             repositoryOptions: { queryRunner },
+                //         }),
+                //     ),
+                // );
 
                 await this.resourceManagerService.updateManagers(resourceId, newManagerIds, { queryRunner });
             }

@@ -11,13 +11,12 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 
-@ApiTags('차량 소모품')
+@ApiTags('4. 차량 소모품')
 @Controller('consumables')
 @ApiBearerAuth()
 export class ConsumableController {
     constructor(private readonly consumableUsecase: ConsumableUsecase) {}
 
-    @ApiTags('sprint0.3')
     @Post()
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 등록' })
@@ -34,7 +33,6 @@ export class ConsumableController {
         return consumable;
     }
 
-    @ApiTags('sprint0.3')
     @Get('vehicle/:vehicleInfoId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 목록 조회' })
@@ -61,7 +59,6 @@ export class ConsumableController {
         }));
     }
 
-    @ApiTags('sprint0.3')
     @Get(':consumableId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 상세 조회' })
@@ -97,7 +94,6 @@ export class ConsumableController {
         };
     }
 
-    @ApiTags('sprint0.3')
     @Patch(':consumableId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 수정' })
@@ -121,7 +117,6 @@ export class ConsumableController {
         };
     }
 
-    @ApiTags('sprint0.3')
     @Delete(':consumableId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 삭제' })

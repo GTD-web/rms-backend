@@ -7,12 +7,11 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-response.dto';
 
 @Public()
-@ApiTags('인증')
+@ApiTags('1. 인증')
 @Controller('auth')
 export class AuthController {
     constructor(@Inject('AuthService') private authService: AuthService) {}
 
-    @ApiTags('sprint0.1')
     @Post('login')
     @ApiOperation({ summary: '로그인' })
     @ApiDataResponse({ status: 200, description: '로그인 성공', type: LoginResponseDto })

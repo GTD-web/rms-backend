@@ -13,7 +13,6 @@ import { FileResponseDto } from '@resource/modules/file/application/dtos/file-re
 export class FileController {
     constructor(private readonly fileService: FileService) {}
 
-    @ApiTags('sprint0.1')
     @Post('upload')
     @ApiConsumes('multipart/form-data')
     @ApiBody({
@@ -34,7 +33,6 @@ export class FileController {
         return this.fileService.uploadFile(file);
     }
 
-    @ApiTags('sprint0.1')
     @Delete(':fileId')
     @ApiOperation({ summary: '파일 삭제' })
     @ApiDataResponse({ status: 200, description: '파일 삭제 성공' })
@@ -42,7 +40,6 @@ export class FileController {
         await this.fileService.deleteFile({ fileId });
     }
 
-    // @ApiTags('sprint0.1')
     // @Delete('')
     // @ApiOperation({ summary: '파일 삭제' })
     // @ApiDataResponse({ status: 200, description: '파일 삭제 성공' })

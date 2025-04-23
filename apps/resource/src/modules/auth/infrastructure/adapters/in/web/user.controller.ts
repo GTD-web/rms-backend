@@ -14,7 +14,6 @@ import { ChangePasswordDto } from '@resource/modules/auth/application/dto/change
 export class UserController {
     constructor(private readonly userUsecase: UserUsecase) {}
 
-    @ApiTags('sprint0.2')
     @Get('me')
     @ApiOperation({ summary: '내 상세 정보 조회' })
     @ApiDataResponse({ status: 200, description: '내 상세 정보 조회 성공', type: UserResponseDto })
@@ -22,7 +21,6 @@ export class UserController {
         return this.userUsecase.findByUserId(user.userId);
     }
 
-    @ApiTags('sprint0.2')
     @Post('check-password')
     @ApiOperation({ summary: '비밀번호 확인' })
     @ApiDataResponse({ status: 200, description: '비밀번호 확인 성공' })
@@ -30,7 +28,6 @@ export class UserController {
         return this.userUsecase.checkPassword(user.userId, checkPasswordDto.password);
     }
 
-    @ApiTags('sprint0.2')
     @Post('change-password')
     @ApiOperation({ summary: '비밀번호 변경' })
     @ApiDataResponse({ status: 200, description: '비밀번호 변경 성공' })

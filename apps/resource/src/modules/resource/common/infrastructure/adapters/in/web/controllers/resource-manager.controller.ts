@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ResourceManagerService } from '@resource/modules/resource/common/application/services/resource-manager.service';
 
-@ApiTags('resource-managers')
+// @ApiTags('resource-managers')
 @Controller('resources/:resourceId/managers')
 export class ResourceManagerController {
     constructor(private readonly resourceManagerService: ResourceManagerService) {}

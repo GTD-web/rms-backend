@@ -659,7 +659,7 @@ describe('ReservationUsecase Integration Test', () => {
 
             // 4. 상태 수정
             const updateDto = {
-                status: ReservationStatus.CANCELLED,
+                status: ReservationStatus.CANCELED,
             } as UpdateReservationStatusDto;
 
             const result = await reservationUsecase.updateStatus(

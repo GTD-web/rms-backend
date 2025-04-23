@@ -14,13 +14,12 @@ import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceGroupService } from '../../../../../application/services/resource-group.service';
 import { UpdateResourceGroupOrdersDto } from '@resource/modules/resource/common/application/dtos/update-resource.dto';
 
-@ApiTags('자원 그룹')
+@ApiTags('3. 자원 그룹')
 @Controller('resource-groups')
 @ApiBearerAuth()
 export class ResourceGroupController {
     constructor(private readonly resourceGroupUsecase: ResourceGroupUsecase) {}
 
-    @ApiTags('sprint0.1')
     @Get('parents')
     @Roles(Role.USER)
     @ApiOperation({ summary: '상위그룹 목록 조회 #사용자/자원구분/모달' })
@@ -32,7 +31,6 @@ export class ResourceGroupController {
         return this.resourceGroupUsecase.findParentResourceGroups();
     }
 
-    @ApiTags('sprint0.1', 'sprint0.3')
     @Get('resources')
     @Roles(Role.USER)
     @ApiOperation({ summary: '상위그룹-하위그룹-자원 목록 조회 #사용자/자원선택/모달 #관리자/자원관리/자원목록' })
@@ -45,7 +43,6 @@ export class ResourceGroupController {
         return this.resourceGroupUsecase.findResourceGroupsWithResourceData(type);
     }
 
-    @ApiTags('sprint0.3')
     @Post()
     @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 그룹 생성' })
@@ -59,7 +56,6 @@ export class ResourceGroupController {
     }
 
     // 그룹 순서 변경
-    @ApiTags('sprint0.3')
     @Patch('order')
     @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 그룹 순서 변경' })
@@ -71,7 +67,6 @@ export class ResourceGroupController {
         return this.resourceGroupUsecase.reorderResourceGroups(updateResourceGroupOrdersDto);
     }
 
-    @ApiTags('sprint0.3')
     @Patch(':resourceGroupId')
     @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 그룹 수정' })
@@ -86,7 +81,6 @@ export class ResourceGroupController {
         return this.resourceGroupUsecase.updateResourceGroup(resourceGroupId, updateResourceGroupDto);
     }
 
-    @ApiTags('sprint0.3')
     @Delete(':resourceGroupId')
     @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 그룹 삭제' })

@@ -23,6 +23,7 @@ exports.AppController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 let AppController = class AppController {
     getVersion() {
         return {
@@ -40,6 +41,7 @@ __decorate([
     __metadata("design:returntype", Object)
 ], AppController.prototype, "getVersion", null);
 exports.AppController = AppController = __decorate([
+    (0, swagger_1.ApiExcludeController)(),
     (0, common_1.Controller)('')
 ], AppController);
 
@@ -974,6 +976,62 @@ exports.JwtAuthUsecase = JwtAuthUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/auth/application/usecases/resource-manager.usecase.ts":
+/*!*****************************************************************************************!*\
+  !*** ./apps/resource/src/modules/auth/application/usecases/resource-manager.usecase.ts ***!
+  \*****************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceManagerUseCase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let ResourceManagerUseCase = class ResourceManagerUseCase {
+    constructor(userService) {
+        this.userService = userService;
+    }
+    async findAllResourceManagers() {
+        const resourceManagers = await this.userService.findAll({
+            where: {
+                roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.RESOURCE_ADMIN}' = ANY("roles")`),
+            },
+            relations: ['employee'],
+        });
+        const departments = new Map();
+        resourceManagers.forEach((resourceManager) => {
+            if (!departments.has(resourceManager.employee.department)) {
+                departments.set(resourceManager.employee.department, []);
+            }
+            departments.get(resourceManager.employee.department)?.push(resourceManager.employee);
+        });
+        return Array.from(departments.entries()).map(([department, employees]) => ({
+            department,
+            employees,
+        }));
+    }
+};
+exports.ResourceManagerUseCase = ResourceManagerUseCase;
+exports.ResourceManagerUseCase = ResourceManagerUseCase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
+], ResourceManagerUseCase);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/auth/application/usecases/sso-auth.usecase.ts":
 /*!*********************************************************************************!*\
   !*** ./apps/resource/src/modules/auth/application/usecases/sso-auth.usecase.ts ***!
@@ -1197,6 +1255,8 @@ const user_service_1 = __webpack_require__(/*! ./application/services/user.servi
 const user_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/user.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/user.controller.ts");
 const user_usecase_1 = __webpack_require__(/*! ./application/usecases/user.usecase */ "./apps/resource/src/modules/auth/application/usecases/user.usecase.ts");
 const user_event_handler_1 = __webpack_require__(/*! ./application/handler/user-event.handler */ "./apps/resource/src/modules/auth/application/handler/user-event.handler.ts");
+const resource_manager_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/resource-manager.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/resource-manager.controller.ts");
+const resource_manager_usecase_1 = __webpack_require__(/*! ./application/usecases/resource-manager.usecase */ "./apps/resource/src/modules/auth/application/usecases/resource-manager.usecase.ts");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -1217,8 +1277,9 @@ exports.AuthModule = AuthModule = __decorate([
             },
             user_usecase_1.UserUsecase,
             user_event_handler_1.UserEventHandler,
+            resource_manager_usecase_1.ResourceManagerUseCase,
         ],
-        controllers: [auth_controller_1.AuthController, user_controller_1.UserController],
+        controllers: [auth_controller_1.AuthController, user_controller_1.UserController, resource_manager_controller_1.ResourceManagerController],
         exports: [
             jwt_strategy_1.JwtStrategy,
             {
@@ -1297,7 +1358,6 @@ let AuthController = class AuthController {
 };
 exports.AuthController = AuthController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Post)('login'),
     (0, swagger_1.ApiOperation)({ summary: '로그인' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '로그인 성공', type: login_response_dto_1.LoginResponseDto }),
@@ -1308,11 +1368,69 @@ __decorate([
 ], AuthController.prototype, "login", null);
 exports.AuthController = AuthController = __decorate([
     (0, public_decorator_1.Public)(),
-    (0, swagger_1.ApiTags)('인증'),
+    (0, swagger_1.ApiTags)('1. 인증'),
     (0, common_1.Controller)('auth'),
     __param(0, (0, common_1.Inject)('AuthService')),
     __metadata("design:paramtypes", [typeof (_a = typeof auth_service_port_1.AuthService !== "undefined" && auth_service_port_1.AuthService) === "function" ? _a : Object])
 ], AuthController);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/resource-manager.controller.ts":
+/*!******************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/auth/infrastructure/adapters/in/web/resource-manager.controller.ts ***!
+  \******************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceManagerController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const resource_manager_usecase_1 = __webpack_require__(/*! @resource/modules/auth/application/usecases/resource-manager.usecase */ "./apps/resource/src/modules/auth/application/usecases/resource-manager.usecase.ts");
+const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
+let ResourceManagerController = class ResourceManagerController {
+    constructor(resourceManagerUseCase) {
+        this.resourceManagerUseCase = resourceManagerUseCase;
+    }
+    async findAllResourceManagers() {
+        return this.resourceManagerUseCase.findAllResourceManagers();
+    }
+};
+exports.ResourceManagerController = ResourceManagerController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
+    (0, swagger_1.ApiOperation)({ summary: '자원 관리자 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 관리자 목록 조회 성공',
+        type: [dtos_index_1.EmplyeesByDepartmentResponseDto],
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], ResourceManagerController.prototype, "findAllResourceManagers", null);
+exports.ResourceManagerController = ResourceManagerController = __decorate([
+    (0, swagger_1.ApiTags)('3. 자원 관리자'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Controller)('resource-managers'),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_manager_usecase_1.ResourceManagerUseCase !== "undefined" && resource_manager_usecase_1.ResourceManagerUseCase) === "function" ? _a : Object])
+], ResourceManagerController);
 
 
 /***/ }),
@@ -1364,7 +1482,6 @@ let UserController = class UserController {
 };
 exports.UserController = UserController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.2'),
     (0, common_1.Get)('me'),
     (0, swagger_1.ApiOperation)({ summary: '내 상세 정보 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '내 상세 정보 조회 성공', type: user_response_dto_1.UserResponseDto }),
@@ -1374,7 +1491,6 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "findUser", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.2'),
     (0, common_1.Post)('check-password'),
     (0, swagger_1.ApiOperation)({ summary: '비밀번호 확인' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '비밀번호 확인 성공' }),
@@ -1385,7 +1501,6 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "checkPassword", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.2'),
     (0, common_1.Post)('change-password'),
     (0, swagger_1.ApiOperation)({ summary: '비밀번호 변경' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '비밀번호 변경 성공' }),
@@ -2162,7 +2277,6 @@ let EmployeeController = class EmployeeController {
 };
 exports.EmployeeController = EmployeeController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Get)('department'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '부서별 직원 목록 조회 #사용자/참석자설정/모달' }),
@@ -2550,7 +2664,6 @@ let FileController = class FileController {
 };
 exports.FileController = FileController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Post)('upload'),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
@@ -2573,7 +2686,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "uploadFile", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Delete)(':fileId'),
     (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 삭제 성공' }),
@@ -3573,7 +3685,6 @@ let NotificationController = class NotificationController {
 };
 exports.NotificationController = NotificationController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Post)('subscribe'),
     (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -3587,7 +3698,6 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], NotificationController.prototype, "subscribe", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Post)('unsubscribe'),
     (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독 취소' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -3600,7 +3710,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "unsubscribe", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Post)('send'),
     (0, swagger_1.ApiOperation)({ summary: '웹 푸시 알림 전송' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -3613,7 +3722,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "send", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: '알람 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -3639,7 +3747,6 @@ __decorate([
     __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], NotificationController.prototype, "findAllByEmployeeId", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)(':notificationId/read'),
     (0, swagger_1.ApiOperation)({ summary: '알람 읽음 처리' }),
     __param(0, (0, user_decorator_1.User)()),
@@ -3649,7 +3756,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAsRead", null);
 __decorate([
-    (0, swagger_1.ApiTags)('a.test'),
+    (0, swagger_1.ApiTags)('알림테스트'),
     (0, common_1.Post)('send/test'),
     (0, swagger_1.ApiOperation)({ summary: '알람 테스트 전송' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -4963,7 +5070,7 @@ let ReservationUsecase = class ReservationUsecase {
             throw new common_1.NotFoundException('Reservation not found');
         }
         if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
-            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
+            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELED ||
             reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
             throw new common_1.BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
         }
@@ -4994,7 +5101,7 @@ let ReservationUsecase = class ReservationUsecase {
         const allowed = user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN) ||
             (await this.checkReservationAccess(reservationId, user.employeeId));
         if (allowed) {
-            if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELLED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
+            if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
                 this.deleteReservationClosingJob(reservationId);
             }
             const updatedReservation = await this.reservationService.update(reservationId, updateDto);
@@ -5012,7 +5119,7 @@ let ReservationUsecase = class ReservationUsecase {
                         case reservation_type_enum_1.ReservationStatus.CONFIRMED:
                             notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED;
                             break;
-                        case reservation_type_enum_1.ReservationStatus.CANCELLED:
+                        case reservation_type_enum_1.ReservationStatus.CANCELED:
                             notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED;
                             break;
                         case reservation_type_enum_1.ReservationStatus.REJECTED:
@@ -5051,7 +5158,7 @@ let ReservationUsecase = class ReservationUsecase {
             throw new common_1.NotFoundException('Reservation not found');
         }
         if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
-            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
+            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELED ||
             reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
             throw new common_1.BadRequestException(`Cannot update participants of reservation in ${reservation.status} status`);
         }
@@ -5251,7 +5358,6 @@ let ReservationController = class ReservationController {
 };
 exports.ReservationController = ReservationController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Post)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 생성' }),
@@ -5266,7 +5372,6 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], ReservationController.prototype, "create", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Get)('me'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회 #사용자/홈 ' }),
@@ -5287,7 +5392,6 @@ __decorate([
     __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], ReservationController.prototype, "findMyReservationList", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Get)('me/current'),
     (0, swagger_1.ApiOperation)({ summary: '내 예약 현재 예약 조회 #사용자/자원예약/이용중 ' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -5302,7 +5406,6 @@ __decorate([
     __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ReservationController.prototype, "findMyCurrentReservation", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Get)(':reservationId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 조회 #사용자/예약상세페이지' }),
@@ -5317,7 +5420,6 @@ __decorate([
     __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], ReservationController.prototype, "findOne", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1', 'sprint0.3'),
     (0, common_1.Get)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({
@@ -5359,7 +5461,6 @@ __decorate([
     __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
 ], ReservationController.prototype, "findReservationList", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Patch)(':reservationId/title'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 제목 수정' }),
@@ -5375,7 +5476,6 @@ __decorate([
     __metadata("design:returntype", typeof (_t = typeof Promise !== "undefined" && Promise) === "function" ? _t : Object)
 ], ReservationController.prototype, "updateTitle", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Patch)(':reservationId/time'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 시간 수정' }),
@@ -5391,7 +5491,6 @@ __decorate([
     __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
 ], ReservationController.prototype, "update", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1', 'sprint0.3'),
     (0, common_1.Patch)(':reservationId/status'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 상태 수정 #사용자/예약상세페이지 #관리자/예약관리/예약상세' }),
@@ -5407,7 +5506,6 @@ __decorate([
     __metadata("design:returntype", typeof (_z = typeof Promise !== "undefined" && Promise) === "function" ? _z : Object)
 ], ReservationController.prototype, "updateStatus", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Patch)(':reservationId/participants'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 참가자 수정' }),
@@ -5423,7 +5521,6 @@ __decorate([
     __metadata("design:returntype", typeof (_2 = typeof Promise !== "undefined" && Promise) === "function" ? _2 : Object)
 ], ReservationController.prototype, "updateParticipants", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Patch)(':reservationId/cc-receipient'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 수신참조자 수정' }),
@@ -5447,7 +5544,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ReservationController.prototype, "closeReservation", null);
 exports.ReservationController = ReservationController = __decorate([
-    (0, swagger_1.ApiTags)('예약'),
+    (0, swagger_1.ApiTags)('2. 예약'),
     (0, common_1.Controller)('reservations'),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof reservation_usecase_1.ReservationUsecase !== "undefined" && reservation_usecase_1.ReservationUsecase) === "function" ? _a : Object])
@@ -7287,6 +7384,16 @@ let ResourceUsecase = class ResourceUsecase {
         if (!managers || managers.length === 0) {
             throw new common_1.BadRequestException('Managers are required');
         }
+        if (managers.length > 1) {
+            throw new common_1.BadRequestException('Only one manager is allowed');
+        }
+        const manager = await this.resourceManagerService.findOne({
+            where: { employeeId: managers[0].employeeId },
+            relations: ['employee', 'employee.user'],
+        });
+        if (!manager.employee.user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN)) {
+            throw new common_1.BadRequestException('The manager is not a resource admin');
+        }
         const group = await this.resourceGroupService.findOne({
             where: { resourceGroupId: resource.resourceGroupId },
         });
@@ -7318,11 +7425,6 @@ let ResourceUsecase = class ResourceUsecase {
                         employeeId: manager.employeeId,
                     }, { queryRunner });
                 }),
-                ...managers.map((manager) => this.eventEmitter.emit('add.user.role', {
-                    employeeId: manager.employeeId,
-                    role: role_type_enum_1.Role.RESOURCE_ADMIN,
-                    repositoryOptions: { queryRunner },
-                })),
             ]);
             await queryRunner.commitTransaction();
             return true;
@@ -7346,6 +7448,21 @@ let ResourceUsecase = class ResourceUsecase {
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
         }
+        if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 1) {
+            throw new common_1.BadRequestException('Only one manager is allowed');
+        }
+        if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 0) {
+            const managerId = updateRequest.managers[0].employeeId;
+            const manager = await this.resourceManagerService.findOne({
+                where: {
+                    employeeId: managerId,
+                },
+                relations: ['employee', 'employee.user'],
+            });
+            if (!manager.employee.user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN)) {
+                throw new common_1.BadRequestException('The manager is not a resource admin');
+            }
+        }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -7354,34 +7471,7 @@ let ResourceUsecase = class ResourceUsecase {
                 await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
             }
             if (updateRequest.managers) {
-                const currentManagers = await this.resourceManagerService.findAll({
-                    where: {
-                        resourceId: resourceId,
-                    },
-                });
-                const currentManagerIds = currentManagers.map((m) => m.employeeId);
                 const newManagerIds = updateRequest.managers.map((m) => m.employeeId);
-                const removedManagerIds = currentManagerIds.filter((id) => !newManagerIds.includes(id));
-                await Promise.all(removedManagerIds.map(async (employeeId) => {
-                    const otherResources = await this.resourceManagerService.findAll({
-                        where: {
-                            employeeId: employeeId,
-                        },
-                    });
-                    if (otherResources.length === 1) {
-                        await this.eventEmitter.emit('remove.user.role', {
-                            employeeId: employeeId,
-                            role: role_type_enum_1.Role.RESOURCE_ADMIN,
-                            repositoryOptions: { queryRunner },
-                        });
-                    }
-                }));
-                const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
-                await Promise.all(addedManagerIds.map((employeeId) => this.eventEmitter.emit('add.user.role', {
-                    employeeId: employeeId,
-                    role: role_type_enum_1.Role.RESOURCE_ADMIN,
-                    repositoryOptions: { queryRunner },
-                })));
                 await this.resourceManagerService.updateManagers(resourceId, newManagerIds, { queryRunner });
             }
             await queryRunner.commitTransaction();
@@ -7564,7 +7654,6 @@ let ResourceGroupController = class ResourceGroupController {
 };
 exports.ResourceGroupController = ResourceGroupController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Get)('parents'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '상위그룹 목록 조회 #사용자/자원구분/모달' }),
@@ -7577,7 +7666,6 @@ __decorate([
     __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
 ], ResourceGroupController.prototype, "findParentResourceGroups", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1', 'sprint0.3'),
     (0, common_1.Get)('resources'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '상위그룹-하위그룹-자원 목록 조회 #사용자/자원선택/모달 #관리자/자원관리/자원목록' }),
@@ -7592,7 +7680,6 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], ResourceGroupController.prototype, "findAll", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Post)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 생성' }),
@@ -7607,7 +7694,6 @@ __decorate([
     __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], ResourceGroupController.prototype, "create", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)('order'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 순서 변경' }),
@@ -7621,7 +7707,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ResourceGroupController.prototype, "updateOrder", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)(':resourceGroupId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 수정' }),
@@ -7636,7 +7721,6 @@ __decorate([
     __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], ResourceGroupController.prototype, "update", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Delete)(':resourceGroupId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 삭제' }),
@@ -7649,7 +7733,7 @@ __decorate([
     __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], ResourceGroupController.prototype, "remove", null);
 exports.ResourceGroupController = ResourceGroupController = __decorate([
-    (0, swagger_1.ApiTags)('자원 그룹'),
+    (0, swagger_1.ApiTags)('3. 자원 그룹'),
     (0, common_1.Controller)('resource-groups'),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_group_usecase_1.ResourceGroupUsecase !== "undefined" && resource_group_usecase_1.ResourceGroupUsecase) === "function" ? _a : Object])
@@ -7678,7 +7762,6 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceManagerController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const resource_manager_service_1 = __webpack_require__(/*! @resource/modules/resource/common/application/services/resource-manager.service */ "./apps/resource/src/modules/resource/common/application/services/resource-manager.service.ts");
 let ResourceManagerController = class ResourceManagerController {
     constructor(resourceManagerService) {
@@ -7687,7 +7770,6 @@ let ResourceManagerController = class ResourceManagerController {
 };
 exports.ResourceManagerController = ResourceManagerController;
 exports.ResourceManagerController = ResourceManagerController = __decorate([
-    (0, swagger_1.ApiTags)('resource-managers'),
     (0, common_1.Controller)('resources/:resourceId/managers'),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_manager_service_1.ResourceManagerService !== "undefined" && resource_manager_service_1.ResourceManagerService) === "function" ? _a : Object])
 ], ResourceManagerController);
@@ -7760,7 +7842,6 @@ let ResourceController = class ResourceController {
 };
 exports.ResourceController = ResourceController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: '자원 목록 조회 #관리자/자원관리/자원리스트' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -7775,7 +7856,6 @@ __decorate([
     __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
 ], ResourceController.prototype, "findAll", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Get)('reservations'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '자원 별 예약 목록 조회 #사용자/자원예약/리스트 #사용자/세부예약내역' }),
@@ -7796,7 +7876,6 @@ __decorate([
     __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], ResourceController.prototype, "findResourcesByTypeAndDateWithReservations", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.1'),
     (0, common_1.Patch)(':resourceId/return-vehicle'),
     (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -7811,7 +7890,6 @@ __decorate([
     __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], ResourceController.prototype, "returnVehicle", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Post)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 생성 #관리자/자원관리/생성' }),
@@ -7825,7 +7903,6 @@ __decorate([
     __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ResourceController.prototype, "createWithInfos", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(':resourceId'),
     (0, swagger_1.ApiOperation)({ summary: '자원 상세 조회 #관리자/자원관리/상세' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -7839,7 +7916,6 @@ __decorate([
     __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], ResourceController.prototype, "findOne", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)('order'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 순서 변경' }),
@@ -7853,7 +7929,6 @@ __decorate([
     __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], ResourceController.prototype, "reorder", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)(':resourceId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 수정' }),
@@ -7869,7 +7944,6 @@ __decorate([
     __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
 ], ResourceController.prototype, "update", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Delete)(':resourceId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 삭제' }),
@@ -7883,7 +7957,7 @@ __decorate([
     __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
 ], ResourceController.prototype, "remove", null);
 exports.ResourceController = ResourceController = __decorate([
-    (0, swagger_1.ApiTags)('자원'),
+    (0, swagger_1.ApiTags)('3. 자원'),
     (0, common_1.Controller)('resources'),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_usecase_1.ResourceUsecase !== "undefined" && resource_usecase_1.ResourceUsecase) === "function" ? _a : Object])
@@ -8669,50 +8743,50 @@ class CreateVehicleInfoDto {
 exports.CreateVehicleInfoDto = CreateVehicleInfoDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: true }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: '차량 번호는 문자열이어야 합니다.' }),
+    (0, class_validator_1.Length)(0, 100, { message: '차량 번호는 100자 이하여야 합니다.' }),
     __metadata("design:type", String)
 ], CreateVehicleInfoDto.prototype, "vehicleNumber", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: '남은 주행거리는 숫자여야 합니다.' }),
+    (0, class_validator_1.Min)(0, { message: '남은 주행거리는 0 이상이어야 합니다.' }),
+    (0, class_validator_1.Max)(999999999, { message: '남은 주행거리는 999999999 이하여야 합니다.' }),
     __metadata("design:type", Number)
 ], CreateVehicleInfoDto.prototype, "leftMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: '총 주행거리는 숫자여야 합니다.' }),
+    (0, class_validator_1.Min)(0, { message: '총 주행거리는 0 이상이어야 합니다.' }),
+    (0, class_validator_1.Max)(999999999, { message: '총 주행거리는 999999999 이하여야 합니다.' }),
     __metadata("design:type", Number)
 ], CreateVehicleInfoDto.prototype, "totalMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: '보험 이름은 문자열이어야 합니다.' }),
+    (0, class_validator_1.Length)(0, 100, { message: '보험 이름은 100자 이하여야 합니다.' }),
     __metadata("design:type", String)
 ], CreateVehicleInfoDto.prototype, "insuranceName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: '보험사 전화 번호는 문자열이어야 합니다.' }),
+    (0, class_validator_1.Length)(0, 100, { message: '보험사 전화 번호는 100자 이하여야 합니다.' }),
     __metadata("design:type", String)
 ], CreateVehicleInfoDto.prototype, "insuranceNumber", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '주차위치 이미지 배열' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: '주차위치 이미지 입력 값은 배열이어야 합니다.' }),
     __metadata("design:type", Array)
 ], CreateVehicleInfoDto.prototype, "parkingLocationImages", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '계기판 이미지 배열' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: '계기판 이미지 입력 값은 배열이어야 합니다.' }),
     __metadata("design:type", Array)
 ], CreateVehicleInfoDto.prototype, "odometerImages", void 0);
 class CreateConsumableDto {
@@ -8720,20 +8794,20 @@ class CreateConsumableDto {
 exports.CreateConsumableDto = CreateConsumableDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: '소모품 이름은 문자열이어야 합니다.' }),
+    (0, class_validator_1.Length)(0, 100, { message: '소모품 이름은 100자 이하여야 합니다.' }),
     __metadata("design:type", String)
 ], CreateConsumableDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: '소모품 교체 주기는 숫자여야 합니다.' }),
+    (0, class_validator_1.Min)(0, { message: '소모품 교체 주기는 0 이상이어야 합니다.' }),
+    (0, class_validator_1.Max)(999999999, { message: '소모품 교체 주기는 999999999 이하여야 합니다.' }),
     __metadata("design:type", Number)
 ], CreateConsumableDto.prototype, "replaceCycle", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ default: true, description: '소모품 교체 알림 주기' }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: '소모품 교체 알림 주기는 불리언 값이어야 합니다.' }),
     __metadata("design:type", Boolean)
 ], CreateConsumableDto.prototype, "notifyReplacementCycle", void 0);
 __decorate([
@@ -8756,25 +8830,32 @@ __decorate([
 ], CreateMaintenanceDto.prototype, "date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: '주행거리는 숫자여야 합니다.' }),
+    (0, class_validator_1.Min)(0, { message: '주행거리는 0 이상이어야 합니다.' }),
+    (0, class_validator_1.Max)(999999999, { message: '주행거리는 999999999 이하여야 합니다.' }),
     __metadata("design:type", Number)
 ], CreateMaintenanceDto.prototype, "mileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: '비용은 숫자여야 합니다.' }),
+    (0, class_validator_1.Min)(0, { message: '비용은 0 이상이어야 합니다.' }),
+    (0, class_validator_1.Max)(999999999, { message: '비용은 999999999 이하여야 합니다.' }),
     __metadata("design:type", Number)
 ], CreateMaintenanceDto.prototype, "cost", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '이미지 배열' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: '이미지 입력 값은 배열이어야 합니다.' }),
     __metadata("design:type", Array)
 ], CreateMaintenanceDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '정비 담당자' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)({ message: '정비 담당자는 문자열이어야 합니다.' }),
+    (0, class_validator_1.Length)(0, 100, { message: '정비 담당자는 100자 이하여야 합니다.' }),
+    __metadata("design:type", String)
+], CreateMaintenanceDto.prototype, "maintananceBy", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '소모품 ID',
@@ -9454,7 +9535,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
+            const maintenance = await this.maintenanceService.save({ ...createMaintenanceDto, maintananceBy: user.employee.employeeId }, { queryRunner });
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
@@ -9871,7 +9952,6 @@ let ConsumableController = class ConsumableController {
 };
 exports.ConsumableController = ConsumableController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Post)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 등록' }),
@@ -9887,7 +9967,6 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], ConsumableController.prototype, "create", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)('vehicle/:vehicleInfoId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 목록 조회' }),
@@ -9903,7 +9982,6 @@ __decorate([
     __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], ConsumableController.prototype, "findAll", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(':consumableId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 상세 조회' }),
@@ -9919,7 +9997,6 @@ __decorate([
     __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], ConsumableController.prototype, "findOne", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)(':consumableId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 수정' }),
@@ -9936,7 +10013,6 @@ __decorate([
     __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ConsumableController.prototype, "update", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Delete)(':consumableId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 삭제' }),
@@ -9951,7 +10027,7 @@ __decorate([
     __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], ConsumableController.prototype, "remove", null);
 exports.ConsumableController = ConsumableController = __decorate([
-    (0, swagger_1.ApiTags)('차량 소모품'),
+    (0, swagger_1.ApiTags)('4. 차량 소모품'),
     (0, common_1.Controller)('consumables'),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof consumable_usecase_1.ConsumableUsecase !== "undefined" && consumable_usecase_1.ConsumableUsecase) === "function" ? _a : Object])
@@ -10017,7 +10093,6 @@ let MaintenanceController = class MaintenanceController {
 };
 exports.MaintenanceController = MaintenanceController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Post)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 생성' }),
@@ -10033,7 +10108,6 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], MaintenanceController.prototype, "create", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)('vehicle/:vehicleInfoId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 목록 조회' }),
@@ -10051,7 +10125,6 @@ __decorate([
     __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], MaintenanceController.prototype, "findAll", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(':maintenanceId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 상세 이력 조회' }),
@@ -10066,7 +10139,6 @@ __decorate([
     __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], MaintenanceController.prototype, "findOne", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)(':maintenanceId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 수정' }),
@@ -10082,7 +10154,6 @@ __decorate([
     __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], MaintenanceController.prototype, "update", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Delete)(':maintenanceId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 삭제' }),
@@ -10096,7 +10167,7 @@ __decorate([
     __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], MaintenanceController.prototype, "remove", null);
 exports.MaintenanceController = MaintenanceController = __decorate([
-    (0, swagger_1.ApiTags)('정비 이력'),
+    (0, swagger_1.ApiTags)('4. 차량 정비 이력'),
     (0, common_1.Controller)('maintenances'),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof maintenance_usecase_1.MaintenanceUsecase !== "undefined" && maintenance_usecase_1.MaintenanceUsecase) === "function" ? _a : Object])
@@ -10146,7 +10217,6 @@ let VehicleInfoController = class VehicleInfoController {
 };
 exports.VehicleInfoController = VehicleInfoController;
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Get)(':vehicleInfoId'),
     (0, swagger_1.ApiOperation)({ summary: '차량 정보 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -10160,7 +10230,6 @@ __decorate([
     __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
 ], VehicleInfoController.prototype, "findVehicleInfo", null);
 __decorate([
-    (0, swagger_1.ApiTags)('sprint0.3'),
     (0, common_1.Patch)(':vehicleInfoId'),
     (0, swagger_1.ApiOperation)({ summary: '차량 정보 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -10175,7 +10244,7 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], VehicleInfoController.prototype, "update", null);
 exports.VehicleInfoController = VehicleInfoController = __decorate([
-    (0, swagger_1.ApiTags)('차량 정보'),
+    (0, swagger_1.ApiTags)('4. 차량 정보'),
     (0, common_1.Controller)('vehicle-info'),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _a : Object])
@@ -10610,6 +10679,7 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
+        synchronize: configService.get('NODE_ENV') === 'local',
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
         extra: {
@@ -11221,7 +11291,7 @@ exports.File = File = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.File = exports.EmployeeNotification = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.Schedule = exports.ReservationParticipant = exports.Reservation = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.User = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
+exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.Schedule = exports.ReservationParticipant = exports.Reservation = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.User = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
 const employee_entity_1 = __webpack_require__(/*! ./employee.entity */ "./libs/entities/employee.entity.ts");
 Object.defineProperty(exports, "Employee", ({ enumerable: true, get: function () { return employee_entity_1.Employee; } }));
 const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./libs/entities/user.entity.ts");
@@ -11254,6 +11324,8 @@ const employee_notification_entity_1 = __webpack_require__(/*! ./employee-notifi
 Object.defineProperty(exports, "EmployeeNotification", ({ enumerable: true, get: function () { return employee_notification_entity_1.EmployeeNotification; } }));
 const file_entity_1 = __webpack_require__(/*! ./file.entity */ "./libs/entities/file.entity.ts");
 Object.defineProperty(exports, "File", ({ enumerable: true, get: function () { return file_entity_1.File; } }));
+const monthly_resource_usage_stats_view_entity_1 = __webpack_require__(/*! ./monthly_resource_usage_stats.view.entity */ "./libs/entities/monthly_resource_usage_stats.view.entity.ts");
+Object.defineProperty(exports, "EmployeeReservationStats", ({ enumerable: true, get: function () { return monthly_resource_usage_stats_view_entity_1.EmployeeReservationStats; } }));
 exports.Entities = [
     employee_entity_1.Employee,
     user_entity_1.User,
@@ -11271,6 +11343,7 @@ exports.Entities = [
     notification_entity_1.Notification,
     employee_notification_entity_1.EmployeeNotification,
     file_entity_1.File,
+    monthly_resource_usage_stats_view_entity_1.EmployeeReservationStats,
 ];
 exports.EntitiesMap = {
     Employee: employee_entity_1.Employee,
@@ -11289,6 +11362,7 @@ exports.EntitiesMap = {
     Notification: notification_entity_1.Notification,
     EmployeeNotification: employee_notification_entity_1.EmployeeNotification,
     File: file_entity_1.File,
+    EmployeeReservationStats: monthly_resource_usage_stats_view_entity_1.EmployeeReservationStats,
 };
 
 
@@ -11344,6 +11418,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'json', nullable: true, comment: '정비사진 배열' }),
     __metadata("design:type", Array)
 ], Maintenance.prototype, "images", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Maintenance.prototype, "maintananceBy", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({ type: 'timestamp with time zone' }),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
@@ -11406,6 +11484,131 @@ __decorate([
 exports.MeetingRoomInfo = MeetingRoomInfo = __decorate([
     (0, typeorm_1.Entity)('meeting_room_infos')
 ], MeetingRoomInfo);
+
+
+/***/ }),
+
+/***/ "./libs/entities/monthly_resource_usage_stats.view.entity.ts":
+/*!*******************************************************************!*\
+  !*** ./libs/entities/monthly_resource_usage_stats.view.entity.ts ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeReservationStats = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let EmployeeReservationStats = class EmployeeReservationStats {
+};
+exports.EmployeeReservationStats = EmployeeReservationStats;
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", Number)
+], EmployeeReservationStats.prototype, "year", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", Number)
+], EmployeeReservationStats.prototype, "month", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", String)
+], EmployeeReservationStats.prototype, "year_month", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", String)
+], EmployeeReservationStats.prototype, "employeeId", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", String)
+], EmployeeReservationStats.prototype, "employeeName", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", Number)
+], EmployeeReservationStats.prototype, "reservationCount", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", Number)
+], EmployeeReservationStats.prototype, "totalHours", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", Number)
+], EmployeeReservationStats.prototype, "avgHoursPerReservation", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", Number)
+], EmployeeReservationStats.prototype, "vehicleCount", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", Number)
+], EmployeeReservationStats.prototype, "meetingRoomCount", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", Number)
+], EmployeeReservationStats.prototype, "accommodationCount", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", Number)
+], EmployeeReservationStats.prototype, "cancellationCount", void 0);
+__decorate([
+    (0, typeorm_1.ViewColumn)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], EmployeeReservationStats.prototype, "computedAt", void 0);
+exports.EmployeeReservationStats = EmployeeReservationStats = __decorate([
+    (0, typeorm_1.ViewEntity)({
+        expression: `SELECT
+    -- 시간 기준
+    EXTRACT(YEAR FROM r."startDate") AS year,
+    EXTRACT(MONTH FROM r."startDate") AS month,
+    TO_CHAR(r."startDate", 'YYYY-MM') AS year_month,
+    
+    -- 직원 정보
+    rp."employeeId",
+    e.name AS employee_name,
+    
+    -- 예약 통계
+    COUNT(DISTINCT r."reservationId") AS reservation_count,
+    SUM(EXTRACT(EPOCH FROM (r."endDate" - r."startDate"))/3600) AS total_hours,
+    AVG(EXTRACT(EPOCH FROM (r."endDate" - r."startDate"))/3600) AS avg_hours_per_reservation,
+    
+    -- 자원 유형별 예약 횟수
+    COUNT(DISTINCT CASE WHEN res.type = 'VEHICLE' THEN r."reservationId" END) AS vehicle_count,
+    COUNT(DISTINCT CASE WHEN res.type = 'MEETING_ROOM' THEN r."reservationId" END) AS meeting_room_count,
+    COUNT(DISTINCT CASE WHEN res.type = 'ACCOMMODATION' THEN r."reservationId" END) AS accommodation_count,
+    
+    -- 취소 및 변경 빈도
+    COUNT(DISTINCT CASE WHEN r.status = 'CANCELED' THEN r."reservationId" END) AS cancellation_count,
+    
+    -- 가장 많이 예약한 자원 (서브쿼리로 처리해야 할 수 있음)
+    -- 복잡한 구현은 애플리케이션 코드에서 처리 가능
+    
+    -- 집계 시점
+    NOW() AS computed_at
+FROM 
+    reservations r
+    JOIN reservation_participants rp ON r."reservationId" = rp."reservationId"
+    JOIN resources res ON r."resourceId" = res."resourceId"
+    JOIN employees e ON rp."employeeId" = e."employeeId"
+WHERE
+    rp.type = 'RESERVER' -- 예약 주체만 집계할 경우
+GROUP BY
+    EXTRACT(YEAR FROM r."startDate"),
+    EXTRACT(MONTH FROM r."startDate"),
+    TO_CHAR(r."startDate", 'YYYY-MM'),
+    rp."employeeId",
+    e.name`,
+    })
+], EmployeeReservationStats);
 
 
 /***/ }),
@@ -12141,7 +12344,7 @@ var ReservationStatus;
 (function (ReservationStatus) {
     ReservationStatus["PENDING"] = "PENDING";
     ReservationStatus["CONFIRMED"] = "CONFIRMED";
-    ReservationStatus["CANCELLED"] = "CANCELLED";
+    ReservationStatus["CANCELED"] = "CANCELED";
     ReservationStatus["REJECTED"] = "REJECTED";
     ReservationStatus["CLOSED"] = "CLOSED";
 })(ReservationStatus || (exports.ReservationStatus = ReservationStatus = {}));
@@ -12313,10 +12516,11 @@ let ErrorInterceptor = class ErrorInterceptor {
             if (error instanceof common_1.HttpException) {
                 console.error('Error:', error);
                 const response = error.getResponse();
-                const errorMessage = typeof response === 'object'
-                    ? Array.isArray(response.message)
-                        ? response.message[0]
-                        : response.message
+                const message = response.message;
+                const errorMessage = typeof message === 'object'
+                    ? Array.isArray(message)
+                        ? message.join('\n')
+                        : message
                     : error.message;
                 return (0, rxjs_1.throwError)(() => ({
                     success: false,
@@ -12325,9 +12529,9 @@ let ErrorInterceptor = class ErrorInterceptor {
                 }));
             }
             console.error('Unexpected error:', error);
-            return (0, rxjs_1.throwError)(() => new common_1.InternalServerErrorException({
+            return (0, rxjs_1.throwError)(() => ({
                 success: false,
-                message: '서버 내부 오류가 발생했습니다.',
+                message: '예상치 못한 오류가 발생했습니다.',
                 statusCode: 500,
             }));
         }));
