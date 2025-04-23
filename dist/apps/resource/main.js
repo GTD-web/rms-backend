@@ -9441,11 +9441,14 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
-        const sameDateMaintenance = await this.maintenanceService.findOne({
-            where: { consumableId: createMaintenanceDto.consumableId, date: createMaintenanceDto.date },
+        const existingMaintenance = await this.maintenanceService.findOne({
+            where: {
+                consumableId: createMaintenanceDto.consumableId,
+                date: (0, typeorm_1.MoreThanOrEqual)(createMaintenanceDto.date),
+            },
         });
-        if (sameDateMaintenance) {
-            throw new common_1.BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+        if (existingMaintenance) {
+            throw new common_1.BadRequestException('직전 정비 이력 보다 이전 날짜에 정비 이력을 등록할 수 없습니다.');
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -9559,17 +9562,16 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
-        console.log('updateMaintenanceDto', updateMaintenanceDto);
         if (updateMaintenanceDto.date) {
-            const sameDateMaintenance = await this.maintenanceService.findOne({
+            const existingMaintenance = await this.maintenanceService.findOne({
                 where: {
                     maintenanceId: (0, typeorm_1.Not)(maintenanceId),
                     consumableId: updateMaintenanceDto.consumableId,
-                    date: updateMaintenanceDto.date,
+                    date: (0, typeorm_1.MoreThanOrEqual)(updateMaintenanceDto.date),
                 },
             });
-            if (sameDateMaintenance) {
-                throw new common_1.BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+            if (existingMaintenance) {
+                throw new common_1.BadRequestException('직전 정비 이력 보다 이전 날짜에 정비 이력을 등록할 수 없습니다.');
             }
         }
         const queryRunner = this.dataSource.createQueryRunner();
