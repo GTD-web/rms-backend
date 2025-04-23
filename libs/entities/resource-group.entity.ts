@@ -9,7 +9,7 @@ export class ResourceGroup {
     })
     resourceGroupId: string;
 
-    @Column()
+    @Column({ unique: true })
     title: string;
 
     @Column({ nullable: true })

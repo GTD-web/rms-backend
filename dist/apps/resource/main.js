@@ -4097,12 +4097,14 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], CreateReservationDto.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], CreateReservationDto.prototype, "description", void 0);
 __decorate([
@@ -4397,6 +4399,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], UpdateReservationTitleDto.prototype, "title", void 0);
 class UpdateReservationTimeDto {
@@ -4453,6 +4456,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], UpdateReservationStatusDto.prototype, "rejectReason", void 0);
 class UpdateReservationParticipantsDto {
@@ -4755,6 +4759,7 @@ let ReservationUsecase = class ReservationUsecase {
                 const reservationWithResource = await this.reservationService.findOne({
                     where: { reservationId: savedReservation.reservationId },
                     relations: ['resource'],
+                    withDeleted: true,
                 });
                 if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
                     this.createReservationClosingJob(reservationWithResource);
@@ -4814,6 +4819,7 @@ let ReservationUsecase = class ReservationUsecase {
                 'participants',
                 'participants.employee',
             ],
+            withDeleted: true,
         });
         if (!reservation) {
             throw new common_1.NotFoundException('Reservation not found');
@@ -4845,6 +4851,7 @@ let ReservationUsecase = class ReservationUsecase {
                 reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
             },
             relations: ['resource', 'participants', 'participants.employee'],
+            withDeleted: true,
         });
         const count = await this.reservationService.count({
             where: {
@@ -4870,7 +4877,11 @@ let ReservationUsecase = class ReservationUsecase {
             startDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.date(now).toDate()),
             endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(now).toDate()),
         };
-        const reservation = await this.reservationService.findOne({ where, relations: ['resource'] });
+        const reservation = await this.reservationService.findOne({
+            where,
+            relations: ['resource'],
+            withDeleted: true,
+        });
         return reservation ? new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation) : null;
     }
     async findReservationList(startDate, endDate, resourceType, resourceId, status) {
@@ -4916,6 +4927,7 @@ let ReservationUsecase = class ReservationUsecase {
         const reservations = await this.reservationService.findAll({
             where,
             relations: ['resource', 'participants', 'participants.employee'],
+            withDeleted: true,
         });
         const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation));
         return reservationResponseDtos;
@@ -4945,6 +4957,7 @@ let ReservationUsecase = class ReservationUsecase {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['resource'],
+            withDeleted: true,
         });
         if (!reservation) {
             throw new common_1.NotFoundException('Reservation not found');
@@ -4973,6 +4986,7 @@ let ReservationUsecase = class ReservationUsecase {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['resource'],
+            withDeleted: true,
         });
         if (!reservation) {
             throw new common_1.NotFoundException('Reservation not found');
@@ -5031,6 +5045,7 @@ let ReservationUsecase = class ReservationUsecase {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['resource'],
+            withDeleted: true,
         });
         if (!reservation) {
             throw new common_1.NotFoundException('Reservation not found');
@@ -5052,6 +5067,7 @@ let ReservationUsecase = class ReservationUsecase {
         const updatedReservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['participants', 'resource'],
+            withDeleted: true,
         });
         if (updatedReservation.resource.notifyParticipantChange) {
             try {
@@ -5598,6 +5614,7 @@ let ReservationRepository = class ReservationRepository {
         const entity = await repository.findOne({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entity ? entity : null;
     }
@@ -5611,6 +5628,7 @@ let ReservationRepository = class ReservationRepository {
             order: repositoryOptions?.order,
             skip: repositoryOptions?.skip,
             take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entities;
     }
@@ -6138,12 +6156,14 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], CreateResourceGroupDto.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], CreateResourceGroupDto.prototype, "description", void 0);
 class CreateResourceManagerDto {
@@ -6160,11 +6180,14 @@ exports.ResourceLocation = ResourceLocation;
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], ResourceLocation.prototype, "address", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], ResourceLocation.prototype, "detailAddress", void 0);
 class CreateResourceDto {
@@ -6178,12 +6201,14 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], CreateResourceDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], CreateResourceDto.prototype, "description", void 0);
 __decorate([
@@ -6509,6 +6534,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], UpdateResourceGroupDto.prototype, "title", void 0);
 class UpdateResourceDto {
@@ -6524,12 +6550,14 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], UpdateResourceDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], UpdateResourceDto.prototype, "description", void 0);
 __decorate([
@@ -6553,6 +6581,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], UpdateResourceDto.prototype, "unavailableReason", void 0);
 __decorate([
@@ -6593,13 +6622,17 @@ __decorate([
     __metadata("design:type", typeof (_b = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _b : Object)
 ], ReturnVehicleDto.prototype, "location", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     __metadata("design:type", Number)
 ], ReturnVehicleDto.prototype, "leftMileage", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     __metadata("design:type", Number)
 ], ReturnVehicleDto.prototype, "totalMileage", void 0);
 __decorate([
@@ -7176,13 +7209,12 @@ let ResourceUsecase = class ResourceUsecase {
         if (resource.vehicleInfo) {
             if (resource.vehicleInfo.consumables) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
-                resource.vehicleInfo.consumables.forEach(async (consumable) => {
+                for (const consumable of resource.vehicleInfo.consumables) {
                     const replaceCycle = Number(consumable.replaceCycle);
                     const latestMaintenance = await this.maintenanceService.findOne({
                         where: { consumableId: consumable.consumableId },
                         order: { date: 'DESC' },
                     });
-                    console.log('latestMaintenance', latestMaintenance);
                     consumable.maintenances = [latestMaintenance].map((maintenance) => {
                         return {
                             ...maintenance,
@@ -7190,6 +7222,10 @@ let ResourceUsecase = class ResourceUsecase {
                             maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
                         };
                     });
+                }
+                resource.vehicleInfo.consumables.sort((a, b) => {
+                    return (a.maintenances[0]['mileageFromLastMaintenance'] -
+                        b.maintenances[0]['mileageFromLastMaintenance']);
                 });
             }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
@@ -7386,6 +7422,9 @@ let ResourceUsecase = class ResourceUsecase {
         });
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
+        }
+        if (resource.isAvailable) {
+            throw new common_1.BadRequestException('Resource is available');
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -8629,27 +8668,39 @@ class CreateVehicleInfoDto {
 }
 exports.CreateVehicleInfoDto = CreateVehicleInfoDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ required: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
+    __metadata("design:type", String)
+], CreateVehicleInfoDto.prototype, "vehicleNumber", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     __metadata("design:type", Number)
 ], CreateVehicleInfoDto.prototype, "leftMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     __metadata("design:type", Number)
 ], CreateVehicleInfoDto.prototype, "totalMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], CreateVehicleInfoDto.prototype, "insuranceName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], CreateVehicleInfoDto.prototype, "insuranceNumber", void 0);
 __decorate([
@@ -8670,11 +8721,14 @@ exports.CreateConsumableDto = CreateConsumableDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], CreateConsumableDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     __metadata("design:type", Number)
 ], CreateConsumableDto.prototype, "replaceCycle", void 0);
 __decorate([
@@ -8694,18 +8748,25 @@ class CreateMaintenanceDto {
 exports.CreateMaintenanceDto = CreateMaintenanceDto;
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식이어야 합니다.',
+    }),
     __metadata("design:type", String)
 ], CreateMaintenanceDto.prototype, "date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     __metadata("design:type", Number)
 ], CreateMaintenanceDto.prototype, "mileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     __metadata("design:type", Number)
 ], CreateMaintenanceDto.prototype, "cost", void 0);
 __decorate([
@@ -8750,20 +8811,27 @@ class UpdateMaintenanceDto {
 exports.UpdateMaintenanceDto = UpdateMaintenanceDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식이어야 합니다.',
+    }),
     __metadata("design:type", String)
 ], UpdateMaintenanceDto.prototype, "date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateMaintenanceDto.prototype, "mileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     __metadata("design:type", Number)
 ], UpdateMaintenanceDto.prototype, "cost", void 0);
 __decorate([
@@ -8786,11 +8854,14 @@ exports.UpdateConsumableDto = UpdateConsumableDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     __metadata("design:type", String)
 ], UpdateConsumableDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     __metadata("design:type", Number)
 ], UpdateConsumableDto.prototype, "replaceCycle", void 0);
 __decorate([
@@ -8812,24 +8883,37 @@ exports.UpdateVehicleInfoDto = UpdateVehicleInfoDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateVehicleInfoDto.prototype, "vehicleNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateVehicleInfoDto.prototype, "insuranceName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 100),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateVehicleInfoDto.prototype, "insuranceNumber", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateVehicleInfoDto.prototype, "totalMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(999999999),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateVehicleInfoDto.prototype, "leftMileage", void 0);
@@ -9475,11 +9559,18 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
-        const sameDateMaintenance = await this.maintenanceService.findOne({
-            where: { consumableId: updateMaintenanceDto.consumableId, date: updateMaintenanceDto.date },
-        });
-        if (sameDateMaintenance) {
-            throw new common_1.BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+        console.log('updateMaintenanceDto', updateMaintenanceDto);
+        if (updateMaintenanceDto.date) {
+            const sameDateMaintenance = await this.maintenanceService.findOne({
+                where: {
+                    maintenanceId: (0, typeorm_1.Not)(maintenanceId),
+                    consumableId: updateMaintenanceDto.consumableId,
+                    date: updateMaintenanceDto.date,
+                },
+            });
+            if (sameDateMaintenance) {
+                throw new common_1.BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+            }
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -9502,7 +9593,11 @@ let MaintenanceUsecase = class MaintenanceUsecase {
                 }
             }
             await queryRunner.commitTransaction();
-            return maintenance;
+            return await this.maintenanceService.findOne({
+                where: {
+                    maintenanceId: maintenanceId,
+                },
+            });
         }
         catch (error) {
             await queryRunner.rollbackTransaction();
@@ -9791,7 +9886,7 @@ __decorate([
 ], ConsumableController.prototype, "create", null);
 __decorate([
     (0, swagger_1.ApiTags)('sprint0.3'),
-    (0, common_1.Get)(':vehicleInfoId'),
+    (0, common_1.Get)('vehicle/:vehicleInfoId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -10911,7 +11006,7 @@ __decorate([
     __metadata("design:type", String)
 ], Consumable.prototype, "vehicleInfoId", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], Consumable.prototype, "name", void 0);
 __decorate([
@@ -11575,7 +11670,7 @@ __decorate([
     __metadata("design:type", String)
 ], ResourceGroup.prototype, "resourceGroupId", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], ResourceGroup.prototype, "title", void 0);
 __decorate([
@@ -11957,15 +12052,17 @@ let VehicleInfo = class VehicleInfo {
 };
 exports.VehicleInfo = VehicleInfo;
 __decorate([
-    (0, typeorm_1.PrimaryColumn)('uuid', {
-        generated: 'uuid',
-    }),
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
     __metadata("design:type", String)
 ], VehicleInfo.prototype, "vehicleInfoId", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], VehicleInfo.prototype, "resourceId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], VehicleInfo.prototype, "vehicleNumber", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)

@@ -9,7 +9,7 @@ import { MaintenanceService } from '../services/maintenance.service';
 import { Maintenance } from '@libs/entities';
 import { CreateMaintenanceDto } from '../dtos/create-vehicle-info.dto';
 import { User as UserEntity } from '@libs/entities';
-import { DataSource, In, LessThan, MoreThan } from 'typeorm';
+import { DataSource, In, LessThan, MoreThan, Not } from 'typeorm';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
 @Injectable()
@@ -166,12 +166,18 @@ export class MaintenanceUsecase {
     ): Promise<Maintenance> {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
-
-        const sameDateMaintenance = await this.maintenanceService.findOne({
-            where: { consumableId: updateMaintenanceDto.consumableId, date: updateMaintenanceDto.date },
-        });
-        if (sameDateMaintenance) {
-            throw new BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+        console.log('updateMaintenanceDto', updateMaintenanceDto);
+        if (updateMaintenanceDto.date) {
+            const sameDateMaintenance = await this.maintenanceService.findOne({
+                where: {
+                    maintenanceId: Not(maintenanceId),
+                    consumableId: updateMaintenanceDto.consumableId,
+                    date: updateMaintenanceDto.date,
+                },
+            });
+            if (sameDateMaintenance) {
+                throw new BadRequestException('동일한 날짜에 이미 정비 이력이 존재합니다.');
+            }
         }
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -199,7 +205,11 @@ export class MaintenanceUsecase {
                 }
             }
             await queryRunner.commitTransaction();
-            return maintenance;
+            return await this.maintenanceService.findOne({
+                where: {
+                    maintenanceId: maintenanceId,
+                },
+            });
         } catch (error) {
             await queryRunner.rollbackTransaction();
             throw error;

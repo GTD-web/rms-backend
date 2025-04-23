@@ -134,6 +134,7 @@ export class ReservationUsecase {
                 const reservationWithResource = await this.reservationService.findOne({
                     where: { reservationId: savedReservation.reservationId! },
                     relations: ['resource'],
+                    withDeleted: true,
                 });
 
                 if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
@@ -193,6 +194,7 @@ export class ReservationUsecase {
                 'participants',
                 'participants.employee',
             ],
+            withDeleted: true,
         });
 
         if (!reservation) {
@@ -241,6 +243,7 @@ export class ReservationUsecase {
                 reservationId: In(reservations.map((r) => r.reservationId)),
             },
             relations: ['resource', 'participants', 'participants.employee'],
+            withDeleted: true,
         });
         const count = await this.reservationService.count({
             where: {
@@ -274,7 +277,11 @@ export class ReservationUsecase {
             endDate: MoreThan(DateUtil.date(now).toDate()),
         };
 
-        const reservation = await this.reservationService.findOne({ where, relations: ['resource'] });
+        const reservation = await this.reservationService.findOne({
+            where,
+            relations: ['resource'],
+            withDeleted: true,
+        });
         return reservation ? new ReservationWithRelationsResponseDto(reservation) : null;
     }
 
@@ -331,6 +338,7 @@ export class ReservationUsecase {
         const reservations = await this.reservationService.findAll({
             where,
             relations: ['resource', 'participants', 'participants.employee'],
+            withDeleted: true,
         });
         const reservationResponseDtos = reservations.map(
             (reservation) => new ReservationWithRelationsResponseDto(reservation),
@@ -371,6 +379,7 @@ export class ReservationUsecase {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['resource'],
+            withDeleted: true,
         });
         if (!reservation) {
             throw new NotFoundException('Reservation not found');
@@ -415,6 +424,7 @@ export class ReservationUsecase {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['resource'],
+            withDeleted: true,
         });
         if (!reservation) {
             throw new NotFoundException('Reservation not found');
@@ -488,6 +498,7 @@ export class ReservationUsecase {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['resource'],
+            withDeleted: true,
         });
 
         if (!reservation) {
@@ -524,6 +535,7 @@ export class ReservationUsecase {
         const updatedReservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['participants', 'resource'],
+            withDeleted: true,
         });
 
         if (updatedReservation.resource.notifyParticipantChange) {

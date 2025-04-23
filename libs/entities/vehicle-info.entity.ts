@@ -1,16 +1,17 @@
-import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Resource } from './resource.entity';
 import { Consumable } from './consumable.entity';
 
 @Entity('vehicle_infos')
 export class VehicleInfo {
-    @PrimaryColumn('uuid', {
-        generated: 'uuid',
-    })
+    @PrimaryGeneratedColumn('uuid')
     vehicleInfoId: string;
 
     @Column()
     resourceId: string;
+
+    @Column({ nullable: true })
+    vehicleNumber: string;
 
     @Column({ default: 0 })
     leftMileage: number;

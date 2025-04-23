@@ -1,4 +1,15 @@
-import { IsString, IsOptional, IsBoolean, IsArray, ValidateNested, IsNumber } from 'class-validator';
+import {
+    IsString,
+    IsOptional,
+    IsBoolean,
+    IsArray,
+    ValidateNested,
+    IsNumber,
+    Min,
+    Max,
+    IsInt,
+    Length,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { CreateResourceManagerDto, ResourceLocation } from './create-resource.dto';
@@ -7,6 +18,7 @@ export class UpdateResourceGroupDto {
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
+    @Length(0, 100)
     title?: string;
 
     // @ApiProperty({ required: false })
@@ -24,11 +36,13 @@ export class UpdateResourceDto {
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
+    @Length(0, 100)
     name?: string;
 
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
+    @Length(0, 100)
     description?: string;
 
     @ApiProperty({ required: false, type: 'object' })
@@ -48,6 +62,7 @@ export class UpdateResourceDto {
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
+    @Length(0, 100)
     unavailableReason?: string;
 
     @ApiProperty({ required: false })
@@ -81,12 +96,16 @@ export class ReturnVehicleDto {
     @ApiProperty()
     location: ResourceLocation;
 
-    @ApiProperty()
-    @IsNumber()
+    @ApiProperty({ minimum: 0, maximum: 999999999 })
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     leftMileage: number;
 
-    @ApiProperty()
-    @IsNumber()
+    @ApiProperty({ minimum: 0, maximum: 999999999 })
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     totalMileage: number;
 
     @ApiProperty()

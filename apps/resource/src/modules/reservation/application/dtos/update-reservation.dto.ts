@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsBoolean, IsOptional, IsArray, IsEnum, IsDateString, Matches } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, IsArray, IsEnum, IsDateString, Matches, Length } from 'class-validator';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { Reservation } from '@libs/entities/reservation.entity';
 import { DateUtil } from '@libs/utils/date.util';
@@ -8,6 +8,7 @@ export class UpdateReservationTitleDto {
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
+    @Length(0, 100)
     title?: string;
 }
 
@@ -60,6 +61,7 @@ export class UpdateReservationStatusDto {
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
+    @Length(0, 100)
     rejectReason?: string;
 }
 

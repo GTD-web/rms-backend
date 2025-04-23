@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, ValidateNested, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean, ValidateNested, IsArray, Length } from 'class-validator';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -17,11 +17,13 @@ export class CreateResourceGroupDto {
 
     @ApiProperty()
     @IsString()
+    @Length(0, 100)
     title: string;
 
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
+    @Length(0, 100)
     description?: string;
 }
 
@@ -34,10 +36,13 @@ export class CreateResourceManagerDto {
 export class ResourceLocation {
     @ApiProperty()
     @IsString()
+    @Length(0, 100)
     address: string;
 
     @ApiProperty()
     @IsString()
+    @IsOptional()
+    @Length(0, 100)
     detailAddress?: string;
 }
 
@@ -48,11 +53,13 @@ export class CreateResourceDto {
 
     @ApiProperty()
     @IsString()
+    @Length(0, 100)
     name: string;
 
     @ApiProperty()
     @IsString()
     @IsOptional()
+    @Length(0, 100)
     description?: string;
 
     @ApiProperty({ type: ResourceLocation })

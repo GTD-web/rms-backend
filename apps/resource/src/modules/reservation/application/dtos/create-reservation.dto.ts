@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsBoolean, IsOptional, IsArray, IsDateString, IsEnum, Matches } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, IsArray, IsDateString, IsEnum, Matches, Length } from 'class-validator';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 
 export class CreateReservationDto {
@@ -13,11 +13,13 @@ export class CreateReservationDto {
 
     @ApiProperty()
     @IsString()
+    @Length(0, 100)
     title: string;
 
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
+    @Length(0, 100)
     description?: string;
 
     @ApiProperty({

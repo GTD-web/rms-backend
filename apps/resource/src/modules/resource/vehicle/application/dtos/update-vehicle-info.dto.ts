@@ -1,21 +1,38 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsArray, IsDate, IsBoolean } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+    IsOptional,
+    IsArray,
+    IsBoolean,
+    Min,
+    Max,
+    IsInt,
+    IsDateString,
+    Matches,
+    IsString,
+    Length,
+} from 'class-validator';
 
 export class UpdateMaintenanceDto {
     @ApiProperty({ required: false })
-    @IsString()
     @IsOptional()
+    @IsDateString()
+    @Matches(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식이어야 합니다.',
+    })
     date?: string;
 
     @ApiProperty({ required: false })
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     @IsOptional()
     mileage?: number;
 
     @ApiProperty({ required: false })
     @IsOptional()
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     cost?: number;
 
     @ApiProperty({ required: false, type: [String] })
@@ -34,10 +51,13 @@ export class UpdateMaintenanceDto {
 export class UpdateConsumableDto {
     @ApiProperty({ description: '소모품 이름' })
     @IsString()
+    @Length(0, 100)
     name: string;
 
     @ApiProperty({ description: '소모품 교체 주기' })
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     replaceCycle: number;
 
     @ApiProperty({ default: true, description: '소모품 교체 알림 주기' })
@@ -55,21 +75,33 @@ export class UpdateConsumableDto {
 export class UpdateVehicleInfoDto {
     @ApiProperty({ required: false })
     @IsString()
+    @Length(0, 100)
+    @IsOptional()
+    vehicleNumber?: string;
+
+    @ApiProperty({ required: false })
+    @IsString()
+    @Length(0, 100)
     @IsOptional()
     insuranceName?: string;
 
     @ApiProperty({ required: false })
     @IsString()
+    @Length(0, 100)
     @IsOptional()
     insuranceNumber?: string;
 
     @ApiProperty({ required: false })
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     @IsOptional()
     totalMileage?: number;
 
     @ApiProperty({ required: false })
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     @IsOptional()
     leftMileage?: number;
 

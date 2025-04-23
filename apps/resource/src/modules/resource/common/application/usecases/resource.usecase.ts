@@ -190,14 +190,12 @@ export class ResourceUsecase {
         if (resource.vehicleInfo) {
             if (resource.vehicleInfo.consumables) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
-                resource.vehicleInfo.consumables.forEach(async (consumable) => {
+                for (const consumable of resource.vehicleInfo.consumables) {
                     const replaceCycle = Number(consumable.replaceCycle);
                     const latestMaintenance = await this.maintenanceService.findOne({
                         where: { consumableId: consumable.consumableId },
                         order: { date: 'DESC' },
                     });
-                    console.log('latestMaintenance', latestMaintenance);
-
                     consumable.maintenances = [latestMaintenance].map((maintenance) => {
                         return {
                             ...maintenance,
@@ -205,6 +203,13 @@ export class ResourceUsecase {
                             maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
                         };
                     });
+                }
+
+                resource.vehicleInfo.consumables.sort((a, b) => {
+                    return (
+                        a.maintenances[0]['mileageFromLastMaintenance'] -
+                        b.maintenances[0]['mileageFromLastMaintenance']
+                    );
                 });
             }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(
@@ -462,6 +467,10 @@ export class ResourceUsecase {
         if (!resource) {
             throw new NotFoundException('Resource not found');
         }
+        if (resource.isAvailable) {
+            throw new BadRequestException('Resource is available');
+        }
+
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();

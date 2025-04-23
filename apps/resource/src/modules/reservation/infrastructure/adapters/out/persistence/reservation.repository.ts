@@ -55,6 +55,7 @@ export class ReservationRepository implements ReservationRepositoryPort {
         const entity = await repository.findOne({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entity ? entity : null;
     }
@@ -69,6 +70,7 @@ export class ReservationRepository implements ReservationRepositoryPort {
             order: repositoryOptions?.order,
             skip: repositoryOptions?.skip,
             take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entities;
     }

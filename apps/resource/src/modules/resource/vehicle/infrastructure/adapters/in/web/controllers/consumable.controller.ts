@@ -35,7 +35,7 @@ export class ConsumableController {
     }
 
     @ApiTags('sprint0.3')
-    @Get(':vehicleInfoId')
+    @Get('vehicle/:vehicleInfoId')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 목록 조회' })
     @ApiDataResponse({

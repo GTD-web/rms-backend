@@ -1,25 +1,48 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsArray, IsBoolean, IsNumber } from 'class-validator';
+import {
+    IsString,
+    IsOptional,
+    IsArray,
+    IsBoolean,
+    IsNumber,
+    Max,
+    Min,
+    IsInt,
+    Length,
+    IsDateString,
+    Matches,
+} from 'class-validator';
 
 export class CreateVehicleInfoDto {
+    @ApiProperty({ required: true })
+    @IsString()
+    @Length(0, 100)
+    vehicleNumber: string;
+
     @ApiProperty({ required: false })
     @IsOptional()
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     leftMileage?: number;
 
     @ApiProperty({ required: false })
     @IsOptional()
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     totalMileage?: number;
 
     @ApiProperty({ required: false })
     @IsOptional()
     @IsString()
+    @Length(0, 100)
     insuranceName?: string;
 
     @ApiProperty({ required: false })
     @IsOptional()
     @IsString()
+    @Length(0, 100)
     insuranceNumber?: string;
 
     @ApiProperty({ required: false, type: [String], description: '주차위치 이미지 배열' })
@@ -36,10 +59,13 @@ export class CreateVehicleInfoDto {
 export class CreateConsumableDto {
     @ApiProperty({ description: '소모품 이름' })
     @IsString()
+    @Length(0, 100)
     name: string;
 
     @ApiProperty({ description: '소모품 교체 주기' })
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     replaceCycle: number;
 
     @ApiProperty({ default: true, description: '소모품 교체 알림 주기' })
@@ -55,16 +81,23 @@ export class CreateConsumableDto {
 
 export class CreateMaintenanceDto {
     @ApiProperty()
-    @IsString()
+    @IsDateString()
+    @Matches(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식이어야 합니다.',
+    })
     date: string;
 
     @ApiProperty()
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     mileage: number;
 
     @ApiProperty({ required: false })
     @IsOptional()
-    @IsNumber()
+    @IsInt()
+    @Min(0)
+    @Max(999999999)
     cost?: number;
 
     @ApiProperty({ required: false, type: [String] })
