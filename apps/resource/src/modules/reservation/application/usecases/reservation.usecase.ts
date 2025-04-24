@@ -13,7 +13,17 @@ import {
     ReservationWithResourceResponseDto,
 } from '../dtos/reservation-response.dto';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
-import { DataSource, FindOptionsWhere, LessThan, MoreThan, In, Between, LessThanOrEqual } from 'typeorm';
+import {
+    DataSource,
+    FindOptionsWhere,
+    LessThan,
+    MoreThan,
+    In,
+    Between,
+    LessThanOrEqual,
+    Not,
+    MoreThanOrEqual,
+} from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { ReservationService } from '../services/reservation.service';
 import { ParticipantService } from '../services/participant.service';
@@ -283,6 +293,46 @@ export class ReservationUsecase {
             withDeleted: true,
         });
         return reservation ? new ReservationWithRelationsResponseDto(reservation) : null;
+    }
+
+    async findMyAllReservations(
+        employeeId: string,
+        page?: number,
+        limit?: number,
+        type?: ParticipantsType,
+    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+        const today = DateUtil.now().toDate();
+        const where: FindOptionsWhere<Reservation> = {
+            participants: { employeeId, type },
+            status: type === ParticipantsType.RESERVER ? Not(ReservationStatus.CLOSED) : ReservationStatus.CONFIRMED,
+            // startDate: LessThanOrEqual(today),
+            endDate: MoreThanOrEqual(today),
+        };
+        const options: RepositoryOptions = {
+            where,
+            relations: ['participants', 'participants.employee'],
+        };
+        const reservations = await this.reservationService.findAll(options);
+        const count = reservations.length;
+
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: In(reservations.map((r) => r.reservationId)),
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+        return {
+            items: reservationWithParticipants.map(
+                (reservation) => new ReservationWithRelationsResponseDto(reservation),
+            ),
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
     }
 
     async findReservationList(

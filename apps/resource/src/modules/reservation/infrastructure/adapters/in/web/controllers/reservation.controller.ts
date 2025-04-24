@@ -9,6 +9,7 @@ import {
     Query,
     ParseArrayPipe,
     ForbiddenException,
+    BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
@@ -28,7 +29,7 @@ import { ReservationUsecase } from '../../../../../application/usecases/reservat
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import {
     ReservationWithResourceResponseDto,
     ReservationWithRelationsResponseDto,
@@ -92,6 +93,32 @@ export class ReservationController {
         @Query('resourceType') resourceType: ResourceType,
     ): Promise<ReservationWithRelationsResponseDto> {
         return this.reservationUsecase.findMyCurrentReservation(user.employeeId, resourceType);
+    }
+
+    @Get('me/all')
+    @Roles(Role.USER)
+    @ApiOperation({ summary: '내 예약 및 참여 예약 조회' })
+    @ApiDataResponse({
+        description: '내 예약 및 참여 예약 조회 성공',
+        type: [ReservationWithRelationsResponseDto],
+    })
+    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
+    @ApiQuery({
+        name: 'type',
+        enum: ParticipantsType,
+        example: ParticipantsType.RESERVER,
+    })
+    async findMyAllReservations(
+        @User() user: UserEntity,
+        @Query('type') type: ParticipantsType,
+        @Query() query?: PaginationQueryDto,
+    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+        if (type !== ParticipantsType.RESERVER && type !== ParticipantsType.PARTICIPANT) {
+            throw new BadRequestException('지원하지 않는 타입입니다.');
+        }
+        const { page, limit } = query;
+        return await this.reservationUsecase.findMyAllReservations(user.employeeId, page, limit, type);
     }
 
     @Get(':reservationId')
