@@ -14,7 +14,12 @@ import { Maintenance } from './maintenance.entity';
 import { Notification } from './notification.entity';
 import { EmployeeNotification } from './employee-notification.entity';
 import { File } from './file.entity';
-import { EmployeeReservationStats } from './monthly_resource_usage_stats.view.entity';
+import {
+    EmployeeReservationStats,
+    ResourceUsageStats,
+    VehicleMaintenanceHistory,
+    ConsumableMaintenanceStats,
+} from './view';
 
 export const Entities = [
     Employee,
@@ -34,6 +39,9 @@ export const Entities = [
     EmployeeNotification,
     File,
     EmployeeReservationStats,
+    ResourceUsageStats,
+    VehicleMaintenanceHistory,
+    ConsumableMaintenanceStats,
 ];
 
 export const EntitiesMap = {
@@ -54,6 +62,9 @@ export const EntitiesMap = {
     EmployeeNotification,
     File,
     EmployeeReservationStats,
+    ResourceUsageStats,
+    VehicleMaintenanceHistory,
+    ConsumableMaintenanceStats,
 };
 
 export {
@@ -74,4 +85,7 @@ export {
     EmployeeNotification,
     File,
     EmployeeReservationStats,
+    ResourceUsageStats,
+    VehicleMaintenanceHistory,
+    ConsumableMaintenanceStats,
 };

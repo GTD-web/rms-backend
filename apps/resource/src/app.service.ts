@@ -1,136 +1,139 @@
 import { Injectable } from '@nestjs/common';
+import { Repository, FindOptionsWhere, Between, Like, MoreThanOrEqual } from 'typeorm';
 import {
-    employeesSeedData,
-    resourceGroupsSeedData,
-    resourcesSeedData,
-    subResourceGroupsSeedData,
-} from './mockdata.seed';
-import { Not, Repository } from 'typeorm';
-import {
-    ResourceGroup as ResourceGroupEntity,
-    Employee as EmployeeEntity,
-    User as UserEntity,
-    Resource as ResourceEntity,
+    ResourceUsageStats,
+    VehicleMaintenanceHistory,
+    ConsumableMaintenanceStats,
+    EmployeeReservationStats,
 } from '@libs/entities';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
-import { DateUtil } from '@libs/utils/date.util';
+import {
+    ConsumableMaintenanceStatsFilterDto,
+    EmployeeReservationStatsFilterDto,
+    ResourceUsageStatsFilterDto,
+    VehicleMaintenanceHistoryFilterDto,
+} from './app.dto';
 
 @Injectable()
 export class AppService {
     constructor(
-        @InjectRepository(EmployeeEntity)
-        private readonly employeeRepository: Repository<EmployeeEntity>,
-        @InjectRepository(ResourceGroupEntity)
-        private readonly resourceGroupRepository: Repository<ResourceGroupEntity>,
-        @InjectRepository(ResourceEntity)
-        private readonly resourceRepository: Repository<ResourceEntity>,
-        @InjectRepository(UserEntity)
-        private readonly userRepository: Repository<UserEntity>,
-        private readonly jwtService: JwtService,
+        @InjectRepository(ResourceUsageStats)
+        private readonly resourceUsageStatsRepository: Repository<ResourceUsageStats>,
+        @InjectRepository(VehicleMaintenanceHistory)
+        private readonly vehicleMaintenanceHistoryRepository: Repository<VehicleMaintenanceHistory>,
+        @InjectRepository(ConsumableMaintenanceStats)
+        private readonly consumableMaintenanceStatsRepository: Repository<ConsumableMaintenanceStats>,
+        @InjectRepository(EmployeeReservationStats)
+        private readonly employeeReservationStatsRepository: Repository<EmployeeReservationStats>,
     ) {}
 
-    async onModuleInit() {
-        // await this.clear();
-        // await this.seedEmployee();
-        // await this.seedResourceGroup();
-        // await this.seedSubResourceGroup();
-        // await this.seedResource();
-    }
+    async getResourceUsageStats(filter?: ResourceUsageStatsFilterDto): Promise<ResourceUsageStats[]> {
+        const where: FindOptionsWhere<ResourceUsageStats> = {};
 
-    async seedEmployee() {
-        const employees = await this.employeeRepository.find();
-        if (employees.length === 0) {
-            for (const employee of employeesSeedData) {
-                const savedEmployee = await this.employeeRepository.save(employee);
-                const password = await bcrypt.hash(employee.password, 10);
-                const user = await this.userRepository.save({
-                    email: employee.email,
-                    password: password,
-                    employeeId: savedEmployee.employeeId,
-                    roles: employee.roles,
-                });
-
-                const accessToken = this.jwtService.sign(
-                    {
-                        email: employee.email,
-                        employeeId: savedEmployee.employeeId,
-                        userId: user.userId,
-                    },
-                    { expiresIn: '24h' },
-                );
-                user.accessToken = accessToken;
-                user.expiredAt = DateUtil.now().addDays(1).format();
-                await this.userRepository.save(user);
-                savedEmployee.userId = user.userId;
-                await this.employeeRepository.save(savedEmployee);
-            }
+        if (filter?.year) {
+            where.year = filter.year;
         }
-    }
 
-    async seedResourceGroup() {
-        const resourceGroups = await this.resourceGroupRepository.find();
-        if (resourceGroups.length === 0) {
-            for (const resourceGroup of resourceGroupsSeedData) {
-                await this.resourceGroupRepository.save(resourceGroup);
-            }
+        if (filter?.month) {
+            where.month = filter.month;
         }
-    }
 
-    async seedSubResourceGroup() {
-        const resourceGroups = await this.resourceGroupRepository.find({
-            where: { parentResourceGroupId: IsNull() },
-            relations: ['children'],
-        });
-        if (resourceGroups.length > 0) {
-            if (resourceGroups[0].children.length === 0) {
-                for (const data of subResourceGroupsSeedData) {
-                    const parentResourceGroup = resourceGroups.find((group) => group.type === data.type);
-                    const resourceGroup = {
-                        ...data,
-                        parentResourceGroupId: parentResourceGroup.resourceGroupId,
-                    };
-                    await this.resourceGroupRepository.save(resourceGroup);
-                }
-            }
+        if (filter?.resourceId) {
+            where.resourceId = filter.resourceId;
         }
-    }
 
-    async seedResource() {
-        const resources = await this.resourceRepository.find();
-        if (resources.length === 0) {
-            const resourceGroups = await this.resourceGroupRepository.find({
-                where: { parentResourceGroupId: IsNull() },
-            });
-            for (const resource of resourcesSeedData) {
-                const parentResourceGroup = resourceGroups.find((group) => group.type === resource.type);
-                await this.resourceRepository.save({
-                    ...resource,
-                    resourceGroupId: parentResourceGroup.resourceGroupId,
-                });
-            }
+        if (filter?.employeeId) {
+            where.employeeId = filter.employeeId;
         }
+
+        if (filter?.resourceType) {
+            where.resourceType = filter.resourceType;
+        }
+
+        return this.resourceUsageStatsRepository.find({ where });
     }
 
-    async clear() {
-        await this.resourceRepository.delete({});
+    async getVehicleMaintenanceHistory(
+        filter?: VehicleMaintenanceHistoryFilterDto,
+    ): Promise<VehicleMaintenanceHistory[]> {
+        const where: FindOptionsWhere<VehicleMaintenanceHistory> = {};
 
-        // 1. 먼저 하위 자원 그룹 삭제 (parentResourceGroupId가 있는 그룹)
-        await this.resourceGroupRepository.delete({
-            parentResourceGroupId: Not(IsNull()),
-        });
+        if (filter?.startDate && filter?.endDate) {
+            where.maintenanceDate = Between(filter.startDate, filter.endDate);
+        } else if (filter?.startDate) {
+            where.maintenanceDate = Between(filter.startDate, new Date().toISOString());
+        }
 
-        // 2. 그 다음 최상위 자원 그룹 삭제 (parentResourceGroupId가 null인 그룹)
-        await this.resourceGroupRepository.delete({
-            parentResourceGroupId: IsNull(),
-        });
+        if (filter?.resourceId) {
+            where.resourceId = filter.resourceId;
+        }
 
-        await this.userRepository.update({}, { employeeId: null });
-        await this.employeeRepository.update({}, { userId: null });
-        await this.userRepository.delete({});
+        if (filter?.vehicleInfoId) {
+            where.vehicleInfoId = filter.vehicleInfoId;
+        }
 
-        await this.employeeRepository.delete({});
+        if (filter?.consumableId) {
+            where.consumableId = filter.consumableId;
+        }
+
+        if (filter?.responsibleEmployeeId) {
+            where.responsibleEmployeeId = filter.responsibleEmployeeId;
+        }
+
+        return this.vehicleMaintenanceHistoryRepository.find({ where });
+    }
+
+    async getConsumableMaintenanceStats(
+        filter?: ConsumableMaintenanceStatsFilterDto,
+    ): Promise<ConsumableMaintenanceStats[]> {
+        const where: FindOptionsWhere<ConsumableMaintenanceStats> = {};
+
+        if (filter?.year) {
+            where.currentYear = filter.year;
+        }
+
+        if (filter?.month) {
+            where.currentMonth = filter.month;
+        }
+
+        if (filter?.resourceId) {
+            where.resourceId = filter.resourceId;
+        }
+
+        if (filter?.vehicleInfoId) {
+            where.vehicleInfoId = filter.vehicleInfoId;
+        }
+
+        if (filter?.consumableId) {
+            where.consumableId = filter.consumableId;
+        }
+
+        if (filter?.minMaintenanceCount) {
+            where.maintenanceCount = MoreThanOrEqual(filter.minMaintenanceCount);
+        }
+
+        return this.consumableMaintenanceStatsRepository.find({ where });
+    }
+
+    async getEmployeeReservationStats(filter?: EmployeeReservationStatsFilterDto): Promise<EmployeeReservationStats[]> {
+        const where: FindOptionsWhere<EmployeeReservationStats> = {};
+
+        if (filter?.year) {
+            where.year = filter.year;
+        }
+
+        if (filter?.month) {
+            where.month = filter.month;
+        }
+
+        if (filter?.employeeId) {
+            where.employeeId = filter.employeeId;
+        }
+
+        if (filter?.employeeName) {
+            where.employeeName = Like(`%${filter.employeeName}%`);
+        }
+
+        return this.employeeReservationStatsRepository.find({ where });
     }
 }

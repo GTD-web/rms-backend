@@ -93,3 +93,23 @@ export {
 export { PushSubscriptionDto } from './modules/notification/application/dto/push-subscription.dto';
 export { ResponseNotificationDto } from './modules/notification/application/dto/response-notification.dto';
 export { NotificationDataDto } from './modules/notification/application/dto/response-notification.dto';
+
+// Statistics
+export {
+    EmployeeReservationStatsFilterDto,
+    EmployeeReservationStatsResponseDto,
+} from './statistics/employee-reservation-stats.dto';
+
+export { ResourceUsageStatsFilterDto, ResourceUsageStatsResponseDto } from './statistics/resource-usage-stats.dto';
+
+export {
+    VehicleMaintenanceHistoryFilterDto,
+    VehicleMaintenanceHistoryResponseDto,
+} from './statistics/vehicle-maintenance-history.dto';
+
+export {
+    ConsumableMaintenanceStatsFilterDto,
+    ConsumableMaintenanceStatsResponseDto,
+} from './statistics/consumable-maintenance-stats.dto';
+
+export { StatisticsResponseDto } from './common/base.dto';
