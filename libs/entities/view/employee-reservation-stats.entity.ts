@@ -51,7 +51,7 @@ export class EmployeeReservationStats {
     month: number;
 
     @ViewColumn()
-    year_month: string;
+    yearMonth: string;
 
     @ViewColumn()
     employeeId: string;

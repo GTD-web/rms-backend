@@ -13001,7 +13001,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.ViewColumn)(),
     __metadata("design:type", String)
-], EmployeeReservationStats.prototype, "year_month", void 0);
+], EmployeeReservationStats.prototype, "yearMonth", void 0);
 __decorate([
     (0, typeorm_1.ViewColumn)(),
     __metadata("design:type", String)
