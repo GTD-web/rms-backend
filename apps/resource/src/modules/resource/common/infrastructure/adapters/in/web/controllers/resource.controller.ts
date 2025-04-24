@@ -21,6 +21,7 @@ export class ResourceController {
     constructor(private readonly resourceUsecase: ResourceUsecase) {}
 
     @Get()
+    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 목록 조회 #관리자/자원관리/자원리스트' })
     @ApiDataResponse({
         status: 200,
@@ -53,6 +54,7 @@ export class ResourceController {
     }
 
     @Patch(':resourceId/return-vehicle')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })
     @ApiDataResponse({
         status: 200,
@@ -78,6 +80,7 @@ export class ResourceController {
     }
 
     @Get(':resourceId')
+    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 상세 조회 #관리자/자원관리/상세' })
     @ApiDataResponse({
         status: 200,

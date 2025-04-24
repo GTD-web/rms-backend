@@ -37,6 +37,9 @@ export class MaintenanceResponseDto {
 
     @ApiProperty({ required: false })
     isLatest?: boolean;
+
+    @ApiProperty({ required: false })
+    previousDate?: string;
 }
 
 export class ConsumableResponseDto {

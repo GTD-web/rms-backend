@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Delete, Body, Param, Patch, Query, ParseArrayPipe } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Delete,
+    Body,
+    Param,
+    Patch,
+    Query,
+    ParseArrayPipe,
+    ForbiddenException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
@@ -69,6 +80,7 @@ export class ReservationController {
     }
 
     @Get('me/current')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '내 예약 현재 예약 조회 #사용자/자원예약/이용중 ' })
     @ApiDataResponse({
         description: '내 예약 현재 예약 조회 성공',
@@ -171,18 +183,36 @@ export class ReservationController {
     }
 
     @Patch(':reservationId/status')
-    @Roles(Role.USER)
-    @ApiOperation({ summary: '예약 상태 수정 #사용자/예약상세페이지 #관리자/예약관리/예약상세' })
+    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
+    @ApiOperation({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' })
     @ApiDataResponse({
         description: '예약 상태 수정 성공',
         type: ReservationResponseDto,
     })
     async updateStatus(
-        @User() user: UserEntity,
         @Param('reservationId') reservationId: string,
         @Body() updateDto: UpdateReservationStatusDto,
     ): Promise<ReservationResponseDto> {
-        return this.reservationUsecase.updateStatus(reservationId, updateDto, user);
+        return this.reservationUsecase.updateStatus(reservationId, updateDto);
+    }
+
+    @Patch(':reservationId/status/cancel')
+    @Roles(Role.USER)
+    @ApiOperation({ summary: '예약 취소 #사용자/예약상세페이지' })
+    @ApiDataResponse({
+        description: '예약 상태 수정 성공',
+        type: ReservationResponseDto,
+    })
+    async updateStatusCancel(
+        @User() user: UserEntity,
+        @Param('reservationId') reservationId: string,
+        // @Body() updateDto: UpdateReservationStatusDto,
+    ): Promise<ReservationResponseDto> {
+        const allowed = await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
+        if (!allowed) {
+            throw new ForbiddenException('예약 취소 권한이 없습니다.');
+        }
+        return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELED });
     }
 
     @Patch(':reservationId/participants')

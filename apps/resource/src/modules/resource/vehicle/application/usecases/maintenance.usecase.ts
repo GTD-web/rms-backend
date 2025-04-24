@@ -160,6 +160,7 @@ export class MaintenanceUsecase {
             consumableName: maintenance.consumable.name,
             resourceName: maintenance.consumable.vehicleInfo.resource.name,
             previousMileage: previousMaintenance ? previousMaintenance.mileage : 0,
+            previousDate: previousMaintenance ? previousMaintenance.date : null,
             isLatest: !nextMaintenance,
         };
     }
