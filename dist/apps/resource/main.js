@@ -7390,17 +7390,27 @@ let ResourceUsecase = class ResourceUsecase {
                         where: { consumableId: consumable.consumableId },
                         order: { date: 'DESC' },
                     });
-                    consumable.maintenances = [latestMaintenance].map((maintenance) => {
-                        return {
-                            ...maintenance,
-                            mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
-                            maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
-                        };
-                    });
+                    if (latestMaintenance) {
+                        consumable.maintenances = [latestMaintenance].map((maintenance) => {
+                            return {
+                                ...maintenance,
+                                mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                                maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                            };
+                        });
+                    }
                 }
                 resource.vehicleInfo.consumables.sort((a, b) => {
-                    return (a.maintenances[0]['mileageFromLastMaintenance'] -
-                        b.maintenances[0]['mileageFromLastMaintenance']);
+                    if (!a.maintenances?.length && !b.maintenances?.length) {
+                        return a.name.localeCompare(b.name);
+                    }
+                    if (!a.maintenances?.length)
+                        return -1;
+                    if (!b.maintenances?.length)
+                        return 1;
+                    const aMileage = a.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
+                    const bMileage = b.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
+                    return aMileage - bMileage;
                 });
             }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);

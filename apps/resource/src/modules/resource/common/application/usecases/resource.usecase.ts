@@ -208,20 +208,32 @@ export class ResourceUsecase {
                         where: { consumableId: consumable.consumableId },
                         order: { date: 'DESC' },
                     });
-                    consumable.maintenances = [latestMaintenance].map((maintenance) => {
-                        return {
-                            ...maintenance,
-                            mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
-                            maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
-                        };
-                    });
+                    if (latestMaintenance) {
+                        consumable.maintenances = [latestMaintenance].map((maintenance) => {
+                            return {
+                                ...maintenance,
+                                mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                                maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                            };
+                        });
+                    }
                 }
-
                 resource.vehicleInfo.consumables.sort((a, b) => {
-                    return (
-                        a.maintenances[0]['mileageFromLastMaintenance'] -
-                        b.maintenances[0]['mileageFromLastMaintenance']
-                    );
+                    // Check if both consumables have maintenance records
+                    if (!a.maintenances?.length && !b.maintenances?.length) {
+                        // Neither has maintenance records, sort by name or other property
+                        return a.name.localeCompare(b.name);
+                    }
+
+                    // If only one has maintenance records, prioritize the one without maintenance
+                    if (!a.maintenances?.length) return -1;
+                    if (!b.maintenances?.length) return 1;
+
+                    // Now safely access maintenance records
+                    const aMileage = a.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
+                    const bMileage = b.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
+
+                    return aMileage - bMileage;
                 });
             }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(
