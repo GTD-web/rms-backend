@@ -456,7 +456,7 @@ __decorate([
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ReturnVehicleDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = void 0;
+exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login.dto */ "./apps/resource/src/modules/auth/application/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login-response.dto */ "./apps/resource/src/modules/auth/application/dto/login-response.dto.ts");
@@ -531,6 +531,10 @@ Object.defineProperty(exports, "CreateReservationResponseDto", ({ enumerable: tr
 Object.defineProperty(exports, "ReservationResponseDto", ({ enumerable: true, get: function () { return reservation_response_dto_1.ReservationResponseDto; } }));
 Object.defineProperty(exports, "ReservationWithResourceResponseDto", ({ enumerable: true, get: function () { return reservation_response_dto_1.ReservationWithResourceResponseDto; } }));
 Object.defineProperty(exports, "ReservationWithRelationsResponseDto", ({ enumerable: true, get: function () { return reservation_response_dto_1.ReservationWithRelationsResponseDto; } }));
+var resource_query_dto_1 = __webpack_require__(/*! ./modules/resource/common/application/dtos/resource-query.dto */ "./apps/resource/src/modules/resource/common/application/dtos/resource-query.dto.ts");
+Object.defineProperty(exports, "ResourceQueryDto", ({ enumerable: true, get: function () { return resource_query_dto_1.ResourceQueryDto; } }));
+var available_time_response_dto_1 = __webpack_require__(/*! ./modules/resource/common/application/dtos/available-time-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/available-time-response.dto.ts");
+Object.defineProperty(exports, "ResourceAvailabilityDto", ({ enumerable: true, get: function () { return available_time_response_dto_1.ResourceAvailabilityDto; } }));
 var file_response_dto_1 = __webpack_require__(/*! ./modules/file/application/dtos/file-response.dto */ "./apps/resource/src/modules/file/application/dtos/file-response.dto.ts");
 Object.defineProperty(exports, "FileResponseDto", ({ enumerable: true, get: function () { return file_response_dto_1.FileResponseDto; } }));
 var create_notification_dto_1 = __webpack_require__(/*! ./modules/notification/application/dto/create-notification.dto */ "./apps/resource/src/modules/notification/application/dto/create-notification.dto.ts");
@@ -5490,7 +5494,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('me'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회 #사용자/홈 ' }),
+    (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회, 시간 별, 자원 타입별 쿼리 가능 #사용자/홈 ' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '내 예약 리스트 조회 성공',
         type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
@@ -5510,7 +5514,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('me/current'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '내 예약 현재 예약 조회 #사용자/자원예약/이용중 ' }),
+    (0, swagger_1.ApiOperation)({ summary: '내 예약 현재 예약 조회, 자원 타입별 쿼리 가능 #사용자/자원예약/이용중 ' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '내 예약 현재 예약 조회 성공',
         type: reservation_response_dto_1.ReservationWithRelationsResponseDto,
@@ -5525,7 +5529,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('me/all'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '내 예약 및 참여 예약 조회' }),
+    (0, swagger_1.ApiOperation)({ summary: '내 예약 및 참여 예약 조회, 타입별 쿼리 가능 #사용자/홈/추가기획사항 ' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '내 예약 및 참여 예약 조회 성공',
         type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
@@ -5547,9 +5551,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':reservationId'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '예약 조회 #사용자/예약상세페이지' }),
+    (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 조회 성공',
+        description: '예약 상세 조회 성공',
         type: reservation_response_dto_1.ReservationWithRelationsResponseDto,
     }),
     __param(0, (0, user_decorator_1.User)()),
@@ -6363,6 +6367,79 @@ exports.AccommodationInfoRepository = AccommodationInfoRepository = __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/resource/common/application/dtos/available-time-response.dto.ts":
+/*!***************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/resource/common/application/dtos/available-time-response.dto.ts ***!
+  \***************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceAvailabilityDto = exports.TimeSlotDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class TimeSlotDto {
+}
+exports.TimeSlotDto = TimeSlotDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '시작 시간 (ISO 문자열)',
+        example: '2025-01-01T09:00:00',
+    }),
+    __metadata("design:type", String)
+], TimeSlotDto.prototype, "startTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '종료 시간 (ISO 문자열)',
+        example: '2025-01-01T10:00:00',
+    }),
+    __metadata("design:type", String)
+], TimeSlotDto.prototype, "endTime", void 0);
+class ResourceAvailabilityDto {
+}
+exports.ResourceAvailabilityDto = ResourceAvailabilityDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 ID',
+        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
+    }),
+    __metadata("design:type", String)
+], ResourceAvailabilityDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 이름',
+        example: '회의실 A',
+    }),
+    __metadata("design:type", String)
+], ResourceAvailabilityDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        required: false,
+        description: '자원 위치',
+        example: '서울특별시 강남구 테헤란로 14길 6 남도빌딩 3층',
+    }),
+    __metadata("design:type", String)
+], ResourceAvailabilityDto.prototype, "resourceLocation", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        required: false,
+        description: '가용 시간 슬롯 목록',
+        type: [TimeSlotDto],
+    }),
+    __metadata("design:type", Array)
+], ResourceAvailabilityDto.prototype, "availableTimeSlots", void 0);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/resource/common/application/dtos/create-resource.dto.ts":
 /*!*******************************************************************************************!*\
   !*** ./apps/resource/src/modules/resource/common/application/dtos/create-resource.dto.ts ***!
@@ -6512,6 +6589,122 @@ __decorate([
     (0, class_transformer_1.Type)(() => CreateResourceManagerDto),
     __metadata("design:type", Array)
 ], CreateResourceInfoDto.prototype, "managers", void 0);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/resource/common/application/dtos/resource-query.dto.ts":
+/*!******************************************************************************************!*\
+  !*** ./apps/resource/src/modules/resource/common/application/dtos/resource-query.dto.ts ***!
+  \******************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceQueryDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
+class ResourceQueryDto extends paginate_query_dto_1.PaginationQueryDto {
+}
+exports.ResourceQueryDto = ResourceQueryDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '리소스 타입',
+        enum: resource_type_enum_1.ResourceType,
+        example: resource_type_enum_1.ResourceType.MEETING_ROOM,
+    }),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], ResourceQueryDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '리소스 그룹 ID',
+        example: 'ca33f67a-a9c2-4a29-b266-3d82f9aa7fe4',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceQueryDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '시작 날짜',
+        example: '2024-01-01',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], ResourceQueryDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '종료 날짜',
+        example: '2024-01-31',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], ResourceQueryDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '시작 시간',
+        example: '09:00:00',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceQueryDto.prototype, "startTime", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '종료 시간',
+        example: '18:00:00',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceQueryDto.prototype, "endTime", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '오전 시간대 필터',
+        example: true,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_transformer_1.Type)(() => Boolean),
+    __metadata("design:type", Boolean)
+], ResourceQueryDto.prototype, "am", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '오후 시간대 필터',
+        example: true,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_transformer_1.Type)(() => Boolean),
+    __metadata("design:type", Boolean)
+], ResourceQueryDto.prototype, "pm", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '이용 시간 단위(분)',
+        example: 30,
+        minimum: 1,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], ResourceQueryDto.prototype, "timeUnit", void 0);
 
 
 /***/ }),
@@ -7325,6 +7518,7 @@ const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestj
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const maintenance_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
+const available_time_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/available-time-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/available-time-response.dto.ts");
 let ResourceUsecase = class ResourceUsecase {
     constructor(resourceService, resourceManagerService, resourceGroupService, vehicleInfoService, vehicleInfoUsecase, maintenanceService, dataSource, fileService, typeHandlers, eventEmitter) {
         this.resourceService = resourceService;
@@ -7491,6 +7685,128 @@ let ResourceUsecase = class ResourceUsecase {
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.odometerImages);
         }
         return resource;
+    }
+    async findAvailableTime(query) {
+        const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit } = query;
+        const resources = await this.resourceService.findAll({
+            where: {
+                isAvailable: true,
+                resourceGroupId: resourceGroupId,
+                type: resourceType,
+            },
+            relations: ['resourceGroup', 'reservations'],
+        });
+        if (!resources || resources.length === 0) {
+            return [];
+        }
+        const result = [];
+        const isSameDay = startDate === endDate;
+        if (timeUnit) {
+            for (const resource of resources) {
+                const availabilityDto = new available_time_response_dto_1.ResourceAvailabilityDto();
+                availabilityDto.resourceId = resource.resourceId;
+                availabilityDto.resourceName = resource.name;
+                availabilityDto.availableTimeSlots = this.calculateAvailableTimeSlots(resource, startDate, endDate, am, pm, timeUnit, isSameDay);
+                result.push(availabilityDto);
+            }
+        }
+        else {
+            const combinedStartDateTime = startTime
+                ? `${startDate} ${startTime}`
+                : am
+                    ? `${startDate} 09:00:00`
+                    : `${startDate} 13:00:00`;
+            const combinedEndDateTime = endTime
+                ? `${endDate} ${endTime}`
+                : pm
+                    ? `${endDate} 18:00:00`
+                    : `${endDate} 12:00:00`;
+            const startDateObj = date_util_1.DateUtil.date(combinedStartDateTime);
+            const endDateObj = date_util_1.DateUtil.date(combinedEndDateTime);
+            for (const resource of resources) {
+                const confirmedReservations = resource.reservations.filter((reservation) => reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED);
+                const hasConflict = confirmedReservations.some((reservation) => {
+                    const reserveStart = date_util_1.DateUtil.date(reservation.startDate);
+                    const reserveEnd = date_util_1.DateUtil.date(reservation.endDate);
+                    return ((this.isSameOrAfter(startDateObj, reserveStart) && this.isBefore(startDateObj, reserveEnd)) ||
+                        (this.isAfter(endDateObj, reserveStart) && this.isSameOrBefore(endDateObj, reserveEnd)) ||
+                        (this.isBefore(startDateObj, reserveStart) && this.isAfter(endDateObj, reserveEnd)));
+                });
+                if (!hasConflict) {
+                    const availabilityDto = new available_time_response_dto_1.ResourceAvailabilityDto();
+                    availabilityDto.resourceId = resource.resourceId;
+                    availabilityDto.resourceName = resource.name;
+                    if (resource.location) {
+                        const location = resource.location;
+                        availabilityDto.resourceLocation =
+                            location.address + (location.detailAddress ? ` ${location.detailAddress}` : '');
+                    }
+                    result.push(availabilityDto);
+                }
+            }
+        }
+        return result;
+    }
+    calculateAvailableTimeSlots(resource, startDate, endDate, am, pm, timeUnit, isSameDay) {
+        const availableSlots = [];
+        const existingReservations = resource.reservations || [];
+        const confirmedReservations = existingReservations.filter((reservation) => reservation.status === 'CONFIRMED');
+        if (isSameDay) {
+            const dateStr = startDate;
+            if (am) {
+                this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
+            }
+            if (pm) {
+                this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+            }
+        }
+        else {
+            let currentDate = date_util_1.DateUtil.date(startDate);
+            const endDateObj = date_util_1.DateUtil.date(endDate);
+            while (this.isSameOrBefore(currentDate, endDateObj)) {
+                const dateStr = currentDate.format('YYYY-MM-DD');
+                this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                currentDate = currentDate.addDays(1);
+            }
+        }
+        return availableSlots;
+    }
+    processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots) {
+        let slotStart = date_util_1.DateUtil.date(`${dateStr} ${startTime}`);
+        const endTime_obj = date_util_1.DateUtil.date(`${dateStr} ${endTime}`);
+        while (this.isBefore(slotStart, endTime_obj)) {
+            const slotEnd = slotStart.addMinutes(timeUnit);
+            if (this.isAfter(slotEnd, endTime_obj)) {
+                continue;
+            }
+            const isAvailable = !confirmedReservations.some((reservation) => {
+                const reservationStart = date_util_1.DateUtil.date(reservation.startDate);
+                const reservationEnd = date_util_1.DateUtil.date(reservation.endDate);
+                return ((this.isSameOrAfter(slotStart, reservationStart) && this.isBefore(slotStart, reservationEnd)) ||
+                    (this.isAfter(slotEnd, reservationStart) && this.isSameOrBefore(slotEnd, reservationEnd)) ||
+                    (this.isBefore(slotStart, reservationStart) && this.isAfter(slotEnd, reservationEnd)));
+            });
+            if (isAvailable) {
+                availableSlots.push({
+                    startTime: slotStart.format(),
+                    endTime: slotEnd.format(),
+                });
+            }
+            slotStart = slotStart.addMinutes(timeUnit);
+        }
+    }
+    isSameOrBefore(d1, d2) {
+        return d1.toDate().getTime() <= d2.toDate().getTime();
+    }
+    isBefore(d1, d2) {
+        return d1.toDate().getTime() < d2.toDate().getTime();
+    }
+    isAfter(d1, d2) {
+        return d1.toDate().getTime() > d2.toDate().getTime();
+    }
+    isSameOrAfter(d1, d2) {
+        return d1.toDate().getTime() >= d2.toDate().getTime();
     }
     async returnVehicle(user, resourceId, updateDto) {
         const queryRunner = this.dataSource.createQueryRunner();
@@ -7958,13 +8274,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
 const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
+const resource_query_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/resource-query.dto */ "./apps/resource/src/modules/resource/common/application/dtos/resource-query.dto.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
@@ -7982,6 +8299,9 @@ let ResourceController = class ResourceController {
     }
     async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate) {
         return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
+    }
+    async findAvailableTime(query) {
+        return this.resourceUsecase.findAvailableTime(query);
     }
     async returnVehicle(user, resourceId, returnDto) {
         return this.resourceUsecase.returnVehicle(user, resourceId, returnDto);
@@ -8039,6 +8359,33 @@ __decorate([
     __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], ResourceController.prototype, "findResourcesByTypeAndDateWithReservations", null);
 __decorate([
+    (0, common_1.Get)('available-time'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    (0, swagger_1.ApiOperation)({ summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 가능 시간 조회 성공',
+        type: [dtos_index_1.ResourceAvailabilityDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: true, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({
+        name: 'resourceGroupId',
+        type: String,
+        required: true,
+        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'startDate', type: String, required: false, example: '2025-01-01' }),
+    (0, swagger_1.ApiQuery)({ name: 'endDate', type: String, required: false, example: '2025-01-01' }),
+    (0, swagger_1.ApiQuery)({ name: 'startTime', type: String, required: false, example: '09:00:00' }),
+    (0, swagger_1.ApiQuery)({ name: 'endTime', type: String, required: false, example: '18:00:00' }),
+    (0, swagger_1.ApiQuery)({ name: 'am', type: Boolean, required: false, example: true }),
+    (0, swagger_1.ApiQuery)({ name: 'pm', type: Boolean, required: false, example: true }),
+    (0, swagger_1.ApiQuery)({ name: 'timeUnit', type: Number, required: false, example: 30 }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_g = typeof resource_query_dto_1.ResourceQueryDto !== "undefined" && resource_query_dto_1.ResourceQueryDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], ResourceController.prototype, "findAvailableTime", null);
+__decorate([
     (0, common_1.Patch)(':resourceId/return-vehicle'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
@@ -8050,8 +8397,8 @@ __decorate([
     __param(1, (0, common_1.Param)('resourceId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _g : Object, String, typeof (_h = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String, typeof (_k = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ResourceController.prototype, "returnVehicle", null);
 __decorate([
     (0, common_1.Post)(),
@@ -8063,8 +8410,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof dtos_index_1.CreateResourceInfoDto !== "undefined" && dtos_index_1.CreateResourceInfoDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:paramtypes", [typeof (_m = typeof dtos_index_1.CreateResourceInfoDto !== "undefined" && dtos_index_1.CreateResourceInfoDto) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], ResourceController.prototype, "createWithInfos", null);
 __decorate([
     (0, common_1.Get)(':resourceId'),
@@ -8078,7 +8425,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], ResourceController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)('order'),
@@ -8090,8 +8437,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_o = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _o : Object]),
-    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
+    __metadata("design:paramtypes", [typeof (_q = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _q : Object]),
+    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
 ], ResourceController.prototype, "reorder", null);
 __decorate([
     (0, common_1.Patch)(':resourceId'),
@@ -8105,8 +8452,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_q = typeof dtos_index_1.UpdateResourceInfoDto !== "undefined" && dtos_index_1.UpdateResourceInfoDto) === "function" ? _q : Object]),
-    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
+    __metadata("design:paramtypes", [String, typeof (_s = typeof dtos_index_1.UpdateResourceInfoDto !== "undefined" && dtos_index_1.UpdateResourceInfoDto) === "function" ? _s : Object]),
+    __metadata("design:returntype", typeof (_t = typeof Promise !== "undefined" && Promise) === "function" ? _t : Object)
 ], ResourceController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':resourceId'),
@@ -8119,7 +8466,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
+    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
 ], ResourceController.prototype, "remove", null);
 exports.ResourceController = ResourceController = __decorate([
     (0, swagger_1.ApiTags)('3. 자원'),

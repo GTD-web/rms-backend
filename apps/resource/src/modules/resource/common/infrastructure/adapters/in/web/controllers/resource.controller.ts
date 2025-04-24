@@ -1,7 +1,13 @@
 import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
-import { CreateResourceInfoDto, UpdateResourceInfoDto, ResourceResponseDto } from '@resource/dtos.index';
+import {
+    CreateResourceInfoDto,
+    UpdateResourceInfoDto,
+    ResourceResponseDto,
+    ResourceAvailabilityDto,
+} from '@resource/dtos.index';
+import { ResourceQueryDto } from '@resource/modules/resource/common/application/dtos/resource-query.dto';
 import { Role } from '@libs/enums/role-type.enum';
 import { Roles } from '@libs/decorators/role.decorator';
 import { ResourceType } from '@libs/enums/resource-type.enum';
@@ -51,6 +57,31 @@ export class ResourceController {
         @Query('endDate') endDate: string,
     ): Promise<ResourceGroupWithResourcesAndReservationsResponseDto[]> {
         return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
+    }
+
+    @Get('available-time')
+    @Roles(Role.USER)
+    @ApiOperation({ summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지' })
+    @ApiDataResponse({
+        description: '예약 가능 시간 조회 성공',
+        type: [ResourceAvailabilityDto],
+    })
+    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: true, example: ResourceType.MEETING_ROOM })
+    @ApiQuery({
+        name: 'resourceGroupId',
+        type: String,
+        required: true,
+        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
+    })
+    @ApiQuery({ name: 'startDate', type: String, required: false, example: '2025-01-01' })
+    @ApiQuery({ name: 'endDate', type: String, required: false, example: '2025-01-01' })
+    @ApiQuery({ name: 'startTime', type: String, required: false, example: '09:00:00' })
+    @ApiQuery({ name: 'endTime', type: String, required: false, example: '18:00:00' })
+    @ApiQuery({ name: 'am', type: Boolean, required: false, example: true })
+    @ApiQuery({ name: 'pm', type: Boolean, required: false, example: true })
+    @ApiQuery({ name: 'timeUnit', type: Number, required: false, example: 30 })
+    async findAvailableTime(@Query() query: ResourceQueryDto): Promise<ResourceAvailabilityDto[]> {
+        return this.resourceUsecase.findAvailableTime(query);
     }
 
     @Patch(':resourceId/return-vehicle')

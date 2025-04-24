@@ -82,6 +82,10 @@ export {
     ReservationWithRelationsResponseDto,
 } from './modules/reservation/application/dtos/reservation-response.dto';
 
+// Reservation Query DTOs
+export { ResourceQueryDto } from './modules/resource/common/application/dtos/resource-query.dto';
+export { ResourceAvailabilityDto } from './modules/resource/common/application/dtos/available-time-response.dto';
+
 // File Module DTOs
 export { FileResponseDto } from './modules/file/application/dtos/file-response.dto';
 

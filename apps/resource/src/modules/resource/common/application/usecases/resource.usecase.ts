@@ -42,6 +42,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DateUtil } from '@libs/utils/date.util';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { MaintenanceService } from '@resource/modules/resource/vehicle/application/services/maintenance.service';
+import {
+    ResourceAvailabilityDto,
+    TimeSlotDto,
+} from '@resource/modules/resource/common/application/dtos/available-time-response.dto';
+import { Reservation } from '@libs/entities/reservation.entity';
+import { ResourceQueryDto } from '../dtos/resource-query.dto';
 
 @Injectable()
 export class ResourceUsecase {
@@ -245,6 +251,233 @@ export class ResourceUsecase {
         }
 
         return resource;
+    }
+
+    async findAvailableTime(query: ResourceQueryDto): Promise<ResourceAvailabilityDto[]> {
+        const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit } = query;
+        const resources = await this.resourceService.findAll({
+            where: {
+                isAvailable: true,
+                resourceGroupId: resourceGroupId,
+                type: resourceType,
+            },
+            relations: ['resourceGroup', 'reservations'],
+        });
+
+        if (!resources || resources.length === 0) {
+            return [];
+        }
+
+        // 결과 리스트 초기화
+        const result: ResourceAvailabilityDto[] = [];
+
+        // 날짜가 같은 경우 (당일 예약건)
+        const isSameDay = startDate === endDate;
+
+        // timeUnit이 있는 경우: 시간 슬롯 계산
+        if (timeUnit) {
+            for (const resource of resources) {
+                const availabilityDto = new ResourceAvailabilityDto();
+                availabilityDto.resourceId = resource.resourceId;
+                availabilityDto.resourceName = resource.name;
+
+                // 시간 슬롯 계산
+                availabilityDto.availableTimeSlots = this.calculateAvailableTimeSlots(
+                    resource,
+                    startDate,
+                    endDate,
+                    am,
+                    pm,
+                    timeUnit,
+                    isSameDay,
+                );
+
+                result.push(availabilityDto);
+            }
+        }
+        // timeUnit이 없는 경우: 예약 가능한 자원만 필터링하여 반환 (시간 슬롯 없음)
+        else {
+            const combinedStartDateTime = startTime
+                ? `${startDate} ${startTime}`
+                : am
+                  ? `${startDate} 09:00:00`
+                  : `${startDate} 13:00:00`;
+            const combinedEndDateTime = endTime
+                ? `${endDate} ${endTime}`
+                : pm
+                  ? `${endDate} 18:00:00`
+                  : `${endDate} 12:00:00`;
+
+            const startDateObj = DateUtil.date(combinedStartDateTime);
+            const endDateObj = DateUtil.date(combinedEndDateTime);
+
+            // 자원별로 예약 가능 여부 확인
+            for (const resource of resources) {
+                // 확정된 예약만 필터링
+                const confirmedReservations = resource.reservations.filter(
+                    (reservation) => reservation.status === ReservationStatus.CONFIRMED,
+                );
+
+                // 예약 충돌 체크
+                const hasConflict = confirmedReservations.some((reservation) => {
+                    const reserveStart = DateUtil.date(reservation.startDate);
+                    const reserveEnd = DateUtil.date(reservation.endDate);
+
+                    // 완전한 겹침 체크 (새 예약의 시작이 기존 예약 범위 내 또는 새 예약의 종료가 기존 예약 범위 내)
+                    return (
+                        (this.isSameOrAfter(startDateObj, reserveStart) && this.isBefore(startDateObj, reserveEnd)) ||
+                        (this.isAfter(endDateObj, reserveStart) && this.isSameOrBefore(endDateObj, reserveEnd)) ||
+                        (this.isBefore(startDateObj, reserveStart) && this.isAfter(endDateObj, reserveEnd))
+                    );
+                });
+
+                // 충돌이 없는 경우에만 결과에 추가
+                if (!hasConflict) {
+                    const availabilityDto = new ResourceAvailabilityDto();
+                    availabilityDto.resourceId = resource.resourceId;
+                    availabilityDto.resourceName = resource.name;
+
+                    // 위치 정보 추가
+                    if (resource.location) {
+                        const location = resource.location as { address: string; detailAddress?: string };
+                        availabilityDto.resourceLocation =
+                            location.address + (location.detailAddress ? ` ${location.detailAddress}` : '');
+                    }
+
+                    result.push(availabilityDto);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 자원의 가용 시간 슬롯을 계산합니다.
+     */
+    private calculateAvailableTimeSlots(
+        resource: Resource,
+        startDate: string,
+        endDate: string,
+        am: boolean,
+        pm: boolean,
+        timeUnit: number,
+        isSameDay: boolean,
+    ): TimeSlotDto[] {
+        const availableSlots: TimeSlotDto[] = [];
+        const existingReservations = resource.reservations || [];
+
+        // 예약 상태가 CONFIRMED인 예약만 필터링
+        const confirmedReservations = existingReservations.filter((reservation) => reservation.status === 'CONFIRMED');
+
+        if (isSameDay) {
+            // 당일 예약건 처리
+            const dateStr = startDate; // YYYY-MM-DD 형식
+
+            // 오전 시간대 처리 (09:00 ~ 12:00)
+            if (am) {
+                this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
+            }
+
+            // 오후 시간대 처리 (13:00 ~ 18:00)
+            if (pm) {
+                this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+            }
+        } else {
+            // 여러 일 예약건 처리 - 시작일부터 종료일까지 일별로 처리
+            let currentDate = DateUtil.date(startDate);
+            const endDateObj = DateUtil.date(endDate);
+
+            // 날짜를 순회하며 처리
+            while (this.isSameOrBefore(currentDate, endDateObj)) {
+                const dateStr = currentDate.format('YYYY-MM-DD');
+
+                // 하루 전체 시간대 처리 (09:00 ~ 18:00, 점심시간 제외)
+                this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+
+                // 하루 증가
+                currentDate = currentDate.addDays(1);
+            }
+        }
+
+        return availableSlots;
+    }
+
+    /**
+     * 특정 시간 범위에 대한 가용 시간 슬롯을 처리합니다.
+     */
+    private processTimeRange(
+        dateStr: string,
+        startTime: string,
+        endTime: string,
+        timeUnit: number,
+        confirmedReservations: Reservation[],
+        availableSlots: TimeSlotDto[],
+    ): void {
+        let slotStart = DateUtil.date(`${dateStr} ${startTime}`);
+        const endTime_obj = DateUtil.date(`${dateStr} ${endTime}`);
+
+        // timeUnit 단위로 시간 슬롯 생성
+        while (this.isBefore(slotStart, endTime_obj)) {
+            const slotEnd = slotStart.addMinutes(timeUnit);
+
+            // 슬롯이 종료 시간을 초과하면 종료 시간으로 조정
+            if (this.isAfter(slotEnd, endTime_obj)) {
+                continue;
+            }
+
+            // 이 시간 슬롯이 기존 예약과 겹치는지 확인
+            const isAvailable = !confirmedReservations.some((reservation) => {
+                const reservationStart = DateUtil.date(reservation.startDate);
+                const reservationEnd = DateUtil.date(reservation.endDate);
+
+                // 슬롯 시작이 예약 범위 내에 있거나, 슬롯 종료가 예약 범위 내에 있거나,
+                // 슬롯이 예약을 완전히 포함하는 경우 충돌
+                return (
+                    (this.isSameOrAfter(slotStart, reservationStart) && this.isBefore(slotStart, reservationEnd)) ||
+                    (this.isAfter(slotEnd, reservationStart) && this.isSameOrBefore(slotEnd, reservationEnd)) ||
+                    (this.isBefore(slotStart, reservationStart) && this.isAfter(slotEnd, reservationEnd))
+                );
+            });
+
+            if (isAvailable) {
+                availableSlots.push({
+                    startTime: slotStart.format(),
+                    endTime: slotEnd.format(),
+                });
+            }
+
+            slotStart = slotStart.addMinutes(timeUnit);
+        }
+    }
+
+    /**
+     * DateUtil 헬퍼 메서드: d1이 d2와 같거나 이전인지 확인
+     */
+    private isSameOrBefore(d1: any, d2: any): boolean {
+        return d1.toDate().getTime() <= d2.toDate().getTime();
+    }
+
+    /**
+     * DateUtil 헬퍼 메서드: d1이 d2 이전인지 확인
+     */
+    private isBefore(d1: any, d2: any): boolean {
+        return d1.toDate().getTime() < d2.toDate().getTime();
+    }
+
+    /**
+     * DateUtil 헬퍼 메서드: d1이 d2 이후인지 확인
+     */
+    private isAfter(d1: any, d2: any): boolean {
+        return d1.toDate().getTime() > d2.toDate().getTime();
+    }
+
+    /**
+     * DateUtil 헬퍼 메서드: d1이 d2와 같거나 이후인지 확인
+     */
+    private isSameOrAfter(d1: any, d2: any): boolean {
+        return d1.toDate().getTime() >= d2.toDate().getTime();
     }
 
     async returnVehicle(user: UserEntity, resourceId: string, updateDto: ReturnVehicleDto): Promise<boolean> {

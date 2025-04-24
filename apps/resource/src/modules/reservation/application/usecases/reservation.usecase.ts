@@ -44,7 +44,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { CronJob } from 'cron/dist';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-
+import { ResourceAvailabilityDto } from '../../../resource/common/application/dtos/available-time-response.dto';
 @Injectable()
 export class ReservationUsecase {
     constructor(

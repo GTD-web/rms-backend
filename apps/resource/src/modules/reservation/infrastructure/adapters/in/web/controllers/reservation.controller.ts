@@ -61,7 +61,7 @@ export class ReservationController {
 
     @Get('me')
     @Roles(Role.USER)
-    @ApiOperation({ summary: '내 예약 리스트 조회 #사용자/홈 ' })
+    @ApiOperation({ summary: '내 예약 리스트 조회, 시간 별, 자원 타입별 쿼리 가능 #사용자/홈 ' })
     @ApiDataResponse({
         description: '내 예약 리스트 조회 성공',
         type: [ReservationWithRelationsResponseDto],
@@ -82,7 +82,7 @@ export class ReservationController {
 
     @Get('me/current')
     @Roles(Role.USER)
-    @ApiOperation({ summary: '내 예약 현재 예약 조회 #사용자/자원예약/이용중 ' })
+    @ApiOperation({ summary: '내 예약 현재 예약 조회, 자원 타입별 쿼리 가능 #사용자/자원예약/이용중 ' })
     @ApiDataResponse({
         description: '내 예약 현재 예약 조회 성공',
         type: ReservationWithRelationsResponseDto,
@@ -97,7 +97,7 @@ export class ReservationController {
 
     @Get('me/all')
     @Roles(Role.USER)
-    @ApiOperation({ summary: '내 예약 및 참여 예약 조회' })
+    @ApiOperation({ summary: '내 예약 및 참여 예약 조회, 타입별 쿼리 가능 #사용자/홈/추가기획사항 ' })
     @ApiDataResponse({
         description: '내 예약 및 참여 예약 조회 성공',
         type: [ReservationWithRelationsResponseDto],
@@ -123,9 +123,9 @@ export class ReservationController {
 
     @Get(':reservationId')
     @Roles(Role.USER)
-    @ApiOperation({ summary: '예약 조회 #사용자/예약상세페이지' })
+    @ApiOperation({ summary: '예약 상세 조회 #사용자/예약상세페이지' })
     @ApiDataResponse({
-        description: '예약 조회 성공',
+        description: '예약 상세 조회 성공',
         type: ReservationWithRelationsResponseDto,
     })
     async findOne(
