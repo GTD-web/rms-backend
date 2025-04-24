@@ -64,7 +64,7 @@ export class ResourceController {
     @ApiOperation({ summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지' })
     @ApiDataResponse({
         description: '예약 가능 시간 조회 성공',
-        type: [ResourceAvailabilityDto],
+        type: ResourceAvailabilityDto,
     })
     @ApiQuery({ name: 'resourceType', enum: ResourceType, required: true, example: ResourceType.MEETING_ROOM })
     @ApiQuery({

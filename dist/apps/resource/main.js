@@ -8364,7 +8364,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 가능 시간 조회 성공',
-        type: [dtos_index_1.ResourceAvailabilityDto],
+        type: dtos_index_1.ResourceAvailabilityDto,
     }),
     (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: true, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
     (0, swagger_1.ApiQuery)({
