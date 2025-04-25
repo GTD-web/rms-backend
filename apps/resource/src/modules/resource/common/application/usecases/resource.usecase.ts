@@ -549,9 +549,9 @@ export class ResourceUsecase {
             throw new BadRequestException('Managers are required');
         }
 
-        if (managers.length > 1) {
-            throw new BadRequestException('Only one manager is allowed');
-        }
+        // if (managers.length > 1) {
+        //     throw new BadRequestException('Only one manager is allowed');
+        // }
 
         // const manager = await this.resourceManagerService.findOne({
         //     where: { employeeId: managers[0].employeeId },

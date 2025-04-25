@@ -235,10 +235,7 @@ export class ReservationController {
         @Param('reservationId') reservationId: string,
         // @Body() updateDto: UpdateReservationStatusDto,
     ): Promise<ReservationResponseDto> {
-        const allowed = await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        if (!allowed) {
-            throw new ForbiddenException('예약 취소 권한이 없습니다.');
-        }
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELED });
     }
 
@@ -258,21 +255,21 @@ export class ReservationController {
         return this.reservationUsecase.updateParticipants(reservationId, updateDto);
     }
 
-    @Patch(':reservationId/cc-receipient')
-    @Roles(Role.USER)
-    @ApiOperation({ summary: '예약 수신참조자 수정' })
-    @ApiDataResponse({
-        description: '예약 수신참조자 수정 성공',
-        type: ReservationResponseDto,
-    })
-    async updateCcReceipient(
-        @User() user: UserEntity,
-        @Param('reservationId') reservationId: string,
-        @Body() updateDto: UpdateReservationCcReceipientDto,
-    ): Promise<ReservationResponseDto> {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateCcReceipient(reservationId, updateDto);
-    }
+    // @Patch(':reservationId/cc-receipient')
+    // @Roles(Role.USER)
+    // @ApiOperation({ summary: '예약 수신참조자 수정' })
+    // @ApiDataResponse({
+    //     description: '예약 수신참조자 수정 성공',
+    //     type: ReservationResponseDto,
+    // })
+    // async updateCcReceipient(
+    //     @User() user: UserEntity,
+    //     @Param('reservationId') reservationId: string,
+    //     @Body() updateDto: UpdateReservationCcReceipientDto,
+    // ): Promise<ReservationResponseDto> {
+    //     await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
+    //     return this.reservationUsecase.updateCcReceipient(reservationId, updateDto);
+    // }
 
     @ApiExcludeEndpoint()
     @Public()

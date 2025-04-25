@@ -594,35 +594,35 @@ export class ReservationUsecase {
         return new ReservationResponseDto(updatedReservation);
     }
 
-    async updateCcReceipient(
-        reservationId: string,
-        updateDto: UpdateReservationCcReceipientDto,
-    ): Promise<ReservationResponseDto> {
-        // 기존 수신참조자 조회
-        const ccReceipients = await this.participantService.findAll({ where: { reservationId } });
+    // async updateCcReceipient(
+    //     reservationId: string,
+    //     updateDto: UpdateReservationCcReceipientDto,
+    // ): Promise<ReservationResponseDto> {
+    //     // 기존 수신참조자 조회
+    //     const ccReceipients = await this.participantService.findAll({ where: { reservationId } });
 
-        // 기존 수신참조자 삭제
-        await Promise.all(
-            ccReceipients.map((ccReceipient) => this.participantService.delete(ccReceipient.participantId)),
-        );
+    //     // 기존 수신참조자 삭제
+    //     await Promise.all(
+    //         ccReceipients.map((ccReceipient) => this.participantService.delete(ccReceipient.participantId)),
+    //     );
 
-        // 새로운 수신참조자 저장
-        await Promise.all(
-            updateDto.ccReceipientIds.map((employeeId) =>
-                this.participantService.save({
-                    reservationId,
-                    employeeId,
-                    type: ParticipantsType.CC_RECEIPIENT,
-                } as ReservationParticipant),
-            ),
-        );
+    //     // 새로운 수신참조자 저장
+    //     await Promise.all(
+    //         updateDto.ccReceipientIds.map((employeeId) =>
+    //             this.participantService.save({
+    //                 reservationId,
+    //                 employeeId,
+    //                 type: ParticipantsType.CC_RECEIPIENT,
+    //             } as ReservationParticipant),
+    //         ),
+    //     );
 
-        const updatedReservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['participants'],
-        });
-        return new ReservationResponseDto(updatedReservation);
-    }
+    //     const updatedReservation = await this.reservationService.findOne({
+    //         where: { reservationId },
+    //         relations: ['participants'],
+    //     });
+    //     return new ReservationResponseDto(updatedReservation);
+    // }
 
     // 이 아래에 Job 삭제 메서드 추가
     private deleteReservationClosingJob(reservationId: string): void {

@@ -50,20 +50,21 @@ export class ConsumableUsecase {
     }
 
     async checkRole(vehicleInfoId: string, user: User): Promise<boolean> {
-        if (user.roles.includes(Role.SYSTEM_ADMIN)) return true;
-        const result = await this.consumableService.findOne({
-            where: {
-                vehicleInfoId: vehicleInfoId,
-                vehicleInfo: {
-                    resource: {
-                        resourceManagers: {
-                            employeeId: user.employeeId,
-                        },
-                    },
-                },
-            },
-            relations: ['vehicleInfo', 'vehicleInfo.resource', 'vehicleInfo.resource.resourceManagers'],
-        });
-        return !!result;
+        return true;
+        // if (user.roles.includes(Role.SYSTEM_ADMIN)) return true;
+        // const result = await this.consumableService.findOne({
+        //     where: {
+        //         vehicleInfoId: vehicleInfoId,
+        //         vehicleInfo: {
+        //             resource: {
+        //                 resourceManagers: {
+        //                     employeeId: user.employeeId,
+        //                 },
+        //             },
+        //         },
+        //     },
+        //     relations: ['vehicleInfo', 'vehicleInfo.resource', 'vehicleInfo.resource.resourceManagers'],
+        // });
+        // return !!result;
     }
 }

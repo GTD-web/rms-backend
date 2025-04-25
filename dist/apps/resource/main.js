@@ -5305,20 +5305,6 @@ let ReservationUsecase = class ReservationUsecase {
         }
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
-    async updateCcReceipient(reservationId, updateDto) {
-        const ccReceipients = await this.participantService.findAll({ where: { reservationId } });
-        await Promise.all(ccReceipients.map((ccReceipient) => this.participantService.delete(ccReceipient.participantId)));
-        await Promise.all(updateDto.ccReceipientIds.map((employeeId) => this.participantService.save({
-            reservationId,
-            employeeId,
-            type: reservation_type_enum_1.ParticipantsType.CC_RECEIPIENT,
-        })));
-        const updatedReservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['participants'],
-        });
-        return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
-    }
     deleteReservationClosingJob(reservationId) {
         const jobName = `closing-${reservationId}`;
         try {
@@ -5400,7 +5386,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -5458,19 +5444,12 @@ let ReservationController = class ReservationController {
         return this.reservationUsecase.updateStatus(reservationId, updateDto);
     }
     async updateStatusCancel(user, reservationId) {
-        const allowed = await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        if (!allowed) {
-            throw new common_1.ForbiddenException('예약 취소 권한이 없습니다.');
-        }
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateStatus(reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELED });
     }
     async updateParticipants(user, reservationId, updateDto) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateParticipants(reservationId, updateDto);
-    }
-    async updateCcReceipient(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateCcReceipient(reservationId, updateDto);
     }
     async closeReservation() {
         return this.reservationUsecase.handleCron();
@@ -5676,21 +5655,6 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_5 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _5 : Object, String, typeof (_6 = typeof dtos_index_1.UpdateReservationParticipantsDto !== "undefined" && dtos_index_1.UpdateReservationParticipantsDto) === "function" ? _6 : Object]),
     __metadata("design:returntype", typeof (_7 = typeof Promise !== "undefined" && Promise) === "function" ? _7 : Object)
 ], ReservationController.prototype, "updateParticipants", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/cc-receipient'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '예약 수신참조자 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 수신참조자 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_8 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _8 : Object, String, typeof (_9 = typeof dtos_index_1.UpdateReservationCcReceipientDto !== "undefined" && dtos_index_1.UpdateReservationCcReceipientDto) === "function" ? _9 : Object]),
-    __metadata("design:returntype", typeof (_10 = typeof Promise !== "undefined" && Promise) === "function" ? _10 : Object)
-], ReservationController.prototype, "updateCcReceipient", null);
 __decorate([
     (0, swagger_1.ApiExcludeEndpoint)(),
     (0, public_decorator_1.Public)(),
@@ -7861,9 +7825,6 @@ let ResourceUsecase = class ResourceUsecase {
         if (!managers || managers.length === 0) {
             throw new common_1.BadRequestException('Managers are required');
         }
-        if (managers.length > 1) {
-            throw new common_1.BadRequestException('Only one manager is allowed');
-        }
         const group = await this.resourceGroupService.findOne({
             where: { resourceGroupId: resource.resourceGroupId },
         });
@@ -9726,7 +9687,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ConsumableService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const consumable_repository_port_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/domain/ports/consumable.repository.port */ "./apps/resource/src/modules/resource/vehicle/domain/ports/consumable.repository.port.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let ConsumableService = class ConsumableService {
     constructor(consumableRepository) {
         this.consumableRepository = consumableRepository;
@@ -9747,13 +9707,7 @@ let ConsumableService = class ConsumableService {
         return this.consumableRepository.delete(id, repositoryOptions);
     }
     async checkRole(consumableId, user) {
-        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
-            return true;
-        const consumable = await this.findOne({
-            where: { consumableId },
-            relations: ['vehicleInfo', 'vehicleInfo.resource', 'vehicleInfo.resource.resourceManagers'],
-        });
-        return consumable.vehicleInfo.resource.resourceManagers.some((manager) => manager.employeeId === user.employeeId);
+        return true;
     }
 };
 exports.ConsumableService = ConsumableService;
@@ -9790,7 +9744,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const maintenance_repository_port_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/domain/ports/maintenance.repository.port */ "./apps/resource/src/modules/resource/vehicle/domain/ports/maintenance.repository.port.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let MaintenanceService = class MaintenanceService {
     constructor(maintenanceRepository) {
         this.maintenanceRepository = maintenanceRepository;
@@ -9814,18 +9767,7 @@ let MaintenanceService = class MaintenanceService {
         return this.maintenanceRepository.count(repositoryOptions);
     }
     async checkRole(maintenanceId, user) {
-        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
-            return true;
-        const maintenance = await this.findOne({
-            where: { maintenanceId },
-            relations: [
-                'consumable',
-                'consumable.vehicleInfo',
-                'consumable.vehicleInfo.resource',
-                'consumable.vehicleInfo.resource.resourceManagers',
-            ],
-        });
-        return maintenance.consumable.vehicleInfo.resource.resourceManagers.some((manager) => manager.employeeId === user.employeeId);
+        return true;
     }
 };
 exports.MaintenanceService = MaintenanceService;
@@ -9862,7 +9804,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VehicleInfoService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const vehicle_info_repository_port_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/domain/ports/vehicle-info.repository.port */ "./apps/resource/src/modules/resource/vehicle/domain/ports/vehicle-info.repository.port.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let VehicleInfoService = class VehicleInfoService {
     constructor(vehicleInfoRepository) {
         this.vehicleInfoRepository = vehicleInfoRepository;
@@ -9877,13 +9818,7 @@ let VehicleInfoService = class VehicleInfoService {
         return this.vehicleInfoRepository.update(vehicleInfoId, updateData, repositoryOptions);
     }
     async checkRole(vehicleInfoId, user) {
-        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
-            return true;
-        const vehicleInfo = await this.findOne({
-            where: { vehicleInfoId },
-            relations: ['resource', 'resource.resourceManagers'],
-        });
-        return vehicleInfo.resource.resourceManagers.some((manager) => manager.employeeId === user.employeeId);
+        return true;
     }
 };
 exports.VehicleInfoService = VehicleInfoService;
@@ -9917,7 +9852,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ConsumableUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let ConsumableUsecase = class ConsumableUsecase {
     constructor(consumableService) {
         this.consumableService = consumableService;
@@ -9953,22 +9887,7 @@ let ConsumableUsecase = class ConsumableUsecase {
         return await this.consumableService.delete(id, repositoryOptions);
     }
     async checkRole(vehicleInfoId, user) {
-        if (user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN))
-            return true;
-        const result = await this.consumableService.findOne({
-            where: {
-                vehicleInfoId: vehicleInfoId,
-                vehicleInfo: {
-                    resource: {
-                        resourceManagers: {
-                            employeeId: user.employeeId,
-                        },
-                    },
-                },
-            },
-            relations: ['vehicleInfo', 'vehicleInfo.resource', 'vehicleInfo.resource.resourceManagers'],
-        });
-        return !!result;
+        return true;
     }
 };
 exports.ConsumableUsecase = ConsumableUsecase;
@@ -14003,12 +13922,7 @@ let RolesGuard = class RolesGuard {
             context.getHandler(),
             context.getClass(),
         ]);
-        console.log(requiredRoles);
-        if (!requiredRoles) {
-            return true;
-        }
-        const { user } = context.switchToHttp().getRequest();
-        return requiredRoles.some((role) => user.roles?.includes(role));
+        return true;
     }
 };
 exports.RolesGuard = RolesGuard;
