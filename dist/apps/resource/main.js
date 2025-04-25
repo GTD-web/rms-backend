@@ -4916,86 +4916,6 @@ let ReservationUsecase = class ReservationUsecase {
             await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
         }
     }
-    async makeReservation(user, createDto) {
-        const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.date(createDto.startDate).toDate(), date_util_1.DateUtil.date(createDto.endDate).toDate());
-        if (conflicts.length > 0) {
-            throw new common_1.BadRequestException('Reservation time conflict - check in logic');
-        }
-        if (createDto.startDate > createDto.endDate) {
-            throw new common_1.BadRequestException('Start date must be before end date');
-        }
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-        try {
-            const reservation = this.reservationService.create(createDto);
-            const savedReservation = await this.reservationService.save(reservation, { queryRunner });
-            await Promise.all([
-                this.participantService.save({
-                    reservationId: savedReservation.reservationId,
-                    employeeId: user.employeeId,
-                    type: reservation_type_enum_1.ParticipantsType.RESERVER,
-                }, { queryRunner }),
-                ...createDto.participantIds.map((employeeId) => this.participantService.save({
-                    reservationId: savedReservation.reservationId,
-                    employeeId,
-                    type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
-                }, { queryRunner })),
-            ]);
-            await queryRunner.commitTransaction();
-            try {
-                const reservationWithResource = await this.reservationService.findOne({
-                    where: { reservationId: savedReservation.reservationId },
-                    relations: ['resource'],
-                    withDeleted: true,
-                });
-                if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
-                    this.createReservationClosingJob(reservationWithResource);
-                    const notiTarget = [...createDto.participantIds, user.employeeId];
-                    this.eventEmitter.emit('create.notification', {
-                        notificationType: notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED,
-                        notificationData: {
-                            reservationId: reservationWithResource.reservationId,
-                            reservationTitle: reservationWithResource.title,
-                            reservationDate: date_util_1.DateUtil.format(reservationWithResource.startDate),
-                            resourceId: reservationWithResource.resource.resourceId,
-                            resourceName: reservationWithResource.resource.name,
-                            resourceType: reservationWithResource.resource.type,
-                        },
-                        notiTarget,
-                    });
-                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
-                        this.eventEmitter.emit('create.notification', {
-                            notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
-                            notificationData: {
-                                reservationId: reservationWithResource.reservationId,
-                                reservationTitle: reservationWithResource.title,
-                                resourceId: reservationWithResource.resource.resourceId,
-                                resourceName: reservationWithResource.resource.name,
-                                resourceType: reservationWithResource.resource.type,
-                                beforeMinutes: beforeMinutes,
-                            },
-                            notiTarget,
-                        });
-                    }
-                }
-            }
-            catch (error) {
-                console.log(error);
-                console.log('Notification creation failed');
-            }
-            return {
-                reservationId: savedReservation.reservationId,
-            };
-        }
-        catch (error) {
-            await queryRunner.rollbackTransaction();
-            throw error;
-        }
-        finally {
-            await queryRunner.release();
-        }
-    }
     async findReservationDetail(user, reservationId) {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
@@ -5159,6 +5079,86 @@ let ReservationUsecase = class ReservationUsecase {
             throw new common_1.UnauthorizedException('No Access to Reservation');
         }
         return true;
+    }
+    async makeReservation(user, createDto) {
+        const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.date(createDto.startDate).toDate(), date_util_1.DateUtil.date(createDto.endDate).toDate());
+        if (conflicts.length > 0) {
+            throw new common_1.BadRequestException('Reservation time conflict - check in logic');
+        }
+        if (createDto.startDate > createDto.endDate) {
+            throw new common_1.BadRequestException('Start date must be before end date');
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const reservation = this.reservationService.create(createDto);
+            const savedReservation = await this.reservationService.save(reservation, { queryRunner });
+            await Promise.all([
+                this.participantService.save({
+                    reservationId: savedReservation.reservationId,
+                    employeeId: user.employeeId,
+                    type: reservation_type_enum_1.ParticipantsType.RESERVER,
+                }, { queryRunner }),
+                ...createDto.participantIds.map((employeeId) => this.participantService.save({
+                    reservationId: savedReservation.reservationId,
+                    employeeId,
+                    type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
+                }, { queryRunner })),
+            ]);
+            await queryRunner.commitTransaction();
+            try {
+                const reservationWithResource = await this.reservationService.findOne({
+                    where: { reservationId: savedReservation.reservationId },
+                    relations: ['resource'],
+                    withDeleted: true,
+                });
+                if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                    this.createReservationClosingJob(reservationWithResource);
+                    const notiTarget = [...createDto.participantIds, user.employeeId];
+                    this.eventEmitter.emit('create.notification', {
+                        notificationType: notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED,
+                        notificationData: {
+                            reservationId: reservationWithResource.reservationId,
+                            reservationTitle: reservationWithResource.title,
+                            reservationDate: date_util_1.DateUtil.format(reservationWithResource.startDate),
+                            resourceId: reservationWithResource.resource.resourceId,
+                            resourceName: reservationWithResource.resource.name,
+                            resourceType: reservationWithResource.resource.type,
+                        },
+                        notiTarget,
+                    });
+                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
+                        this.eventEmitter.emit('create.notification', {
+                            notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
+                            notificationData: {
+                                reservationId: reservationWithResource.reservationId,
+                                reservationTitle: reservationWithResource.title,
+                                resourceId: reservationWithResource.resource.resourceId,
+                                resourceName: reservationWithResource.resource.name,
+                                resourceType: reservationWithResource.resource.type,
+                                beforeMinutes: beforeMinutes,
+                            },
+                            notiTarget,
+                        });
+                    }
+                }
+            }
+            catch (error) {
+                console.log(error);
+                console.log('Notification creation failed');
+            }
+            return {
+                reservationId: savedReservation.reservationId,
+            };
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async updateTitle(reservationId, updateDto, repositoryOptions) {
         const reservation = await this.reservationService.findOne({ where: { reservationId } });
@@ -7865,13 +7865,6 @@ let ResourceUsecase = class ResourceUsecase {
         if (managers.length > 1) {
             throw new common_1.BadRequestException('Only one manager is allowed');
         }
-        const manager = await this.resourceManagerService.findOne({
-            where: { employeeId: managers[0].employeeId },
-            relations: ['employee', 'employee.user'],
-        });
-        if (!manager.employee.user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN)) {
-            throw new common_1.BadRequestException('The manager is not a resource admin');
-        }
         const group = await this.resourceGroupService.findOne({
             where: { resourceGroupId: resource.resourceGroupId },
         });
@@ -7898,6 +7891,7 @@ let ResourceUsecase = class ResourceUsecase {
             await handler.createTypeInfo(savedResource, typeInfo, { queryRunner });
             await Promise.all([
                 ...managers.map((manager) => {
+                    console.log(manager);
                     return this.resourceManagerService.save({
                         resourceId: savedResource.resourceId,
                         employeeId: manager.employeeId,

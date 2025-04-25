@@ -1,16 +1,9 @@
-import {
-    Injectable,
-    BadRequestException,
-    NotFoundException,
-    ForbiddenException,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
 import {
     CreateReservationResponseDto,
     ReservationResponseDto,
     ReservationWithRelationsResponseDto,
-    ReservationWithResourceResponseDto,
 } from '../dtos/reservation-response.dto';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import {
@@ -40,11 +33,10 @@ import { RepositoryOptions } from '@libs/interfaces/repository-option.interface'
 import { User } from '@libs/entities';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
-import { Role } from '@libs/enums/role-type.enum';
 import { CronJob } from 'cron/dist';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ResourceAvailabilityDto } from '../../../resource/common/application/dtos/available-time-response.dto';
+
 @Injectable()
 export class ReservationUsecase {
     constructor(
@@ -52,7 +44,6 @@ export class ReservationUsecase {
         private readonly participantService: ParticipantService,
         private readonly dataSource: DataSource,
         private readonly eventEmitter: EventEmitter2,
-        // private readonly notificationUsecase: NotificationUsecase,
         private readonly schedulerRegistry: SchedulerRegistry,
     ) {}
 
@@ -92,107 +83,7 @@ export class ReservationUsecase {
         }
     }
 
-    async makeReservation(user: User, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
-        const conflicts = await this.reservationService.findConflictingReservations(
-            createDto.resourceId,
-            DateUtil.date(createDto.startDate).toDate(),
-            DateUtil.date(createDto.endDate).toDate(),
-        );
-
-        if (conflicts.length > 0) {
-            throw new BadRequestException('Reservation time conflict - check in logic');
-        }
-
-        if (createDto.startDate > createDto.endDate) {
-            throw new BadRequestException('Start date must be before end date');
-        }
-
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-
-        try {
-            const reservation = this.reservationService.create(createDto);
-
-            const savedReservation = await this.reservationService.save(reservation, { queryRunner });
-
-            // 참가자 정보 저장
-            await Promise.all([
-                this.participantService.save(
-                    {
-                        reservationId: savedReservation.reservationId!,
-                        employeeId: user.employeeId,
-                        type: ParticipantsType.RESERVER,
-                    } as ReservationParticipant,
-                    { queryRunner },
-                ),
-                ...createDto.participantIds.map((employeeId) =>
-                    this.participantService.save(
-                        {
-                            reservationId: savedReservation.reservationId!,
-                            employeeId,
-                            type: ParticipantsType.PARTICIPANT,
-                        } as ReservationParticipant,
-                        { queryRunner },
-                    ),
-                ),
-            ]);
-
-            await queryRunner.commitTransaction();
-
-            try {
-                const reservationWithResource = await this.reservationService.findOne({
-                    where: { reservationId: savedReservation.reservationId! },
-                    relations: ['resource'],
-                    withDeleted: true,
-                });
-
-                if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
-                    this.createReservationClosingJob(reservationWithResource);
-                    const notiTarget = [...createDto.participantIds, user.employeeId];
-                    this.eventEmitter.emit('create.notification', {
-                        notificationType: NotificationType.RESERVATION_STATUS_CONFIRMED,
-                        notificationData: {
-                            reservationId: reservationWithResource.reservationId,
-                            reservationTitle: reservationWithResource.title,
-                            reservationDate: DateUtil.format(reservationWithResource.startDate),
-                            resourceId: reservationWithResource.resource.resourceId,
-                            resourceName: reservationWithResource.resource.name,
-                            resourceType: reservationWithResource.resource.type,
-                        },
-                        notiTarget,
-                    });
-                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
-                        this.eventEmitter.emit('create.notification', {
-                            notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
-                            notificationData: {
-                                reservationId: reservationWithResource.reservationId,
-                                reservationTitle: reservationWithResource.title,
-                                resourceId: reservationWithResource.resource.resourceId,
-                                resourceName: reservationWithResource.resource.name,
-                                resourceType: reservationWithResource.resource.type,
-                                beforeMinutes: beforeMinutes,
-                            },
-                            notiTarget,
-                        });
-                    }
-                }
-            } catch (error) {
-                console.log(error);
-                console.log('Notification creation failed');
-            }
-
-            return {
-                reservationId: savedReservation.reservationId,
-            };
-        } catch (error) {
-            await queryRunner.rollbackTransaction();
-            throw error;
-        } finally {
-            await queryRunner.release();
-        }
-    }
-
+    /** 예약 상세 보기 */
     async findReservationDetail(user: User, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
@@ -219,6 +110,7 @@ export class ReservationUsecase {
         return reservationResponseDto;
     }
 
+    /** 내 예약 리스트 조회 (날짜별, 자원 타입별 가능) */
     async findMyReservationList(
         employeeId: string,
         startDate?: string,
@@ -273,6 +165,7 @@ export class ReservationUsecase {
         };
     }
 
+    /** 내가 만든 예약들 중 현재 진행중인 예약 하나 */
     async findMyCurrentReservation(
         employeeId: string,
         resourceType: ResourceType,
@@ -405,6 +298,107 @@ export class ReservationUsecase {
             throw new UnauthorizedException('No Access to Reservation');
         }
         return true;
+    }
+
+    async makeReservation(user: User, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
+        const conflicts = await this.reservationService.findConflictingReservations(
+            createDto.resourceId,
+            DateUtil.date(createDto.startDate).toDate(),
+            DateUtil.date(createDto.endDate).toDate(),
+        );
+
+        if (conflicts.length > 0) {
+            throw new BadRequestException('Reservation time conflict - check in logic');
+        }
+
+        if (createDto.startDate > createDto.endDate) {
+            throw new BadRequestException('Start date must be before end date');
+        }
+
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            const reservation = this.reservationService.create(createDto);
+
+            const savedReservation = await this.reservationService.save(reservation, { queryRunner });
+
+            // 참가자 정보 저장
+            await Promise.all([
+                this.participantService.save(
+                    {
+                        reservationId: savedReservation.reservationId!,
+                        employeeId: user.employeeId,
+                        type: ParticipantsType.RESERVER,
+                    } as ReservationParticipant,
+                    { queryRunner },
+                ),
+                ...createDto.participantIds.map((employeeId) =>
+                    this.participantService.save(
+                        {
+                            reservationId: savedReservation.reservationId!,
+                            employeeId,
+                            type: ParticipantsType.PARTICIPANT,
+                        } as ReservationParticipant,
+                        { queryRunner },
+                    ),
+                ),
+            ]);
+
+            await queryRunner.commitTransaction();
+
+            try {
+                const reservationWithResource = await this.reservationService.findOne({
+                    where: { reservationId: savedReservation.reservationId! },
+                    relations: ['resource'],
+                    withDeleted: true,
+                });
+
+                if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
+                    this.createReservationClosingJob(reservationWithResource);
+                    const notiTarget = [...createDto.participantIds, user.employeeId];
+                    this.eventEmitter.emit('create.notification', {
+                        notificationType: NotificationType.RESERVATION_STATUS_CONFIRMED,
+                        notificationData: {
+                            reservationId: reservationWithResource.reservationId,
+                            reservationTitle: reservationWithResource.title,
+                            reservationDate: DateUtil.format(reservationWithResource.startDate),
+                            resourceId: reservationWithResource.resource.resourceId,
+                            resourceName: reservationWithResource.resource.name,
+                            resourceType: reservationWithResource.resource.type,
+                        },
+                        notiTarget,
+                    });
+                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
+                        this.eventEmitter.emit('create.notification', {
+                            notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
+                            notificationData: {
+                                reservationId: reservationWithResource.reservationId,
+                                reservationTitle: reservationWithResource.title,
+                                resourceId: reservationWithResource.resource.resourceId,
+                                resourceName: reservationWithResource.resource.name,
+                                resourceType: reservationWithResource.resource.type,
+                                beforeMinutes: beforeMinutes,
+                            },
+                            notiTarget,
+                        });
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+                console.log('Notification creation failed');
+            }
+
+            return {
+                reservationId: savedReservation.reservationId,
+            };
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        } finally {
+            await queryRunner.release();
+        }
     }
 
     async updateTitle(

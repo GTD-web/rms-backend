@@ -553,14 +553,14 @@ export class ResourceUsecase {
             throw new BadRequestException('Only one manager is allowed');
         }
 
-        const manager = await this.resourceManagerService.findOne({
-            where: { employeeId: managers[0].employeeId },
-            relations: ['employee', 'employee.user'],
-        });
-
-        if (!manager.employee.user.roles.includes(Role.RESOURCE_ADMIN)) {
-            throw new BadRequestException('The manager is not a resource admin');
-        }
+        // const manager = await this.resourceManagerService.findOne({
+        //     where: { employeeId: managers[0].employeeId },
+        //     relations: ['employee', 'employee.user'],
+        // });
+        // console.log(manager);
+        // if (!manager.employee.user.roles.includes(Role.RESOURCE_ADMIN)) {
+        //     throw new BadRequestException('The manager is not a resource admin');
+        // }
 
         // 1. 그룹 존재 확인
         const group = await this.resourceGroupService.findOne({
@@ -601,6 +601,7 @@ export class ResourceUsecase {
             // 5. 자원 관리자 정보 저장
             await Promise.all([
                 ...managers.map((manager) => {
+                    console.log(manager);
                     return this.resourceManagerService.save(
                         {
                             resourceId: savedResource.resourceId,
