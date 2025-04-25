@@ -8298,7 +8298,7 @@ __decorate([
     __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], ResourceController.prototype, "findResourcesByTypeAndDateWithReservations", null);
 __decorate([
-    (0, common_1.Get)('available-time'),
+    (0, common_1.Get)('availability'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({

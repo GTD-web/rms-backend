@@ -44,7 +44,7 @@ import { Public } from '@libs/decorators/public.decorator';
 @ApiBearerAuth()
 export class ReservationController {
     constructor(private readonly reservationUsecase: ReservationUsecase) {}
-
+    // check api
     @Post()
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 생성' })
@@ -59,6 +59,7 @@ export class ReservationController {
         return this.reservationUsecase.makeReservation(user, createDto);
     }
 
+    // check api - url, query
     @Get('me')
     @Roles(Role.USER)
     @ApiOperation({ summary: '내 예약 리스트 조회, 시간 별, 자원 타입별 쿼리 가능 #사용자/홈 ' })
@@ -95,6 +96,7 @@ export class ReservationController {
         return this.reservationUsecase.findMyCurrentReservation(user.employeeId, resourceType);
     }
 
+    // check api - 다른 두개의 api로 대체 예정 (upcoming)
     @Get('me/all')
     @Roles(Role.USER)
     @ApiOperation({ summary: '내 예약 및 참여 예약 조회, 타입별 쿼리 가능 #사용자/홈/추가기획사항 ' })
@@ -121,6 +123,7 @@ export class ReservationController {
         return await this.reservationUsecase.findMyAllReservations(user.employeeId, page, limit, type);
     }
 
+    // check api
     @Get(':reservationId')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 상세 조회 #사용자/예약상세페이지' })
@@ -177,6 +180,7 @@ export class ReservationController {
         return this.reservationUsecase.findReservationList(startDate, endDate, resourceType, resourceId, status);
     }
 
+    // check api
     @Patch(':reservationId/title')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 제목 수정' })
@@ -192,7 +196,7 @@ export class ReservationController {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateTitle(reservationId, updateDto);
     }
-
+    // check api
     @Patch(':reservationId/time')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 시간 수정' })
@@ -223,6 +227,7 @@ export class ReservationController {
         return this.reservationUsecase.updateStatus(reservationId, updateDto);
     }
 
+    // check api
     @Patch(':reservationId/status/cancel')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 취소 #사용자/예약상세페이지' })
@@ -238,7 +243,7 @@ export class ReservationController {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELED });
     }
-
+    // check api
     @Patch(':reservationId/participants')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 참가자 수정' })

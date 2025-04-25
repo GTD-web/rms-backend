@@ -17,6 +17,7 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 export class NotificationController {
     constructor(private readonly notificationUsecase: NotificationUsecase) {}
 
+    // check api
     @Post('subscribe')
     @ApiOperation({ summary: '웹 푸시 구독' })
     @ApiDataResponse({
@@ -51,6 +52,7 @@ export class NotificationController {
         );
     }
 
+    // check api
     @Get()
     @ApiOperation({ summary: '알람 목록 조회' })
     @ApiDataResponse({
@@ -76,6 +78,7 @@ export class NotificationController {
         return await this.notificationUsecase.findMyNotifications(employeeId, query);
     }
 
+    // check api
     @Patch(':notificationId/read')
     @ApiOperation({ summary: '알람 읽음 처리' })
     async markAsRead(@User() user: UserEntity, @Param('notificationId') notificationId: string) {

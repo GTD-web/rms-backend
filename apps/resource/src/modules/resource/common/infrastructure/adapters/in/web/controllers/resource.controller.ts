@@ -39,6 +39,7 @@ export class ResourceController {
         return this.resourceUsecase.findResources(type);
     }
 
+    // check api
     @Get('reservations')
     @Roles(Role.USER)
     @ApiOperation({ summary: '자원 별 예약 목록 조회 #사용자/자원예약/리스트 #사용자/세부예약내역' })
@@ -59,7 +60,8 @@ export class ResourceController {
         return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
     }
 
-    @Get('available-time')
+    // check api - url
+    @Get('availability')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지' })
     @ApiDataResponse({
@@ -84,6 +86,7 @@ export class ResourceController {
         return this.resourceUsecase.findAvailableTime(query);
     }
 
+    // check api
     @Patch(':resourceId/return-vehicle')
     @Roles(Role.USER)
     @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })
