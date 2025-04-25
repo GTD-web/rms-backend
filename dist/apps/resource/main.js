@@ -7510,7 +7510,6 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 const resource_manager_service_1 = __webpack_require__(/*! ../services/resource-manager.service */ "./apps/resource/src/modules/resource/common/application/services/resource-manager.service.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const vehicle_info_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/vehicle-info.usecase.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const file_service_1 = __webpack_require__(/*! @resource/modules/file/application/services/file.service */ "./apps/resource/src/modules/file/application/services/file.service.ts");
@@ -7919,21 +7918,6 @@ let ResourceUsecase = class ResourceUsecase {
         });
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
-        }
-        if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 1) {
-            throw new common_1.BadRequestException('Only one manager is allowed');
-        }
-        if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 0) {
-            const managerId = updateRequest.managers[0].employeeId;
-            const manager = await this.resourceManagerService.findOne({
-                where: {
-                    employeeId: managerId,
-                },
-                relations: ['employee', 'employee.user'],
-            });
-            if (!manager.employee.user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN)) {
-                throw new common_1.BadRequestException('The manager is not a resource admin');
-            }
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();

@@ -643,22 +643,22 @@ export class ResourceUsecase {
             throw new NotFoundException('Resource not found');
         }
 
-        if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 1) {
-            throw new BadRequestException('Only one manager is allowed');
-        }
+        // if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 1) {
+        //     throw new BadRequestException('Only one manager is allowed');
+        // }
 
-        if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 0) {
-            const managerId = updateRequest.managers[0].employeeId;
-            const manager = await this.resourceManagerService.findOne({
-                where: {
-                    employeeId: managerId,
-                },
-                relations: ['employee', 'employee.user'],
-            });
-            if (!manager.employee.user.roles.includes(Role.RESOURCE_ADMIN)) {
-                throw new BadRequestException('The manager is not a resource admin');
-            }
-        }
+        // if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 0) {
+        //     const managerId = updateRequest.managers[0].employeeId;
+        //     const manager = await this.resourceManagerService.findOne({
+        //         where: {
+        //             employeeId: managerId,
+        //         },
+        //         relations: ['employee', 'employee.user'],
+        //     });
+        //     if (!manager.employee.user.roles.includes(Role.RESOURCE_ADMIN)) {
+        //         throw new BadRequestException('The manager is not a resource admin');
+        //     }
+        // }
 
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
