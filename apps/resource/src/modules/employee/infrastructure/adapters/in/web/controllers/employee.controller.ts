@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Patch } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { EmployeeService } from '@resource/modules/employee/application/services/employee.service';
 import { Role } from '@libs/enums/role-type.enum';
@@ -25,36 +25,43 @@ export class EmployeeController {
         return this.employeeUseCase.findAllEmplyeesByDepartment();
     }
 
+    
     @Get('sync')
+    @ApiExcludeEndpoint()
     async syncEmployees() {
         return await this.employeeUseCase.syncEmployees();
     }
 
     @Post('webhook/create')
+    @ApiExcludeEndpoint()
     async webhookCreate(@Body() body: any) {
         console.log('created employee', body);
         await this.employeeUseCase.syncEmployees();
     }
 
     @Post('webhook/update')
+    @ApiExcludeEndpoint()
     async webhookUpdate(@Body() body: any) {
         console.log('updated employee', body);
         await this.employeeUseCase.syncEmployees();
     }
 
     @Post('webhook/position_changed')
+    @ApiExcludeEndpoint()
     async webhookPositionChanged(@Body() body: any) {
         console.log('position changed', body);
         await this.employeeUseCase.syncEmployees();
     }
 
     @Post('webhook/department_changed')
+    @ApiExcludeEndpoint()
     async webhookDepartmentChanged(@Body() body: any) {
         console.log('department changed', body);
         await this.employeeUseCase.syncEmployees();
     }
 
     @Post('webhook/delete')
+    @ApiExcludeEndpoint()
     async webhookDelete(@Body() body: any) {
         console.log('deleted employee', body);
         await this.employeeUseCase.syncEmployees();

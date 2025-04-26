@@ -7,12 +7,12 @@ import { UpdateVehicleInfoDto } from '@resource/modules/resource/vehicle/applica
 import { VehicleInfoResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-response.dto';
 import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
 
-@ApiTags('4. 차량 정보')
+@ApiTags('차량 정보')
 @Controller('vehicle-info')
 @ApiBearerAuth()
 export class VehicleInfoController {
     constructor(private readonly vehicleInfoUsecase: VehicleInfoUsecase) {}
-
+    // check api
     @Get(':vehicleInfoId')
     @ApiOperation({ summary: '차량 정보 조회' })
     @ApiDataResponse({
@@ -24,6 +24,7 @@ export class VehicleInfoController {
         return this.vehicleInfoUsecase.findVehicleInfo(vehicleInfoId);
     }
 
+    // check api
     @Patch(':vehicleInfoId')
     @ApiOperation({ summary: '차량 정보 수정' })
     @ApiDataResponse({

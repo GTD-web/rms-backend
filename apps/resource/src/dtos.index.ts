@@ -80,11 +80,21 @@ export {
     ReservationResponseDto,
     ReservationWithResourceResponseDto,
     ReservationWithRelationsResponseDto,
+    GroupedReservationResponseDto
 } from './modules/reservation/application/dtos/reservation-response.dto';
+
+// Reservation Snapshot Module DTOs
+export {
+    CreateReservationSnapshotDto,
+    UpdateReservationSnapshotDto,
+    ReservationSnapshotResponseDto,
+} from './modules/reservation/application/dtos/reservation-snapshot.dto';
 
 // Reservation Query DTOs
 export { ResourceQueryDto } from './modules/resource/common/application/dtos/resource-query.dto';
 export { ResourceAvailabilityDto } from './modules/resource/common/application/dtos/available-time-response.dto';
+export { CheckAvailabilityQueryDto } from './modules/resource/common/application/dtos/check-availability.dto';
+export { CheckAvailabilityResponseDto } from './modules/resource/common/application/dtos/check-availability.dto';
 
 // File Module DTOs
 export { FileResponseDto } from './modules/file/application/dtos/file-response.dto';

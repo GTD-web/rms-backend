@@ -7,7 +7,7 @@ import { EmployeeRepository } from './infrastructure/adapters/out/persistence/em
 import { EmployeeUseCase } from './application/usecases/employee.usecase';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EmployeeEventHandler } from './application/handler/employee-event.handler';
-
+import { UserEmployeeController } from './infrastructure/adapters/in/web/controllers/v1/employee.controller';
 @Module({
     imports: [TypeOrmModule.forFeature([Employee])],
     providers: [
@@ -19,7 +19,7 @@ import { EmployeeEventHandler } from './application/handler/employee-event.handl
         EmployeeUseCase,
         EmployeeEventHandler,
     ],
-    controllers: [EmployeeController],
+    controllers: [EmployeeController, UserEmployeeController],
     exports: [EmployeeService, EmployeeUseCase],
 })
 export class EmployeeModule {}

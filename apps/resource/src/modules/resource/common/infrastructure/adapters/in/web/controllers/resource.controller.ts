@@ -20,7 +20,7 @@ import {
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 
-@ApiTags('3. 자원')
+@ApiTags('자원')
 @Controller('resources')
 @ApiBearerAuth()
 export class ResourceController {

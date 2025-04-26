@@ -22,6 +22,7 @@ export class UserUsecase {
             department: user.employee?.department,
             position: user.employee?.position,
             roles: user.roles,
+            isPushNotificationEnabled: user.isPushNotificationEnabled,
         };
     }
 

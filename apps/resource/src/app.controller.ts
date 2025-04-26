@@ -21,8 +21,8 @@ import {
     VehicleMaintenanceHistoryResponseDto,
 } from './app.dto';
 
-@ApiTags('통계')
-@Controller('')
+@ApiTags('6. 통계 - 관리자 페이지')
+@Controller('v1/statistics')
 export class AppController {
     constructor(private readonly appService: AppService) {}
 

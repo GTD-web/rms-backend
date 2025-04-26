@@ -16,7 +16,7 @@ import { EmployeeNotificationService } from './application/services/employee-not
 import { EmployeeNotificationRepository } from './infrastructure/adapters/out/persistence/employee-notification.repository';
 import { EmployeeNotification } from '@libs/entities';
 import { NotificationEventHandler } from './application/handler/notification-event.handler';
-
+import { UserNotificationController } from './infrastructure/adapters/in/web/controllers/v1/notification.controller';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Notification, EmployeeNotification]),
@@ -46,7 +46,7 @@ import { NotificationEventHandler } from './application/handler/notification-eve
         },
         NotificationEventHandler,
     ],
-    controllers: [NotificationController],
+    controllers: [NotificationController, UserNotificationController],
     exports: [
         NotificationService,
         AdapterService,

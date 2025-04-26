@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, NotFoundException, UnauthorizedExcepti
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
 import {
     CreateReservationResponseDto,
+    GroupedReservationResponseDto,
     ReservationResponseDto,
     ReservationWithRelationsResponseDto,
 } from '../dtos/reservation-response.dto';
@@ -36,6 +37,7 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { CronJob } from 'cron/dist';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 
 @Injectable()
 export class ReservationUsecase {
@@ -113,18 +115,18 @@ export class ReservationUsecase {
     /** 내 예약 리스트 조회 (날짜별, 자원 타입별 가능) */
     async findMyReservationList(
         employeeId: string,
-        startDate?: string,
-        resourceType?: ResourceType,
         page?: number,
         limit?: number,
+        resourceType?: ResourceType,
+        startDate?: string,
     ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
         const where: FindOptionsWhere<Reservation> = { participants: { employeeId, type: ParticipantsType.RESERVER } };
-        if (startDate) {
-            where.startDate = Between(
-                DateUtil.date(startDate + ' 00:00:00').toDate(),
-                DateUtil.date(startDate + ' 23:59:59').toDate(),
-            );
-        }
+        // if (startDate) {
+        //     where.startDate = Between(
+        //         DateUtil.date(startDate + ' 00:00:00').toDate(),
+        //         DateUtil.date(startDate + ' 23:59:59').toDate(),
+        //     );
+        // }
         if (resourceType) {
             where.resource = {
                 type: resourceType as ResourceType,
@@ -186,6 +188,48 @@ export class ReservationUsecase {
             withDeleted: true,
         });
         return reservation ? new ReservationWithRelationsResponseDto(reservation) : null;
+    }
+
+    async findMyUpcomingReservationList(
+        employeeId: string,
+        query?: PaginationQueryDto,
+    ): Promise<PaginationData<GroupedReservationResponseDto>> {
+        const { page, limit } = query;
+        const today = DateUtil.now().toDate();
+        const where: FindOptionsWhere<Reservation> = {
+            participants: { employeeId, type: ParticipantsType.RESERVER },
+            status: Not(ReservationStatus.CLOSED),
+            // 시간에 대한 조건은 변경 될 수 있음음
+            // startDate: LessThanOrEqual(today),
+            endDate: MoreThanOrEqual(today),
+        };
+        const options: RepositoryOptions = {
+            where,
+            relations: ['participants', 'participants.employee'],
+        };
+        const reservations = await this.reservationService.findAll(options);
+        const count = reservations.length;
+
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: In(reservations.map((r) => r.reservationId)),
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        return null;
+        // return {
+        //     items: reservationWithParticipants.map(
+        //         (reservation) => new GroupedReservationResponseDto(reservation),
+        //     ),
+        //     meta: {
+        //         total: count,
+        //         page,
+        //         limit,
+        //         hasNext: page * limit < count,
+        //     },
+        // };
     }
 
     async findMyAllReservations(
@@ -593,36 +637,6 @@ export class ReservationUsecase {
 
         return new ReservationResponseDto(updatedReservation);
     }
-
-    // async updateCcReceipient(
-    //     reservationId: string,
-    //     updateDto: UpdateReservationCcReceipientDto,
-    // ): Promise<ReservationResponseDto> {
-    //     // 기존 수신참조자 조회
-    //     const ccReceipients = await this.participantService.findAll({ where: { reservationId } });
-
-    //     // 기존 수신참조자 삭제
-    //     await Promise.all(
-    //         ccReceipients.map((ccReceipient) => this.participantService.delete(ccReceipient.participantId)),
-    //     );
-
-    //     // 새로운 수신참조자 저장
-    //     await Promise.all(
-    //         updateDto.ccReceipientIds.map((employeeId) =>
-    //             this.participantService.save({
-    //                 reservationId,
-    //                 employeeId,
-    //                 type: ParticipantsType.CC_RECEIPIENT,
-    //             } as ReservationParticipant),
-    //         ),
-    //     );
-
-    //     const updatedReservation = await this.reservationService.findOne({
-    //         where: { reservationId },
-    //         relations: ['participants'],
-    //     });
-    //     return new ReservationResponseDto(updatedReservation);
-    // }
 
     // 이 아래에 Job 삭제 메서드 추가
     private deleteReservationClosingJob(reservationId: string): void {

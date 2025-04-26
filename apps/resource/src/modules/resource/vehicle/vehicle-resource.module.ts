@@ -14,6 +14,9 @@ import { VehicleInfoController } from './infrastructure/adapters/in/web/controll
 import { VehicleInfoUsecase } from './application/usecases/vehicle-info.usecase';
 import { ConsumableUsecase } from './application/usecases/consumable.usecase';
 import { MaintenanceUsecase } from './application/usecases/maintenance.usecase';
+import { AdminVehicleInfoController } from './infrastructure/adapters/in/web/controllers/v1/admin.vehicle-info.controller';
+import { AdminConsumableController } from './infrastructure/adapters/in/web/controllers/v1/admin.consumable.controller';
+import { AdminMaintenanceController } from './infrastructure/adapters/in/web/controllers/v1/admin.maintenance.controller';
 
 @Module({
     imports: [TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance])],
@@ -41,7 +44,7 @@ import { MaintenanceUsecase } from './application/usecases/maintenance.usecase';
             useExisting: MaintenanceRepository,
         },
     ],
-    controllers: [VehicleInfoController, ConsumableController, MaintenanceController],
+    controllers: [VehicleInfoController, ConsumableController, MaintenanceController, AdminVehicleInfoController, AdminConsumableController, AdminMaintenanceController],
     exports: [
         VehicleResourceHandler,
         VehicleInfoService,

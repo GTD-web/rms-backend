@@ -6,7 +6,6 @@ import { ResourceGroupService } from './common/application/services/resource-gro
 import { ResourceManagerService } from './common/application/services/resource-manager.service';
 import { ResourceController } from './common/infrastructure/adapters/in/web/controllers/resource.controller';
 import { ResourceGroupController } from './common/infrastructure/adapters/in/web/controllers/resource-group.controller';
-import { ResourceManagerController } from './common/infrastructure/adapters/in/web/controllers/resource-manager.controller';
 import { ResourceRepository } from './common/infrastructure/adapters/out/persistence/resource.repository';
 import { ResourceGroupRepository } from './common/infrastructure/adapters/out/persistence/resource-group.repository';
 import { ResourceManagerRepository } from './common/infrastructure/adapters/out/persistence/resource-manager.repository';
@@ -20,6 +19,10 @@ import { AccommodationResourceHandler } from './accommodation/application/handle
 import { ResourceGroupUsecase } from './common/application/usecases/resource-group.usecase';
 import { ResourceUsecase } from './common/application/usecases/resource.usecase';
 import { FileModule } from '../file/file.module';
+import { AdminResourceController } from './common/infrastructure/adapters/in/web/controllers/v1/admin.resource.controller';
+import { AdminResourceGroupController } from './common/infrastructure/adapters/in/web/controllers/v1/admin.resource-group.controller';
+import { UserResourceGroupController } from './common/infrastructure/adapters/in/web/controllers/v1/resource-group.controller';
+import { UserResourceController } from './common/infrastructure/adapters/in/web/controllers/v1/resource.controller';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Resource, ResourceGroup, ResourceManager]),
@@ -62,7 +65,12 @@ import { FileModule } from '../file/file.module';
         ResourceUsecase,
         ResourceGroupUsecase,
     ],
-    controllers: [ResourceController, ResourceGroupController, ResourceManagerController],
+    controllers: [ResourceController, 
+        ResourceGroupController, 
+        AdminResourceController, 
+        AdminResourceGroupController,   
+        UserResourceGroupController, 
+        UserResourceController],
     exports: [ResourceService, ResourceGroupService, ResourceManagerService],
 })
 export class ResourceModule {}

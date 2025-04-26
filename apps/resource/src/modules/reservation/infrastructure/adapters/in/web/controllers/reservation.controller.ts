@@ -39,7 +39,7 @@ import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { Public } from '@libs/decorators/public.decorator';
 
-@ApiTags('2. 예약')
+@ApiTags('예약')
 @Controller('reservations')
 @ApiBearerAuth()
 export class ReservationController {
@@ -78,7 +78,7 @@ export class ReservationController {
         @Query() query?: PaginationQueryDto,
     ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
         const { page, limit } = query;
-        return this.reservationUsecase.findMyReservationList(user.employeeId, startDate, resourceType, page, limit);
+        return this.reservationUsecase.findMyReservationList(user.employeeId, page, limit, resourceType, startDate);
     }
 
     @Get('me/current')
@@ -123,7 +123,7 @@ export class ReservationController {
         return await this.reservationUsecase.findMyAllReservations(user.employeeId, page, limit, type);
     }
 
-    // check api
+    // check api - user, admin 구분 필요
     @Get(':reservationId')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 상세 조회 #사용자/예약상세페이지' })
@@ -137,11 +137,12 @@ export class ReservationController {
     ): Promise<ReservationWithRelationsResponseDto> {
         return this.reservationUsecase.findReservationDetail(user, reservationId);
     }
-
+    
+    // check api
     @Get()
     @Roles(Role.USER)
     @ApiOperation({
-        summary: '예약 리스트 조회 #사용자/자원캘린더 #사용자/자원예약/예약가능시간확인 #관리자/홈 #관리자/예약관리',
+        summary: '예약 리스트 조회 #관리자/예약관리',
     })
     @ApiDataResponse({
         description: '예약 리스트 조회 성공',
@@ -180,7 +181,7 @@ export class ReservationController {
         return this.reservationUsecase.findReservationList(startDate, endDate, resourceType, resourceId, status);
     }
 
-    // check api
+    // check api - user, admin 구분 필요
     @Patch(':reservationId/title')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 제목 수정' })
@@ -196,7 +197,7 @@ export class ReservationController {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateTitle(reservationId, updateDto);
     }
-    // check api
+    // check api - user, admin 구분 필요
     @Patch(':reservationId/time')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 시간 수정' })
@@ -213,6 +214,7 @@ export class ReservationController {
         return this.reservationUsecase.updateTime(reservationId, updateDto);
     }
 
+    // check api
     @Patch(':reservationId/status')
     @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' })
@@ -243,7 +245,7 @@ export class ReservationController {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELED });
     }
-    // check api
+    // check api - user, admin 구분 필요
     @Patch(':reservationId/participants')
     @Roles(Role.USER)
     @ApiOperation({ summary: '예약 참가자 수정' })

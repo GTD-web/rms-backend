@@ -14,7 +14,7 @@ import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceGroupService } from '../../../../../application/services/resource-group.service';
 import { UpdateResourceGroupOrdersDto } from '@resource/modules/resource/common/application/dtos/update-resource.dto';
 
-@ApiTags('3. 자원 그룹')
+@ApiTags('자원 그룹')
 @Controller('resource-groups')
 @ApiBearerAuth()
 export class ResourceGroupController {

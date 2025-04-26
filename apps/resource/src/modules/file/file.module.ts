@@ -8,9 +8,11 @@ import { LocalStorageAdapter } from './infrastructure/adapters/out/storage/local
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_CONFIG } from '@libs/configs/env.config';
 import { S3StorageAdapter } from './infrastructure/adapters/out/storage/s3-stroage.adapter';
+import { CommonFileController } from './infrastructure/adapters/in/web/controllers/v1/file.controller';
+
 @Module({
     imports: [TypeOrmModule.forFeature([File]), ConfigModule.forFeature(APP_CONFIG)],
-    controllers: [FileController],
+    controllers: [FileController, CommonFileController],
     providers: [
         ConfigService,
         FileService,

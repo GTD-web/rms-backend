@@ -31,6 +31,9 @@ export class User {
     @Column({ type: 'jsonb', nullable: true, comment: '웹푸시 알림 관련 구독 정보' })
     subscription: PushNotificationSubscription;
 
+    @Column({ default: true, comment: '웹푸시 알림 설정 여부' })
+    isPushNotificationEnabled: boolean;
+
     @Column({ type: 'enum', enum: Role, array: true, default: [Role.USER], comment: '사용자 역할' })
     roles: Role[];
 

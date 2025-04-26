@@ -6,10 +6,10 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { ResourceManagerUseCase } from '@resource/modules/auth/application/usecases/resource-manager.usecase';
 import { EmplyeesByDepartmentResponseDto } from '@resource/dtos.index';
 
-@ApiTags('3. 자원 관리자')
+@ApiTags('3. 자원 관리자 - 관리자 페이지')
 @ApiBearerAuth()
-@Controller('resource-managers')
-export class ResourceManagerController {
+@Controller('v1/admin/resource-managers')
+export class AdminResourceManagerController {
     constructor(private readonly resourceManagerUseCase: ResourceManagerUseCase) {}
 
     @Get()

@@ -171,3 +171,14 @@ export class CreateReservationResponseDto {
     @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
     reservationId: string;
 }
+
+export class GroupedReservationResponseDto {
+    @ApiProperty({ description: '날짜 (YYYY-MM-DD 형식)' })
+    date: string;
+
+    @ApiProperty({ 
+        description: '해당 날짜의 예약 목록',
+        type: [ReservationWithRelationsResponseDto]
+    })
+    reservations: ReservationWithRelationsResponseDto[];
+}

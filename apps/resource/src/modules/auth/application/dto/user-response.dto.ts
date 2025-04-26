@@ -35,4 +35,9 @@ export class UserResponseDto {
         example: ['USER', 'RESOURCE_ADMIN', 'SYSTEM_ADMIN'],
     })
     roles: string[];
+
+    @ApiProperty({
+        example: true,
+    })
+    isPushNotificationEnabled: boolean;
 }

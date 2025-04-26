@@ -7,7 +7,7 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-response.dto';
 
 @Public()
-@ApiTags('1. 인증')
+@ApiTags('인증')
 @Controller('auth')
 export class AuthController {
     constructor(@Inject('AuthService') private authService: AuthService) {}

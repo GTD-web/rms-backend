@@ -8,6 +8,8 @@ import { ReservationParticipantRepository } from './infrastructure/adapters/out/
 import { ParticipantService } from './application/services/participant.service';
 import { ReservationUsecase } from './application/usecases/reservation.usecase';
 import { ReservationEventHandler } from './application/handler/reservation-event.handler';
+import { AdminReservationController } from './infrastructure/adapters/in/web/controllers/v1/admin.reservation.controller';
+import { UserReservationController } from './infrastructure/adapters/in/web/controllers/v1/reservation.controller';
 
 @Module({
     imports: [TypeOrmModule.forFeature([Reservation, ReservationParticipant, Schedule])],
@@ -25,7 +27,7 @@ import { ReservationEventHandler } from './application/handler/reservation-event
         ReservationUsecase,
         ReservationEventHandler,
     ],
-    controllers: [ReservationController],
+    controllers: [ReservationController, AdminReservationController, UserReservationController],
     exports: [ReservationService],
 })
 export class ReservationModule {}
