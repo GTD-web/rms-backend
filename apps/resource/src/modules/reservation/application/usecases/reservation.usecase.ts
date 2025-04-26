@@ -113,6 +113,7 @@ export class ReservationUsecase {
     }
 
     /** 내 예약 리스트 조회 (날짜별, 자원 타입별 가능) */
+    // v1 내 예약 히스토리리
     async findMyReservationList(
         employeeId: string,
         page?: number,
@@ -167,7 +168,8 @@ export class ReservationUsecase {
         };
     }
 
-    /** 내가 만든 예약들 중 현재 진행중인 예약 하나 */
+    /** 내가 만든 예약들 중 현재 진행중인 예약 하나 */ 
+    // Deprecated
     async findMyCurrentReservation(
         employeeId: string,
         resourceType: ResourceType,
@@ -190,22 +192,28 @@ export class ReservationUsecase {
         return reservation ? new ReservationWithRelationsResponseDto(reservation) : null;
     }
 
+    // v1 홈화면 예약 리스트 조회
     async findMyUpcomingReservationList(
         employeeId: string,
         query?: PaginationQueryDto,
+        resourceType?: ResourceType,
     ): Promise<PaginationData<GroupedReservationResponseDto>> {
         const { page, limit } = query;
-        const today = DateUtil.now().toDate();
+        const today = DateUtil.date(DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
         const where: FindOptionsWhere<Reservation> = {
             participants: { employeeId, type: ParticipantsType.RESERVER },
-            status: Not(ReservationStatus.CLOSED),
-            // 시간에 대한 조건은 변경 될 수 있음음
+            // status: Not(ReservationStatus.CLOSED),
             // startDate: LessThanOrEqual(today),
             endDate: MoreThanOrEqual(today),
         };
+        if (resourceType) {
+            where.resource = {
+                type: resourceType as ResourceType,
+            };
+        }
         const options: RepositoryOptions = {
             where,
-            relations: ['participants', 'participants.employee'],
+            relations: ['resource', 'participants', 'participants.employee'],
         };
         const reservations = await this.reservationService.findAll(options);
         const count = reservations.length;
@@ -214,24 +222,99 @@ export class ReservationUsecase {
             where: {
                 reservationId: In(reservations.map((r) => r.reservationId)),
             },
+            order: {
+                startDate: 'ASC',
+            },
             skip: (page - 1) * limit,
             take: limit,
         });
 
-        return null;
-        // return {
-        //     items: reservationWithParticipants.map(
-        //         (reservation) => new GroupedReservationResponseDto(reservation),
-        //     ),
-        //     meta: {
-        //         total: count,
-        //         page,
-        //         limit,
-        //         hasNext: page * limit < count,
-        //     },
-        // };
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: (reservations as Reservation[]).map(reservation => new ReservationWithRelationsResponseDto(reservation))
+        }));
+
+        return {
+            items: groupedReservationsResponse,
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
     }
 
+    // v1 홈화면 일정 리스트 조회
+    async findMyAllSchedules(
+        employeeId: string,
+        query?: PaginationQueryDto,
+        resourceType?: ResourceType,
+    ): Promise<PaginationData<GroupedReservationResponseDto>> {
+        const { page, limit } = query;
+        const today = DateUtil.date(DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
+        const where: FindOptionsWhere<Reservation> = {
+            participants: { employeeId },
+            status: ReservationStatus.CONFIRMED,
+            endDate: MoreThanOrEqual(today),
+        };
+        if (resourceType) {
+            where.resource = {
+                type: resourceType as ResourceType,
+            };
+        }
+        const options: RepositoryOptions = {
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+        };
+        const reservations = await this.reservationService.findAll(options);
+        const count = reservations.length;
+
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: In(reservations.map((r) => r.reservationId)),
+            },
+            order: {
+                startDate: 'ASC',
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: (reservations as Reservation[]).map(reservation => new ReservationWithRelationsResponseDto(reservation))
+        }));
+
+        return {
+            items: groupedReservationsResponse,
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+    
     async findMyAllReservations(
         employeeId: string,
         page?: number,
@@ -272,6 +355,7 @@ export class ReservationUsecase {
         };
     }
 
+    // v1 관리자 예약 리스트 조회
     async findReservationList(
         startDate?: string,
         endDate?: string,
@@ -673,4 +757,6 @@ export class ReservationUsecase {
         this.schedulerRegistry.addCronJob(jobName, job as any);
         job.start();
     }
+
+    
 }

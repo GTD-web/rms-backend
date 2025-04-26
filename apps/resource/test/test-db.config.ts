@@ -48,7 +48,7 @@ export async function getTestDbConfig(testId: string): Promise<TypeOrmModuleOpti
         dataSources.set(testId, dataSource);
 
         // Seed initial data
-        await seedTestData(dataSource);
+        // await seedTestData(dataSource);
     }
 
     const container = containers.get(testId);
@@ -65,74 +65,74 @@ export async function getTestDbConfig(testId: string): Promise<TypeOrmModuleOpti
     };
 }
 
-async function seedTestData(dataSource: DataSource) {
-    // Clear existing data
-    await dataSource.synchronize(true);
+// async function seedTestData(dataSource: DataSource) {
+//     // Clear existing data
+//     await dataSource.synchronize(true);
 
-    // Create repositories
-    const employeeRepo = dataSource.getRepository(Employee);
-    const resourceGroupRepo = dataSource.getRepository(ResourceGroup);
-    const userRepo = dataSource.getRepository(User);
+//     // Create repositories
+//     const employeeRepo = dataSource.getRepository(Employee);
+//     const resourceGroupRepo = dataSource.getRepository(ResourceGroup);
+//     const userRepo = dataSource.getRepository(User);
 
-    // Seed employees and users
-    for (const employeeData of employeesSeedData) {
-        // Create employee first
-        const savedEmployee = await employeeRepo.save(employeeData);
+//     // Seed employees and users
+//     for (const employeeData of employeesSeedData) {
+//         // Create employee first
+//         const savedEmployee = await employeeRepo.save(employeeData);
 
-        // Create associated user
-        const hashedPassword = await bcrypt.hash(employeeData.password, 10);
-        const user = await userRepo.save({
-            email: employeeData.email,
-            password: hashedPassword,
-            employeeId: savedEmployee.employeeId,
-            roles: employeeData.roles,
-        });
+//         // Create associated user
+//         const hashedPassword = await bcrypt.hash(employeeData.password, 10);
+//         const user = await userRepo.save({
+//             email: employeeData.email,
+//             password: hashedPassword,
+//             employeeId: savedEmployee.employeeId,
+//             roles: employeeData.roles,
+//         });
 
-        // Update employee with userId
-        savedEmployee.userId = user.userId;
-        await employeeRepo.save(savedEmployee);
-    }
+//         // Update employee with userId
+//         savedEmployee.userId = user.userId;
+//         await employeeRepo.save(savedEmployee);
+//     }
 
-    // 1. 상위 자원 그룹 생성
-    const parentGroups = await resourceGroupRepo.save(
-        resourceGroupsSeedData.map((group) => ({
-            ...group,
-            parentResourceGroupId: null,
-        })),
-    );
+//     // 1. 상위 자원 그룹 생성
+//     const parentGroups = await resourceGroupRepo.save(
+//         resourceGroupsSeedData.map((group) => ({
+//             ...group,
+//             parentResourceGroupId: null,
+//         })),
+//     );
 
-    // 2. 하위 자원 그룹 생성
-    const subGroups = [];
-    for (const parentGroup of parentGroups) {
-        if (parentGroup.type === ResourceType.VEHICLE) {
-            const subGroup = await resourceGroupRepo.save({
-                ...subResourceGroupsSeedData[0],
-                parentResourceGroupId: parentGroup.resourceGroupId,
-            });
-            subGroups.push(subGroup);
-        }
-    }
+//     // 2. 하위 자원 그룹 생성
+//     const subGroups = [];
+//     for (const parentGroup of parentGroups) {
+//         if (parentGroup.type === ResourceType.VEHICLE) {
+//             const subGroup = await resourceGroupRepo.save({
+//                 ...subResourceGroupsSeedData[0],
+//                 parentResourceGroupId: parentGroup.resourceGroupId,
+//             });
+//             subGroups.push(subGroup);
+//         }
+//     }
 
-    // 3. 자원 생성
-    const resourceRepo = dataSource.getRepository(Resource);
+//     // 3. 자원 생성
+//     const resourceRepo = dataSource.getRepository(Resource);
 
-    // 하위 그룹에 속한 자원 생성 (하위 그룹이 있는 경우)
-    if (subGroups.length > 0) {
-        const subGroupResources = await Promise.all(
-            resourcesSeedData.map((resource) =>
-                resourceRepo.save({
-                    name: resource.title,
-                    description: resource.description,
-                    type: resource.type,
-                    resourceGroupId: subGroups[0].resourceGroupId,
-                    notifyParticipantChange: true,
-                    notifyReservationChange: true,
-                    images: [],
-                }),
-            ),
-        );
-    }
-}
+//     // 하위 그룹에 속한 자원 생성 (하위 그룹이 있는 경우)
+//     if (subGroups.length > 0) {
+//         const subGroupResources = await Promise.all(
+//             resourcesSeedData.map((resource) =>
+//                 resourceRepo.save({
+//                     name: resource.title,
+//                     description: resource.description,
+//                     type: resource.type,
+//                     resourceGroupId: subGroups[0].resourceGroupId,
+//                     notifyParticipantChange: true,
+//                     notifyReservationChange: true,
+//                     images: [],
+//                 }),
+//             ),
+//         );
+//     }
+// }
 
 export async function clearTestData(testId: string) {
     const dataSource = dataSources.get(testId);

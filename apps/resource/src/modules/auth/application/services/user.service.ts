@@ -41,23 +41,23 @@ export class UserService {
         return updatedUser;
     }
 
-    async addRole(employeeId: string, role: Role, repositoryOptions?: RepositoryOptions): Promise<void> {
-        const user = await this.userRepository.findOne({ where: { employeeId }, relations: ['employee'] });
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-        if (!user.roles.includes(role)) {
-            user.roles.push(role);
-            await this.userRepository.update(user.userId, user, repositoryOptions);
-        }
-    }
+    // async addRole(employeeId: string, role: Role, repositoryOptions?: RepositoryOptions): Promise<void> {
+    //     const user = await this.userRepository.findOne({ where: { employeeId }, relations: ['employee'] });
+    //     if (!user) {
+    //         throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    //     }
+    //     if (!user.roles.includes(role)) {
+    //         user.roles.push(role);
+    //         await this.userRepository.update(user.userId, user, repositoryOptions);
+    //     }
+    // }
 
-    async removeRole(employeeId: string, role: Role, repositoryOptions?: RepositoryOptions): Promise<void> {
-        const user = await this.userRepository.findOne({ where: { employeeId }, relations: ['employee'] });
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-        user.roles = user.roles.filter((r) => r !== role);
-        await this.userRepository.update(user.userId, user, repositoryOptions);
-    }
+    // async removeRole(employeeId: string, role: Role, repositoryOptions?: RepositoryOptions): Promise<void> {
+    //     const user = await this.userRepository.findOne({ where: { employeeId }, relations: ['employee'] });
+    //     if (!user) {
+    //         throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    //     }
+    //     user.roles = user.roles.filter((r) => r !== role);
+    //     await this.userRepository.update(user.userId, user, repositoryOptions);
+    // }
 }

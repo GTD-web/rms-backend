@@ -14,21 +14,21 @@ import { UpdateNotificationSettingsDto } from '@resource/modules/auth/applicatio
 @ApiBearerAuth()
 export class UserUserController {
     constructor(private readonly userUsecase: UserUsecase) {}
-    // check api
+
     @Get('me')
     @ApiOperation({ summary: '내 상세 정보 조회' })
     @ApiDataResponse({ status: 200, description: '내 상세 정보 조회 성공', type: UserResponseDto })
     findUser(@User() user: UserEntity) {
         return this.userUsecase.findByUserId(user.userId);
     }
-    // check api - url
+
     @Post('check-password')
     @ApiOperation({ summary: '비밀번호 확인' })
     @ApiDataResponse({ status: 200, description: '비밀번호 확인 성공' })
     checkPassword(@User() user: UserEntity, @Body() checkPasswordDto: CheckPasswordDto) {
         return this.userUsecase.checkPassword(user.userId, checkPasswordDto.password);
     }
-    // check api - url
+
     @Post('change-password')
     @ApiOperation({ summary: '비밀번호 변경' })
     @ApiDataResponse({ status: 200, description: '비밀번호 변경 성공' })
@@ -47,6 +47,6 @@ export class UserUserController {
         @User() user: UserEntity,
         @Body() updateDto: UpdateNotificationSettingsDto,
     ): Promise<UserResponseDto> {
-        return null;
+        return this.userUsecase.changeNotificationSettings(user.userId, updateDto);
     }
 }

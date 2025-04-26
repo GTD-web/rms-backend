@@ -85,7 +85,15 @@ export class UserResourceController {
     async checkAvailability(
         @Query() query: CheckAvailabilityQueryDto,
     ): Promise<CheckAvailabilityResponseDto> {
-        return null;
+        const isAvailable = await this.resourceUsecase.checkAvailability(
+            query.resourceId,
+            query.startDate,
+            query.endDate,
+        );
+
+        return {
+            isAvailable,
+        };
     }
 
     // check api

@@ -13,7 +13,14 @@ export class UserEventHandler {
     async handleUserRoleAddedEvent(payload: { employeeId: string; role: Role; repositoryOptions?: RepositoryOptions }) {
         console.log(`Role ${payload.role} added to user ${payload.employeeId}`);
         // 역할 추가 이벤트에 대한 처리 로직
-        await this.userService.addRole(payload.employeeId, payload.role, payload.repositoryOptions);
+        const user = await this.userService.findByEmployeeId(payload.employeeId);
+        if (!user) {
+            throw new NotFoundException('사용자를 찾을 수 없습니다.');
+        }
+        if (!user.roles.includes(payload.role)) {
+            user.roles.push(payload.role);
+            await this.userService.update(user, payload.repositoryOptions);
+        }   
     }
 
     @OnEvent('remove.user.role')
@@ -24,7 +31,12 @@ export class UserEventHandler {
     }) {
         console.log(`Role ${payload.role} removed from user ${payload.employeeId}`);
         // 역할 제거 이벤트에 대한 처리 로직
-        await this.userService.removeRole(payload.employeeId, payload.role, payload.repositoryOptions);
+        const user = await this.userService.findByEmployeeId(payload.employeeId);
+        if (!user) {
+            throw new NotFoundException('사용자를 찾을 수 없습니다.');
+        }
+        user.roles = user.roles.filter((r) => r !== payload.role);
+        await this.userService.update(user, payload.repositoryOptions);
     }
 
     @OnEvent('update.user.subscription')
@@ -39,7 +51,15 @@ export class UserEventHandler {
         if (!user) {
             throw new NotFoundException('User not found');
         }
-        user.subscription = payload.subscription;
+
+        if (user.subscriptions) {
+            if (user.subscriptions.length > 4) {
+                user.subscriptions.shift()
+            }
+            user.subscriptions.push(payload.subscription)
+        } else {
+            user.subscriptions = [payload.subscription];
+        }
         await this.userService.update(user);
     }
 
@@ -65,6 +85,6 @@ export class UserEventHandler {
             throw new NotFoundException('User not found');
         }
 
-        return user.subscription;
+        return user.subscriptions;
     }
 }

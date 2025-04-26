@@ -480,6 +480,29 @@ export class ResourceUsecase {
         return d1.toDate().getTime() >= d2.toDate().getTime();
     }
 
+    async checkAvailability(
+        resourceId: string,
+        startDate: string,
+        endDate: string,
+    ): Promise<boolean> {
+        const startDateObj = DateUtil.date(startDate).toDate();
+        const endDateObj = DateUtil.date(endDate).toDate();
+
+        const resource = await this.resourceService.findOne({
+            where: {
+                resourceId: resourceId,
+                reservations: {
+                    status: ReservationStatus.CONFIRMED,
+                    startDate: LessThan(endDateObj),
+                    endDate: MoreThanOrEqual(startDateObj),
+                },
+            },
+            relations: ['reservations'],
+        });
+
+        return !!resource;
+    }
+
     async returnVehicle(user: UserEntity, resourceId: string, updateDto: ReturnVehicleDto): Promise<boolean> {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();

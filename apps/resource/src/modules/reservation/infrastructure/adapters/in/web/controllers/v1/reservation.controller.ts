@@ -91,23 +91,26 @@ export class UserReservationController {
     })
     async findMyUpcomingReservationList(
         @User() user: UserEntity,
+        @Query('resourceType') resourceType?: ResourceType,
         @Query() query?: PaginationQueryDto,
     ): Promise<PaginationData<GroupedReservationResponseDto>> {
-        return this.reservationUsecase.findMyUpcomingReservationList(user.employeeId, query);
+        return this.reservationUsecase.findMyUpcomingReservationList(user.employeeId, query, resourceType);
     }
 
     @Get('my-upcoming-schedules')
     @Roles(Role.USER)
-    @ApiOperation({ summary: '내 일정 리스트 조회' })
+    @ApiOperation({ summary: '내 일정 리스트 조회 (예약자/참석자 모두 포함)' })
     @ApiDataResponse({
-        description: '내 일정 리스트 조회',
+        description: '내 일정 리스트 조회 (예약자/참석자 모두 포함)',
         type: [GroupedReservationResponseDto],
     })
+    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
     async findMyUpcomingSchedules(
         @User() user: UserEntity,
+        @Query('resourceType') resourceType?: ResourceType,
         @Query() query?: PaginationQueryDto,
     ): Promise<PaginationData<GroupedReservationResponseDto>> {
-        return null
+        return this.reservationUsecase.findMyAllSchedules(user.employeeId, query, resourceType);
     }
 
     @Get(':reservationId')

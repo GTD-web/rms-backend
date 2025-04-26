@@ -3,6 +3,7 @@ import { User } from '@libs/entities';
 import { UserService } from '../services/user.service';
 import { UserResponseDto } from '@resource/dtos.index';
 import * as bcrypt from 'bcrypt';
+import { UpdateNotificationSettingsDto } from '../dto/notification-settings.dto';
 
 @Injectable()
 export class UserUsecase {
@@ -42,4 +43,14 @@ export class UserUsecase {
         user.password = await bcrypt.hash(password, 10);
         await this.userService.update(user);
     }
+
+    async changeNotificationSettings(userId: string, updateDto: UpdateNotificationSettingsDto): Promise<UserResponseDto> {
+        const user = await this.userService.findByUserId(userId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        user.isPushNotificationEnabled = updateDto.isPushNotificationEnabled;
+        await this.userService.update(user);
+        return this.findByUserId(userId);
+    }   
 }

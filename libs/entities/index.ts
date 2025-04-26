@@ -20,6 +20,7 @@ import {
     VehicleMaintenanceHistory,
     ConsumableMaintenanceStats,
 } from './view';
+import { ReservationSnapshot } from './reservation-snapshot.entity';
 
 export const Entities = [
     Employee,
@@ -30,6 +31,7 @@ export const Entities = [
     MeetingRoomInfo,
     AccommodationInfo,
     Reservation,
+    ReservationSnapshot,
     ReservationParticipant,
     Schedule,
     ResourceManager,
@@ -53,6 +55,7 @@ export const EntitiesMap = {
     MeetingRoomInfo,
     AccommodationInfo,
     Reservation,
+    ReservationSnapshot,
     ReservationParticipant,
     Schedule,
     ResourceManager,
@@ -76,6 +79,7 @@ export {
     MeetingRoomInfo,
     AccommodationInfo,
     Reservation,
+    ReservationSnapshot,
     ReservationParticipant,
     Schedule,
     ResourceManager,

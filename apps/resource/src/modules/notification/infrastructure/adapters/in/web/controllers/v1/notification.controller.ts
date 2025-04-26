@@ -17,7 +17,6 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 export class UserNotificationController {
     constructor(private readonly notificationUsecase: NotificationUsecase) {}
 
-    // check api
     @Post('subscribe')
     @ApiOperation({ summary: '웹 푸시 구독' })
     @ApiDataResponse({
@@ -27,16 +26,6 @@ export class UserNotificationController {
     async subscribe(@User() user: UserEntity, @Body() subscription: PushSubscriptionDto): Promise<void> {
         await this.notificationUsecase.subscribe(user, subscription);
     }
-
-    // @Post('unsubscribe')
-    // @ApiOperation({ summary: '웹 푸시 구독 취소' })
-    // @ApiDataResponse({
-    //     status: 200,
-    //     description: '웹 푸시 구독 취소 성공',
-    // })
-    // async unsubscribe(@User() user: UserEntity) {
-    //     await this.notificationUsecase.unsubscribe(user);
-    // }
 
     @Post('send')
     @ApiOperation({ summary: '웹 푸시 알림 전송' })
@@ -52,7 +41,6 @@ export class UserNotificationController {
         );
     }
 
-    // check api
     @Get()
     @ApiOperation({ summary: '알람 목록 조회' })
     @ApiDataResponse({
@@ -78,35 +66,11 @@ export class UserNotificationController {
         return await this.notificationUsecase.findMyNotifications(employeeId, query);
     }
 
-    // check api
     @Patch(':notificationId/read')
     @ApiOperation({ summary: '알람 읽음 처리' })
     async markAsRead(@User() user: UserEntity, @Param('notificationId') notificationId: string) {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
     }
-
-    // @ApiTags('알림테스트')
-    // @Post('send/test')
-    // @ApiOperation({ summary: '알람 테스트 전송' })
-    // @ApiDataResponse({
-    //     status: 200,
-    //     description: '알람 테스트 전송 성공',
-    // })
-    // @ApiBody({
-    //     schema: {
-    //         type: 'object',
-    //         properties: {
-    //             notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-    //             data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-    //         },
-    //     },
-    // })
-    // async sendTest(
-    //     @User() user: UserEntity,
-    //     @Body() sendNotificationDto: { notification: { title: string; body: string }; target: string[] },
-    // ) {
-    //     await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
-    // }
 
     // @Patch(':employeeId/readAll')
     // @ApiOperation({ summary: '모든 알람 읽음 처리' })

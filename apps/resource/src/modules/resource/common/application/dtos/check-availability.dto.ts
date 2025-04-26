@@ -1,14 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsUUID } from 'class-validator';
+import { IsDate, IsString, IsUUID } from 'class-validator';
 
 export class CheckAvailabilityQueryDto {
+    @ApiProperty({ description: '자원 ID' })
+    @IsUUID()
+    resourceId: string;
+
     @ApiProperty({ description: '예약 시작 시간' })
-    @IsDate()
-    startDate: Date;
+    @IsString()
+    startDate: string;
 
     @ApiProperty({ description: '예약 종료 시간' })
-    @IsDate()
-    endDate: Date;
+    @IsString()
+    endDate: string;
 }
 
 export class CheckAvailabilityResponseDto {
