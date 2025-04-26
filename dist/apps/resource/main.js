@@ -5838,10 +5838,7 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
         const snapshot = await this.snapshotService.findOne({
             where: { userId },
         });
-        if (!snapshot) {
-            throw new Error('Snapshot not found');
-        }
-        return this.toResponseDto(snapshot);
+        return snapshot ? this.toResponseDto(snapshot) : null;
     }
     async findAllSnapshots(options) {
         const snapshots = await this.snapshotService.findAll(options);

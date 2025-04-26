@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ReservationSnapshotService } from '../services/reservation-snapshot.service';
 import { ReservationSnapshot } from '@libs/entities';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
@@ -30,10 +30,7 @@ export class ReservationSnapshotUsecase {
         const snapshot = await this.snapshotService.findOne({
             where: { userId },
         });
-        if (!snapshot) {
-            throw new Error('Snapshot not found');
-        }
-        return this.toResponseDto(snapshot);
+        return snapshot ? this.toResponseDto(snapshot) : null;
     }
 
     async findAllSnapshots(options?: RepositoryOptions): Promise<ReservationSnapshotResponseDto[]> {
