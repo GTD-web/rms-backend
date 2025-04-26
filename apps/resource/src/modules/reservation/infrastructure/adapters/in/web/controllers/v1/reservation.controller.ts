@@ -42,12 +42,17 @@ import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { Public } from '@libs/decorators/public.decorator';
 import { CreateReservationSnapshotDto } from '@resource/modules/reservation/application/dtos/reservation-snapshot.dto';
+import { ReservationSnapshotUsecase } from '@resource/modules/reservation/application/usecases/reservation-snapshot.usecase';
+import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 
 @ApiTags('2. 예약 - 사용자 페이지')
 @Controller('v1/reservations')
 @ApiBearerAuth()
 export class UserReservationController {
-    constructor(private readonly reservationUsecase: ReservationUsecase) {}
+    constructor(
+        private readonly reservationUsecase: ReservationUsecase,
+        private readonly reservationSnapshotUsecase: ReservationSnapshotUsecase,
+    ) {}
 
     @Post()
     @Roles(Role.USER)
@@ -198,9 +203,10 @@ export class UserReservationController {
         type: ReservationSnapshotResponseDto,
     })
     async createSnapshot(
+        @User() user: UserEntity,
         @Body() createSnapshotDto: CreateReservationSnapshotDto,
     ): Promise<ReservationSnapshotResponseDto> {
-        return null;
+        return this.reservationSnapshotUsecase.createSnapshot(user, createSnapshotDto);
     }
 
     @Patch('snapshot')
@@ -210,20 +216,31 @@ export class UserReservationController {
         type: ReservationSnapshotResponseDto,
     })
     async updateSnapshot(
+        @User() user: UserEntity,
         @Body() updateSnapshotDto: UpdateReservationSnapshotDto,
     ): Promise<ReservationSnapshotResponseDto> {
-        return null;
+        return this.reservationSnapshotUsecase.updateSnapshot(updateSnapshotDto);
     }
 
-    @Get('snapshot/:snapshotId')
-    @ApiOperation({ summary: '예약 스냅샷 조회' })
+    @Get('snapshot/user')
+    @ApiOperation({ summary: '유저의 예약 스냅샷 조회' })
     @ApiDataResponse({
         description: '예약 스냅샷 조회 성공',
         type: ReservationSnapshotResponseDto,
     })
-    async findSnapshot(
-        @Param('snapshotId') snapshotId: string,
+    async findUserSnapshot(
+        @User() user: UserEntity,
     ): Promise<ReservationSnapshotResponseDto> {
-        return null;
+        return this.reservationSnapshotUsecase.findSnapshotByUserId(user.userId);
     }
+
+    @Delete('snapshot/:snapshotId')
+    @ApiOperation({ summary: '예약 스냅샷 삭제' })
+    async deleteSnapshot(
+        @User() user: UserEntity,
+        @Param('snapshotId') snapshotId: string,
+    ): Promise<void> {
+        await this.reservationSnapshotUsecase.deleteSnapshot(snapshotId);
+    }
+
 }

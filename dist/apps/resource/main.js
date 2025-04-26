@@ -5287,12 +5287,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.ParticipantDto = void 0;
+exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.ResourceDto = exports.ParticipantDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const employee_response_dto_1 = __webpack_require__(/*! @resource/modules/employee/application/dtos/employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/employee-response.dto.ts");
-const resource_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/resource-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/resource-response.dto.ts");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 class ParticipantDto {
 }
@@ -5302,15 +5300,42 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], ParticipantDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ParticipantDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ParticipantDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ParticipantDto.prototype, "position", void 0);
+class ResourceDto {
+}
+exports.ResourceDto = ResourceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], ResourceDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceDto.prototype, "name", void 0);
 class CreateReservationSnapshotDto {
 }
 exports.CreateReservationSnapshotDto = CreateReservationSnapshotDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
-    __metadata("design:type", String)
-], CreateReservationSnapshotDto.prototype, "resourceId", void 0);
+    __metadata("design:type", ResourceDto)
+], CreateReservationSnapshotDto.prototype, "resource", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -5326,14 +5351,14 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDate)(),
-    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
 ], CreateReservationSnapshotDto.prototype, "startDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDate)(),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
 ], CreateReservationSnapshotDto.prototype, "endDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, default: false }),
@@ -5379,9 +5404,9 @@ __decorate([
     __metadata("design:type", String)
 ], ReservationSnapshotResponseDto.prototype, "userId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", String)
-], ReservationSnapshotResponseDto.prototype, "resourceId", void 0);
+    (0, swagger_1.ApiProperty)({ required: false, type: () => ResourceDto }),
+    __metadata("design:type", ResourceDto)
+], ReservationSnapshotResponseDto.prototype, "resource", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", String)
@@ -5392,11 +5417,11 @@ __decorate([
 ], ReservationSnapshotResponseDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    __metadata("design:type", String)
 ], ReservationSnapshotResponseDto.prototype, "startDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    __metadata("design:type", String)
 ], ReservationSnapshotResponseDto.prototype, "endDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
@@ -5411,20 +5436,16 @@ __decorate([
     __metadata("design:type", Array)
 ], ReservationSnapshotResponseDto.prototype, "notifyMinutesBeforeStart", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, type: () => resource_response_dto_1.ResourceResponseDto }),
-    __metadata("design:type", typeof (_e = typeof resource_response_dto_1.ResourceResponseDto !== "undefined" && resource_response_dto_1.ResourceResponseDto) === "function" ? _e : Object)
-], ReservationSnapshotResponseDto.prototype, "resource", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false, type: () => [employee_response_dto_1.EmployeeResponseDto] }),
+    (0, swagger_1.ApiProperty)({ required: false, type: () => [ParticipantDto] }),
     __metadata("design:type", Array)
 ], ReservationSnapshotResponseDto.prototype, "participants", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], ReservationSnapshotResponseDto.prototype, "createdAt", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", typeof (_g = typeof Date !== "undefined" && Date) === "function" ? _g : Object)
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], ReservationSnapshotResponseDto.prototype, "updatedAt", void 0);
 
 
@@ -5641,6 +5662,67 @@ exports.ParticipantService = ParticipantService = __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/reservation/application/services/reservation-snapshot.service.ts":
+/*!****************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/reservation/application/services/reservation-snapshot.service.ts ***!
+  \****************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationSnapshotService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_snapshot_repository_port_1 = __webpack_require__(/*! @resource/modules/reservation/domain/ports/reservation-snapshot.repository.port */ "./apps/resource/src/modules/reservation/domain/ports/reservation-snapshot.repository.port.ts");
+let ReservationSnapshotService = class ReservationSnapshotService {
+    constructor(repository) {
+        this.repository = repository;
+    }
+    async findOne(options) {
+        return this.repository.findOne(options);
+    }
+    async findAll(options) {
+        return this.repository.findAll(options);
+    }
+    create(dto) {
+        const snapshot = this.repository.create(dto);
+        return snapshot;
+    }
+    async save(snapshot, options) {
+        return this.repository.save(snapshot, options);
+    }
+    async update(id, dto, options) {
+        return this.repository.update(id, dto, options);
+    }
+    async delete(id, options) {
+        await this.repository.delete(id, options);
+    }
+    async count(options) {
+        return this.repository.count(options);
+    }
+};
+exports.ReservationSnapshotService = ReservationSnapshotService;
+exports.ReservationSnapshotService = ReservationSnapshotService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)('ReservationSnapshotRepositoryPort')),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_snapshot_repository_port_1.ReservationSnapshotRepositoryPort !== "undefined" && reservation_snapshot_repository_port_1.ReservationSnapshotRepositoryPort) === "function" ? _a : Object])
+], ReservationSnapshotService);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/reservation/application/services/reservation.service.ts":
 /*!*******************************************************************************************!*\
   !*** ./apps/resource/src/modules/reservation/application/services/reservation.service.ts ***!
@@ -5712,6 +5794,85 @@ exports.ReservationService = ReservationService = __decorate([
     __param(0, (0, common_1.Inject)('ReservationRepositoryPort')),
     __metadata("design:paramtypes", [typeof (_a = typeof reservation_repository_port_1.ReservationRepositoryPort !== "undefined" && reservation_repository_port_1.ReservationRepositoryPort) === "function" ? _a : Object])
 ], ReservationService);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/reservation/application/usecases/reservation-snapshot.usecase.ts":
+/*!****************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/reservation/application/usecases/reservation-snapshot.usecase.ts ***!
+  \****************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationSnapshotUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_snapshot_service_1 = __webpack_require__(/*! ../services/reservation-snapshot.service */ "./apps/resource/src/modules/reservation/application/services/reservation-snapshot.service.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
+    constructor(snapshotService) {
+        this.snapshotService = snapshotService;
+    }
+    async createSnapshot(user, dto) {
+        const snapshot = this.snapshotService.create(dto);
+        snapshot.userId = user.userId;
+        const savedSnapshot = await this.snapshotService.save(snapshot);
+        return this.toResponseDto(savedSnapshot);
+    }
+    async updateSnapshot(dto) {
+        const updatedSnapshot = await this.snapshotService.update(dto.snapshotId, dto);
+        return this.toResponseDto(updatedSnapshot);
+    }
+    async findSnapshotByUserId(userId) {
+        const snapshot = await this.snapshotService.findOne({
+            where: { userId },
+        });
+        if (!snapshot) {
+            throw new Error('Snapshot not found');
+        }
+        return this.toResponseDto(snapshot);
+    }
+    async findAllSnapshots(options) {
+        const snapshots = await this.snapshotService.findAll(options);
+        return snapshots.map(snapshot => this.toResponseDto(snapshot));
+    }
+    async deleteSnapshot(snapshotId) {
+        await this.snapshotService.delete(snapshotId);
+    }
+    toResponseDto(snapshot) {
+        return {
+            snapshotId: snapshot.snapshotId,
+            userId: snapshot.userId,
+            resource: snapshot.resource,
+            title: snapshot.title,
+            description: snapshot.description,
+            startDate: date_util_1.DateUtil.format(snapshot?.startDate),
+            endDate: date_util_1.DateUtil.format(snapshot?.endDate),
+            isAllDay: snapshot.isAllDay,
+            notifyBeforeStart: snapshot.notifyBeforeStart,
+            notifyMinutesBeforeStart: snapshot.notifyMinutesBeforeStart,
+            participants: snapshot.participants,
+            createdAt: snapshot.createdAt,
+            updatedAt: snapshot.updatedAt,
+        };
+    }
+};
+exports.ReservationSnapshotUsecase = ReservationSnapshotUsecase;
+exports.ReservationSnapshotUsecase = ReservationSnapshotUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_snapshot_service_1.ReservationSnapshotService !== "undefined" && reservation_snapshot_service_1.ReservationSnapshotService) === "function" ? _a : Object])
+], ReservationSnapshotUsecase);
 
 
 /***/ }),
@@ -6325,6 +6486,18 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/reservation/domain/ports/reservation-snapshot.repository.port.ts":
+/*!****************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/reservation/domain/ports/reservation-snapshot.repository.port.ts ***!
+  \****************************************************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/reservation/domain/ports/reservation.repository.port.ts":
 /*!*******************************************************************************************!*\
   !*** ./apps/resource/src/modules/reservation/domain/ports/reservation.repository.port.ts ***!
@@ -6847,7 +7020,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -6865,9 +7038,11 @@ const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-
 const reservation_response_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/reservation-response.dto */ "./apps/resource/src/modules/reservation/application/dtos/reservation-response.dto.ts");
 const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
 const reservation_snapshot_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/reservation-snapshot.dto */ "./apps/resource/src/modules/reservation/application/dtos/reservation-snapshot.dto.ts");
+const reservation_snapshot_usecase_1 = __webpack_require__(/*! @resource/modules/reservation/application/usecases/reservation-snapshot.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation-snapshot.usecase.ts");
 let UserReservationController = class UserReservationController {
-    constructor(reservationUsecase) {
+    constructor(reservationUsecase, reservationSnapshotUsecase) {
         this.reservationUsecase = reservationUsecase;
+        this.reservationSnapshotUsecase = reservationSnapshotUsecase;
     }
     async create(user, createDto) {
         return this.reservationUsecase.makeReservation(user, createDto);
@@ -6901,14 +7076,17 @@ let UserReservationController = class UserReservationController {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateParticipants(reservationId, updateDto);
     }
-    async createSnapshot(createSnapshotDto) {
-        return null;
+    async createSnapshot(user, createSnapshotDto) {
+        return this.reservationSnapshotUsecase.createSnapshot(user, createSnapshotDto);
     }
-    async updateSnapshot(updateSnapshotDto) {
-        return null;
+    async updateSnapshot(user, updateSnapshotDto) {
+        return this.reservationSnapshotUsecase.updateSnapshot(updateSnapshotDto);
     }
-    async findSnapshot(snapshotId) {
-        return null;
+    async findUserSnapshot(user) {
+        return this.reservationSnapshotUsecase.findSnapshotByUserId(user.userId);
+    }
+    async deleteSnapshot(user, snapshotId) {
+        await this.reservationSnapshotUsecase.deleteSnapshot(snapshotId);
     }
 };
 exports.UserReservationController = UserReservationController;
@@ -6923,8 +7101,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof create_reservation_dto_1.CreateReservationDto !== "undefined" && create_reservation_dto_1.CreateReservationDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+    __metadata("design:paramtypes", [typeof (_c = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _c : Object, typeof (_d = typeof create_reservation_dto_1.CreateReservationDto !== "undefined" && create_reservation_dto_1.CreateReservationDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], UserReservationController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)('me'),
@@ -6941,8 +7119,8 @@ __decorate([
     __param(1, (0, common_1.Query)('resourceType')),
     __param(2, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, typeof (_f = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _f : Object, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _f : Object, typeof (_g = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _g : Object, typeof (_h = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], UserReservationController.prototype, "findMyReservationList", null);
 __decorate([
     (0, common_1.Get)('my-upcoming'),
@@ -6956,8 +7134,8 @@ __decorate([
     __param(1, (0, common_1.Query)('resourceType')),
     __param(2, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, typeof (_k = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _k : Object, typeof (_l = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _l : Object]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _k : Object, typeof (_l = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _l : Object, typeof (_m = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], UserReservationController.prototype, "findMyUpcomingReservationList", null);
 __decorate([
     (0, common_1.Get)('my-upcoming-schedules'),
@@ -6972,8 +7150,8 @@ __decorate([
     __param(1, (0, common_1.Query)('resourceType')),
     __param(2, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_o = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _o : Object, typeof (_p = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _p : Object, typeof (_q = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _q : Object]),
-    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
+    __metadata("design:paramtypes", [typeof (_p = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _p : Object, typeof (_q = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _q : Object, typeof (_r = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _r : Object]),
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
 ], UserReservationController.prototype, "findMyUpcomingSchedules", null);
 __decorate([
     (0, common_1.Get)(':reservationId'),
@@ -6986,8 +7164,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_s = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _s : Object, String]),
-    __metadata("design:returntype", typeof (_t = typeof Promise !== "undefined" && Promise) === "function" ? _t : Object)
+    __metadata("design:paramtypes", [typeof (_t = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _t : Object, String]),
+    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
 ], UserReservationController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/title'),
@@ -7001,8 +7179,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_u = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _u : Object, String, typeof (_v = typeof dtos_index_1.UpdateReservationTitleDto !== "undefined" && dtos_index_1.UpdateReservationTitleDto) === "function" ? _v : Object]),
-    __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
+    __metadata("design:paramtypes", [typeof (_v = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _v : Object, String, typeof (_w = typeof dtos_index_1.UpdateReservationTitleDto !== "undefined" && dtos_index_1.UpdateReservationTitleDto) === "function" ? _w : Object]),
+    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
 ], UserReservationController.prototype, "updateTitle", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/time'),
@@ -7016,8 +7194,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_x = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _x : Object, String, typeof (_y = typeof dtos_index_1.UpdateReservationTimeDto !== "undefined" && dtos_index_1.UpdateReservationTimeDto) === "function" ? _y : Object]),
-    __metadata("design:returntype", typeof (_z = typeof Promise !== "undefined" && Promise) === "function" ? _z : Object)
+    __metadata("design:paramtypes", [typeof (_y = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _y : Object, String, typeof (_z = typeof dtos_index_1.UpdateReservationTimeDto !== "undefined" && dtos_index_1.UpdateReservationTimeDto) === "function" ? _z : Object]),
+    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
 ], UserReservationController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/status/cancel'),
@@ -7030,8 +7208,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_0 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _0 : Object, String]),
-    __metadata("design:returntype", typeof (_1 = typeof Promise !== "undefined" && Promise) === "function" ? _1 : Object)
+    __metadata("design:paramtypes", [typeof (_1 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _1 : Object, String]),
+    __metadata("design:returntype", typeof (_2 = typeof Promise !== "undefined" && Promise) === "function" ? _2 : Object)
 ], UserReservationController.prototype, "updateStatusCancel", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/participants'),
@@ -7045,8 +7223,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_2 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _2 : Object, String, typeof (_3 = typeof dtos_index_1.UpdateReservationParticipantsDto !== "undefined" && dtos_index_1.UpdateReservationParticipantsDto) === "function" ? _3 : Object]),
-    __metadata("design:returntype", typeof (_4 = typeof Promise !== "undefined" && Promise) === "function" ? _4 : Object)
+    __metadata("design:paramtypes", [typeof (_3 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _3 : Object, String, typeof (_4 = typeof dtos_index_1.UpdateReservationParticipantsDto !== "undefined" && dtos_index_1.UpdateReservationParticipantsDto) === "function" ? _4 : Object]),
+    __metadata("design:returntype", typeof (_5 = typeof Promise !== "undefined" && Promise) === "function" ? _5 : Object)
 ], UserReservationController.prototype, "updateParticipants", null);
 __decorate([
     (0, common_1.Post)('snapshot'),
@@ -7055,10 +7233,11 @@ __decorate([
         description: '예약 스냅샷 생성 성공',
         type: dtos_index_1.ReservationSnapshotResponseDto,
     }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_5 = typeof reservation_snapshot_dto_1.CreateReservationSnapshotDto !== "undefined" && reservation_snapshot_dto_1.CreateReservationSnapshotDto) === "function" ? _5 : Object]),
-    __metadata("design:returntype", typeof (_6 = typeof Promise !== "undefined" && Promise) === "function" ? _6 : Object)
+    __metadata("design:paramtypes", [typeof (_6 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _6 : Object, typeof (_7 = typeof reservation_snapshot_dto_1.CreateReservationSnapshotDto !== "undefined" && reservation_snapshot_dto_1.CreateReservationSnapshotDto) === "function" ? _7 : Object]),
+    __metadata("design:returntype", typeof (_8 = typeof Promise !== "undefined" && Promise) === "function" ? _8 : Object)
 ], UserReservationController.prototype, "createSnapshot", null);
 __decorate([
     (0, common_1.Patch)('snapshot'),
@@ -7067,28 +7246,38 @@ __decorate([
         description: '예약 스냅샷 업데이트 성공',
         type: dtos_index_1.ReservationSnapshotResponseDto,
     }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_7 = typeof dtos_index_1.UpdateReservationSnapshotDto !== "undefined" && dtos_index_1.UpdateReservationSnapshotDto) === "function" ? _7 : Object]),
-    __metadata("design:returntype", typeof (_8 = typeof Promise !== "undefined" && Promise) === "function" ? _8 : Object)
+    __metadata("design:paramtypes", [typeof (_9 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _9 : Object, typeof (_10 = typeof dtos_index_1.UpdateReservationSnapshotDto !== "undefined" && dtos_index_1.UpdateReservationSnapshotDto) === "function" ? _10 : Object]),
+    __metadata("design:returntype", typeof (_11 = typeof Promise !== "undefined" && Promise) === "function" ? _11 : Object)
 ], UserReservationController.prototype, "updateSnapshot", null);
 __decorate([
-    (0, common_1.Get)('snapshot/:snapshotId'),
-    (0, swagger_1.ApiOperation)({ summary: '예약 스냅샷 조회' }),
+    (0, common_1.Get)('snapshot/user'),
+    (0, swagger_1.ApiOperation)({ summary: '유저의 예약 스냅샷 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 스냅샷 조회 성공',
         type: dtos_index_1.ReservationSnapshotResponseDto,
     }),
-    __param(0, (0, common_1.Param)('snapshotId')),
+    __param(0, (0, user_decorator_1.User)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_9 = typeof Promise !== "undefined" && Promise) === "function" ? _9 : Object)
-], UserReservationController.prototype, "findSnapshot", null);
+    __metadata("design:paramtypes", [typeof (_12 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _12 : Object]),
+    __metadata("design:returntype", typeof (_13 = typeof Promise !== "undefined" && Promise) === "function" ? _13 : Object)
+], UserReservationController.prototype, "findUserSnapshot", null);
+__decorate([
+    (0, common_1.Delete)('snapshot/:snapshotId'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 스냅샷 삭제' }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('snapshotId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_14 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _14 : Object, String]),
+    __metadata("design:returntype", typeof (_15 = typeof Promise !== "undefined" && Promise) === "function" ? _15 : Object)
+], UserReservationController.prototype, "deleteSnapshot", null);
 exports.UserReservationController = UserReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 - 사용자 페이지'),
     (0, common_1.Controller)('v1/reservations'),
     (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_usecase_1.ReservationUsecase !== "undefined" && reservation_usecase_1.ReservationUsecase) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_usecase_1.ReservationUsecase !== "undefined" && reservation_usecase_1.ReservationUsecase) === "function" ? _a : Object, typeof (_b = typeof reservation_snapshot_usecase_1.ReservationSnapshotUsecase !== "undefined" && reservation_snapshot_usecase_1.ReservationSnapshotUsecase) === "function" ? _b : Object])
 ], UserReservationController);
 
 
@@ -7176,6 +7365,99 @@ exports.ReservationParticipantRepository = ReservationParticipantRepository = __
     __param(0, (0, typeorm_1.InjectRepository)(entities_1.ReservationParticipant)),
     __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
 ], ReservationParticipantRepository);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/reservation/infrastructure/adapters/out/persistence/reservation-snapshot.repository.ts":
+/*!**************************************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/reservation/infrastructure/adapters/out/persistence/reservation-snapshot.repository.ts ***!
+  \**************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationSnapshotRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+let ReservationSnapshotRepository = class ReservationSnapshotRepository {
+    constructor(repository) {
+        this.repository = repository;
+    }
+    async findAll(repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(entities_1.ReservationSnapshot)
+            : this.repository;
+        return repository.find({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+            order: repositoryOptions?.order,
+            skip: repositoryOptions?.skip,
+            take: repositoryOptions?.take,
+        });
+    }
+    async findOne(repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(entities_1.ReservationSnapshot)
+            : this.repository;
+        return repository.findOne({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+        });
+    }
+    create(dto) {
+        const snapshot = this.repository.create(dto);
+        return snapshot;
+    }
+    async save(snapshot, repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(entities_1.ReservationSnapshot)
+            : this.repository;
+        return repository.save(snapshot);
+    }
+    async update(id, dto) {
+        await this.repository.update(id, dto);
+        const updated = await this.repository.findOne({
+            where: { snapshotId: id },
+        });
+        return updated;
+    }
+    async delete(id, repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(entities_1.ReservationSnapshot)
+            : this.repository;
+        await repository.delete(id);
+    }
+    async count(repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(entities_1.ReservationSnapshot)
+            : this.repository;
+        return repository.count({
+            where: repositoryOptions?.where
+        });
+    }
+};
+exports.ReservationSnapshotRepository = ReservationSnapshotRepository;
+exports.ReservationSnapshotRepository = ReservationSnapshotRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(entities_1.ReservationSnapshot)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], ReservationSnapshotRepository);
 
 
 /***/ }),
@@ -7331,15 +7613,19 @@ const reservation_usecase_1 = __webpack_require__(/*! ./application/usecases/res
 const reservation_event_handler_1 = __webpack_require__(/*! ./application/handler/reservation-event.handler */ "./apps/resource/src/modules/reservation/application/handler/reservation-event.handler.ts");
 const admin_reservation_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.reservation.controller */ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/admin.reservation.controller.ts");
 const reservation_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/reservation.controller */ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/reservation.controller.ts");
+const reservation_snapshot_usecase_1 = __webpack_require__(/*! ./application/usecases/reservation-snapshot.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation-snapshot.usecase.ts");
+const reservation_snapshot_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/reservation-snapshot.repository */ "./apps/resource/src/modules/reservation/infrastructure/adapters/out/persistence/reservation-snapshot.repository.ts");
+const reservation_snapshot_service_1 = __webpack_require__(/*! ./application/services/reservation-snapshot.service */ "./apps/resource/src/modules/reservation/application/services/reservation-snapshot.service.ts");
 let ReservationModule = class ReservationModule {
 };
 exports.ReservationModule = ReservationModule;
 exports.ReservationModule = ReservationModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.Reservation, entities_1.ReservationParticipant, entities_1.Schedule])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.Reservation, entities_1.ReservationParticipant, entities_1.Schedule, entities_1.ReservationSnapshot])],
         providers: [
             reservation_service_1.ReservationService,
             participant_service_1.ParticipantService,
+            reservation_snapshot_service_1.ReservationSnapshotService,
             {
                 provide: 'ReservationRepositoryPort',
                 useClass: reservation_repository_1.ReservationRepository,
@@ -7348,11 +7634,16 @@ exports.ReservationModule = ReservationModule = __decorate([
                 provide: 'ReservationParticipantRepositoryPort',
                 useClass: reservation_participant_repository_1.ReservationParticipantRepository,
             },
+            {
+                provide: 'ReservationSnapshotRepositoryPort',
+                useClass: reservation_snapshot_repository_1.ReservationSnapshotRepository,
+            },
             reservation_usecase_1.ReservationUsecase,
             reservation_event_handler_1.ReservationEventHandler,
+            reservation_snapshot_usecase_1.ReservationSnapshotUsecase,
         ],
         controllers: [reservation_controller_1.ReservationController, admin_reservation_controller_1.AdminReservationController, reservation_controller_2.UserReservationController],
-        exports: [reservation_service_1.ReservationService],
+        exports: [reservation_service_1.ReservationService, reservation_snapshot_usecase_1.ReservationSnapshotUsecase],
     })
 ], ReservationModule);
 
@@ -14992,9 +15283,9 @@ __decorate([
     __metadata("design:type", String)
 ], ReservationSnapshot.prototype, "userId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], ReservationSnapshot.prototype, "resourceId", void 0);
+    (0, typeorm_1.Column)('jsonb', { nullable: true }),
+    __metadata("design:type", Object)
+], ReservationSnapshot.prototype, "resource", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)

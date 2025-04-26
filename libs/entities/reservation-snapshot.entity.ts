@@ -13,8 +13,11 @@ export class ReservationSnapshot {
     @Column()
     userId: string;
 
-    @Column({ nullable: true })
-    resourceId: string;
+    @Column('jsonb', { nullable: true })
+    resource: {
+        resourceId: string;
+        name: string;
+    };
 
     @Column({ nullable: true })
     title: string;
@@ -40,6 +43,9 @@ export class ReservationSnapshot {
     @Column('jsonb', { nullable: true })
     participants: {
         employeeId: string;
+        name: string;
+        department: string;
+        position: string;
     }[];
 
     @CreateDateColumn({ type: 'timestamp with time zone' })
@@ -47,7 +53,6 @@ export class ReservationSnapshot {
 
     @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
-
 
     @ManyToOne(() => User)
     @JoinColumn({ name: 'userId' })
