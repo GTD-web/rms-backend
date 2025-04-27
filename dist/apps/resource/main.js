@@ -9355,7 +9355,36 @@ let ResourceUsecase = class ResourceUsecase {
         }));
         return resourceGroupsWithResources;
     }
-    async findResourceDetail(resourceId) {
+    async findResourceDetailForUser(resourceId) {
+        const resource = await this.resourceService.findOne({
+            where: { resourceId: resourceId },
+            relations: [
+                'resourceGroup',
+                'vehicleInfo',
+                'meetingRoomInfo',
+                'accommodationInfo',
+                'resourceManagers',
+                'resourceManagers.employee',
+                'reservations',
+            ],
+        });
+        if (!resource) {
+            throw new common_1.NotFoundException('Resource not found');
+        }
+        resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
+        if (resource.vehicleInfo) {
+            resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
+            resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.odometerImages);
+        }
+        if (resource.reservations) {
+            resource.reservations.forEach((reservation) => {
+                reservation.startDate = date_util_1.DateUtil.date(reservation.startDate).toDate();
+                reservation.endDate = date_util_1.DateUtil.date(reservation.endDate).toDate();
+            });
+        }
+        return new resource_response_dto_1.ResourceWithReservationsResponseDto(resource);
+    }
+    async findResourceDetailForAdmin(resourceId) {
         const resource = await this.resourceService.findOne({
             where: { resourceId: resourceId },
             relations: [
@@ -9668,7 +9697,7 @@ let ResourceUsecase = class ResourceUsecase {
                 await this.resourceManagerService.updateManagers(resourceId, newManagerIds, { queryRunner });
             }
             await queryRunner.commitTransaction();
-            return this.findResourceDetail(resourceId);
+            return this.findResourceDetailForAdmin(resourceId);
         }
         catch (err) {
             await queryRunner.rollbackTransaction();
@@ -9990,7 +10019,7 @@ let ResourceController = class ResourceController {
         return this.resourceUsecase.createResourceWithInfos(createResourceInfo);
     }
     async findOne(resourceId) {
-        return this.resourceUsecase.findResourceDetail(resourceId);
+        return this.resourceUsecase.findResourceDetailForAdmin(resourceId);
     }
     async reorder(updateResourceOrdersDto) {
         return this.resourceUsecase.reorderResources(updateResourceOrdersDto);
@@ -10346,7 +10375,7 @@ let AdminResourceController = class AdminResourceController {
         return this.resourceUsecase.findResources(type);
     }
     async findOne(resourceId) {
-        return this.resourceUsecase.findResourceDetail(resourceId);
+        return this.resourceUsecase.findResourceDetailForAdmin(resourceId);
     }
     async reorder(updateResourceOrdersDto) {
         return this.resourceUsecase.reorderResources(updateResourceOrdersDto);
@@ -10567,7 +10596,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -10600,6 +10629,9 @@ let UserResourceController = class UserResourceController {
         return {
             isAvailable,
         };
+    }
+    async findOne(resourceId) {
+        return this.resourceUsecase.findResourceDetailForUser(resourceId);
     }
     async returnVehicle(user, resourceId, returnDto) {
         return this.resourceUsecase.returnVehicle(user, resourceId, returnDto);
@@ -10667,6 +10699,20 @@ __decorate([
     __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], UserResourceController.prototype, "checkAvailability", null);
 __decorate([
+    (0, common_1.Get)(':resourceId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    (0, swagger_1.ApiOperation)({ summary: '자원 상세 조회 ' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원을 성공적으로 조회했습니다.',
+        type: dtos_index_1.ResourceResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('resourceId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], UserResourceController.prototype, "findOne", null);
+__decorate([
     (0, common_1.Patch)(':resourceId/return-vehicle'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
@@ -10678,8 +10724,8 @@ __decorate([
     __param(1, (0, common_1.Param)('resourceId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String, typeof (_k = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _k : Object, String, typeof (_l = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], UserResourceController.prototype, "returnVehicle", null);
 exports.UserResourceController = UserResourceController = __decorate([
     (0, swagger_1.ApiTags)('3. 자원 - 사용자 페이지'),

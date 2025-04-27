@@ -96,6 +96,18 @@ export class UserResourceController {
         };
     }
 
+    @Get(':resourceId')
+    @Roles(Role.USER)
+    @ApiOperation({ summary: '자원 상세 조회 ' })
+    @ApiDataResponse({
+        status: 200,
+        description: '자원을 성공적으로 조회했습니다.',
+        type: ResourceResponseDto,
+    })
+    async findOne(@Param('resourceId') resourceId: string): Promise<ResourceResponseDto> {
+        return this.resourceUsecase.findResourceDetailForUser(resourceId);
+    }
+
     // check api
     @Patch(':resourceId/return-vehicle')
     @Roles(Role.USER)

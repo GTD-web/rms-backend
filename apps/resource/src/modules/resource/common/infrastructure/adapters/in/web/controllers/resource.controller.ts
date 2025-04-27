@@ -122,7 +122,7 @@ export class ResourceController {
         type: ResourceResponseDto,
     })
     async findOne(@Param('resourceId') resourceId: string): Promise<ResourceResponseDto> {
-        return this.resourceUsecase.findResourceDetail(resourceId);
+        return this.resourceUsecase.findResourceDetailForAdmin(resourceId);
     }
 
     @Patch('order')

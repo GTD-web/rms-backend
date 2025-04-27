@@ -5,7 +5,7 @@ import {
     InternalServerErrorException,
     Inject,
 } from '@nestjs/common';
-import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto } from '../dtos/resource-response.dto';
+import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto, ResourceWithReservationsResponseDto } from '../dtos/resource-response.dto';
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
 import {
@@ -48,6 +48,7 @@ import {
 } from '@resource/modules/resource/common/application/dtos/available-time-response.dto';
 import { Reservation } from '@libs/entities/reservation.entity';
 import { ResourceQueryDto } from '../dtos/resource-query.dto';
+import { ReservationResponseDto } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
 
 @Injectable()
 export class ResourceUsecase {
@@ -183,8 +184,46 @@ export class ResourceUsecase {
 
         return resourceGroupsWithResources;
     }
+    async findResourceDetailForUser(resourceId: string): Promise<ResourceWithReservationsResponseDto> {
+        const resource = await this.resourceService.findOne({
+            where: { resourceId: resourceId },
+            relations: [
+                'resourceGroup',
+                'vehicleInfo',
+                'meetingRoomInfo',
+                'accommodationInfo',
+                'resourceManagers',
+                'resourceManagers.employee',
+                'reservations',
+            ],
+        });
 
-    async findResourceDetail(resourceId: string): Promise<ResourceResponseDto> {
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+        resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
+
+        // 관리자 페이지 내 자원 상세 페이지에서 사용하는 정비기록 관련 계산 필드 추가
+        if (resource.vehicleInfo) {
+            resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(
+                resource.vehicleInfo.parkingLocationImages,
+            );
+            resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(
+                resource.vehicleInfo.odometerImages,
+            );
+        }   
+
+        if (resource.reservations) {
+            resource.reservations.forEach((reservation) => {
+                reservation.startDate = DateUtil.date(reservation.startDate).toDate();
+                reservation.endDate = DateUtil.date(reservation.endDate).toDate();
+            });
+        }
+
+        return new ResourceWithReservationsResponseDto(resource);
+    }
+
+    async findResourceDetailForAdmin(resourceId: string): Promise<ResourceResponseDto> {
         const resource = await this.resourceService.findOne({
             where: { resourceId: resourceId },
             relations: [
@@ -666,23 +705,6 @@ export class ResourceUsecase {
             throw new NotFoundException('Resource not found');
         }
 
-        // if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 1) {
-        //     throw new BadRequestException('Only one manager is allowed');
-        // }
-
-        // if (updateRequest.managers && Array.isArray(updateRequest.managers) && updateRequest.managers.length > 0) {
-        //     const managerId = updateRequest.managers[0].employeeId;
-        //     const manager = await this.resourceManagerService.findOne({
-        //         where: {
-        //             employeeId: managerId,
-        //         },
-        //         relations: ['employee', 'employee.user'],
-        //     });
-        //     if (!manager.employee.user.roles.includes(Role.RESOURCE_ADMIN)) {
-        //         throw new BadRequestException('The manager is not a resource admin');
-        //     }
-        // }
-
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -695,51 +717,13 @@ export class ResourceUsecase {
 
             // 2. 자원 관리자 정보 업데이트
             if (updateRequest.managers) {
-                // const currentManagers = await this.resourceManagerService.findAll({
-                //     where: {
-                //         resourceId: resourceId,
-                //     },
-                // });
-                // const currentManagerIds = currentManagers.map((m) => m.employeeId);
                 const newManagerIds = updateRequest.managers.map((m) => m.employeeId);
-
-                // 제거된 관리자들의 role 업데이트
-                // const removedManagerIds = currentManagerIds.filter((id) => !newManagerIds.includes(id));
-                // await Promise.all(
-                //     removedManagerIds.map(async (employeeId) => {
-                //         const otherResources = await this.resourceManagerService.findAll({
-                //             where: {
-                //                 employeeId: employeeId,
-                //             },
-                //         });
-                //         if (otherResources.length === 1) {
-                //             await this.eventEmitter.emit('remove.user.role', {
-                //                 employeeId: employeeId,
-                //                 role: Role.RESOURCE_ADMIN,
-                //                 repositoryOptions: { queryRunner },
-                //             });
-                //         }
-                //     }),
-                // );
-
-                // // 새로운 관리자들의 role 업데이트
-                // const addedManagerIds = newManagerIds.filter((id) => !currentManagerIds.includes(id));
-                // await Promise.all(
-                //     addedManagerIds.map((employeeId) =>
-                //         this.eventEmitter.emit('add.user.role', {
-                //             employeeId: employeeId,
-                //             role: Role.RESOURCE_ADMIN,
-                //             repositoryOptions: { queryRunner },
-                //         }),
-                //     ),
-                // );
-
                 await this.resourceManagerService.updateManagers(resourceId, newManagerIds, { queryRunner });
             }
 
             await queryRunner.commitTransaction();
 
-            return this.findResourceDetail(resourceId);
+            return this.findResourceDetailForAdmin(resourceId);
         } catch (err) {
             await queryRunner.rollbackTransaction();
             throw new InternalServerErrorException('Failed to update resource');
