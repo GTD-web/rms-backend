@@ -12,7 +12,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { Roles } from '@libs/decorators/role.decorator';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceUsecase } from '@resource/modules/resource/common/application/usecases/resource.usecase';
-import { ResourceGroupWithResourcesAndReservationsResponseDto } from '@resource/modules/resource/common/application/dtos/resource-response.dto';
+import { ResourceGroupWithResourcesAndReservationsResponseDto, ResourceWithReservationsResponseDto } from '@resource/modules/resource/common/application/dtos/resource-response.dto';
 import {
     ReturnVehicleDto,
     UpdateResourceOrdersDto,
@@ -102,10 +102,12 @@ export class UserResourceController {
     @ApiDataResponse({
         status: 200,
         description: '자원을 성공적으로 조회했습니다.',
-        type: ResourceResponseDto,
+        type: ResourceWithReservationsResponseDto,
     })
-    async findOne(@Param('resourceId') resourceId: string): Promise<ResourceResponseDto> {
-        return this.resourceUsecase.findResourceDetailForUser(resourceId);
+    async findOne(
+        @User() user: UserEntity,
+        @Param('resourceId') resourceId: string): Promise<ResourceWithReservationsResponseDto> {
+        return this.resourceUsecase.findResourceDetailForUser(user.employeeId,resourceId);
     }
 
     // check api

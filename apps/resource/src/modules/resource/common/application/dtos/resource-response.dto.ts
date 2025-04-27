@@ -22,6 +22,26 @@ export class ResourceManagerResponseDto {
     employee: EmployeeResponseDto;
 }
 
+export class ResourceGroupResponseDto {
+    @ApiProperty()
+    resourceGroupId?: string;
+
+    @ApiProperty()
+    title: string;
+
+    @ApiProperty({ required: false })
+    description?: string;
+
+    @ApiProperty({ enum: ResourceType })
+    type: ResourceType;
+
+    @ApiProperty()
+    order: number;
+
+    @ApiProperty({ required: false })
+    parentResourceGroupId?: string;
+}
+
 export class ResourceResponseDto {
     constructor(resource?: Resource) {
         this.resourceId = resource?.resourceId;
@@ -37,6 +57,7 @@ export class ResourceResponseDto {
         this.notifyReservationChange = resource?.notifyReservationChange;
         this.order = resource?.order;
         this.managers = resource?.resourceManagers;
+        this.resourceGroup = resource?.resourceGroup;
 
         if (resource?.vehicleInfo) {
             this.typeInfo = resource.vehicleInfo as unknown as VehicleInfoResponseDto;
@@ -98,6 +119,9 @@ export class ResourceResponseDto {
 
     @ApiProperty({ required: false, type: [ResourceManagerResponseDto] })
     managers?: ResourceManagerResponseDto[];
+
+    @ApiProperty({ required: false})
+    resourceGroup?: ResourceGroupResponseDto;
 }
 
 export class ResourceSelectResponseDto {
@@ -124,29 +148,15 @@ export class ResourceSelectResponseDto {
 }
 
 export class ResourceWithReservationsResponseDto extends ResourceResponseDto {
+    constructor(resource?: Resource) {
+        super(resource);
+        this.reservations = resource?.reservations.map((reservation) => new ReservationResponseDto(reservation));
+    }
+
     @ApiProperty({ required: false, type: [ReservationResponseDto] })
     reservations?: ReservationResponseDto[];
 }
 
-export class ResourceGroupResponseDto {
-    @ApiProperty()
-    resourceGroupId?: string;
-
-    @ApiProperty()
-    title: string;
-
-    @ApiProperty({ required: false })
-    description?: string;
-
-    @ApiProperty({ enum: ResourceType })
-    type: ResourceType;
-
-    @ApiProperty()
-    order: number;
-
-    @ApiProperty({ required: false })
-    parentResourceGroupId?: string;
-}
 
 export class ChildResourceGroupResponseDto extends ResourceGroupResponseDto {
     @ApiProperty({ type: () => ResourceSelectResponseDto, required: false })

@@ -8455,7 +8455,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceManagerResponseDto = void 0;
+exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const vehicle_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/vehicle-response.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/vehicle-response.dto.ts");
 const meeting_room_info_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/meeting-room/application/dtos/meeting-room-info-response.dto */ "./apps/resource/src/modules/resource/meeting-room/application/dtos/meeting-room-info-response.dto.ts");
@@ -8484,6 +8484,33 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", typeof (_a = typeof employee_response_dto_1.EmployeeResponseDto !== "undefined" && employee_response_dto_1.EmployeeResponseDto) === "function" ? _a : Object)
 ], ResourceManagerResponseDto.prototype, "employee", void 0);
+class ResourceGroupResponseDto {
+}
+exports.ResourceGroupResponseDto = ResourceGroupResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceGroupResponseDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceGroupResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ResourceGroupResponseDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    __metadata("design:type", typeof (_b = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _b : Object)
+], ResourceGroupResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ResourceGroupResponseDto.prototype, "order", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ResourceGroupResponseDto.prototype, "parentResourceGroupId", void 0);
 class ResourceResponseDto {
     constructor(resource) {
         this.resourceId = resource?.resourceId;
@@ -8499,6 +8526,7 @@ class ResourceResponseDto {
         this.notifyReservationChange = resource?.notifyReservationChange;
         this.order = resource?.order;
         this.managers = resource?.resourceManagers;
+        this.resourceGroup = resource?.resourceGroup;
         if (resource?.vehicleInfo) {
             this.typeInfo = resource.vehicleInfo;
         }
@@ -8529,7 +8557,7 @@ __decorate([
 ], ResourceResponseDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: create_resource_dto_1.ResourceLocation }),
-    __metadata("design:type", typeof (_b = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_c = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _c : Object)
 ], ResourceResponseDto.prototype, "location", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
@@ -8541,7 +8569,7 @@ __decorate([
 ], ResourceResponseDto.prototype, "imageFiles", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
-    __metadata("design:type", typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_d = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _d : Object)
 ], ResourceResponseDto.prototype, "type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -8578,6 +8606,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [ResourceManagerResponseDto] }),
     __metadata("design:type", Array)
 ], ResourceResponseDto.prototype, "managers", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", ResourceGroupResponseDto)
+], ResourceResponseDto.prototype, "resourceGroup", void 0);
 class ResourceSelectResponseDto {
 }
 exports.ResourceSelectResponseDto = ResourceSelectResponseDto;
@@ -8610,39 +8642,16 @@ __decorate([
     __metadata("design:type", Number)
 ], ResourceSelectResponseDto.prototype, "order", void 0);
 class ResourceWithReservationsResponseDto extends ResourceResponseDto {
+    constructor(resource) {
+        super(resource);
+        this.reservations = resource?.reservations.map((reservation) => new reservation_response_dto_1.ReservationResponseDto(reservation));
+    }
 }
 exports.ResourceWithReservationsResponseDto = ResourceWithReservationsResponseDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [reservation_response_dto_1.ReservationResponseDto] }),
     __metadata("design:type", Array)
 ], ResourceWithReservationsResponseDto.prototype, "reservations", void 0);
-class ResourceGroupResponseDto {
-}
-exports.ResourceGroupResponseDto = ResourceGroupResponseDto;
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", String)
-], ResourceGroupResponseDto.prototype, "resourceGroupId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", String)
-], ResourceGroupResponseDto.prototype, "title", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", String)
-], ResourceGroupResponseDto.prototype, "description", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
-    __metadata("design:type", typeof (_f = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _f : Object)
-], ResourceGroupResponseDto.prototype, "type", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", Number)
-], ResourceGroupResponseDto.prototype, "order", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", String)
-], ResourceGroupResponseDto.prototype, "parentResourceGroupId", void 0);
 class ChildResourceGroupResponseDto extends ResourceGroupResponseDto {
 }
 exports.ChildResourceGroupResponseDto = ChildResourceGroupResponseDto;
@@ -9359,9 +9368,9 @@ let ResourceUsecase = class ResourceUsecase {
         }));
         return resourceGroupsWithResources;
     }
-    async findResourceDetailForUser(resourceId) {
+    async findResourceDetailForUser(employeeId, resourceId) {
         const resource = await this.resourceService.findOne({
-            where: { resourceId: resourceId },
+            where: { resourceId: resourceId, },
             relations: [
                 'resourceGroup',
                 'vehicleInfo',
@@ -9369,7 +9378,6 @@ let ResourceUsecase = class ResourceUsecase {
                 'accommodationInfo',
                 'resourceManagers',
                 'resourceManagers.employee',
-                'reservations',
             ],
         });
         if (!resource) {
@@ -9380,12 +9388,19 @@ let ResourceUsecase = class ResourceUsecase {
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.odometerImages);
         }
-        if (resource.reservations) {
-            resource.reservations.forEach((reservation) => {
-                reservation.startDate = date_util_1.DateUtil.date(reservation.startDate).toDate();
-                reservation.endDate = date_util_1.DateUtil.date(reservation.endDate).toDate();
-            });
-        }
+        const today = date_util_1.DateUtil.date(date_util_1.DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
+        const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
+            repositoryOptions: {
+                where: {
+                    resourceId: resourceId,
+                    participants: { employeeId: employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
+                    status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING]),
+                    endDate: (0, typeorm_1.MoreThanOrEqual)(today),
+                },
+                relations: ['participants'],
+            },
+        });
+        resource.reservations = reservations;
         return new resource_response_dto_1.ResourceWithReservationsResponseDto(resource);
     }
     async findResourceDetailForAdmin(resourceId) {
@@ -10600,7 +10615,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -10634,8 +10649,8 @@ let UserResourceController = class UserResourceController {
             isAvailable,
         };
     }
-    async findOne(resourceId) {
-        return this.resourceUsecase.findResourceDetailForUser(resourceId);
+    async findOne(user, resourceId) {
+        return this.resourceUsecase.findResourceDetailForUser(user.employeeId, resourceId);
     }
     async returnVehicle(user, resourceId, returnDto) {
         return this.resourceUsecase.returnVehicle(user, resourceId, returnDto);
@@ -10709,12 +10724,13 @@ __decorate([
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
         description: '자원을 성공적으로 조회했습니다.',
-        type: dtos_index_1.ResourceResponseDto,
+        type: resource_response_dto_1.ResourceWithReservationsResponseDto,
     }),
-    __param(0, (0, common_1.Param)('resourceId')),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], UserResourceController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':resourceId/return-vehicle'),
@@ -10728,8 +10744,8 @@ __decorate([
     __param(1, (0, common_1.Param)('resourceId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _k : Object, String, typeof (_l = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _l : Object]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+    __metadata("design:paramtypes", [typeof (_l = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _l : Object, String, typeof (_m = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], UserResourceController.prototype, "returnVehicle", null);
 exports.UserResourceController = UserResourceController = __decorate([
     (0, swagger_1.ApiTags)('3. 자원 - 사용자 페이지'),

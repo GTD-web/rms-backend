@@ -20,6 +20,7 @@ import {
     Between,
     TypeORMError,
     DriverOptionNotSetError,
+    FindOptionsWhere,
 } from 'typeorm';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
@@ -36,7 +37,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { UserService } from '@resource/modules/auth/application/services/user.service';
 import { User as UserEntity } from '@libs/entities';
 import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
-import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-type.enum';
 import { FileService } from '@resource/modules/file/application/services/file.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DateUtil } from '@libs/utils/date.util';
@@ -184,9 +185,9 @@ export class ResourceUsecase {
 
         return resourceGroupsWithResources;
     }
-    async findResourceDetailForUser(resourceId: string): Promise<ResourceWithReservationsResponseDto> {
+    async findResourceDetailForUser(employeeId: string, resourceId: string): Promise<ResourceWithReservationsResponseDto> {
         const resource = await this.resourceService.findOne({
-            where: { resourceId: resourceId },
+            where: { resourceId: resourceId, },
             relations: [
                 'resourceGroup',
                 'vehicleInfo',
@@ -194,7 +195,6 @@ export class ResourceUsecase {
                 'accommodationInfo',
                 'resourceManagers',
                 'resourceManagers.employee',
-                'reservations',
             ],
         });
 
@@ -213,13 +213,21 @@ export class ResourceUsecase {
             );
         }   
 
-        if (resource.reservations) {
-            resource.reservations.forEach((reservation) => {
-                reservation.startDate = DateUtil.date(reservation.startDate).toDate();
-                reservation.endDate = DateUtil.date(reservation.endDate).toDate();
-            });
-        }
+        const today = DateUtil.date(DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
 
+        const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
+            repositoryOptions: {
+                where: { 
+                    resourceId: resourceId, 
+                    participants: { employeeId: employeeId, type: ParticipantsType.RESERVER } ,
+                    status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]), 
+                    endDate: MoreThanOrEqual(today),
+                },
+                relations: ['participants'],
+            },
+        });
+        resource.reservations = reservations;
+       
         return new ResourceWithReservationsResponseDto(resource);
     }
 
