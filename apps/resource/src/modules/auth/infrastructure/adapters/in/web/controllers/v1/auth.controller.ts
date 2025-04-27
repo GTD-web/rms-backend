@@ -16,7 +16,6 @@ export class UserAuthController {
     @ApiOperation({ summary: '로그인' })
     @ApiDataResponse({ status: 201, description: '로그인 성공', type: LoginResponseDto })
     login(@Body() loginDto: LoginDto) {
-        console.log(loginDto);
         return this.authService.login(loginDto);
     }
 }

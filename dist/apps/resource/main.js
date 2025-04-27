@@ -1831,7 +1831,6 @@ let UserAuthController = class UserAuthController {
         this.authService = authService;
     }
     login(loginDto) {
-        console.log(loginDto);
         return this.authService.login(loginDto);
     }
 };
