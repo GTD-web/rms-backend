@@ -6041,6 +6041,7 @@ let ReservationUsecase = class ReservationUsecase {
             where: {
                 reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
             },
+            relations: ['resource', 'participants', 'participants.employee'],
             order: {
                 startDate: 'ASC',
             },
@@ -6086,12 +6087,15 @@ let ReservationUsecase = class ReservationUsecase {
             where,
             relations: ['resource', 'participants', 'participants.employee'],
         };
+        console.log(options);
         const reservations = await this.reservationService.findAll(options);
+        console.log(reservations);
         const count = reservations.length;
         const reservationWithParticipants = await this.reservationService.findAll({
             where: {
                 reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
             },
+            relations: ['resource', 'participants', 'participants.employee'],
             order: {
                 startDate: 'ASC',
             },

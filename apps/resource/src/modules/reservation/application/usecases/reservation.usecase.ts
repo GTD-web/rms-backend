@@ -202,8 +202,6 @@ export class ReservationUsecase {
         const today = DateUtil.date(DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
         const where: FindOptionsWhere<Reservation> = {
             participants: { employeeId, type: ParticipantsType.RESERVER },
-            // status: Not(ReservationStatus.CLOSED),
-            // startDate: LessThanOrEqual(today),
             endDate: MoreThanOrEqual(today),
         };
         if (resourceType) {
@@ -222,6 +220,7 @@ export class ReservationUsecase {
             where: {
                 reservationId: In(reservations.map((r) => r.reservationId)),
             },
+            relations: ['resource', 'participants', 'participants.employee'],
             order: {
                 startDate: 'ASC',
             },
@@ -276,13 +275,17 @@ export class ReservationUsecase {
             where,
             relations: ['resource', 'participants', 'participants.employee'],
         };
+        console.log(options);
+
         const reservations = await this.reservationService.findAll(options);
+        console.log(reservations);
         const count = reservations.length;
 
         const reservationWithParticipants = await this.reservationService.findAll({
             where: {
                 reservationId: In(reservations.map((r) => r.reservationId)),
             },
+            relations: ['resource', 'participants', 'participants.employee'],
             order: {
                 startDate: 'ASC',
             },
