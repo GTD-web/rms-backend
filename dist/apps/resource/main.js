@@ -9395,7 +9395,7 @@ let ResourceUsecase = class ResourceUsecase {
                     resourceId: resourceId,
                     participants: { employeeId: employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
                     status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING]),
-                    endDate: (0, typeorm_1.MoreThanOrEqual)(today),
+                    endDate: (0, typeorm_1.MoreThan)(today),
                 },
                 relations: ['participants'],
             },

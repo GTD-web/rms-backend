@@ -221,7 +221,7 @@ export class ResourceUsecase {
                     resourceId: resourceId, 
                     participants: { employeeId: employeeId, type: ParticipantsType.RESERVER } ,
                     status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]), 
-                    endDate: MoreThanOrEqual(today),
+                    endDate: MoreThan(today),
                 },
                 relations: ['participants'],
             },
