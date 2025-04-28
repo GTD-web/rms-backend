@@ -40,6 +40,7 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { ReservationVehicleService } from '../services/reservation-vehicle.service';
+import { ReturnVehicleDto } from '@resource/dtos.index';
 @Injectable()
 export class ReservationUsecase {
     constructor(
@@ -253,6 +254,48 @@ export class ReservationUsecase {
             withDeleted: true,
         });
         return reservation ? new ReservationWithRelationsResponseDto(reservation) : null;
+    }
+
+    async findMyUsingReservationList(employeeId: string): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+        // 현재 이용중인 예약 조회
+        const where: FindOptionsWhere<Reservation>[] = [
+            {
+                participants: { employeeId, type: ParticipantsType.RESERVER },
+                resource: { type: ResourceType.VEHICLE },
+                status: ReservationStatus.CONFIRMED,
+                startDate: LessThanOrEqual(DateUtil.date(DateUtil.now().format()).toDate()),
+                endDate: MoreThanOrEqual(DateUtil.date(DateUtil.now().format()).toDate()),
+            },
+            {
+                participants: { employeeId, type: ParticipantsType.RESERVER },
+                status: ReservationStatus.CLOSED,
+                reservationVehicles: {
+                    isReturned: false,
+                },
+            },
+        ];
+        const reservations = await this.reservationService.findAll({
+            where,
+            relations: ['resource', 'reservationVehicles', 'participants'],
+            order: {
+                startDate: 'ASC',
+            },
+        });
+        reservations.sort((a, b) => {
+            if (a.status === ReservationStatus.CONFIRMED) {
+                return -1;
+            }
+            return 1;
+        });
+        return {
+            items: reservations.map((reservation) => new ReservationWithRelationsResponseDto(reservation)),
+            meta: {
+                total: reservations.length,
+                page: 1,
+                limit: reservations.length,
+                hasNext: false,
+            },
+        };
     }
 
     // v1 홈화면 예약 리스트 조회
@@ -840,6 +883,97 @@ export class ReservationUsecase {
         }
 
         return new ReservationResponseDto(updatedReservation);
+    }
+
+    async returnVehicle(user: User, reservationId: string, returnDto: ReturnVehicleDto): Promise<boolean> {
+        // 1. 예약 정보 조회
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['resource', 'resource.vehicleInfo'],
+            withDeleted: true,
+        });
+
+        if (!reservation) {
+            throw new NotFoundException('Reservation not found');
+        }
+
+        // 리소스 타입이 차량인지 확인
+        if (reservation.resource.type !== ResourceType.VEHICLE) {
+            throw new BadRequestException('Reservation resource is not a vehicle');
+        }
+
+        // 2. 예약 상태 확인 (확정된 예약만 반납 가능)
+        if (reservation.status !== ReservationStatus.CONFIRMED && reservation.status !== ReservationStatus.CLOSED) {
+            throw new BadRequestException(`Cannot return vehicle for reservation in ${reservation.status} status`);
+        }
+
+        // 3. 트랜잭션 시작
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            // 4. ReservationVehicle 조회 및 업데이트
+            const reservationVehicles = await this.reservationVehicleService.findByReservationId(reservationId, {
+                queryRunner,
+            });
+
+            if (!reservationVehicles || reservationVehicles.length === 0) {
+                throw new NotFoundException('Reservation vehicle not found');
+            }
+
+            const reservationVehicle = reservationVehicles[0]; // 일반적으로 예약당 하나의 차량
+
+            // 이미 반납된 경우 체크
+            if (reservationVehicle.isReturned) {
+                throw new BadRequestException('Vehicle already returned');
+            }
+
+            // 5. ReservationVehicle 업데이트
+            await this.reservationVehicleService.update(
+                reservationVehicle.reservationVehicleId,
+                {
+                    endOdometer: returnDto.totalMileage,
+                    isReturned: true,
+                    returnedAt: DateUtil.now().toDate(),
+                },
+                { queryRunner },
+            );
+
+            // 6. VehicleInfo 업데이트
+            const vehicleInfoId = reservation.resource.vehicleInfo.vehicleInfoId;
+
+            // 차량 리소스 위치 업데이트
+            await this.eventEmitter.emitAsync('update.resource', {
+                resourceId: reservation.resource.resourceId,
+                updateData: { location: returnDto.location },
+                repositoryOptions: { queryRunner },
+            });
+
+            // 차량 정보 업데이트
+            await this.eventEmitter.emitAsync('update.vehicle.info', {
+                vehicleInfoId,
+                updateData: {
+                    totalMileage: returnDto.totalMileage,
+                    leftMileage: returnDto.leftMileage,
+                    parkingLocationImages: returnDto.parkingLocationImages,
+                    odometerImages: returnDto.odometerImages,
+                },
+                repositoryOptions: { queryRunner },
+            });
+
+            // 트랜잭션 커밋
+            await queryRunner.commitTransaction();
+            return true;
+        } catch (error) {
+            // 에러 발생 시 롤백
+            await queryRunner.rollbackTransaction();
+            console.error('Error in returnVehicle:', error);
+            throw error;
+        } finally {
+            // 트랜잭션 종료
+            await queryRunner.release();
+        }
     }
 
     // 이 아래에 Job 삭제 메서드 추가

@@ -26,6 +26,7 @@ import {
     UpdateReservationStatusDto,
     ReservationSnapshotResponseDto,
     UpdateReservationSnapshotDto,
+    ReturnVehicleDto,
 } from '@resource/dtos.index';
 import { ReservationUsecase } from '../../../../../../application/usecases/reservation.usecase';
 import { User } from '@libs/decorators/user.decorator';
@@ -117,16 +118,18 @@ export class UserReservationController {
         );
     }
 
-    // @Get('my-using')
-    // @Roles(Role.USER)
-    // @ApiOperation({ summary: '내 사용중인 예약 리스트 조회' })
-    // @ApiDataResponse({
-    //     description: '내 사용중인 예약 리스트 조회',
-    //     type: [GroupedReservationResponseDto],
-    // })
-    // async findMyUsingReservationList(@User() user: UserEntity): Promise<PaginationData<GroupedReservationResponseDto>> {
-    //     return this.reservationUsecase.findMyUsingReservationList(user.employeeId);
-    // }
+    @Get('my-using')
+    @Roles(Role.USER)
+    @ApiOperation({ summary: '내 이용중인 예약 리스트 조회' })
+    @ApiDataResponse({
+        description: '내 이용중인 예약 리스트 조회',
+        type: [ReservationWithRelationsResponseDto],
+    })
+    async findMyUsingReservationList(
+        @User() user: UserEntity,
+    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+        return this.reservationUsecase.findMyUsingReservationList(user.employeeId);
+    }
 
     @Get('my-upcoming')
     @Roles(Role.USER)
@@ -240,6 +243,22 @@ export class UserReservationController {
     ): Promise<ReservationResponseDto> {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateParticipants(reservationId, updateDto);
+    }
+
+    // check api
+    @Patch(':reservationId/return-vehicle')
+    @Roles(Role.USER)
+    @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })
+    @ApiDataResponse({
+        status: 200,
+        description: '차량 반납 성공',
+    })
+    async returnVehicle(
+        @User() user: UserEntity,
+        @Param('reservationId') reservationId: string,
+        @Body() returnDto: ReturnVehicleDto,
+    ): Promise<boolean> {
+        return this.reservationUsecase.returnVehicle(user, reservationId, returnDto);
     }
 
     @Post('snapshot')

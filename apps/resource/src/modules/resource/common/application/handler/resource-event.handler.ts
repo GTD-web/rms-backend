@@ -11,4 +11,13 @@ export class ResourceEventHandler {
     async handleFindResource(payload: { repositoryOptions?: RepositoryOptions }) {
         return await this.resourceService.findAll(payload.repositoryOptions);
     }
+
+    @OnEvent('update.resource')
+    async handleUpdateResource(payload: {
+        resourceId: string;
+        updateData: any;
+        repositoryOptions?: RepositoryOptions;
+    }) {
+        return await this.resourceService.update(payload.resourceId, payload.updateData, payload.repositoryOptions);
+    }
 }
