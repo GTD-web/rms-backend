@@ -10566,11 +10566,12 @@ let ResourceUsecase = class ResourceUsecase {
             relations: ['resourceGroup', 'reservations'],
         });
         if (!resources || resources.length === 0) {
-            return [];
+            throw new common_1.NotFoundException('이용 가능한 자원이 없습니다.');
         }
         const result = [];
         const isSameDay = startDate === endDate;
-        if (timeUnit) {
+        const isAccommodation = resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION;
+        if (!isAccommodation && isSameDay && timeUnit) {
             for (const resource of resources) {
                 const availabilityDto = new available_time_response_dto_1.ResourceAvailabilityDto();
                 availabilityDto.resourceId = resource.resourceId;
@@ -10579,9 +10580,9 @@ let ResourceUsecase = class ResourceUsecase {
                 result.push(availabilityDto);
             }
         }
-        else {
-            const combinedStartDateTime = startTime ? `${startDate} ${startTime}` : `${startDate} 09:00:00`;
-            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 18:00:00`;
+        else if (isAccommodation || !isSameDay) {
+            const combinedStartDateTime = startTime ? `${startDate} ${startTime}` : `${startDate} 00:00:00`;
+            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 23:59:59`;
             const startDateObj = date_util_1.DateUtil.date(combinedStartDateTime);
             const endDateObj = date_util_1.DateUtil.date(combinedEndDateTime);
             for (const resource of resources) {
@@ -10605,6 +10606,9 @@ let ResourceUsecase = class ResourceUsecase {
                     result.push(availabilityDto);
                 }
             }
+        }
+        else {
+            throw new common_1.BadRequestException('시간 조회 조건이 올바르지 않습니다.');
         }
         return result;
     }

@@ -327,7 +327,7 @@ export class ResourceUsecase {
         });
 
         if (!resources || resources.length === 0) {
-            return [];
+            throw new NotFoundException('이용 가능한 자원이 없습니다.');
         }
 
         // 결과 리스트 초기화
@@ -335,9 +335,12 @@ export class ResourceUsecase {
 
         // 날짜가 같은 경우 (당일 예약건)
         const isSameDay = startDate === endDate;
+        const isAccommodation = resourceType === ResourceType.ACCOMMODATION;
+        // 숙소 예약이 아닌 당일 예약건 -> 시간 슬롯
+        // 숙소 예약 혹은 여러 일 예약건 -> 자원 슬롯
 
         // timeUnit이 있는 경우: 시간 슬롯 계산
-        if (timeUnit) {
+        if (!isAccommodation && isSameDay && timeUnit) {
             for (const resource of resources) {
                 const availabilityDto = new ResourceAvailabilityDto();
                 availabilityDto.resourceId = resource.resourceId;
@@ -358,10 +361,10 @@ export class ResourceUsecase {
             }
         }
         // timeUnit이 없는 경우: 예약 가능한 자원만 필터링하여 반환 (시간 슬롯 없음)
-        else {
-            const combinedStartDateTime = startTime ? `${startDate} ${startTime}` : `${startDate} 09:00:00`; // 기본 시작 시간은 09:00
+        else if (isAccommodation || !isSameDay) {
+            const combinedStartDateTime = startTime ? `${startDate} ${startTime}` : `${startDate} 00:00:00`; // 기본 시작 시간은 09:00
 
-            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 18:00:00`; // 기본 종료 시간은 18:00
+            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 23:59:59`; // 기본 종료 시간은 18:00
 
             const startDateObj = DateUtil.date(combinedStartDateTime);
             const endDateObj = DateUtil.date(combinedEndDateTime);
@@ -402,6 +405,8 @@ export class ResourceUsecase {
                     result.push(availabilityDto);
                 }
             }
+        } else {
+            throw new BadRequestException('시간 조회 조건이 올바르지 않습니다.');
         }
 
         return result;
