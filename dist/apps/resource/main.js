@@ -10522,7 +10522,7 @@ let ResourceUsecase = class ResourceUsecase {
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.odometerImages);
         }
-        return resource;
+        return new resource_response_dto_1.ResourceResponseDto(resource);
     }
     async findResourceDetailForAdmin(resourceId) {
         const resource = await this.resourceService.findOne({
@@ -11848,7 +11848,7 @@ __decorate([
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
         description: '자원을 성공적으로 조회했습니다.',
-        type: resource_response_dto_1.ResourceWithReservationsResponseDto,
+        type: dtos_index_1.ResourceResponseDto,
     }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('resourceId')),

@@ -246,7 +246,7 @@ export class ResourceUsecase {
                 resource.vehicleInfo.odometerImages,
             );
         }
-        return resource;
+        return new ResourceResponseDto(resource);
     }
 
     async findResourceDetailForAdmin(resourceId: string): Promise<ResourceResponseDto> {

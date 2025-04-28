@@ -105,12 +105,9 @@ export class UserResourceController {
     @ApiDataResponse({
         status: 200,
         description: '자원을 성공적으로 조회했습니다.',
-        type: ResourceWithReservationsResponseDto,
+        type: ResourceResponseDto,
     })
-    async findOne(
-        @User() user: UserEntity,
-        @Param('resourceId') resourceId: string,
-    ): Promise<ResourceWithReservationsResponseDto> {
+    async findOne(@User() user: UserEntity, @Param('resourceId') resourceId: string): Promise<ResourceResponseDto> {
         return this.resourceUsecase.findResourceDetailForUser(user.employeeId, resourceId);
     }
 
