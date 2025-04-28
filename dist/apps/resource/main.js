@@ -5646,9 +5646,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GroupedReservationResponseDto = exports.CreateReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationVehicleResponseDto = exports.ReservationParticipantResponseDto = exports.ReservationResponseDto = void 0;
+exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.CreateReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationVehicleResponseDto = exports.ReservationParticipantResponseDto = exports.ReservationResponseDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const reservation_type_enum_2 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
@@ -5834,6 +5834,24 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], GroupedReservationResponseDto.prototype, "reservations", void 0);
+class GroupedReservationWithResourceResponseDto {
+}
+exports.GroupedReservationWithResourceResponseDto = GroupedReservationWithResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 정보',
+        type: () => dtos_index_1.ResourceResponseDto,
+    }),
+    __metadata("design:type", typeof (_f = typeof dtos_index_1.ResourceResponseDto !== "undefined" && dtos_index_1.ResourceResponseDto) === "function" ? _f : Object)
+], GroupedReservationWithResourceResponseDto.prototype, "resource", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 목록',
+        required: false,
+        type: [GroupedReservationResponseDto],
+    }),
+    __metadata("design:type", Array)
+], GroupedReservationWithResourceResponseDto.prototype, "groupedReservations", void 0);
 
 
 /***/ }),
@@ -6546,6 +6564,7 @@ const dist_1 = __webpack_require__(/*! cron/dist */ "cron/dist");
 const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 const reservation_vehicle_service_1 = __webpack_require__(/*! ../services/reservation-vehicle.service */ "./apps/resource/src/modules/reservation/application/services/reservation-vehicle.service.ts");
+const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
 let ReservationUsecase = class ReservationUsecase {
     constructor(reservationService, participantService, reservationVehicleService, dataSource, eventEmitter, schedulerRegistry) {
         this.reservationService = reservationService;
@@ -6625,7 +6644,7 @@ let ReservationUsecase = class ReservationUsecase {
             },
         };
     }
-    async findResourceReservationList(employeeId, page, limit, resourceId, month, isMine) {
+    async findResourceReservationList(employeeId, resourceId, page, limit, month, isMine) {
         const monthStart = `${month}-01 00:00:00`;
         const lastDay = date_util_1.DateUtil.date(month).getLastDayOfMonth().getDate();
         const monthEnd = `${month}-${lastDay} 23:59:59`;
@@ -6636,10 +6655,17 @@ let ReservationUsecase = class ReservationUsecase {
               (${alias} <= :monthStartDate AND "Reservation"."endDate" >= :monthEndDate))`, { monthStartDate, monthEndDate });
         const where = {
             startDate: dateCondition,
+            resourceId: resourceId,
         };
-        if (resourceId) {
-            where.resourceId = resourceId;
+        const [resources] = await this.eventEmitter.emitAsync('find.resource', {
+            repositoryOptions: {
+                where: { resourceId: resourceId },
+            },
+        });
+        if (resources && resources.length === 0) {
+            throw new common_1.NotFoundException('Resource not found');
         }
+        const resource = resources[0];
         if (isMine) {
             where.participants = { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER };
         }
@@ -6656,7 +6682,7 @@ let ReservationUsecase = class ReservationUsecase {
             where: {
                 reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
             },
-            relations: ['resource', 'participants', 'participants.employee'],
+            relations: ['participants', 'participants.employee'],
             withDeleted: true,
         });
         const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
@@ -6672,13 +6698,8 @@ let ReservationUsecase = class ReservationUsecase {
             reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
         }));
         return {
-            items: groupedReservationsResponse,
-            meta: {
-                total: count,
-                page,
-                limit,
-                hasNext: page * limit < count,
-            },
+            resource: new dtos_index_1.ResourceResponseDto(resource),
+            groupedReservations: groupedReservationsResponse,
         };
     }
     async findMyCurrentReservation(employeeId, resourceType) {
@@ -7887,7 +7908,7 @@ let UserReservationController = class UserReservationController {
     async findResourceReservationList(user, resourceId, query, month, isMine) {
         const { page, limit } = query;
         console.log(page, limit);
-        return this.reservationUsecase.findResourceReservationList(user.employeeId, page, limit, resourceId, month, isMine);
+        return this.reservationUsecase.findResourceReservationList(user.employeeId, resourceId, page, limit, month, isMine);
     }
     async findMyUsingReservationList(user) {
         return this.reservationUsecase.findMyUsingReservationList(user.employeeId);
@@ -7972,7 +7993,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: '자원별 예약 리스트 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '자원별 예약 리스트 조회',
-        type: [reservation_response_dto_1.GroupedReservationResponseDto],
+        type: reservation_response_dto_1.GroupedReservationWithResourceResponseDto,
     }),
     (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
     (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),

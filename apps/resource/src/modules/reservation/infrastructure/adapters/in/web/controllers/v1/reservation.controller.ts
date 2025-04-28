@@ -37,6 +37,7 @@ import {
     ReservationWithResourceResponseDto,
     ReservationWithRelationsResponseDto,
     GroupedReservationResponseDto,
+    GroupedReservationWithResourceResponseDto,
 } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
 import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
@@ -93,7 +94,7 @@ export class UserReservationController {
     @ApiOperation({ summary: '자원별 예약 리스트 조회' })
     @ApiDataResponse({
         description: '자원별 예약 리스트 조회',
-        type: [GroupedReservationResponseDto],
+        type: GroupedReservationWithResourceResponseDto,
     })
     @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
     @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
@@ -105,14 +106,14 @@ export class UserReservationController {
         @Query() query?: PaginationQueryDto,
         @Query('month') month?: string,
         @Query('isMine') isMine?: boolean,
-    ): Promise<PaginationData<GroupedReservationResponseDto>> {
+    ): Promise<GroupedReservationWithResourceResponseDto> {
         const { page, limit } = query;
         console.log(page, limit);
         return this.reservationUsecase.findResourceReservationList(
             user.employeeId,
+            resourceId,
             page,
             limit,
-            resourceId,
             month,
             isMine,
         );

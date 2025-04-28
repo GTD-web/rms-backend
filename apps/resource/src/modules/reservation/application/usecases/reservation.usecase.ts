@@ -3,6 +3,7 @@ import { CreateReservationDto } from '../dtos/create-reservation.dto';
 import {
     CreateReservationResponseDto,
     GroupedReservationResponseDto,
+    GroupedReservationWithResourceResponseDto,
     ReservationResponseDto,
     ReservationWithRelationsResponseDto,
 } from '../dtos/reservation-response.dto';
@@ -40,7 +41,7 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { ReservationVehicleService } from '../services/reservation-vehicle.service';
-import { ReturnVehicleDto } from '@resource/dtos.index';
+import { ResourceResponseDto, ReturnVehicleDto } from '@resource/dtos.index';
 @Injectable()
 export class ReservationUsecase {
     constructor(
@@ -147,12 +148,12 @@ export class ReservationUsecase {
     /** 자원별 예약 리스트 조회 */
     async findResourceReservationList(
         employeeId: string,
+        resourceId: string,
         page?: number,
         limit?: number,
-        resourceId?: string,
         month?: string,
         isMine?: boolean,
-    ): Promise<PaginationData<GroupedReservationResponseDto>> {
+    ): Promise<GroupedReservationWithResourceResponseDto> {
         // 이번 달의 시작일과 마지막일 계산
         const monthStart = `${month}-01 00:00:00`;
         const lastDay = DateUtil.date(month).getLastDayOfMonth().getDate();
@@ -175,11 +176,18 @@ export class ReservationUsecase {
 
         const where: FindOptionsWhere<Reservation> = {
             startDate: dateCondition,
+            resourceId: resourceId,
         };
 
-        if (resourceId) {
-            where.resourceId = resourceId;
+        const [resources] = await this.eventEmitter.emitAsync('find.resource', {
+            repositoryOptions: {
+                where: { resourceId: resourceId },
+            },
+        });
+        if (resources && resources.length === 0) {
+            throw new NotFoundException('Resource not found');
         }
+        const resource = resources[0];
 
         if (isMine) {
             where.participants = { employeeId, type: ParticipantsType.RESERVER };
@@ -201,7 +209,7 @@ export class ReservationUsecase {
             where: {
                 reservationId: In(reservations.map((r) => r.reservationId)),
             },
-            relations: ['resource', 'participants', 'participants.employee'],
+            relations: ['participants', 'participants.employee'],
             withDeleted: true,
         });
 
@@ -222,13 +230,8 @@ export class ReservationUsecase {
         }));
 
         return {
-            items: groupedReservationsResponse,
-            meta: {
-                total: count,
-                page,
-                limit,
-                hasNext: page * limit < count,
-            },
+            resource: new ResourceResponseDto(resource),
+            groupedReservations: groupedReservationsResponse,
         };
     }
 

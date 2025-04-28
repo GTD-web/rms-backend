@@ -151,3 +151,18 @@ export class GroupedReservationResponseDto {
     })
     reservations: ReservationWithRelationsResponseDto[];
 }
+
+export class GroupedReservationWithResourceResponseDto {
+    @ApiProperty({
+        description: '자원 정보',
+        type: () => ResourceResponseDto,
+    })
+    resource: ResourceResponseDto;
+
+    @ApiProperty({
+        description: '예약 목록',
+        required: false,
+        type: [GroupedReservationResponseDto],
+    })
+    groupedReservations?: GroupedReservationResponseDto[];
+}
