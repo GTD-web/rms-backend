@@ -10576,7 +10576,7 @@ let ResourceUsecase = class ResourceUsecase {
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.odometerImages);
         }
-        return resource;
+        return new resource_response_dto_1.ResourceResponseDto(resource);
     }
     async findAvailableTime(query) {
         const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit } = query;

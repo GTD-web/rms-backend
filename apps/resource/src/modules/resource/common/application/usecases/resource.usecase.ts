@@ -314,7 +314,7 @@ export class ResourceUsecase {
             );
         }
 
-        return resource;
+        return new ResourceResponseDto(resource);
     }
 
     async findAvailableTime(query: ResourceQueryDto): Promise<ResourceAvailabilityDto[]> {
