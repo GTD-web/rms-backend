@@ -10435,16 +10435,8 @@ let ResourceUsecase = class ResourceUsecase {
             }
         }
         else {
-            const combinedStartDateTime = startTime
-                ? `${startDate} ${startTime}`
-                : am
-                    ? `${startDate} 09:00:00`
-                    : `${startDate} 13:00:00`;
-            const combinedEndDateTime = endTime
-                ? `${endDate} ${endTime}`
-                : pm
-                    ? `${endDate} 18:00:00`
-                    : `${endDate} 12:00:00`;
+            const combinedStartDateTime = startTime ? `${startDate} ${startTime}` : `${startDate} 09:00:00`;
+            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 18:00:00`;
             const startDateObj = date_util_1.DateUtil.date(combinedStartDateTime);
             const endDateObj = date_util_1.DateUtil.date(combinedEndDateTime);
             for (const resource of resources) {
@@ -10477,11 +10469,14 @@ let ResourceUsecase = class ResourceUsecase {
         const confirmedReservations = existingReservations.filter((reservation) => reservation.status === 'CONFIRMED');
         if (isSameDay) {
             const dateStr = startDate;
-            if (am) {
+            if (am && pm) {
+                this.processTimeRange(dateStr, '09:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+            }
+            else if (am) {
                 this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
             }
-            if (pm) {
-                this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+            else if (pm) {
+                this.processTimeRange(dateStr, '12:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
             }
         }
         else {
@@ -10489,8 +10484,7 @@ let ResourceUsecase = class ResourceUsecase {
             const endDateObj = date_util_1.DateUtil.date(endDate);
             while (this.isSameOrBefore(currentDate, endDateObj)) {
                 const dateStr = currentDate.format('YYYY-MM-DD');
-                this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
-                this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, '09:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
                 currentDate = currentDate.addDays(1);
             }
         }

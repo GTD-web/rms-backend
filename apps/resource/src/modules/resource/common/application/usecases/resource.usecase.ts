@@ -359,16 +359,9 @@ export class ResourceUsecase {
         }
         // timeUnit이 없는 경우: 예약 가능한 자원만 필터링하여 반환 (시간 슬롯 없음)
         else {
-            const combinedStartDateTime = startTime
-                ? `${startDate} ${startTime}`
-                : am
-                  ? `${startDate} 09:00:00`
-                  : `${startDate} 13:00:00`;
-            const combinedEndDateTime = endTime
-                ? `${endDate} ${endTime}`
-                : pm
-                  ? `${endDate} 18:00:00`
-                  : `${endDate} 12:00:00`;
+            const combinedStartDateTime = startTime ? `${startDate} ${startTime}` : `${startDate} 09:00:00`; // 기본 시작 시간은 09:00
+
+            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 18:00:00`; // 기본 종료 시간은 18:00
 
             const startDateObj = DateUtil.date(combinedStartDateTime);
             const endDateObj = DateUtil.date(combinedEndDateTime);
@@ -435,15 +428,12 @@ export class ResourceUsecase {
         if (isSameDay) {
             // 당일 예약건 처리
             const dateStr = startDate; // YYYY-MM-DD 형식
-
-            // 오전 시간대 처리 (09:00 ~ 12:00)
-            if (am) {
+            if (am && pm) {
+                this.processTimeRange(dateStr, '09:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+            } else if (am) {
                 this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
-            }
-
-            // 오후 시간대 처리 (13:00 ~ 18:00)
-            if (pm) {
-                this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+            } else if (pm) {
+                this.processTimeRange(dateStr, '12:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
             }
         } else {
             // 여러 일 예약건 처리 - 시작일부터 종료일까지 일별로 처리
@@ -454,9 +444,10 @@ export class ResourceUsecase {
             while (this.isSameOrBefore(currentDate, endDateObj)) {
                 const dateStr = currentDate.format('YYYY-MM-DD');
 
-                // 하루 전체 시간대 처리 (09:00 ~ 18:00, 점심시간 제외)
-                this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
-                this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                // 하루 전체 시간대 처리 (09:00 ~ 18:00)
+                this.processTimeRange(dateStr, '09:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                // 점심시간 제외
+                // this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
 
                 // 하루 증가
                 currentDate = currentDate.addDays(1);
