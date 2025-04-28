@@ -24,7 +24,7 @@ import {
     UpdateReservationCcReceipientDto,
     UpdateReservationTitleDto,
     UpdateReservationStatusDto,
-    ReservationSnapshotResponseDto, 
+    ReservationSnapshotResponseDto,
     UpdateReservationSnapshotDto,
 } from '@resource/dtos.index';
 import { ReservationUsecase } from '../../../../../../application/usecases/reservation.usecase';
@@ -84,7 +84,36 @@ export class UserReservationController {
         @Query() query?: PaginationQueryDto,
     ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
         const { page, limit } = query;
-        return this.reservationUsecase.findMyReservationList(user.employeeId, page, limit, resourceType );
+        return this.reservationUsecase.findMyReservationList(user.employeeId, page, limit, resourceType);
+    }
+
+    @Get('resource/:resourceId')
+    @Roles(Role.USER)
+    @ApiOperation({ summary: '자원별 예약 리스트 조회' })
+    @ApiDataResponse({
+        description: '자원별 예약 리스트 조회',
+        type: [GroupedReservationResponseDto],
+    })
+    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
+    @ApiQuery({ name: 'month', type: String, example: '2025-04' })
+    @ApiQuery({ name: 'isMine', type: Boolean, required: false, example: true })
+    async findResourceReservationList(
+        @User() user: UserEntity,
+        @Param('resourceId') resourceId: string,
+        @Query() query?: PaginationQueryDto,
+        @Query('month') month?: string,
+        @Query('isMine') isMine?: boolean,
+    ): Promise<PaginationData<GroupedReservationResponseDto>> {
+        const { page, limit } = query;
+        return this.reservationUsecase.findResourceReservationList(
+            user.employeeId,
+            page,
+            limit,
+            resourceId,
+            month,
+            isMine,
+        );
     }
 
     @Get('my-upcoming')
@@ -180,21 +209,21 @@ export class UserReservationController {
         return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELED });
     }
 
-     @Patch(':reservationId/participants')
-     @Roles(Role.USER)
-     @ApiOperation({ summary: '예약 참가자 수정' })
-     @ApiDataResponse({
-         description: '예약 참가자 수정 성공',
-         type: ReservationResponseDto,
-     })
-     async updateParticipants(
-         @User() user: UserEntity,
-         @Param('reservationId') reservationId: string,
-         @Body() updateDto: UpdateReservationParticipantsDto,
-     ): Promise<ReservationResponseDto> {
-         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-         return this.reservationUsecase.updateParticipants(reservationId, updateDto);
-     }
+    @Patch(':reservationId/participants')
+    @Roles(Role.USER)
+    @ApiOperation({ summary: '예약 참가자 수정' })
+    @ApiDataResponse({
+        description: '예약 참가자 수정 성공',
+        type: ReservationResponseDto,
+    })
+    async updateParticipants(
+        @User() user: UserEntity,
+        @Param('reservationId') reservationId: string,
+        @Body() updateDto: UpdateReservationParticipantsDto,
+    ): Promise<ReservationResponseDto> {
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
+        return this.reservationUsecase.updateParticipants(reservationId, updateDto);
+    }
 
     @Post('snapshot')
     @ApiOperation({ summary: '예약 스냅샷 생성' })
@@ -228,19 +257,13 @@ export class UserReservationController {
         description: '예약 스냅샷 조회 성공',
         type: ReservationSnapshotResponseDto,
     })
-    async findUserSnapshot(
-        @User() user: UserEntity,
-    ): Promise<ReservationSnapshotResponseDto> {
+    async findUserSnapshot(@User() user: UserEntity): Promise<ReservationSnapshotResponseDto> {
         return this.reservationSnapshotUsecase.findSnapshotByUserId(user.userId);
     }
 
     @Delete('snapshot/:snapshotId')
     @ApiOperation({ summary: '예약 스냅샷 삭제' })
-    async deleteSnapshot(
-        @User() user: UserEntity,
-        @Param('snapshotId') snapshotId: string,
-    ): Promise<void> {
+    async deleteSnapshot(@User() user: UserEntity, @Param('snapshotId') snapshotId: string): Promise<void> {
         await this.reservationSnapshotUsecase.deleteSnapshot(snapshotId);
     }
-
 }

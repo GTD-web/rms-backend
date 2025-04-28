@@ -37,7 +37,15 @@ import { AdminResourceManagerController } from './infrastructure/adapters/in/web
         UserEventHandler,
         ResourceManagerUseCase,
     ],
-    controllers: [AuthController, UserController, ResourceManagerController, UserAuthController, UserUserController, AdminUserController, AdminResourceManagerController],
+    controllers: [
+        AuthController,
+        UserController,
+        ResourceManagerController,
+        UserAuthController,
+        UserUserController,
+        AdminUserController,
+        AdminResourceManagerController,
+    ],
     exports: [
         JwtStrategy,
         {

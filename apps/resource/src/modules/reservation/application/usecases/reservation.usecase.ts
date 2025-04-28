@@ -17,6 +17,7 @@ import {
     LessThanOrEqual,
     Not,
     MoreThanOrEqual,
+    Raw,
 } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { ReservationService } from '../services/reservation.service';
@@ -85,33 +86,6 @@ export class ReservationUsecase {
         }
     }
 
-    /** 예약 상세 보기 */
-    async findReservationDetail(user: User, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
-        const reservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: [
-                'resource',
-                'resource.vehicleInfo',
-                'resource.meetingRoomInfo',
-                'resource.accommodationInfo',
-                'participants',
-                'participants.employee',
-            ],
-            withDeleted: true,
-        });
-
-        if (!reservation) {
-            throw new NotFoundException('Reservation not found');
-        }
-
-        const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
-        reservationResponseDto.isMine = reservationResponseDto.reservers.some(
-            (reserver) => reserver.employeeId === user.employeeId,
-        );
-
-        return reservationResponseDto;
-    }
-
     /** 내 예약 리스트 조회 (날짜별, 자원 타입별 가능) */
     // v1 내 예약 히스토리리
     async findMyReservationList(
@@ -168,7 +142,95 @@ export class ReservationUsecase {
         };
     }
 
-    /** 내가 만든 예약들 중 현재 진행중인 예약 하나 */ 
+    /** 자원별 예약 리스트 조회 */
+    async findResourceReservationList(
+        employeeId: string,
+        page?: number,
+        limit?: number,
+        resourceId?: string,
+        month?: string,
+        isMine?: boolean,
+    ): Promise<PaginationData<GroupedReservationResponseDto>> {
+        // 이번 달의 시작일과 마지막일 계산
+        const monthStart = `${month}-01 00:00:00`;
+        const lastDay = DateUtil.date(month).getLastDayOfMonth().getDate();
+        const monthEnd = `${month}-${lastDay} 23:59:59`;
+
+        const monthStartDate = DateUtil.date(monthStart).toDate();
+        const monthEndDate = DateUtil.date(monthEnd).toDate();
+
+        // Raw SQL을 사용하여 복잡한 날짜 조건 처리
+        // 1. 시작일이 이번 달 안에 있는 경우
+        // 2. 종료일이 이번 달 안에 있는 경우
+        // 3. 시작일이 이번 달 이전이고 종료일이 이번 달 이후인 경우
+        const dateCondition = Raw(
+            (alias) =>
+                `(${alias} BETWEEN :monthStartDate AND :monthEndDate OR
+              "Reservation"."endDate" BETWEEN :monthStartDate AND :monthEndDate OR
+              (${alias} <= :monthStartDate AND "Reservation"."endDate" >= :monthEndDate))`,
+            { monthStartDate, monthEndDate },
+        );
+
+        const where: FindOptionsWhere<Reservation> = {
+            startDate: dateCondition,
+        };
+
+        if (resourceId) {
+            where.resourceId = resourceId;
+        }
+
+        if (isMine) {
+            where.participants = { employeeId, type: ParticipantsType.RESERVER };
+        }
+
+        const options: RepositoryOptions = {
+            where,
+        };
+
+        if (page && limit) {
+            options.skip = (page - 1) * limit;
+            options.take = limit;
+        }
+
+        const reservations = await this.reservationService.findAll(options);
+        const count = await this.reservationService.count({ where });
+
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: In(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['resource', 'participants', 'participants.employee'],
+            withDeleted: true,
+        });
+
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: (reservations as Reservation[]).map(
+                (reservation) => new ReservationWithRelationsResponseDto(reservation),
+            ),
+        }));
+
+        return {
+            items: groupedReservationsResponse,
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+
+    /** 내가 만든 예약들 중 현재 진행중인 예약 하나 */
     // Deprecated
     async findMyCurrentReservation(
         employeeId: string,
@@ -239,7 +301,9 @@ export class ReservationUsecase {
 
         const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
             date,
-            reservations: (reservations as Reservation[]).map(reservation => new ReservationWithRelationsResponseDto(reservation))
+            reservations: (reservations as Reservation[]).map(
+                (reservation) => new ReservationWithRelationsResponseDto(reservation),
+            ),
         }));
 
         return {
@@ -304,7 +368,9 @@ export class ReservationUsecase {
 
         const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
             date,
-            reservations: (reservations as Reservation[]).map(reservation => new ReservationWithRelationsResponseDto(reservation))
+            reservations: (reservations as Reservation[]).map(
+                (reservation) => new ReservationWithRelationsResponseDto(reservation),
+            ),
         }));
 
         return {
@@ -317,7 +383,34 @@ export class ReservationUsecase {
             },
         };
     }
-    
+
+    /** 예약 상세 보기 */
+    async findReservationDetail(user: User, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: [
+                'resource',
+                'resource.vehicleInfo',
+                'resource.meetingRoomInfo',
+                'resource.accommodationInfo',
+                'participants',
+                'participants.employee',
+            ],
+            withDeleted: true,
+        });
+
+        if (!reservation) {
+            throw new NotFoundException('Reservation not found');
+        }
+
+        const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
+        reservationResponseDto.isMine = reservationResponseDto.reservers.some(
+            (reserver) => reserver.employeeId === user.employeeId,
+        );
+
+        return reservationResponseDto;
+    }
+
     async findMyAllReservations(
         employeeId: string,
         page?: number,
@@ -760,6 +853,4 @@ export class ReservationUsecase {
         this.schedulerRegistry.addCronJob(jobName, job as any);
         job.start();
     }
-
-    
 }

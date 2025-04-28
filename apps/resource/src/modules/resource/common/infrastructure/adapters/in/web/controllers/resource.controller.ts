@@ -57,7 +57,7 @@ export class ResourceController {
         @Query('startDate') startDate: string,
         @Query('endDate') endDate: string,
     ): Promise<ResourceGroupWithResourcesAndReservationsResponseDto[]> {
-        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
+        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate);
     }
 
     // check api - url

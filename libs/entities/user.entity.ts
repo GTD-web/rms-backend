@@ -2,7 +2,7 @@ import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { Employee } from './employee.entity';
 import { Role } from '@libs/enums/role-type.enum';
 import { PushNotificationSubscription } from '@resource/modules/notification/domain/ports/push-notification.port';
-
+import { ApiProperty } from '@nestjs/swagger';
 @Entity('users')
 export class User {
     @PrimaryColumn('uuid', {

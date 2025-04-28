@@ -47,6 +47,30 @@ class DateUtilWrapper {
     second(seconds: number) {
         return new DateUtilWrapper(this.date.second(seconds));
     }
+
+    getYear() {
+        return this.date.year();
+    }
+
+    getMonth() {
+        return this.date.month() + 1; // dayjs는 0부터 시작하므로 1을 더해줌
+    }
+
+    getDate() {
+        return this.date.date();
+    }
+
+    getDaysInMonth() {
+        return this.date.daysInMonth();
+    }
+
+    getFirstDayOfMonth() {
+        return new DateUtilWrapper(this.date.startOf('month'));
+    }
+
+    getLastDayOfMonth() {
+        return new DateUtilWrapper(this.date.endOf('month'));
+    }
 }
 
 export class DateUtil {
@@ -87,5 +111,47 @@ export class DateUtil {
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
         return this.now().hour(hours).minute(mins).second(0);
+    }
+
+    /**
+     * 주어진 날짜의 연도를 가져옵니다.
+     */
+    static getYear(date: Date | string | number = new Date()) {
+        return this.date(date).getYear();
+    }
+
+    /**
+     * 주어진 날짜의 월을 가져옵니다. (1-12)
+     */
+    static getMonth(date: Date | string | number = new Date()) {
+        return this.date(date).getMonth();
+    }
+
+    /**
+     * 주어진 날짜의 일을 가져옵니다.
+     */
+    static getDate(date: Date | string | number = new Date()) {
+        return this.date(date).getDate();
+    }
+
+    /**
+     * 주어진 날짜가 속한 월의 총 일수를 가져옵니다.
+     */
+    static getDaysInMonth(date: Date | string | number = new Date()) {
+        return this.date(date).getDaysInMonth();
+    }
+
+    /**
+     * 주어진 날짜가 속한 월의 첫 날을 가져옵니다.
+     */
+    static getFirstDayOfMonth(date: Date | string | number = new Date()) {
+        return this.date(date).getFirstDayOfMonth();
+    }
+
+    /**
+     * 주어진 날짜가 속한 월의 마지막 날을 가져옵니다.
+     */
+    static getLastDayOfMonth(date: Date | string | number = new Date()) {
+        return this.date(date).getLastDayOfMonth();
     }
 }

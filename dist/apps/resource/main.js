@@ -209,6 +209,9 @@ const file_module_1 = __webpack_require__(/*! ./modules/file/file.module */ "./a
 const app_controller_1 = __webpack_require__(/*! ./app.controller */ "./apps/resource/src/app.controller.ts");
 const api_doc_service_1 = __webpack_require__(/*! @libs/utils/api-doc.service */ "./libs/utils/api-doc.service.ts");
 const db_doc_service_1 = __webpack_require__(/*! @libs/utils/db-doc.service */ "./libs/utils/db-doc.service.ts");
+const user_domain_module_1 = __webpack_require__(/*! ./modules/auth/user.domain.module */ "./apps/resource/src/modules/auth/user.domain.module.ts");
+const employee_domain_module_1 = __webpack_require__(/*! ./modules/employee/employee.domain.module */ "./apps/resource/src/modules/employee/employee.domain.module.ts");
+const notification_domain_module_1 = __webpack_require__(/*! ./modules/notification/notification.domain.module */ "./apps/resource/src/modules/notification/notification.domain.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -236,6 +239,9 @@ exports.AppModule = AppModule = __decorate([
             reservation_module_1.ReservationModule,
             notification_module_1.NotificationModule,
             file_module_1.FileModule,
+            user_domain_module_1.UserDomainModule,
+            employee_domain_module_1.EmployeeDomainModule,
+            notification_domain_module_1.NotificationDomainModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, api_doc_service_1.ApiDocService, db_doc_service_1.DbDocService],
@@ -1427,7 +1433,15 @@ exports.AuthModule = AuthModule = __decorate([
             user_event_handler_1.UserEventHandler,
             resource_manager_usecase_1.ResourceManagerUseCase,
         ],
-        controllers: [auth_controller_1.AuthController, user_controller_1.UserController, resource_manager_controller_1.ResourceManagerController, auth_controller_2.UserAuthController, user_controller_2.UserUserController, admin_user_controller_1.AdminUserController, admin_resource_manager_controller_1.AdminResourceManagerController],
+        controllers: [
+            auth_controller_1.AuthController,
+            user_controller_1.UserController,
+            resource_manager_controller_1.ResourceManagerController,
+            auth_controller_2.UserAuthController,
+            user_controller_2.UserUserController,
+            admin_user_controller_1.AdminUserController,
+            admin_resource_manager_controller_1.AdminResourceManagerController,
+        ],
         exports: [
             jwt_strategy_1.JwtStrategy,
             {
@@ -1463,6 +1477,121 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/auth/infrastructure/adapters/in/domain/controllers/user.controllers.ts":
+/*!**********************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/auth/infrastructure/adapters/in/domain/controllers/user.controllers.ts ***!
+  \**********************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserDomainController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const user_service_1 = __webpack_require__(/*! @resource/modules/auth/application/services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+let UserDomainController = class UserDomainController {
+    constructor(userService) {
+        this.userService = userService;
+    }
+    async findAll() {
+        return this.userService.findAll();
+    }
+    async findByEmployeeId(employeeId) {
+        return this.userService.findByEmployeeId(employeeId);
+    }
+    async findByEmail(email) {
+        return this.userService.findByEmail(email);
+    }
+    async findByUserId(userId) {
+        return this.userService.findByUserId(userId);
+    }
+    async save(user) {
+        return this.userService.save(user);
+    }
+    async update(userId, user) {
+        return this.userService.update({ ...user, userId });
+    }
+};
+exports.UserDomainController = UserDomainController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '모든 사용자 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '모든 사용자 조회 성공', type: [entities_1.User] }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], UserDomainController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('employee/:employeeId'),
+    (0, swagger_1.ApiOperation)({ summary: '사원 ID로 사용자 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '사용자 조회 성공', type: entities_1.User }),
+    __param(0, (0, common_1.Param)('employeeId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], UserDomainController.prototype, "findByEmployeeId", null);
+__decorate([
+    (0, common_1.Get)('email/:email'),
+    (0, swagger_1.ApiOperation)({ summary: '이메일로 사용자 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '사용자 조회 성공', type: entities_1.User }),
+    __param(0, (0, common_1.Param)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], UserDomainController.prototype, "findByEmail", null);
+__decorate([
+    (0, common_1.Get)(':userId'),
+    (0, swagger_1.ApiOperation)({ summary: '사용자 ID로 사용자 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '사용자 조회 성공', type: entities_1.User }),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], UserDomainController.prototype, "findByUserId", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '사용자 저장' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: '사용자 저장 성공', type: entities_1.User }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], UserDomainController.prototype, "save", null);
+__decorate([
+    (0, common_1.Patch)(':userId'),
+    (0, swagger_1.ApiOperation)({ summary: '사용자 정보 업데이트' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '사용자 정보 업데이트 성공', type: entities_1.User }),
+    __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], UserDomainController.prototype, "update", null);
+exports.UserDomainController = UserDomainController = __decorate([
+    (0, swagger_1.ApiTags)('User Domain Test'),
+    (0, common_1.Controller)('domain/users'),
+    (0, public_decorator_1.Public)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
+], UserDomainController);
 
 
 /***/ }),
@@ -2096,6 +2225,49 @@ exports.JwtStrategy = JwtStrategy = __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/auth/user.domain.module.ts":
+/*!**************************************************************!*\
+  !*** ./apps/resource/src/modules/auth/user.domain.module.ts ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserDomainModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const user_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/user.repository */ "./apps/resource/src/modules/auth/infrastructure/adapters/out/user.repository.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const user_service_1 = __webpack_require__(/*! ./application/services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+const user_controllers_1 = __webpack_require__(/*! ./infrastructure/adapters/in/domain/controllers/user.controllers */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/domain/controllers/user.controllers.ts");
+let UserDomainModule = class UserDomainModule {
+};
+exports.UserDomainModule = UserDomainModule;
+exports.UserDomainModule = UserDomainModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.User])],
+        providers: [
+            user_service_1.UserService,
+            user_repository_1.UserRepository,
+            {
+                provide: 'UserRepositoryPort',
+                useClass: user_repository_1.UserRepository,
+            },
+        ],
+        controllers: [user_controllers_1.UserDomainController],
+        exports: [user_service_1.UserService],
+    })
+], UserDomainModule);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/employee/application/dtos/create-employee.dto.ts":
 /*!************************************************************************************!*\
   !*** ./apps/resource/src/modules/employee/application/dtos/create-employee.dto.ts ***!
@@ -2607,6 +2779,49 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/employee/employee.domain.module.ts":
+/*!**********************************************************************!*\
+  !*** ./apps/resource/src/modules/employee/employee.domain.module.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeDomainModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const employee_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/employee.repository */ "./apps/resource/src/modules/employee/infrastructure/adapters/out/persistence/employee.repository.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const employee_service_1 = __webpack_require__(/*! ./application/services/employee.service */ "./apps/resource/src/modules/employee/application/services/employee.service.ts");
+const employee_controllers_1 = __webpack_require__(/*! ./infrastructure/adapters/in/domain/controllers/employee.controllers */ "./apps/resource/src/modules/employee/infrastructure/adapters/in/domain/controllers/employee.controllers.ts");
+let EmployeeDomainModule = class EmployeeDomainModule {
+};
+exports.EmployeeDomainModule = EmployeeDomainModule;
+exports.EmployeeDomainModule = EmployeeDomainModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.Employee])],
+        providers: [
+            employee_service_1.EmployeeService,
+            employee_repository_1.EmployeeRepository,
+            {
+                provide: 'EmployeeRepositoryPort',
+                useClass: employee_repository_1.EmployeeRepository,
+            },
+        ],
+        controllers: [employee_controllers_1.EmployeeDomainController],
+        exports: [employee_service_1.EmployeeService],
+    })
+], EmployeeDomainModule);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/employee/employee.module.ts":
 /*!***************************************************************!*\
   !*** ./apps/resource/src/modules/employee/employee.module.ts ***!
@@ -2650,6 +2865,100 @@ exports.EmployeeModule = EmployeeModule = __decorate([
         exports: [employee_service_1.EmployeeService, employee_usecase_1.EmployeeUseCase],
     })
 ], EmployeeModule);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/employee/infrastructure/adapters/in/domain/controllers/employee.controllers.ts":
+/*!******************************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/employee/infrastructure/adapters/in/domain/controllers/employee.controllers.ts ***!
+  \******************************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeDomainController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const employee_service_1 = __webpack_require__(/*! @resource/modules/employee/application/services/employee.service */ "./apps/resource/src/modules/employee/application/services/employee.service.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const mms_employee_response_dto_1 = __webpack_require__(/*! @resource/modules/employee/application/dtos/mms-employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts");
+let EmployeeDomainController = class EmployeeDomainController {
+    constructor(employeeService) {
+        this.employeeService = employeeService;
+    }
+    async findAll() {
+        return this.employeeService.findAll();
+    }
+    async findByEmployeeNumber(employeeNumber) {
+        return this.employeeService.findByEmployeeNumber(employeeNumber);
+    }
+    async save(employeeDto) {
+        const employee = this.employeeService.create(employeeDto);
+        return this.employeeService.save(employee);
+    }
+    async update(employeeId, employee) {
+        employee.employeeId = employeeId;
+        return this.employeeService.update(employee);
+    }
+};
+exports.EmployeeDomainController = EmployeeDomainController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '모든 직원 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '모든 직원 조회 성공', type: [entities_1.Employee] }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], EmployeeDomainController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':employeeNumber'),
+    (0, swagger_1.ApiOperation)({ summary: '사원 번호로 직원 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '직원 조회 성공', type: entities_1.Employee }),
+    __param(0, (0, common_1.Param)('employeeNumber')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], EmployeeDomainController.prototype, "findByEmployeeNumber", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '직원 생성 및 저장' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: '직원 저장 성공', type: entities_1.Employee }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], EmployeeDomainController.prototype, "save", null);
+__decorate([
+    (0, common_1.Patch)(':employeeId'),
+    (0, swagger_1.ApiOperation)({ summary: '직원 정보 업데이트' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '직원 정보 업데이트 성공', type: entities_1.Employee }),
+    __param(0, (0, common_1.Param)('employeeId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_f = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], EmployeeDomainController.prototype, "update", null);
+exports.EmployeeDomainController = EmployeeDomainController = __decorate([
+    (0, swagger_1.ApiTags)('Employee Domain Test'),
+    (0, common_1.Controller)('domain/employees'),
+    (0, public_decorator_1.Public)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+], EmployeeDomainController);
 
 
 /***/ }),
@@ -3060,18 +3369,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const file_repository_port_1 = __webpack_require__(/*! ../../domain/ports/file.repository.port */ "./apps/resource/src/modules/file/domain/ports/file.repository.port.ts");
 const file_storage_port_1 = __webpack_require__(/*! ../../domain/ports/file-storage.port */ "./apps/resource/src/modules/file/domain/ports/file-storage.port.ts");
-const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 let FileService = class FileService {
-    constructor(fileRepository, fileStorage, configService) {
+    constructor(fileRepository, fileStorage) {
         this.fileRepository = fileRepository;
         this.fileStorage = fileStorage;
-        this.configService = configService;
     }
     async findFileById(fileId) {
         const file = await this.fileRepository.findById(fileId);
@@ -3118,7 +3425,7 @@ exports.FileService = FileService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)('FileRepositoryPort')),
     __param(1, (0, common_1.Inject)('FileStoragePort')),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_port_1.FileRepositoryPort !== "undefined" && file_repository_port_1.FileRepositoryPort) === "function" ? _a : Object, typeof (_b = typeof file_storage_port_1.FileStoragePort !== "undefined" && file_storage_port_1.FileStoragePort) === "function" ? _b : Object, typeof (_c = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_port_1.FileRepositoryPort !== "undefined" && file_repository_port_1.FileRepositoryPort) === "function" ? _a : Object, typeof (_b = typeof file_storage_port_1.FileStoragePort !== "undefined" && file_storage_port_1.FileStoragePort) === "function" ? _b : Object])
 ], FileService);
 
 
@@ -4288,6 +4595,235 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/notification/infrastructure/adapters/in/domain/controllers/employee-notification.controllers.ts":
+/*!***********************************************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/notification/infrastructure/adapters/in/domain/controllers/employee-notification.controllers.ts ***!
+  \***********************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeNotificationDomainController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const employee_notification_service_1 = __webpack_require__(/*! @resource/modules/notification/application/services/employee-notification.service */ "./apps/resource/src/modules/notification/application/services/employee-notification.service.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const create_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/create-notification.dto */ "./apps/resource/src/modules/notification/application/dto/create-notification.dto.ts");
+let EmployeeNotificationDomainController = class EmployeeNotificationDomainController {
+    constructor(employeeNotificationService) {
+        this.employeeNotificationService = employeeNotificationService;
+    }
+    async findAll() {
+        return this.employeeNotificationService.findAll();
+    }
+    async findOne() {
+        return this.employeeNotificationService.findOne();
+    }
+    async create(createEmployeeNotificationDto) {
+        return this.employeeNotificationService.save(createEmployeeNotificationDto);
+    }
+    async update(id, updateEmployeeNotificationDto) {
+        return this.employeeNotificationService.update(id, updateEmployeeNotificationDto);
+    }
+};
+exports.EmployeeNotificationDomainController = EmployeeNotificationDomainController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '모든 직원 알림 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '모든 직원 알림 조회 성공', type: [entities_1.EmployeeNotification] }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], EmployeeNotificationDomainController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('one'),
+    (0, swagger_1.ApiOperation)({ summary: '직원 알림 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '직원 알림 조회 성공', type: entities_1.EmployeeNotification }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], EmployeeNotificationDomainController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '직원 알림 생성' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: '직원 알림 생성 성공', type: entities_1.EmployeeNotification }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof create_notification_dto_1.CreateEmployeeNotificationDto !== "undefined" && create_notification_dto_1.CreateEmployeeNotificationDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], EmployeeNotificationDomainController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: '직원 알림 업데이트' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '직원 알림 업데이트 성공', type: entities_1.EmployeeNotification }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_f = typeof Partial !== "undefined" && Partial) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], EmployeeNotificationDomainController.prototype, "update", null);
+exports.EmployeeNotificationDomainController = EmployeeNotificationDomainController = __decorate([
+    (0, swagger_1.ApiTags)('Employee Notification Domain Test'),
+    (0, common_1.Controller)('domain/employee-notifications'),
+    (0, public_decorator_1.Public)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_notification_service_1.EmployeeNotificationService !== "undefined" && employee_notification_service_1.EmployeeNotificationService) === "function" ? _a : Object])
+], EmployeeNotificationDomainController);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/notification/infrastructure/adapters/in/domain/controllers/notification.controllers.ts":
+/*!**************************************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/notification/infrastructure/adapters/in/domain/controllers/notification.controllers.ts ***!
+  \**************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationDomainController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const notification_service_1 = __webpack_require__(/*! @resource/modules/notification/application/services/notification.service */ "./apps/resource/src/modules/notification/application/services/notification.service.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const create_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/create-notification.dto */ "./apps/resource/src/modules/notification/application/dto/create-notification.dto.ts");
+let NotificationDomainController = class NotificationDomainController {
+    constructor(notificationService) {
+        this.notificationService = notificationService;
+    }
+    async findAll() {
+        return this.notificationService.findAll();
+    }
+    async count() {
+        return this.notificationService.count();
+    }
+    async findById(id) {
+        return this.notificationService.findById(id);
+    }
+    async create(createNotificationDto) {
+        return this.notificationService.save(createNotificationDto);
+    }
+    async update(id, notification) {
+        return this.notificationService.update(id, notification);
+    }
+    async markAsRead(id) {
+        return this.notificationService.markAsRead(id);
+    }
+    async markAsUnread(id) {
+        return this.notificationService.markAsUnread(id);
+    }
+    async markAllAsRead() {
+        return this.notificationService.markAllAsRead();
+    }
+};
+exports.NotificationDomainController = NotificationDomainController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '모든 알림 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '모든 알림 조회 성공', type: [entities_1.Notification] }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], NotificationDomainController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('count'),
+    (0, swagger_1.ApiOperation)({ summary: '알림 개수 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '알림 개수 조회 성공', type: Number }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], NotificationDomainController.prototype, "count", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: '알림 ID로 조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '알림 조회 성공', type: entities_1.Notification }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], NotificationDomainController.prototype, "findById", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '알림 생성' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: '알림 생성 성공', type: entities_1.Notification }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof create_notification_dto_1.CreateNotificationDto !== "undefined" && create_notification_dto_1.CreateNotificationDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], NotificationDomainController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: '알림 업데이트' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '알림 업데이트 성공', type: entities_1.Notification }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_g = typeof Partial !== "undefined" && Partial) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], NotificationDomainController.prototype, "update", null);
+__decorate([
+    (0, common_1.Patch)(':id/read'),
+    (0, swagger_1.ApiOperation)({ summary: '알림 읽음 표시' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '알림 읽음 표시 성공' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], NotificationDomainController.prototype, "markAsRead", null);
+__decorate([
+    (0, common_1.Patch)(':id/unread'),
+    (0, swagger_1.ApiOperation)({ summary: '알림 읽지 않음 표시' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '알림 읽지 않음 표시 성공' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+], NotificationDomainController.prototype, "markAsUnread", null);
+__decorate([
+    (0, common_1.Patch)('read-all'),
+    (0, swagger_1.ApiOperation)({ summary: '모든 알림 읽음 표시' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '모든 알림 읽음 표시 성공' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+], NotificationDomainController.prototype, "markAllAsRead", null);
+exports.NotificationDomainController = NotificationDomainController = __decorate([
+    (0, swagger_1.ApiTags)('Notification Domain Test'),
+    (0, common_1.Controller)('domain/notifications'),
+    (0, public_decorator_1.Public)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _a : Object])
+], NotificationDomainController);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/notification/infrastructure/adapters/in/web/controllers/notification.controller.ts":
 /*!**********************************************************************************************************************!*\
   !*** ./apps/resource/src/modules/notification/infrastructure/adapters/in/web/controllers/notification.controller.ts ***!
@@ -4852,6 +5388,58 @@ exports.NotificationRepository = NotificationRepository = __decorate([
     __param(0, (0, typeorm_2.InjectRepository)(notification_entity_1.Notification)),
     __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.Repository !== "undefined" && typeorm_1.Repository) === "function" ? _a : Object])
 ], NotificationRepository);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/notification/notification.domain.module.ts":
+/*!******************************************************************************!*\
+  !*** ./apps/resource/src/modules/notification/notification.domain.module.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationDomainModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const notification_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/notification.repository */ "./apps/resource/src/modules/notification/infrastructure/adapters/out/persistence/notification.repository.ts");
+const employee_notification_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/employee-notification.repository */ "./apps/resource/src/modules/notification/infrastructure/adapters/out/persistence/employee-notification.repository.ts");
+const notification_service_1 = __webpack_require__(/*! ./application/services/notification.service */ "./apps/resource/src/modules/notification/application/services/notification.service.ts");
+const employee_notification_service_1 = __webpack_require__(/*! ./application/services/employee-notification.service */ "./apps/resource/src/modules/notification/application/services/employee-notification.service.ts");
+const notification_controllers_1 = __webpack_require__(/*! ./infrastructure/adapters/in/domain/controllers/notification.controllers */ "./apps/resource/src/modules/notification/infrastructure/adapters/in/domain/controllers/notification.controllers.ts");
+const employee_notification_controllers_1 = __webpack_require__(/*! ./infrastructure/adapters/in/domain/controllers/employee-notification.controllers */ "./apps/resource/src/modules/notification/infrastructure/adapters/in/domain/controllers/employee-notification.controllers.ts");
+let NotificationDomainModule = class NotificationDomainModule {
+};
+exports.NotificationDomainModule = NotificationDomainModule;
+exports.NotificationDomainModule = NotificationDomainModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.Notification, entities_1.EmployeeNotification])],
+        providers: [
+            notification_service_1.NotificationService,
+            employee_notification_service_1.EmployeeNotificationService,
+            notification_repository_1.NotificationRepository,
+            employee_notification_repository_1.EmployeeNotificationRepository,
+            {
+                provide: 'NotificationRepositoryPort',
+                useClass: notification_repository_1.NotificationRepository,
+            },
+            {
+                provide: 'EmployeeNotificationRepositoryPort',
+                useClass: employee_notification_repository_1.EmployeeNotificationRepository,
+            },
+        ],
+        controllers: [notification_controllers_1.NotificationDomainController, employee_notification_controllers_1.EmployeeNotificationDomainController],
+        exports: [notification_service_1.NotificationService, employee_notification_service_1.EmployeeNotificationService],
+    })
+], NotificationDomainModule);
 
 
 /***/ }),
@@ -5945,26 +6533,6 @@ let ReservationUsecase = class ReservationUsecase {
             await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
         }
     }
-    async findReservationDetail(user, reservationId) {
-        const reservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: [
-                'resource',
-                'resource.vehicleInfo',
-                'resource.meetingRoomInfo',
-                'resource.accommodationInfo',
-                'participants',
-                'participants.employee',
-            ],
-            withDeleted: true,
-        });
-        if (!reservation) {
-            throw new common_1.NotFoundException('Reservation not found');
-        }
-        const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
-        reservationResponseDto.isMine = reservationResponseDto.reservers.some((reserver) => reserver.employeeId === user.employeeId);
-        return reservationResponseDto;
-    }
     async findMyReservationList(employeeId, page, limit, resourceType, startDate) {
         const where = { participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } };
         if (resourceType) {
@@ -5994,6 +6562,62 @@ let ReservationUsecase = class ReservationUsecase {
         });
         return {
             items: reservationWithParticipants.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+    async findResourceReservationList(employeeId, page, limit, resourceId, month, isMine) {
+        const monthStart = `${month}-01 00:00:00`;
+        const lastDay = date_util_1.DateUtil.date(month).getLastDayOfMonth().getDate();
+        const monthEnd = `${month}-${lastDay} 23:59:59`;
+        const monthStartDate = date_util_1.DateUtil.date(monthStart).toDate();
+        const monthEndDate = date_util_1.DateUtil.date(monthEnd).toDate();
+        const dateCondition = (0, typeorm_1.Raw)((alias) => `(${alias} BETWEEN :monthStartDate AND :monthEndDate OR
+              "Reservation"."endDate" BETWEEN :monthStartDate AND :monthEndDate OR
+              (${alias} <= :monthStartDate AND "Reservation"."endDate" >= :monthEndDate))`, { monthStartDate, monthEndDate });
+        const where = {
+            startDate: dateCondition,
+        };
+        if (resourceId) {
+            where.resourceId = resourceId;
+        }
+        if (isMine) {
+            where.participants = { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER };
+        }
+        const options = {
+            where,
+        };
+        if (page && limit) {
+            options.skip = (page - 1) * limit;
+            options.take = limit;
+        }
+        const reservations = await this.reservationService.findAll(options);
+        const count = await this.reservationService.count({ where });
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['resource', 'participants', 'participants.employee'],
+            withDeleted: true,
+        });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }));
+        return {
+            items: groupedReservationsResponse,
             meta: {
                 total: count,
                 page,
@@ -6057,7 +6681,7 @@ let ReservationUsecase = class ReservationUsecase {
         }, {});
         const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
             date,
-            reservations: reservations.map(reservation => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation))
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
         }));
         return {
             items: groupedReservationsResponse,
@@ -6111,7 +6735,7 @@ let ReservationUsecase = class ReservationUsecase {
         }, {});
         const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
             date,
-            reservations: reservations.map(reservation => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation))
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
         }));
         return {
             items: groupedReservationsResponse,
@@ -6122,6 +6746,26 @@ let ReservationUsecase = class ReservationUsecase {
                 hasNext: page * limit < count,
             },
         };
+    }
+    async findReservationDetail(user, reservationId) {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: [
+                'resource',
+                'resource.vehicleInfo',
+                'resource.meetingRoomInfo',
+                'resource.accommodationInfo',
+                'participants',
+                'participants.employee',
+            ],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException('Reservation not found');
+        }
+        const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
+        reservationResponseDto.isMine = reservationResponseDto.reservers.some((reserver) => reserver.employeeId === user.employeeId);
+        return reservationResponseDto;
     }
     async findMyAllReservations(employeeId, page, limit, type) {
         const today = date_util_1.DateUtil.now().toDate();
@@ -7020,7 +7664,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -7050,6 +7694,10 @@ let UserReservationController = class UserReservationController {
     async findMyReservationList(user, resourceType, query) {
         const { page, limit } = query;
         return this.reservationUsecase.findMyReservationList(user.employeeId, page, limit, resourceType);
+    }
+    async findResourceReservationList(user, resourceId, query, month, isMine) {
+        const { page, limit } = query;
+        return this.reservationUsecase.findResourceReservationList(user.employeeId, page, limit, resourceId, month, isMine);
     }
     async findMyUpcomingReservationList(user, resourceType, query) {
         return this.reservationUsecase.findMyUpcomingReservationList(user.employeeId, query, resourceType);
@@ -7123,6 +7771,27 @@ __decorate([
     __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], UserReservationController.prototype, "findMyReservationList", null);
 __decorate([
+    (0, common_1.Get)('resource/:resourceId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    (0, swagger_1.ApiOperation)({ summary: '자원별 예약 리스트 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '자원별 예약 리스트 조회',
+        type: [reservation_response_dto_1.GroupedReservationResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    (0, swagger_1.ApiQuery)({ name: 'month', type: String, example: '2025-04' }),
+    (0, swagger_1.ApiQuery)({ name: 'isMine', type: Boolean, required: false, example: true }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('resourceId')),
+    __param(2, (0, common_1.Query)()),
+    __param(3, (0, common_1.Query)('month')),
+    __param(4, (0, common_1.Query)('isMine')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _k : Object, String, typeof (_l = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _l : Object, String, Boolean]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+], UserReservationController.prototype, "findResourceReservationList", null);
+__decorate([
     (0, common_1.Get)('my-upcoming'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회' }),
@@ -7134,8 +7803,8 @@ __decorate([
     __param(1, (0, common_1.Query)('resourceType')),
     __param(2, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _k : Object, typeof (_l = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _l : Object, typeof (_m = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [typeof (_o = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _o : Object, typeof (_p = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _p : Object, typeof (_q = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _q : Object]),
+    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
 ], UserReservationController.prototype, "findMyUpcomingReservationList", null);
 __decorate([
     (0, common_1.Get)('my-upcoming-schedules'),
@@ -7150,8 +7819,8 @@ __decorate([
     __param(1, (0, common_1.Query)('resourceType')),
     __param(2, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_p = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _p : Object, typeof (_q = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _q : Object, typeof (_r = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _r : Object]),
-    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
+    __metadata("design:paramtypes", [typeof (_s = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _s : Object, typeof (_t = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _t : Object, typeof (_u = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _u : Object]),
+    __metadata("design:returntype", typeof (_v = typeof Promise !== "undefined" && Promise) === "function" ? _v : Object)
 ], UserReservationController.prototype, "findMyUpcomingSchedules", null);
 __decorate([
     (0, common_1.Get)(':reservationId'),
@@ -7164,8 +7833,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_t = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _t : Object, String]),
-    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
+    __metadata("design:paramtypes", [typeof (_w = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _w : Object, String]),
+    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
 ], UserReservationController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/title'),
@@ -7179,8 +7848,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_v = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _v : Object, String, typeof (_w = typeof dtos_index_1.UpdateReservationTitleDto !== "undefined" && dtos_index_1.UpdateReservationTitleDto) === "function" ? _w : Object]),
-    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
+    __metadata("design:paramtypes", [typeof (_y = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _y : Object, String, typeof (_z = typeof dtos_index_1.UpdateReservationTitleDto !== "undefined" && dtos_index_1.UpdateReservationTitleDto) === "function" ? _z : Object]),
+    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
 ], UserReservationController.prototype, "updateTitle", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/time'),
@@ -7194,8 +7863,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_y = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _y : Object, String, typeof (_z = typeof dtos_index_1.UpdateReservationTimeDto !== "undefined" && dtos_index_1.UpdateReservationTimeDto) === "function" ? _z : Object]),
-    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
+    __metadata("design:paramtypes", [typeof (_1 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _1 : Object, String, typeof (_2 = typeof dtos_index_1.UpdateReservationTimeDto !== "undefined" && dtos_index_1.UpdateReservationTimeDto) === "function" ? _2 : Object]),
+    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
 ], UserReservationController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/status/cancel'),
@@ -7208,8 +7877,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_1 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _1 : Object, String]),
-    __metadata("design:returntype", typeof (_2 = typeof Promise !== "undefined" && Promise) === "function" ? _2 : Object)
+    __metadata("design:paramtypes", [typeof (_4 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _4 : Object, String]),
+    __metadata("design:returntype", typeof (_5 = typeof Promise !== "undefined" && Promise) === "function" ? _5 : Object)
 ], UserReservationController.prototype, "updateStatusCancel", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/participants'),
@@ -7223,8 +7892,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_3 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _3 : Object, String, typeof (_4 = typeof dtos_index_1.UpdateReservationParticipantsDto !== "undefined" && dtos_index_1.UpdateReservationParticipantsDto) === "function" ? _4 : Object]),
-    __metadata("design:returntype", typeof (_5 = typeof Promise !== "undefined" && Promise) === "function" ? _5 : Object)
+    __metadata("design:paramtypes", [typeof (_6 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _6 : Object, String, typeof (_7 = typeof dtos_index_1.UpdateReservationParticipantsDto !== "undefined" && dtos_index_1.UpdateReservationParticipantsDto) === "function" ? _7 : Object]),
+    __metadata("design:returntype", typeof (_8 = typeof Promise !== "undefined" && Promise) === "function" ? _8 : Object)
 ], UserReservationController.prototype, "updateParticipants", null);
 __decorate([
     (0, common_1.Post)('snapshot'),
@@ -7236,8 +7905,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_6 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _6 : Object, typeof (_7 = typeof reservation_snapshot_dto_1.CreateReservationSnapshotDto !== "undefined" && reservation_snapshot_dto_1.CreateReservationSnapshotDto) === "function" ? _7 : Object]),
-    __metadata("design:returntype", typeof (_8 = typeof Promise !== "undefined" && Promise) === "function" ? _8 : Object)
+    __metadata("design:paramtypes", [typeof (_9 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _9 : Object, typeof (_10 = typeof reservation_snapshot_dto_1.CreateReservationSnapshotDto !== "undefined" && reservation_snapshot_dto_1.CreateReservationSnapshotDto) === "function" ? _10 : Object]),
+    __metadata("design:returntype", typeof (_11 = typeof Promise !== "undefined" && Promise) === "function" ? _11 : Object)
 ], UserReservationController.prototype, "createSnapshot", null);
 __decorate([
     (0, common_1.Patch)('snapshot'),
@@ -7249,8 +7918,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_9 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _9 : Object, typeof (_10 = typeof dtos_index_1.UpdateReservationSnapshotDto !== "undefined" && dtos_index_1.UpdateReservationSnapshotDto) === "function" ? _10 : Object]),
-    __metadata("design:returntype", typeof (_11 = typeof Promise !== "undefined" && Promise) === "function" ? _11 : Object)
+    __metadata("design:paramtypes", [typeof (_12 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _12 : Object, typeof (_13 = typeof dtos_index_1.UpdateReservationSnapshotDto !== "undefined" && dtos_index_1.UpdateReservationSnapshotDto) === "function" ? _13 : Object]),
+    __metadata("design:returntype", typeof (_14 = typeof Promise !== "undefined" && Promise) === "function" ? _14 : Object)
 ], UserReservationController.prototype, "updateSnapshot", null);
 __decorate([
     (0, common_1.Get)('snapshot/user'),
@@ -7261,8 +7930,8 @@ __decorate([
     }),
     __param(0, (0, user_decorator_1.User)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_12 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _12 : Object]),
-    __metadata("design:returntype", typeof (_13 = typeof Promise !== "undefined" && Promise) === "function" ? _13 : Object)
+    __metadata("design:paramtypes", [typeof (_15 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _15 : Object]),
+    __metadata("design:returntype", typeof (_16 = typeof Promise !== "undefined" && Promise) === "function" ? _16 : Object)
 ], UserReservationController.prototype, "findUserSnapshot", null);
 __decorate([
     (0, common_1.Delete)('snapshot/:snapshotId'),
@@ -7270,8 +7939,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('snapshotId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_14 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _14 : Object, String]),
-    __metadata("design:returntype", typeof (_15 = typeof Promise !== "undefined" && Promise) === "function" ? _15 : Object)
+    __metadata("design:paramtypes", [typeof (_17 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _17 : Object, String]),
+    __metadata("design:returntype", typeof (_18 = typeof Promise !== "undefined" && Promise) === "function" ? _18 : Object)
 ], UserReservationController.prototype, "deleteSnapshot", null);
 exports.UserReservationController = UserReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 - 사용자 페이지'),
@@ -9286,7 +9955,7 @@ let ResourceUsecase = class ResourceUsecase {
         });
         return resources.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
     }
-    async findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user) {
+    async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate, isMine) {
         if (!!startDate && !!endDate && startDate > endDate) {
             throw new common_1.BadRequestException('Start date must be before end date');
         }
@@ -9344,7 +10013,8 @@ let ResourceUsecase = class ResourceUsecase {
                         },
                     },
                 });
-                const reservationResponseDtos = reservations.map((reservation) => {
+                const reservationResponseDtos = reservations
+                    .map((reservation) => {
                     const isMine = reservation.participants.some((participant) => participant.employeeId === user.employeeId);
                     delete reservation.participants;
                     return {
@@ -9353,6 +10023,12 @@ let ResourceUsecase = class ResourceUsecase {
                         endDate: date_util_1.DateUtil.date(reservation.endDate).format(),
                         isMine: isMine,
                     };
+                })
+                    .filter((reservation) => {
+                    if (isMine) {
+                        return reservation.isMine;
+                    }
+                    return true;
                 });
                 return {
                     ...resource,
@@ -9369,7 +10045,7 @@ let ResourceUsecase = class ResourceUsecase {
     }
     async findResourceDetailForUser(employeeId, resourceId) {
         const resource = await this.resourceService.findOne({
-            where: { resourceId: resourceId, },
+            where: { resourceId: resourceId },
             relations: [
                 'resourceGroup',
                 'vehicleInfo',
@@ -10025,7 +10701,7 @@ let ResourceController = class ResourceController {
         return this.resourceUsecase.findResources(type);
     }
     async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate) {
-        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
+        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate);
     }
     async findAvailableTime(query) {
         return this.resourceUsecase.findAvailableTime(query);
@@ -10636,8 +11312,8 @@ let UserResourceController = class UserResourceController {
     constructor(resourceUsecase) {
         this.resourceUsecase = resourceUsecase;
     }
-    async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate) {
-        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
+    async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate, isMine) {
+        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate, isMine);
     }
     async findAvailableTime(query) {
         return this.resourceUsecase.findAvailableTime(query);
@@ -10668,12 +11344,14 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'type', enum: resource_type_enum_1.ResourceType }),
     (0, swagger_1.ApiQuery)({ name: 'startDate', example: '2025-01-01 or 2025-01-01 00:00:00' }),
     (0, swagger_1.ApiQuery)({ name: 'endDate', example: '2025-01-01 or 2025-01-01 00:00:00' }),
+    (0, swagger_1.ApiQuery)({ name: 'isMine', type: Boolean, required: false, example: true }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)('type')),
     __param(2, (0, common_1.Query)('startDate')),
     __param(3, (0, common_1.Query)('endDate')),
+    __param(4, (0, common_1.Query)('isMine')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object, String, String]),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object, String, String, Boolean]),
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], UserResourceController.prototype, "findResourcesByTypeAndDateWithReservations", null);
 __decorate([
@@ -16928,6 +17606,15 @@ exports.setupSwagger = setupSwagger;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const response_dto_1 = __webpack_require__(/*! ../dtos/response.dto */ "./libs/dtos/response.dto.ts");
 const paginate_response_dto_1 = __webpack_require__(/*! ../dtos/paginate-response.dto */ "./libs/dtos/paginate-response.dto.ts");
+const user_domain_module_1 = __webpack_require__(/*! @resource/modules/auth/user.domain.module */ "./apps/resource/src/modules/auth/user.domain.module.ts");
+const employee_domain_module_1 = __webpack_require__(/*! @resource/modules/employee/employee.domain.module */ "./apps/resource/src/modules/employee/employee.domain.module.ts");
+const notification_domain_module_1 = __webpack_require__(/*! @resource/modules/notification/notification.domain.module */ "./apps/resource/src/modules/notification/notification.domain.module.ts");
+const auth_module_1 = __webpack_require__(/*! @resource/modules/auth/auth.module */ "./apps/resource/src/modules/auth/auth.module.ts");
+const employee_module_1 = __webpack_require__(/*! @resource/modules/employee/employee.module */ "./apps/resource/src/modules/employee/employee.module.ts");
+const resource_module_1 = __webpack_require__(/*! @resource/modules/resource/resource.module */ "./apps/resource/src/modules/resource/resource.module.ts");
+const reservation_module_1 = __webpack_require__(/*! @resource/modules/reservation/reservation.module */ "./apps/resource/src/modules/reservation/reservation.module.ts");
+const notification_module_1 = __webpack_require__(/*! @resource/modules/notification/notification.module */ "./apps/resource/src/modules/notification/notification.module.ts");
+const file_module_1 = __webpack_require__(/*! @resource/modules/file/file.module */ "./apps/resource/src/modules/file/file.module.ts");
 function setupSwagger(app, dtos) {
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Resource Management API')
@@ -16936,7 +17623,27 @@ function setupSwagger(app, dtos) {
         .addBearerAuth()
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config, {
+        include: [auth_module_1.AuthModule, employee_module_1.EmployeeModule, resource_module_1.ResourceModule, reservation_module_1.ReservationModule, notification_module_1.NotificationModule, file_module_1.FileModule],
         extraModels: [response_dto_1.BaseResponseDto, paginate_response_dto_1.PaginationData, ...dtos],
+    });
+    const domainConfig = new swagger_1.DocumentBuilder()
+        .setTitle('Domain API')
+        .setDescription('Domain API Description')
+        .setVersion('1.0')
+        .build();
+    const domainDocument = swagger_1.SwaggerModule.createDocument(app, domainConfig, {
+        include: [user_domain_module_1.UserDomainModule, employee_domain_module_1.EmployeeDomainModule, notification_domain_module_1.NotificationDomainModule],
+    });
+    swagger_1.SwaggerModule.setup('domain-api-docs', app, domainDocument, {
+        jsonDocumentUrl: '/domain-api-docs-json',
+        customJs: [
+            'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
+        ],
+        customCssUrl: [
+            'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
+            'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.css',
+        ],
     });
     swagger_1.SwaggerModule.setup('api-docs', app, document, {
         jsonDocumentUrl: '/api-docs-json',
@@ -17290,6 +17997,24 @@ class DateUtilWrapper {
     second(seconds) {
         return new DateUtilWrapper(this.date.second(seconds));
     }
+    getYear() {
+        return this.date.year();
+    }
+    getMonth() {
+        return this.date.month() + 1;
+    }
+    getDate() {
+        return this.date.date();
+    }
+    getDaysInMonth() {
+        return this.date.daysInMonth();
+    }
+    getFirstDayOfMonth() {
+        return new DateUtilWrapper(this.date.startOf('month'));
+    }
+    getLastDayOfMonth() {
+        return new DateUtilWrapper(this.date.endOf('month'));
+    }
 }
 class DateUtil {
     static now() {
@@ -17321,6 +18046,24 @@ class DateUtil {
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
         return this.now().hour(hours).minute(mins).second(0);
+    }
+    static getYear(date = new Date()) {
+        return this.date(date).getYear();
+    }
+    static getMonth(date = new Date()) {
+        return this.date(date).getMonth();
+    }
+    static getDate(date = new Date()) {
+        return this.date(date).getDate();
+    }
+    static getDaysInMonth(date = new Date()) {
+        return this.date(date).getDaysInMonth();
+    }
+    static getFirstDayOfMonth(date = new Date()) {
+        return this.date(date).getFirstDayOfMonth();
+    }
+    static getLastDayOfMonth(date = new Date()) {
+        return this.date(date).getLastDayOfMonth();
     }
 }
 exports.DateUtil = DateUtil;

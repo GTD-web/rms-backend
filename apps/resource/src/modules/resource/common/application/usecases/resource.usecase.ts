@@ -5,7 +5,11 @@ import {
     InternalServerErrorException,
     Inject,
 } from '@nestjs/common';
-import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto, ResourceWithReservationsResponseDto } from '../dtos/resource-response.dto';
+import {
+    ResourceGroupWithResourcesResponseDto,
+    ResourceResponseDto,
+    ResourceWithReservationsResponseDto,
+} from '../dtos/resource-response.dto';
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
 import {
@@ -86,10 +90,11 @@ export class ResourceUsecase {
     }
 
     async findResourcesByTypeAndDateWithReservations(
+        user: UserEntity,
         type: ResourceType,
         startDate: string,
         endDate: string,
-        user: UserEntity,
+        isMine?: boolean,
     ): Promise<ResourceGroupWithResourcesResponseDto[]> {
         if (!!startDate && !!endDate && startDate > endDate) {
             throw new BadRequestException('Start date must be before end date');
@@ -155,18 +160,25 @@ export class ResourceUsecase {
                             },
                         });
 
-                        const reservationResponseDtos = reservations.map((reservation) => {
-                            const isMine = reservation.participants.some(
-                                (participant) => participant.employeeId === user.employeeId,
-                            );
-                            delete reservation.participants;
-                            return {
-                                ...reservation,
-                                startDate: DateUtil.date(reservation.startDate).format(),
-                                endDate: DateUtil.date(reservation.endDate).format(),
-                                isMine: isMine,
-                            };
-                        });
+                        const reservationResponseDtos = reservations
+                            .map((reservation) => {
+                                const isMine = reservation.participants.some(
+                                    (participant) => participant.employeeId === user.employeeId,
+                                );
+                                delete reservation.participants;
+                                return {
+                                    ...reservation,
+                                    startDate: DateUtil.date(reservation.startDate).format(),
+                                    endDate: DateUtil.date(reservation.endDate).format(),
+                                    isMine: isMine,
+                                };
+                            })
+                            .filter((reservation) => {
+                                if (isMine) {
+                                    return reservation.isMine;
+                                }
+                                return true;
+                            });
 
                         return {
                             ...resource,
@@ -185,9 +197,12 @@ export class ResourceUsecase {
 
         return resourceGroupsWithResources;
     }
-    async findResourceDetailForUser(employeeId: string, resourceId: string): Promise<ResourceWithReservationsResponseDto> {
+    async findResourceDetailForUser(
+        employeeId: string,
+        resourceId: string,
+    ): Promise<ResourceWithReservationsResponseDto> {
         const resource = await this.resourceService.findOne({
-            where: { resourceId: resourceId, },
+            where: { resourceId: resourceId },
             relations: [
                 'resourceGroup',
                 'vehicleInfo',
@@ -211,23 +226,23 @@ export class ResourceUsecase {
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(
                 resource.vehicleInfo.odometerImages,
             );
-        }   
+        }
 
         const today = DateUtil.date(DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
 
         const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
             repositoryOptions: {
-                where: { 
-                    resourceId: resourceId, 
-                    participants: { employeeId: employeeId, type: ParticipantsType.RESERVER } ,
-                    status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]), 
+                where: {
+                    resourceId: resourceId,
+                    participants: { employeeId: employeeId, type: ParticipantsType.RESERVER },
+                    status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
                     endDate: MoreThan(today),
                 },
                 relations: ['participants'],
             },
         });
         resource.reservations = reservations;
-       
+
         return new ResourceWithReservationsResponseDto(resource);
     }
 
@@ -527,11 +542,7 @@ export class ResourceUsecase {
         return d1.toDate().getTime() >= d2.toDate().getTime();
     }
 
-    async checkAvailability(
-        resourceId: string,
-        startDate: string,
-        endDate: string,
-    ): Promise<boolean> {
+    async checkAvailability(resourceId: string, startDate: string, endDate: string): Promise<boolean> {
         const startDateObj = DateUtil.date(startDate).toDate();
         const endDateObj = DateUtil.date(endDate).toDate();
 

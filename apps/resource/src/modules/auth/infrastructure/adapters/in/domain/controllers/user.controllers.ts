@@ -2,11 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UserService } from '@resource/modules/auth/application/services/user.service';
 import { User } from '@libs/entities';
-import { Role } from '@libs/enums/role-type.enum';
+import { Public } from '@libs/decorators/public.decorator';
 
 @ApiTags('User Domain Test')
 @Controller('domain/users')
-export class UserControllers {
+@Public()
+export class UserDomainController {
     constructor(private readonly userService: UserService) {}
 
     @Get()
@@ -48,6 +49,6 @@ export class UserControllers {
     @ApiOperation({ summary: '사용자 정보 업데이트' })
     @ApiResponse({ status: 200, description: '사용자 정보 업데이트 성공', type: User })
     async update(@Param('userId') userId: string, @Body() user: User): Promise<User> {
-        return this.userService.update({...user, userId});
+        return this.userService.update({ ...user, userId });
     }
 }

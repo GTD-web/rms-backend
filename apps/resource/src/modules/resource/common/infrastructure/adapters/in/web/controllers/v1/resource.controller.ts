@@ -12,7 +12,10 @@ import { Role } from '@libs/enums/role-type.enum';
 import { Roles } from '@libs/decorators/role.decorator';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceUsecase } from '@resource/modules/resource/common/application/usecases/resource.usecase';
-import { ResourceGroupWithResourcesAndReservationsResponseDto, ResourceWithReservationsResponseDto } from '@resource/modules/resource/common/application/dtos/resource-response.dto';
+import {
+    ResourceGroupWithResourcesAndReservationsResponseDto,
+    ResourceWithReservationsResponseDto,
+} from '@resource/modules/resource/common/application/dtos/resource-response.dto';
 import {
     ReturnVehicleDto,
     UpdateResourceOrdersDto,
@@ -40,13 +43,15 @@ export class UserResourceController {
     @ApiQuery({ name: 'type', enum: ResourceType })
     @ApiQuery({ name: 'startDate', example: '2025-01-01 or 2025-01-01 00:00:00' })
     @ApiQuery({ name: 'endDate', example: '2025-01-01 or 2025-01-01 00:00:00' })
+    @ApiQuery({ name: 'isMine', type: Boolean, required: false, example: true })
     async findResourcesByTypeAndDateWithReservations(
         @User() user: UserEntity,
         @Query('type') type: ResourceType,
         @Query('startDate') startDate: string,
         @Query('endDate') endDate: string,
+        @Query('isMine') isMine: boolean,
     ): Promise<ResourceGroupWithResourcesAndReservationsResponseDto[]> {
-        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(type, startDate, endDate, user);
+        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate, isMine);
     }
 
     // check api - url
@@ -82,9 +87,7 @@ export class UserResourceController {
         description: '예약 시간 가용성 확인 결과',
         type: CheckAvailabilityResponseDto,
     })
-    async checkAvailability(
-        @Query() query: CheckAvailabilityQueryDto,
-    ): Promise<CheckAvailabilityResponseDto> {
+    async checkAvailability(@Query() query: CheckAvailabilityQueryDto): Promise<CheckAvailabilityResponseDto> {
         const isAvailable = await this.resourceUsecase.checkAvailability(
             query.resourceId,
             query.startDate,
@@ -106,8 +109,9 @@ export class UserResourceController {
     })
     async findOne(
         @User() user: UserEntity,
-        @Param('resourceId') resourceId: string): Promise<ResourceWithReservationsResponseDto> {
-        return this.resourceUsecase.findResourceDetailForUser(user.employeeId,resourceId);
+        @Param('resourceId') resourceId: string,
+    ): Promise<ResourceWithReservationsResponseDto> {
+        return this.resourceUsecase.findResourceDetailForUser(user.employeeId, resourceId);
     }
 
     // check api

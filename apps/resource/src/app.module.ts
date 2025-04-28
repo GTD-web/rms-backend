@@ -26,7 +26,9 @@ import { FileModule } from './modules/file/file.module';
 import { AppController } from './app.controller';
 import { ApiDocService } from '@libs/utils/api-doc.service';
 import { DbDocService } from '@libs/utils/db-doc.service';
-
+import { UserDomainModule } from './modules/auth/user.domain.module';
+import { EmployeeDomainModule } from './modules/employee/employee.domain.module';
+import { NotificationDomainModule } from './modules/notification/notification.domain.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -50,6 +52,10 @@ import { DbDocService } from '@libs/utils/db-doc.service';
         ReservationModule,
         NotificationModule,
         FileModule,
+
+        UserDomainModule,
+        EmployeeDomainModule,
+        NotificationDomainModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],

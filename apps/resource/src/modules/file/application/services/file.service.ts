@@ -11,7 +11,6 @@ export class FileService {
         private readonly fileRepository: FileRepositoryPort,
         @Inject('FileStoragePort')
         private readonly fileStorage: FileStoragePort,
-        private readonly configService: ConfigService,
     ) {}
 
     async findFileById(fileId: string): Promise<File> {
