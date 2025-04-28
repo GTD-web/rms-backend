@@ -468,6 +468,8 @@ export class ResourceUsecase {
 
     /**
      * 특정 시간 범위에 대한 가용 시간 슬롯을 처리합니다.
+     * timeUnit: 각 예약의 길이(기간) (분 단위)
+     * 슬롯 시작 시간은 30분 간격으로 생성됩니다.
      */
     private processTimeRange(
         dateStr: string,
@@ -477,15 +479,22 @@ export class ResourceUsecase {
         confirmedReservations: Reservation[],
         availableSlots: TimeSlotDto[],
     ): void {
-        let slotStart = DateUtil.date(`${dateStr} ${startTime}`);
+        const startTime_obj = DateUtil.date(`${dateStr} ${startTime}`);
         const endTime_obj = DateUtil.date(`${dateStr} ${endTime}`);
 
-        // timeUnit 단위로 시간 슬롯 생성
+        // 30분 간격으로 슬롯 시작 시간 생성
+        const slotIntervalMinutes = 30;
+
+        // 각 슬롯 시작 시간에 대해 반복
+        let slotStart = startTime_obj;
+
         while (this.isBefore(slotStart, endTime_obj)) {
+            // timeUnit 만큼의 슬롯 길이를 계산
             const slotEnd = slotStart.addMinutes(timeUnit);
 
-            // 슬롯이 종료 시간을 초과하면 종료 시간으로 조정
+            // 슬롯 끝이 허용된 종료 시간을 초과하면, 처리하지 않고 다음 시작 시간으로 넘어감
             if (this.isAfter(slotEnd, endTime_obj)) {
+                slotStart = slotStart.addMinutes(slotIntervalMinutes);
                 continue;
             }
 
@@ -510,7 +519,8 @@ export class ResourceUsecase {
                 });
             }
 
-            slotStart = slotStart.addMinutes(timeUnit);
+            // 다음 슬롯 시작 시간은 30분 후
+            slotStart = slotStart.addMinutes(slotIntervalMinutes);
         }
     }
 

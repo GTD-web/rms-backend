@@ -23,6 +23,7 @@ import { AdminResourceController } from './common/infrastructure/adapters/in/web
 import { AdminResourceGroupController } from './common/infrastructure/adapters/in/web/controllers/v1/admin.resource-group.controller';
 import { UserResourceGroupController } from './common/infrastructure/adapters/in/web/controllers/v1/resource-group.controller';
 import { UserResourceController } from './common/infrastructure/adapters/in/web/controllers/v1/resource.controller';
+import { ResourceEventHandler } from './common/application/handler/resource-event.handler';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Resource, ResourceGroup, ResourceManager]),
@@ -64,13 +65,16 @@ import { UserResourceController } from './common/infrastructure/adapters/in/web/
         },
         ResourceUsecase,
         ResourceGroupUsecase,
+        ResourceEventHandler,
     ],
-    controllers: [ResourceController, 
-        ResourceGroupController, 
-        AdminResourceController, 
-        AdminResourceGroupController,   
-        UserResourceGroupController, 
-        UserResourceController],
+    controllers: [
+        ResourceController,
+        ResourceGroupController,
+        AdminResourceController,
+        AdminResourceGroupController,
+        UserResourceGroupController,
+        UserResourceController,
+    ],
     exports: [ResourceService, ResourceGroupService, ResourceManagerService],
 })
 export class ResourceModule {}

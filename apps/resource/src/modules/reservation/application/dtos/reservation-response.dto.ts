@@ -71,6 +71,32 @@ export class ReservationParticipantResponseDto {
     employee?: EmployeeResponseDto;
 }
 
+export class ReservationVehicleResponseDto {
+    @ApiProperty()
+    reservationVehicleId: string;
+
+    @ApiProperty()
+    vehicleInfoId: string;
+
+    @ApiProperty()
+    startOdometer: number;
+
+    @ApiProperty()
+    endOdometer: number;
+
+    @ApiProperty()
+    startFuelLevel: number;
+
+    @ApiProperty()
+    endFuelLevel: number;
+
+    @ApiProperty()
+    isReturned: boolean;
+
+    @ApiProperty()
+    returnedAt: Date;
+}
+
 export class ReservationWithResourceResponseDto extends ReservationResponseDto {
     constructor(reservation?: Reservation) {
         super(reservation);
@@ -91,6 +117,7 @@ export class ReservationWithRelationsResponseDto extends ReservationResponseDto 
         this.participants = reservation?.participants?.filter(
             (participant) => participant.type === ParticipantsType.PARTICIPANT,
         );
+        this.reservationVehicles = reservation?.reservationVehicles;
     }
 
     @ApiProperty({ type: () => ResourceResponseDto, required: false })
@@ -102,69 +129,11 @@ export class ReservationWithRelationsResponseDto extends ReservationResponseDto 
     @ApiProperty({ type: [ReservationParticipantResponseDto], required: false })
     participants?: ReservationParticipantResponseDto[];
 
+    @ApiProperty({ type: [ReservationVehicleResponseDto], required: false })
+    reservationVehicles?: ReservationVehicleResponseDto[];
+
     @ApiProperty({ required: false })
     isMine?: boolean;
-
-    getPropertiesAndTypes() {
-        return {
-            reservationId: {
-                type: String,
-                required: true,
-            },
-            resourceId: {
-                type: String,
-                required: false,
-            },
-            title: {
-                type: String,
-                required: false,
-            },
-            description: {
-                type: String,
-                required: false,
-            },
-            startDate: {
-                type: String,
-                required: false,
-            },
-            endDate: {
-                type: String,
-                required: false,
-            },
-            status: {
-                type: String,
-                required: false,
-            },
-            isAllDay: {
-                type: Boolean,
-                required: false,
-            },
-            notifyBeforeStart: {
-                type: Boolean,
-                required: false,
-            },
-            notifyMinutesBeforeStart: {
-                type: [Number],
-                required: false,
-            },
-            isMine: {
-                type: Boolean,
-                required: false,
-            },
-            resource: {
-                type: ResourceResponseDto,
-                required: false,
-            },
-            reservers: {
-                type: [ReservationParticipantResponseDto],
-                required: false,
-            },
-            participants: {
-                type: [ReservationParticipantResponseDto],
-                required: false,
-            },
-        };
-    }
 }
 
 export class CreateReservationResponseDto {
@@ -176,9 +145,9 @@ export class GroupedReservationResponseDto {
     @ApiProperty({ description: '날짜 (YYYY-MM-DD 형식)' })
     date: string;
 
-    @ApiProperty({ 
+    @ApiProperty({
         description: '해당 날짜의 예약 목록',
-        type: [ReservationWithRelationsResponseDto]
+        type: [ReservationWithRelationsResponseDto],
     })
     reservations: ReservationWithRelationsResponseDto[];
 }

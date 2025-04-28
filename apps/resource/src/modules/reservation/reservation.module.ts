@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Reservation, ReservationParticipant, Schedule, ReservationSnapshot } from '@libs/entities';
+import { Reservation, ReservationParticipant, Schedule, ReservationSnapshot, ReservationVehicle } from '@libs/entities';
 import { ReservationService } from './application/services/reservation.service';
 import { ReservationController } from './infrastructure/adapters/in/web/controllers/reservation.controller';
 import { ReservationRepository } from './infrastructure/adapters/out/persistence/reservation.repository';
@@ -13,12 +13,24 @@ import { UserReservationController } from './infrastructure/adapters/in/web/cont
 import { ReservationSnapshotUsecase } from './application/usecases/reservation-snapshot.usecase';
 import { ReservationSnapshotRepository } from './infrastructure/adapters/out/persistence/reservation-snapshot.repository';
 import { ReservationSnapshotService } from './application/services/reservation-snapshot.service';
+import { ReservationVehicleService } from './application/services/reservation-vehicle.service';
+import { ReservationVehicleRepository } from './infrastructure/adapters/out/persistence/reservation-vehicle.repository';
+
 @Module({
-    imports: [TypeOrmModule.forFeature([Reservation, ReservationParticipant, Schedule, ReservationSnapshot])],
+    imports: [
+        TypeOrmModule.forFeature([
+            Reservation,
+            ReservationParticipant,
+            Schedule,
+            ReservationSnapshot,
+            ReservationVehicle,
+        ]),
+    ],
     providers: [
         ReservationService,
         ParticipantService,
         ReservationSnapshotService,
+        ReservationVehicleService,
         {
             provide: 'ReservationRepositoryPort',
             useClass: ReservationRepository,
@@ -31,12 +43,16 @@ import { ReservationSnapshotService } from './application/services/reservation-s
             provide: 'ReservationSnapshotRepositoryPort',
             useClass: ReservationSnapshotRepository,
         },
+        {
+            provide: 'ReservationVehicleRepositoryPort',
+            useClass: ReservationVehicleRepository,
+        },
 
         ReservationUsecase,
         ReservationEventHandler,
         ReservationSnapshotUsecase,
     ],
     controllers: [ReservationController, AdminReservationController, UserReservationController],
-    exports: [ReservationService, ReservationSnapshotUsecase],
+    exports: [ReservationService, ReservationSnapshotUsecase, ReservationVehicleService],
 })
 export class ReservationModule {}

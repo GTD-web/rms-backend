@@ -22,7 +22,7 @@ import {
 import { DateUtil } from '@libs/utils/date.util';
 import { ReservationService } from '../services/reservation.service';
 import { ParticipantService } from '../services/participant.service';
-import { ReservationParticipant, Reservation } from '@libs/entities';
+import { ReservationParticipant, Reservation, ReservationVehicle } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     UpdateReservationCcReceipientDto,
@@ -39,12 +39,13 @@ import { CronJob } from 'cron/dist';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-
+import { ReservationVehicleService } from '../services/reservation-vehicle.service';
 @Injectable()
 export class ReservationUsecase {
     constructor(
         private readonly reservationService: ReservationService,
         private readonly participantService: ParticipantService,
+        private readonly reservationVehicleService: ReservationVehicleService,
         private readonly dataSource: DataSource,
         private readonly eventEmitter: EventEmitter2,
         private readonly schedulerRegistry: SchedulerRegistry,
@@ -546,7 +547,30 @@ export class ReservationUsecase {
         try {
             const reservation = this.reservationService.create(createDto);
 
-            const savedReservation = await this.reservationService.save(reservation, { queryRunner });
+            const savedReservation = await this.reservationService.save(reservation, {
+                queryRunner,
+            });
+
+            // 차량 예약 정보 생성
+            if (createDto.resourceType === ResourceType.VEHICLE) {
+                const [resources] = await this.eventEmitter.emitAsync('find.resource', {
+                    repositoryOptions: {
+                        where: { resourceId: createDto.resourceId },
+                        relations: ['vehicleInfo'],
+                    },
+                });
+                const resource = resources[0];
+                const reservationVehicle = new ReservationVehicle();
+                reservationVehicle.reservationId = savedReservation.reservationId!;
+                reservationVehicle.vehicleInfoId = resource.vehicleInfo.vehicleInfoId;
+                reservationVehicle.startOdometer = resource.vehicleInfo.totalMileage;
+                reservationVehicle.isReturned = false;
+                reservationVehicle.returnedAt = null;
+
+                await this.reservationVehicleService.save(reservationVehicle, {
+                    queryRunner,
+                });
+            }
 
             // 참가자 정보 저장
             await Promise.all([

@@ -117,6 +117,17 @@ export class UserReservationController {
         );
     }
 
+    // @Get('my-using')
+    // @Roles(Role.USER)
+    // @ApiOperation({ summary: '내 사용중인 예약 리스트 조회' })
+    // @ApiDataResponse({
+    //     description: '내 사용중인 예약 리스트 조회',
+    //     type: [GroupedReservationResponseDto],
+    // })
+    // async findMyUsingReservationList(@User() user: UserEntity): Promise<PaginationData<GroupedReservationResponseDto>> {
+    //     return this.reservationUsecase.findMyUsingReservationList(user.employeeId);
+    // }
+
     @Get('my-upcoming')
     @Roles(Role.USER)
     @ApiOperation({ summary: '내 예약 리스트 조회' })
@@ -124,6 +135,9 @@ export class UserReservationController {
         description: '내 예약 리스트 조회',
         type: [GroupedReservationResponseDto],
     })
+    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
     async findMyUpcomingReservationList(
         @User() user: UserEntity,
         @Query('resourceType') resourceType?: ResourceType,
@@ -140,6 +154,8 @@ export class UserReservationController {
         type: [GroupedReservationResponseDto],
     })
     @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
     async findMyUpcomingSchedules(
         @User() user: UserEntity,
         @Query('resourceType') resourceType?: ResourceType,

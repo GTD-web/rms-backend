@@ -21,7 +21,7 @@ import {
     ConsumableMaintenanceStats,
 } from './view';
 import { ReservationSnapshot } from './reservation-snapshot.entity';
-
+import { ReservationVehicle } from './reservation-vehicle.entity';
 export const Entities = [
     Employee,
     User,
@@ -31,6 +31,7 @@ export const Entities = [
     MeetingRoomInfo,
     AccommodationInfo,
     Reservation,
+    ReservationVehicle,
     ReservationSnapshot,
     ReservationParticipant,
     Schedule,
@@ -55,6 +56,7 @@ export const EntitiesMap = {
     MeetingRoomInfo,
     AccommodationInfo,
     Reservation,
+    ReservationVehicle,
     ReservationSnapshot,
     ReservationParticipant,
     Schedule,
@@ -79,6 +81,7 @@ export {
     MeetingRoomInfo,
     AccommodationInfo,
     Reservation,
+    ReservationVehicle,
     ReservationSnapshot,
     ReservationParticipant,
     Schedule,

@@ -1,8 +1,8 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, OneToMany, Exclusion } from 'typeorm';
 import { Resource } from './resource.entity';
 import { ReservationParticipant } from './reservation-participant.entity';
-import { Schedule } from './schedule.entity';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { ReservationVehicle } from './reservation-vehicle.entity';
 
 @Entity('reservations')
 export class Reservation {
@@ -51,6 +51,6 @@ export class Reservation {
     @OneToMany(() => ReservationParticipant, (participant) => participant.reservation)
     participants: ReservationParticipant[];
 
-    @OneToMany(() => Schedule, (schedule) => schedule.reservation)
-    schedules: Schedule[];
+    @OneToMany(() => ReservationVehicle, (reservationVehicle) => reservationVehicle.reservation)
+    reservationVehicles: ReservationVehicle[];
 }
