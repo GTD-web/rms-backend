@@ -106,6 +106,7 @@ export class UserReservationController {
         @Query('isMine') isMine?: boolean,
     ): Promise<PaginationData<GroupedReservationResponseDto>> {
         const { page, limit } = query;
+        console.log(page, limit);
         return this.reservationUsecase.findResourceReservationList(
             user.employeeId,
             page,

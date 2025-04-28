@@ -7697,6 +7697,7 @@ let UserReservationController = class UserReservationController {
     }
     async findResourceReservationList(user, resourceId, query, month, isMine) {
         const { page, limit } = query;
+        console.log(page, limit);
         return this.reservationUsecase.findResourceReservationList(user.employeeId, page, limit, resourceId, month, isMine);
     }
     async findMyUpcomingReservationList(user, resourceType, query) {
@@ -15182,7 +15183,7 @@ const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 class PaginationQueryDto {
     constructor() {
         this.page = 1;
-        this.limit = 20;
+        this.limit = 100;
     }
     getOffset() {
         return (this.page - 1) * this.limit;
@@ -15206,7 +15207,7 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: '한 페이지당 항목 수',
         type: Number,
-        default: 20,
+        default: 100,
         minimum: 1,
         maximum: 100,
     }),
