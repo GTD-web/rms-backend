@@ -5,27 +5,10 @@ import {
     InternalServerErrorException,
     Inject,
 } from '@nestjs/common';
-import {
-    ResourceGroupWithResourcesResponseDto,
-    ResourceResponseDto,
-    ResourceWithReservationsResponseDto,
-} from '../dtos/resource-response.dto';
+import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto } from '../dtos/resource-response.dto';
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
-import {
-    IsNull,
-    Not,
-    MoreThan,
-    LessThan,
-    DataSource,
-    In,
-    MoreThanOrEqual,
-    LessThanOrEqual,
-    Between,
-    TypeORMError,
-    DriverOptionNotSetError,
-    FindOptionsWhere,
-} from 'typeorm';
+import { IsNull, Not, LessThan, DataSource, In, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     ReturnVehicleDto,
@@ -37,11 +20,9 @@ import { Resource } from '@libs/entities/resource.entity';
 import { CreateResourceInfoDto } from '../dtos/create-resource.dto';
 import { ResourceTypeHandler } from '@resource/modules/resource/common/domain/ports/resource-type.handler.port';
 import { ResourceManagerService } from '../services/resource-manager.service';
-import { Role } from '@libs/enums/role-type.enum';
-import { UserService } from '@resource/modules/auth/application/services/user.service';
 import { User as UserEntity } from '@libs/entities';
 import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
-import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-type.enum';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { FileService } from '@resource/modules/file/application/services/file.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DateUtil } from '@libs/utils/date.util';
@@ -53,7 +34,7 @@ import {
 } from '@resource/modules/resource/common/application/dtos/available-time-response.dto';
 import { Reservation } from '@libs/entities/reservation.entity';
 import { ResourceQueryDto } from '../dtos/resource-query.dto';
-import { ReservationResponseDto } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
+import { ConsumableService } from '@resource/modules/resource/vehicle/application/services/consumable.service';
 
 @Injectable()
 export class ResourceUsecase {
@@ -64,6 +45,7 @@ export class ResourceUsecase {
         private readonly vehicleInfoService: VehicleInfoService,
         private readonly vehicleInfoUsecase: VehicleInfoUsecase,
         private readonly maintenanceService: MaintenanceService,
+        private readonly consumableService: ConsumableService,
         private readonly dataSource: DataSource,
         private readonly fileService: FileService,
         @Inject('ResourceTypeHandlers')
@@ -197,15 +179,13 @@ export class ResourceUsecase {
 
         return resourceGroupsWithResources;
     }
-    async findResourceDetailForUser(
-        employeeId: string,
-        resourceId: string,
-    ): Promise<ResourceWithReservationsResponseDto> {
+    async findResourceDetailForUser(employeeId: string, resourceId: string): Promise<ResourceResponseDto> {
         const resource = await this.resourceService.findOne({
             where: { resourceId: resourceId },
             relations: [
                 'resourceGroup',
                 'vehicleInfo',
+                // 'vehicleInfo.consumables',
                 'meetingRoomInfo',
                 'accommodationInfo',
                 'resourceManagers',
@@ -218,8 +198,47 @@ export class ResourceUsecase {
         }
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
 
-        // 관리자 페이지 내 자원 상세 페이지에서 사용하는 정비기록 관련 계산 필드 추가
-        if (resource.vehicleInfo) {
+        //  소모품 현황과 정비내역 및 정비내역 추가 기능 필요
+        if (resource.vehicleInfo && resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
+            resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
+                where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
+            });
+            if (resource.vehicleInfo.consumables && resource.vehicleInfo.consumables.length > 0) {
+                const mileage = Number(resource.vehicleInfo.totalMileage);
+                for (const consumable of resource.vehicleInfo.consumables) {
+                    const replaceCycle = Number(consumable.replaceCycle);
+                    const latestMaintenance = await this.maintenanceService.findOne({
+                        where: { consumableId: consumable.consumableId },
+                        order: { date: 'DESC' },
+                    });
+                    if (latestMaintenance) {
+                        consumable.maintenances = [latestMaintenance].map((maintenance) => {
+                            return {
+                                ...maintenance,
+                                mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                                maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                            };
+                        });
+                    }
+                }
+                resource.vehicleInfo.consumables.sort((a, b) => {
+                    // Check if both consumables have maintenance records
+                    if (!a.maintenances?.length && !b.maintenances?.length) {
+                        // Neither has maintenance records, sort by name or other property
+                        return a.name.localeCompare(b.name);
+                    }
+
+                    // If only one has maintenance records, prioritize the one without maintenance
+                    if (!a.maintenances?.length) return -1;
+                    if (!b.maintenances?.length) return 1;
+
+                    // Now safely access maintenance records
+                    const aMileage = a.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
+                    const bMileage = b.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
+
+                    return aMileage - bMileage;
+                });
+            }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(
                 resource.vehicleInfo.parkingLocationImages,
             );
@@ -227,23 +246,7 @@ export class ResourceUsecase {
                 resource.vehicleInfo.odometerImages,
             );
         }
-
-        const today = DateUtil.date(DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
-
-        const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
-            repositoryOptions: {
-                where: {
-                    resourceId: resourceId,
-                    participants: { employeeId: employeeId, type: ParticipantsType.RESERVER },
-                    status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
-                    endDate: MoreThan(today),
-                },
-                relations: ['participants'],
-            },
-        });
-        resource.reservations = reservations;
-
-        return new ResourceWithReservationsResponseDto(resource);
+        return resource;
     }
 
     async findResourceDetailForAdmin(resourceId: string): Promise<ResourceResponseDto> {
@@ -253,7 +256,6 @@ export class ResourceUsecase {
                 'resourceGroup',
                 'vehicleInfo',
                 'vehicleInfo.consumables',
-                // 'vehicleInfo.consumables.maintenances',
                 'meetingRoomInfo',
                 'accommodationInfo',
                 'resourceManagers',

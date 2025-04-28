@@ -11,6 +11,7 @@ import { ResourceModule } from '@resource/modules/resource/resource.module';
 import { ReservationModule } from '@resource/modules/reservation/reservation.module';
 import { NotificationModule } from '@resource/modules/notification/notification.module';
 import { FileModule } from '@resource/modules/file/file.module';
+import { VehicleResourceModule } from '@resource/modules/resource/vehicle/vehicle-resource.module';
 
 export function setupSwagger(app: INestApplication, dtos: any[]) {
     const config = new DocumentBuilder()
@@ -21,7 +22,15 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
         .build();
 
     const document = SwaggerModule.createDocument(app, config, {
-        include: [AuthModule, EmployeeModule, ResourceModule, ReservationModule, NotificationModule, FileModule],
+        include: [
+            AuthModule,
+            EmployeeModule,
+            ResourceModule,
+            VehicleResourceModule,
+            ReservationModule,
+            NotificationModule,
+            FileModule,
+        ],
         extraModels: [BaseResponseDto, PaginationData, ...dtos],
     });
 

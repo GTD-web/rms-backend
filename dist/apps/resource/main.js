@@ -10327,7 +10327,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -10346,14 +10346,16 @@ const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/uti
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const maintenance_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
 const available_time_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/available-time-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/available-time-response.dto.ts");
+const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
 let ResourceUsecase = class ResourceUsecase {
-    constructor(resourceService, resourceManagerService, resourceGroupService, vehicleInfoService, vehicleInfoUsecase, maintenanceService, dataSource, fileService, typeHandlers, eventEmitter) {
+    constructor(resourceService, resourceManagerService, resourceGroupService, vehicleInfoService, vehicleInfoUsecase, maintenanceService, consumableService, dataSource, fileService, typeHandlers, eventEmitter) {
         this.resourceService = resourceService;
         this.resourceManagerService = resourceManagerService;
         this.resourceGroupService = resourceGroupService;
         this.vehicleInfoService = vehicleInfoService;
         this.vehicleInfoUsecase = vehicleInfoUsecase;
         this.maintenanceService = maintenanceService;
+        this.consumableService = consumableService;
         this.dataSource = dataSource;
         this.fileService = fileService;
         this.typeHandlers = typeHandlers;
@@ -10482,24 +10484,45 @@ let ResourceUsecase = class ResourceUsecase {
             throw new common_1.NotFoundException('Resource not found');
         }
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
-        if (resource.vehicleInfo) {
+        if (resource.vehicleInfo && resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
+            resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
+                where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
+            });
+            if (resource.vehicleInfo.consumables && resource.vehicleInfo.consumables.length > 0) {
+                const mileage = Number(resource.vehicleInfo.totalMileage);
+                for (const consumable of resource.vehicleInfo.consumables) {
+                    const replaceCycle = Number(consumable.replaceCycle);
+                    const latestMaintenance = await this.maintenanceService.findOne({
+                        where: { consumableId: consumable.consumableId },
+                        order: { date: 'DESC' },
+                    });
+                    if (latestMaintenance) {
+                        consumable.maintenances = [latestMaintenance].map((maintenance) => {
+                            return {
+                                ...maintenance,
+                                mileageFromLastMaintenance: mileage - Number(maintenance.mileage),
+                                maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
+                            };
+                        });
+                    }
+                }
+                resource.vehicleInfo.consumables.sort((a, b) => {
+                    if (!a.maintenances?.length && !b.maintenances?.length) {
+                        return a.name.localeCompare(b.name);
+                    }
+                    if (!a.maintenances?.length)
+                        return -1;
+                    if (!b.maintenances?.length)
+                        return 1;
+                    const aMileage = a.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
+                    const bMileage = b.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
+                    return aMileage - bMileage;
+                });
+            }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.odometerImages);
         }
-        const today = date_util_1.DateUtil.date(date_util_1.DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
-        const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
-            repositoryOptions: {
-                where: {
-                    resourceId: resourceId,
-                    participants: { employeeId: employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
-                    status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING]),
-                    endDate: (0, typeorm_1.MoreThan)(today),
-                },
-                relations: ['participants'],
-            },
-        });
-        resource.reservations = reservations;
-        return new resource_response_dto_1.ResourceWithReservationsResponseDto(resource);
+        return resource;
     }
     async findResourceDetailForAdmin(resourceId) {
         const resource = await this.resourceService.findOne({
@@ -10893,8 +10916,8 @@ let ResourceUsecase = class ResourceUsecase {
 exports.ResourceUsecase = ResourceUsecase;
 exports.ResourceUsecase = ResourceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __param(8, (0, common_1.Inject)('ResourceTypeHandlers')),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.ResourceService !== "undefined" && resource_service_1.ResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.ResourceManagerService !== "undefined" && resource_manager_service_1.ResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof resource_group_service_1.ResourceGroupService !== "undefined" && resource_group_service_1.ResourceGroupService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _e : Object, typeof (_f = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object, typeof (_h = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _h : Object, typeof (_j = typeof Map !== "undefined" && Map) === "function" ? _j : Object, typeof (_k = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _k : Object])
+    __param(9, (0, common_1.Inject)('ResourceTypeHandlers')),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.ResourceService !== "undefined" && resource_service_1.ResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.ResourceManagerService !== "undefined" && resource_manager_service_1.ResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof resource_group_service_1.ResourceGroupService !== "undefined" && resource_group_service_1.ResourceGroupService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _e : Object, typeof (_f = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _f : Object, typeof (_g = typeof consumable_service_1.ConsumableService !== "undefined" && consumable_service_1.ConsumableService) === "function" ? _g : Object, typeof (_h = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _h : Object, typeof (_j = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _j : Object, typeof (_k = typeof Map !== "undefined" && Map) === "function" ? _k : Object, typeof (_l = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _l : Object])
 ], ResourceUsecase);
 
 
@@ -12755,13 +12778,6 @@ __decorate([
     __metadata("design:type", Array)
 ], CreateMaintenanceDto.prototype, "images", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, description: '정비 담당자' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)({ message: '정비 담당자는 문자열이어야 합니다.' }),
-    (0, class_validator_1.Length)(0, 100, { message: '정비 담당자는 100자 이하여야 합니다.' }),
-    __metadata("design:type", String)
-], CreateMaintenanceDto.prototype, "maintananceBy", void 0);
-__decorate([
     (0, swagger_1.ApiProperty)({
         description: '소모품 ID',
         example: 'consumable-123',
@@ -13431,6 +13447,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         this.dataSource = dataSource;
     }
     async save(user, createMaintenanceDto) {
+        console.log(user);
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
@@ -13447,7 +13464,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            const maintenance = await this.maintenanceService.save({ ...createMaintenanceDto, maintananceBy: user.employee.employeeId }, { queryRunner });
+            const maintenance = await this.maintenanceService.save({ ...createMaintenanceDto, maintananceBy: user.employeeId }, { queryRunner });
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
@@ -14484,6 +14501,157 @@ exports.AdminVehicleInfoController = AdminVehicleInfoController = __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/consumable.controller.ts":
+/*!***************************************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/consumable.controller.ts ***!
+  \***************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserConsumableController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const vehicle_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/vehicle-response.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/vehicle-response.dto.ts");
+const consumable_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/consumable.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/consumable.usecase.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+let UserConsumableController = class UserConsumableController {
+    constructor(consumableUsecase) {
+        this.consumableUsecase = consumableUsecase;
+    }
+    async findOne(user, consumableId) {
+        const consumable = await this.consumableUsecase.findOne(user, {
+            where: {
+                consumableId: consumableId,
+            },
+            relations: ['maintenances'],
+        });
+        return {
+            consumableId: consumable.consumableId,
+            vehicleInfoId: consumable.vehicleInfoId,
+            name: consumable.name,
+            replaceCycle: consumable.replaceCycle,
+            notifyReplacementCycle: consumable.notifyReplacementCycle,
+            maintenances: consumable.maintenances.map((maintenance) => ({
+                maintenanceId: maintenance.maintenanceId,
+                consumableId: maintenance.consumableId,
+                date: maintenance.date,
+                mileage: maintenance.mileage,
+                cost: maintenance.cost,
+                images: maintenance.images,
+            })),
+        };
+    }
+};
+exports.UserConsumableController = UserConsumableController;
+__decorate([
+    (0, common_1.Get)(':consumableId'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
+    (0, swagger_1.ApiOperation)({ summary: '소모품 상세 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '소모품을 성공적으로 조회했습니다.',
+        type: vehicle_response_dto_1.ConsumableResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('consumableId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, String]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], UserConsumableController.prototype, "findOne", null);
+exports.UserConsumableController = UserConsumableController = __decorate([
+    (0, swagger_1.ApiTags)('4. 차량 소모품 - 사용자 페이지'),
+    (0, common_1.Controller)('v1/consumables'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof consumable_usecase_1.ConsumableUsecase !== "undefined" && consumable_usecase_1.ConsumableUsecase) === "function" ? _a : Object])
+], UserConsumableController);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/maintenance.controller.ts":
+/*!****************************************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/maintenance.controller.ts ***!
+  \****************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserMaintenanceController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const create_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/create-vehicle-info.dto.ts");
+const vehicle_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/vehicle-response.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/vehicle-response.dto.ts");
+const maintenance_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/maintenance.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/maintenance.usecase.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+let UserMaintenanceController = class UserMaintenanceController {
+    constructor(maintenanceUsecase) {
+        this.maintenanceUsecase = maintenanceUsecase;
+    }
+    async create(user, createMaintenanceDto) {
+        return this.maintenanceUsecase.save(user, createMaintenanceDto);
+    }
+};
+exports.UserMaintenanceController = UserMaintenanceController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
+    (0, swagger_1.ApiOperation)({ summary: '정비 이력 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 201,
+        description: '정비 이력이 생성되었습니다.',
+        type: vehicle_response_dto_1.MaintenanceResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof create_vehicle_info_dto_1.CreateMaintenanceDto !== "undefined" && create_vehicle_info_dto_1.CreateMaintenanceDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], UserMaintenanceController.prototype, "create", null);
+exports.UserMaintenanceController = UserMaintenanceController = __decorate([
+    (0, swagger_1.ApiTags)('4. 차량 정비 이력 - 사용자 페이지'),
+    (0, common_1.Controller)('v1/maintenances'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_usecase_1.MaintenanceUsecase !== "undefined" && maintenance_usecase_1.MaintenanceUsecase) === "function" ? _a : Object])
+], UserMaintenanceController);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/vehicle-info.controller.ts":
 /*!**************************************************************************************************************************!*\
   !*** ./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/vehicle-info.controller.ts ***!
@@ -14843,6 +15011,8 @@ const admin_vehicle_info_controller_1 = __webpack_require__(/*! ./infrastructure
 const admin_consumable_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.consumable.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/admin.consumable.controller.ts");
 const admin_maintenance_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.maintenance.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/admin.maintenance.controller.ts");
 const vehicle_event_handler_1 = __webpack_require__(/*! ./application/handlers/vehicle-event.handler */ "./apps/resource/src/modules/resource/vehicle/application/handlers/vehicle-event.handler.ts");
+const consumable_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/consumable.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/consumable.controller.ts");
+const maintenance_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/maintenance.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/maintenance.controller.ts");
 let VehicleResourceModule = class VehicleResourceModule {
 };
 exports.VehicleResourceModule = VehicleResourceModule;
@@ -14881,6 +15051,8 @@ exports.VehicleResourceModule = VehicleResourceModule = __decorate([
             admin_vehicle_info_controller_1.AdminVehicleInfoController,
             admin_consumable_controller_1.AdminConsumableController,
             admin_maintenance_controller_1.AdminMaintenanceController,
+            consumable_controller_2.UserConsumableController,
+            maintenance_controller_2.UserMaintenanceController,
         ],
         exports: [
             vehicle_resource_handler_1.VehicleResourceHandler,
@@ -18182,6 +18354,7 @@ const resource_module_1 = __webpack_require__(/*! @resource/modules/resource/res
 const reservation_module_1 = __webpack_require__(/*! @resource/modules/reservation/reservation.module */ "./apps/resource/src/modules/reservation/reservation.module.ts");
 const notification_module_1 = __webpack_require__(/*! @resource/modules/notification/notification.module */ "./apps/resource/src/modules/notification/notification.module.ts");
 const file_module_1 = __webpack_require__(/*! @resource/modules/file/file.module */ "./apps/resource/src/modules/file/file.module.ts");
+const vehicle_resource_module_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/vehicle-resource.module */ "./apps/resource/src/modules/resource/vehicle/vehicle-resource.module.ts");
 function setupSwagger(app, dtos) {
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Resource Management API')
@@ -18190,7 +18363,15 @@ function setupSwagger(app, dtos) {
         .addBearerAuth()
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config, {
-        include: [auth_module_1.AuthModule, employee_module_1.EmployeeModule, resource_module_1.ResourceModule, reservation_module_1.ReservationModule, notification_module_1.NotificationModule, file_module_1.FileModule],
+        include: [
+            auth_module_1.AuthModule,
+            employee_module_1.EmployeeModule,
+            resource_module_1.ResourceModule,
+            vehicle_resource_module_1.VehicleResourceModule,
+            reservation_module_1.ReservationModule,
+            notification_module_1.NotificationModule,
+            file_module_1.FileModule,
+        ],
         extraModels: [response_dto_1.BaseResponseDto, paginate_response_dto_1.PaginationData, ...dtos],
     });
     const domainConfig = new swagger_1.DocumentBuilder()

@@ -22,6 +22,7 @@ export class MaintenanceUsecase {
     ) {}
 
     async save(user: UserEntity, createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
+        console.log(user);
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
 
@@ -40,7 +41,7 @@ export class MaintenanceUsecase {
         await queryRunner.startTransaction();
         try {
             const maintenance = await this.maintenanceService.save(
-                { ...createMaintenanceDto, maintananceBy: user.employee.employeeId },
+                { ...createMaintenanceDto, maintananceBy: user.employeeId },
                 { queryRunner },
             );
             if (createMaintenanceDto.mileage) {

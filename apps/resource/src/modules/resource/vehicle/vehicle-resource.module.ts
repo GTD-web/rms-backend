@@ -18,6 +18,8 @@ import { AdminVehicleInfoController } from './infrastructure/adapters/in/web/con
 import { AdminConsumableController } from './infrastructure/adapters/in/web/controllers/v1/admin.consumable.controller';
 import { AdminMaintenanceController } from './infrastructure/adapters/in/web/controllers/v1/admin.maintenance.controller';
 import { VehicleEventHandler } from './application/handlers/vehicle-event.handler';
+import { UserConsumableController } from './infrastructure/adapters/in/web/controllers/v1/consumable.controller';
+import { UserMaintenanceController } from './infrastructure/adapters/in/web/controllers/v1/maintenance.controller';
 @Module({
     imports: [TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance])],
     providers: [
@@ -52,6 +54,8 @@ import { VehicleEventHandler } from './application/handlers/vehicle-event.handle
         AdminVehicleInfoController,
         AdminConsumableController,
         AdminMaintenanceController,
+        UserConsumableController,
+        UserMaintenanceController,
     ],
     exports: [
         VehicleResourceHandler,

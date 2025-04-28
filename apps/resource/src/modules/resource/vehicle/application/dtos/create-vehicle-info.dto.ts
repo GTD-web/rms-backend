@@ -105,10 +105,10 @@ export class CreateMaintenanceDto {
     @IsArray({ message: '이미지 입력 값은 배열이어야 합니다.' })
     images?: string[];
 
-    @ApiProperty({ required: false, description: '정비 담당자' })
-    @IsOptional()
-    @IsString({ message: '정비 담당자는 문자열이어야 합니다.' })
-    @Length(0, 100, { message: '정비 담당자는 100자 이하여야 합니다.' })
+    // @ApiProperty({ required: false, description: '정비 담당자' })
+    // @IsOptional()
+    // @IsString({ message: '정비 담당자는 문자열이어야 합니다.' })
+    // @Length(0, 100, { message: '정비 담당자는 100자 이하여야 합니다.' })
     maintananceBy?: string;
 
     @ApiProperty({
