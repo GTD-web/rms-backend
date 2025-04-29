@@ -97,6 +97,10 @@ export {
     CreateReservationSnapshotDto,
     UpdateReservationSnapshotDto,
     ReservationSnapshotResponseDto,
+    DateRangeResponseDto,
+    TimeInfoResponseDto,
+    TimeRangeResponseDto,
+    SelectedResourceResponseDto,
 } from './modules/reservation/application/dtos/reservation-snapshot.dto';
 
 // Reservation Query DTOs

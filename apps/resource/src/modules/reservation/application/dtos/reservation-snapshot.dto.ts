@@ -232,6 +232,44 @@ export class UpdateReservationSnapshotDto extends CreateReservationSnapshotDto {
     snapshotId: string;
 }
 
+export class DateRangeResponseDto {
+    @ApiProperty({ required: false })
+    from?: Date;
+
+    @ApiProperty({ required: false })
+    to?: Date;
+}
+
+export class TimeInfoResponseDto {
+    @ApiProperty({ required: false })
+    hour?: number;
+
+    @ApiProperty({ required: false })
+    minute?: number;
+}
+
+export class TimeRangeResponseDto {
+    @ApiProperty({ required: false })
+    am?: boolean;
+
+    @ApiProperty({ required: false })
+    pm?: boolean;
+}
+
+export class SelectedResourceResponseDto {
+    @ApiProperty({ required: false })
+    resourceId?: string;
+
+    @ApiProperty({ required: false })
+    resourceName?: string;
+
+    @ApiProperty({ required: false })
+    startDate?: Date;
+
+    @ApiProperty({ required: false })
+    endDate?: Date;
+}
+
 export class ReservationSnapshotResponseDto {
     @ApiProperty()
     snapshotId: string;
@@ -248,40 +286,23 @@ export class ReservationSnapshotResponseDto {
     @ApiProperty({ required: false, type: DroppableGroupDataDto })
     droppableGroupData?: DroppableGroupDataDto;
 
-    @ApiProperty({ required: false, type: Object })
-    dateRange?: {
-        from?: Date;
-        to?: Date;
-    };
+    @ApiProperty({ required: false, type: DateRangeResponseDto })
+    dateRange?: DateRangeResponseDto;
 
-    @ApiProperty({ required: false, type: Object })
-    startTime?: {
-        hour?: number;
-        minute?: number;
-    };
+    @ApiProperty({ required: false, type: TimeInfoResponseDto })
+    startTime?: TimeInfoResponseDto;
 
-    @ApiProperty({ required: false, type: Object })
-    endTime?: {
-        hour?: number;
-        minute?: number;
-    };
+    @ApiProperty({ required: false, type: TimeInfoResponseDto })
+    endTime?: TimeInfoResponseDto;
 
-    @ApiProperty({ required: false, type: Object })
-    timeRange?: {
-        am?: boolean;
-        pm?: boolean;
-    };
+    @ApiProperty({ required: false, type: TimeRangeResponseDto })
+    timeRange?: TimeRangeResponseDto;
 
     @ApiProperty({ required: false })
     timeUnit?: number;
 
-    @ApiProperty({ required: false, type: Object })
-    selectedResource?: {
-        resourceId?: string;
-        resourceName?: string;
-        startDate?: Date;
-        endDate?: Date;
-    };
+    @ApiProperty({ required: false, type: SelectedResourceResponseDto })
+    selectedResource?: SelectedResourceResponseDto;
 
     @ApiProperty({ required: false })
     title?: string;
