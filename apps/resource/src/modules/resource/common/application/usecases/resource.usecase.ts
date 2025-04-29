@@ -8,7 +8,7 @@ import {
 import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto } from '../dtos/resource-response.dto';
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
-import { IsNull, Not, LessThan, DataSource, In, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
+import { IsNull, Not, LessThan, DataSource, In, MoreThanOrEqual, LessThanOrEqual, Between, Raw } from 'typeorm';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     ReturnVehicleDto,
@@ -112,29 +112,39 @@ export class ResourceUsecase {
 
                 const resourcesWithReservations = await Promise.all(
                     resources.map(async (resource) => {
+                        const dateCondition = Raw(
+                            (alias) =>
+                                `(${alias} BETWEEN :startDateObj AND :endDateObj OR
+                              "Reservation"."endDate" BETWEEN :startDateObj AND :endDateObj OR
+                              (${alias} <= :startDateObj AND "Reservation"."endDate" >= :endDateObj))`,
+                            { startDateObj, endDateObj },
+                        );
+
                         const where = {
+                            startDate: dateCondition,
                             resourceId: resource.resourceId,
                             status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
                         };
-                        const whereArray = [
-                            {
-                                ...where,
-                                startDate: MoreThanOrEqual(startDateObj),
-                                endDate: LessThanOrEqual(endDateObj),
-                            },
-                            {
-                                ...where,
-                                startDate: Between(startDateObj, endDateObj),
-                            },
-                            {
-                                ...where,
-                                endDate: Between(startDateObj, endDateObj),
-                            },
-                        ];
+
+                        // const whereArray = [
+                        //     {
+                        //         ...where,
+                        //         startDate: MoreThanOrEqual(startDateObj),
+                        //         endDate: LessThanOrEqual(endDateObj),
+                        //     },
+                        //     {
+                        //         ...where,
+                        //         startDate: Between(startDateObj, endDateObj),
+                        //     },
+                        //     {
+                        //         ...where,
+                        //         endDate: Between(startDateObj, endDateObj),
+                        //     },
+                        // ];
 
                         const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
                             repositoryOptions: {
-                                where: whereArray,
+                                where: where,
                                 relations: ['participants'],
                                 order: {
                                     startDate: 'ASC',

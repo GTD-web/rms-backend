@@ -10485,28 +10485,17 @@ let ResourceUsecase = class ResourceUsecase {
                 },
             });
             const resourcesWithReservations = await Promise.all(resources.map(async (resource) => {
+                const dateCondition = (0, typeorm_1.Raw)((alias) => `(${alias} BETWEEN :startDateObj AND :endDateObj OR
+                              "Reservation"."endDate" BETWEEN :startDateObj AND :endDateObj OR
+                              (${alias} <= :startDateObj AND "Reservation"."endDate" >= :endDateObj))`, { startDateObj, endDateObj });
                 const where = {
+                    startDate: dateCondition,
                     resourceId: resource.resourceId,
                     status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
                 };
-                const whereArray = [
-                    {
-                        ...where,
-                        startDate: (0, typeorm_1.MoreThanOrEqual)(startDateObj),
-                        endDate: (0, typeorm_1.LessThanOrEqual)(endDateObj),
-                    },
-                    {
-                        ...where,
-                        startDate: (0, typeorm_1.Between)(startDateObj, endDateObj),
-                    },
-                    {
-                        ...where,
-                        endDate: (0, typeorm_1.Between)(startDateObj, endDateObj),
-                    },
-                ];
                 const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
                     repositoryOptions: {
-                        where: whereArray,
+                        where: where,
                         relations: ['participants'],
                         order: {
                             startDate: 'ASC',
