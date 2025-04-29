@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
-import { MaintenanceService } from '@resource/modules/resource/vehicle/application/services/maintenance.service';
 import { CreateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 import { UpdateMaintenanceDto } from '@resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
 import { MaintenanceResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-response.dto';
@@ -16,11 +15,11 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 @ApiTags('4. 차량 정비 이력 - 관리자 페이지')
 @Controller('v1/admin/maintenances')
 @ApiBearerAuth()
+@Roles(Role.SYSTEM_ADMIN)
 export class AdminMaintenanceController {
     constructor(private readonly maintenanceUsecase: MaintenanceUsecase) {}
-    // check api
+
     @Post()
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 이력 생성' })
     @ApiDataResponse({
         status: 201,
@@ -33,9 +32,8 @@ export class AdminMaintenanceController {
     ): Promise<MaintenanceResponseDto> {
         return this.maintenanceUsecase.save(user, createMaintenanceDto);
     }
-    // check api
+
     @Get('vehicle/:vehicleInfoId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 이력 목록 조회' })
     @ApiDataResponse({
         description: '정비 이력 목록을 조회했습니다.',
@@ -51,9 +49,8 @@ export class AdminMaintenanceController {
         const { page, limit } = query;
         return this.maintenanceUsecase.findAllByVehicleInfoId(user, vehicleInfoId, page, limit);
     }
-    // check api
+
     @Get(':maintenanceId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 상세 이력 조회' })
     @ApiDataResponse({
         description: '정비 상세 이력을 조회했습니다.',
@@ -65,9 +62,8 @@ export class AdminMaintenanceController {
     ): Promise<MaintenanceResponseDto> {
         return this.maintenanceUsecase.findOne(user, maintenanceId);
     }
-    // check api
+
     @Patch(':maintenanceId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 이력 수정' })
     @ApiDataResponse({
         description: '정비 이력이 수정되었습니다.',
@@ -80,9 +76,8 @@ export class AdminMaintenanceController {
     ): Promise<MaintenanceResponseDto> {
         return this.maintenanceUsecase.update(user, maintenanceId, updateMaintenanceDto);
     }
-    // check api
+
     @Delete(':maintenanceId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '정비 이력 삭제' })
     @ApiDataResponse({
         description: '정비 이력이 삭제되었습니다.',

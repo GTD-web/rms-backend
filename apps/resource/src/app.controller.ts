@@ -1,13 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { DateUtil } from '@libs/utils/date.util';
 import { Public } from '@libs/decorators/public.decorator';
-import { ApiExcludeController, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
-import {
-    ConsumableMaintenanceStats,
-    EmployeeReservationStats,
-    ResourceUsageStats,
-    VehicleMaintenanceHistory,
-} from '@libs/entities';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+
 import { AppService } from './app.service';
 import {
     ConsumableMaintenanceStatsFilterDto,
@@ -20,9 +15,12 @@ import {
     VehicleMaintenanceHistoryFilterDto,
     VehicleMaintenanceHistoryResponseDto,
 } from './app.dto';
+import { Roles } from '@libs/decorators/role.decorator';
+import { Role } from '@libs/enums/role-type.enum';
 
 @ApiTags('6. 통계 - 관리자 페이지')
 @Controller('v1/statistics')
+// @Roles(Role.SYSTEM_ADMIN)
 export class AppController {
     constructor(private readonly appService: AppService) {}
 

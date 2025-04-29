@@ -1,9 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
-import { ConsumableService } from '@resource/modules/resource/vehicle/application/services/consumable.service';
-import { CreateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
-import { UpdateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
 import { ConsumableResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-response.dto';
 import { ConsumableUsecase } from '@resource/modules/resource/vehicle/application/usecases/consumable.usecase';
 import { Role } from '@libs/enums/role-type.enum';
@@ -14,12 +11,11 @@ import { User as UserEntity } from '@libs/entities';
 @ApiTags('4. 차량 소모품 - 사용자 페이지')
 @Controller('v1/consumables')
 @ApiBearerAuth()
+@Roles(Role.RESOURCE_ADMIN)
 export class UserConsumableController {
     constructor(private readonly consumableUsecase: ConsumableUsecase) {}
 
-    // check api
     @Get(':consumableId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 상세 조회' })
     @ApiDataResponse({
         status: 200,

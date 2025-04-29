@@ -10,10 +10,13 @@ import { ResponseNotificationDto } from '@resource/modules/notification/applicat
 import { SendNotificationDto } from '@resource/modules/notification/application/dto/create-notification.dto';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { Roles } from '@libs/decorators/role.decorator';
+import { Role } from '@libs/enums/role-type.enum';
 
 @ApiTags('5. 알림 - 사용자 페이지')
 @Controller('v1/notifications')
 @ApiBearerAuth()
+@Roles(Role.USER)
 export class UserNotificationController {
     constructor(private readonly notificationUsecase: NotificationUsecase) {}
 

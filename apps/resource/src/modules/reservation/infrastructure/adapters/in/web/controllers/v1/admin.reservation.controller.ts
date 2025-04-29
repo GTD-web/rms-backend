@@ -1,27 +1,13 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Delete,
-    Body,
-    Param,
-    Patch,
-    Query,
-    ParseArrayPipe,
-    ForbiddenException,
-    BadRequestException,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
+import { Controller, Get, Body, Param, Patch, Query, ParseArrayPipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { CreateReservationDto } from '../../../../../../application/dtos/create-reservation.dto';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import {
-    CreateReservationResponseDto,
     ReservationResponseDto,
     UpdateReservationTimeDto,
     UpdateReservationParticipantsDto,
-    UpdateReservationCcReceipientDto,
     UpdateReservationTitleDto,
     UpdateReservationStatusDto,
 } from '@resource/dtos.index';
@@ -29,23 +15,20 @@ import { ReservationUsecase } from '../../../../../../application/usecases/reser
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import {
     ReservationWithResourceResponseDto,
     ReservationWithRelationsResponseDto,
 } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
 import { DateUtil } from '@libs/utils/date.util';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
-import { Public } from '@libs/decorators/public.decorator';
 
 @ApiTags('2. 예약 - 관리자 페이지')
 @Controller('v1/admin/reservations')
 @ApiBearerAuth()
+@Roles(Role.SYSTEM_ADMIN)
 export class AdminReservationController {
     constructor(private readonly reservationUsecase: ReservationUsecase) {}
 
-    // check api
     @Get()
     @ApiOperation({
         summary: '예약 리스트 조회 #관리자/예약관리',
@@ -87,9 +70,7 @@ export class AdminReservationController {
         return this.reservationUsecase.findReservationList(startDate, endDate, resourceType, resourceId, status);
     }
 
-    // check api - user, admin 구분 필요
     @Get(':reservationId')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 상세 조회 #사용자/예약상세페이지' })
     @ApiDataResponse({
         description: '예약 상세 조회 성공',
@@ -102,9 +83,7 @@ export class AdminReservationController {
         return this.reservationUsecase.findReservationDetail(user, reservationId);
     }
 
-    // check api - user, admin 구분 필요
     @Patch(':reservationId/title')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 제목 수정' })
     @ApiDataResponse({
         description: '예약 제목 수정 성공',
@@ -118,9 +97,8 @@ export class AdminReservationController {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateTitle(reservationId, updateDto);
     }
-    // check api - user, admin 구분 필요
+
     @Patch(':reservationId/time')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 시간 수정' })
     @ApiDataResponse({
         description: '예약 시간 수정 성공',
@@ -135,9 +113,7 @@ export class AdminReservationController {
         return this.reservationUsecase.updateTime(reservationId, updateDto);
     }
 
-    // check api
     @Patch(':reservationId/status')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' })
     @ApiDataResponse({
         description: '예약 상태 수정 성공',
@@ -150,21 +126,18 @@ export class AdminReservationController {
         return this.reservationUsecase.updateStatus(reservationId, updateDto);
     }
 
-     // check api - user, admin 구분 필요
-     @Patch(':reservationId/participants')
-     @Roles(Role.USER)
-     @ApiOperation({ summary: '예약 참가자 수정' })
-     @ApiDataResponse({
-         description: '예약 참가자 수정 성공',
-         type: ReservationResponseDto,
-     })
-     async updateParticipants(
-         @User() user: UserEntity,
-         @Param('reservationId') reservationId: string,
-         @Body() updateDto: UpdateReservationParticipantsDto,
-     ): Promise<ReservationResponseDto> {
-         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-         return this.reservationUsecase.updateParticipants(reservationId, updateDto);
-     }
-
+    @Patch(':reservationId/participants')
+    @ApiOperation({ summary: '예약 참가자 수정' })
+    @ApiDataResponse({
+        description: '예약 참가자 수정 성공',
+        type: ReservationResponseDto,
+    })
+    async updateParticipants(
+        @User() user: UserEntity,
+        @Param('reservationId') reservationId: string,
+        @Body() updateDto: UpdateReservationParticipantsDto,
+    ): Promise<ReservationResponseDto> {
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
+        return this.reservationUsecase.updateParticipants(reservationId, updateDto);
+    }
 }

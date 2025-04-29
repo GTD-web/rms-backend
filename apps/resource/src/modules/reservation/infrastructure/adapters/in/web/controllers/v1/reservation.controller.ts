@@ -1,17 +1,5 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Delete,
-    Body,
-    Param,
-    Patch,
-    Query,
-    ParseArrayPipe,
-    ForbiddenException,
-    BadRequestException,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
+import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { CreateReservationDto } from '../../../../../../application/dtos/create-reservation.dto';
@@ -21,9 +9,7 @@ import {
     ReservationResponseDto,
     UpdateReservationTimeDto,
     UpdateReservationParticipantsDto,
-    UpdateReservationCcReceipientDto,
     UpdateReservationTitleDto,
-    UpdateReservationStatusDto,
     ReservationSnapshotResponseDto,
     UpdateReservationSnapshotDto,
     ReturnVehicleDto,
@@ -32,24 +18,21 @@ import { ReservationUsecase } from '../../../../../../application/usecases/reser
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import {
-    ReservationWithResourceResponseDto,
     ReservationWithRelationsResponseDto,
     GroupedReservationResponseDto,
     GroupedReservationWithResourceResponseDto,
 } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
-import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
-import { Public } from '@libs/decorators/public.decorator';
 import { CreateReservationSnapshotDto } from '@resource/modules/reservation/application/dtos/reservation-snapshot.dto';
 import { ReservationSnapshotUsecase } from '@resource/modules/reservation/application/usecases/reservation-snapshot.usecase';
-import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 
 @ApiTags('2. 예약 - 사용자 페이지')
 @Controller('v1/reservations')
 @ApiBearerAuth()
+@Roles(Role.USER)
 export class UserReservationController {
     constructor(
         private readonly reservationUsecase: ReservationUsecase,
@@ -57,7 +40,6 @@ export class UserReservationController {
     ) {}
 
     @Post()
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 생성' })
     @ApiDataResponse({
         description: '예약 생성 성공',
@@ -71,7 +53,6 @@ export class UserReservationController {
     }
 
     @Get('me')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '내 예약 리스트 조회, 자원 타입별 ' })
     @ApiDataResponse({
         description: '내 예약 리스트 조회',
@@ -90,7 +71,6 @@ export class UserReservationController {
     }
 
     @Get('resource/:resourceId')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '자원별 예약 리스트 조회' })
     @ApiDataResponse({
         description: '자원별 예약 리스트 조회',
@@ -120,7 +100,6 @@ export class UserReservationController {
     }
 
     @Get('my-using')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '내 이용중인 예약 리스트 조회' })
     @ApiDataResponse({
         description: '내 이용중인 예약 리스트 조회',
@@ -133,7 +112,6 @@ export class UserReservationController {
     }
 
     @Get('my-upcoming')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '내 예약 리스트 조회' })
     @ApiDataResponse({
         description: '내 예약 리스트 조회',
@@ -151,7 +129,6 @@ export class UserReservationController {
     }
 
     @Get('my-upcoming-schedules')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '내 일정 리스트 조회 (예약자/참석자 모두 포함)' })
     @ApiDataResponse({
         description: '내 일정 리스트 조회 (예약자/참석자 모두 포함)',
@@ -169,7 +146,6 @@ export class UserReservationController {
     }
 
     @Get(':reservationId')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 상세 조회 #사용자/예약상세페이지' })
     @ApiDataResponse({
         description: '예약 상세 조회 성공',
@@ -183,7 +159,6 @@ export class UserReservationController {
     }
 
     @Patch(':reservationId/title')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 제목 수정' })
     @ApiDataResponse({
         description: '예약 제목 수정 성공',
@@ -199,7 +174,6 @@ export class UserReservationController {
     }
 
     @Patch(':reservationId/time')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 시간 수정' })
     @ApiDataResponse({
         description: '예약 시간 수정 성공',
@@ -215,7 +189,6 @@ export class UserReservationController {
     }
 
     @Patch(':reservationId/status/cancel')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 취소 #사용자/예약상세페이지' })
     @ApiDataResponse({
         description: '예약 상태 수정 성공',
@@ -231,7 +204,6 @@ export class UserReservationController {
     }
 
     @Patch(':reservationId/participants')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 참가자 수정' })
     @ApiDataResponse({
         description: '예약 참가자 수정 성공',
@@ -248,7 +220,6 @@ export class UserReservationController {
 
     // check api
     @Patch(':reservationId/return-vehicle')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })
     @ApiDataResponse({
         status: 200,

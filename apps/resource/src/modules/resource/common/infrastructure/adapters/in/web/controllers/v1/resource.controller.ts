@@ -1,25 +1,14 @@
-import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Body, Param, Patch, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
-import {
-    CreateResourceInfoDto,
-    UpdateResourceInfoDto,
-    ResourceResponseDto,
-    ResourceAvailabilityDto,
-} from '@resource/dtos.index';
+import { ResourceResponseDto, ResourceAvailabilityDto } from '@resource/dtos.index';
 import { ResourceQueryDto } from '@resource/modules/resource/common/application/dtos/resource-query.dto';
 import { Role } from '@libs/enums/role-type.enum';
 import { Roles } from '@libs/decorators/role.decorator';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceUsecase } from '@resource/modules/resource/common/application/usecases/resource.usecase';
-import {
-    ResourceGroupWithResourcesAndReservationsResponseDto,
-    ResourceWithReservationsResponseDto,
-} from '@resource/modules/resource/common/application/dtos/resource-response.dto';
-import {
-    ReturnVehicleDto,
-    UpdateResourceOrdersDto,
-} from '@resource/modules/resource/common/application/dtos/update-resource.dto';
+import { ResourceGroupWithResourcesAndReservationsResponseDto } from '@resource/modules/resource/common/application/dtos/resource-response.dto';
+import { ReturnVehicleDto } from '@resource/modules/resource/common/application/dtos/update-resource.dto';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 import { CheckAvailabilityQueryDto } from '@resource/modules/resource/common/application/dtos/check-availability.dto';
@@ -28,12 +17,11 @@ import { CheckAvailabilityResponseDto } from '@resource/modules/resource/common/
 @ApiTags('3. 자원 - 사용자 페이지')
 @Controller('v1/resources')
 @ApiBearerAuth()
+@Roles(Role.USER)
 export class UserResourceController {
     constructor(private readonly resourceUsecase: ResourceUsecase) {}
 
-    // check api
     @Get('reservations')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '자원 별 예약 목록 조회 #사용자/자원예약/리스트 #사용자/세부예약내역' })
     @ApiDataResponse({
         status: 200,
@@ -54,9 +42,7 @@ export class UserResourceController {
         return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate, isMine);
     }
 
-    // check api - url
     @Get('availability')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지' })
     @ApiDataResponse({
         description: '예약 가능 시간 조회 성공',
@@ -81,7 +67,6 @@ export class UserResourceController {
     }
 
     @Get('check-availability')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '예약 시간 가용성 확인' })
     @ApiDataResponse({
         description: '예약 시간 가용성 확인 결과',
@@ -100,7 +85,6 @@ export class UserResourceController {
     }
 
     @Get(':resourceId')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '자원 상세 조회 ' })
     @ApiDataResponse({
         status: 200,
@@ -111,9 +95,7 @@ export class UserResourceController {
         return this.resourceUsecase.findResourceDetailForUser(user.employeeId, resourceId);
     }
 
-    // check api
     @Patch(':resourceId/return-vehicle')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })
     @ApiDataResponse({
         status: 200,

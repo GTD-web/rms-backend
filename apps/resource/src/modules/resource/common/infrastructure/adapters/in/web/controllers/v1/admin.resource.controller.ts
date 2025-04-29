@@ -1,33 +1,21 @@
 import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
-import {
-    CreateResourceInfoDto,
-    UpdateResourceInfoDto,
-    ResourceResponseDto,
-    ResourceAvailabilityDto,
-} from '@resource/dtos.index';
-import { ResourceQueryDto } from '@resource/modules/resource/common/application/dtos/resource-query.dto';
+import { CreateResourceInfoDto, UpdateResourceInfoDto, ResourceResponseDto } from '@resource/dtos.index';
 import { Role } from '@libs/enums/role-type.enum';
 import { Roles } from '@libs/decorators/role.decorator';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceUsecase } from '@resource/modules/resource/common/application/usecases/resource.usecase';
-import { ResourceGroupWithResourcesAndReservationsResponseDto } from '@resource/modules/resource/common/application/dtos/resource-response.dto';
-import {
-    ReturnVehicleDto,
-    UpdateResourceOrdersDto,
-} from '@resource/modules/resource/common/application/dtos/update-resource.dto';
-import { User } from '@libs/decorators/user.decorator';
-import { User as UserEntity } from '@libs/entities';
+import { UpdateResourceOrdersDto } from '@resource/modules/resource/common/application/dtos/update-resource.dto';
 
 @ApiTags('3. 자원 - 관리자 페이지')
 @Controller('v1/admin/resources')
 @ApiBearerAuth()
+@Roles(Role.SYSTEM_ADMIN)
 export class AdminResourceController {
     constructor(private readonly resourceUsecase: ResourceUsecase) {}
 
     @Post()
-    @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 생성 #관리자/자원관리/생성' })
     @ApiDataResponse({
         status: 201,
@@ -38,7 +26,6 @@ export class AdminResourceController {
     }
 
     @Get()
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 목록 조회 #관리자/자원관리/자원리스트' })
     @ApiDataResponse({
         status: 200,
@@ -50,9 +37,7 @@ export class AdminResourceController {
         return this.resourceUsecase.findResources(type);
     }
 
-
     @Get(':resourceId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 상세 조회 #관리자/자원관리/상세' })
     @ApiDataResponse({
         status: 200,
@@ -64,7 +49,6 @@ export class AdminResourceController {
     }
 
     @Patch('order')
-    @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 순서 변경' })
     @ApiDataResponse({
         status: 200,
@@ -75,7 +59,6 @@ export class AdminResourceController {
     }
 
     @Patch(':resourceId')
-    @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 수정' })
     @ApiDataResponse({
         status: 200,
@@ -90,7 +73,6 @@ export class AdminResourceController {
     }
 
     @Patch(':resourceId/availability')
-    @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 예약 가능 상태 수정' })
     @ApiDataResponse({
         status: 200,
@@ -105,7 +87,6 @@ export class AdminResourceController {
     }
 
     @Delete(':resourceId')
-    @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 삭제' })
     @ApiDataResponse({
         status: 200,

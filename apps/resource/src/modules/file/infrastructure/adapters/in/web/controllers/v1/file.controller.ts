@@ -5,11 +5,13 @@ import { ApiTags, ApiConsumes, ApiBody, ApiBearerAuth, ApiOperation, ApiResponse
 import { Public } from '@libs/decorators/public.decorator';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { FileResponseDto } from '@resource/modules/file/application/dtos/file-response.dto';
+import { Roles } from '@libs/decorators/role.decorator';
+import { Role } from '@libs/enums/role-type.enum';
 
 @ApiTags('0. 파일 - 공통 페이지')
 @Controller('v1/files')
 @ApiBearerAuth()
-@Public()
+@Roles(Role.USER)
 export class CommonFileController {
     constructor(private readonly fileService: FileService) {}
 

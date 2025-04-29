@@ -3825,9 +3825,10 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
 const file_service_1 = __webpack_require__(/*! @resource/modules/file/application/services/file.service */ "./apps/resource/src/modules/file/application/services/file.service.ts");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
 const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
 const file_response_dto_1 = __webpack_require__(/*! @resource/modules/file/application/dtos/file-response.dto */ "./apps/resource/src/modules/file/application/dtos/file-response.dto.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let CommonFileController = class CommonFileController {
     constructor(fileService) {
         this.fileService = fileService;
@@ -3875,7 +3876,7 @@ exports.CommonFileController = CommonFileController = __decorate([
     (0, swagger_1.ApiTags)('0. 파일 - 공통 페이지'),
     (0, common_1.Controller)('v1/files'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, public_decorator_1.Public)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _a : Object])
 ], CommonFileController);
 
@@ -5226,6 +5227,8 @@ const push_subscription_dto_1 = __webpack_require__(/*! @resource/modules/notifi
 const response_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/response-notification.dto */ "./apps/resource/src/modules/notification/application/dto/response-notification.dto.ts");
 const create_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/create-notification.dto */ "./apps/resource/src/modules/notification/application/dto/create-notification.dto.ts");
 const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let UserNotificationController = class UserNotificationController {
     constructor(notificationUsecase) {
         this.notificationUsecase = notificationUsecase;
@@ -5307,6 +5310,7 @@ exports.UserNotificationController = UserNotificationController = __decorate([
     (0, swagger_1.ApiTags)('5. 알림 - 사용자 페이지'),
     (0, common_1.Controller)('v1/notifications'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof notification_usecase_1.NotificationUsecase !== "undefined" && notification_usecase_1.NotificationUsecase) === "function" ? _a : Object])
 ], UserNotificationController);
 
@@ -7984,7 +7988,6 @@ __decorate([
 ], AdminReservationController.prototype, "findReservationList", null);
 __decorate([
     (0, common_1.Get)(':reservationId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 상세 조회 성공',
@@ -7998,7 +8001,6 @@ __decorate([
 ], AdminReservationController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/title'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 제목 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 제목 수정 성공',
@@ -8013,7 +8015,6 @@ __decorate([
 ], AdminReservationController.prototype, "updateTitle", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/time'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 시간 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 시간 수정 성공',
@@ -8028,7 +8029,6 @@ __decorate([
 ], AdminReservationController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/status'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 상태 수정 성공',
@@ -8042,7 +8042,6 @@ __decorate([
 ], AdminReservationController.prototype, "updateStatus", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/participants'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 참가자 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 참가자 수정 성공',
@@ -8059,6 +8058,7 @@ exports.AdminReservationController = AdminReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 - 관리자 페이지'),
     (0, common_1.Controller)('v1/admin/reservations'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof reservation_usecase_1.ReservationUsecase !== "undefined" && reservation_usecase_1.ReservationUsecase) === "function" ? _a : Object])
 ], AdminReservationController);
 
@@ -8167,7 +8167,6 @@ let UserReservationController = class UserReservationController {
 exports.UserReservationController = UserReservationController;
 __decorate([
     (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 생성' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 생성 성공',
@@ -8181,7 +8180,6 @@ __decorate([
 ], UserReservationController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)('me'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회, 자원 타입별 ' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '내 예약 리스트 조회',
@@ -8199,7 +8197,6 @@ __decorate([
 ], UserReservationController.prototype, "findMyReservationList", null);
 __decorate([
     (0, common_1.Get)('resource/:resourceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '자원별 예약 리스트 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '자원별 예약 리스트 조회',
@@ -8220,7 +8217,6 @@ __decorate([
 ], UserReservationController.prototype, "findResourceReservationList", null);
 __decorate([
     (0, common_1.Get)('my-using'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '내 이용중인 예약 리스트 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '내 이용중인 예약 리스트 조회',
@@ -8233,7 +8229,6 @@ __decorate([
 ], UserReservationController.prototype, "findMyUsingReservationList", null);
 __decorate([
     (0, common_1.Get)('my-upcoming'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '내 예약 리스트 조회',
@@ -8251,7 +8246,6 @@ __decorate([
 ], UserReservationController.prototype, "findMyUpcomingReservationList", null);
 __decorate([
     (0, common_1.Get)('my-upcoming-schedules'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '내 일정 리스트 조회 (예약자/참석자 모두 포함)' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '내 일정 리스트 조회 (예약자/참석자 모두 포함)',
@@ -8269,7 +8263,6 @@ __decorate([
 ], UserReservationController.prototype, "findMyUpcomingSchedules", null);
 __decorate([
     (0, common_1.Get)(':reservationId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 상세 조회 성공',
@@ -8283,7 +8276,6 @@ __decorate([
 ], UserReservationController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/title'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 제목 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 제목 수정 성공',
@@ -8298,7 +8290,6 @@ __decorate([
 ], UserReservationController.prototype, "updateTitle", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/time'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 시간 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 시간 수정 성공',
@@ -8313,7 +8304,6 @@ __decorate([
 ], UserReservationController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/status/cancel'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 취소 #사용자/예약상세페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 상태 수정 성공',
@@ -8327,7 +8317,6 @@ __decorate([
 ], UserReservationController.prototype, "updateStatusCancel", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/participants'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 참가자 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 참가자 수정 성공',
@@ -8342,7 +8331,6 @@ __decorate([
 ], UserReservationController.prototype, "updateParticipants", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/return-vehicle'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -8406,6 +8394,7 @@ exports.UserReservationController = UserReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 - 사용자 페이지'),
     (0, common_1.Controller)('v1/reservations'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof reservation_usecase_1.ReservationUsecase !== "undefined" && reservation_usecase_1.ReservationUsecase) === "function" ? _a : Object, typeof (_b = typeof reservation_snapshot_usecase_1.ReservationSnapshotUsecase !== "undefined" && reservation_snapshot_usecase_1.ReservationSnapshotUsecase) === "function" ? _b : Object])
 ], UserReservationController);
 
@@ -11618,7 +11607,6 @@ let AdminResourceGroupController = class AdminResourceGroupController {
 exports.AdminResourceGroupController = AdminResourceGroupController;
 __decorate([
     (0, common_1.Get)('parents'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '상위그룹 목록 조회 #사용자/자원구분/모달' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '상위 자원 그룹 목록을 조회했습니다.',
@@ -11630,7 +11618,6 @@ __decorate([
 ], AdminResourceGroupController.prototype, "findParentResourceGroups", null);
 __decorate([
     (0, common_1.Get)('resources'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '상위그룹-하위그룹-자원 목록 조회 #사용자/자원선택/모달 #관리자/자원관리/자원목록' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '자원 그룹들과 각 그룹에 속한 자원 목록을 조회했습니다.',
@@ -11644,7 +11631,6 @@ __decorate([
 ], AdminResourceGroupController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 생성' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 201,
@@ -11658,7 +11644,6 @@ __decorate([
 ], AdminResourceGroupController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(':resourceGroupId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '자원 그룹이 수정되었습니다.',
@@ -11672,7 +11657,6 @@ __decorate([
 ], AdminResourceGroupController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)('order'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 순서 변경' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -11685,7 +11669,6 @@ __decorate([
 ], AdminResourceGroupController.prototype, "updateOrder", null);
 __decorate([
     (0, common_1.Delete)(':resourceGroupId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '자원 그룹이 삭제되었습니다.',
@@ -11699,6 +11682,7 @@ exports.AdminResourceGroupController = AdminResourceGroupController = __decorate
     (0, swagger_1.ApiTags)('3. 자원 그룹 - 관리자 페이지'),
     (0, common_1.Controller)('v1/admin/resource-groups'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_group_usecase_1.ResourceGroupUsecase !== "undefined" && resource_group_usecase_1.ResourceGroupUsecase) === "function" ? _a : Object])
 ], AdminResourceGroupController);
 
@@ -11765,7 +11749,6 @@ let AdminResourceController = class AdminResourceController {
 exports.AdminResourceController = AdminResourceController;
 __decorate([
     (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 생성 #관리자/자원관리/생성' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 201,
@@ -11778,7 +11761,6 @@ __decorate([
 ], AdminResourceController.prototype, "createWithInfos", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 목록 조회 #관리자/자원관리/자원리스트' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -11793,7 +11775,6 @@ __decorate([
 ], AdminResourceController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':resourceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 상세 조회 #관리자/자원관리/상세' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -11807,7 +11788,6 @@ __decorate([
 ], AdminResourceController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)('order'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 순서 변경' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -11820,7 +11800,6 @@ __decorate([
 ], AdminResourceController.prototype, "reorder", null);
 __decorate([
     (0, common_1.Patch)(':resourceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -11835,7 +11814,6 @@ __decorate([
 ], AdminResourceController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':resourceId/availability'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 예약 가능 상태 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -11850,7 +11828,6 @@ __decorate([
 ], AdminResourceController.prototype, "updateAvailability", null);
 __decorate([
     (0, common_1.Delete)(':resourceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -11865,6 +11842,7 @@ exports.AdminResourceController = AdminResourceController = __decorate([
     (0, swagger_1.ApiTags)('3. 자원 - 관리자 페이지'),
     (0, common_1.Controller)('v1/admin/resources'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_usecase_1.ResourceUsecase !== "undefined" && resource_usecase_1.ResourceUsecase) === "function" ? _a : Object])
 ], AdminResourceController);
 
@@ -11915,7 +11893,6 @@ let UserResourceGroupController = class UserResourceGroupController {
 exports.UserResourceGroupController = UserResourceGroupController;
 __decorate([
     (0, common_1.Get)('parents'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '상위그룹 목록 조회 #사용자/자원구분/모달' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '상위 자원 그룹 목록을 조회했습니다.',
@@ -11927,7 +11904,6 @@ __decorate([
 ], UserResourceGroupController.prototype, "findParentResourceGroups", null);
 __decorate([
     (0, common_1.Get)('resources'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '상위그룹-하위그룹-자원 목록 조회 #사용자/자원선택/모달 #관리자/자원관리/자원목록' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '자원 그룹들과 각 그룹에 속한 자원 목록을 조회했습니다.',
@@ -11943,6 +11919,7 @@ exports.UserResourceGroupController = UserResourceGroupController = __decorate([
     (0, swagger_1.ApiTags)('3. 자원 그룹 - 사용자 페이지'),
     (0, common_1.Controller)('v1/resource-groups'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_group_usecase_1.ResourceGroupUsecase !== "undefined" && resource_group_usecase_1.ResourceGroupUsecase) === "function" ? _a : Object])
 ], UserResourceGroupController);
 
@@ -12012,7 +11989,6 @@ let UserResourceController = class UserResourceController {
 exports.UserResourceController = UserResourceController;
 __decorate([
     (0, common_1.Get)('reservations'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '자원 별 예약 목록 조회 #사용자/자원예약/리스트 #사용자/세부예약내역' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -12034,7 +12010,6 @@ __decorate([
 ], UserResourceController.prototype, "findResourcesByTypeAndDateWithReservations", null);
 __decorate([
     (0, common_1.Get)('availability'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 가능 시간 조회 성공',
@@ -12061,7 +12036,6 @@ __decorate([
 ], UserResourceController.prototype, "findAvailableTime", null);
 __decorate([
     (0, common_1.Get)('check-availability'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '예약 시간 가용성 확인' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '예약 시간 가용성 확인 결과',
@@ -12074,7 +12048,6 @@ __decorate([
 ], UserResourceController.prototype, "checkAvailability", null);
 __decorate([
     (0, common_1.Get)(':resourceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '자원 상세 조회 ' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -12089,7 +12062,6 @@ __decorate([
 ], UserResourceController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':resourceId/return-vehicle'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -12106,6 +12078,7 @@ exports.UserResourceController = UserResourceController = __decorate([
     (0, swagger_1.ApiTags)('3. 자원 - 사용자 페이지'),
     (0, common_1.Controller)('v1/resources'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_usecase_1.ResourceUsecase !== "undefined" && resource_usecase_1.ResourceUsecase) === "function" ? _a : Object])
 ], UserResourceController);
 
@@ -14432,7 +14405,6 @@ let AdminConsumableController = class AdminConsumableController {
 exports.AdminConsumableController = AdminConsumableController;
 __decorate([
     (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 등록' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 201,
@@ -14447,7 +14419,6 @@ __decorate([
 ], AdminConsumableController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)('vehicle/:vehicleInfoId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -14462,7 +14433,6 @@ __decorate([
 ], AdminConsumableController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':consumableId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 상세 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -14477,7 +14447,6 @@ __decorate([
 ], AdminConsumableController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':consumableId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -14493,7 +14462,6 @@ __decorate([
 ], AdminConsumableController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':consumableId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -14509,6 +14477,7 @@ exports.AdminConsumableController = AdminConsumableController = __decorate([
     (0, swagger_1.ApiTags)('4. 차량 소모품 - 관리자 페이지'),
     (0, common_1.Controller)('v1/admin/consumables'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof consumable_usecase_1.ConsumableUsecase !== "undefined" && consumable_usecase_1.ConsumableUsecase) === "function" ? _a : Object])
 ], AdminConsumableController);
 
@@ -14573,7 +14542,6 @@ let AdminMaintenanceController = class AdminMaintenanceController {
 exports.AdminMaintenanceController = AdminMaintenanceController;
 __decorate([
     (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 생성' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 201,
@@ -14588,7 +14556,6 @@ __decorate([
 ], AdminMaintenanceController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)('vehicle/:vehicleInfoId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '정비 이력 목록을 조회했습니다.',
@@ -14605,7 +14572,6 @@ __decorate([
 ], AdminMaintenanceController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':maintenanceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 상세 이력 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '정비 상세 이력을 조회했습니다.',
@@ -14619,7 +14585,6 @@ __decorate([
 ], AdminMaintenanceController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':maintenanceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '정비 이력이 수정되었습니다.',
@@ -14634,7 +14599,6 @@ __decorate([
 ], AdminMaintenanceController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':maintenanceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '정비 이력이 삭제되었습니다.',
@@ -14649,6 +14613,7 @@ exports.AdminMaintenanceController = AdminMaintenanceController = __decorate([
     (0, swagger_1.ApiTags)('4. 차량 정비 이력 - 관리자 페이지'),
     (0, common_1.Controller)('v1/admin/maintenances'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof maintenance_usecase_1.MaintenanceUsecase !== "undefined" && maintenance_usecase_1.MaintenanceUsecase) === "function" ? _a : Object])
 ], AdminMaintenanceController);
 
@@ -14683,6 +14648,8 @@ const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-r
 const update_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/update-vehicle-info.dto.ts");
 const vehicle_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/vehicle-response.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/vehicle-response.dto.ts");
 const vehicle_info_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/vehicle-info.usecase.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let AdminVehicleInfoController = class AdminVehicleInfoController {
     constructor(vehicleInfoUsecase) {
         this.vehicleInfoUsecase = vehicleInfoUsecase;
@@ -14726,6 +14693,7 @@ exports.AdminVehicleInfoController = AdminVehicleInfoController = __decorate([
     (0, swagger_1.ApiTags)('4. 차량 정보 - 관리자 페이지'),
     (0, common_1.Controller)('v1/admin/vehicle-info'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _a : Object])
 ], AdminVehicleInfoController);
 
@@ -14794,7 +14762,6 @@ let UserConsumableController = class UserConsumableController {
 exports.UserConsumableController = UserConsumableController;
 __decorate([
     (0, common_1.Get)(':consumableId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '소모품 상세 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -14811,6 +14778,7 @@ exports.UserConsumableController = UserConsumableController = __decorate([
     (0, swagger_1.ApiTags)('4. 차량 소모품 - 사용자 페이지'),
     (0, common_1.Controller)('v1/consumables'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof consumable_usecase_1.ConsumableUsecase !== "undefined" && consumable_usecase_1.ConsumableUsecase) === "function" ? _a : Object])
 ], UserConsumableController);
 
@@ -14860,7 +14828,6 @@ let UserMaintenanceController = class UserMaintenanceController {
 exports.UserMaintenanceController = UserMaintenanceController;
 __decorate([
     (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '정비 이력 생성' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 201,
@@ -14877,6 +14844,7 @@ exports.UserMaintenanceController = UserMaintenanceController = __decorate([
     (0, swagger_1.ApiTags)('4. 차량 정비 이력 - 사용자 페이지'),
     (0, common_1.Controller)('v1/maintenances'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof maintenance_usecase_1.MaintenanceUsecase !== "undefined" && maintenance_usecase_1.MaintenanceUsecase) === "function" ? _a : Object])
 ], UserMaintenanceController);
 

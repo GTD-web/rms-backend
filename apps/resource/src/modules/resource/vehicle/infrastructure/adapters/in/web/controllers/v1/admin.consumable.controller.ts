@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
-import { ConsumableService } from '@resource/modules/resource/vehicle/application/services/consumable.service';
 import { CreateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 import { UpdateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto';
 import { ConsumableResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-response.dto';
@@ -14,11 +13,11 @@ import { User as UserEntity } from '@libs/entities';
 @ApiTags('4. 차량 소모품 - 관리자 페이지')
 @Controller('v1/admin/consumables')
 @ApiBearerAuth()
+@Roles(Role.SYSTEM_ADMIN)
 export class AdminConsumableController {
     constructor(private readonly consumableUsecase: ConsumableUsecase) {}
-    // check api
+
     @Post()
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 등록' })
     @ApiDataResponse({
         status: 201,
@@ -32,9 +31,8 @@ export class AdminConsumableController {
         const consumable = await this.consumableUsecase.save(user, createConsumableDto);
         return consumable;
     }
-    // check api
+
     @Get('vehicle/:vehicleInfoId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 목록 조회' })
     @ApiDataResponse({
         status: 200,
@@ -58,9 +56,8 @@ export class AdminConsumableController {
             notifyReplacementCycle: consumable.notifyReplacementCycle,
         }));
     }
-    // check api
+
     @Get(':consumableId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 상세 조회' })
     @ApiDataResponse({
         status: 200,
@@ -93,9 +90,8 @@ export class AdminConsumableController {
             })),
         };
     }
-    // check api
+
     @Patch(':consumableId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 수정' })
     @ApiDataResponse({
         status: 200,
@@ -116,9 +112,8 @@ export class AdminConsumableController {
             notifyReplacementCycle: consumable.notifyReplacementCycle,
         };
     }
-    // check api
+
     @Delete(':consumableId')
-    @Roles(Role.RESOURCE_ADMIN, Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '소모품 삭제' })
     @ApiDataResponse({
         status: 200,
