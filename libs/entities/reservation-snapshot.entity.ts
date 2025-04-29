@@ -22,7 +22,7 @@ export class ReservationSnapshot {
     @Column()
     userId: string;
 
-    @Column()
+    @Column({ nullable: true })
     step: 'groups' | 'date-time' | 'resources' | 'info';
 
     @Column('jsonb', { nullable: true })
@@ -48,19 +48,19 @@ export class ReservationSnapshot {
     @Column({ type: 'timestamp with time zone', nullable: true })
     endTime: Date;
 
-    @Column()
+    @Column({ nullable: true })
     am: boolean;
 
-    @Column()
+    @Column({ nullable: true })
     pm: boolean;
 
-    @Column()
+    @Column({ nullable: true })
     timeUnit: number;
 
-    @Column()
+    @Column({ nullable: true })
     resourceId: string;
 
-    @Column()
+    @Column({ nullable: true })
     resourceName: string;
 
     @Column({ type: 'timestamp with time zone', nullable: true })

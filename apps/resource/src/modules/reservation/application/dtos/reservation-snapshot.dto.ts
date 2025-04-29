@@ -177,8 +177,8 @@ export class ReservationSnapshotResponseDto {
     @ApiProperty()
     userId: string;
 
-    @ApiProperty({ enum: ['groups', 'date-time', 'resources', 'info'] })
-    step: 'groups' | 'date-time' | 'resources' | 'info';
+    @ApiProperty({ enum: ['groups', 'date-time', 'resources', 'info'], required: false })
+    step?: 'groups' | 'date-time' | 'resources' | 'info';
 
     @ApiProperty({ required: false, type: DroppableGroupDataDto })
     droppableGroupData?: DroppableGroupDataDto;
@@ -195,19 +195,19 @@ export class ReservationSnapshotResponseDto {
     @ApiProperty({ required: false })
     endTime?: Date;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     am: boolean;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     pm: boolean;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     timeUnit: number;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     resourceId: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     resourceName: string;
 
     @ApiProperty({ required: false })

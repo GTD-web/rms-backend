@@ -6188,7 +6188,7 @@ __decorate([
     __metadata("design:type", String)
 ], ReservationSnapshotResponseDto.prototype, "userId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: ['groups', 'date-time', 'resources', 'info'] }),
+    (0, swagger_1.ApiProperty)({ enum: ['groups', 'date-time', 'resources', 'info'], required: false }),
     __metadata("design:type", String)
 ], ReservationSnapshotResponseDto.prototype, "step", void 0);
 __decorate([
@@ -6212,23 +6212,23 @@ __decorate([
     __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], ReservationSnapshotResponseDto.prototype, "endTime", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Boolean)
 ], ReservationSnapshotResponseDto.prototype, "am", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Boolean)
 ], ReservationSnapshotResponseDto.prototype, "pm", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Number)
 ], ReservationSnapshotResponseDto.prototype, "timeUnit", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", String)
 ], ReservationSnapshotResponseDto.prototype, "resourceId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", String)
 ], ReservationSnapshotResponseDto.prototype, "resourceName", void 0);
 __decorate([
@@ -16906,7 +16906,7 @@ __decorate([
     __metadata("design:type", String)
 ], ReservationSnapshot.prototype, "userId", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], ReservationSnapshot.prototype, "step", void 0);
 __decorate([
@@ -16930,23 +16930,23 @@ __decorate([
     __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], ReservationSnapshot.prototype, "endTime", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Boolean)
 ], ReservationSnapshot.prototype, "am", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Boolean)
 ], ReservationSnapshot.prototype, "pm", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Number)
 ], ReservationSnapshot.prototype, "timeUnit", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], ReservationSnapshot.prototype, "resourceId", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], ReservationSnapshot.prototype, "resourceName", void 0);
 __decorate([
