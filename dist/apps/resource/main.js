@@ -462,7 +462,7 @@ __decorate([
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ReturnVehicleDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = void 0;
+exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login.dto */ "./apps/resource/src/modules/auth/application/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login-response.dto */ "./apps/resource/src/modules/auth/application/dto/login-response.dto.ts");
@@ -544,6 +544,10 @@ Object.defineProperty(exports, "AttendeeDto", ({ enumerable: true, get: function
 Object.defineProperty(exports, "DroppableGroupItemDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.DroppableGroupItemDto; } }));
 Object.defineProperty(exports, "DroppableGroupDataDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.DroppableGroupDataDto; } }));
 Object.defineProperty(exports, "ReminderTimeDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.ReminderTimeDto; } }));
+Object.defineProperty(exports, "DateRangeDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.DateRangeDto; } }));
+Object.defineProperty(exports, "TimeInfoDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.TimeInfoDto; } }));
+Object.defineProperty(exports, "TimeRangeDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.TimeRangeDto; } }));
+Object.defineProperty(exports, "SelectedResourceDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.SelectedResourceDto; } }));
 Object.defineProperty(exports, "CreateReservationSnapshotDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.CreateReservationSnapshotDto; } }));
 Object.defineProperty(exports, "UpdateReservationSnapshotDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.UpdateReservationSnapshotDto; } }));
 Object.defineProperty(exports, "ReservationSnapshotResponseDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.ReservationSnapshotResponseDto; } }));
@@ -5974,11 +5978,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = void 0;
+exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.ReminderTimeDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
 class AttendeeDto {
 }
 exports.AttendeeDto = AttendeeDto;
@@ -6042,6 +6047,78 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], DroppableGroupDataDto.prototype, "items", void 0);
+class DateRangeDto {
+}
+exports.DateRangeDto = DateRangeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DateRangeDto.prototype, "from", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DateRangeDto.prototype, "to", void 0);
+class TimeInfoDto {
+}
+exports.TimeInfoDto = TimeInfoDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], TimeInfoDto.prototype, "hour", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], TimeInfoDto.prototype, "minute", void 0);
+class TimeRangeDto {
+}
+exports.TimeRangeDto = TimeRangeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TimeRangeDto.prototype, "am", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TimeRangeDto.prototype, "pm", void 0);
+class SelectedResourceDto {
+}
+exports.SelectedResourceDto = SelectedResourceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SelectedResourceDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SelectedResourceDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SelectedResourceDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SelectedResourceDto.prototype, "endDate", void 0);
 class ReminderTimeDto {
 }
 exports.ReminderTimeDto = ReminderTimeDto;
@@ -6073,47 +6150,49 @@ __decorate([
     __metadata("design:type", String)
 ], CreateReservationSnapshotDto.prototype, "step", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateReservationSnapshotDto.prototype, "resourceType", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: DroppableGroupDataDto }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsObject)(),
     __metadata("design:type", DroppableGroupDataDto)
 ], CreateReservationSnapshotDto.prototype, "droppableGroupData", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, swagger_1.ApiProperty)({ required: false, type: DateRangeDto }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
-], CreateReservationSnapshotDto.prototype, "startDate", void 0);
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => DateRangeDto),
+    __metadata("design:type", DateRangeDto)
+], CreateReservationSnapshotDto.prototype, "dateRange", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, swagger_1.ApiProperty)({ required: false, type: TimeInfoDto }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
-], CreateReservationSnapshotDto.prototype, "endDate", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => TimeInfoDto),
+    __metadata("design:type", TimeInfoDto)
 ], CreateReservationSnapshotDto.prototype, "startTime", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, swagger_1.ApiProperty)({ required: false, type: TimeInfoDto }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => TimeInfoDto),
+    __metadata("design:type", TimeInfoDto)
 ], CreateReservationSnapshotDto.prototype, "endTime", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, swagger_1.ApiProperty)({ required: false, type: TimeRangeDto }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], CreateReservationSnapshotDto.prototype, "am", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], CreateReservationSnapshotDto.prototype, "pm", void 0);
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => TimeRangeDto),
+    __metadata("design:type", TimeRangeDto)
+], CreateReservationSnapshotDto.prototype, "timeRange", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -6121,29 +6200,13 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateReservationSnapshotDto.prototype, "timeUnit", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, swagger_1.ApiProperty)({ required: false, type: SelectedResourceDto }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
-    __metadata("design:type", String)
-], CreateReservationSnapshotDto.prototype, "resourceId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateReservationSnapshotDto.prototype, "resourceName", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
-], CreateReservationSnapshotDto.prototype, "selectedStartDate", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
-], CreateReservationSnapshotDto.prototype, "selectedEndDate", void 0);
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => SelectedResourceDto),
+    __metadata("design:type", SelectedResourceDto)
+], CreateReservationSnapshotDto.prototype, "selectedResource", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -6204,53 +6267,37 @@ __decorate([
     __metadata("design:type", String)
 ], ReservationSnapshotResponseDto.prototype, "step", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationSnapshotResponseDto.prototype, "resourceType", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: DroppableGroupDataDto }),
     __metadata("design:type", DroppableGroupDataDto)
 ], ReservationSnapshotResponseDto.prototype, "droppableGroupData", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
-], ReservationSnapshotResponseDto.prototype, "startDate", void 0);
+    (0, swagger_1.ApiProperty)({ required: false, type: Object }),
+    __metadata("design:type", Object)
+], ReservationSnapshotResponseDto.prototype, "dateRange", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
-], ReservationSnapshotResponseDto.prototype, "endDate", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    (0, swagger_1.ApiProperty)({ required: false, type: Object }),
+    __metadata("design:type", Object)
 ], ReservationSnapshotResponseDto.prototype, "startTime", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    (0, swagger_1.ApiProperty)({ required: false, type: Object }),
+    __metadata("design:type", Object)
 ], ReservationSnapshotResponseDto.prototype, "endTime", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", Boolean)
-], ReservationSnapshotResponseDto.prototype, "am", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", Boolean)
-], ReservationSnapshotResponseDto.prototype, "pm", void 0);
+    (0, swagger_1.ApiProperty)({ required: false, type: Object }),
+    __metadata("design:type", Object)
+], ReservationSnapshotResponseDto.prototype, "timeRange", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Number)
 ], ReservationSnapshotResponseDto.prototype, "timeUnit", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", String)
-], ReservationSnapshotResponseDto.prototype, "resourceId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", String)
-], ReservationSnapshotResponseDto.prototype, "resourceName", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
-], ReservationSnapshotResponseDto.prototype, "selectedStartDate", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
-], ReservationSnapshotResponseDto.prototype, "selectedEndDate", void 0);
+    (0, swagger_1.ApiProperty)({ required: false, type: Object }),
+    __metadata("design:type", Object)
+], ReservationSnapshotResponseDto.prototype, "selectedResource", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", String)
@@ -6277,11 +6324,11 @@ __decorate([
 ], ReservationSnapshotResponseDto.prototype, "attendees", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", typeof (_g = typeof Date !== "undefined" && Date) === "function" ? _g : Object)
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], ReservationSnapshotResponseDto.prototype, "createdAt", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", typeof (_h = typeof Date !== "undefined" && Date) === "function" ? _h : Object)
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], ReservationSnapshotResponseDto.prototype, "updatedAt", void 0);
 
 
@@ -6759,18 +6806,14 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
             snapshotId: snapshot.snapshotId,
             userId: snapshot.userId,
             step: snapshot.step,
+            resourceType: snapshot.resourceType,
             droppableGroupData: snapshot.droppableGroupData,
-            startDate: snapshot.startDate,
-            endDate: snapshot.endDate,
+            dateRange: snapshot.dateRange,
             startTime: snapshot.startTime,
             endTime: snapshot.endTime,
-            am: snapshot.am,
-            pm: snapshot.pm,
+            timeRange: snapshot.timeRange,
             timeUnit: snapshot.timeUnit,
-            resourceId: snapshot.resourceId,
-            resourceName: snapshot.resourceName,
-            selectedStartDate: snapshot.selectedStartDate,
-            selectedEndDate: snapshot.selectedEndDate,
+            selectedResource: snapshot.selectedResource,
             title: snapshot.title,
             reminderTimes: snapshot.reminderTimes,
             isAllDay: snapshot.isAllDay,
@@ -16899,7 +16942,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationSnapshot = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
@@ -16922,53 +16965,37 @@ __decorate([
     __metadata("design:type", String)
 ], ReservationSnapshot.prototype, "step", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], ReservationSnapshot.prototype, "resourceType", void 0);
+__decorate([
     (0, typeorm_1.Column)('jsonb', { nullable: true }),
     __metadata("design:type", Object)
 ], ReservationSnapshot.prototype, "droppableGroupData", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
-    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
-], ReservationSnapshot.prototype, "startDate", void 0);
+    (0, typeorm_1.Column)('jsonb', { nullable: true }),
+    __metadata("design:type", Object)
+], ReservationSnapshot.prototype, "dateRange", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
-], ReservationSnapshot.prototype, "endDate", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    __metadata("design:type", Object)
 ], ReservationSnapshot.prototype, "startTime", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
-    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    __metadata("design:type", Object)
 ], ReservationSnapshot.prototype, "endTime", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", Boolean)
-], ReservationSnapshot.prototype, "am", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", Boolean)
-], ReservationSnapshot.prototype, "pm", void 0);
+    __metadata("design:type", Object)
+], ReservationSnapshot.prototype, "timeRange", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Number)
 ], ReservationSnapshot.prototype, "timeUnit", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], ReservationSnapshot.prototype, "resourceId", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], ReservationSnapshot.prototype, "resourceName", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
-    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
-], ReservationSnapshot.prototype, "selectedStartDate", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
-    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
-], ReservationSnapshot.prototype, "selectedEndDate", void 0);
+    __metadata("design:type", Object)
+], ReservationSnapshot.prototype, "selectedResource", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
@@ -16995,16 +17022,16 @@ __decorate([
 ], ReservationSnapshot.prototype, "attendees", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({ type: 'timestamp with time zone' }),
-    __metadata("design:type", typeof (_g = typeof Date !== "undefined" && Date) === "function" ? _g : Object)
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], ReservationSnapshot.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp with time zone' }),
-    __metadata("design:type", typeof (_h = typeof Date !== "undefined" && Date) === "function" ? _h : Object)
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], ReservationSnapshot.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User),
     (0, typeorm_1.JoinColumn)({ name: 'userId' }),
-    __metadata("design:type", typeof (_j = typeof user_entity_1.User !== "undefined" && user_entity_1.User) === "function" ? _j : Object)
+    __metadata("design:type", typeof (_c = typeof user_entity_1.User !== "undefined" && user_entity_1.User) === "function" ? _c : Object)
 ], ReservationSnapshot.prototype, "user", void 0);
 exports.ReservationSnapshot = ReservationSnapshot = __decorate([
     (0, typeorm_1.Entity)('reservation_snapshots')

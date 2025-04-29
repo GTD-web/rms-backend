@@ -9,7 +9,9 @@ import {
     IsUUID,
     IsArray,
     IsDateString,
+    ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class AttendeeDto {
     @ApiProperty({ required: false })
@@ -62,6 +64,64 @@ export class DroppableGroupDataDto {
     items?: DroppableGroupItemDto[];
 }
 
+export class DateRangeDto {
+    @ApiProperty({ required: false })
+    @IsDateString()
+    @IsOptional()
+    from?: string;
+
+    @ApiProperty({ required: false })
+    @IsDateString()
+    @IsOptional()
+    to?: string;
+}
+
+export class TimeInfoDto {
+    @ApiProperty({ required: false })
+    @IsNumber()
+    @IsOptional()
+    hour?: number;
+
+    @ApiProperty({ required: false })
+    @IsNumber()
+    @IsOptional()
+    minute?: number;
+}
+
+export class TimeRangeDto {
+    @ApiProperty({ required: false })
+    @IsBoolean()
+    @IsOptional()
+    am?: boolean;
+
+    @ApiProperty({ required: false })
+    @IsBoolean()
+    @IsOptional()
+    pm?: boolean;
+}
+
+export class SelectedResourceDto {
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    resourceId?: string;
+
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    resourceName?: string;
+
+    @ApiProperty({ required: false })
+    @IsDateString()
+    @IsOptional()
+    startDate?: string;
+
+    @ApiProperty({ required: false })
+    @IsDateString()
+    @IsOptional()
+    endDate?: string;
+}
+
 export class ReminderTimeDto {
     @ApiProperty({ required: false })
     @IsString()
@@ -85,65 +145,55 @@ export class CreateReservationSnapshotDto {
     @IsOptional()
     step?: 'groups' | 'date-time' | 'resources' | 'info';
 
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    resourceType?: string;
+
     @ApiProperty({ required: false, type: DroppableGroupDataDto })
     @IsOptional()
     @IsObject()
     droppableGroupData?: DroppableGroupDataDto;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ required: false, type: DateRangeDto })
     @IsOptional()
-    @IsDateString()
-    startDate?: string;
+    @IsObject()
+    @ValidateNested()
+    @Type(() => DateRangeDto)
+    dateRange?: DateRangeDto;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ required: false, type: TimeInfoDto })
     @IsOptional()
-    @IsDateString()
-    endDate?: string;
+    @IsObject()
+    @ValidateNested()
+    @Type(() => TimeInfoDto)
+    startTime?: TimeInfoDto;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ required: false, type: TimeInfoDto })
     @IsOptional()
-    @IsDateString()
-    startTime?: string;
+    @IsObject()
+    @ValidateNested()
+    @Type(() => TimeInfoDto)
+    endTime?: TimeInfoDto;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ required: false, type: TimeRangeDto })
     @IsOptional()
-    @IsDateString()
-    endTime?: string;
-
-    @ApiProperty({ required: false })
-    @IsOptional()
-    @IsBoolean()
-    am?: boolean;
-
-    @ApiProperty({ required: false })
-    @IsOptional()
-    @IsBoolean()
-    pm?: boolean;
+    @IsObject()
+    @ValidateNested()
+    @Type(() => TimeRangeDto)
+    timeRange?: TimeRangeDto;
 
     @ApiProperty({ required: false })
     @IsOptional()
     @IsNumber()
     timeUnit?: number;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ required: false, type: SelectedResourceDto })
     @IsOptional()
-    @IsUUID()
-    resourceId?: string;
-
-    @ApiProperty({ required: false })
-    @IsOptional()
-    @IsString()
-    resourceName?: string;
-
-    @ApiProperty({ required: false })
-    @IsOptional()
-    @IsDateString()
-    selectedStartDate?: string;
-
-    @ApiProperty({ required: false })
-    @IsOptional()
-    @IsDateString()
-    selectedEndDate?: string;
+    @IsObject()
+    @ValidateNested()
+    @Type(() => SelectedResourceDto)
+    selectedResource?: SelectedResourceDto;
 
     @ApiProperty({ required: false })
     @IsOptional()
@@ -192,41 +242,46 @@ export class ReservationSnapshotResponseDto {
     @ApiProperty({ enum: ['groups', 'date-time', 'resources', 'info'], required: false })
     step?: 'groups' | 'date-time' | 'resources' | 'info';
 
+    @ApiProperty({ required: false })
+    resourceType?: string;
+
     @ApiProperty({ required: false, type: DroppableGroupDataDto })
     droppableGroupData?: DroppableGroupDataDto;
 
-    @ApiProperty({ required: false })
-    startDate?: Date;
+    @ApiProperty({ required: false, type: Object })
+    dateRange?: {
+        from?: Date;
+        to?: Date;
+    };
+
+    @ApiProperty({ required: false, type: Object })
+    startTime?: {
+        hour?: number;
+        minute?: number;
+    };
+
+    @ApiProperty({ required: false, type: Object })
+    endTime?: {
+        hour?: number;
+        minute?: number;
+    };
+
+    @ApiProperty({ required: false, type: Object })
+    timeRange?: {
+        am?: boolean;
+        pm?: boolean;
+    };
 
     @ApiProperty({ required: false })
-    endDate?: Date;
+    timeUnit?: number;
 
-    @ApiProperty({ required: false })
-    startTime?: Date;
-
-    @ApiProperty({ required: false })
-    endTime?: Date;
-
-    @ApiProperty({ required: false })
-    am: boolean;
-
-    @ApiProperty({ required: false })
-    pm: boolean;
-
-    @ApiProperty({ required: false })
-    timeUnit: number;
-
-    @ApiProperty({ required: false })
-    resourceId: string;
-
-    @ApiProperty({ required: false })
-    resourceName: string;
-
-    @ApiProperty({ required: false })
-    selectedStartDate?: Date;
-
-    @ApiProperty({ required: false })
-    selectedEndDate?: Date;
+    @ApiProperty({ required: false, type: Object })
+    selectedResource?: {
+        resourceId?: string;
+        resourceName?: string;
+        startDate?: Date;
+        endDate?: Date;
+    };
 
     @ApiProperty({ required: false })
     title?: string;

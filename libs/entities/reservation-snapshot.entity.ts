@@ -25,6 +25,9 @@ export class ReservationSnapshot {
     @Column({ nullable: true })
     step: 'groups' | 'date-time' | 'resources' | 'info';
 
+    @Column({ nullable: true })
+    resourceType: string;
+
     @Column('jsonb', { nullable: true })
     droppableGroupData: {
         id?: string;
@@ -36,38 +39,40 @@ export class ReservationSnapshot {
         }[];
     };
 
-    @Column({ type: 'timestamp with time zone', nullable: true })
-    startDate: Date;
+    @Column('jsonb', { nullable: true })
+    dateRange: {
+        from?: Date;
+        to?: Date;
+    };
 
     @Column({ type: 'timestamp with time zone', nullable: true })
-    endDate: Date;
+    startTime: {
+        hour?: number;
+        minute?: number;
+    };
 
     @Column({ type: 'timestamp with time zone', nullable: true })
-    startTime: Date;
-
-    @Column({ type: 'timestamp with time zone', nullable: true })
-    endTime: Date;
+    endTime: {
+        hour?: number;
+        minute?: number;
+    };
 
     @Column({ nullable: true })
-    am: boolean;
-
-    @Column({ nullable: true })
-    pm: boolean;
+    timeRange: {
+        am?: boolean;
+        pm?: boolean;
+    };
 
     @Column({ nullable: true })
     timeUnit: number;
 
     @Column({ nullable: true })
-    resourceId: string;
-
-    @Column({ nullable: true })
-    resourceName: string;
-
-    @Column({ type: 'timestamp with time zone', nullable: true })
-    selectedStartDate: Date;
-
-    @Column({ type: 'timestamp with time zone', nullable: true })
-    selectedEndDate: Date;
+    selectedResource: {
+        resourceId?: string;
+        resourceName?: string;
+        startDate?: Date;
+        endDate?: Date;
+    };
 
     @Column({ nullable: true })
     title: string;
