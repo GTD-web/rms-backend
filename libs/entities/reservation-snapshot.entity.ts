@@ -73,7 +73,7 @@ export class ReservationSnapshot {
     title: string;
 
     @Column('jsonb', { nullable: true })
-    ReminderTimes: {
+    reminderTimes: {
         id: string;
         time: number;
         isSelected: boolean;

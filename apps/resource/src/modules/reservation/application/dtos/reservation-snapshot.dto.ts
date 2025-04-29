@@ -1,12 +1,7 @@
-import { ReservationSnapshot } from '@libs/entities';
 import { ApiProperty } from '@nestjs/swagger';
-import { EmployeeResponseDto } from '@resource/modules/employee/application/dtos/employee-response.dto';
-import { ResourceResponseDto } from '@resource/modules/resource/common/application/dtos/resource-response.dto';
 import {
     IsBoolean,
-    IsDate,
     IsEnum,
-    IsNotEmpty,
     IsNumber,
     IsObject,
     IsOptional,
@@ -146,7 +141,7 @@ export class CreateReservationSnapshotDto {
     @ApiProperty({ required: false, type: [ReminderTimeDto] })
     @IsOptional()
     @IsArray()
-    ReminderTimes?: ReminderTimeDto[];
+    reminderTimes?: ReminderTimeDto[];
 
     @ApiProperty({ required: false, default: false })
     @IsOptional()
@@ -225,7 +220,7 @@ export class ReservationSnapshotResponseDto {
     title?: string;
 
     @ApiProperty({ required: false, type: [ReminderTimeDto] })
-    ReminderTimes?: ReminderTimeDto[];
+    reminderTimes?: ReminderTimeDto[];
 
     @ApiProperty({ required: false })
     isAllDay: boolean;

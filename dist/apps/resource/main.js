@@ -6143,7 +6143,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     __metadata("design:type", Array)
-], CreateReservationSnapshotDto.prototype, "ReminderTimes", void 0);
+], CreateReservationSnapshotDto.prototype, "reminderTimes", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, default: false }),
     (0, class_validator_1.IsOptional)(),
@@ -6246,7 +6246,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [ReminderTimeDto] }),
     __metadata("design:type", Array)
-], ReservationSnapshotResponseDto.prototype, "ReminderTimes", void 0);
+], ReservationSnapshotResponseDto.prototype, "reminderTimes", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Boolean)
@@ -6760,7 +6760,7 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
             selectedStartDate: snapshot.selectedStartDate,
             selectedEndDate: snapshot.selectedEndDate,
             title: snapshot.title,
-            ReminderTimes: snapshot.ReminderTimes,
+            reminderTimes: snapshot.reminderTimes,
             isAllDay: snapshot.isAllDay,
             notifyBeforeStart: snapshot.notifyBeforeStart,
             notifyMinutesBeforeStart: snapshot.notifyMinutesBeforeStart,
@@ -16964,7 +16964,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)('jsonb', { nullable: true }),
     __metadata("design:type", Array)
-], ReservationSnapshot.prototype, "ReminderTimes", void 0);
+], ReservationSnapshot.prototype, "reminderTimes", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)

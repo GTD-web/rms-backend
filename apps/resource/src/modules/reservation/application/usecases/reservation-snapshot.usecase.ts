@@ -57,7 +57,7 @@ export class ReservationSnapshotUsecase {
             selectedStartDate: snapshot.selectedStartDate,
             selectedEndDate: snapshot.selectedEndDate,
             title: snapshot.title,
-            ReminderTimes: snapshot.ReminderTimes,
+            reminderTimes: snapshot.reminderTimes,
             isAllDay: snapshot.isAllDay,
             notifyBeforeStart: snapshot.notifyBeforeStart,
             notifyMinutesBeforeStart: snapshot.notifyMinutesBeforeStart,
