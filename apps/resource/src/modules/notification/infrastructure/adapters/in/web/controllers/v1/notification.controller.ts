@@ -14,7 +14,7 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-
+import { Public } from '@libs/decorators/public.decorator';
 @ApiTags('5. 알림 - 사용자 페이지')
 @Controller('v1/notifications')
 @ApiBearerAuth()
@@ -38,21 +38,9 @@ export class UserNotificationController {
         status: 200,
         description: '웹 푸시 알림 전송 성공',
     })
-    async send(@Body() sendNotificationDto: SendNotificationDto) {
+    async send(@Body() body: any) {
+        const sendNotificationDto = body.data ? body.data : body;
         console.log(sendNotificationDto);
-        sendNotificationDto.notificationTarget = ['374054a4-0663-40b0-b96b-169719597703'];
-        sendNotificationDto.notificationData = {
-            reservationId: '1',
-            reservationTitle: 'test',
-            reservationDate: '2025-01-01',
-            beforeMinutes: 10,
-            resourceId: '1',
-            resourceName: 'test',
-            resourceType: ResourceType.VEHICLE,
-            consumableName: 'test',
-        };
-        sendNotificationDto.notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
-
         await this.notificationUsecase.createNotification(
             sendNotificationDto.notificationType,
             sendNotificationDto.notificationData,
@@ -96,4 +84,14 @@ export class UserNotificationController {
     // async markAllAsRead(@Param('employeeId') employeeId: string) {
     //     // await this.notificationService.markAllAsRead();
     // }
+
+    @Public()
+    @ApiTags('알림테스트')
+    @Post('send/test')
+    async sendTest(@Body() body: any) {
+        console.log(body);
+        const employeeId = body.data.employeeId;
+        const payload = body.notification;
+        await this.notificationUsecase.sendTestNotification(employeeId, payload);
+    }
 }

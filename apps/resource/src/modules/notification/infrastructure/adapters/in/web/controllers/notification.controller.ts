@@ -85,29 +85,6 @@ export class NotificationController {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
     }
 
-    @ApiTags('알림테스트')
-    @Post('send/test')
-    @ApiOperation({ summary: '알람 테스트 전송' })
-    @ApiDataResponse({
-        status: 200,
-        description: '알람 테스트 전송 성공',
-    })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-                data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-            },
-        },
-    })
-    async sendTest(
-        @User() user: UserEntity,
-        @Body() sendNotificationDto: { notification: { title: string; body: string }; target: string[] },
-    ) {
-        await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
-    }
-
     // @Patch(':employeeId/readAll')
     // @ApiOperation({ summary: '모든 알람 읽음 처리' })
     // async markAllAsRead(@Param('employeeId') employeeId: string) {
