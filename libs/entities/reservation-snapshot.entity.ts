@@ -22,23 +22,62 @@ export class ReservationSnapshot {
     @Column()
     userId: string;
 
+    @Column()
+    step: 'groups' | 'date-time' | 'resources' | 'info';
+
     @Column('jsonb', { nullable: true })
-    resource: {
-        resourceId: string;
-        name: string;
+    droppableGroupData: {
+        id: string;
+        title?: string;
+        items: {
+            id: string;
+            title: string;
+            order: number;
+        }[];
     };
-
-    @Column({ nullable: true })
-    title: string;
-
-    @Column({ nullable: true })
-    description: string;
 
     @Column({ type: 'timestamp with time zone', nullable: true })
     startDate: Date;
 
     @Column({ type: 'timestamp with time zone', nullable: true })
     endDate: Date;
+
+    @Column({ type: 'timestamp with time zone', nullable: true })
+    startTime: Date;
+
+    @Column({ type: 'timestamp with time zone', nullable: true })
+    endTime: Date;
+
+    @Column()
+    am: boolean;
+
+    @Column()
+    pm: boolean;
+
+    @Column()
+    timeUnit: number;
+
+    @Column()
+    resourceId: string;
+
+    @Column()
+    resourceName: string;
+
+    @Column({ type: 'timestamp with time zone', nullable: true })
+    selectedStartDate: Date;
+
+    @Column({ type: 'timestamp with time zone', nullable: true })
+    selectedEndDate: Date;
+
+    @Column({ nullable: true })
+    title: string;
+
+    @Column('jsonb', { nullable: true })
+    ReminderTimes: {
+        id: string;
+        time: number;
+        isSelected: boolean;
+    }[];
 
     @Column({ default: false })
     isAllDay: boolean;
@@ -50,8 +89,8 @@ export class ReservationSnapshot {
     notifyMinutesBeforeStart: number[];
 
     @Column('jsonb', { nullable: true })
-    participants: {
-        employeeId: string;
+    attendees: {
+        id: string;
         name: string;
         department: string;
     }[];

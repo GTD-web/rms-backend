@@ -2,12 +2,24 @@ import { ReservationSnapshot } from '@libs/entities';
 import { ApiProperty } from '@nestjs/swagger';
 import { EmployeeResponseDto } from '@resource/modules/employee/application/dtos/employee-response.dto';
 import { ResourceResponseDto } from '@resource/modules/resource/common/application/dtos/resource-response.dto';
-import { IsBoolean, IsDate, IsOptional, IsString, IsUUID, IsArray, IsDateString } from 'class-validator';
+import {
+    IsBoolean,
+    IsDate,
+    IsEnum,
+    IsNotEmpty,
+    IsNumber,
+    IsObject,
+    IsOptional,
+    IsString,
+    IsUUID,
+    IsArray,
+    IsDateString,
+} from 'class-validator';
 
-export class ParticipantDto {
+export class AttendeeDto {
     @ApiProperty()
     @IsUUID()
-    employeeId: string;
+    id: string;
 
     @ApiProperty()
     @IsString()
@@ -18,30 +30,58 @@ export class ParticipantDto {
     department: string;
 }
 
-export class ResourceDto {
+export class DroppableGroupItemDto {
     @ApiProperty()
-    @IsUUID()
-    resourceId: string;
+    @IsString()
+    id: string;
 
     @ApiProperty()
     @IsString()
-    name: string;
+    title: string;
+
+    @ApiProperty()
+    @IsNumber()
+    order: number;
 }
 
-export class CreateReservationSnapshotDto {
-    @ApiProperty({ required: false })
-    @IsOptional()
-    resource?: ResourceDto;
+export class DroppableGroupDataDto {
+    @ApiProperty()
+    @IsString()
+    id: string;
 
     @ApiProperty({ required: false })
     @IsOptional()
     @IsString()
     title?: string;
 
-    @ApiProperty({ required: false })
-    @IsOptional()
+    @ApiProperty({ type: [DroppableGroupItemDto] })
+    @IsArray()
+    items: DroppableGroupItemDto[];
+}
+
+export class ReminderTimeDto {
+    @ApiProperty()
     @IsString()
-    description?: string;
+    id: string;
+
+    @ApiProperty()
+    @IsNumber()
+    time: number;
+
+    @ApiProperty()
+    @IsBoolean()
+    isSelected: boolean;
+}
+
+export class CreateReservationSnapshotDto {
+    @ApiProperty({ enum: ['groups', 'date-time', 'resources', 'info'] })
+    @IsEnum(['groups', 'date-time', 'resources', 'info'])
+    step: 'groups' | 'date-time' | 'resources' | 'info';
+
+    @ApiProperty({ required: false, type: DroppableGroupDataDto })
+    @IsOptional()
+    @IsObject()
+    droppableGroupData?: DroppableGroupDataDto;
 
     @ApiProperty({ required: false })
     @IsOptional()
@@ -52,6 +92,61 @@ export class CreateReservationSnapshotDto {
     @IsOptional()
     @IsDateString()
     endDate?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsDateString()
+    startTime?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsDateString()
+    endTime?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsBoolean()
+    am?: boolean;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsBoolean()
+    pm?: boolean;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsNumber()
+    timeUnit?: number;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsUUID()
+    resourceId?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    resourceName?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsDateString()
+    selectedStartDate?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsDateString()
+    selectedEndDate?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    title?: string;
+
+    @ApiProperty({ required: false, type: [ReminderTimeDto] })
+    @IsOptional()
+    @IsArray()
+    ReminderTimes?: ReminderTimeDto[];
 
     @ApiProperty({ required: false, default: false })
     @IsOptional()
@@ -68,10 +163,10 @@ export class CreateReservationSnapshotDto {
     @IsArray()
     notifyMinutesBeforeStart?: number[];
 
-    @ApiProperty({ required: false, type: () => [ParticipantDto] })
+    @ApiProperty({ required: false, type: [AttendeeDto] })
     @IsOptional()
     @IsArray()
-    participants?: ParticipantDto[];
+    attendees?: AttendeeDto[];
 }
 
 export class UpdateReservationSnapshotDto extends CreateReservationSnapshotDto {
@@ -87,32 +182,62 @@ export class ReservationSnapshotResponseDto {
     @ApiProperty()
     userId: string;
 
-    @ApiProperty({ required: false, type: () => ResourceDto })
-    resource?: ResourceDto;
+    @ApiProperty({ enum: ['groups', 'date-time', 'resources', 'info'] })
+    step: 'groups' | 'date-time' | 'resources' | 'info';
+
+    @ApiProperty({ required: false, type: DroppableGroupDataDto })
+    droppableGroupData?: DroppableGroupDataDto;
+
+    @ApiProperty({ required: false })
+    startDate?: Date;
+
+    @ApiProperty({ required: false })
+    endDate?: Date;
+
+    @ApiProperty({ required: false })
+    startTime?: Date;
+
+    @ApiProperty({ required: false })
+    endTime?: Date;
+
+    @ApiProperty()
+    am: boolean;
+
+    @ApiProperty()
+    pm: boolean;
+
+    @ApiProperty()
+    timeUnit: number;
+
+    @ApiProperty()
+    resourceId: string;
+
+    @ApiProperty()
+    resourceName: string;
+
+    @ApiProperty({ required: false })
+    selectedStartDate?: Date;
+
+    @ApiProperty({ required: false })
+    selectedEndDate?: Date;
 
     @ApiProperty({ required: false })
     title?: string;
 
-    @ApiProperty({ required: false })
-    description?: string;
+    @ApiProperty({ required: false, type: [ReminderTimeDto] })
+    ReminderTimes?: ReminderTimeDto[];
 
     @ApiProperty({ required: false })
-    startDate?: string;
+    isAllDay: boolean;
 
     @ApiProperty({ required: false })
-    endDate?: string;
-
-    @ApiProperty({ required: false })
-    isAllDay?: boolean;
-
-    @ApiProperty({ required: false })
-    notifyBeforeStart?: boolean;
+    notifyBeforeStart: boolean;
 
     @ApiProperty({ required: false, type: [Number] })
     notifyMinutesBeforeStart?: number[];
 
-    @ApiProperty({ required: false, type: () => [ParticipantDto] })
-    participants?: ParticipantDto[];
+    @ApiProperty({ required: false, type: [AttendeeDto] })
+    attendees?: AttendeeDto[];
 
     @ApiProperty()
     createdAt: Date;

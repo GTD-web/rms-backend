@@ -86,6 +86,10 @@ export {
 
 // Reservation Snapshot Module DTOs
 export {
+    AttendeeDto,
+    DroppableGroupItemDto,
+    DroppableGroupDataDto,
+    ReminderTimeDto,
     CreateReservationSnapshotDto,
     UpdateReservationSnapshotDto,
     ReservationSnapshotResponseDto,
