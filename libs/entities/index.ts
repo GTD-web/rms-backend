@@ -22,6 +22,10 @@ import {
 } from './view';
 import { ReservationSnapshot } from './reservation-snapshot.entity';
 import { ReservationVehicle } from './reservation-vehicle.entity';
+import { InsuranceCompany } from './insurance-company.entity';
+import { VehicleInsurance } from './vehicle-insurance.entity';
+import { ConsumableItem } from './consumable-item.entity';
+
 export const Entities = [
     Employee,
     User,
@@ -45,6 +49,9 @@ export const Entities = [
     ResourceUsageStats,
     VehicleMaintenanceHistory,
     ConsumableMaintenanceStats,
+    // InsuranceCompany,
+    // VehicleInsurance,
+    // ConsumableItem,
 ];
 
 export const EntitiesMap = {
@@ -70,6 +77,9 @@ export const EntitiesMap = {
     ResourceUsageStats,
     VehicleMaintenanceHistory,
     ConsumableMaintenanceStats,
+    // InsuranceCompany,
+    // VehicleInsurance,
+    // ConsumableItem,
 };
 
 export {
@@ -95,4 +105,7 @@ export {
     ResourceUsageStats,
     VehicleMaintenanceHistory,
     ConsumableMaintenanceStats,
+    // InsuranceCompany,
+    // VehicleInsurance,
+    // ConsumableItem,
 };

@@ -80,7 +80,8 @@ export {
     ReservationResponseDto,
     ReservationWithResourceResponseDto,
     ReservationWithRelationsResponseDto,
-    GroupedReservationResponseDto
+    GroupedReservationResponseDto,
+    GroupedReservationWithResourceResponseDto,
 } from './modules/reservation/application/dtos/reservation-response.dto';
 
 // Reservation Snapshot Module DTOs

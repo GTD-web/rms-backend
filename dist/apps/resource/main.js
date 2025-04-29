@@ -2,171 +2,6 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler-storage.interface.js":
-/*!******************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler-storage.interface.js ***!
-  \******************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ThrottlerStorage = void 0;
-exports.ThrottlerStorage = Symbol('ThrottlerStorage');
-//# sourceMappingURL=throttler-storage.interface.js.map
-
-/***/ }),
-
-/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.constants.js":
-/*!**********************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.constants.js ***!
-  \**********************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.THROTTLER_SKIP = exports.THROTTLER_OPTIONS = exports.THROTTLER_TTL = exports.THROTTLER_LIMIT = void 0;
-exports.THROTTLER_LIMIT = 'THROTTLER:LIMIT';
-exports.THROTTLER_TTL = 'THROTTLER:TTL';
-exports.THROTTLER_OPTIONS = 'THROTTLER:MODULE_OPTIONS';
-exports.THROTTLER_SKIP = 'THROTTLER:SKIP';
-//# sourceMappingURL=throttler.constants.js.map
-
-/***/ }),
-
-/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.decorator.js":
-/*!**********************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.decorator.js ***!
-  \**********************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.InjectThrottlerStorage = exports.InjectThrottlerOptions = exports.SkipThrottle = exports.Throttle = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const throttler_constants_1 = __webpack_require__(/*! ./throttler.constants */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.constants.js");
-const throttler_providers_1 = __webpack_require__(/*! ./throttler.providers */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.providers.js");
-function setThrottlerMetadata(target, limit, ttl) {
-    Reflect.defineMetadata(throttler_constants_1.THROTTLER_TTL, ttl, target);
-    Reflect.defineMetadata(throttler_constants_1.THROTTLER_LIMIT, limit, target);
-}
-const Throttle = (limit = 20, ttl = 60) => {
-    return (target, propertyKey, descriptor) => {
-        if (descriptor) {
-            setThrottlerMetadata(descriptor.value, limit, ttl);
-            return descriptor;
-        }
-        setThrottlerMetadata(target, limit, ttl);
-        return target;
-    };
-};
-exports.Throttle = Throttle;
-const SkipThrottle = (skip = true) => {
-    return (target, propertyKey, descriptor) => {
-        if (descriptor) {
-            Reflect.defineMetadata(throttler_constants_1.THROTTLER_SKIP, skip, descriptor.value);
-            return descriptor;
-        }
-        Reflect.defineMetadata(throttler_constants_1.THROTTLER_SKIP, skip, target);
-        return target;
-    };
-};
-exports.SkipThrottle = SkipThrottle;
-const InjectThrottlerOptions = () => (0, common_1.Inject)((0, throttler_providers_1.getOptionsToken)());
-exports.InjectThrottlerOptions = InjectThrottlerOptions;
-const InjectThrottlerStorage = () => (0, common_1.Inject)((0, throttler_providers_1.getStorageToken)());
-exports.InjectThrottlerStorage = InjectThrottlerStorage;
-//# sourceMappingURL=throttler.decorator.js.map
-
-/***/ }),
-
-/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.providers.js":
-/*!**********************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.providers.js ***!
-  \**********************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getStorageToken = exports.getOptionsToken = exports.ThrottlerStorageProvider = exports.createThrottlerProviders = void 0;
-const throttler_storage_interface_1 = __webpack_require__(/*! ./throttler-storage.interface */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler-storage.interface.js");
-const throttler_constants_1 = __webpack_require__(/*! ./throttler.constants */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.constants.js");
-const throttler_service_1 = __webpack_require__(/*! ./throttler.service */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.service.js");
-function createThrottlerProviders(options) {
-    return [
-        {
-            provide: throttler_constants_1.THROTTLER_OPTIONS,
-            useValue: options,
-        },
-    ];
-}
-exports.createThrottlerProviders = createThrottlerProviders;
-exports.ThrottlerStorageProvider = {
-    provide: throttler_storage_interface_1.ThrottlerStorage,
-    useFactory: (options) => {
-        return options.storage ? options.storage : new throttler_service_1.ThrottlerStorageService();
-    },
-    inject: [throttler_constants_1.THROTTLER_OPTIONS],
-};
-const getOptionsToken = () => throttler_constants_1.THROTTLER_OPTIONS;
-exports.getOptionsToken = getOptionsToken;
-const getStorageToken = () => throttler_storage_interface_1.ThrottlerStorage;
-exports.getStorageToken = getStorageToken;
-//# sourceMappingURL=throttler.providers.js.map
-
-/***/ }),
-
-/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.service.js":
-/*!********************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.service.js ***!
-  \********************************************************************************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ThrottlerStorageService = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-let ThrottlerStorageService = class ThrottlerStorageService {
-    constructor() {
-        this._storage = {};
-        this.timeoutIds = [];
-    }
-    get storage() {
-        return this._storage;
-    }
-    async getRecord(key) {
-        return this.storage[key] || [];
-    }
-    async addRecord(key, ttl) {
-        const ttlMilliseconds = ttl * 1000;
-        if (!this.storage[key]) {
-            this.storage[key] = [];
-        }
-        this.storage[key].push(Date.now() + ttlMilliseconds);
-        const timeoutId = setTimeout(() => {
-            this.storage[key].shift();
-            clearTimeout(timeoutId);
-            this.timeoutIds = this.timeoutIds.filter((id) => id != timeoutId);
-        }, ttlMilliseconds);
-        this.timeoutIds.push(timeoutId);
-    }
-    onApplicationShutdown() {
-        this.timeoutIds.forEach(clearTimeout);
-    }
-};
-ThrottlerStorageService = __decorate([
-    (0, common_1.Injectable)()
-], ThrottlerStorageService);
-exports.ThrottlerStorageService = ThrottlerStorageService;
-//# sourceMappingURL=throttler.service.js.map
-
-/***/ }),
-
 /***/ "./apps/resource/src/app.controller.ts":
 /*!*********************************************!*\
   !*** ./apps/resource/src/app.controller.ts ***!
@@ -627,7 +462,7 @@ __decorate([
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ReturnVehicleDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = void 0;
+exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login.dto */ "./apps/resource/src/modules/auth/application/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login-response.dto */ "./apps/resource/src/modules/auth/application/dto/login-response.dto.ts");
@@ -703,6 +538,7 @@ Object.defineProperty(exports, "ReservationResponseDto", ({ enumerable: true, ge
 Object.defineProperty(exports, "ReservationWithResourceResponseDto", ({ enumerable: true, get: function () { return reservation_response_dto_1.ReservationWithResourceResponseDto; } }));
 Object.defineProperty(exports, "ReservationWithRelationsResponseDto", ({ enumerable: true, get: function () { return reservation_response_dto_1.ReservationWithRelationsResponseDto; } }));
 Object.defineProperty(exports, "GroupedReservationResponseDto", ({ enumerable: true, get: function () { return reservation_response_dto_1.GroupedReservationResponseDto; } }));
+Object.defineProperty(exports, "GroupedReservationWithResourceResponseDto", ({ enumerable: true, get: function () { return reservation_response_dto_1.GroupedReservationWithResourceResponseDto; } }));
 var reservation_snapshot_dto_1 = __webpack_require__(/*! ./modules/reservation/application/dtos/reservation-snapshot.dto */ "./apps/resource/src/modules/reservation/application/dtos/reservation-snapshot.dto.ts");
 Object.defineProperty(exports, "CreateReservationSnapshotDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.CreateReservationSnapshotDto; } }));
 Object.defineProperty(exports, "UpdateReservationSnapshotDto", ({ enumerable: true, get: function () { return reservation_snapshot_dto_1.UpdateReservationSnapshotDto; } }));
@@ -3325,7 +3161,7 @@ const employees_by_department_response_dto_1 = __webpack_require__(/*! @resource
 const employee_usecase_1 = __webpack_require__(/*! @resource/modules/employee/application/usecases/employee.usecase */ "./apps/resource/src/modules/employee/application/usecases/employee.usecase.ts");
 const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
 const mms_employee_response_dto_1 = __webpack_require__(/*! @resource/modules/employee/application/dtos/mms-employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts");
-const throttler_decorator_1 = __webpack_require__(/*! @nestjs/throttler/dist/throttler.decorator */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.decorator.js");
+const throttler_decorator_1 = __webpack_require__(/*! @nestjs/throttler/dist/throttler.decorator */ "@nestjs/throttler/dist/throttler.decorator");
 let UserEmployeeController = class UserEmployeeController {
     constructor(employeeUseCase) {
         this.employeeUseCase = employeeUseCase;
@@ -18650,12 +18486,13 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
         this.MAX_RETRIES = 3;
         this.RETRY_DELAY = 2000;
         if (process.env.NODE_ENV === 'local') {
+            this.generateApiDocs();
         }
     }
     async getApiJson(retries = this.MAX_RETRIES) {
         await new Promise((resolve) => setTimeout(resolve, this.RETRY_DELAY));
         try {
-            const response = await axios_1.default.get('http://localhost:3000/api-docs-json');
+            const response = await axios_1.default.get('http://localhost:3060/api-docs-json');
             this.data = response.data;
         }
         catch (error) {
@@ -18665,18 +18502,24 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
         }
     }
     getControllers() {
-        return Object.entries(this.data.paths)
+        const v1Paths = Object.entries(this.data.paths).filter(([path]) => path.startsWith('/api/v1/'));
+        return v1Paths
             .map(([path, routes]) => {
-            const controller = path.split('/')[2];
+            const pathParts = path.split('/');
+            const isAdmin = pathParts[3] === 'admin';
+            const controllerIndex = isAdmin ? 4 : 3;
+            const controller = pathParts[controllerIndex] || 'undefined';
+            const controllerName = isAdmin ? `admin-${controller}` : controller;
             const apis = Object.entries(routes).map(([method, metadata]) => {
                 return {
                     method,
                     path,
                     metadata,
+                    isAdmin,
                 };
             });
             return {
-                controller,
+                controller: controllerName,
                 apis,
             };
         })
@@ -18698,6 +18541,8 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
         return schema.type || 'object';
     }
     renderSchemaJson(schema, indentLevel = 1) {
+        if (!schema)
+            return 'null';
         const indent = '  '.repeat(indentLevel);
         const commentIndent = '  '.repeat(Math.max(0, indentLevel - 1));
         let content = '';
@@ -18705,6 +18550,9 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
             content += '{\n';
             const properties = Object.entries(schema.properties);
             properties.forEach(([key, prop], index) => {
+                if (!prop) {
+                    prop = {};
+                }
                 const isLast = index === properties.length - 1;
                 const required = (schema.required || []).includes(key);
                 const comment = [];
@@ -18740,9 +18588,17 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
             });
             content += `${commentIndent}}`;
         }
+        else if (schema.type === 'array' && schema.items) {
+            content = `[${this.getExampleValue(schema.items)}]`;
+        }
+        else {
+            content = this.getExampleValue(schema);
+        }
         return content;
     }
     getExampleValue(prop) {
+        if (!prop)
+            return 'null';
         if (prop.example !== undefined) {
             return typeof prop.example === 'string' ? `"${prop.example}"` : prop.example;
         }
@@ -18763,7 +18619,7 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
     }
     resolveSchema(schema, schemas, visited = new Set()) {
         if (!schema)
-            return schema;
+            return { type: 'object', properties: {} };
         if (schema.$ref) {
             const refPath = schema.$ref.split('/');
             const schemaName = refPath[refPath.length - 1];
@@ -18771,10 +18627,19 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
                 return { type: 'object', description: `Reference to ${schemaName}` };
             }
             visited.add(schemaName);
+            if (!schemas[schemaName]) {
+                this.logger.warn(`Schema reference not found: ${schemaName}`);
+                return { type: 'object', properties: {} };
+            }
             return this.resolveSchema(schemas[schemaName], schemas, visited);
         }
         if (schema.allOf) {
-            const resolvedSchemas = schema.allOf.map((s) => this.resolveSchema(s, schemas, visited));
+            const resolvedSchemas = schema.allOf
+                .filter((s) => s)
+                .map((s) => this.resolveSchema(s, schemas, visited));
+            if (resolvedSchemas.length === 0) {
+                return { type: 'object', properties: {} };
+            }
             return resolvedSchemas.reduce((acc, curr) => {
                 return {
                     ...acc,
@@ -18790,7 +18655,12 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
         if (schema.properties) {
             const resolvedProperties = {};
             Object.entries(schema.properties).forEach(([key, value]) => {
-                resolvedProperties[key] = this.resolveSchema(value, schemas, new Set(visited));
+                if (value !== null && value !== undefined) {
+                    resolvedProperties[key] = this.resolveSchema(value, schemas, new Set(visited));
+                }
+                else {
+                    resolvedProperties[key] = { type: 'object', properties: {} };
+                }
             });
             return { ...schema, properties: resolvedProperties };
         }
@@ -18803,86 +18673,153 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
         return schema;
     }
     async generateApiDocs() {
-        await this.getApiJson();
-        const controllers = this.getControllers();
-        const schemas = this.data.components.schemas;
-        Object.keys(controllers).forEach((controller, index) => {
-            let markdownContent = `# ${controller[0].toUpperCase() + controller.slice(1)}\n\n`;
-            const domain = controllers[controller];
-            for (const api of domain) {
-                const method = api.method.toUpperCase();
-                const path = api.path;
-                const metadata = api.metadata;
-                markdownContent += `### ${metadata.summary || path}\n\n`;
-                if (metadata.description) {
-                    markdownContent += `${metadata.description}\n\n`;
-                }
-                markdownContent += `- **Method:** \`${method}\`\n`;
-                markdownContent += `- **Endpoint:** \`${path}\`\n\n`;
-                if (metadata.parameters && metadata.parameters.length > 0) {
-                    const pathParams = metadata.parameters.filter((p) => p.in === 'path');
-                    const queryParams = metadata.parameters.filter((p) => p.in === 'query');
-                    if (pathParams.length > 0) {
-                        markdownContent += `#### 🔵 Path Parameters\n\n`;
-                        markdownContent += '```json\n';
-                        markdownContent += '{\n';
-                        pathParams.forEach((param, index) => {
-                            const resolvedSchema = this.resolveSchema(param.schema, schemas);
-                            const isLast = index === pathParams.length - 1;
-                            const example = this.getExampleValue(resolvedSchema);
-                            const required = param.required ? '✅ Required' : '❌ Optional';
-                            markdownContent += `  "${param.name}": ${example} // ${required} ${param.description || ''}\n`;
-                            markdownContent += `${isLast ? '' : ','}\n`;
-                        });
-                        markdownContent += '}\n';
-                        markdownContent += '```\n\n';
-                    }
-                    if (queryParams.length > 0) {
-                        markdownContent += `#### 🟣 Query Parameters\n\n`;
-                        markdownContent += '```json\n';
-                        markdownContent += '{\n';
-                        queryParams.forEach((param, index) => {
-                            const resolvedSchema = this.resolveSchema(param.schema, schemas);
-                            const isLast = index === queryParams.length - 1;
-                            const example = this.getExampleValue(resolvedSchema);
-                            const required = param.required ? '✅ Required' : '❌ Optional';
-                            markdownContent += `  "${param.name}": ${example} // ${required} ${param.description || ''}\n`;
-                            markdownContent += `${isLast ? '' : ','}\n`;
-                        });
-                        markdownContent += '}\n';
-                        markdownContent += '```\n\n';
-                    }
-                }
-                if (metadata.requestBody) {
-                    markdownContent += `#### 🟠 Request Body\n\n`;
-                    const content = metadata.requestBody.content;
-                    Object.keys(content).forEach((contentType) => {
-                        markdownContent += `**Content Type:** \`${contentType}\`\n\n`;
-                        const resolvedSchema = this.resolveSchema(content[contentType].schema, schemas);
-                        markdownContent += '```json\n';
-                        markdownContent += this.renderSchemaJson(resolvedSchema);
-                        markdownContent += '\n```\n\n';
-                    });
-                }
-                markdownContent += `#### Responses\n\n`;
-                Object.entries(metadata.responses).forEach(([code, response]) => {
-                    const titleEmoji = code.startsWith('2') ? '🟢' : '🔴';
-                    markdownContent += `##### ${titleEmoji} ${code} - ${response.description}\n\n`;
-                    if (response.content) {
-                        Object.keys(response.content).forEach((contentType) => {
-                            markdownContent += `**Content Type:** \`${contentType}\`\n\n`;
-                            const resolvedSchema = this.resolveSchema(response.content[contentType].schema, schemas);
-                            markdownContent += '```json\n';
-                            markdownContent += this.renderSchemaJson(resolvedSchema);
-                            markdownContent += '\n```\n\n';
-                        });
-                    }
-                });
-                markdownContent += `---\n\n`;
+        try {
+            await this.getApiJson();
+            if (!this.data || !this.data.paths) {
+                this.logger.error('API 문서 데이터를 불러오는데 실패했습니다.');
+                return;
             }
-            const docsPath = (0, path_1.join)('C:/Users/USER/Desktop/projects/RMS-documents/docs/개발/03_api', `${index + 1 < 10 ? '0' : ''}${index + 1}_${controller}.md`);
-            this.saveMarkdown(docsPath, markdownContent);
-        });
+            const controllers = this.getControllers();
+            if (Object.keys(controllers).length === 0) {
+                this.logger.warn('API v1 경로를 찾을 수 없습니다.');
+                return;
+            }
+            const schemas = this.data.components?.schemas || {};
+            Object.keys(controllers).forEach((controller, index) => {
+                try {
+                    const isAdmin = controller.startsWith('admin-');
+                    const controllerName = isAdmin ? controller.substring(6) : controller;
+                    const apiType = isAdmin ? '[관리자 API]' : '[사용자 API]';
+                    let markdownContent = `# ${apiType} ${controllerName[0].toUpperCase() + controllerName.slice(1)}\n\n`;
+                    const domain = controllers[controller];
+                    for (const api of domain) {
+                        try {
+                            const method = api.method.toUpperCase();
+                            const path = api.path;
+                            const metadata = api.metadata;
+                            markdownContent += `### ${metadata.summary || path}\n\n`;
+                            if (metadata.description) {
+                                markdownContent += `${metadata.description}\n\n`;
+                            }
+                            markdownContent += `- **Method:** \`${method}\`\n`;
+                            markdownContent += `- **Endpoint:** \`${path}\`\n\n`;
+                            if (metadata.parameters && metadata.parameters.length > 0) {
+                                const pathParams = metadata.parameters.filter((p) => p.in === 'path');
+                                const queryParams = metadata.parameters.filter((p) => p.in === 'query');
+                                if (pathParams.length > 0) {
+                                    markdownContent += `#### 🔵 Path Parameters\n\n`;
+                                    markdownContent += '```json\n';
+                                    markdownContent += '{\n';
+                                    pathParams.forEach((param, index) => {
+                                        try {
+                                            const resolvedSchema = this.resolveSchema(param.schema, schemas);
+                                            const isLast = index === pathParams.length - 1;
+                                            const example = this.getExampleValue(resolvedSchema);
+                                            const required = param.required ? '✅ Required' : '❌ Optional';
+                                            markdownContent += `  "${param.name}": ${example} // ${required} ${param.description || ''}\n`;
+                                            markdownContent += `${isLast ? '' : ','}\n`;
+                                        }
+                                        catch (err) {
+                                            this.logger.error(`Path parameter 처리 중 오류: ${err.message}`);
+                                            markdownContent += `  "${param.name}": null // Error processing parameter\n`;
+                                            markdownContent += `${index === pathParams.length - 1 ? '' : ','}\n`;
+                                        }
+                                    });
+                                    markdownContent += '}\n';
+                                    markdownContent += '```\n\n';
+                                }
+                                if (queryParams.length > 0) {
+                                    markdownContent += `#### 🟣 Query Parameters\n\n`;
+                                    markdownContent += '```json\n';
+                                    markdownContent += '{\n';
+                                    queryParams.forEach((param, index) => {
+                                        try {
+                                            const resolvedSchema = this.resolveSchema(param.schema, schemas);
+                                            const isLast = index === queryParams.length - 1;
+                                            const example = this.getExampleValue(resolvedSchema);
+                                            const required = param.required ? '✅ Required' : '❌ Optional';
+                                            markdownContent += `  "${param.name}": ${example} // ${required} ${param.description || ''}\n`;
+                                            markdownContent += `${isLast ? '' : ','}\n`;
+                                        }
+                                        catch (err) {
+                                            this.logger.error(`Query parameter 처리 중 오류: ${err.message}`);
+                                            markdownContent += `  "${param.name}": null // Error processing parameter\n`;
+                                            markdownContent += `${index === queryParams.length - 1 ? '' : ','}\n`;
+                                        }
+                                    });
+                                    markdownContent += '}\n';
+                                    markdownContent += '```\n\n';
+                                }
+                            }
+                            if (metadata.requestBody) {
+                                markdownContent += `#### 🟠 Request Body\n\n`;
+                                const content = metadata.requestBody.content;
+                                if (content) {
+                                    Object.keys(content).forEach((contentType) => {
+                                        try {
+                                            markdownContent += `**Content Type:** \`${contentType}\`\n\n`;
+                                            const resolvedSchema = this.resolveSchema(content[contentType].schema, schemas);
+                                            markdownContent += '```json\n';
+                                            markdownContent += this.renderSchemaJson(resolvedSchema);
+                                            markdownContent += '\n```\n\n';
+                                        }
+                                        catch (err) {
+                                            this.logger.error(`Request body 처리 중 오류: ${err.message}`);
+                                            markdownContent +=
+                                                '```json\n{ "error": "Error processing request body" }\n```\n\n';
+                                        }
+                                    });
+                                }
+                            }
+                            markdownContent += `#### Responses\n\n`;
+                            if (metadata.responses) {
+                                Object.entries(metadata.responses).forEach(([code, response]) => {
+                                    try {
+                                        const titleEmoji = code.startsWith('2') ? '🟢' : '🔴';
+                                        markdownContent += `##### ${titleEmoji} ${code} - ${response.description || 'No description'}\n\n`;
+                                        if (response.content) {
+                                            Object.keys(response.content).forEach((contentType) => {
+                                                try {
+                                                    markdownContent += `**Content Type:** \`${contentType}\`\n\n`;
+                                                    const resolvedSchema = this.resolveSchema(response.content[contentType].schema, schemas);
+                                                    markdownContent += '```json\n';
+                                                    markdownContent += this.renderSchemaJson(resolvedSchema);
+                                                    markdownContent += '\n```\n\n';
+                                                }
+                                                catch (err) {
+                                                    this.logger.error(`Response content 처리 중 오류: ${err.message}`);
+                                                    markdownContent +=
+                                                        '```json\n{ "error": "Error processing response" }\n```\n\n';
+                                                }
+                                            });
+                                        }
+                                    }
+                                    catch (err) {
+                                        this.logger.error(`Response 처리 중 오류: ${err.message}`);
+                                        markdownContent += `##### Status ${code} - Error processing response\n\n`;
+                                    }
+                                });
+                            }
+                            markdownContent += `---\n\n`;
+                        }
+                        catch (err) {
+                            this.logger.error(`API 엔드포인트 처리 중 오류: ${err.message}`);
+                            markdownContent += `### Error processing endpoint: ${api.path}\n\n---\n\n`;
+                        }
+                    }
+                    const filePrefix = isAdmin ? 'admin_' : '';
+                    const docsPath = (0, path_1.join)('C:/Users/USER/Desktop/projects/RMS-documents/docs/개발/03_api', `${index + 1 < 10 ? '0' : ''}${index + 1}_${filePrefix}${controllerName}.md`);
+                    this.saveMarkdown(docsPath, markdownContent);
+                }
+                catch (err) {
+                    this.logger.error(`컨트롤러 문서화 중 오류 발생: ${controller}, ${err.message}`);
+                }
+            });
+            this.logger.log('API 문서 생성이 완료되었습니다.');
+        }
+        catch (err) {
+            this.logger.error(`API 문서 생성 중 예상치 못한 오류 발생: ${err.message}`);
+        }
     }
     saveMarkdown(filePath, content) {
         fs.writeFileSync(filePath, content);
@@ -19288,6 +19225,16 @@ module.exports = require("@nestjs/schedule");
 /***/ ((module) => {
 
 module.exports = require("@nestjs/swagger");
+
+/***/ }),
+
+/***/ "@nestjs/throttler/dist/throttler.decorator":
+/*!*************************************************************!*\
+  !*** external "@nestjs/throttler/dist/throttler.decorator" ***!
+  \*************************************************************/
+/***/ ((module) => {
+
+module.exports = require("@nestjs/throttler/dist/throttler.decorator");
 
 /***/ }),
 
