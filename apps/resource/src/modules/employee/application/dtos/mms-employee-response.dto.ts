@@ -52,3 +52,17 @@ export class MMSEmployeeResponseDto {
     @ApiProperty({ description: '직급', example: '대표이사' })
     rank: string;
 }
+
+export class MMSWebhookRequestDto {
+    @ApiProperty({ description: '이벤트 타입', example: 'employee.updated' })
+    event_type: string;
+
+    @ApiProperty({ description: '엔티티 타입', example: 'employee' })
+    entity_type: string;
+
+    @ApiProperty({ description: '타임스탬프', example: '2025-04-29T02:11:51.794Z' })
+    timestamp: string;
+
+    @ApiProperty({ description: '페이로드' })
+    payload: MMSEmployeeResponseDto;
+}

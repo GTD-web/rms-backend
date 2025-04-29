@@ -2435,7 +2435,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MMSEmployeeResponseDto = void 0;
+exports.MMSWebhookRequestDto = exports.MMSEmployeeResponseDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 class MMSEmployeeResponseDto {
     constructor(employee) {
@@ -2502,6 +2502,25 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: '직급', example: '대표이사' }),
     __metadata("design:type", String)
 ], MMSEmployeeResponseDto.prototype, "rank", void 0);
+class MMSWebhookRequestDto {
+}
+exports.MMSWebhookRequestDto = MMSWebhookRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이벤트 타입', example: 'employee.updated' }),
+    __metadata("design:type", String)
+], MMSWebhookRequestDto.prototype, "event_type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '엔티티 타입', example: 'employee' }),
+    __metadata("design:type", String)
+], MMSWebhookRequestDto.prototype, "entity_type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '타임스탬프', example: '2025-04-29T02:11:51.794Z' }),
+    __metadata("design:type", String)
+], MMSWebhookRequestDto.prototype, "timestamp", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '페이로드' }),
+    __metadata("design:type", MMSEmployeeResponseDto)
+], MMSWebhookRequestDto.prototype, "payload", void 0);
 
 
 /***/ }),
@@ -3174,19 +3193,19 @@ let UserEmployeeController = class UserEmployeeController {
     }
     async webhookCreate(body) {
         console.log('created employee', body);
-        await this.employeeUseCase.syncEmployee(body.employee_number);
+        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
     }
     async webhookUpdate(body) {
         console.log('updated employee', body);
-        await this.employeeUseCase.syncEmployee(body.employee_number);
+        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
     }
     async webhookPositionChanged(body) {
         console.log('position changed', body);
-        await this.employeeUseCase.syncEmployee(body.employee_number);
+        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
     }
     async webhookDepartmentChanged(body) {
         console.log('department changed', body);
-        await this.employeeUseCase.syncEmployee(body.employee_number);
+        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
     }
     async webhookDelete(body) {
         console.log('deleted employee', body);
@@ -3220,7 +3239,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _c : Object]),
+    __metadata("design:paramtypes", [typeof (_c = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _c : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookCreate", null);
 __decorate([
@@ -3230,7 +3249,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _d : Object]),
+    __metadata("design:paramtypes", [typeof (_d = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookUpdate", null);
 __decorate([
@@ -3240,7 +3259,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _e : Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _e : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookPositionChanged", null);
 __decorate([
@@ -3250,7 +3269,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _f : Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookDepartmentChanged", null);
 __decorate([
@@ -3260,7 +3279,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _g : Object]),
+    __metadata("design:paramtypes", [typeof (_g = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _g : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookDelete", null);
 exports.UserEmployeeController = UserEmployeeController = __decorate([
@@ -18486,7 +18505,6 @@ let ApiDocService = ApiDocService_1 = class ApiDocService {
         this.MAX_RETRIES = 3;
         this.RETRY_DELAY = 2000;
         if (process.env.NODE_ENV === 'local') {
-            this.generateApiDocs();
         }
     }
     async getApiJson(retries = this.MAX_RETRIES) {

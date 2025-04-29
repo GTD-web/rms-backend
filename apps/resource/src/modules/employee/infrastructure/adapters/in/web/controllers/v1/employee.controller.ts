@@ -6,7 +6,10 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { EmplyeesByDepartmentResponseDto } from '@resource/modules/employee/application/dtos/employees-by-department-response.dto';
 import { EmployeeUseCase } from '@resource/modules/employee/application/usecases/employee.usecase';
 import { Public } from '@libs/decorators/public.decorator';
-import { MMSEmployeeResponseDto } from '@resource/modules/employee/application/dtos/mms-employee-response.dto';
+import {
+    MMSEmployeeResponseDto,
+    MMSWebhookRequestDto,
+} from '@resource/modules/employee/application/dtos/mms-employee-response.dto';
 import { Throttle } from '@nestjs/throttler/dist/throttler.decorator';
 
 @ApiTags('5. 직원 - 사용자 페이지')
@@ -37,44 +40,44 @@ export class UserEmployeeController {
     @ApiExcludeEndpoint()
     @Public()
     @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookCreate(@Body() body: MMSEmployeeResponseDto) {
+    async webhookCreate(@Body() body: MMSWebhookRequestDto) {
         console.log('created employee', body);
-        await this.employeeUseCase.syncEmployee(body.employee_number);
+        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
     }
 
     @Post('webhook/update')
     @ApiExcludeEndpoint()
     @Public()
     @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookUpdate(@Body() body: MMSEmployeeResponseDto) {
+    async webhookUpdate(@Body() body: MMSWebhookRequestDto) {
         console.log('updated employee', body);
-        await this.employeeUseCase.syncEmployee(body.employee_number);
+        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
     }
 
     @Post('webhook/position_changed')
     @ApiExcludeEndpoint()
     @Public()
     @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookPositionChanged(@Body() body: MMSEmployeeResponseDto) {
+    async webhookPositionChanged(@Body() body: MMSWebhookRequestDto) {
         console.log('position changed', body);
-        await this.employeeUseCase.syncEmployee(body.employee_number);
+        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
     }
 
     @Post('webhook/department_changed')
     @ApiExcludeEndpoint()
     @Public()
     @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookDepartmentChanged(@Body() body: MMSEmployeeResponseDto) {
+    async webhookDepartmentChanged(@Body() body: MMSWebhookRequestDto) {
         console.log('department changed', body);
-        await this.employeeUseCase.syncEmployee(body.employee_number);
+        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
     }
 
     @Post('webhook/delete')
     @ApiExcludeEndpoint()
     @Public()
     @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookDelete(@Body() body: MMSEmployeeResponseDto) {
+    async webhookDelete(@Body() body: MMSWebhookRequestDto) {
         console.log('deleted employee', body);
-        // await this.employeeUseCase.syncEmployee(body.employee_number);
+        // await this.employeeUseCase.syncEmployee(body.payload.employee_number);
     }
 }
