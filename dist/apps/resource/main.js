@@ -6616,7 +6616,7 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
     }
     async findAllSnapshots(options) {
         const snapshots = await this.snapshotService.findAll(options);
-        return snapshots.map(snapshot => this.toResponseDto(snapshot));
+        return snapshots.map((snapshot) => this.toResponseDto(snapshot));
     }
     async deleteSnapshot(snapshotId) {
         await this.snapshotService.delete(snapshotId);
@@ -6628,8 +6628,8 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
             resource: snapshot.resource,
             title: snapshot.title,
             description: snapshot.description,
-            startDate: date_util_1.DateUtil.format(snapshot?.startDate),
-            endDate: date_util_1.DateUtil.format(snapshot?.endDate),
+            startDate: snapshot?.startDate ? date_util_1.DateUtil.format(snapshot?.startDate) : null,
+            endDate: snapshot?.endDate ? date_util_1.DateUtil.format(snapshot?.endDate) : null,
             isAllDay: snapshot.isAllDay,
             notifyBeforeStart: snapshot.notifyBeforeStart,
             notifyMinutesBeforeStart: snapshot.notifyMinutesBeforeStart,

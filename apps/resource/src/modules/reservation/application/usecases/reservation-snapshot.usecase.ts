@@ -7,12 +7,9 @@ import { ReservationSnapshotResponseDto } from '@resource/modules/reservation/ap
 import { DateUtil } from '@libs/utils/date.util';
 import { User } from '@libs/entities';
 
-
 @Injectable()
 export class ReservationSnapshotUsecase {
-    constructor(
-        private readonly snapshotService: ReservationSnapshotService,
-    ) {}
+    constructor(private readonly snapshotService: ReservationSnapshotService) {}
 
     async createSnapshot(user: User, dto: CreateReservationSnapshotDto): Promise<ReservationSnapshotResponseDto> {
         const snapshot = this.snapshotService.create(dto);
@@ -35,7 +32,7 @@ export class ReservationSnapshotUsecase {
 
     async findAllSnapshots(options?: RepositoryOptions): Promise<ReservationSnapshotResponseDto[]> {
         const snapshots = await this.snapshotService.findAll(options);
-        return snapshots.map(snapshot => this.toResponseDto(snapshot));
+        return snapshots.map((snapshot) => this.toResponseDto(snapshot));
     }
 
     async deleteSnapshot(snapshotId: string): Promise<void> {
@@ -49,8 +46,8 @@ export class ReservationSnapshotUsecase {
             resource: snapshot.resource,
             title: snapshot.title,
             description: snapshot.description,
-            startDate: DateUtil.format(snapshot?.startDate),
-            endDate: DateUtil.format(snapshot?.endDate),
+            startDate: snapshot?.startDate ? DateUtil.format(snapshot?.startDate) : null,
+            endDate: snapshot?.endDate ? DateUtil.format(snapshot?.endDate) : null,
             isAllDay: snapshot.isAllDay,
             notifyBeforeStart: snapshot.notifyBeforeStart,
             notifyMinutesBeforeStart: snapshot.notifyMinutesBeforeStart,
@@ -59,4 +56,4 @@ export class ReservationSnapshotUsecase {
             updatedAt: snapshot.updatedAt,
         };
     }
-} 
+}
