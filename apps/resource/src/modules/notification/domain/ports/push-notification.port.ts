@@ -24,7 +24,7 @@ export interface PushNotificationPayload {
 
 export interface PushNotificationSendResult {
     success: boolean;
-    message: string;
+    message: any;
     error: string;
 }
 
@@ -33,5 +33,10 @@ export interface PushNotificationPort {
         subscription: PushNotificationSubscription,
         payload: PushNotificationPayload,
     ): Promise<PushNotificationSendResult>;
+    bulkSendNotification(
+        subscriptions: PushNotificationSubscription[],
+        payload: PushNotificationPayload,
+    ): Promise<PushNotificationSendResult>;
+
     sendTestNotification(subscription: PushNotificationSubscription, payload: any): Promise<any>;
 }

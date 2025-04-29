@@ -32,6 +32,16 @@ export class WebPushAdapter implements PushNotificationPort {
         };
     }
 
+    async bulkSendNotification(
+        subscriptions: PushNotificationSubscription[],
+        payload: PushNotificationPayload,
+    ): Promise<PushNotificationSendResult> {
+        return {
+            success: true,
+            message: 'success',
+            error: 'success',
+        };
+    }
     async sendTestNotification(subscription: PushNotificationSubscription, payload: any): Promise<any> {
         return;
     }

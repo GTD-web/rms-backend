@@ -35,7 +35,6 @@ export class FCMAdapter implements PushNotificationPort {
             if (!subscription || !subscription.fcm || !subscription.fcm.token) {
                 throw new BadRequestException('FCM token is missing');
             }
-
             const message = {
                 token: subscription.fcm.token,
                 notification: {
@@ -50,6 +49,47 @@ export class FCMAdapter implements PushNotificationPort {
 
             const response = await getMessaging()
                 .send(message)
+                .then((response) => {
+                    console.log('FCM send successful. Message ID:', response);
+                    return { success: true, message: response, error: null };
+                })
+                .catch((error) => {
+                    console.error('FCM send error:', {
+                        code: error.code,
+                        message: error.message,
+                        details: error.details,
+                        stack: error.stack,
+                    });
+                    return { success: false, message: 'failed', error: error.message };
+                });
+            return response;
+        } catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
+            return { success: false, message: 'failed', error: error.message };
+        }
+    }
+
+    async bulkSendNotification(
+        subscriptions: PushNotificationSubscription[],
+        payload: PushNotificationPayload,
+    ): Promise<PushNotificationSendResult> {
+        try {
+            const messages = subscriptions.map((subscription) => ({
+                token: subscription.fcm.token,
+            }));
+            const response = await getMessaging()
+                .sendEachForMulticast({
+                    tokens: messages.map((message) => message.token),
+                    notification: {
+                        title: payload.title,
+                        body: payload.body,
+                    },
+                })
                 .then((response) => {
                     console.log('FCM send successful. Message ID:', response);
                     return { success: true, message: response, error: null };

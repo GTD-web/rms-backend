@@ -4242,7 +4242,7 @@ let AdapterService = class AdapterService {
         const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
             employeeId,
         });
-        await this.pushNotificationService.sendNotification(subscription, {
+        await this.pushNotificationService.bulkSendNotification(subscription, {
             title: notification.title,
             body: notification.body,
         });
@@ -5084,6 +5084,8 @@ const create_notification_dto_1 = __webpack_require__(/*! @resource/modules/noti
 const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
 const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 let UserNotificationController = class UserNotificationController {
     constructor(notificationUsecase) {
         this.notificationUsecase = notificationUsecase;
@@ -5092,6 +5094,19 @@ let UserNotificationController = class UserNotificationController {
         await this.notificationUsecase.subscribe(user, subscription);
     }
     async send(sendNotificationDto) {
+        console.log(sendNotificationDto);
+        sendNotificationDto.notificationTarget = ['374054a4-0663-40b0-b96b-169719597703'];
+        sendNotificationDto.notificationData = {
+            reservationId: '1',
+            reservationTitle: 'test',
+            reservationDate: '2025-01-01',
+            beforeMinutes: 10,
+            resourceId: '1',
+            resourceName: 'test',
+            resourceType: resource_type_enum_1.ResourceType.VEHICLE,
+            consumableName: 'test',
+        };
+        sendNotificationDto.notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED;
         await this.notificationUsecase.createNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
     }
     async findAllByEmployeeId(employeeId, query) {
@@ -5231,6 +5246,44 @@ let FCMAdapter = class FCMAdapter {
             };
             const response = await (0, messaging_1.getMessaging)()
                 .send(message)
+                .then((response) => {
+                console.log('FCM send successful. Message ID:', response);
+                return { success: true, message: response, error: null };
+            })
+                .catch((error) => {
+                console.error('FCM send error:', {
+                    code: error.code,
+                    message: error.message,
+                    details: error.details,
+                    stack: error.stack,
+                });
+                return { success: false, message: 'failed', error: error.message };
+            });
+            return response;
+        }
+        catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
+            return { success: false, message: 'failed', error: error.message };
+        }
+    }
+    async bulkSendNotification(subscriptions, payload) {
+        try {
+            const messages = subscriptions.map((subscription) => ({
+                token: subscription.fcm.token,
+            }));
+            const response = await (0, messaging_1.getMessaging)()
+                .sendEachForMulticast({
+                tokens: messages.map((message) => message.token),
+                notification: {
+                    title: payload.title,
+                    body: payload.body,
+                },
+            })
                 .then((response) => {
                 console.log('FCM send successful. Message ID:', response);
                 return { success: true, message: response, error: null };
