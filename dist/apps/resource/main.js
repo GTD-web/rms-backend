@@ -10677,10 +10677,10 @@ let ResourceUsecase = class ResourceUsecase {
             },
             relations: ['resourceGroup', 'reservations'],
         });
-        if (!resources || resources.length === 0) {
-            throw new common_1.NotFoundException('이용 가능한 자원이 없습니다.');
-        }
         const result = [];
+        if (!resources || (resources && resources.length === 0)) {
+            return result;
+        }
         const isSameDay = startDate === endDate;
         const isAccommodation = resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION;
         if (!isAccommodation && isSameDay && timeUnit) {
@@ -16750,17 +16750,13 @@ __decorate([
     __metadata("design:type", String)
 ], ReservationSnapshot.prototype, "userId", void 0);
 __decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], ReservationSnapshot.prototype, "step", void 0);
+__decorate([
     (0, typeorm_1.Column)('jsonb', { nullable: true }),
     __metadata("design:type", Object)
 ], ReservationSnapshot.prototype, "resource", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], ReservationSnapshot.prototype, "title", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], ReservationSnapshot.prototype, "description", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
@@ -16769,6 +16765,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], ReservationSnapshot.prototype, "endDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], ReservationSnapshot.prototype, "title", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], ReservationSnapshot.prototype, "description", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)

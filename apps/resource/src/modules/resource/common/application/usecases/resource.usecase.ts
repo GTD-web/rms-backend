@@ -339,13 +339,13 @@ export class ResourceUsecase {
             },
             relations: ['resourceGroup', 'reservations'],
         });
+        const result: ResourceAvailabilityDto[] = [];
 
-        if (!resources || resources.length === 0) {
-            throw new NotFoundException('이용 가능한 자원이 없습니다.');
+        if (!resources || (resources && resources.length === 0)) {
+            return result;
         }
 
         // 결과 리스트 초기화
-        const result: ResourceAvailabilityDto[] = [];
 
         // 날짜가 같은 경우 (당일 예약건)
         const isSameDay = startDate === endDate;
