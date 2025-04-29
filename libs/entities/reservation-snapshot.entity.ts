@@ -45,19 +45,19 @@ export class ReservationSnapshot {
         to?: Date;
     };
 
-    @Column({ type: 'timestamp with time zone', nullable: true })
+    @Column('jsonb', { nullable: true })
     startTime: {
         hour?: number;
         minute?: number;
     };
 
-    @Column({ type: 'timestamp with time zone', nullable: true })
+    @Column('jsonb', { nullable: true })
     endTime: {
         hour?: number;
         minute?: number;
     };
 
-    @Column({ nullable: true })
+    @Column('jsonb', { nullable: true })
     timeRange: {
         am?: boolean;
         pm?: boolean;
@@ -66,7 +66,7 @@ export class ReservationSnapshot {
     @Column({ nullable: true })
     timeUnit: number;
 
-    @Column({ nullable: true })
+    @Column('jsonb', { nullable: true })
     selectedResource: {
         resourceId?: string;
         resourceName?: string;

@@ -16977,15 +16977,15 @@ __decorate([
     __metadata("design:type", Object)
 ], ReservationSnapshot.prototype, "dateRange", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
+    (0, typeorm_1.Column)('jsonb', { nullable: true }),
     __metadata("design:type", Object)
 ], ReservationSnapshot.prototype, "startTime", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
+    (0, typeorm_1.Column)('jsonb', { nullable: true }),
     __metadata("design:type", Object)
 ], ReservationSnapshot.prototype, "endTime", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)('jsonb', { nullable: true }),
     __metadata("design:type", Object)
 ], ReservationSnapshot.prototype, "timeRange", void 0);
 __decorate([
@@ -16993,7 +16993,7 @@ __decorate([
     __metadata("design:type", Number)
 ], ReservationSnapshot.prototype, "timeUnit", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)('jsonb', { nullable: true }),
     __metadata("design:type", Object)
 ], ReservationSnapshot.prototype, "selectedResource", void 0);
 __decorate([
