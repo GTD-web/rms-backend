@@ -4612,8 +4612,8 @@ let NotificationUsecase = class NotificationUsecase {
         this.schedulerRegistry.addCronJob(jobName, job);
         job.start();
     }
-    async sendTestNotification(user, payload) {
-        await this.adapterService.sendTestNotification(user, payload);
+    async sendTestNotification(employeeId, payload) {
+        await this.adapterService.send(employeeId, payload);
     }
 };
 exports.NotificationUsecase = NotificationUsecase;
@@ -4909,7 +4909,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationController = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -4940,9 +4940,6 @@ let NotificationController = class NotificationController {
     }
     async markAsRead(user, notificationId) {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
-    }
-    async sendTest(user, sendNotificationDto) {
-        await this.notificationUsecase.sendTestNotification(user, sendNotificationDto);
     }
 };
 exports.NotificationController = NotificationController;
@@ -5017,29 +5014,6 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAsRead", null);
-__decorate([
-    (0, swagger_1.ApiTags)('알림테스트'),
-    (0, common_1.Post)('send/test'),
-    (0, swagger_1.ApiOperation)({ summary: '알람 테스트 전송' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '알람 테스트 전송 성공',
-    }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                notification: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-                data: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } },
-            },
-        },
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _k : Object, Object]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "sendTest", null);
 exports.NotificationController = NotificationController = __decorate([
     (0, swagger_1.ApiTags)('알림'),
     (0, common_1.Controller)('notifications'),
@@ -5069,7 +5043,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserNotificationController = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -5080,12 +5054,10 @@ const notification_usecase_1 = __webpack_require__(/*! @resource/modules/notific
 const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
 const push_subscription_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/push-subscription.dto */ "./apps/resource/src/modules/notification/application/dto/push-subscription.dto.ts");
 const response_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/response-notification.dto */ "./apps/resource/src/modules/notification/application/dto/response-notification.dto.ts");
-const create_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/create-notification.dto */ "./apps/resource/src/modules/notification/application/dto/create-notification.dto.ts");
 const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
 const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
 let UserNotificationController = class UserNotificationController {
     constructor(notificationUsecase) {
         this.notificationUsecase = notificationUsecase;
@@ -5093,20 +5065,9 @@ let UserNotificationController = class UserNotificationController {
     async subscribe(user, subscription) {
         await this.notificationUsecase.subscribe(user, subscription);
     }
-    async send(sendNotificationDto) {
+    async send(body) {
+        const sendNotificationDto = body.data ? body.data : body;
         console.log(sendNotificationDto);
-        sendNotificationDto.notificationTarget = ['374054a4-0663-40b0-b96b-169719597703'];
-        sendNotificationDto.notificationData = {
-            reservationId: '1',
-            reservationTitle: 'test',
-            reservationDate: '2025-01-01',
-            beforeMinutes: 10,
-            resourceId: '1',
-            resourceName: 'test',
-            resourceType: resource_type_enum_1.ResourceType.VEHICLE,
-            consumableName: 'test',
-        };
-        sendNotificationDto.notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED;
         await this.notificationUsecase.createNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
     }
     async findAllByEmployeeId(employeeId, query) {
@@ -5114,6 +5075,12 @@ let UserNotificationController = class UserNotificationController {
     }
     async markAsRead(user, notificationId) {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
+    }
+    async sendTest(body) {
+        console.log(body);
+        const employeeId = body.data.employeeId;
+        const payload = body.notification;
+        await this.notificationUsecase.sendTestNotification(employeeId, payload);
     }
 };
 exports.UserNotificationController = UserNotificationController;
@@ -5139,7 +5106,7 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _e : Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserNotificationController.prototype, "send", null);
 __decorate([
@@ -5164,8 +5131,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)('employeeId')),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_f = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [String, typeof (_e = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], UserNotificationController.prototype, "findAllByEmployeeId", null);
 __decorate([
     (0, common_1.Patch)(':notificationId/read'),
@@ -5173,9 +5140,18 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('notificationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _h : Object, String]),
+    __metadata("design:paramtypes", [typeof (_g = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _g : Object, String]),
     __metadata("design:returntype", Promise)
 ], UserNotificationController.prototype, "markAsRead", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, swagger_1.ApiTags)('알림테스트'),
+    (0, common_1.Post)('send/test'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserNotificationController.prototype, "sendTest", null);
 exports.UserNotificationController = UserNotificationController = __decorate([
     (0, swagger_1.ApiTags)('5. 알림 - 사용자 페이지'),
     (0, common_1.Controller)('v1/notifications'),
@@ -10552,7 +10528,8 @@ let ResourceUsecase = class ResourceUsecase {
                 });
                 const reservationResponseDtos = reservations
                     .map((reservation) => {
-                    const isMine = reservation.participants.some((participant) => participant.employeeId === user.employeeId);
+                    const isMine = reservation.participants.some((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER &&
+                        participant.employeeId === user.employeeId);
                     delete reservation.participants;
                     return {
                         ...reservation,

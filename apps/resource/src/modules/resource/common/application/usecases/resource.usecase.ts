@@ -22,7 +22,7 @@ import { ResourceTypeHandler } from '@resource/modules/resource/common/domain/po
 import { ResourceManagerService } from '../services/resource-manager.service';
 import { User as UserEntity } from '@libs/entities';
 import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
-import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { FileService } from '@resource/modules/file/application/services/file.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DateUtil } from '@libs/utils/date.util';
@@ -155,7 +155,9 @@ export class ResourceUsecase {
                         const reservationResponseDtos = reservations
                             .map((reservation) => {
                                 const isMine = reservation.participants.some(
-                                    (participant) => participant.employeeId === user.employeeId,
+                                    (participant) =>
+                                        participant.type === ParticipantsType.RESERVER &&
+                                        participant.employeeId === user.employeeId,
                                 );
                                 delete reservation.participants;
                                 return {
