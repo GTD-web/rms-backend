@@ -16,10 +16,6 @@ export class ParticipantDto {
     @ApiProperty()
     @IsString()
     department: string;
-
-    @ApiProperty()
-    @IsString()
-    position: string;
 }
 
 export class ResourceDto {
@@ -123,4 +119,4 @@ export class ReservationSnapshotResponseDto {
 
     @ApiProperty()
     updatedAt: Date;
-} 
+}

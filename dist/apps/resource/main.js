@@ -6017,11 +6017,6 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ParticipantDto.prototype, "department", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], ParticipantDto.prototype, "position", void 0);
 class ResourceDto {
 }
 exports.ResourceDto = ResourceDto;
