@@ -12,66 +12,78 @@ import {
 } from 'class-validator';
 
 export class AttendeeDto {
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsUUID()
-    id: string;
+    @IsOptional()
+    id?: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString()
-    name: string;
+    @IsOptional()
+    name?: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString()
-    department: string;
+    @IsOptional()
+    department?: string;
 }
 
 export class DroppableGroupItemDto {
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString()
-    id: string;
+    @IsOptional()
+    id?: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString()
-    title: string;
+    @IsOptional()
+    title?: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsNumber()
-    order: number;
+    @IsOptional()
+    order?: number;
 }
 
 export class DroppableGroupDataDto {
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString()
-    id: string;
+    @IsOptional()
+    id?: string;
 
     @ApiProperty({ required: false })
     @IsOptional()
     @IsString()
     title?: string;
 
-    @ApiProperty({ type: [DroppableGroupItemDto] })
+    @ApiProperty({ type: [DroppableGroupItemDto], required: false })
     @IsArray()
-    items: DroppableGroupItemDto[];
+    @IsOptional()
+    items?: DroppableGroupItemDto[];
 }
 
 export class ReminderTimeDto {
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString()
-    id: string;
+    @IsOptional()
+    id?: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsNumber()
-    time: number;
+    @IsOptional()
+    time?: number;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsBoolean()
-    isSelected: boolean;
+    @IsOptional()
+    isSelected?: boolean;
 }
 
 export class CreateReservationSnapshotDto {
-    @ApiProperty({ enum: ['groups', 'date-time', 'resources', 'info'] })
+    @ApiProperty({ enum: ['groups', 'date-time', 'resources', 'info'], required: false })
     @IsEnum(['groups', 'date-time', 'resources', 'info'])
-    step: 'groups' | 'date-time' | 'resources' | 'info';
+    @IsOptional()
+    step?: 'groups' | 'date-time' | 'resources' | 'info';
 
     @ApiProperty({ required: false, type: DroppableGroupDataDto })
     @IsOptional()

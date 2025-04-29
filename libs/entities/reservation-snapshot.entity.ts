@@ -27,12 +27,12 @@ export class ReservationSnapshot {
 
     @Column('jsonb', { nullable: true })
     droppableGroupData: {
-        id: string;
+        id?: string;
         title?: string;
-        items: {
-            id: string;
-            title: string;
-            order: number;
+        items?: {
+            id?: string;
+            title?: string;
+            order?: number;
         }[];
     };
 
@@ -74,9 +74,9 @@ export class ReservationSnapshot {
 
     @Column('jsonb', { nullable: true })
     reminderTimes: {
-        id: string;
-        time: number;
-        isSelected: boolean;
+        id?: string;
+        time?: number;
+        isSelected?: boolean;
     }[];
 
     @Column({ default: false })
@@ -90,9 +90,9 @@ export class ReservationSnapshot {
 
     @Column('jsonb', { nullable: true })
     attendees: {
-        id: string;
-        name: string;
-        department: string;
+        id?: string;
+        name?: string;
+        department?: string;
     }[];
 
     @CreateDateColumn({ type: 'timestamp with time zone' })

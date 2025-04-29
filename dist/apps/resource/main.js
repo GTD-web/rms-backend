@@ -5983,44 +5983,51 @@ class AttendeeDto {
 }
 exports.AttendeeDto = AttendeeDto;
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], AttendeeDto.prototype, "id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], AttendeeDto.prototype, "name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], AttendeeDto.prototype, "department", void 0);
 class DroppableGroupItemDto {
 }
 exports.DroppableGroupItemDto = DroppableGroupItemDto;
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], DroppableGroupItemDto.prototype, "id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], DroppableGroupItemDto.prototype, "title", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], DroppableGroupItemDto.prototype, "order", void 0);
 class DroppableGroupDataDto {
 }
 exports.DroppableGroupDataDto = DroppableGroupDataDto;
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], DroppableGroupDataDto.prototype, "id", void 0);
 __decorate([
@@ -6030,34 +6037,39 @@ __decorate([
     __metadata("design:type", String)
 ], DroppableGroupDataDto.prototype, "title", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: [DroppableGroupItemDto] }),
+    (0, swagger_1.ApiProperty)({ type: [DroppableGroupItemDto], required: false }),
     (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], DroppableGroupDataDto.prototype, "items", void 0);
 class ReminderTimeDto {
 }
 exports.ReminderTimeDto = ReminderTimeDto;
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], ReminderTimeDto.prototype, "id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], ReminderTimeDto.prototype, "time", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], ReminderTimeDto.prototype, "isSelected", void 0);
 class CreateReservationSnapshotDto {
 }
 exports.CreateReservationSnapshotDto = CreateReservationSnapshotDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: ['groups', 'date-time', 'resources', 'info'] }),
+    (0, swagger_1.ApiProperty)({ enum: ['groups', 'date-time', 'resources', 'info'], required: false }),
     (0, class_validator_1.IsEnum)(['groups', 'date-time', 'resources', 'info']),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateReservationSnapshotDto.prototype, "step", void 0);
 __decorate([
