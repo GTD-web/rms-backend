@@ -9,11 +9,11 @@ import { EmplyeesByDepartmentResponseDto } from '@resource/dtos.index';
 @ApiTags('3. 자원 관리자 - 관리자 페이지')
 @ApiBearerAuth()
 @Controller('v1/admin/resource-managers')
+@Roles(Role.SYSTEM_ADMIN)
 export class AdminResourceManagerController {
     constructor(private readonly resourceManagerUseCase: ResourceManagerUseCase) {}
 
     @Get()
-    @Roles(Role.SYSTEM_ADMIN)
     @ApiOperation({ summary: '자원 관리자 목록 조회' })
     @ApiDataResponse({
         status: 200,

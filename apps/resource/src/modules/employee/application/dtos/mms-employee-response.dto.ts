@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class MMSEmployeeResponseDto {
     constructor(employee: any) {
-        this._id = employee._id;
+        this.id = employee.id;
         this.employee_number = employee.employee_number;
         this.name = employee.name;
         this.email = employee.email;
@@ -17,7 +17,7 @@ export class MMSEmployeeResponseDto {
     }
 
     @ApiProperty({ description: '직원 ID', example: '67d116b591e5366c327915d2' })
-    _id: string;
+    id: string;
 
     @ApiProperty({ description: '사번', example: '24020' })
     employee_number: string;

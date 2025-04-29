@@ -2,6 +2,171 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler-storage.interface.js":
+/*!******************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler-storage.interface.js ***!
+  \******************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ThrottlerStorage = void 0;
+exports.ThrottlerStorage = Symbol('ThrottlerStorage');
+//# sourceMappingURL=throttler-storage.interface.js.map
+
+/***/ }),
+
+/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.constants.js":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.constants.js ***!
+  \**********************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.THROTTLER_SKIP = exports.THROTTLER_OPTIONS = exports.THROTTLER_TTL = exports.THROTTLER_LIMIT = void 0;
+exports.THROTTLER_LIMIT = 'THROTTLER:LIMIT';
+exports.THROTTLER_TTL = 'THROTTLER:TTL';
+exports.THROTTLER_OPTIONS = 'THROTTLER:MODULE_OPTIONS';
+exports.THROTTLER_SKIP = 'THROTTLER:SKIP';
+//# sourceMappingURL=throttler.constants.js.map
+
+/***/ }),
+
+/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.decorator.js":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.decorator.js ***!
+  \**********************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.InjectThrottlerStorage = exports.InjectThrottlerOptions = exports.SkipThrottle = exports.Throttle = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const throttler_constants_1 = __webpack_require__(/*! ./throttler.constants */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.constants.js");
+const throttler_providers_1 = __webpack_require__(/*! ./throttler.providers */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.providers.js");
+function setThrottlerMetadata(target, limit, ttl) {
+    Reflect.defineMetadata(throttler_constants_1.THROTTLER_TTL, ttl, target);
+    Reflect.defineMetadata(throttler_constants_1.THROTTLER_LIMIT, limit, target);
+}
+const Throttle = (limit = 20, ttl = 60) => {
+    return (target, propertyKey, descriptor) => {
+        if (descriptor) {
+            setThrottlerMetadata(descriptor.value, limit, ttl);
+            return descriptor;
+        }
+        setThrottlerMetadata(target, limit, ttl);
+        return target;
+    };
+};
+exports.Throttle = Throttle;
+const SkipThrottle = (skip = true) => {
+    return (target, propertyKey, descriptor) => {
+        if (descriptor) {
+            Reflect.defineMetadata(throttler_constants_1.THROTTLER_SKIP, skip, descriptor.value);
+            return descriptor;
+        }
+        Reflect.defineMetadata(throttler_constants_1.THROTTLER_SKIP, skip, target);
+        return target;
+    };
+};
+exports.SkipThrottle = SkipThrottle;
+const InjectThrottlerOptions = () => (0, common_1.Inject)((0, throttler_providers_1.getOptionsToken)());
+exports.InjectThrottlerOptions = InjectThrottlerOptions;
+const InjectThrottlerStorage = () => (0, common_1.Inject)((0, throttler_providers_1.getStorageToken)());
+exports.InjectThrottlerStorage = InjectThrottlerStorage;
+//# sourceMappingURL=throttler.decorator.js.map
+
+/***/ }),
+
+/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.providers.js":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.providers.js ***!
+  \**********************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getStorageToken = exports.getOptionsToken = exports.ThrottlerStorageProvider = exports.createThrottlerProviders = void 0;
+const throttler_storage_interface_1 = __webpack_require__(/*! ./throttler-storage.interface */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler-storage.interface.js");
+const throttler_constants_1 = __webpack_require__(/*! ./throttler.constants */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.constants.js");
+const throttler_service_1 = __webpack_require__(/*! ./throttler.service */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.service.js");
+function createThrottlerProviders(options) {
+    return [
+        {
+            provide: throttler_constants_1.THROTTLER_OPTIONS,
+            useValue: options,
+        },
+    ];
+}
+exports.createThrottlerProviders = createThrottlerProviders;
+exports.ThrottlerStorageProvider = {
+    provide: throttler_storage_interface_1.ThrottlerStorage,
+    useFactory: (options) => {
+        return options.storage ? options.storage : new throttler_service_1.ThrottlerStorageService();
+    },
+    inject: [throttler_constants_1.THROTTLER_OPTIONS],
+};
+const getOptionsToken = () => throttler_constants_1.THROTTLER_OPTIONS;
+exports.getOptionsToken = getOptionsToken;
+const getStorageToken = () => throttler_storage_interface_1.ThrottlerStorage;
+exports.getStorageToken = getStorageToken;
+//# sourceMappingURL=throttler.providers.js.map
+
+/***/ }),
+
+/***/ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.service.js":
+/*!********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.service.js ***!
+  \********************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ThrottlerStorageService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+let ThrottlerStorageService = class ThrottlerStorageService {
+    constructor() {
+        this._storage = {};
+        this.timeoutIds = [];
+    }
+    get storage() {
+        return this._storage;
+    }
+    async getRecord(key) {
+        return this.storage[key] || [];
+    }
+    async addRecord(key, ttl) {
+        const ttlMilliseconds = ttl * 1000;
+        if (!this.storage[key]) {
+            this.storage[key] = [];
+        }
+        this.storage[key].push(Date.now() + ttlMilliseconds);
+        const timeoutId = setTimeout(() => {
+            this.storage[key].shift();
+            clearTimeout(timeoutId);
+            this.timeoutIds = this.timeoutIds.filter((id) => id != timeoutId);
+        }, ttlMilliseconds);
+        this.timeoutIds.push(timeoutId);
+    }
+    onApplicationShutdown() {
+        this.timeoutIds.forEach(clearTimeout);
+    }
+};
+ThrottlerStorageService = __decorate([
+    (0, common_1.Injectable)()
+], ThrottlerStorageService);
+exports.ThrottlerStorageService = ThrottlerStorageService;
+//# sourceMappingURL=throttler.service.js.map
+
+/***/ }),
+
 /***/ "./apps/resource/src/app.controller.ts":
 /*!*********************************************!*\
   !*** ./apps/resource/src/app.controller.ts ***!
@@ -924,6 +1089,15 @@ let UserEventHandler = class UserEventHandler {
         }
         await this.userService.update(user);
     }
+    async handleUserMobileUpdateEvent(payload) {
+        console.log(`Mobile updated for user ${payload.employeeId} ${payload.mobile}`);
+        const user = await this.userService.findByEmployeeId(payload.employeeId);
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        user.mobile = payload.mobile;
+        await this.userService.update(user);
+    }
     async handleUserGetEvent(payload) {
         console.log(`User found for employeeId ${payload.employeeId} or userId ${payload.userId}`);
         if (payload.employeeId) {
@@ -962,6 +1136,12 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserEventHandler.prototype, "handleUserSubscriptionUpdateEvent", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('update.user.mobile'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserEventHandler.prototype, "handleUserMobileUpdateEvent", null);
 __decorate([
     (0, event_emitter_1.OnEvent)('find.user'),
     __metadata("design:type", Function),
@@ -1834,7 +2014,6 @@ let AdminResourceManagerController = class AdminResourceManagerController {
 exports.AdminResourceManagerController = AdminResourceManagerController;
 __decorate([
     (0, common_1.Get)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, swagger_1.ApiOperation)({ summary: '자원 관리자 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -1849,6 +2028,7 @@ exports.AdminResourceManagerController = AdminResourceManagerController = __deco
     (0, swagger_1.ApiTags)('3. 자원 관리자 - 관리자 페이지'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('v1/admin/resource-managers'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_manager_usecase_1.ResourceManagerUseCase !== "undefined" && resource_manager_usecase_1.ResourceManagerUseCase) === "function" ? _a : Object])
 ], AdminResourceManagerController);
 
@@ -1885,6 +2065,8 @@ const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/in
 const user_usecase_1 = __webpack_require__(/*! @resource/modules/auth/application/usecases/user.usecase */ "./apps/resource/src/modules/auth/application/usecases/user.usecase.ts");
 const user_response_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/user-response.dto */ "./apps/resource/src/modules/auth/application/dto/user-response.dto.ts");
 const check_password_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/check-password.dto */ "./apps/resource/src/modules/auth/application/dto/check-password.dto.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let AdminUserController = class AdminUserController {
     constructor(userUsecase) {
         this.userUsecase = userUsecase;
@@ -1918,8 +2100,9 @@ __decorate([
 ], AdminUserController.prototype, "changeRole", null);
 exports.AdminUserController = AdminUserController = __decorate([
     (0, swagger_1.ApiTags)('5. 유저 - 관리자 페이지'),
-    (0, common_1.Controller)('v1/admin/users'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Controller)('v1/admin/users'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     __metadata("design:paramtypes", [typeof (_a = typeof user_usecase_1.UserUsecase !== "undefined" && user_usecase_1.UserUsecase) === "function" ? _a : Object])
 ], AdminUserController);
 
@@ -1974,9 +2157,9 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UserAuthController.prototype, "login", null);
 exports.UserAuthController = UserAuthController = __decorate([
-    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiTags)('1. 인증 - 사용자 페이지'),
     (0, common_1.Controller)('v1/auth'),
+    (0, public_decorator_1.Public)(),
     __param(0, (0, common_1.Inject)('AuthService')),
     __metadata("design:paramtypes", [typeof (_a = typeof auth_service_port_1.AuthService !== "undefined" && auth_service_port_1.AuthService) === "function" ? _a : Object])
 ], UserAuthController);
@@ -2016,6 +2199,8 @@ const user_response_dto_1 = __webpack_require__(/*! @resource/modules/auth/appli
 const check_password_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/check-password.dto */ "./apps/resource/src/modules/auth/application/dto/check-password.dto.ts");
 const change_password_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/change-password.dto */ "./apps/resource/src/modules/auth/application/dto/change-password.dto.ts");
 const notification_settings_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/notification-settings.dto */ "./apps/resource/src/modules/auth/application/dto/notification-settings.dto.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let UserUserController = class UserUserController {
     constructor(userUsecase) {
         this.userUsecase = userUsecase;
@@ -2069,7 +2254,7 @@ __decorate([
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
         description: '알림 설정 성공',
-        type: user_response_dto_1.UserResponseDto
+        type: user_response_dto_1.UserResponseDto,
     }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Body)()),
@@ -2081,6 +2266,7 @@ exports.UserUserController = UserUserController = __decorate([
     (0, swagger_1.ApiTags)('5. 유저 - 사용자 페이지'),
     (0, common_1.Controller)('v1/users'),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof user_usecase_1.UserUsecase !== "undefined" && user_usecase_1.UserUsecase) === "function" ? _a : Object])
 ], UserUserController);
 
@@ -2417,7 +2603,7 @@ exports.MMSEmployeeResponseDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 class MMSEmployeeResponseDto {
     constructor(employee) {
-        this._id = employee._id;
+        this.id = employee.id;
         this.employee_number = employee.employee_number;
         this.name = employee.name;
         this.email = employee.email;
@@ -2435,7 +2621,7 @@ exports.MMSEmployeeResponseDto = MMSEmployeeResponseDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '직원 ID', example: '67d116b591e5366c327915d2' }),
     __metadata("design:type", String)
-], MMSEmployeeResponseDto.prototype, "_id", void 0);
+], MMSEmployeeResponseDto.prototype, "id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '사번', example: '24020' }),
     __metadata("design:type", String)
@@ -2666,16 +2852,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeUseCase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! ../services/employee.service */ "./apps/resource/src/modules/employee/application/services/employee.service.ts");
 const mms_employee_response_dto_1 = __webpack_require__(/*! ../dtos/mms-employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts");
 const axios_1 = __webpack_require__(/*! axios */ "axios");
+const dist_1 = __webpack_require__(/*! @nestjs/event-emitter/dist */ "@nestjs/event-emitter/dist");
 let EmployeeUseCase = class EmployeeUseCase {
-    constructor(employeeService) {
+    constructor(employeeService, eventEmitter) {
         this.employeeService = employeeService;
+        this.eventEmitter = eventEmitter;
     }
     async findEmployee(employeeNumber, repositoryOptions) {
         let employee = await this.employeeService.findByEmployeeNumber(employeeNumber);
@@ -2731,6 +2919,12 @@ let EmployeeUseCase = class EmployeeUseCase {
             else {
                 await this.employeeService.save(this.employeeService.create(employee));
             }
+            if (employee.phone_number) {
+                this.eventEmitter.emit('update.user.mobile', {
+                    employeeId: user.employeeId,
+                    mobile: employee.phone_number,
+                });
+            }
         }
         catch (error) {
             console.log(error);
@@ -2751,6 +2945,12 @@ let EmployeeUseCase = class EmployeeUseCase {
                 else {
                     await this.employeeService.save(this.employeeService.create(employee));
                 }
+                if (employee.phone_number) {
+                    this.eventEmitter.emit('update.user.mobile', {
+                        employeeId: user.employeeId,
+                        mobile: employee.phone_number,
+                    });
+                }
             }
             catch (error) {
                 console.log(error);
@@ -2761,7 +2961,7 @@ let EmployeeUseCase = class EmployeeUseCase {
 exports.EmployeeUseCase = EmployeeUseCase;
 exports.EmployeeUseCase = EmployeeUseCase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object, typeof (_b = typeof dist_1.EventEmitter2 !== "undefined" && dist_1.EventEmitter2) === "function" ? _b : Object])
 ], EmployeeUseCase);
 
 
@@ -3113,7 +3313,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserEmployeeController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -3123,6 +3323,9 @@ const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "
 const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
 const employees_by_department_response_dto_1 = __webpack_require__(/*! @resource/modules/employee/application/dtos/employees-by-department-response.dto */ "./apps/resource/src/modules/employee/application/dtos/employees-by-department-response.dto.ts");
 const employee_usecase_1 = __webpack_require__(/*! @resource/modules/employee/application/usecases/employee.usecase */ "./apps/resource/src/modules/employee/application/usecases/employee.usecase.ts");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const mms_employee_response_dto_1 = __webpack_require__(/*! @resource/modules/employee/application/dtos/mms-employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts");
+const throttler_decorator_1 = __webpack_require__(/*! @nestjs/throttler/dist/throttler.decorator */ "./node_modules/.pnpm/@nestjs+throttler@3.1.0_@nestjs+common@10.4.17_@nestjs+core@10.4.17_reflect-metadata@0.2.2/node_modules/@nestjs/throttler/dist/throttler.decorator.js");
 let UserEmployeeController = class UserEmployeeController {
     constructor(employeeUseCase) {
         this.employeeUseCase = employeeUseCase;
@@ -3135,23 +3338,22 @@ let UserEmployeeController = class UserEmployeeController {
     }
     async webhookCreate(body) {
         console.log('created employee', body);
-        await this.employeeUseCase.syncEmployees();
+        await this.employeeUseCase.syncEmployee(body.employee_number);
     }
     async webhookUpdate(body) {
         console.log('updated employee', body);
-        await this.employeeUseCase.syncEmployees();
+        await this.employeeUseCase.syncEmployee(body.employee_number);
     }
     async webhookPositionChanged(body) {
         console.log('position changed', body);
-        await this.employeeUseCase.syncEmployees();
+        await this.employeeUseCase.syncEmployee(body.employee_number);
     }
     async webhookDepartmentChanged(body) {
         console.log('department changed', body);
-        await this.employeeUseCase.syncEmployees();
+        await this.employeeUseCase.syncEmployee(body.employee_number);
     }
     async webhookDelete(body) {
         console.log('deleted employee', body);
-        await this.employeeUseCase.syncEmployees();
     }
 };
 exports.UserEmployeeController = UserEmployeeController;
@@ -3178,41 +3380,51 @@ __decorate([
 __decorate([
     (0, common_1.Post)('webhook/create'),
     (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [typeof (_c = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _c : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookCreate", null);
 __decorate([
     (0, common_1.Post)('webhook/update'),
     (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [typeof (_d = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookUpdate", null);
 __decorate([
     (0, common_1.Post)('webhook/position_changed'),
     (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _e : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookPositionChanged", null);
 __decorate([
     (0, common_1.Post)('webhook/department_changed'),
     (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookDepartmentChanged", null);
 __decorate([
     (0, common_1.Post)('webhook/delete'),
     (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [typeof (_g = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _g : Object]),
     __metadata("design:returntype", Promise)
 ], UserEmployeeController.prototype, "webhookDelete", null);
 exports.UserEmployeeController = UserEmployeeController = __decorate([
@@ -3296,9 +3508,7 @@ let EmployeeRepository = class EmployeeRepository {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Employee)
             : this.repository;
-        console.log(employeeNumber);
         const entity = await repository.findOne({ where: { employeeNumber } });
-        console.log('entity', entity);
         return entity ? entity : null;
     }
 };
@@ -19050,6 +19260,16 @@ module.exports = require("@nestjs/core");
 /***/ ((module) => {
 
 module.exports = require("@nestjs/event-emitter");
+
+/***/ }),
+
+/***/ "@nestjs/event-emitter/dist":
+/*!*********************************************!*\
+  !*** external "@nestjs/event-emitter/dist" ***!
+  \*********************************************/
+/***/ ((module) => {
+
+module.exports = require("@nestjs/event-emitter/dist");
 
 /***/ }),
 

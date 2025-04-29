@@ -6,9 +6,9 @@ import { Public } from '@libs/decorators/public.decorator';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-response.dto';
 
-@Public()
 @ApiTags('1. 인증 - 사용자 페이지')
 @Controller('v1/auth')
+@Public()
 export class UserAuthController {
     constructor(@Inject('AuthService') private authService: AuthService) {}
 

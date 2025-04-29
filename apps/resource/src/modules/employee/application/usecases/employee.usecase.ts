@@ -6,10 +6,14 @@ import axios from 'axios';
 import { EmployeeResponseDto } from '../dtos/employee-response.dto';
 import { Employee } from '@libs/entities';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter/dist';
 
 @Injectable()
 export class EmployeeUseCase {
-    constructor(private readonly employeeService: EmployeeService) {}
+    constructor(
+        private readonly employeeService: EmployeeService,
+        private readonly eventEmitter: EventEmitter2,
+    ) {}
 
     async findEmployee(employeeNumber: string, repositoryOptions?: RepositoryOptions): Promise<Employee> {
         let employee = await this.employeeService.findByEmployeeNumber(employeeNumber);
@@ -74,6 +78,12 @@ export class EmployeeUseCase {
             } else {
                 await this.employeeService.save(this.employeeService.create(employee));
             }
+            if (employee.phone_number) {
+                this.eventEmitter.emit('update.user.mobile', {
+                    employeeId: user.employeeId,
+                    mobile: employee.phone_number,
+                });
+            }
         } catch (error) {
             console.log(error);
         }
@@ -92,6 +102,12 @@ export class EmployeeUseCase {
                     await this.employeeService.save(user);
                 } else {
                     await this.employeeService.save(this.employeeService.create(employee));
+                }
+                if (employee.phone_number) {
+                    this.eventEmitter.emit('update.user.mobile', {
+                        employeeId: user.employeeId,
+                        mobile: employee.phone_number,
+                    });
                 }
             } catch (error) {
                 console.log(error);

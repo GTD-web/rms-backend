@@ -8,10 +8,13 @@ import { UserResponseDto } from '@resource/modules/auth/application/dto/user-res
 import { CheckPasswordDto } from '@resource/modules/auth/application/dto/check-password.dto';
 import { ChangePasswordDto } from '@resource/modules/auth/application/dto/change-password.dto';
 import { UpdateNotificationSettingsDto } from '@resource/modules/auth/application/dto/notification-settings.dto';
+import { Roles } from '@libs/decorators/role.decorator';
+import { Role } from '@libs/enums/role-type.enum';
 
 @ApiTags('5. 유저 - 사용자 페이지')
 @Controller('v1/users')
 @ApiBearerAuth()
+@Roles(Role.USER)
 export class UserUserController {
     constructor(private readonly userUsecase: UserUsecase) {}
 
@@ -38,10 +41,10 @@ export class UserUserController {
 
     @Patch('me/notification-settings')
     @ApiOperation({ summary: '알림 설정' })
-    @ApiDataResponse({ 
-        status: 200, 
+    @ApiDataResponse({
+        status: 200,
         description: '알림 설정 성공',
-        type: UserResponseDto 
+        type: UserResponseDto,
     })
     async changeNotificationSettings(
         @User() user: UserEntity,

@@ -20,7 +20,7 @@ export class UserEventHandler {
         if (!user.roles.includes(payload.role)) {
             user.roles.push(payload.role);
             await this.userService.update(user, payload.repositoryOptions);
-        }   
+        }
     }
 
     @OnEvent('remove.user.role')
@@ -54,12 +54,29 @@ export class UserEventHandler {
 
         if (user.subscriptions) {
             if (user.subscriptions.length > 4) {
-                user.subscriptions.shift()
+                user.subscriptions.shift();
             }
-            user.subscriptions.push(payload.subscription)
+            user.subscriptions.push(payload.subscription);
         } else {
             user.subscriptions = [payload.subscription];
         }
+        await this.userService.update(user);
+    }
+
+    @OnEvent('update.user.mobile')
+    async handleUserMobileUpdateEvent(payload: {
+        employeeId: string;
+        mobile: string;
+        // repositoryOptions?: RepositoryOptions;
+    }) {
+        console.log(`Mobile updated for user ${payload.employeeId} ${payload.mobile}`);
+        // 구독 정보 업데이트 이벤트에 대한 처리 로직
+        const user = await this.userService.findByEmployeeId(payload.employeeId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        user.mobile = payload.mobile;
         await this.userService.update(user);
     }
 
