@@ -38,9 +38,7 @@ export class UserNotificationController {
         status: 200,
         description: '웹 푸시 알림 전송 성공',
     })
-    async send(@Body() body: any) {
-        const sendNotificationDto = body.data ? body.data : body;
-        console.log(sendNotificationDto);
+    async send(@Body() sendNotificationDto: SendNotificationDto) {
         await this.notificationUsecase.createNotification(
             sendNotificationDto.notificationType,
             sendNotificationDto.notificationData,
