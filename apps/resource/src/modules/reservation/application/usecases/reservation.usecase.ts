@@ -727,7 +727,8 @@ export class ReservationUsecase {
                 throw new BadRequestException('Cannot update time of confirmed accommodation reservation');
             }
         }
-
+        const participantIds = updateDto.participantIds;
+        delete updateDto.participantIds;
         let updatedReservation = await this.reservationService.update(reservationId, {
             ...updateDto,
             startDate: updateDto.startDate ? DateUtil.date(updateDto.startDate).toDate() : undefined,
@@ -746,10 +747,8 @@ export class ReservationUsecase {
             const participants = await this.participantService.findAll({
                 where: { reservationId, type: ParticipantsType.PARTICIPANT },
             });
-            const newParticipants = updateDto.participantIds.filter(
-                (id) => !participants.some((p) => p.employeeId === id),
-            );
-            const deletedParticipants = participants.filter((p) => !updateDto.participantIds.includes(p.employeeId));
+            const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
+            const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
 
             // 기존 참가자 삭제
             await Promise.all(
