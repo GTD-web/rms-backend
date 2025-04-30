@@ -1,7 +1,7 @@
 export enum ReservationStatus {
     PENDING = 'PENDING', // 예약대기
     CONFIRMED = 'CONFIRMED', // 예약완료
-    CANCELED = 'CANCELED', // 예약취소
+    CANCELLED = 'CANCELLED', // 예약취소
     REJECTED = 'REJECTED', // 예약반려
     CLOSED = 'CLOSED', // 예약종료
 }

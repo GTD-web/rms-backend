@@ -7517,7 +7517,7 @@ let ReservationUsecase = class ReservationUsecase {
             throw new common_1.NotFoundException('Reservation not found');
         }
         let hasUpdateTime = false;
-        let hasUpdateParticipants = updateDto.participantIds.length > 0;
+        const hasUpdateParticipants = updateDto.participantIds.length > 0;
         if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
             hasUpdateTime = true;
             const conflicts = await this.reservationService.findConflictingReservations(updateDto.resourceId, date_util_1.DateUtil.date(updateDto.startDate).toDate(), date_util_1.DateUtil.date(updateDto.endDate).toDate(), reservationId);
@@ -7600,7 +7600,7 @@ let ReservationUsecase = class ReservationUsecase {
             throw new common_1.NotFoundException('Reservation not found');
         }
         if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
-            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELED ||
+            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
             reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
             throw new common_1.BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
         }
@@ -7629,7 +7629,7 @@ let ReservationUsecase = class ReservationUsecase {
             throw new common_1.NotFoundException('Reservation not found');
         }
         if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
-            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELED ||
+            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
             reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
             throw new common_1.BadRequestException(`Cannot update participants of reservation in ${reservation.status} status`);
         }
@@ -7680,7 +7680,7 @@ let ReservationUsecase = class ReservationUsecase {
             throw new common_1.NotFoundException('Reservation not found');
         }
         const updatedReservation = await this.reservationService.update(reservationId, updateDto);
-        if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
+        if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELLED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
             this.deleteReservationClosingJob(reservationId);
         }
         if (updateDto.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
@@ -7697,7 +7697,7 @@ let ReservationUsecase = class ReservationUsecase {
                     case reservation_type_enum_1.ReservationStatus.CONFIRMED:
                         notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED;
                         break;
-                    case reservation_type_enum_1.ReservationStatus.CANCELED:
+                    case reservation_type_enum_1.ReservationStatus.CANCELLED:
                         notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED;
                         break;
                     case reservation_type_enum_1.ReservationStatus.REJECTED:
@@ -7950,7 +7950,7 @@ let ReservationController = class ReservationController {
     }
     async updateStatusCancel(user, reservationId) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateStatus(reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELED });
+        return this.reservationUsecase.updateStatus(reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELLED });
     }
     async updateParticipants(user, reservationId, updateDto) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
@@ -8453,7 +8453,7 @@ let UserReservationController = class UserReservationController {
     }
     async updateStatusCancel(user, reservationId) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateStatus(reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELED });
+        return this.reservationUsecase.updateStatus(reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELLED });
     }
     async updateParticipants(user, reservationId, updateDto) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
@@ -18221,7 +18221,7 @@ exports.EmployeeReservationStats = EmployeeReservationStats = __decorate([
     COUNT(DISTINCT CASE WHEN res.type = 'ACCOMMODATION' THEN r."reservationId" END) AS "accommodationCount",
     
     -- 취소 및 변경 빈도
-    COUNT(DISTINCT CASE WHEN r.status = 'CANCELED' THEN r."reservationId" END) AS "cancellationCount",
+    COUNT(DISTINCT CASE WHEN r.status = 'CANCELLED' THEN r."reservationId" END) AS "cancellationCount",
     
     -- 가장 많이 예약한 자원 (서브쿼리로 처리해야 할 수 있음)
     -- 복잡한 구현은 애플리케이션 코드에서 처리 가능
@@ -18385,7 +18385,7 @@ FROM
     JOIN employees e ON rp."employeeId" = e."employeeId"
 WHERE
     rp.type = 'RESERVER' -- 예약 주체만 집계
-    AND r.status <> 'CANCELED' -- 취소된 예약 제외
+    AND r.status <> 'CANCELLED' -- 취소된 예약 제외
 GROUP BY
     res."resourceId",
     res.name,
@@ -18611,7 +18611,7 @@ var ReservationStatus;
 (function (ReservationStatus) {
     ReservationStatus["PENDING"] = "PENDING";
     ReservationStatus["CONFIRMED"] = "CONFIRMED";
-    ReservationStatus["CANCELED"] = "CANCELED";
+    ReservationStatus["CANCELLED"] = "CANCELLED";
     ReservationStatus["REJECTED"] = "REJECTED";
     ReservationStatus["CLOSED"] = "CLOSED";
 })(ReservationStatus || (exports.ReservationStatus = ReservationStatus = {}));

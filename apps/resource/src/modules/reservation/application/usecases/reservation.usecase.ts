@@ -706,7 +706,7 @@ export class ReservationUsecase {
             throw new NotFoundException('Reservation not found');
         }
         let hasUpdateTime = false;
-        let hasUpdateParticipants = updateDto.participantIds.length > 0;
+        const hasUpdateParticipants = updateDto.participantIds.length > 0;
 
         if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
             hasUpdateTime = true;
@@ -829,7 +829,7 @@ export class ReservationUsecase {
 
         if (
             reservation.status === ReservationStatus.CLOSED ||
-            reservation.status === ReservationStatus.CANCELED ||
+            reservation.status === ReservationStatus.CANCELLED ||
             reservation.status === ReservationStatus.REJECTED
         ) {
             throw new BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
@@ -874,7 +874,7 @@ export class ReservationUsecase {
 
         if (
             reservation.status === ReservationStatus.CLOSED ||
-            reservation.status === ReservationStatus.CANCELED ||
+            reservation.status === ReservationStatus.CANCELLED ||
             reservation.status === ReservationStatus.REJECTED
         ) {
             throw new BadRequestException(`Cannot update participants of reservation in ${reservation.status} status`);
@@ -943,7 +943,7 @@ export class ReservationUsecase {
         const updatedReservation = await this.reservationService.update(reservationId, updateDto);
 
         // 상태가 CANCELLED 또는 REJECTED인 경우 Job 삭제
-        if (updateDto.status === ReservationStatus.CANCELED || updateDto.status === ReservationStatus.REJECTED) {
+        if (updateDto.status === ReservationStatus.CANCELLED || updateDto.status === ReservationStatus.REJECTED) {
             this.deleteReservationClosingJob(reservationId);
         }
         // 상태가 CONFIRMED로 변경된 경우 새로운 Job 생성
@@ -963,7 +963,7 @@ export class ReservationUsecase {
                     case ReservationStatus.CONFIRMED:
                         notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
                         break;
-                    case ReservationStatus.CANCELED:
+                    case ReservationStatus.CANCELLED:
                         notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
                         break;
                     case ReservationStatus.REJECTED:

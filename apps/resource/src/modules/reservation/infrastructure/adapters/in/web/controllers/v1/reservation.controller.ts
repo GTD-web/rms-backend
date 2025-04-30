@@ -258,7 +258,7 @@ export class UserReservationController {
         // @Body() updateDto: UpdateReservationStatusDto,
     ): Promise<ReservationResponseDto> {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELED });
+        return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELLED });
     }
 
     @Patch(':reservationId/participants')

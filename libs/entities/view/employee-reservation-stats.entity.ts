@@ -22,7 +22,7 @@ import { ViewEntity, ViewColumn, Connection } from 'typeorm';
     COUNT(DISTINCT CASE WHEN res.type = 'ACCOMMODATION' THEN r."reservationId" END) AS "accommodationCount",
     
     -- 취소 및 변경 빈도
-    COUNT(DISTINCT CASE WHEN r.status = 'CANCELED' THEN r."reservationId" END) AS "cancellationCount",
+    COUNT(DISTINCT CASE WHEN r.status = 'CANCELLED' THEN r."reservationId" END) AS "cancellationCount",
     
     -- 가장 많이 예약한 자원 (서브쿼리로 처리해야 할 수 있음)
     -- 복잡한 구현은 애플리케이션 코드에서 처리 가능

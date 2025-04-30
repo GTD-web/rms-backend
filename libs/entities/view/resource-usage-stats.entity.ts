@@ -41,7 +41,7 @@ FROM
     JOIN employees e ON rp."employeeId" = e."employeeId"
 WHERE
     rp.type = 'RESERVER' -- 예약 주체만 집계
-    AND r.status <> 'CANCELED' -- 취소된 예약 제외
+    AND r.status <> 'CANCELLED' -- 취소된 예약 제외
 GROUP BY
     res."resourceId",
     res.name,

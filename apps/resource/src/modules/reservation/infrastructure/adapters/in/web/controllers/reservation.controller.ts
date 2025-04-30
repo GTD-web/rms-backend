@@ -137,7 +137,7 @@ export class ReservationController {
     ): Promise<ReservationWithRelationsResponseDto> {
         return this.reservationUsecase.findReservationDetail(user, reservationId);
     }
-    
+
     // check api
     @Get()
     @Roles(Role.USER)
@@ -243,7 +243,7 @@ export class ReservationController {
         // @Body() updateDto: UpdateReservationStatusDto,
     ): Promise<ReservationResponseDto> {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELED });
+        return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELLED });
     }
     // check api - user, admin 구분 필요
     @Patch(':reservationId/participants')
