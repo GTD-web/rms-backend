@@ -243,7 +243,7 @@ export class UserReservationController {
         @User() user: UserEntity,
         @Body() createSnapshotDto: CreateReservationSnapshotDto,
     ): Promise<ReservationSnapshotResponseDto> {
-        return this.reservationSnapshotUsecase.createSnapshot(user, createSnapshotDto);
+        return this.reservationSnapshotUsecase.upsertSnapshot(user, createSnapshotDto);
     }
 
     @Patch('snapshot')

@@ -8308,7 +8308,7 @@ let UserReservationController = class UserReservationController {
         return this.reservationUsecase.returnVehicle(user, reservationId, returnDto);
     }
     async createSnapshot(user, createSnapshotDto) {
-        return this.reservationSnapshotUsecase.createSnapshot(user, createSnapshotDto);
+        return this.reservationSnapshotUsecase.upsertSnapshot(user, createSnapshotDto);
     }
     async updateSnapshot(user, updateSnapshotDto) {
         return this.reservationSnapshotUsecase.updateSnapshot(updateSnapshotDto);
