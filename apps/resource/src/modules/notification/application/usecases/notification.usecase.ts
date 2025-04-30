@@ -85,18 +85,22 @@ export class NotificationUsecase {
                 isSent: true,
             },
         };
+        const total = await this.notificationService.count({
+            where: options.where,
+        });
+
         if (query) {
             options.skip = query.getOffset();
             options.take = query.limit;
         }
-
         const notifications = await this.notificationService.findAll({
             ...options,
             relations: ['employees'],
+            order: {
+                createdAt: 'DESC',
+            },
         });
-        const total = await this.notificationService.count({
-            where: options.where,
-        });
+
         return {
             items: notifications.map((notification) => {
                 return {

@@ -4481,6 +4481,9 @@ let NotificationUsecase = class NotificationUsecase {
                 isSent: true,
             },
         };
+        const total = await this.notificationService.count({
+            where: options.where,
+        });
         if (query) {
             options.skip = query.getOffset();
             options.take = query.limit;
@@ -4488,9 +4491,9 @@ let NotificationUsecase = class NotificationUsecase {
         const notifications = await this.notificationService.findAll({
             ...options,
             relations: ['employees'],
-        });
-        const total = await this.notificationService.count({
-            where: options.where,
+            order: {
+                createdAt: 'DESC',
+            },
         });
         return {
             items: notifications.map((notification) => {
