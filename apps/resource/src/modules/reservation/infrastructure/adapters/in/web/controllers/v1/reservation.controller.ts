@@ -28,6 +28,7 @@ import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { CreateReservationSnapshotDto } from '@resource/modules/reservation/application/dtos/reservation-snapshot.dto';
 import { ReservationSnapshotUsecase } from '@resource/modules/reservation/application/usecases/reservation-snapshot.usecase';
+import { UpdateReservationDto } from '@resource/modules/reservation/application/dtos/update-reservation.dto';
 
 @ApiTags('2. 예약 - 사용자 페이지')
 @Controller('v1/reservations')
@@ -156,6 +157,21 @@ export class UserReservationController {
         @Param('reservationId') reservationId: string,
     ): Promise<ReservationWithRelationsResponseDto> {
         return this.reservationUsecase.findReservationDetail(user, reservationId);
+    }
+
+    @Patch(':reservationId')
+    @ApiOperation({ summary: '예약 수정' })
+    @ApiDataResponse({
+        description: '예약 수정 성공',
+        type: ReservationResponseDto,
+    })
+    async updateReservation(
+        @User() user: UserEntity,
+        @Param('reservationId') reservationId: string,
+        @Body() updateDto: UpdateReservationDto,
+    ): Promise<ReservationResponseDto> {
+        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
+        return this.reservationUsecase.updateReservation(reservationId, updateDto);
     }
 
     @Patch(':reservationId/title')

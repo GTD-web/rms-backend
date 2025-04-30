@@ -21,6 +21,14 @@ export class ResourceQueryDto extends PaginationQueryDto {
     resourceGroupId: string;
 
     @ApiPropertyOptional({
+        description: '예약 ID',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+    })
+    @IsOptional()
+    @IsString()
+    reservationId?: string;
+
+    @ApiPropertyOptional({
         description: '시작 날짜',
         example: '2024-01-01',
     })

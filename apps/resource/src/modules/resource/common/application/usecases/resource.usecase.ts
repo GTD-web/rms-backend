@@ -330,15 +330,49 @@ export class ResourceUsecase {
     }
 
     async findAvailableTime(query: ResourceQueryDto): Promise<ResourceAvailabilityDto[]> {
-        const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit } = query;
+        const {
+            resourceType,
+            resourceGroupId,
+            startDate,
+            endDate,
+            startTime,
+            endTime,
+            am,
+            pm,
+            timeUnit,
+            reservationId,
+        } = query;
         const resources = await this.resourceService.findAll({
             where: {
                 isAvailable: true,
                 resourceGroupId: resourceGroupId,
                 type: resourceType,
             },
-            relations: ['resourceGroup', 'reservations'],
+            relations: ['resourceGroup'],
         });
+
+        for (const resource of resources) {
+            const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
+                repositoryOptions: {
+                    where: {
+                        resourceId: resource.resourceId,
+                        reservationId: reservationId ? Not(reservationId) : undefined,
+                        status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
+                        startDate: LessThan(
+                            endTime
+                                ? DateUtil.date(endDate + ' ' + endTime).toDate()
+                                : DateUtil.date(endDate + ' 23:59:59').toDate(),
+                        ),
+                        endDate: MoreThanOrEqual(
+                            startTime
+                                ? DateUtil.date(startDate + ' ' + startTime).toDate()
+                                : DateUtil.date(startDate + ' 00:00:00').toDate(),
+                        ),
+                    },
+                },
+            });
+            resource.reservations = reservations;
+        }
         const result: ResourceAvailabilityDto[] = [];
 
         if (!resources || (resources && resources.length === 0)) {
@@ -442,7 +476,7 @@ export class ResourceUsecase {
         const existingReservations = resource.reservations || [];
 
         // 예약 상태가 CONFIRMED인 예약만 필터링
-        const confirmedReservations = existingReservations.filter((reservation) => reservation.status === 'CONFIRMED');
+        const confirmedReservations = existingReservations; //.filter((reservation) => reservation.status === 'CONFIRMED');
 
         if (isSameDay) {
             // 당일 예약건 처리
@@ -491,7 +525,6 @@ export class ResourceUsecase {
     ): void {
         const startTime_obj = DateUtil.date(`${dateStr} ${startTime}`);
         const endTime_obj = DateUtil.date(`${dateStr} ${endTime}`);
-
         // 30분 간격으로 슬롯 시작 시간 생성
         const slotIntervalMinutes = 30;
 
@@ -512,7 +545,6 @@ export class ResourceUsecase {
             const isAvailable = !confirmedReservations.some((reservation) => {
                 const reservationStart = DateUtil.date(reservation.startDate);
                 const reservationEnd = DateUtil.date(reservation.endDate);
-
                 // 슬롯 시작이 예약 범위 내에 있거나, 슬롯 종료가 예약 범위 내에 있거나,
                 // 슬롯이 예약을 완전히 포함하는 경우 충돌
                 return (
@@ -565,7 +597,9 @@ export class ResourceUsecase {
     async checkAvailability(resourceId: string, startDate: string, endDate: string): Promise<boolean> {
         const startDateObj = DateUtil.date(startDate).toDate();
         const endDateObj = DateUtil.date(endDate).toDate();
-
+        // startDate: LessThan(endDate),
+        // endDate: MoreThanOrEqual(startDate),
+        // status: ReservationStatus.CONFIRMED,
         const resource = await this.resourceService.findOne({
             where: {
                 resourceId: resourceId,
@@ -578,7 +612,7 @@ export class ResourceUsecase {
             relations: ['reservations'],
         });
 
-        return !!resource;
+        return !resource;
     }
 
     async returnVehicle(user: UserEntity, resourceId: string, updateDto: ReturnVehicleDto): Promise<boolean> {

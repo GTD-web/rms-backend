@@ -55,6 +55,7 @@ export class UserResourceController {
         required: true,
         example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
     })
+    @ApiQuery({ name: 'reservationId', type: String, required: false, example: '123e4567-e89b-12d3-a456-426614174000' })
     @ApiQuery({ name: 'startDate', type: String, required: false, example: '2025-01-01' })
     @ApiQuery({ name: 'endDate', type: String, required: false, example: '2025-01-01' })
     @ApiQuery({ name: 'startTime', type: String, required: false, example: '09:00:00' })

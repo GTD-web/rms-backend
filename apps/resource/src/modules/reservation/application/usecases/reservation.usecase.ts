@@ -27,6 +27,7 @@ import { ReservationParticipant, Reservation, ReservationVehicle } from '@libs/e
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     UpdateReservationCcReceipientDto,
+    UpdateReservationDto,
     UpdateReservationParticipantsDto,
     UpdateReservationStatusDto,
     UpdateReservationTimeDto,
@@ -695,6 +696,108 @@ export class ReservationUsecase {
         }
     }
 
+    async updateReservation(reservationId: string, updateDto: UpdateReservationDto): Promise<ReservationResponseDto> {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId, status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED]) },
+            relations: ['resource'],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new NotFoundException('Reservation not found');
+        }
+        let hasUpdateTime = false;
+        let hasUpdateParticipants = updateDto.participantIds.length > 0;
+
+        if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
+            hasUpdateTime = true;
+            const conflicts = await this.reservationService.findConflictingReservations(
+                updateDto.resourceId,
+                DateUtil.date(updateDto.startDate).toDate(),
+                DateUtil.date(updateDto.endDate).toDate(),
+            );
+            if (conflicts.length > 0) {
+                throw new BadRequestException('Reservation time conflict - check in logic');
+            }
+
+            if (
+                reservation.status === ReservationStatus.CONFIRMED &&
+                reservation.resource.type === ResourceType.ACCOMMODATION
+            ) {
+                throw new BadRequestException('Cannot update time of confirmed accommodation reservation');
+            }
+        }
+
+        let updatedReservation = await this.reservationService.update(reservationId, {
+            ...updateDto,
+            startDate: updateDto.startDate ? DateUtil.date(updateDto.startDate).toDate() : undefined,
+            endDate: updateDto.endDate ? DateUtil.date(updateDto.endDate).toDate() : undefined,
+        });
+
+        // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
+        if (hasUpdateTime && reservation.status === ReservationStatus.CONFIRMED) {
+            // 기존 Job 삭제
+            this.deleteReservationClosingJob(reservationId);
+            this.createReservationClosingJob(reservation);
+        }
+
+        if (hasUpdateParticipants) {
+            // 기존 참가자 조회
+            const participants = await this.participantService.findAll({
+                where: { reservationId, type: ParticipantsType.PARTICIPANT },
+            });
+            const newParticipants = updateDto.participantIds.filter(
+                (id) => !participants.some((p) => p.employeeId === id),
+            );
+            const deletedParticipants = participants.filter((p) => !updateDto.participantIds.includes(p.employeeId));
+
+            // 기존 참가자 삭제
+            await Promise.all(
+                deletedParticipants.map((participant) => this.participantService.delete(participant.participantId)),
+            );
+
+            // 새로운 참가자 저장
+            await Promise.all(
+                newParticipants.map((employeeId) =>
+                    this.participantService.save({
+                        reservationId,
+                        employeeId,
+                        type: ParticipantsType.PARTICIPANT,
+                    } as ReservationParticipant),
+                ),
+            );
+
+            updatedReservation = await this.reservationService.findOne({
+                where: { reservationId },
+                relations: ['participants', 'resource'],
+                withDeleted: true,
+            });
+
+            if (updatedReservation.resource.notifyParticipantChange) {
+                try {
+                    const notiTarget = [...newParticipants, ...deletedParticipants.map((p) => p.employeeId)];
+
+                    this.eventEmitter.emit('create.notification', {
+                        notificationType: NotificationType.RESERVATION_PARTICIPANT_CHANGED,
+                        notificationData: {
+                            reservationId: updatedReservation.reservationId,
+                            reservationTitle: updatedReservation.title,
+                            reservationDate: DateUtil.format(updatedReservation.startDate),
+                            resourceId: updatedReservation.resource.resourceId,
+                            resourceName: updatedReservation.resource.name,
+                            resourceType: updatedReservation.resource.type,
+                        },
+                        notiTarget,
+                    });
+                } catch (error) {
+                    console.log(error);
+                    console.log('Notification creation failed in updateParticipants');
+                }
+            }
+        }
+
+        return new ReservationResponseDto(updatedReservation);
+    }
+
     async updateTitle(
         reservationId: string,
         updateDto: UpdateReservationTitleDto,
@@ -749,68 +852,6 @@ export class ReservationUsecase {
             // 기존 Job 삭제
             this.deleteReservationClosingJob(reservationId);
             this.createReservationClosingJob(updatedReservation);
-        }
-
-        return new ReservationResponseDto(updatedReservation);
-    }
-
-    async updateStatus(reservationId: string, updateDto: UpdateReservationStatusDto): Promise<ReservationResponseDto> {
-        const reservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['resource'],
-            withDeleted: true,
-        });
-        if (!reservation) {
-            throw new NotFoundException('Reservation not found');
-        }
-
-        const updatedReservation = await this.reservationService.update(reservationId, updateDto);
-
-        // 상태가 CANCELLED 또는 REJECTED인 경우 Job 삭제
-        if (updateDto.status === ReservationStatus.CANCELED || updateDto.status === ReservationStatus.REJECTED) {
-            this.deleteReservationClosingJob(reservationId);
-        }
-        // 상태가 CONFIRMED로 변경된 경우 새로운 Job 생성
-        if (updateDto.status === ReservationStatus.CONFIRMED) {
-            this.createReservationClosingJob(updatedReservation);
-        }
-
-        if (reservation.resource.notifyReservationChange) {
-            try {
-                const reservers = await this.participantService.findAll({
-                    where: { reservationId },
-                });
-                const notiTarget = reservers.map((reserver) => reserver.employeeId);
-
-                let notificationType: NotificationType;
-                switch (updateDto.status) {
-                    case ReservationStatus.CONFIRMED:
-                        notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
-                        break;
-                    case ReservationStatus.CANCELED:
-                        notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
-                        break;
-                    case ReservationStatus.REJECTED:
-                        notificationType = NotificationType.RESERVATION_STATUS_REJECTED;
-                        break;
-                }
-
-                this.eventEmitter.emit('create.notification', {
-                    notificationType,
-                    notificationData: {
-                        reservationId: reservation.reservationId,
-                        reservationTitle: reservation.title,
-                        reservationDate: DateUtil.format(reservation.startDate),
-                        resourceId: reservation.resource.resourceId,
-                        resourceName: reservation.resource.name,
-                        resourceType: reservation.resource.type,
-                    },
-                    notiTarget,
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Notification creation failed in updateStatus');
-            }
         }
 
         return new ReservationResponseDto(updatedReservation);
@@ -882,6 +923,68 @@ export class ReservationUsecase {
             } catch (error) {
                 console.log(error);
                 console.log('Notification creation failed in updateParticipants');
+            }
+        }
+
+        return new ReservationResponseDto(updatedReservation);
+    }
+
+    async updateStatus(reservationId: string, updateDto: UpdateReservationStatusDto): Promise<ReservationResponseDto> {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['resource'],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new NotFoundException('Reservation not found');
+        }
+
+        const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+
+        // 상태가 CANCELLED 또는 REJECTED인 경우 Job 삭제
+        if (updateDto.status === ReservationStatus.CANCELED || updateDto.status === ReservationStatus.REJECTED) {
+            this.deleteReservationClosingJob(reservationId);
+        }
+        // 상태가 CONFIRMED로 변경된 경우 새로운 Job 생성
+        if (updateDto.status === ReservationStatus.CONFIRMED) {
+            this.createReservationClosingJob(updatedReservation);
+        }
+
+        if (reservation.resource.notifyReservationChange) {
+            try {
+                const reservers = await this.participantService.findAll({
+                    where: { reservationId },
+                });
+                const notiTarget = reservers.map((reserver) => reserver.employeeId);
+
+                let notificationType: NotificationType;
+                switch (updateDto.status) {
+                    case ReservationStatus.CONFIRMED:
+                        notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
+                        break;
+                    case ReservationStatus.CANCELED:
+                        notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
+                        break;
+                    case ReservationStatus.REJECTED:
+                        notificationType = NotificationType.RESERVATION_STATUS_REJECTED;
+                        break;
+                }
+
+                this.eventEmitter.emit('create.notification', {
+                    notificationType,
+                    notificationData: {
+                        reservationId: reservation.reservationId,
+                        reservationTitle: reservation.title,
+                        reservationDate: DateUtil.format(reservation.startDate),
+                        resourceId: reservation.resource.resourceId,
+                        resourceName: reservation.resource.name,
+                        resourceType: reservation.resource.type,
+                    },
+                    notiTarget,
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Notification creation failed in updateStatus');
             }
         }
 
