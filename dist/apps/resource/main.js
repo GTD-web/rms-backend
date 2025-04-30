@@ -7309,6 +7309,7 @@ let ReservationUsecase = class ReservationUsecase {
                 'resource.accommodationInfo',
                 'participants',
                 'participants.employee',
+                'reservationVehicles'
             ],
             withDeleted: true,
         });

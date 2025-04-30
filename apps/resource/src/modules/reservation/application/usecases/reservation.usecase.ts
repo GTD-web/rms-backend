@@ -443,6 +443,7 @@ export class ReservationUsecase {
                 'resource.accommodationInfo',
                 'participants',
                 'participants.employee',
+                'reservationVehicles'
             ],
             withDeleted: true,
         });
