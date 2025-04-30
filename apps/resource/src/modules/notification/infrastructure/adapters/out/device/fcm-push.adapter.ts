@@ -79,12 +79,13 @@ export class FCMAdapter implements PushNotificationPort {
         payload: PushNotificationPayload,
     ): Promise<PushNotificationSendResult> {
         try {
-            const messages = subscriptions.map((subscription) => ({
-                token: subscription.fcm.token,
-            }));
+            // 동일 토큰 제거
+            const messages = subscriptions.map((subscription) => subscription.fcm.token);
+            const set = new Set(messages);
+            const uniqueMessages = Array.from(set);
             const response = await getMessaging()
                 .sendEachForMulticast({
-                    tokens: messages.map((message) => message.token),
+                    tokens: uniqueMessages,
                     notification: {
                         title: payload.title,
                         body: payload.body,

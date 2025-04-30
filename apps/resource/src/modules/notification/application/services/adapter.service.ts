@@ -19,6 +19,7 @@ export class AdapterService {
         const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
             employeeId,
         });
+
         await this.pushNotificationService.bulkSendNotification(subscription as PushNotificationSubscription[], {
             title: notification.title,
             body: notification.body,

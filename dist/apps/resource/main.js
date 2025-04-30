@@ -5260,12 +5260,12 @@ let FCMAdapter = class FCMAdapter {
     }
     async bulkSendNotification(subscriptions, payload) {
         try {
-            const messages = subscriptions.map((subscription) => ({
-                token: subscription.fcm.token,
-            }));
+            const messages = subscriptions.map((subscription) => subscription.fcm.token);
+            const set = new Set(messages);
+            const uniqueMessages = Array.from(set);
             const response = await (0, messaging_1.getMessaging)()
                 .sendEachForMulticast({
-                tokens: messages.map((message) => message.token),
+                tokens: uniqueMessages,
                 notification: {
                     title: payload.title,
                     body: payload.body,
