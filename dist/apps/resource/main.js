@@ -6855,13 +6855,14 @@ let ReservationService = class ReservationService {
         const updatedReservation = await this.reservationRepository.update(reservationId, reservation, repositoryOptions);
         return updatedReservation;
     }
-    async findConflictingReservations(resourceId, startDate, endDate) {
+    async findConflictingReservations(resourceId, startDate, endDate, reservationId) {
         return await this.findAll({
             where: {
                 resourceId,
+                ...(reservationId && { reservationId: (0, typeorm_1.Not)(reservationId) }),
                 startDate: (0, typeorm_1.LessThan)(endDate),
                 endDate: (0, typeorm_1.MoreThanOrEqual)(startDate),
-                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
             },
         });
     }
@@ -7519,7 +7520,7 @@ let ReservationUsecase = class ReservationUsecase {
         let hasUpdateParticipants = updateDto.participantIds.length > 0;
         if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
             hasUpdateTime = true;
-            const conflicts = await this.reservationService.findConflictingReservations(updateDto.resourceId, date_util_1.DateUtil.date(updateDto.startDate).toDate(), date_util_1.DateUtil.date(updateDto.endDate).toDate());
+            const conflicts = await this.reservationService.findConflictingReservations(updateDto.resourceId, date_util_1.DateUtil.date(updateDto.startDate).toDate(), date_util_1.DateUtil.date(updateDto.endDate).toDate(), reservationId);
             if (conflicts.length > 0) {
                 throw new common_1.BadRequestException('Reservation time conflict - check in logic');
             }

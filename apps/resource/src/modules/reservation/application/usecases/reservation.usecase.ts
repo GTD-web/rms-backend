@@ -714,6 +714,7 @@ export class ReservationUsecase {
                 updateDto.resourceId,
                 DateUtil.date(updateDto.startDate).toDate(),
                 DateUtil.date(updateDto.endDate).toDate(),
+                reservationId,
             );
             if (conflicts.length > 0) {
                 throw new BadRequestException('Reservation time conflict - check in logic');

@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ReservationRepositoryPort } from '../../domain/ports/reservation.repository.port';
 import { Reservation } from '@libs/entities';
-import { LessThan, MoreThanOrEqual } from 'typeorm';
+import { In, LessThan, MoreThanOrEqual, Not } from 'typeorm';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
@@ -51,13 +51,19 @@ export class ReservationService {
         return updatedReservation;
     }
 
-    async findConflictingReservations(resourceId: string, startDate: Date, endDate: Date): Promise<Reservation[]> {
+    async findConflictingReservations(
+        resourceId: string,
+        startDate: Date,
+        endDate: Date,
+        reservationId?: string,
+    ): Promise<Reservation[]> {
         return await this.findAll({
             where: {
                 resourceId,
+                ...(reservationId && { reservationId: Not(reservationId) }),
                 startDate: LessThan(endDate),
                 endDate: MoreThanOrEqual(startDate),
-                status: ReservationStatus.CONFIRMED,
+                status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
             },
         });
     }
