@@ -387,10 +387,9 @@ export class ReservationUsecase {
             where,
             relations: ['resource', 'participants', 'participants.employee'],
         };
-        console.log(options);
 
         const reservations = await this.reservationService.findAll(options);
-        console.log(reservations);
+
         const count = reservations.length;
 
         const reservationWithParticipants = await this.reservationService.findAll({

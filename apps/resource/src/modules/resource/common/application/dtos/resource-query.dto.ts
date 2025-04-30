@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform, plainToClass } from 'class-transformer';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 
@@ -66,7 +66,7 @@ export class ResourceQueryDto extends PaginationQueryDto {
     })
     @IsOptional()
     @IsBoolean()
-    @Type(() => Boolean)
+    @Transform(({ value }) => value === 'true' || value === true)
     am?: boolean;
 
     @ApiPropertyOptional({
@@ -75,7 +75,7 @@ export class ResourceQueryDto extends PaginationQueryDto {
     })
     @IsOptional()
     @IsBoolean()
-    @Type(() => Boolean)
+    @Transform(({ value }) => value === 'true' || value === true)
     pm?: boolean;
 
     @ApiPropertyOptional({

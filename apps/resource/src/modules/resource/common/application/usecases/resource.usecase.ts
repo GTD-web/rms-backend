@@ -342,6 +342,8 @@ export class ResourceUsecase {
             timeUnit,
             reservationId,
         } = query;
+
+
         const resources = await this.resourceService.findAll({
             where: {
                 isAvailable: true,
@@ -350,6 +352,13 @@ export class ResourceUsecase {
             },
             relations: ['resourceGroup'],
         });
+        
+        let startDateObj = LessThan(endTime
+            ? DateUtil.date(endDate + ' ' + endTime).toDate()
+            : DateUtil.date(endDate + ' 23:59:59').toDate());
+        let endDateObj = MoreThanOrEqual(startTime
+            ? DateUtil.date(startDate + ' ' + startTime).toDate()
+            : DateUtil.date(startDate + ' 00:00:00').toDate());
 
         for (const resource of resources) {
             const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
@@ -358,20 +367,13 @@ export class ResourceUsecase {
                         resourceId: resource.resourceId,
                         reservationId: reservationId ? Not(reservationId) : undefined,
                         status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
-                        startDate: LessThan(
-                            endTime
-                                ? DateUtil.date(endDate + ' ' + endTime).toDate()
-                                : DateUtil.date(endDate + ' 23:59:59').toDate(),
-                        ),
-                        endDate: MoreThanOrEqual(
-                            startTime
-                                ? DateUtil.date(startDate + ' ' + startTime).toDate()
-                                : DateUtil.date(startDate + ' 00:00:00').toDate(),
-                        ),
+                        startDate: startDateObj,
+                        endDate: endDateObj,
                     },
                 },
             });
             resource.reservations = reservations;
+            console.log(reservations);
         }
         const result: ResourceAvailabilityDto[] = [];
 
@@ -472,6 +474,7 @@ export class ResourceUsecase {
         timeUnit: number,
         isSameDay: boolean,
     ): TimeSlotDto[] {
+        console.log(am, pm);
         const availableSlots: TimeSlotDto[] = [];
         const existingReservations = resource.reservations || [];
 
@@ -481,12 +484,18 @@ export class ResourceUsecase {
         if (isSameDay) {
             // 당일 예약건 처리
             const dateStr = startDate; // YYYY-MM-DD 형식
+            const currentMinute = DateUtil.now().toDate().getMinutes();
+            const roundedHour = currentMinute < 30 ? DateUtil.now().format('HH:00:00') : DateUtil.now().format('HH:30:00');
+            const startTime = DateUtil.date(startDate).format('YYYY-MM-DD') === DateUtil.now().format('YYYY-MM-DD') 
+                ? roundedHour 
+                : '09:00:00';
+            const endTime = pm ? '18:00:00' : '12:00:00';
             if (am && pm) {
-                this.processTimeRange(dateStr, '09:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             } else if (am) {
-                this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             } else if (pm) {
-                this.processTimeRange(dateStr, '12:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             }
         } else {
             // 여러 일 예약건 처리 - 시작일부터 종료일까지 일별로 처리

@@ -7262,9 +7262,7 @@ let ReservationUsecase = class ReservationUsecase {
             where,
             relations: ['resource', 'participants', 'participants.employee'],
         };
-        console.log(options);
         const reservations = await this.reservationService.findAll(options);
-        console.log(reservations);
         const count = reservations.length;
         const reservationWithParticipants = await this.reservationService.findAll({
             where: {
@@ -9990,7 +9988,7 @@ __decorate([
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
-    (0, class_transformer_1.Type)(() => Boolean),
+    (0, class_transformer_1.Transform)(({ value }) => value === 'true' || value === true),
     __metadata("design:type", Boolean)
 ], ResourceQueryDto.prototype, "am", void 0);
 __decorate([
@@ -10000,7 +9998,7 @@ __decorate([
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
-    (0, class_transformer_1.Type)(() => Boolean),
+    (0, class_transformer_1.Transform)(({ value }) => value === 'true' || value === true),
     __metadata("design:type", Boolean)
 ], ResourceQueryDto.prototype, "pm", void 0);
 __decorate([
@@ -11123,6 +11121,12 @@ let ResourceUsecase = class ResourceUsecase {
             },
             relations: ['resourceGroup'],
         });
+        let startDateObj = (0, typeorm_1.LessThan)(endTime
+            ? date_util_1.DateUtil.date(endDate + ' ' + endTime).toDate()
+            : date_util_1.DateUtil.date(endDate + ' 23:59:59').toDate());
+        let endDateObj = (0, typeorm_1.MoreThanOrEqual)(startTime
+            ? date_util_1.DateUtil.date(startDate + ' ' + startTime).toDate()
+            : date_util_1.DateUtil.date(startDate + ' 00:00:00').toDate());
         for (const resource of resources) {
             const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
                 repositoryOptions: {
@@ -11130,16 +11134,13 @@ let ResourceUsecase = class ResourceUsecase {
                         resourceId: resource.resourceId,
                         reservationId: reservationId ? (0, typeorm_1.Not)(reservationId) : undefined,
                         status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
-                        startDate: (0, typeorm_1.LessThan)(endTime
-                            ? date_util_1.DateUtil.date(endDate + ' ' + endTime).toDate()
-                            : date_util_1.DateUtil.date(endDate + ' 23:59:59').toDate()),
-                        endDate: (0, typeorm_1.MoreThanOrEqual)(startTime
-                            ? date_util_1.DateUtil.date(startDate + ' ' + startTime).toDate()
-                            : date_util_1.DateUtil.date(startDate + ' 00:00:00').toDate()),
+                        startDate: startDateObj,
+                        endDate: endDateObj,
                     },
                 },
             });
             resource.reservations = reservations;
+            console.log(reservations);
         }
         const result = [];
         if (!resources || (resources && resources.length === 0)) {
@@ -11189,19 +11190,26 @@ let ResourceUsecase = class ResourceUsecase {
         return result;
     }
     calculateAvailableTimeSlots(resource, startDate, endDate, am, pm, timeUnit, isSameDay) {
+        console.log(am, pm);
         const availableSlots = [];
         const existingReservations = resource.reservations || [];
         const confirmedReservations = existingReservations;
         if (isSameDay) {
             const dateStr = startDate;
+            const currentMinute = date_util_1.DateUtil.now().toDate().getMinutes();
+            const roundedHour = currentMinute < 30 ? date_util_1.DateUtil.now().format('HH:00:00') : date_util_1.DateUtil.now().format('HH:30:00');
+            const startTime = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD')
+                ? roundedHour
+                : '09:00:00';
+            const endTime = pm ? '18:00:00' : '12:00:00';
             if (am && pm) {
-                this.processTimeRange(dateStr, '09:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             }
             else if (am) {
-                this.processTimeRange(dateStr, '09:00:00', '12:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             }
             else if (pm) {
-                this.processTimeRange(dateStr, '12:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             }
         }
         else {
