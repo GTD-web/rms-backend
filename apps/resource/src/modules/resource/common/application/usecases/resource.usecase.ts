@@ -611,6 +611,7 @@ export class ResourceUsecase {
             },
             relations: ['reservations'],
         });
+        console.log(resource);
 
         return !resource;
     }

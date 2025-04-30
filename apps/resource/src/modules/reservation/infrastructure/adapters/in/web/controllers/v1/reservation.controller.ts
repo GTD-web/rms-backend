@@ -40,6 +40,48 @@ export class UserReservationController {
         private readonly reservationSnapshotUsecase: ReservationSnapshotUsecase,
     ) {}
 
+    @Post('snapshot')
+    @ApiOperation({ summary: '예약 스냅샷 생성' })
+    @ApiDataResponse({
+        description: '예약 스냅샷 생성 성공',
+        type: ReservationSnapshotResponseDto,
+    })
+    async createSnapshot(
+        @User() user: UserEntity,
+        @Body() createSnapshotDto: CreateReservationSnapshotDto,
+    ): Promise<ReservationSnapshotResponseDto> {
+        return this.reservationSnapshotUsecase.upsertSnapshot(user, createSnapshotDto);
+    }
+
+    @Patch('snapshot')
+    @ApiOperation({ summary: '예약 스냅샷 업데이트' })
+    @ApiDataResponse({
+        description: '예약 스냅샷 업데이트 성공',
+        type: ReservationSnapshotResponseDto,
+    })
+    async updateSnapshot(
+        @User() user: UserEntity,
+        @Body() updateSnapshotDto: UpdateReservationSnapshotDto,
+    ): Promise<ReservationSnapshotResponseDto> {
+        return this.reservationSnapshotUsecase.updateSnapshot(updateSnapshotDto);
+    }
+
+    @Get('snapshot/user')
+    @ApiOperation({ summary: '유저의 예약 스냅샷 조회' })
+    @ApiDataResponse({
+        description: '예약 스냅샷 조회 성공',
+        type: ReservationSnapshotResponseDto,
+    })
+    async findUserSnapshot(@User() user: UserEntity): Promise<ReservationSnapshotResponseDto> {
+        return this.reservationSnapshotUsecase.findSnapshotByUserId(user.userId);
+    }
+
+    @Delete('snapshot/:snapshotId')
+    @ApiOperation({ summary: '예약 스냅샷 삭제' })
+    async deleteSnapshot(@User() user: UserEntity, @Param('snapshotId') snapshotId: string): Promise<void> {
+        await this.reservationSnapshotUsecase.deleteSnapshot(snapshotId);
+    }
+
     @Post()
     @ApiOperation({ summary: '예약 생성' })
     @ApiDataResponse({
@@ -247,47 +289,5 @@ export class UserReservationController {
         @Body() returnDto: ReturnVehicleDto,
     ): Promise<boolean> {
         return this.reservationUsecase.returnVehicle(user, reservationId, returnDto);
-    }
-
-    @Post('snapshot')
-    @ApiOperation({ summary: '예약 스냅샷 생성' })
-    @ApiDataResponse({
-        description: '예약 스냅샷 생성 성공',
-        type: ReservationSnapshotResponseDto,
-    })
-    async createSnapshot(
-        @User() user: UserEntity,
-        @Body() createSnapshotDto: CreateReservationSnapshotDto,
-    ): Promise<ReservationSnapshotResponseDto> {
-        return this.reservationSnapshotUsecase.upsertSnapshot(user, createSnapshotDto);
-    }
-
-    @Patch('snapshot')
-    @ApiOperation({ summary: '예약 스냅샷 업데이트' })
-    @ApiDataResponse({
-        description: '예약 스냅샷 업데이트 성공',
-        type: ReservationSnapshotResponseDto,
-    })
-    async updateSnapshot(
-        @User() user: UserEntity,
-        @Body() updateSnapshotDto: UpdateReservationSnapshotDto,
-    ): Promise<ReservationSnapshotResponseDto> {
-        return this.reservationSnapshotUsecase.updateSnapshot(updateSnapshotDto);
-    }
-
-    @Get('snapshot/user')
-    @ApiOperation({ summary: '유저의 예약 스냅샷 조회' })
-    @ApiDataResponse({
-        description: '예약 스냅샷 조회 성공',
-        type: ReservationSnapshotResponseDto,
-    })
-    async findUserSnapshot(@User() user: UserEntity): Promise<ReservationSnapshotResponseDto> {
-        return this.reservationSnapshotUsecase.findSnapshotByUserId(user.userId);
-    }
-
-    @Delete('snapshot/:snapshotId')
-    @ApiOperation({ summary: '예약 스냅샷 삭제' })
-    async deleteSnapshot(@User() user: UserEntity, @Param('snapshotId') snapshotId: string): Promise<void> {
-        await this.reservationSnapshotUsecase.deleteSnapshot(snapshotId);
     }
 }
