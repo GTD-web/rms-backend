@@ -11,6 +11,15 @@ import { User } from '@libs/entities';
 export class ReservationSnapshotUsecase {
     constructor(private readonly snapshotService: ReservationSnapshotService) {}
 
+    async upsertSnapshot(user: User, dto: CreateReservationSnapshotDto): Promise<ReservationSnapshotResponseDto> {
+        let snapshot = await this.findSnapshotByUserId(user.userId);
+        if (snapshot) {
+            return await this.updateSnapshot({ ...dto, snapshotId: snapshot.snapshotId });
+        } else {
+            return await this.createSnapshot(user, dto);
+        }
+    }
+
     async createSnapshot(user: User, dto: CreateReservationSnapshotDto): Promise<ReservationSnapshotResponseDto> {
         const snapshot = this.snapshotService.create(dto);
         snapshot.userId = user.userId;

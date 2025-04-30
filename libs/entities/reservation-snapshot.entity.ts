@@ -108,5 +108,5 @@ export class ReservationSnapshot {
 
     @ManyToOne(() => User)
     @JoinColumn({ name: 'userId' })
-    user: User;
+    user?: User;
 }

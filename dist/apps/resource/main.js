@@ -6833,6 +6833,15 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
     constructor(snapshotService) {
         this.snapshotService = snapshotService;
     }
+    async upsertSnapshot(user, dto) {
+        let snapshot = await this.findSnapshotByUserId(user.userId);
+        if (snapshot) {
+            return await this.updateSnapshot({ ...dto, snapshotId: snapshot.snapshotId });
+        }
+        else {
+            return await this.createSnapshot(user, dto);
+        }
+    }
     async createSnapshot(user, dto) {
         const snapshot = this.snapshotService.create(dto);
         snapshot.userId = user.userId;
