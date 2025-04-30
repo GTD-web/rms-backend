@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ReservationRepositoryPort } from '../../domain/ports/reservation.repository.port';
 import { Reservation } from '@libs/entities';
-import { In, LessThan, MoreThanOrEqual, Not } from 'typeorm';
+import { In, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Not } from 'typeorm';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
@@ -61,8 +61,8 @@ export class ReservationService {
             where: {
                 resourceId,
                 ...(reservationId && { reservationId: Not(reservationId) }),
-                startDate: LessThan(endDate),
-                endDate: MoreThanOrEqual(startDate),
+                startDate: LessThanOrEqual(endDate),
+                endDate: MoreThan(startDate),
                 status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
             },
         });

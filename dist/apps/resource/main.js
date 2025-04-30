@@ -6860,8 +6860,8 @@ let ReservationService = class ReservationService {
             where: {
                 resourceId,
                 ...(reservationId && { reservationId: (0, typeorm_1.Not)(reservationId) }),
-                startDate: (0, typeorm_1.LessThan)(endDate),
-                endDate: (0, typeorm_1.MoreThanOrEqual)(startDate),
+                startDate: (0, typeorm_1.LessThanOrEqual)(endDate),
+                endDate: (0, typeorm_1.MoreThan)(startDate),
                 status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
             },
         });
