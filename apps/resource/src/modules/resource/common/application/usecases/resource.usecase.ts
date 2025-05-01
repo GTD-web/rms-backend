@@ -126,21 +126,6 @@ export class ResourceUsecase {
                             status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
                         };
 
-                        // const whereArray = [
-                        //     {
-                        //         ...where,
-                        //         startDate: MoreThanOrEqual(startDateObj),
-                        //         endDate: LessThanOrEqual(endDateObj),
-                        //     },
-                        //     {
-                        //         ...where,
-                        //         startDate: Between(startDateObj, endDateObj),
-                        //     },
-                        //     {
-                        //         ...where,
-                        //         endDate: Between(startDateObj, endDateObj),
-                        //     },
-                        // ];
 
                         const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
                             repositoryOptions: {
@@ -169,7 +154,10 @@ export class ResourceUsecase {
                             })
                             .filter((reservation) => {
                                 if (isMine) {
-                                    return reservation.isMine;
+                                    return reservation.participants.some(
+                                        (participant) =>
+                                            participant.employeeId === user.employeeId,
+                                    );
                                 }
                                 return true;
                             });

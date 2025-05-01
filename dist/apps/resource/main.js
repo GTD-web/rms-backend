@@ -10984,7 +10984,7 @@ let ResourceUsecase = class ResourceUsecase {
                 })
                     .filter((reservation) => {
                     if (isMine) {
-                        return reservation.isMine;
+                        return reservation.participants.some((participant) => participant.employeeId === user.employeeId);
                     }
                     return true;
                 });
