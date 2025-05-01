@@ -144,7 +144,6 @@ export class ResourceUsecase {
                                         participant.type === ParticipantsType.RESERVER &&
                                         participant.employeeId === user.employeeId,
                                 );
-                                delete reservation.participants;
                                 return {
                                     ...reservation,
                                     startDate: DateUtil.date(reservation.startDate).format(),
@@ -159,6 +158,7 @@ export class ResourceUsecase {
                                             participant.employeeId === user.employeeId,
                                     );
                                 }
+                                delete reservation.participants;
                                 return true;
                             });
 
@@ -361,7 +361,6 @@ export class ResourceUsecase {
                 },
             });
             resource.reservations = reservations;
-            console.log(reservations);
         }
         const result: ResourceAvailabilityDto[] = [];
 
@@ -476,8 +475,8 @@ export class ResourceUsecase {
             const roundedHour = currentMinute < 30 ? DateUtil.now().format('HH:00:00') : DateUtil.now().format('HH:30:00');
             const startTime = DateUtil.date(startDate).format('YYYY-MM-DD') === DateUtil.now().format('YYYY-MM-DD') 
                 ? roundedHour 
-                : '09:00:00';
-            const endTime = pm ? '18:00:00' : '12:00:00';
+                : am ? '09:00:00' : '13:00:00';
+            const endTime = am ? '12:00:00' : '18:00:00';
             if (am && pm) {
                 this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             } else if (am) {

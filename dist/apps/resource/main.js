@@ -10974,7 +10974,6 @@ let ResourceUsecase = class ResourceUsecase {
                     .map((reservation) => {
                     const isMine = reservation.participants.some((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER &&
                         participant.employeeId === user.employeeId);
-                    delete reservation.participants;
                     return {
                         ...reservation,
                         startDate: date_util_1.DateUtil.date(reservation.startDate).format(),
@@ -10986,6 +10985,7 @@ let ResourceUsecase = class ResourceUsecase {
                     if (isMine) {
                         return reservation.participants.some((participant) => participant.employeeId === user.employeeId);
                     }
+                    delete reservation.participants;
                     return true;
                 });
                 return {
@@ -11140,7 +11140,6 @@ let ResourceUsecase = class ResourceUsecase {
                 },
             });
             resource.reservations = reservations;
-            console.log(reservations);
         }
         const result = [];
         if (!resources || (resources && resources.length === 0)) {
@@ -11200,8 +11199,8 @@ let ResourceUsecase = class ResourceUsecase {
             const roundedHour = currentMinute < 30 ? date_util_1.DateUtil.now().format('HH:00:00') : date_util_1.DateUtil.now().format('HH:30:00');
             const startTime = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD')
                 ? roundedHour
-                : '09:00:00';
-            const endTime = pm ? '18:00:00' : '12:00:00';
+                : am ? '09:00:00' : '13:00:00';
+            const endTime = am ? '12:00:00' : '18:00:00';
             if (am && pm) {
                 this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             }
