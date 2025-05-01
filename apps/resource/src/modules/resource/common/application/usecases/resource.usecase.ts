@@ -476,7 +476,7 @@ export class ResourceUsecase {
             const startTime = DateUtil.date(startDate).format('YYYY-MM-DD') === DateUtil.now().format('YYYY-MM-DD') 
                 ? roundedHour 
                 : am ? '09:00:00' : '13:00:00';
-            const endTime = am ? '12:00:00' : '18:00:00';
+            const endTime = pm ? '18:00:00' : '12:00:00';
             if (am && pm) {
                 this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             } else if (am) {

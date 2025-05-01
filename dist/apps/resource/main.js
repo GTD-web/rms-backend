@@ -11200,7 +11200,7 @@ let ResourceUsecase = class ResourceUsecase {
             const startTime = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD')
                 ? roundedHour
                 : am ? '09:00:00' : '13:00:00';
-            const endTime = am ? '12:00:00' : '18:00:00';
+            const endTime = pm ? '18:00:00' : '12:00:00';
             if (am && pm) {
                 this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
             }
