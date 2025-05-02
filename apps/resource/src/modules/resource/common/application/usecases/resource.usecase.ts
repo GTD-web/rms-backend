@@ -8,7 +8,18 @@ import {
 import { ResourceGroupWithResourcesResponseDto, ResourceResponseDto } from '../dtos/resource-response.dto';
 import { ResourceService } from '../services/resource.service';
 import { ResourceGroupService } from '../services/resource-group.service';
-import { IsNull, Not, LessThan, DataSource, In, MoreThanOrEqual, LessThanOrEqual, Between, Raw } from 'typeorm';
+import {
+    IsNull,
+    Not,
+    LessThan,
+    DataSource,
+    In,
+    MoreThanOrEqual,
+    LessThanOrEqual,
+    Between,
+    Raw,
+    MoreThan,
+} from 'typeorm';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import {
     ReturnVehicleDto,
@@ -598,16 +609,14 @@ export class ResourceUsecase {
     async checkAvailability(resourceId: string, startDate: string, endDate: string): Promise<boolean> {
         const startDateObj = DateUtil.date(startDate).toDate();
         const endDateObj = DateUtil.date(endDate).toDate();
-        // startDate: LessThan(endDate),
-        // endDate: MoreThanOrEqual(startDate),
-        // status: ReservationStatus.CONFIRMED,
+
         const resource = await this.resourceService.findOne({
             where: {
                 resourceId: resourceId,
                 reservations: {
                     status: ReservationStatus.CONFIRMED,
-                    startDate: LessThan(endDateObj),
-                    endDate: MoreThanOrEqual(startDateObj),
+                    startDate: LessThanOrEqual(endDateObj),
+                    endDate: MoreThan(startDateObj),
                 },
             },
             relations: ['reservations'],
