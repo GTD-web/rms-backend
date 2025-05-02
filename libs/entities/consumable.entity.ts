@@ -21,6 +21,9 @@ export class Consumable {
     @Column({ default: true })
     notifyReplacementCycle: boolean;
 
+    @Column({ default: 0 })
+    initMileage: number;
+
     @ManyToOne(() => VehicleInfo)
     @JoinColumn({ name: 'vehicleInfoId', referencedColumnName: 'vehicleInfoId' })
     vehicleInfo: VehicleInfo;

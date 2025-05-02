@@ -11039,6 +11039,14 @@ let ResourceUsecase = class ResourceUsecase {
                             };
                         });
                     }
+                    else {
+                        consumable.maintenances = [
+                            {
+                                mileageFromLastMaintenance: mileage - Number(consumable.initMileage),
+                                maintanceRequired: mileage - Number(consumable.initMileage) > replaceCycle,
+                            },
+                        ];
+                    }
                 }
                 resource.vehicleInfo.consumables.sort((a, b) => {
                     if (!a.maintenances?.length && !b.maintenances?.length) {
@@ -13293,6 +13301,13 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], CreateConsumableDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '초기 주행거리',
+        example: 0,
+    }),
+    __metadata("design:type", Number)
+], CreateConsumableDto.prototype, "initMileage", void 0);
 class CreateMaintenanceDto {
 }
 exports.CreateMaintenanceDto = CreateMaintenanceDto;
@@ -13910,19 +13925,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ConsumableUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
+const vehicle_info_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 let ConsumableUsecase = class ConsumableUsecase {
-    constructor(consumableService) {
+    constructor(consumableService, vehicleInfoService) {
         this.consumableService = consumableService;
+        this.vehicleInfoService = vehicleInfoService;
     }
     async save(user, createConsumableDto, repositoryOptions) {
         const result = await this.checkRole(createConsumableDto.vehicleInfoId, user);
         if (!result)
             throw new common_1.ForbiddenException('권한이 없습니다.');
+        const vehicleInfo = await this.vehicleInfoService.findOne({
+            where: {
+                vehicleInfoId: createConsumableDto.vehicleInfoId,
+            },
+        });
+        if (!vehicleInfo)
+            throw new common_1.NotFoundException('차량 정보를 찾을 수 없습니다.');
+        createConsumableDto.initMileage = vehicleInfo.totalMileage;
         return this.consumableService.save(createConsumableDto, repositoryOptions);
     }
     async findAll(user, repositoryOptions) {
@@ -13956,7 +13981,7 @@ let ConsumableUsecase = class ConsumableUsecase {
 exports.ConsumableUsecase = ConsumableUsecase;
 exports.ConsumableUsecase = ConsumableUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof consumable_service_1.ConsumableService !== "undefined" && consumable_service_1.ConsumableService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof consumable_service_1.ConsumableService !== "undefined" && consumable_service_1.ConsumableService) === "function" ? _a : Object, typeof (_b = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _b : Object])
 ], ConsumableUsecase);
 
 
@@ -16231,7 +16256,6 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
-        synchronize: configService.get('NODE_ENV') === 'local',
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
         extra: {
@@ -16641,6 +16665,10 @@ __decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
 ], Consumable.prototype, "notifyReplacementCycle", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    __metadata("design:type", Number)
+], Consumable.prototype, "initMileage", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => vehicle_info_entity_1.VehicleInfo),
     (0, typeorm_1.JoinColumn)({ name: 'vehicleInfoId', referencedColumnName: 'vehicleInfoId' }),

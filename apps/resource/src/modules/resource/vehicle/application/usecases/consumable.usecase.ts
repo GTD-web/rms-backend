@@ -1,14 +1,17 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ConsumableService } from '@resource/modules/resource/vehicle/application/services/consumable.service';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { Consumable, User } from '@libs/entities';
 import { CreateConsumableDto } from '../dtos/create-vehicle-info.dto';
 import { Role } from '@libs/enums/role-type.enum';
 import { UpdateConsumableDto } from '../dtos/update-vehicle-info.dto';
-
+import { VehicleInfoService } from '@resource/modules/resource/vehicle/application/services/vehicle-info.service';
 @Injectable()
 export class ConsumableUsecase {
-    constructor(private readonly consumableService: ConsumableService) {}
+    constructor(
+        private readonly consumableService: ConsumableService,
+        private readonly vehicleInfoService: VehicleInfoService,
+    ) {}
 
     async save(
         user: User,
@@ -17,6 +20,14 @@ export class ConsumableUsecase {
     ): Promise<Consumable> {
         const result = await this.checkRole(createConsumableDto.vehicleInfoId, user);
         if (!result) throw new ForbiddenException('권한이 없습니다.');
+        const vehicleInfo = await this.vehicleInfoService.findOne({
+            where: {
+                vehicleInfoId: createConsumableDto.vehicleInfoId,
+            },
+        });
+        if (!vehicleInfo) throw new NotFoundException('차량 정보를 찾을 수 없습니다.');
+        createConsumableDto.initMileage = vehicleInfo.totalMileage;
+
         return this.consumableService.save(createConsumableDto, repositoryOptions);
     }
 

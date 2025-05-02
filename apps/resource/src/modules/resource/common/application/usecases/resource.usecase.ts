@@ -31,7 +31,7 @@ import { Resource } from '@libs/entities/resource.entity';
 import { CreateResourceInfoDto } from '../dtos/create-resource.dto';
 import { ResourceTypeHandler } from '@resource/modules/resource/common/domain/ports/resource-type.handler.port';
 import { ResourceManagerService } from '../services/resource-manager.service';
-import { User as UserEntity } from '@libs/entities';
+import { Maintenance, User as UserEntity } from '@libs/entities';
 import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { FileService } from '@resource/modules/file/application/services/file.service';
@@ -228,6 +228,13 @@ export class ResourceUsecase {
                                 maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
                             };
                         });
+                    } else {
+                        consumable.maintenances = [
+                            {
+                                mileageFromLastMaintenance: mileage - Number(consumable.initMileage),
+                                maintanceRequired: mileage - Number(consumable.initMileage) > replaceCycle,
+                            } as unknown as Maintenance,
+                        ];
                     }
                 }
                 resource.vehicleInfo.consumables.sort((a, b) => {

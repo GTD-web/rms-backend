@@ -77,6 +77,12 @@ export class CreateConsumableDto {
         example: 'vehicle-123',
     })
     vehicleInfoId: string;
+
+    @ApiProperty({
+        description: '초기 주행거리',
+        example: 0,
+    })
+    initMileage: number;
 }
 
 export class CreateMaintenanceDto {
