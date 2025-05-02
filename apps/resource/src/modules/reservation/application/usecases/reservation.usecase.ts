@@ -285,6 +285,7 @@ export class ReservationUsecase {
             order: {
                 startDate: 'ASC',
             },
+            withDeleted: true,
         });
         reservations.sort((a, b) => {
             if (a.status === ReservationStatus.CONFIRMED) {
@@ -337,6 +338,7 @@ export class ReservationUsecase {
             },
             skip: (page - 1) * limit,
             take: limit,
+            withDeleted: true,
         });
 
         const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
@@ -403,6 +405,7 @@ export class ReservationUsecase {
             },
             skip: (page - 1) * limit,
             take: limit,
+            withDeleted: true,
         });
 
         const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {

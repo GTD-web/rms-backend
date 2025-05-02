@@ -7188,6 +7188,7 @@ let ReservationUsecase = class ReservationUsecase {
             order: {
                 startDate: 'ASC',
             },
+            withDeleted: true,
         });
         reservations.sort((a, b) => {
             if (a.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
@@ -7233,6 +7234,7 @@ let ReservationUsecase = class ReservationUsecase {
             },
             skip: (page - 1) * limit,
             take: limit,
+            withDeleted: true,
         });
         const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
             const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
@@ -7285,6 +7287,7 @@ let ReservationUsecase = class ReservationUsecase {
             },
             skip: (page - 1) * limit,
             take: limit,
+            withDeleted: true,
         });
         const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
             const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
