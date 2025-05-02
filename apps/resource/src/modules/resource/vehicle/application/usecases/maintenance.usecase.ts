@@ -11,6 +11,7 @@ import { CreateMaintenanceDto } from '../dtos/create-vehicle-info.dto';
 import { User as UserEntity } from '@libs/entities';
 import { DataSource, In, LessThan, MoreThan, MoreThanOrEqual, Not } from 'typeorm';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 @Injectable()
 export class MaintenanceUsecase {
@@ -24,7 +25,7 @@ export class MaintenanceUsecase {
     async save(user: UserEntity, createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
         console.log(user);
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
 
         const existingMaintenance = await this.maintenanceService.findOne({
             where: {
@@ -33,7 +34,7 @@ export class MaintenanceUsecase {
             },
         });
         if (existingMaintenance) {
-            throw new BadRequestException('직전 정비 이력 보다 이전 날짜에 정비 이력을 등록할 수 없습니다.');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.INVALID_DATE);
         }
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -77,7 +78,7 @@ export class MaintenanceUsecase {
         limit: number,
     ): Promise<PaginationData<MaintenanceResponseDto>> {
         const result = await this.vehicleInfoService.checkRole(vehicleInfoId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
 
         const vehicleInfo = await this.vehicleInfoService.findOne({
             where: { vehicleInfoId },
@@ -127,7 +128,7 @@ export class MaintenanceUsecase {
 
     async findAll(user: UserEntity, consumableId: string): Promise<Maintenance[]> {
         const result = await this.consumableService.checkRole(consumableId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
         return this.maintenanceService.findAll({
             where: { consumableId },
         });
@@ -135,7 +136,7 @@ export class MaintenanceUsecase {
 
     async findOne(user: UserEntity, maintenanceId: string): Promise<MaintenanceResponseDto> {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
         const maintenance = await this.maintenanceService.findOne({
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
@@ -173,7 +174,7 @@ export class MaintenanceUsecase {
         repositoryOptions?: RepositoryOptions,
     ): Promise<Maintenance> {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
 
         if (updateMaintenanceDto.date) {
             const existingMaintenance = await this.maintenanceService.findOne({
@@ -184,7 +185,7 @@ export class MaintenanceUsecase {
                 },
             });
             if (existingMaintenance) {
-                throw new BadRequestException('직전 정비 이력 보다 이전 날짜에 정비 이력을 등록할 수 없습니다.');
+                throw new BadRequestException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.INVALID_DATE);
             }
         }
 
@@ -228,7 +229,7 @@ export class MaintenanceUsecase {
 
     async delete(user: UserEntity, maintenanceId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
         return await this.maintenanceService.delete(maintenanceId, repositoryOptions);
     }
 }

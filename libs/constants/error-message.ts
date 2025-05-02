@@ -28,6 +28,7 @@ const ValidationErrorMessage = {
     INVALID_DATE_FORMAT: (field: string, format: string) =>
         `${field}의 날짜 형식이 올바르지 않습니다. ${format} 형식이어야 합니다.`,
     INVALID_ARRAY_ITEM_TYPE: (field: string, type: string) => `${field}의 모든 항목은 ${type}이어야 합니다.`,
+    INVALID_MILEAGE: (field: string) => `${field}은(는) 0 이상 999,999,999 이하의 정수여야 합니다.`,
 };
 
 const BusinessErrorMessage = {
@@ -62,9 +63,12 @@ const BusinessErrorMessage = {
     },
     CONSUMABLE: {
         NOT_FOUND: '요청한 소모품 정보를 찾을 수 없습니다.',
+        UNAUTHORIZED: '소모품 관리 권한이 없습니다.',
     },
     MAINTENANCE: {
         NOT_FOUND: '요청한 정비 정보를 찾을 수 없습니다.',
+        UNAUTHORIZED: '정비 관리 권한이 없습니다.',
+        INVALID_DATE: '직전 정비 이력 보다 이전 날짜에 정비 이력을 등록할 수 없습니다.',
     },
     RESERVATION: {
         NOT_FOUND: '요청한 예약 정보를 찾을 수 없습니다.',

@@ -9770,30 +9770,31 @@ const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-
 const create_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/create-vehicle-info.dto.ts");
 const create_meeting_room_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/meeting-room/application/dtos/create-meeting-room-info.dto */ "./apps/resource/src/modules/resource/meeting-room/application/dtos/create-meeting-room-info.dto.ts");
 const create_accommodation_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/accommodation/application/dtos/create-accommodation-info.dto */ "./apps/resource/src/modules/resource/accommodation/application/dtos/create-accommodation-info.dto.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 class CreateResourceGroupDto {
 }
 exports.CreateResourceGroupDto = CreateResourceGroupDto;
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('상위 자원 그룹 ID') }),
     __metadata("design:type", String)
 ], CreateResourceGroupDto.prototype, "parentResourceGroupId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
-    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('자원 타입', Object.values(resource_type_enum_1.ResourceType)) }),
     __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
 ], CreateResourceGroupDto.prototype, "type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
     __metadata("design:type", String)
 ], CreateResourceGroupDto.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('설명') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) }),
     __metadata("design:type", String)
 ], CreateResourceGroupDto.prototype, "description", void 0);
 class CreateResourceManagerDto {
@@ -9801,7 +9802,7 @@ class CreateResourceManagerDto {
 exports.CreateResourceManagerDto = CreateResourceManagerDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '직원 ID' }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('직원 ID') }),
     __metadata("design:type", String)
 ], CreateResourceManagerDto.prototype, "employeeId", void 0);
 class ResourceLocation {
@@ -9809,15 +9810,15 @@ class ResourceLocation {
 exports.ResourceLocation = ResourceLocation;
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('주소') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('주소', 0, 100) }),
     __metadata("design:type", String)
 ], ResourceLocation.prototype, "address", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('상세 주소') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('상세 주소', 0, 100) }),
     __metadata("design:type", String)
 ], ResourceLocation.prototype, "detailAddress", void 0);
 class CreateResourceDto {
@@ -9825,20 +9826,20 @@ class CreateResourceDto {
 exports.CreateResourceDto = CreateResourceDto;
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 그룹 ID') }),
     __metadata("design:type", String)
 ], CreateResourceDto.prototype, "resourceGroupId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('이름', 0, 100) }),
     __metadata("design:type", String)
 ], CreateResourceDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('설명') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) }),
     __metadata("design:type", String)
 ], CreateResourceDto.prototype, "description", void 0);
 __decorate([
@@ -9848,23 +9849,23 @@ __decorate([
 ], CreateResourceDto.prototype, "location", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [String] }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], CreateResourceDto.prototype, "images", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('참가자 변경 알림 여부') }),
     __metadata("design:type", Boolean)
 ], CreateResourceDto.prototype, "notifyParticipantChange", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('예약 변경 알림 여부') }),
     __metadata("design:type", Boolean)
 ], CreateResourceDto.prototype, "notifyReservationChange", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
-    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('자원 타입', Object.values(resource_type_enum_1.ResourceType)) }),
     __metadata("design:type", typeof (_b = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _b : Object)
 ], CreateResourceDto.prototype, "type", void 0);
 class CreateResourceInfoDto {
@@ -9888,7 +9889,7 @@ __decorate([
 ], CreateResourceInfoDto.prototype, "typeInfo", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [CreateResourceManagerDto] }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('관리자') }),
     (0, class_validator_1.ValidateNested)({ each: true }),
     (0, class_transformer_1.Type)(() => CreateResourceManagerDto),
     __metadata("design:type", Array)
@@ -10292,14 +10293,15 @@ const class_validator_1 = __webpack_require__(/*! class-validator */ "class-vali
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
 const create_resource_dto_1 = __webpack_require__(/*! ./create-resource.dto */ "./apps/resource/src/modules/resource/common/application/dtos/create-resource.dto.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 class UpdateResourceGroupDto {
 }
 exports.UpdateResourceGroupDto = UpdateResourceGroupDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
     __metadata("design:type", String)
 ], UpdateResourceGroupDto.prototype, "title", void 0);
 class UpdateResourceDto {
@@ -10307,22 +10309,22 @@ class UpdateResourceDto {
 exports.UpdateResourceDto = UpdateResourceDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 그룹 ID') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateResourceDto.prototype, "resourceGroupId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('이름') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('이름', 0, 100) }),
     __metadata("design:type", String)
 ], UpdateResourceDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('설명') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) }),
     __metadata("design:type", String)
 ], UpdateResourceDto.prototype, "description", void 0);
 __decorate([
@@ -10332,32 +10334,32 @@ __decorate([
 ], UpdateResourceDto.prototype, "location", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateResourceDto.prototype, "images", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('사용 가능 여부') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateResourceDto.prototype, "isAvailable", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('사용 불가 사유') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('사용 불가 사유', 0, 100) }),
     __metadata("design:type", String)
 ], UpdateResourceDto.prototype, "unavailableReason", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('참가자 변경 알림 여부') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateResourceDto.prototype, "notifyParticipantChange", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('예약 변경 알림 여부') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateResourceDto.prototype, "notifyReservationChange", void 0);
@@ -10374,7 +10376,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [create_resource_dto_1.CreateResourceManagerDto] }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('관리자') }),
     (0, class_validator_1.ValidateNested)({ each: true }),
     (0, class_transformer_1.Type)(() => create_resource_dto_1.CreateResourceManagerDto),
     __metadata("design:type", Array)
@@ -10388,28 +10390,28 @@ __decorate([
 ], ReturnVehicleDto.prototype, "location", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
     __metadata("design:type", Number)
 ], ReturnVehicleDto.prototype, "leftMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
     __metadata("design:type", Number)
 ], ReturnVehicleDto.prototype, "totalMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주차 위치 이미지', '문자열') }),
     __metadata("design:type", Array)
 ], ReturnVehicleDto.prototype, "parkingLocationImages", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지', '문자열') }),
     __metadata("design:type", Array)
 ], ReturnVehicleDto.prototype, "odometerImages", void 0);
 class NewOrderResourceDto {
@@ -10417,12 +10419,12 @@ class NewOrderResourceDto {
 exports.NewOrderResourceDto = NewOrderResourceDto;
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') }),
     __metadata("design:type", String)
 ], NewOrderResourceDto.prototype, "resourceId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNumber)({}, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_NUMBER('순서') }),
     __metadata("design:type", Number)
 ], NewOrderResourceDto.prototype, "newOrder", void 0);
 class UpdateResourceOrdersDto {
@@ -10430,7 +10432,7 @@ class UpdateResourceOrdersDto {
 exports.UpdateResourceOrdersDto = UpdateResourceOrdersDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [NewOrderResourceDto] }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('순서 목록') }),
     __metadata("design:type", Array)
 ], UpdateResourceOrdersDto.prototype, "orders", void 0);
 class NewOrderResourceGroupDto {
@@ -10438,12 +10440,12 @@ class NewOrderResourceGroupDto {
 exports.NewOrderResourceGroupDto = NewOrderResourceGroupDto;
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 그룹 ID') }),
     __metadata("design:type", String)
 ], NewOrderResourceGroupDto.prototype, "resourceGroupId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNumber)({}, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_NUMBER('순서') }),
     __metadata("design:type", Number)
 ], NewOrderResourceGroupDto.prototype, "newOrder", void 0);
 class UpdateResourceGroupOrdersDto {
@@ -10451,7 +10453,7 @@ class UpdateResourceGroupOrdersDto {
 exports.UpdateResourceGroupOrdersDto = UpdateResourceGroupOrdersDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [NewOrderResourceGroupDto] }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('순서 목록') }),
     __metadata("design:type", Array)
 ], UpdateResourceGroupOrdersDto.prototype, "orders", void 0);
 
@@ -13219,55 +13221,56 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 class CreateVehicleInfoDto {
 }
 exports.CreateVehicleInfoDto = CreateVehicleInfoDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: true }),
-    (0, class_validator_1.IsString)({ message: '차량 번호는 문자열이어야 합니다.' }),
-    (0, class_validator_1.Length)(0, 100, { message: '차량 번호는 100자 이하여야 합니다.' }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('차량 번호') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('차량 번호', 0, 100) }),
     __metadata("design:type", String)
 ], CreateVehicleInfoDto.prototype, "vehicleNumber", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsInt)({ message: '남은 주행거리는 숫자여야 합니다.' }),
-    (0, class_validator_1.Min)(0, { message: '남은 주행거리는 0 이상이어야 합니다.' }),
-    (0, class_validator_1.Max)(999999999, { message: '남은 주행거리는 999999999 이하여야 합니다.' }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
     __metadata("design:type", Number)
 ], CreateVehicleInfoDto.prototype, "leftMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsInt)({ message: '총 주행거리는 숫자여야 합니다.' }),
-    (0, class_validator_1.Min)(0, { message: '총 주행거리는 0 이상이어야 합니다.' }),
-    (0, class_validator_1.Max)(999999999, { message: '총 주행거리는 999999999 이하여야 합니다.' }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
     __metadata("design:type", Number)
 ], CreateVehicleInfoDto.prototype, "totalMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)({ message: '보험 이름은 문자열이어야 합니다.' }),
-    (0, class_validator_1.Length)(0, 100, { message: '보험 이름은 100자 이하여야 합니다.' }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('보험 이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험 이름', 0, 100) }),
     __metadata("design:type", String)
 ], CreateVehicleInfoDto.prototype, "insuranceName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)({ message: '보험사 전화 번호는 문자열이어야 합니다.' }),
-    (0, class_validator_1.Length)(0, 100, { message: '보험사 전화 번호는 100자 이하여야 합니다.' }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('보험사 전화 번호') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험사 전화 번호', 0, 100) }),
     __metadata("design:type", String)
 ], CreateVehicleInfoDto.prototype, "insuranceNumber", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '주차위치 이미지 배열' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)({ message: '주차위치 이미지 입력 값은 배열이어야 합니다.' }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차위치 이미지') }),
     __metadata("design:type", Array)
 ], CreateVehicleInfoDto.prototype, "parkingLocationImages", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '계기판 이미지 배열' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)({ message: '계기판 이미지 입력 값은 배열이어야 합니다.' }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('계기판 이미지') }),
     __metadata("design:type", Array)
 ], CreateVehicleInfoDto.prototype, "odometerImages", void 0);
 class CreateConsumableDto {
@@ -13275,20 +13278,20 @@ class CreateConsumableDto {
 exports.CreateConsumableDto = CreateConsumableDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
-    (0, class_validator_1.IsString)({ message: '소모품 이름은 문자열이어야 합니다.' }),
-    (0, class_validator_1.Length)(0, 100, { message: '소모품 이름은 100자 이하여야 합니다.' }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('소모품 이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('소모품 이름', 0, 100) }),
     __metadata("design:type", String)
 ], CreateConsumableDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
-    (0, class_validator_1.IsInt)({ message: '소모품 교체 주기는 숫자여야 합니다.' }),
-    (0, class_validator_1.Min)(0, { message: '소모품 교체 주기는 0 이상이어야 합니다.' }),
-    (0, class_validator_1.Max)(999999999, { message: '소모품 교체 주기는 999999999 이하여야 합니다.' }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('소모품 교체 주기') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') }),
     __metadata("design:type", Number)
 ], CreateConsumableDto.prototype, "replaceCycle", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ default: true, description: '소모품 교체 알림 주기' }),
-    (0, class_validator_1.IsBoolean)({ message: '소모품 교체 알림 주기는 불리언 값이어야 합니다.' }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('소모품 교체 알림 주기') }),
     __metadata("design:type", Boolean)
 ], CreateConsumableDto.prototype, "notifyReplacementCycle", void 0);
 __decorate([
@@ -13312,29 +13315,29 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
-        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식이어야 합니다.',
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('날짜', 'YYYY-MM-DD'),
     }),
     __metadata("design:type", String)
 ], CreateMaintenanceDto.prototype, "date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsInt)({ message: '주행거리는 숫자여야 합니다.' }),
-    (0, class_validator_1.Min)(0, { message: '주행거리는 0 이상이어야 합니다.' }),
-    (0, class_validator_1.Max)(999999999, { message: '주행거리는 999999999 이하여야 합니다.' }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') }),
     __metadata("design:type", Number)
 ], CreateMaintenanceDto.prototype, "mileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsInt)({ message: '비용은 숫자여야 합니다.' }),
-    (0, class_validator_1.Min)(0, { message: '비용은 0 이상이어야 합니다.' }),
-    (0, class_validator_1.Max)(999999999, { message: '비용은 999999999 이하여야 합니다.' }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('비용') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') }),
     __metadata("design:type", Number)
 ], CreateMaintenanceDto.prototype, "cost", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '이미지 배열' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)({ message: '이미지 입력 값은 배열이어야 합니다.' }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
     __metadata("design:type", Array)
 ], CreateMaintenanceDto.prototype, "images", void 0);
 __decorate([
@@ -13368,6 +13371,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateVehicleInfoDto = exports.UpdateConsumableDto = exports.UpdateMaintenanceDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 class UpdateMaintenanceDto {
 }
 exports.UpdateMaintenanceDto = UpdateMaintenanceDto;
@@ -13376,30 +13380,30 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
-        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식이어야 합니다.',
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('날짜', 'YYYY-MM-DD'),
     }),
     __metadata("design:type", String)
 ], UpdateMaintenanceDto.prototype, "date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateMaintenanceDto.prototype, "mileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('비용') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') }),
     __metadata("design:type", Number)
 ], UpdateMaintenanceDto.prototype, "cost", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
     __metadata("design:type", Array)
 ], UpdateMaintenanceDto.prototype, "images", void 0);
 __decorate([
@@ -13415,20 +13419,20 @@ class UpdateConsumableDto {
 exports.UpdateConsumableDto = UpdateConsumableDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('소모품 이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('소모품 이름', 0, 100) }),
     __metadata("design:type", String)
 ], UpdateConsumableDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('소모품 교체 주기') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') }),
     __metadata("design:type", Number)
 ], UpdateConsumableDto.prototype, "replaceCycle", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ default: true, description: '소모품 교체 알림 주기' }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('소모품 교체 알림 주기') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateConsumableDto.prototype, "notifyReplacementCycle", void 0);
@@ -13444,50 +13448,50 @@ class UpdateVehicleInfoDto {
 exports.UpdateVehicleInfoDto = UpdateVehicleInfoDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('차량 번호') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('차량 번호', 0, 100) }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateVehicleInfoDto.prototype, "vehicleNumber", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('보험 이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험 이름', 0, 100) }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateVehicleInfoDto.prototype, "insuranceName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('보험 번호') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험 번호', 0, 100) }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateVehicleInfoDto.prototype, "insuranceNumber", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateVehicleInfoDto.prototype, "totalMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(999999999),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateVehicleInfoDto.prototype, "leftMileage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateVehicleInfoDto.prototype, "parkingLocationImages", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateVehicleInfoDto.prototype, "odometerImages", void 0);
@@ -13928,6 +13932,7 @@ exports.ConsumableUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let ConsumableUsecase = class ConsumableUsecase {
     constructor(consumableService, vehicleInfoService) {
         this.consumableService = consumableService;
@@ -13936,39 +13941,39 @@ let ConsumableUsecase = class ConsumableUsecase {
     async save(user, createConsumableDto, repositoryOptions) {
         const result = await this.checkRole(createConsumableDto.vehicleInfoId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         const vehicleInfo = await this.vehicleInfoService.findOne({
             where: {
                 vehicleInfoId: createConsumableDto.vehicleInfoId,
             },
         });
         if (!vehicleInfo)
-            throw new common_1.NotFoundException('차량 정보를 찾을 수 없습니다.');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         createConsumableDto.initMileage = vehicleInfo.totalMileage;
         return this.consumableService.save(createConsumableDto, repositoryOptions);
     }
     async findAll(user, repositoryOptions) {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         return this.consumableService.findAll(repositoryOptions);
     }
     async findOne(user, repositoryOptions) {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         return this.consumableService.findOne(repositoryOptions);
     }
     async update(user, id, updateData, repositoryOptions) {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         return this.consumableService.update(id, updateData, repositoryOptions);
     }
     async delete(user, id, repositoryOptions) {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         return await this.consumableService.delete(id, repositoryOptions);
     }
     async checkRole(vehicleInfoId, user) {
@@ -14009,6 +14014,7 @@ const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
 const maintenance_service_1 = __webpack_require__(/*! ../services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let MaintenanceUsecase = class MaintenanceUsecase {
     constructor(maintenanceService, consumableService, vehicleInfoService, dataSource) {
         this.maintenanceService = maintenanceService;
@@ -14020,7 +14026,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         console.log(user);
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
         const existingMaintenance = await this.maintenanceService.findOne({
             where: {
                 consumableId: createMaintenanceDto.consumableId,
@@ -14028,7 +14034,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
             },
         });
         if (existingMaintenance) {
-            throw new common_1.BadRequestException('직전 정비 이력 보다 이전 날짜에 정비 이력을 등록할 수 없습니다.');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.INVALID_DATE);
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -14061,7 +14067,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
     async findAllByVehicleInfoId(user, vehicleInfoId, page, limit) {
         const result = await this.vehicleInfoService.checkRole(vehicleInfoId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
         const vehicleInfo = await this.vehicleInfoService.findOne({
             where: { vehicleInfoId },
             relations: ['resource', 'consumables', 'consumables.maintenances'],
@@ -14103,7 +14109,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
     async findAll(user, consumableId) {
         const result = await this.consumableService.checkRole(consumableId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
         return this.maintenanceService.findAll({
             where: { consumableId },
         });
@@ -14111,7 +14117,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
     async findOne(user, maintenanceId) {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
         const maintenance = await this.maintenanceService.findOne({
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
@@ -14142,7 +14148,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
     async update(user, maintenanceId, updateMaintenanceDto, repositoryOptions) {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
         if (updateMaintenanceDto.date) {
             const existingMaintenance = await this.maintenanceService.findOne({
                 where: {
@@ -14152,7 +14158,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
                 },
             });
             if (existingMaintenance) {
-                throw new common_1.BadRequestException('직전 정비 이력 보다 이전 날짜에 정비 이력을 등록할 수 없습니다.');
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.INVALID_DATE);
             }
         }
         const queryRunner = this.dataSource.createQueryRunner();
@@ -14193,7 +14199,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
     async delete(user, maintenanceId, repositoryOptions) {
         const result = await this.maintenanceService.checkRole(maintenanceId, user);
         if (!result)
-            throw new common_1.ForbiddenException('권한이 없습니다.');
+            throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
         return await this.maintenanceService.delete(maintenanceId, repositoryOptions);
     }
 };
@@ -14230,6 +14236,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let VehicleInfoUsecase = class VehicleInfoUsecase {
     constructor(vehicleInfoService, eventEmitter) {
         this.vehicleInfoService = vehicleInfoService;
@@ -14242,7 +14249,7 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
             },
         });
         if (!vehicleInfo) {
-            throw new common_1.NotFoundException('Vehicle info not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
         return {
             vehicleInfoId: vehicleInfo.vehicleInfoId,
@@ -14263,7 +14270,7 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
             relations: ['consumables'],
         });
         if (!previousVehicleInfo) {
-            throw new common_1.NotFoundException('Vehicle info not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
         const previousTotalMileage = Number(previousVehicleInfo.totalMileage);
         const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, repositoryOptions);
@@ -16302,6 +16309,7 @@ const ValidationErrorMessage = {
     IS_NOT_ZERO: (field) => `${field}은(는) 0이 아니어야 합니다.`,
     INVALID_DATE_FORMAT: (field, format) => `${field}의 날짜 형식이 올바르지 않습니다. ${format} 형식이어야 합니다.`,
     INVALID_ARRAY_ITEM_TYPE: (field, type) => `${field}의 모든 항목은 ${type}이어야 합니다.`,
+    INVALID_MILEAGE: (field) => `${field}은(는) 0 이상 999,999,999 이하의 정수여야 합니다.`,
 };
 const BusinessErrorMessage = {
     COMMON: {
@@ -16335,9 +16343,12 @@ const BusinessErrorMessage = {
     },
     CONSUMABLE: {
         NOT_FOUND: '요청한 소모품 정보를 찾을 수 없습니다.',
+        UNAUTHORIZED: '소모품 관리 권한이 없습니다.',
     },
     MAINTENANCE: {
         NOT_FOUND: '요청한 정비 정보를 찾을 수 없습니다.',
+        UNAUTHORIZED: '정비 관리 권한이 없습니다.',
+        INVALID_DATE: '직전 정비 이력 보다 이전 날짜에 정비 이력을 등록할 수 없습니다.',
     },
     RESERVATION: {
         NOT_FOUND: '요청한 예약 정보를 찾을 수 없습니다.',

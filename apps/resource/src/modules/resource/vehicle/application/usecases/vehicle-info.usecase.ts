@@ -7,6 +7,7 @@ import { ConsumableService } from '@resource/modules/resource/vehicle/applicatio
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 @Injectable()
 export class VehicleInfoUsecase {
@@ -22,7 +23,7 @@ export class VehicleInfoUsecase {
             },
         });
         if (!vehicleInfo) {
-            throw new NotFoundException('Vehicle info not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
 
         return {
@@ -49,7 +50,7 @@ export class VehicleInfoUsecase {
             relations: ['consumables'],
         });
         if (!previousVehicleInfo) {
-            throw new NotFoundException('Vehicle info not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
 
         const previousTotalMileage = Number(previousVehicleInfo.totalMileage);

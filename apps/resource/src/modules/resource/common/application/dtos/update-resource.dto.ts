@@ -13,12 +13,13 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { CreateResourceManagerDto, ResourceLocation } from './create-resource.dto';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 export class UpdateResourceGroupDto {
     @ApiProperty({ required: false })
-    @IsString()
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('제목') })
     @IsOptional()
-    @Length(0, 100)
+    @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) })
     title?: string;
 
     // @ApiProperty({ required: false })
@@ -29,20 +30,20 @@ export class UpdateResourceGroupDto {
 
 export class UpdateResourceDto {
     @ApiProperty({ required: false })
-    @IsString()
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('자원 그룹 ID') })
     @IsOptional()
     resourceGroupId?: string;
 
     @ApiProperty({ required: false })
-    @IsString()
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('이름') })
     @IsOptional()
-    @Length(0, 100)
+    @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('이름', 0, 100) })
     name?: string;
 
     @ApiProperty({ required: false })
-    @IsString()
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('설명') })
     @IsOptional()
-    @Length(0, 100)
+    @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) })
     description?: string;
 
     @ApiProperty({ required: false, type: 'object' })
@@ -50,28 +51,28 @@ export class UpdateResourceDto {
     location?: ResourceLocation;
 
     @ApiProperty({ required: false, type: [String] })
-    @IsArray()
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') })
     @IsOptional()
     images?: string[];
 
     @ApiProperty({ required: false })
-    @IsBoolean()
+    @IsBoolean({ message: ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('사용 가능 여부') })
     @IsOptional()
     isAvailable?: boolean;
 
     @ApiProperty({ required: false })
-    @IsString()
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('사용 불가 사유') })
     @IsOptional()
-    @Length(0, 100)
+    @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('사용 불가 사유', 0, 100) })
     unavailableReason?: string;
 
     @ApiProperty({ required: false })
-    @IsBoolean()
+    @IsBoolean({ message: ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('참가자 변경 알림 여부') })
     @IsOptional()
     notifyParticipantChange?: boolean;
 
     @ApiProperty({ required: false })
-    @IsBoolean()
+    @IsBoolean({ message: ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('예약 변경 알림 여부') })
     @IsOptional()
     notifyReservationChange?: boolean;
 }
@@ -85,7 +86,7 @@ export class UpdateResourceInfoDto {
 
     @ApiProperty({ required: false, type: [CreateResourceManagerDto] })
     @IsOptional()
-    @IsArray()
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('관리자') })
     @ValidateNested({ each: true })
     @Type(() => CreateResourceManagerDto)
     managers?: CreateResourceManagerDto[];
@@ -97,56 +98,56 @@ export class ReturnVehicleDto {
     location: ResourceLocation;
 
     @ApiProperty({ minimum: 0, maximum: 999999999 })
-    @IsInt()
-    @Min(0)
-    @Max(999999999)
+    @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') })
+    @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') })
+    @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') })
     leftMileage: number;
 
     @ApiProperty({ minimum: 0, maximum: 999999999 })
-    @IsInt()
-    @Min(0)
-    @Max(999999999)
+    @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') })
+    @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') })
+    @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') })
     totalMileage: number;
 
     @ApiProperty()
-    @IsArray()
-    @IsString({ each: true })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') })
+    @IsString({ each: true, message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주차 위치 이미지', '문자열') })
     parkingLocationImages: string[];
 
     @ApiProperty()
-    @IsArray()
-    @IsString({ each: true })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') })
+    @IsString({ each: true, message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지', '문자열') })
     odometerImages: string[];
 }
 
 export class NewOrderResourceDto {
     @ApiProperty()
-    @IsString()
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') })
     resourceId: string;
 
     @ApiProperty()
-    @IsNumber()
+    @IsNumber({}, { message: ERROR_MESSAGE.VALIDATION.IS_NUMBER('순서') })
     newOrder: number;
 }
 
 export class UpdateResourceOrdersDto {
     @ApiProperty({ type: [NewOrderResourceDto] })
-    @IsArray()
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('순서 목록') })
     orders: NewOrderResourceDto[];
 }
 
 export class NewOrderResourceGroupDto {
     @ApiProperty()
-    @IsString()
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('자원 그룹 ID') })
     resourceGroupId: string;
 
     @ApiProperty()
-    @IsNumber()
+    @IsNumber({}, { message: ERROR_MESSAGE.VALIDATION.IS_NUMBER('순서') })
     newOrder: number;
 }
 
 export class UpdateResourceGroupOrdersDto {
     @ApiProperty({ type: [NewOrderResourceGroupDto] })
-    @IsArray()
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('순서 목록') })
     orders: NewOrderResourceGroupDto[];
 }

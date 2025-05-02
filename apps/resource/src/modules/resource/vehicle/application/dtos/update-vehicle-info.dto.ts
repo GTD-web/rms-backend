@@ -11,33 +11,34 @@ import {
     IsString,
     Length,
 } from 'class-validator';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 export class UpdateMaintenanceDto {
     @ApiProperty({ required: false })
     @IsOptional()
     @IsDateString()
     @Matches(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
-        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식이어야 합니다.',
+        message: ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('날짜', 'YYYY-MM-DD'),
     })
     date?: string;
 
     @ApiProperty({ required: false })
-    @IsInt()
-    @Min(0)
-    @Max(999999999)
+    @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('주행거리') })
+    @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') })
+    @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') })
     @IsOptional()
     mileage?: number;
 
     @ApiProperty({ required: false })
     @IsOptional()
-    @IsInt()
-    @Min(0)
-    @Max(999999999)
+    @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('비용') })
+    @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') })
+    @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') })
     cost?: number;
 
     @ApiProperty({ required: false, type: [String] })
     @IsOptional()
-    @IsArray()
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') })
     images?: string[];
 
     @ApiProperty({
@@ -50,18 +51,18 @@ export class UpdateMaintenanceDto {
 
 export class UpdateConsumableDto {
     @ApiProperty({ description: '소모품 이름' })
-    @IsString()
-    @Length(0, 100)
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('소모품 이름') })
+    @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('소모품 이름', 0, 100) })
     name: string;
 
     @ApiProperty({ description: '소모품 교체 주기' })
-    @IsInt()
-    @Min(0)
-    @Max(999999999)
+    @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('소모품 교체 주기') })
+    @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') })
+    @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') })
     replaceCycle: number;
 
     @ApiProperty({ default: true, description: '소모품 교체 알림 주기' })
-    @IsBoolean()
+    @IsBoolean({ message: ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('소모품 교체 알림 주기') })
     @IsOptional()
     notifyReplacementCycle?: boolean;
 
@@ -74,44 +75,44 @@ export class UpdateConsumableDto {
 
 export class UpdateVehicleInfoDto {
     @ApiProperty({ required: false })
-    @IsString()
-    @Length(0, 100)
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('차량 번호') })
+    @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('차량 번호', 0, 100) })
     @IsOptional()
     vehicleNumber?: string;
 
     @ApiProperty({ required: false })
-    @IsString()
-    @Length(0, 100)
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('보험 이름') })
+    @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험 이름', 0, 100) })
     @IsOptional()
     insuranceName?: string;
 
     @ApiProperty({ required: false })
-    @IsString()
-    @Length(0, 100)
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('보험 번호') })
+    @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험 번호', 0, 100) })
     @IsOptional()
     insuranceNumber?: string;
 
     @ApiProperty({ required: false })
-    @IsInt()
-    @Min(0)
-    @Max(999999999)
+    @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') })
+    @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') })
+    @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') })
     @IsOptional()
     totalMileage?: number;
 
     @ApiProperty({ required: false })
-    @IsInt()
-    @Min(0)
-    @Max(999999999)
+    @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') })
+    @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') })
+    @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') })
     @IsOptional()
     leftMileage?: number;
 
     @ApiProperty({ required: false })
-    @IsArray()
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') })
     @IsOptional()
     parkingLocationImages?: string[];
 
     @ApiProperty({ required: false })
-    @IsArray()
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') })
     @IsOptional()
     odometerImages?: string[];
 }

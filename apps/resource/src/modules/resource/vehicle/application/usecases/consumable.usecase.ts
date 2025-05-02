@@ -6,6 +6,8 @@ import { CreateConsumableDto } from '../dtos/create-vehicle-info.dto';
 import { Role } from '@libs/enums/role-type.enum';
 import { UpdateConsumableDto } from '../dtos/update-vehicle-info.dto';
 import { VehicleInfoService } from '@resource/modules/resource/vehicle/application/services/vehicle-info.service';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
+
 @Injectable()
 export class ConsumableUsecase {
     constructor(
@@ -19,13 +21,13 @@ export class ConsumableUsecase {
         repositoryOptions?: RepositoryOptions,
     ): Promise<Consumable> {
         const result = await this.checkRole(createConsumableDto.vehicleInfoId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         const vehicleInfo = await this.vehicleInfoService.findOne({
             where: {
                 vehicleInfoId: createConsumableDto.vehicleInfoId,
             },
         });
-        if (!vehicleInfo) throw new NotFoundException('차량 정보를 찾을 수 없습니다.');
+        if (!vehicleInfo) throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         createConsumableDto.initMileage = vehicleInfo.totalMileage;
 
         return this.consumableService.save(createConsumableDto, repositoryOptions);
@@ -33,13 +35,13 @@ export class ConsumableUsecase {
 
     async findAll(user: User, repositoryOptions?: RepositoryOptions): Promise<Consumable[]> {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         return this.consumableService.findAll(repositoryOptions);
     }
 
     async findOne(user: User, repositoryOptions?: RepositoryOptions): Promise<Consumable | null> {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         return this.consumableService.findOne(repositoryOptions);
     }
 
@@ -50,13 +52,13 @@ export class ConsumableUsecase {
         repositoryOptions?: RepositoryOptions,
     ): Promise<Consumable> {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         return this.consumableService.update(id, updateData, repositoryOptions);
     }
 
     async delete(user: User, id: string, repositoryOptions?: RepositoryOptions): Promise<void> {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
-        if (!result) throw new ForbiddenException('권한이 없습니다.');
+        if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
         return await this.consumableService.delete(id, repositoryOptions);
     }
 
