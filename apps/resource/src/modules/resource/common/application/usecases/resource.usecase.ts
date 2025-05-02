@@ -126,7 +126,6 @@ export class ResourceUsecase {
                             status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
                         };
 
-
                         const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
                             repositoryOptions: {
                                 where: where,
@@ -154,8 +153,7 @@ export class ResourceUsecase {
                             .filter((reservation) => {
                                 if (isMine) {
                                     return reservation.participants.some(
-                                        (participant) =>
-                                            participant.employeeId === user.employeeId,
+                                        (participant) => participant.employeeId === user.employeeId,
                                     );
                                 }
                                 delete reservation.participants;
@@ -266,7 +264,9 @@ export class ResourceUsecase {
         if (!resource) {
             throw new NotFoundException('Resource not found');
         }
+        console.log(resource.images);
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
+        console.log(resource['imageFiles']);
 
         // 관리자 페이지 내 자원 상세 페이지에서 사용하는 정비기록 관련 계산 필드 추가
         if (resource.vehicleInfo) {
@@ -331,7 +331,6 @@ export class ResourceUsecase {
             reservationId,
         } = query;
 
-
         const resources = await this.resourceService.findAll({
             where: {
                 isAvailable: true,
@@ -340,13 +339,15 @@ export class ResourceUsecase {
             },
             relations: ['resourceGroup'],
         });
-        
-        let startDateObj = LessThan(endTime
-            ? DateUtil.date(endDate + ' ' + endTime).toDate()
-            : DateUtil.date(endDate + ' 23:59:59').toDate());
-        let endDateObj = MoreThanOrEqual(startTime
-            ? DateUtil.date(startDate + ' ' + startTime).toDate()
-            : DateUtil.date(startDate + ' 00:00:00').toDate());
+
+        const startDateObj = LessThan(
+            endTime ? DateUtil.date(endDate + ' ' + endTime).toDate() : DateUtil.date(endDate + ' 23:59:59').toDate(),
+        );
+        const endDateObj = MoreThanOrEqual(
+            startTime
+                ? DateUtil.date(startDate + ' ' + startTime).toDate()
+                : DateUtil.date(startDate + ' 00:00:00').toDate(),
+        );
 
         for (const resource of resources) {
             const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
@@ -472,10 +473,14 @@ export class ResourceUsecase {
             // 당일 예약건 처리
             const dateStr = startDate; // YYYY-MM-DD 형식
             const currentMinute = DateUtil.now().toDate().getMinutes();
-            const roundedHour = currentMinute < 30 ? DateUtil.now().format('HH:00:00') : DateUtil.now().format('HH:30:00');
-            const startTime = DateUtil.date(startDate).format('YYYY-MM-DD') === DateUtil.now().format('YYYY-MM-DD') 
-                ? roundedHour 
-                : am ? '09:00:00' : '13:00:00';
+            const roundedHour =
+                currentMinute < 30 ? DateUtil.now().format('HH:00:00') : DateUtil.now().format('HH:30:00');
+            const startTime =
+                DateUtil.date(startDate).format('YYYY-MM-DD') === DateUtil.now().format('YYYY-MM-DD')
+                    ? roundedHour
+                    : am
+                      ? '09:00:00'
+                      : '13:00:00';
             const endTime = pm ? '18:00:00' : '12:00:00';
             if (am && pm) {
                 this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);

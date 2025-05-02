@@ -10107,6 +10107,7 @@ class ResourceResponseDto {
         this.order = resource?.order;
         this.managers = resource?.resourceManagers;
         this.resourceGroup = resource?.resourceGroup;
+        this.imageFiles = resource?.images ? resource['imageFiles'] : [];
         if (resource?.vehicleInfo) {
             this.typeInfo = resource.vehicleInfo;
         }
@@ -11073,7 +11074,9 @@ let ResourceUsecase = class ResourceUsecase {
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
         }
+        console.log(resource.images);
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
+        console.log(resource['imageFiles']);
         if (resource.vehicleInfo) {
             if (resource.vehicleInfo.consumables) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
@@ -11121,10 +11124,8 @@ let ResourceUsecase = class ResourceUsecase {
             },
             relations: ['resourceGroup'],
         });
-        let startDateObj = (0, typeorm_1.LessThan)(endTime
-            ? date_util_1.DateUtil.date(endDate + ' ' + endTime).toDate()
-            : date_util_1.DateUtil.date(endDate + ' 23:59:59').toDate());
-        let endDateObj = (0, typeorm_1.MoreThanOrEqual)(startTime
+        const startDateObj = (0, typeorm_1.LessThan)(endTime ? date_util_1.DateUtil.date(endDate + ' ' + endTime).toDate() : date_util_1.DateUtil.date(endDate + ' 23:59:59').toDate());
+        const endDateObj = (0, typeorm_1.MoreThanOrEqual)(startTime
             ? date_util_1.DateUtil.date(startDate + ' ' + startTime).toDate()
             : date_util_1.DateUtil.date(startDate + ' 00:00:00').toDate());
         for (const resource of resources) {
@@ -11199,7 +11200,9 @@ let ResourceUsecase = class ResourceUsecase {
             const roundedHour = currentMinute < 30 ? date_util_1.DateUtil.now().format('HH:00:00') : date_util_1.DateUtil.now().format('HH:30:00');
             const startTime = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD')
                 ? roundedHour
-                : am ? '09:00:00' : '13:00:00';
+                : am
+                    ? '09:00:00'
+                    : '13:00:00';
             const endTime = pm ? '18:00:00' : '12:00:00';
             if (am && pm) {
                 this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);

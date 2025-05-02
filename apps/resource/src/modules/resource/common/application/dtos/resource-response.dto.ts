@@ -58,6 +58,7 @@ export class ResourceResponseDto {
         this.order = resource?.order;
         this.managers = resource?.resourceManagers;
         this.resourceGroup = resource?.resourceGroup;
+        this.imageFiles = resource?.images ? resource['imageFiles'] : [];
 
         if (resource?.vehicleInfo) {
             this.typeInfo = resource.vehicleInfo as unknown as VehicleInfoResponseDto;
@@ -120,7 +121,7 @@ export class ResourceResponseDto {
     @ApiProperty({ required: false, type: [ResourceManagerResponseDto] })
     managers?: ResourceManagerResponseDto[];
 
-    @ApiProperty({ required: false})
+    @ApiProperty({ required: false })
     resourceGroup?: ResourceGroupResponseDto;
 }
 
@@ -156,7 +157,6 @@ export class ResourceWithReservationsResponseDto extends ResourceResponseDto {
     @ApiProperty({ required: false, type: [ReservationResponseDto] })
     reservations?: ReservationResponseDto[];
 }
-
 
 export class ChildResourceGroupResponseDto extends ResourceGroupResponseDto {
     @ApiProperty({ type: () => ResourceSelectResponseDto, required: false })
