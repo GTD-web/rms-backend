@@ -46,6 +46,7 @@ import {
 import { Reservation } from '@libs/entities/reservation.entity';
 import { ResourceQueryDto } from '../dtos/resource-query.dto';
 import { ConsumableService } from '@resource/modules/resource/vehicle/application/services/consumable.service';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 @Injectable()
 export class ResourceUsecase {
@@ -194,7 +195,6 @@ export class ResourceUsecase {
             relations: [
                 'resourceGroup',
                 'vehicleInfo',
-                // 'vehicleInfo.consumables',
                 'meetingRoomInfo',
                 'accommodationInfo',
                 'resourceManagers',
@@ -203,7 +203,7 @@ export class ResourceUsecase {
         });
 
         if (!resource) {
-            throw new NotFoundException('Resource not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
 
@@ -281,7 +281,7 @@ export class ResourceUsecase {
         });
 
         if (!resource) {
-            throw new NotFoundException('Resource not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
 
@@ -642,7 +642,7 @@ export class ResourceUsecase {
         });
 
         if (!resource) {
-            throw new NotFoundException('Resource not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
 
         // 차량 주행거리정보, 차량 주차위치 이미지 저장
@@ -650,7 +650,7 @@ export class ResourceUsecase {
             where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
         });
         if (!vehicleInfo) {
-            throw new NotFoundException('Vehicle info not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
 
         try {
@@ -683,7 +683,7 @@ export class ResourceUsecase {
             return true;
         } catch (err) {
             await queryRunner.rollbackTransaction();
-            throw new InternalServerErrorException('Failed to return vehicle');
+            throw new InternalServerErrorException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.FAILED_RETURN);
         } finally {
             await queryRunner.release();
         }
@@ -693,11 +693,11 @@ export class ResourceUsecase {
         const { resource, typeInfo, managers } = createResourceInfo;
 
         if (!resource.resourceGroupId) {
-            throw new BadRequestException('Resource group ID is required');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.GROUP_ID_REQUIRED);
         }
 
         if (!managers || managers.length === 0) {
-            throw new BadRequestException('Managers are required');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.MANAGERS_REQUIRED);
         }
 
         // if (managers.length > 1) {
@@ -719,7 +719,7 @@ export class ResourceUsecase {
         });
 
         if (!group) {
-            throw new NotFoundException('Resource group not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE_GROUP.NOT_FOUND);
         }
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -745,7 +745,7 @@ export class ResourceUsecase {
             const handler = this.typeHandlers.get(group.type);
 
             if (!handler) {
-                throw new BadRequestException(`Unsupported resource type: ${group.type}`);
+                throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.UNSUPPORTED_TYPE(group.type));
             }
             await handler.createTypeInfo(savedResource, typeInfo, { queryRunner });
 
@@ -776,7 +776,7 @@ export class ResourceUsecase {
         } catch (err) {
             console.error(err);
             await queryRunner.rollbackTransaction();
-            throw new InternalServerErrorException('Failed to create resource');
+            throw new InternalServerErrorException(ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_CREATE);
         } finally {
             await queryRunner.release();
         }
@@ -791,7 +791,7 @@ export class ResourceUsecase {
         });
 
         if (!resource) {
-            throw new NotFoundException('Resource not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -815,7 +815,7 @@ export class ResourceUsecase {
             return this.findResourceDetailForAdmin(resourceId);
         } catch (err) {
             await queryRunner.rollbackTransaction();
-            throw new InternalServerErrorException('Failed to update resource');
+            throw new InternalServerErrorException(ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_UPDATE);
         } finally {
             await queryRunner.release();
         }
@@ -835,7 +835,7 @@ export class ResourceUsecase {
             await queryRunner.commitTransaction();
         } catch (err) {
             await queryRunner.rollbackTransaction();
-            throw new InternalServerErrorException('Failed to reorder resources');
+            throw new InternalServerErrorException(ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_REORDER);
         } finally {
             await queryRunner.release();
         }
@@ -849,10 +849,10 @@ export class ResourceUsecase {
             relations: ['resourceGroup', 'resourceManagers'],
         });
         if (!resource) {
-            throw new NotFoundException('Resource not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         if (resource.isAvailable) {
-            throw new BadRequestException('Resource is available');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.IS_AVAILABLE);
         }
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -888,7 +888,7 @@ export class ResourceUsecase {
         } catch (err) {
             console.error(err);
             await queryRunner.rollbackTransaction();
-            throw new InternalServerErrorException('Failed to delete resource');
+            throw new InternalServerErrorException(ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_DELETE);
         } finally {
             await queryRunner.release();
         }

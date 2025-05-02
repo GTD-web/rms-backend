@@ -10718,6 +10718,7 @@ const resource_service_1 = __webpack_require__(/*! ../services/resource.service 
 const resource_group_service_1 = __webpack_require__(/*! ../services/resource-group.service */ "./apps/resource/src/modules/resource/common/application/services/resource-group.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let ResourceGroupUsecase = class ResourceGroupUsecase {
     constructor(resourceService, resourceGroupService, dataSource) {
         this.resourceService = resourceService;
@@ -10815,10 +10816,10 @@ let ResourceGroupUsecase = class ResourceGroupUsecase {
             relations: ['resources'],
         });
         if (!resourceGroup) {
-            throw new common_1.NotFoundException('Resource group not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE_GROUP.NOT_FOUND);
         }
         if (resourceGroup.resources.length > 0) {
-            throw new common_1.BadRequestException('Resource group has resources');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.HAS_RESOURCES);
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -10841,7 +10842,7 @@ let ResourceGroupUsecase = class ResourceGroupUsecase {
         }
         catch (err) {
             await queryRunner.rollbackTransaction();
-            throw err;
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE_GROUP.FAILED_REORDER);
         }
         finally {
             await queryRunner.release();
@@ -10896,6 +10897,7 @@ const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notificatio
 const maintenance_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
 const available_time_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/available-time-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/available-time-response.dto.ts");
 const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let ResourceUsecase = class ResourceUsecase {
     constructor(resourceService, resourceManagerService, resourceGroupService, vehicleInfoService, vehicleInfoUsecase, maintenanceService, consumableService, dataSource, fileService, typeHandlers, eventEmitter) {
         this.resourceService = resourceService;
@@ -11020,7 +11022,7 @@ let ResourceUsecase = class ResourceUsecase {
             ],
         });
         if (!resource) {
-            throw new common_1.NotFoundException('Resource not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
         if (resource.vehicleInfo && resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
@@ -11077,7 +11079,7 @@ let ResourceUsecase = class ResourceUsecase {
             ],
         });
         if (!resource) {
-            throw new common_1.NotFoundException('Resource not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
         if (resource.vehicleInfo) {
@@ -11292,13 +11294,13 @@ let ResourceUsecase = class ResourceUsecase {
             relations: ['vehicleInfo', 'resourceManagers'],
         });
         if (!resource) {
-            throw new common_1.NotFoundException('Resource not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         const vehicleInfo = await this.vehicleInfoService.findOne({
             where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
         });
         if (!vehicleInfo) {
-            throw new common_1.NotFoundException('Vehicle info not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
         try {
             await this.resourceService.update(resourceId, { location: updateDto.location }, { queryRunner });
@@ -11323,7 +11325,7 @@ let ResourceUsecase = class ResourceUsecase {
         }
         catch (err) {
             await queryRunner.rollbackTransaction();
-            throw new common_1.InternalServerErrorException('Failed to return vehicle');
+            throw new common_1.InternalServerErrorException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.FAILED_RETURN);
         }
         finally {
             await queryRunner.release();
@@ -11332,16 +11334,16 @@ let ResourceUsecase = class ResourceUsecase {
     async createResourceWithInfos(createResourceInfo) {
         const { resource, typeInfo, managers } = createResourceInfo;
         if (!resource.resourceGroupId) {
-            throw new common_1.BadRequestException('Resource group ID is required');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.GROUP_ID_REQUIRED);
         }
         if (!managers || managers.length === 0) {
-            throw new common_1.BadRequestException('Managers are required');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.MANAGERS_REQUIRED);
         }
         const group = await this.resourceGroupService.findOne({
             where: { resourceGroupId: resource.resourceGroupId },
         });
         if (!group) {
-            throw new common_1.NotFoundException('Resource group not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE_GROUP.NOT_FOUND);
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -11358,7 +11360,7 @@ let ResourceUsecase = class ResourceUsecase {
             });
             const handler = this.typeHandlers.get(group.type);
             if (!handler) {
-                throw new common_1.BadRequestException(`Unsupported resource type: ${group.type}`);
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.UNSUPPORTED_TYPE(group.type));
             }
             await handler.createTypeInfo(savedResource, typeInfo, { queryRunner });
             await Promise.all([
@@ -11376,7 +11378,7 @@ let ResourceUsecase = class ResourceUsecase {
         catch (err) {
             console.error(err);
             await queryRunner.rollbackTransaction();
-            throw new common_1.InternalServerErrorException('Failed to create resource');
+            throw new common_1.InternalServerErrorException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_CREATE);
         }
         finally {
             await queryRunner.release();
@@ -11390,7 +11392,7 @@ let ResourceUsecase = class ResourceUsecase {
             relations: ['resourceGroup'],
         });
         if (!resource) {
-            throw new common_1.NotFoundException('Resource not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -11408,7 +11410,7 @@ let ResourceUsecase = class ResourceUsecase {
         }
         catch (err) {
             await queryRunner.rollbackTransaction();
-            throw new common_1.InternalServerErrorException('Failed to update resource');
+            throw new common_1.InternalServerErrorException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_UPDATE);
         }
         finally {
             await queryRunner.release();
@@ -11426,7 +11428,7 @@ let ResourceUsecase = class ResourceUsecase {
         }
         catch (err) {
             await queryRunner.rollbackTransaction();
-            throw new common_1.InternalServerErrorException('Failed to reorder resources');
+            throw new common_1.InternalServerErrorException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_REORDER);
         }
         finally {
             await queryRunner.release();
@@ -11440,10 +11442,10 @@ let ResourceUsecase = class ResourceUsecase {
             relations: ['resourceGroup', 'resourceManagers'],
         });
         if (!resource) {
-            throw new common_1.NotFoundException('Resource not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         if (resource.isAvailable) {
-            throw new common_1.BadRequestException('Resource is available');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.IS_AVAILABLE);
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -11472,7 +11474,7 @@ let ResourceUsecase = class ResourceUsecase {
         catch (err) {
             console.error(err);
             await queryRunner.rollbackTransaction();
-            throw new common_1.InternalServerErrorException('Failed to delete resource');
+            throw new common_1.InternalServerErrorException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_DELETE);
         }
         finally {
             await queryRunner.release();
@@ -16310,30 +16312,32 @@ const BusinessErrorMessage = {
     RESOURCE: {
         NOT_FOUND: '요청한 자원을 찾을 수 없습니다.',
         INVALID_STATUS: '잘못된 상태입니다.',
+        HAS_RESOURCES: '자원이 포함된 그룹은 삭제할 수 없습니다.',
+        IS_AVAILABLE: '사용 가능한 자원은 삭제할 수 없습니다.',
+        GROUP_ID_REQUIRED: '자원 그룹 ID는 필수입니다.',
+        MANAGERS_REQUIRED: '자원 관리자는 필수입니다.',
+        UNSUPPORTED_TYPE: (type) => `지원하지 않는 자원 타입입니다: ${type}`,
+        FAILED_CREATE: '자원 생성에 실패했습니다.',
+        FAILED_UPDATE: '자원 수정에 실패했습니다.',
+        FAILED_DELETE: '자원 삭제에 실패했습니다.',
+        FAILED_REORDER: '자원 순서 변경에 실패했습니다.',
     },
     RESOURCE_GROUP: {
         NOT_FOUND: '요청한 자원 그룹을 찾을 수 없습니다.',
+        FAILED_REORDER: '자원 그룹 순서 변경에 실패했습니다.',
     },
     RESOURCE_MANAGER: {
         NOT_FOUND: '요청한 자원 관리자를 찾을 수 없습니다.',
     },
     VEHICLE_INFO: {
         NOT_FOUND: '요청한 차량 정보를 찾을 수 없습니다.',
+        FAILED_RETURN: '차량 반납에 실패했습니다.',
     },
     CONSUMABLE: {
         NOT_FOUND: '요청한 소모품 정보를 찾을 수 없습니다.',
     },
     MAINTENANCE: {
         NOT_FOUND: '요청한 정비 정보를 찾을 수 없습니다.',
-    },
-    MAINTENANCE_RECORD: {
-        NOT_FOUND: '요청한 정비 기록을 찾을 수 없습니다.',
-    },
-    MAINTENANCE_RECORD_DETAIL: {
-        NOT_FOUND: '요청한 정비 기록 상세 정보를 찾을 수 없습니다.',
-    },
-    MAINTENANCE_RECORD_DETAIL_DETAIL: {
-        NOT_FOUND: '요청한 정비 기록 상세 정보를 찾을 수 없습니다.',
     },
     RESERVATION: {
         NOT_FOUND: '요청한 예약 정보를 찾을 수 없습니다.',
@@ -16345,24 +16349,6 @@ const BusinessErrorMessage = {
         CANNOT_RETURN_STATUS: (status) => `${status} 상태의 예약은 차량을 반납할 수 없습니다.`,
         VEHICLE_NOT_FOUND: '예약된 차량을 찾을 수 없습니다.',
         VEHICLE_ALREADY_RETURNED: '이미 반납된 차량입니다.',
-    },
-    RESERVATION_RECORD: {
-        NOT_FOUND: '요청한 예약 기록을 찾을 수 없습니다.',
-    },
-    RESERVATION_RECORD_DETAIL: {
-        NOT_FOUND: '요청한 예약 기록 상세 정보를 찾을 수 없습니다.',
-    },
-    RESERVATION_RECORD_DETAIL_DETAIL: {
-        NOT_FOUND: '요청한 예약 기록 상세 정보를 찾을 수 없습니다.',
-    },
-    RESOURCE_RESERVATION: {
-        NOT_FOUND: '요청한 자원 예약 정보를 찾을 수 없습니다.',
-    },
-    RESOURCE_RESERVATION_RECORD: {
-        NOT_FOUND: '요청한 자원 예약 기록을 찾을 수 없습니다.',
-    },
-    RESOURCE_RESERVATION_RECORD_DETAIL: {
-        NOT_FOUND: '요청한 자원 예약 기록 상세 정보를 찾을 수 없습니다.',
     },
 };
 exports.ERROR_MESSAGE = {

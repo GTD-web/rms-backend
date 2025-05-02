@@ -9,6 +9,7 @@ import { UpdateResourceGroupOrdersDto, UpdateResourceGroupDto } from '../dtos/up
 import { DataSource } from 'typeorm';
 import { CreateResourceGroupDto } from '../dtos/create-resource.dto';
 import { ResourceGroup } from '@libs/entities';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 @Injectable()
 export class ResourceGroupUsecase {
@@ -131,10 +132,10 @@ export class ResourceGroupUsecase {
         });
 
         if (!resourceGroup) {
-            throw new NotFoundException('Resource group not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE_GROUP.NOT_FOUND);
         }
         if (resourceGroup.resources.length > 0) {
-            throw new BadRequestException('Resource group has resources');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.HAS_RESOURCES);
         }
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -160,7 +161,7 @@ export class ResourceGroupUsecase {
             await queryRunner.commitTransaction();
         } catch (err) {
             await queryRunner.rollbackTransaction();
-            throw err;
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE_GROUP.FAILED_REORDER);
         } finally {
             await queryRunner.release();
         }
