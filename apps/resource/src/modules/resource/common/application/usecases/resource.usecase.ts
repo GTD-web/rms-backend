@@ -615,13 +615,12 @@ export class ResourceUsecase {
                 resourceId: resourceId,
                 reservations: {
                     status: ReservationStatus.CONFIRMED,
-                    startDate: LessThanOrEqual(endDateObj),
+                    startDate: LessThan(endDateObj),
                     endDate: MoreThan(startDateObj),
                 },
             },
             relations: ['reservations'],
         });
-        console.log(resource);
 
         return !resource;
     }

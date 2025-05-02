@@ -11272,13 +11272,12 @@ let ResourceUsecase = class ResourceUsecase {
                 resourceId: resourceId,
                 reservations: {
                     status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
-                    startDate: (0, typeorm_1.LessThanOrEqual)(endDateObj),
+                    startDate: (0, typeorm_1.LessThan)(endDateObj),
                     endDate: (0, typeorm_1.MoreThan)(startDateObj),
                 },
             },
             relations: ['reservations'],
         });
-        console.log(resource);
         return !resource;
     }
     async returnVehicle(user, resourceId, updateDto) {
