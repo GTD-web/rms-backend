@@ -43,6 +43,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { ReservationVehicleService } from '../services/reservation-vehicle.service';
 import { ResourceResponseDto, ReturnVehicleDto } from '@resource/dtos.index';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 @Injectable()
 export class ReservationUsecase {
     constructor(
@@ -186,7 +187,7 @@ export class ReservationUsecase {
             },
         });
         if (resources && resources.length === 0) {
-            throw new NotFoundException('Resource not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         const resource = resources[0];
 
@@ -442,13 +443,13 @@ export class ReservationUsecase {
                 'resource.accommodationInfo',
                 'participants',
                 'participants.employee',
-                'reservationVehicles'
+                'reservationVehicles',
             ],
             withDeleted: true,
         });
 
         if (!reservation) {
-            throw new NotFoundException('Reservation not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
 
         const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
@@ -508,10 +509,10 @@ export class ReservationUsecase {
         status?: string[],
     ): Promise<ReservationWithRelationsResponseDto[]> {
         if (startDate && endDate && startDate > endDate) {
-            throw new BadRequestException('Start date must be before end date');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         }
         if (status && status.filter((s) => ReservationStatus[s]).length === 0) {
-            throw new BadRequestException('Invalid status');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where: FindOptionsWhere<Reservation> = {};
@@ -567,7 +568,7 @@ export class ReservationUsecase {
             relations: ['participants'],
         });
         if (!reservation) {
-            throw new UnauthorizedException('No Access to Reservation');
+            throw new UnauthorizedException(ERROR_MESSAGE.BUSINESS.COMMON.UNAUTHORIZED);
         }
         return true;
     }
@@ -580,11 +581,11 @@ export class ReservationUsecase {
         );
 
         if (conflicts.length > 0) {
-            throw new BadRequestException('Reservation time conflict - check in logic');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
         }
 
         if (createDto.startDate > createDto.endDate) {
-            throw new BadRequestException('Start date must be before end date');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         }
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -703,7 +704,7 @@ export class ReservationUsecase {
             withDeleted: true,
         });
         if (!reservation) {
-            throw new NotFoundException('Reservation not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         let hasUpdateTime = false;
         const hasUpdateParticipants = updateDto.participantIds.length > 0;
@@ -717,14 +718,14 @@ export class ReservationUsecase {
                 reservationId,
             );
             if (conflicts.length > 0) {
-                throw new BadRequestException('Reservation time conflict - check in logic');
+                throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
             }
 
             if (
                 reservation.status === ReservationStatus.CONFIRMED &&
                 reservation.resource.type === ResourceType.ACCOMMODATION
             ) {
-                throw new BadRequestException('Cannot update time of confirmed accommodation reservation');
+                throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_ACCOMMODATION_TIME);
             }
         }
         const participantIds = updateDto.participantIds;
@@ -805,11 +806,11 @@ export class ReservationUsecase {
     ): Promise<ReservationResponseDto> {
         const reservation = await this.reservationService.findOne({ where: { reservationId } });
         if (!reservation) {
-            throw new NotFoundException('Reservation not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
 
         if (reservation.status !== ReservationStatus.PENDING) {
-            throw new BadRequestException(`Cannot update title of reservation in ${reservation.status} status`);
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
 
         const updatedReservation = await this.reservationService.update(reservationId, updateDto, repositoryOptions);
@@ -823,7 +824,7 @@ export class ReservationUsecase {
             withDeleted: true,
         });
         if (!reservation) {
-            throw new NotFoundException('Reservation not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
 
         if (
@@ -831,14 +832,14 @@ export class ReservationUsecase {
             reservation.status === ReservationStatus.CANCELLED ||
             reservation.status === ReservationStatus.REJECTED
         ) {
-            throw new BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
 
         if (
             reservation.status === ReservationStatus.CONFIRMED &&
             reservation.resource.type === ResourceType.ACCOMMODATION
         ) {
-            throw new BadRequestException('Cannot update time of confirmed accommodation reservation');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_ACCOMMODATION_TIME);
         }
 
         const updatedReservation = await this.reservationService.update(reservationId, {
@@ -868,7 +869,7 @@ export class ReservationUsecase {
         });
 
         if (!reservation) {
-            throw new NotFoundException('Reservation not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
 
         if (
@@ -876,7 +877,7 @@ export class ReservationUsecase {
             reservation.status === ReservationStatus.CANCELLED ||
             reservation.status === ReservationStatus.REJECTED
         ) {
-            throw new BadRequestException(`Cannot update participants of reservation in ${reservation.status} status`);
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
 
         // 기존 참가자 조회
@@ -936,7 +937,7 @@ export class ReservationUsecase {
             withDeleted: true,
         });
         if (!reservation) {
-            throw new NotFoundException('Reservation not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
 
         const updatedReservation = await this.reservationService.update(reservationId, updateDto);
@@ -992,7 +993,6 @@ export class ReservationUsecase {
     }
 
     async returnVehicle(user: User, reservationId: string, returnDto: ReturnVehicleDto): Promise<boolean> {
-        // 1. 예약 정보 조회
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
             relations: ['resource', 'resource.vehicleInfo'],
@@ -1000,42 +1000,36 @@ export class ReservationUsecase {
         });
 
         if (!reservation) {
-            throw new NotFoundException('Reservation not found');
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
 
-        // 리소스 타입이 차량인지 확인
         if (reservation.resource.type !== ResourceType.VEHICLE) {
-            throw new BadRequestException('Reservation resource is not a vehicle');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_RESOURCE_TYPE);
         }
 
-        // 2. 예약 상태 확인 (확정된 예약만 반납 가능)
         if (reservation.status !== ReservationStatus.CONFIRMED && reservation.status !== ReservationStatus.CLOSED) {
-            throw new BadRequestException(`Cannot return vehicle for reservation in ${reservation.status} status`);
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_RETURN_STATUS(reservation.status));
         }
 
-        // 3. 트랜잭션 시작
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
 
         try {
-            // 4. ReservationVehicle 조회 및 업데이트
             const reservationVehicles = await this.reservationVehicleService.findByReservationId(reservationId, {
                 queryRunner,
             });
 
             if (!reservationVehicles || reservationVehicles.length === 0) {
-                throw new NotFoundException('Reservation vehicle not found');
+                throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_NOT_FOUND);
             }
 
-            const reservationVehicle = reservationVehicles[0]; // 일반적으로 예약당 하나의 차량
+            const reservationVehicle = reservationVehicles[0];
 
-            // 이미 반납된 경우 체크
             if (reservationVehicle.isReturned) {
-                throw new BadRequestException('Vehicle already returned');
+                throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_ALREADY_RETURNED);
             }
 
-            // 5. ReservationVehicle 업데이트
             await this.reservationVehicleService.update(
                 reservationVehicle.reservationVehicleId,
                 {
@@ -1046,17 +1040,14 @@ export class ReservationUsecase {
                 { queryRunner },
             );
 
-            // 6. VehicleInfo 업데이트
             const vehicleInfoId = reservation.resource.vehicleInfo.vehicleInfoId;
 
-            // 차량 리소스 위치 업데이트
             await this.eventEmitter.emitAsync('update.resource', {
                 resourceId: reservation.resource.resourceId,
                 updateData: { location: returnDto.location },
                 repositoryOptions: { queryRunner },
             });
 
-            // 차량 정보 업데이트
             await this.eventEmitter.emitAsync('update.vehicle.info', {
                 vehicleInfoId,
                 updateData: {
@@ -1068,16 +1059,13 @@ export class ReservationUsecase {
                 repositoryOptions: { queryRunner },
             });
 
-            // 트랜잭션 커밋
             await queryRunner.commitTransaction();
             return true;
         } catch (error) {
-            // 에러 발생 시 롤백
             await queryRunner.rollbackTransaction();
             console.error('Error in returnVehicle:', error);
             throw error;
         } finally {
-            // 트랜잭션 종료
             await queryRunner.release();
         }
     }

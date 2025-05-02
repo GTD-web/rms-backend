@@ -52,6 +52,16 @@ export class AdminResourceGroupController {
         return this.resourceGroupUsecase.createResourceGroup(createResourceGroupDto);
     }
 
+    @Patch('order')
+    @ApiOperation({ summary: '자원 그룹 순서 변경' })
+    @ApiDataResponse({
+        status: 200,
+        description: '자원 그룹 순서가 성공적으로 변경되었습니다.',
+    })
+    async updateOrder(@Body() updateResourceGroupOrdersDto: UpdateResourceGroupOrdersDto) {
+        return this.resourceGroupUsecase.reorderResourceGroups(updateResourceGroupOrdersDto);
+    }
+
     @Patch(':resourceGroupId')
     @ApiOperation({ summary: '자원 그룹 수정' })
     @ApiDataResponse({
@@ -63,16 +73,6 @@ export class AdminResourceGroupController {
         @Body() updateResourceGroupDto: UpdateResourceGroupDto,
     ): Promise<ResourceGroupResponseDto> {
         return this.resourceGroupUsecase.updateResourceGroup(resourceGroupId, updateResourceGroupDto);
-    }
-
-    @Patch('order')
-    @ApiOperation({ summary: '자원 그룹 순서 변경' })
-    @ApiDataResponse({
-        status: 200,
-        description: '자원 그룹 순서가 성공적으로 변경되었습니다.',
-    })
-    async updateOrder(@Body() updateResourceGroupOrdersDto: UpdateResourceGroupOrdersDto) {
-        return this.resourceGroupUsecase.reorderResourceGroups(updateResourceGroupOrdersDto);
     }
 
     @Delete(':resourceGroupId')

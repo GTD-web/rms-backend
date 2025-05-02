@@ -12,7 +12,7 @@ module.exports = {
     },
     rules: {
         'no-console': 'off',
-        'max-classes-per-file': ['error', 10],
+        'max-classes-per-file': ['error', 20],
         'import/no-unresolved': 'off',
         'import/prefer-default-export': 'off',
         'no-useless-constructor': 'off',

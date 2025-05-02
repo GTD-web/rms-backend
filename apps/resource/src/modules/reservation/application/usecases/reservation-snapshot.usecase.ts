@@ -12,7 +12,7 @@ export class ReservationSnapshotUsecase {
     constructor(private readonly snapshotService: ReservationSnapshotService) {}
 
     async upsertSnapshot(user: User, dto: CreateReservationSnapshotDto): Promise<ReservationSnapshotResponseDto> {
-        let snapshot = await this.findSnapshotByUserId(user.userId);
+        const snapshot = await this.findSnapshotByUserId(user.userId);
         if (snapshot) {
             return await this.updateSnapshot({ ...dto, snapshotId: snapshot.snapshotId });
         } else {

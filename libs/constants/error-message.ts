@@ -25,6 +25,9 @@ const ValidationErrorMessage = {
     IS_NEGATIVE: (field: string) => `${field}은(는) 음수여야 합니다.`,
     IS_ZERO: (field: string) => `${field}은(는) 0이어야 합니다.`,
     IS_NOT_ZERO: (field: string) => `${field}은(는) 0이 아니어야 합니다.`,
+    INVALID_DATE_FORMAT: (field: string, format: string) =>
+        `${field}의 날짜 형식이 올바르지 않습니다. ${format} 형식이어야 합니다.`,
+    INVALID_ARRAY_ITEM_TYPE: (field: string, type: string) => `${field}의 모든 항목은 ${type}이어야 합니다.`,
 };
 
 const BusinessErrorMessage = {
@@ -35,6 +38,7 @@ const BusinessErrorMessage = {
     },
     RESOURCE: {
         NOT_FOUND: '요청한 자원을 찾을 수 없습니다.',
+        INVALID_STATUS: '잘못된 상태입니다.',
     },
     RESOURCE_GROUP: {
         NOT_FOUND: '요청한 자원 그룹을 찾을 수 없습니다.',
@@ -62,6 +66,14 @@ const BusinessErrorMessage = {
     },
     RESERVATION: {
         NOT_FOUND: '요청한 예약 정보를 찾을 수 없습니다.',
+        TIME_CONFLICT: '예약 시간이 중복됩니다.',
+        INVALID_DATE_RANGE: '시작 시간은 종료 시간보다 이전이어야 합니다.',
+        CANNOT_UPDATE_ACCOMMODATION_TIME: '확정된 숙소 예약의 시간은 변경할 수 없습니다.',
+        CANNOT_UPDATE_STATUS: (status: string) => `${status} 상태의 예약은 수정할 수 없습니다.`,
+        INVALID_RESOURCE_TYPE: '잘못된 자원 타입입니다.',
+        CANNOT_RETURN_STATUS: (status: string) => `${status} 상태의 예약은 차량을 반납할 수 없습니다.`,
+        VEHICLE_NOT_FOUND: '예약된 차량을 찾을 수 없습니다.',
+        VEHICLE_ALREADY_RETURNED: '이미 반납된 차량입니다.',
     },
     RESERVATION_RECORD: {
         NOT_FOUND: '요청한 예약 기록을 찾을 수 없습니다.',

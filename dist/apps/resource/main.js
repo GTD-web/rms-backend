@@ -5668,30 +5668,31 @@ exports.CreateReservationDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 class CreateReservationDto {
 }
 exports.CreateReservationDto = CreateReservationDto;
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') }),
     __metadata("design:type", String)
 ], CreateReservationDto.prototype, "resourceId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
-    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('자원 타입', Object.values(resource_type_enum_1.ResourceType)) }),
     __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
 ], CreateReservationDto.prototype, "resourceType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
     __metadata("design:type", String)
 ], CreateReservationDto.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('설명') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) }),
     __metadata("design:type", String)
 ], CreateReservationDto.prototype, "description", void 0);
 __decorate([
@@ -5701,7 +5702,7 @@ __decorate([
     }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
-        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD HH:mm:ss 형식이어야 합니다.',
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('시작 시간', 'YYYY-MM-DD HH:mm:ss'),
     }),
     __metadata("design:type", String)
 ], CreateReservationDto.prototype, "startDate", void 0);
@@ -5712,30 +5713,30 @@ __decorate([
     }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
-        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD HH:mm:ss 형식이어야 합니다.',
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('종료 시간', 'YYYY-MM-DD HH:mm:ss'),
     }),
     __metadata("design:type", String)
 ], CreateReservationDto.prototype, "endDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: false }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
     __metadata("design:type", Boolean)
 ], CreateReservationDto.prototype, "isAllDay", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: false }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('시작 전 알림 여부') }),
     __metadata("design:type", Boolean)
 ], CreateReservationDto.prototype, "notifyBeforeStart", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [Number], example: [10, 20] }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('알림 시간') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], CreateReservationDto.prototype, "notifyMinutesBeforeStart", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [String] }),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
     __metadata("design:type", Array)
 ], CreateReservationDto.prototype, "participantIds", void 0);
 
@@ -6415,14 +6416,15 @@ const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 class UpdateReservationTitleDto {
 }
 exports.UpdateReservationTitleDto = UpdateReservationTitleDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
     __metadata("design:type", String)
 ], UpdateReservationTitleDto.prototype, "title", void 0);
 class UpdateReservationTimeDto {
@@ -6446,7 +6448,7 @@ __decorate([
     }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
-        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD HH:mm:ss 형식이어야 합니다.',
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('시작 시간', 'YYYY-MM-DD HH:mm:ss'),
     }),
     __metadata("design:type", String)
 ], UpdateReservationTimeDto.prototype, "startDate", void 0);
@@ -6457,13 +6459,13 @@ __decorate([
     }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
-        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD HH:mm:ss 형식이어야 합니다.',
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('종료 시간', 'YYYY-MM-DD HH:mm:ss'),
     }),
     __metadata("design:type", String)
 ], UpdateReservationTimeDto.prototype, "endDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateReservationTimeDto.prototype, "isAllDay", void 0);
@@ -6472,14 +6474,16 @@ class UpdateReservationStatusDto {
 exports.UpdateReservationStatusDto = UpdateReservationStatusDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: reservation_type_enum_1.ReservationStatus }),
-    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus),
+    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('예약 상태', Object.values(reservation_type_enum_1.ReservationStatus)),
+    }),
     __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _a : Object)
 ], UpdateReservationStatusDto.prototype, "status", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('거절 사유') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('거절 사유', 0, 100) }),
     __metadata("design:type", String)
 ], UpdateReservationStatusDto.prototype, "rejectReason", void 0);
 class UpdateReservationParticipantsDto {
@@ -6487,8 +6491,8 @@ class UpdateReservationParticipantsDto {
 exports.UpdateReservationParticipantsDto = UpdateReservationParticipantsDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [String] }),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
     __metadata("design:type", Array)
 ], UpdateReservationParticipantsDto.prototype, "participantIds", void 0);
 class UpdateReservationCcReceipientDto {
@@ -6496,8 +6500,8 @@ class UpdateReservationCcReceipientDto {
 exports.UpdateReservationCcReceipientDto = UpdateReservationCcReceipientDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [String] }),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('수신참조자 ID') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('수신참조자 ID', '문자열') }),
     __metadata("design:type", Array)
 ], UpdateReservationCcReceipientDto.prototype, "ccReceipientIds", void 0);
 class UpdateReservationDto {
@@ -6505,15 +6509,15 @@ class UpdateReservationDto {
 exports.UpdateReservationDto = UpdateReservationDto;
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateReservationDto.prototype, "resourceId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Length)(0, 100),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
     __metadata("design:type", String)
 ], UpdateReservationDto.prototype, "title", void 0);
 __decorate([
@@ -6523,7 +6527,7 @@ __decorate([
     }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
-        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD HH:mm:ss 형식이어야 합니다.',
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('시작 시간', 'YYYY-MM-DD HH:mm:ss'),
     }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -6535,34 +6539,34 @@ __decorate([
     }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
-        message: '날짜 형식이 올바르지 않습니다. YYYY-MM-DD HH:mm:ss 형식이어야 합니다.',
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('종료 시간', 'YYYY-MM-DD HH:mm:ss'),
     }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateReservationDto.prototype, "endDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: false }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateReservationDto.prototype, "isAllDay", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: false }),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('시작 전 알림 여부') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateReservationDto.prototype, "notifyBeforeStart", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [Number], example: [10, 20] }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('알림 시간') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateReservationDto.prototype, "notifyMinutesBeforeStart", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [String] }),
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
     __metadata("design:type", Array)
 ], UpdateReservationDto.prototype, "participantIds", void 0);
 
@@ -6903,7 +6907,7 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
         this.snapshotService = snapshotService;
     }
     async upsertSnapshot(user, dto) {
-        let snapshot = await this.findSnapshotByUserId(user.userId);
+        const snapshot = await this.findSnapshotByUserId(user.userId);
         if (snapshot) {
             return await this.updateSnapshot({ ...dto, snapshotId: snapshot.snapshotId });
         }
@@ -7001,6 +7005,7 @@ const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 const reservation_vehicle_service_1 = __webpack_require__(/*! ../services/reservation-vehicle.service */ "./apps/resource/src/modules/reservation/application/services/reservation-vehicle.service.ts");
 const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let ReservationUsecase = class ReservationUsecase {
     constructor(reservationService, participantService, reservationVehicleService, dataSource, eventEmitter, schedulerRegistry) {
         this.reservationService = reservationService;
@@ -7099,7 +7104,7 @@ let ReservationUsecase = class ReservationUsecase {
             },
         });
         if (resources && resources.length === 0) {
-            throw new common_1.NotFoundException('Resource not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         const resource = resources[0];
         if (isMine) {
@@ -7307,12 +7312,12 @@ let ReservationUsecase = class ReservationUsecase {
                 'resource.accommodationInfo',
                 'participants',
                 'participants.employee',
-                'reservationVehicles'
+                'reservationVehicles',
             ],
             withDeleted: true,
         });
         if (!reservation) {
-            throw new common_1.NotFoundException('Reservation not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
         reservationResponseDto.isMine = reservationResponseDto.reservers.some((reserver) => reserver.employeeId === user.employeeId);
@@ -7350,10 +7355,10 @@ let ReservationUsecase = class ReservationUsecase {
     }
     async findReservationList(startDate, endDate, resourceType, resourceId, status) {
         if (startDate && endDate && startDate > endDate) {
-            throw new common_1.BadRequestException('Start date must be before end date');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         }
         if (status && status.filter((s) => reservation_type_enum_1.ReservationStatus[s]).length === 0) {
-            throw new common_1.BadRequestException('Invalid status');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where = {};
@@ -7402,17 +7407,17 @@ let ReservationUsecase = class ReservationUsecase {
             relations: ['participants'],
         });
         if (!reservation) {
-            throw new common_1.UnauthorizedException('No Access to Reservation');
+            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.COMMON.UNAUTHORIZED);
         }
         return true;
     }
     async makeReservation(user, createDto) {
         const conflicts = await this.reservationService.findConflictingReservations(createDto.resourceId, date_util_1.DateUtil.date(createDto.startDate).toDate(), date_util_1.DateUtil.date(createDto.endDate).toDate());
         if (conflicts.length > 0) {
-            throw new common_1.BadRequestException('Reservation time conflict - check in logic');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
         }
         if (createDto.startDate > createDto.endDate) {
-            throw new common_1.BadRequestException('Start date must be before end date');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -7513,7 +7518,7 @@ let ReservationUsecase = class ReservationUsecase {
             withDeleted: true,
         });
         if (!reservation) {
-            throw new common_1.NotFoundException('Reservation not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         let hasUpdateTime = false;
         const hasUpdateParticipants = updateDto.participantIds.length > 0;
@@ -7521,11 +7526,11 @@ let ReservationUsecase = class ReservationUsecase {
             hasUpdateTime = true;
             const conflicts = await this.reservationService.findConflictingReservations(updateDto.resourceId, date_util_1.DateUtil.date(updateDto.startDate).toDate(), date_util_1.DateUtil.date(updateDto.endDate).toDate(), reservationId);
             if (conflicts.length > 0) {
-                throw new common_1.BadRequestException('Reservation time conflict - check in logic');
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
             }
             if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED &&
                 reservation.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
-                throw new common_1.BadRequestException('Cannot update time of confirmed accommodation reservation');
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_ACCOMMODATION_TIME);
             }
         }
         const participantIds = updateDto.participantIds;
@@ -7583,10 +7588,10 @@ let ReservationUsecase = class ReservationUsecase {
     async updateTitle(reservationId, updateDto, repositoryOptions) {
         const reservation = await this.reservationService.findOne({ where: { reservationId } });
         if (!reservation) {
-            throw new common_1.NotFoundException('Reservation not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         if (reservation.status !== reservation_type_enum_1.ReservationStatus.PENDING) {
-            throw new common_1.BadRequestException(`Cannot update title of reservation in ${reservation.status} status`);
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
         const updatedReservation = await this.reservationService.update(reservationId, updateDto, repositoryOptions);
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
@@ -7598,16 +7603,16 @@ let ReservationUsecase = class ReservationUsecase {
             withDeleted: true,
         });
         if (!reservation) {
-            throw new common_1.NotFoundException('Reservation not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
             reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
             reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
-            throw new common_1.BadRequestException(`Cannot update time of reservation in ${reservation.status} status`);
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
         if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED &&
             reservation.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
-            throw new common_1.BadRequestException('Cannot update time of confirmed accommodation reservation');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_ACCOMMODATION_TIME);
         }
         const updatedReservation = await this.reservationService.update(reservationId, {
             ...updateDto,
@@ -7627,12 +7632,12 @@ let ReservationUsecase = class ReservationUsecase {
             withDeleted: true,
         });
         if (!reservation) {
-            throw new common_1.NotFoundException('Reservation not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
             reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
             reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
-            throw new common_1.BadRequestException(`Cannot update participants of reservation in ${reservation.status} status`);
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
         const participants = await this.participantService.findAll({
             where: { reservationId, type: reservation_type_enum_1.ParticipantsType.PARTICIPANT },
@@ -7678,7 +7683,7 @@ let ReservationUsecase = class ReservationUsecase {
             withDeleted: true,
         });
         if (!reservation) {
-            throw new common_1.NotFoundException('Reservation not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         const updatedReservation = await this.reservationService.update(reservationId, updateDto);
         if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELLED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
@@ -7732,13 +7737,13 @@ let ReservationUsecase = class ReservationUsecase {
             withDeleted: true,
         });
         if (!reservation) {
-            throw new common_1.NotFoundException('Reservation not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         if (reservation.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
-            throw new common_1.BadRequestException('Reservation resource is not a vehicle');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_RESOURCE_TYPE);
         }
         if (reservation.status !== reservation_type_enum_1.ReservationStatus.CONFIRMED && reservation.status !== reservation_type_enum_1.ReservationStatus.CLOSED) {
-            throw new common_1.BadRequestException(`Cannot return vehicle for reservation in ${reservation.status} status`);
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_RETURN_STATUS(reservation.status));
         }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -7748,11 +7753,11 @@ let ReservationUsecase = class ReservationUsecase {
                 queryRunner,
             });
             if (!reservationVehicles || reservationVehicles.length === 0) {
-                throw new common_1.NotFoundException('Reservation vehicle not found');
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_NOT_FOUND);
             }
             const reservationVehicle = reservationVehicles[0];
             if (reservationVehicle.isReturned) {
-                throw new common_1.BadRequestException('Vehicle already returned');
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_ALREADY_RETURNED);
             }
             await this.reservationVehicleService.update(reservationVehicle.reservationVehicleId, {
                 endOdometer: returnDto.totalMileage,
@@ -11074,9 +11079,7 @@ let ResourceUsecase = class ResourceUsecase {
         if (!resource) {
             throw new common_1.NotFoundException('Resource not found');
         }
-        console.log(resource.images);
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
-        console.log(resource['imageFiles']);
         if (resource.vehicleInfo) {
             if (resource.vehicleInfo.consumables) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
@@ -11937,11 +11940,11 @@ let AdminResourceGroupController = class AdminResourceGroupController {
     async create(createResourceGroupDto) {
         return this.resourceGroupUsecase.createResourceGroup(createResourceGroupDto);
     }
-    async update(resourceGroupId, updateResourceGroupDto) {
-        return this.resourceGroupUsecase.updateResourceGroup(resourceGroupId, updateResourceGroupDto);
-    }
     async updateOrder(updateResourceGroupOrdersDto) {
         return this.resourceGroupUsecase.reorderResourceGroups(updateResourceGroupOrdersDto);
+    }
+    async update(resourceGroupId, updateResourceGroupDto) {
+        return this.resourceGroupUsecase.updateResourceGroup(resourceGroupId, updateResourceGroupDto);
     }
     async remove(resourceGroupId) {
         return this.resourceGroupUsecase.deleteResourceGroup(resourceGroupId);
@@ -11986,6 +11989,18 @@ __decorate([
     __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], AdminResourceGroupController.prototype, "create", null);
 __decorate([
+    (0, common_1.Patch)('order'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 순서 변경' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 그룹 순서가 성공적으로 변경되었습니다.',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_g = typeof update_resource_dto_2.UpdateResourceGroupOrdersDto !== "undefined" && update_resource_dto_2.UpdateResourceGroupOrdersDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", Promise)
+], AdminResourceGroupController.prototype, "updateOrder", null);
+__decorate([
     (0, common_1.Patch)(':resourceGroupId'),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 수정' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -11995,21 +12010,9 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceGroupId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_g = typeof update_resource_dto_1.UpdateResourceGroupDto !== "undefined" && update_resource_dto_1.UpdateResourceGroupDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+    __metadata("design:paramtypes", [String, typeof (_h = typeof update_resource_dto_1.UpdateResourceGroupDto !== "undefined" && update_resource_dto_1.UpdateResourceGroupDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], AdminResourceGroupController.prototype, "update", null);
-__decorate([
-    (0, common_1.Patch)('order'),
-    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 순서 변경' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원 그룹 순서가 성공적으로 변경되었습니다.',
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof update_resource_dto_2.UpdateResourceGroupOrdersDto !== "undefined" && update_resource_dto_2.UpdateResourceGroupOrdersDto) === "function" ? _j : Object]),
-    __metadata("design:returntype", Promise)
-], AdminResourceGroupController.prototype, "updateOrder", null);
 __decorate([
     (0, common_1.Delete)(':resourceGroupId'),
     (0, swagger_1.ApiOperation)({ summary: '자원 그룹 삭제' }),
@@ -16256,6 +16259,116 @@ const typeOrmConfig = (configService) => {
     };
 };
 exports.typeOrmConfig = typeOrmConfig;
+
+
+/***/ }),
+
+/***/ "./libs/constants/error-message.ts":
+/*!*****************************************!*\
+  !*** ./libs/constants/error-message.ts ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ERROR_MESSAGE = void 0;
+const ValidationErrorMessage = {
+    REQUIRED: (field) => `${field}은(는) 필수 값입니다.`,
+    IS_INT: (field) => `${field}은(는) 정수여야 합니다.`,
+    IS_ARRAY: (field) => `${field}은(는) 배열이어야 합니다.`,
+    IS_STRING: (field) => `${field}은(는) 문자열이어야 합니다.`,
+    IS_NUMBER: (field) => `${field}은(는) 숫자여야 합니다.`,
+    IS_BOOLEAN: (field) => `${field}은(는) 불리언이어야 합니다.`,
+    IS_DATE: (field) => `${field}은(는) 날짜여야 합니다.`,
+    IS_EMAIL: (field) => `${field}은(는) 이메일 형식이어야 합니다.`,
+    IS_URL: (field) => `${field}은(는) URL 형식이어야 합니다.`,
+    IS_PHONE: (field) => `${field}은(는) 전화번호 형식이어야 합니다.`,
+    IS_MIN: (field, min) => `${field}은(는) ${min} 이상이어야 합니다.`,
+    IS_MAX: (field, max) => `${field}은(는) ${max} 이하이어야 합니다.`,
+    IS_MIN_LENGTH: (field, minLength) => `${field}은(는) ${minLength} 글자 이상이어야 합니다.`,
+    IS_MAX_LENGTH: (field, maxLength) => `${field}은(는) ${maxLength} 글자 이하이어야 합니다.`,
+    IS_LENGTH: (field, minLength, maxLength) => `${field}은(는) ${minLength} 글자 이상 ${maxLength} 글자 이하이어야 합니다.`,
+    IS_REGEX: (field, regex) => `${field}은(는) ${regex} 형식이어야 합니다.`,
+    IS_ENUM: (field, enumValues) => `${field}은(는) ${enumValues.join(', ')} 중 하나여야 합니다.`,
+    IS_IN: (field, values) => `${field}은(는) ${values.join(', ')} 중 하나여야 합니다.`,
+    IS_NOT_IN: (field, values) => `${field}은(는) ${values.join(', ')} 중 하나여야 합니다.`,
+    IS_NOT_NULL: (field) => `${field}은(는) NULL이 아니어야 합니다.`,
+    IS_NULL: (field) => `${field}은(는) NULL이어야 합니다.`,
+    IS_POSITIVE: (field) => `${field}은(는) 양수여야 합니다.`,
+    IS_NEGATIVE: (field) => `${field}은(는) 음수여야 합니다.`,
+    IS_ZERO: (field) => `${field}은(는) 0이어야 합니다.`,
+    IS_NOT_ZERO: (field) => `${field}은(는) 0이 아니어야 합니다.`,
+    INVALID_DATE_FORMAT: (field, format) => `${field}의 날짜 형식이 올바르지 않습니다. ${format} 형식이어야 합니다.`,
+    INVALID_ARRAY_ITEM_TYPE: (field, type) => `${field}의 모든 항목은 ${type}이어야 합니다.`,
+};
+const BusinessErrorMessage = {
+    COMMON: {
+        NOT_FOUND: '요청한 데이터를 찾을 수 없습니다.',
+        DUPLICATE_USER: '이미 존재하는 사용자입니다.',
+        UNAUTHORIZED: '권한이 없습니다.',
+    },
+    RESOURCE: {
+        NOT_FOUND: '요청한 자원을 찾을 수 없습니다.',
+        INVALID_STATUS: '잘못된 상태입니다.',
+    },
+    RESOURCE_GROUP: {
+        NOT_FOUND: '요청한 자원 그룹을 찾을 수 없습니다.',
+    },
+    RESOURCE_MANAGER: {
+        NOT_FOUND: '요청한 자원 관리자를 찾을 수 없습니다.',
+    },
+    VEHICLE_INFO: {
+        NOT_FOUND: '요청한 차량 정보를 찾을 수 없습니다.',
+    },
+    CONSUMABLE: {
+        NOT_FOUND: '요청한 소모품 정보를 찾을 수 없습니다.',
+    },
+    MAINTENANCE: {
+        NOT_FOUND: '요청한 정비 정보를 찾을 수 없습니다.',
+    },
+    MAINTENANCE_RECORD: {
+        NOT_FOUND: '요청한 정비 기록을 찾을 수 없습니다.',
+    },
+    MAINTENANCE_RECORD_DETAIL: {
+        NOT_FOUND: '요청한 정비 기록 상세 정보를 찾을 수 없습니다.',
+    },
+    MAINTENANCE_RECORD_DETAIL_DETAIL: {
+        NOT_FOUND: '요청한 정비 기록 상세 정보를 찾을 수 없습니다.',
+    },
+    RESERVATION: {
+        NOT_FOUND: '요청한 예약 정보를 찾을 수 없습니다.',
+        TIME_CONFLICT: '예약 시간이 중복됩니다.',
+        INVALID_DATE_RANGE: '시작 시간은 종료 시간보다 이전이어야 합니다.',
+        CANNOT_UPDATE_ACCOMMODATION_TIME: '확정된 숙소 예약의 시간은 변경할 수 없습니다.',
+        CANNOT_UPDATE_STATUS: (status) => `${status} 상태의 예약은 수정할 수 없습니다.`,
+        INVALID_RESOURCE_TYPE: '잘못된 자원 타입입니다.',
+        CANNOT_RETURN_STATUS: (status) => `${status} 상태의 예약은 차량을 반납할 수 없습니다.`,
+        VEHICLE_NOT_FOUND: '예약된 차량을 찾을 수 없습니다.',
+        VEHICLE_ALREADY_RETURNED: '이미 반납된 차량입니다.',
+    },
+    RESERVATION_RECORD: {
+        NOT_FOUND: '요청한 예약 기록을 찾을 수 없습니다.',
+    },
+    RESERVATION_RECORD_DETAIL: {
+        NOT_FOUND: '요청한 예약 기록 상세 정보를 찾을 수 없습니다.',
+    },
+    RESERVATION_RECORD_DETAIL_DETAIL: {
+        NOT_FOUND: '요청한 예약 기록 상세 정보를 찾을 수 없습니다.',
+    },
+    RESOURCE_RESERVATION: {
+        NOT_FOUND: '요청한 자원 예약 정보를 찾을 수 없습니다.',
+    },
+    RESOURCE_RESERVATION_RECORD: {
+        NOT_FOUND: '요청한 자원 예약 기록을 찾을 수 없습니다.',
+    },
+    RESOURCE_RESERVATION_RECORD_DETAIL: {
+        NOT_FOUND: '요청한 자원 예약 기록 상세 정보를 찾을 수 없습니다.',
+    },
+};
+exports.ERROR_MESSAGE = {
+    VALIDATION: ValidationErrorMessage,
+    BUSINESS: BusinessErrorMessage,
+};
 
 
 /***/ }),
