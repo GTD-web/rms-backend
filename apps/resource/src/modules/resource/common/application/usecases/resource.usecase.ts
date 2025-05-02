@@ -228,14 +228,15 @@ export class ResourceUsecase {
                                 maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
                             };
                         });
-                    } else {
-                        consumable.maintenances = [
-                            {
-                                mileageFromLastMaintenance: mileage - Number(consumable.initMileage),
-                                maintanceRequired: mileage - Number(consumable.initMileage) > replaceCycle,
-                            } as unknown as Maintenance,
-                        ];
                     }
+                    // else {
+                    //     consumable.maintenances = [
+                    //         {
+                    //             mileageFromLastMaintenance: mileage - Number(consumable.initMileage),
+                    //             maintanceRequired: mileage - Number(consumable.initMileage) > replaceCycle,
+                    //         } as unknown as Maintenance,
+                    //     ];
+                    // }
                 }
                 resource.vehicleInfo.consumables.sort((a, b) => {
                     // Check if both consumables have maintenance records

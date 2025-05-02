@@ -11039,14 +11039,6 @@ let ResourceUsecase = class ResourceUsecase {
                             };
                         });
                     }
-                    else {
-                        consumable.maintenances = [
-                            {
-                                mileageFromLastMaintenance: mileage - Number(consumable.initMileage),
-                                maintanceRequired: mileage - Number(consumable.initMileage) > replaceCycle,
-                            },
-                        ];
-                    }
                 }
                 resource.vehicleInfo.consumables.sort((a, b) => {
                     if (!a.maintenances?.length && !b.maintenances?.length) {
