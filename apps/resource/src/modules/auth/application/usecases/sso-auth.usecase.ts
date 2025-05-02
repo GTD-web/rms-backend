@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SsoResponseDto } from '../dto/sso-response.dto';
 import { DataSource } from 'typeorm';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 @Injectable()
 export class SsoAuthUsecase implements AuthService {
@@ -51,13 +52,13 @@ export class SsoAuthUsecase implements AuthService {
                     user.employee = result;
                     await this.userService.update(user, { queryRunner });
                 } else {
-                    throw new UnauthorizedException('SSO 로그인 실패');
+                    throw new UnauthorizedException(ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
                 }
                 await queryRunner.commitTransaction();
             } catch (error) {
                 console.log(error);
                 await queryRunner.rollbackTransaction();
-                throw new UnauthorizedException('SSO 로그인 실패');
+                throw new UnauthorizedException(ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
             } finally {
                 await queryRunner.release();
             }
@@ -65,7 +66,7 @@ export class SsoAuthUsecase implements AuthService {
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+            throw new UnauthorizedException(ERROR_MESSAGE.BUSINESS.AUTH.INVALID_PASSWORD);
         }
 
         return user;

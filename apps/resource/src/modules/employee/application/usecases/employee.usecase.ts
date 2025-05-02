@@ -7,6 +7,7 @@ import { EmployeeResponseDto } from '../dtos/employee-response.dto';
 import { Employee } from '@libs/entities';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter/dist';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 @Injectable()
 export class EmployeeUseCase {
@@ -21,7 +22,7 @@ export class EmployeeUseCase {
             await this.syncEmployee(employeeNumber);
             employee = await this.employeeService.findByEmployeeNumber(employeeNumber);
             if (!employee) {
-                throw new NotFoundException('존재하지 않는 사용자입니다.');
+                throw new NotFoundException(ERROR_MESSAGE.BUSINESS.EMPLOYEE.NOT_FOUND);
             }
         }
         return employee;
@@ -85,6 +86,7 @@ export class EmployeeUseCase {
                 });
             }
         } catch (error) {
+            console.log(ERROR_MESSAGE.BUSINESS.EMPLOYEE.SYNC_FAILED);
             console.log(error);
         }
     }
@@ -110,6 +112,7 @@ export class EmployeeUseCase {
                     });
                 }
             } catch (error) {
+                console.log(ERROR_MESSAGE.BUSINESS.EMPLOYEE.SYNC_FAILED);
                 console.log(error);
             }
         }

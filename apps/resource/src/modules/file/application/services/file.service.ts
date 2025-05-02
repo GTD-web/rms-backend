@@ -3,6 +3,7 @@ import { FileRepositoryPort } from '../../domain/ports/file.repository.port';
 import { FileStoragePort } from '../../domain/ports/file-storage.port';
 import { ConfigService } from '@nestjs/config';
 import { File } from '@libs/entities';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 @Injectable()
 export class FileService {
@@ -43,12 +44,12 @@ export class FileService {
         let file: File;
         if (fileId) {
             file = await this.findFileById(fileId);
-            if (!file) throw new NotFoundException('File not found');
+            if (!file) throw new NotFoundException(ERROR_MESSAGE.BUSINESS.FILE.NOT_FOUND);
         } else if (filePath) {
             file = await this.findFileByFilePath(filePath);
-            if (!file) throw new NotFoundException('File not found');
+            if (!file) throw new NotFoundException(ERROR_MESSAGE.BUSINESS.FILE.NOT_FOUND);
         } else {
-            throw new BadRequestException('fileId or filePath is required');
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.FILE.ID_OR_PATH_REQUIRED);
         }
 
         await this.fileStorage.deleteFile(file);

@@ -1228,6 +1228,7 @@ const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
 const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let SsoAuthUsecase = class SsoAuthUsecase {
     constructor(userService, jwtService, eventEmitter, dataSource) {
         this.userService = userService;
@@ -1264,14 +1265,14 @@ let SsoAuthUsecase = class SsoAuthUsecase {
                     await this.userService.update(user, { queryRunner });
                 }
                 else {
-                    throw new common_1.UnauthorizedException('SSO 로그인 실패');
+                    throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
                 }
                 await queryRunner.commitTransaction();
             }
             catch (error) {
                 console.log(error);
                 await queryRunner.rollbackTransaction();
-                throw new common_1.UnauthorizedException('SSO 로그인 실패');
+                throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
             }
             finally {
                 await queryRunner.release();
@@ -1279,7 +1280,7 @@ let SsoAuthUsecase = class SsoAuthUsecase {
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new common_1.UnauthorizedException('비밀번호가 일치하지 않습니다.');
+            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.INVALID_PASSWORD);
         }
         return user;
     }
@@ -1351,6 +1352,7 @@ exports.UserUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
 const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let UserUsecase = class UserUsecase {
     constructor(userService) {
         this.userService = userService;
@@ -1358,7 +1360,7 @@ let UserUsecase = class UserUsecase {
     async findByUserId(userId) {
         const user = await this.userService.findByUserId(userId);
         if (!user) {
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
         }
         return {
             userId: user.userId,
@@ -1374,14 +1376,14 @@ let UserUsecase = class UserUsecase {
     async checkPassword(userId, password) {
         const user = await this.userService.findByUserId(userId);
         if (!user) {
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
         }
         return bcrypt.compare(password, user.password);
     }
     async changePassword(userId, password) {
         const user = await this.userService.findByUserId(userId);
         if (!user) {
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
         }
         user.password = await bcrypt.hash(password, 10);
         await this.userService.update(user);
@@ -1389,7 +1391,7 @@ let UserUsecase = class UserUsecase {
     async changeNotificationSettings(userId, updateDto) {
         const user = await this.userService.findByUserId(userId);
         if (!user) {
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
         }
         user.isPushNotificationEnabled = updateDto.isPushNotificationEnabled;
         await this.userService.update(user);
@@ -2727,6 +2729,7 @@ const employee_service_1 = __webpack_require__(/*! ../services/employee.service 
 const mms_employee_response_dto_1 = __webpack_require__(/*! ../dtos/mms-employee-response.dto */ "./apps/resource/src/modules/employee/application/dtos/mms-employee-response.dto.ts");
 const axios_1 = __webpack_require__(/*! axios */ "axios");
 const dist_1 = __webpack_require__(/*! @nestjs/event-emitter/dist */ "@nestjs/event-emitter/dist");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let EmployeeUseCase = class EmployeeUseCase {
     constructor(employeeService, eventEmitter) {
         this.employeeService = employeeService;
@@ -2738,7 +2741,7 @@ let EmployeeUseCase = class EmployeeUseCase {
             await this.syncEmployee(employeeNumber);
             employee = await this.employeeService.findByEmployeeNumber(employeeNumber);
             if (!employee) {
-                throw new common_1.NotFoundException('존재하지 않는 사용자입니다.');
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.EMPLOYEE.NOT_FOUND);
             }
         }
         return employee;
@@ -2794,6 +2797,7 @@ let EmployeeUseCase = class EmployeeUseCase {
             }
         }
         catch (error) {
+            console.log(error_message_1.ERROR_MESSAGE.BUSINESS.EMPLOYEE.SYNC_FAILED);
             console.log(error);
         }
     }
@@ -2820,6 +2824,7 @@ let EmployeeUseCase = class EmployeeUseCase {
                 }
             }
             catch (error) {
+                console.log(error_message_1.ERROR_MESSAGE.BUSINESS.EMPLOYEE.SYNC_FAILED);
                 console.log(error);
             }
         }
@@ -3452,6 +3457,7 @@ exports.FileService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const file_repository_port_1 = __webpack_require__(/*! ../../domain/ports/file.repository.port */ "./apps/resource/src/modules/file/domain/ports/file.repository.port.ts");
 const file_storage_port_1 = __webpack_require__(/*! ../../domain/ports/file-storage.port */ "./apps/resource/src/modules/file/domain/ports/file-storage.port.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let FileService = class FileService {
     constructor(fileRepository, fileStorage) {
         this.fileRepository = fileRepository;
@@ -3483,15 +3489,15 @@ let FileService = class FileService {
         if (fileId) {
             file = await this.findFileById(fileId);
             if (!file)
-                throw new common_1.NotFoundException('File not found');
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.NOT_FOUND);
         }
         else if (filePath) {
             file = await this.findFileByFilePath(filePath);
             if (!file)
-                throw new common_1.NotFoundException('File not found');
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.NOT_FOUND);
         }
         else {
-            throw new common_1.BadRequestException('fileId or filePath is required');
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.ID_OR_PATH_REQUIRED);
         }
         await this.fileStorage.deleteFile(file);
         await this.fileRepository.delete(file.fileId);
@@ -16317,6 +16323,11 @@ const BusinessErrorMessage = {
         DUPLICATE_USER: '이미 존재하는 사용자입니다.',
         UNAUTHORIZED: '권한이 없습니다.',
     },
+    AUTH: {
+        USER_NOT_FOUND: '사용자를 찾을 수 없습니다.',
+        INVALID_PASSWORD: '비밀번호가 일치하지 않습니다.',
+        SSO_LOGIN_FAILED: 'SSO 로그인에 실패했습니다.',
+    },
     RESOURCE: {
         NOT_FOUND: '요청한 자원을 찾을 수 없습니다.',
         INVALID_STATUS: '잘못된 상태입니다.',
@@ -16360,6 +16371,14 @@ const BusinessErrorMessage = {
         CANNOT_RETURN_STATUS: (status) => `${status} 상태의 예약은 차량을 반납할 수 없습니다.`,
         VEHICLE_NOT_FOUND: '예약된 차량을 찾을 수 없습니다.',
         VEHICLE_ALREADY_RETURNED: '이미 반납된 차량입니다.',
+    },
+    FILE: {
+        NOT_FOUND: '요청한 파일을 찾을 수 없습니다.',
+        ID_OR_PATH_REQUIRED: '파일 ID 또는 파일 경로는 필수입니다.',
+    },
+    EMPLOYEE: {
+        NOT_FOUND: '존재하지 않는 사용자입니다.',
+        SYNC_FAILED: '직원 정보 동기화에 실패했습니다.',
     },
 };
 exports.ERROR_MESSAGE = {

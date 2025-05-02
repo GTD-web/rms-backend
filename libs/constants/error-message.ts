@@ -37,6 +37,11 @@ const BusinessErrorMessage = {
         DUPLICATE_USER: '이미 존재하는 사용자입니다.',
         UNAUTHORIZED: '권한이 없습니다.',
     },
+    AUTH: {
+        USER_NOT_FOUND: '사용자를 찾을 수 없습니다.',
+        INVALID_PASSWORD: '비밀번호가 일치하지 않습니다.',
+        SSO_LOGIN_FAILED: 'SSO 로그인에 실패했습니다.',
+    },
     RESOURCE: {
         NOT_FOUND: '요청한 자원을 찾을 수 없습니다.',
         INVALID_STATUS: '잘못된 상태입니다.',
@@ -80,6 +85,14 @@ const BusinessErrorMessage = {
         CANNOT_RETURN_STATUS: (status: string) => `${status} 상태의 예약은 차량을 반납할 수 없습니다.`,
         VEHICLE_NOT_FOUND: '예약된 차량을 찾을 수 없습니다.',
         VEHICLE_ALREADY_RETURNED: '이미 반납된 차량입니다.',
+    },
+    FILE: {
+        NOT_FOUND: '요청한 파일을 찾을 수 없습니다.',
+        ID_OR_PATH_REQUIRED: '파일 ID 또는 파일 경로는 필수입니다.',
+    },
+    EMPLOYEE: {
+        NOT_FOUND: '존재하지 않는 사용자입니다.',
+        SYNC_FAILED: '직원 정보 동기화에 실패했습니다.',
     },
 };
 
