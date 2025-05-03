@@ -211,6 +211,7 @@ export class ResourceUsecase {
         if (resource.vehicleInfo && resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
             resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
                 where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
+                withDeleted: true,
             });
             if (resource.vehicleInfo.consumables && resource.vehicleInfo.consumables.length > 0) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);

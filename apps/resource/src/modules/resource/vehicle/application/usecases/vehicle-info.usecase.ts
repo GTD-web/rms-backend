@@ -48,6 +48,7 @@ export class VehicleInfoUsecase {
                 vehicleInfoId: vehicleInfoId,
             },
             relations: ['consumables'],
+            withDeleted: true,
         });
         if (!previousVehicleInfo) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
@@ -67,6 +68,7 @@ export class VehicleInfoUsecase {
                 vehicleInfoId: vehicleInfoId,
             },
             relations: ['consumables', 'resource', 'resource.resourceManagers'],
+            withDeleted: true,
         });
 
         const afterTotalMileage = Number(afterVehicleInfo.totalMileage);

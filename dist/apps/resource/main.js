@@ -11039,6 +11039,7 @@ let ResourceUsecase = class ResourceUsecase {
         if (resource.vehicleInfo && resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
             resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
                 where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
+                withDeleted: true,
             });
             if (resource.vehicleInfo.consumables && resource.vehicleInfo.consumables.length > 0) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
@@ -14084,6 +14085,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         const vehicleInfo = await this.vehicleInfoService.findOne({
             where: { vehicleInfoId },
             relations: ['resource', 'consumables', 'consumables.maintenances'],
+            withDeleted: true,
         });
         const options = {
             where: {
@@ -14281,6 +14283,7 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
                 vehicleInfoId: vehicleInfoId,
             },
             relations: ['consumables'],
+            withDeleted: true,
         });
         if (!previousVehicleInfo) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
@@ -14292,6 +14295,7 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
                 vehicleInfoId: vehicleInfoId,
             },
             relations: ['consumables', 'resource', 'resource.resourceManagers'],
+            withDeleted: true,
         });
         const afterTotalMileage = Number(afterVehicleInfo.totalMileage);
         const consumables = afterVehicleInfo.consumables;

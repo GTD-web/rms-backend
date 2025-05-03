@@ -83,6 +83,7 @@ export class MaintenanceUsecase {
         const vehicleInfo = await this.vehicleInfoService.findOne({
             where: { vehicleInfoId },
             relations: ['resource', 'consumables', 'consumables.maintenances'],
+            withDeleted: true,
         });
         const options: RepositoryOptions = {
             where: {
