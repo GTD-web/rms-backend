@@ -65,6 +65,6 @@ export class ConsumableRepository implements ConsumableRepositoryPort {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(ConsumableEntity)
             : this.repository;
-        await repository.delete({ consumableId: id });
+        await repository.softDelete({ consumableId: id });
     }
 }

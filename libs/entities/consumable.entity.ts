@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, OneToMany, DeleteDateColumn } from 'typeorm';
 import { VehicleInfo } from './vehicle-info.entity';
 import { Maintenance } from './maintenance.entity';
 
@@ -23,6 +23,9 @@ export class Consumable {
 
     @Column({ default: 0 })
     initMileage: number;
+
+    @DeleteDateColumn()
+    deletedAt: Date;
 
     @ManyToOne(() => VehicleInfo)
     @JoinColumn({ name: 'vehicleInfoId', referencedColumnName: 'vehicleInfoId' })

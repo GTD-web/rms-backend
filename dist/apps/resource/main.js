@@ -15388,7 +15388,7 @@ let ConsumableRepository = class ConsumableRepository {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Consumable)
             : this.repository;
-        await repository.delete({ consumableId: id });
+        await repository.softDelete({ consumableId: id });
     }
 };
 exports.ConsumableRepository = ConsumableRepository;
@@ -16765,7 +16765,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Consumable = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
@@ -16801,9 +16801,13 @@ __decorate([
     __metadata("design:type", Number)
 ], Consumable.prototype, "initMileage", void 0);
 __decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], Consumable.prototype, "deletedAt", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(() => vehicle_info_entity_1.VehicleInfo),
     (0, typeorm_1.JoinColumn)({ name: 'vehicleInfoId', referencedColumnName: 'vehicleInfoId' }),
-    __metadata("design:type", typeof (_a = typeof vehicle_info_entity_1.VehicleInfo !== "undefined" && vehicle_info_entity_1.VehicleInfo) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof vehicle_info_entity_1.VehicleInfo !== "undefined" && vehicle_info_entity_1.VehicleInfo) === "function" ? _b : Object)
 ], Consumable.prototype, "vehicleInfo", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => maintenance_entity_1.Maintenance, (maintenance) => maintenance.consumable),
