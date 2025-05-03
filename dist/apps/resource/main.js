@@ -6870,7 +6870,7 @@ let ReservationService = class ReservationService {
             where: {
                 resourceId,
                 ...(reservationId && { reservationId: (0, typeorm_1.Not)(reservationId) }),
-                startDate: (0, typeorm_1.LessThanOrEqual)(endDate),
+                startDate: (0, typeorm_1.LessThan)(endDate),
                 endDate: (0, typeorm_1.MoreThan)(startDate),
                 status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
             },
@@ -11132,6 +11132,17 @@ let ResourceUsecase = class ResourceUsecase {
     }
     async findAvailableTime(query) {
         const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservationId, } = query;
+        if (!startDate && !endDate) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.DATE_REQUIRED);
+        }
+        if (startDate && endDate && startDate > endDate) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_DATE_RANGE);
+        }
+        const isTimeRange = startTime && endTime;
+        const isTimeSelected = (am !== undefined || pm !== undefined) && timeUnit;
+        if (isTimeRange && isTimeSelected) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.TIME_RANGE_CONFLICT);
+        }
         const resources = await this.resourceService.findAll({
             where: {
                 isAvailable: true,
@@ -11157,6 +11168,7 @@ let ResourceUsecase = class ResourceUsecase {
                 },
             });
             resource.reservations = reservations;
+            console.log(resource.reservations);
         }
         const result = [];
         if (!resources || (resources && resources.length === 0)) {
@@ -11220,15 +11232,7 @@ let ResourceUsecase = class ResourceUsecase {
                     ? '09:00:00'
                     : '13:00:00';
             const endTime = pm ? '18:00:00' : '12:00:00';
-            if (am && pm) {
-                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
-            }
-            else if (am) {
-                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
-            }
-            else if (pm) {
-                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
-            }
+            this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
         }
         else {
             let currentDate = date_util_1.DateUtil.date(startDate);
@@ -16343,6 +16347,9 @@ const BusinessErrorMessage = {
         FAILED_UPDATE: '자원 수정에 실패했습니다.',
         FAILED_DELETE: '자원 삭제에 실패했습니다.',
         FAILED_REORDER: '자원 순서 변경에 실패했습니다.',
+        DATE_REQUIRED: '시작 날짜와 종료 날짜는 필수입니다.',
+        INVALID_DATE_RANGE: '시작 날짜는 종료 날짜보다 이전이어야 합니다.',
+        TIME_RANGE_CONFLICT: '시간 범위와 시간 단위는 동시에 선택할 수 없습니다.',
     },
     RESOURCE_GROUP: {
         NOT_FOUND: '요청한 자원 그룹을 찾을 수 없습니다.',

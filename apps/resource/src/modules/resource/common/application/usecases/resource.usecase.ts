@@ -347,6 +347,20 @@ export class ResourceUsecase {
             timeUnit,
             reservationId,
         } = query;
+        if (!startDate && !endDate) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.DATE_REQUIRED);
+        }
+
+        if (startDate && endDate && startDate > endDate) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_DATE_RANGE);
+        }
+
+        const isTimeRange = startTime && endTime;
+        const isTimeSelected = (am !== undefined || pm !== undefined) && timeUnit;
+
+        if (isTimeRange && isTimeSelected) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.TIME_RANGE_CONFLICT);
+        }
 
         const resources = await this.resourceService.findAll({
             where: {
@@ -379,6 +393,7 @@ export class ResourceUsecase {
                 },
             });
             resource.reservations = reservations;
+            console.log(resource.reservations);
         }
         const result: ResourceAvailabilityDto[] = [];
 
@@ -499,13 +514,9 @@ export class ResourceUsecase {
                       ? '09:00:00'
                       : '13:00:00';
             const endTime = pm ? '18:00:00' : '12:00:00';
-            if (am && pm) {
-                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
-            } else if (am) {
-                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
-            } else if (pm) {
-                this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
-            }
+           
+            this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
+
         } else {
             // 여러 일 예약건 처리 - 시작일부터 종료일까지 일별로 처리
             let currentDate = DateUtil.date(startDate);

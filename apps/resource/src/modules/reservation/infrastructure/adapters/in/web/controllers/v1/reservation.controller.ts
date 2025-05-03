@@ -95,6 +95,7 @@ export class UserReservationController {
         return this.reservationUsecase.makeReservation(user, createDto);
     }
 
+    // 현재 쓰이는 곳 없음
     @Get('me')
     @ApiOperation({ summary: '내 예약 리스트 조회, 자원 타입별 ' })
     @ApiDataResponse({
@@ -113,6 +114,7 @@ export class UserReservationController {
         return this.reservationUsecase.findMyReservationList(user.employeeId, page, limit, resourceType);
     }
 
+    // 햄버거 메뉴 -> 자원목록 -> 자원상세 -> 내예약으로 들어간 후 나오는 리스트
     @Get('resource/:resourceId')
     @ApiOperation({ summary: '자원별 예약 리스트 조회' })
     @ApiDataResponse({

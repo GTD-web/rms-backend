@@ -54,6 +54,9 @@ const BusinessErrorMessage = {
         FAILED_UPDATE: '자원 수정에 실패했습니다.',
         FAILED_DELETE: '자원 삭제에 실패했습니다.',
         FAILED_REORDER: '자원 순서 변경에 실패했습니다.',
+        DATE_REQUIRED: '시작 날짜와 종료 날짜는 필수입니다.',
+        INVALID_DATE_RANGE: '시작 날짜는 종료 날짜보다 이전이어야 합니다.',
+        TIME_RANGE_CONFLICT: '시간 범위와 시간 단위는 동시에 선택할 수 없습니다.',
     },
     RESOURCE_GROUP: {
         NOT_FOUND: '요청한 자원 그룹을 찾을 수 없습니다.',

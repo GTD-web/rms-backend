@@ -61,7 +61,7 @@ export class ReservationService {
             where: {
                 resourceId,
                 ...(reservationId && { reservationId: Not(reservationId) }),
-                startDate: LessThanOrEqual(endDate),
+                startDate: LessThan(endDate),
                 endDate: MoreThan(startDate),
                 status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
             },
