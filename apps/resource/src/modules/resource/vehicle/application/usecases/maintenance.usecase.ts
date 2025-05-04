@@ -85,6 +85,15 @@ export class MaintenanceUsecase {
             relations: ['resource', 'consumables', 'consumables.maintenances'],
             withDeleted: true,
         });
+        console.log(vehicleInfo);
+        // const consumables = await this.consumableService.findAll({
+        //     where: {
+        //         vehicleInfoId,
+        //     },
+        //     relations: ['vehicleInfo', 'vehicleInfo.resource', 'maintenances'],
+        //     withDeleted: true,
+        // });
+        // console.log(consumables);
         const options: RepositoryOptions = {
             where: {
                 maintenanceId: In(
@@ -93,6 +102,7 @@ export class MaintenanceUsecase {
                     ),
                 ),
             },
+            withDeleted: true,
         };
         const count = await this.maintenanceService.count(options);
 

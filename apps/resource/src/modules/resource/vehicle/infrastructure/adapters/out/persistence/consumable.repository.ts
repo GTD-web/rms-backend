@@ -7,6 +7,7 @@ import { ConsumableRepositoryPort } from '@resource/modules/resource/vehicle/dom
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { CreateConsumableDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
 import { UpdateConsumableDto } from '@resource/dtos.index';
+import { DateUtil } from '@libs/utils/date.util';
 @Injectable()
 export class ConsumableRepository implements ConsumableRepositoryPort {
     constructor(
@@ -32,6 +33,7 @@ export class ConsumableRepository implements ConsumableRepositoryPort {
             order: repositoryOptions?.order,
             skip: repositoryOptions?.skip,
             take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entities;
     }
@@ -43,6 +45,7 @@ export class ConsumableRepository implements ConsumableRepositoryPort {
         const entity = await repository.findOne({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entity ? entity : null;
     }
@@ -65,6 +68,14 @@ export class ConsumableRepository implements ConsumableRepositoryPort {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(ConsumableEntity)
             : this.repository;
+        // 기존 name 조회
+        const consumable = await repository.findOne({ where: { consumableId: id }, withDeleted: true });
+        if (!consumable) throw new NotFoundException('Consumable not found');
+
+        // 고유값(타임스탬프) 추가
+        const deletedName = `${consumable.name}_deleted_${DateUtil.now().format('YYYYMMDDHHmmss')}`;
+
+        await repository.update({ consumableId: id }, { name: deletedName });
         await repository.softDelete({ consumableId: id });
     }
 }

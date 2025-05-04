@@ -28,6 +28,7 @@ export class VehicleInfoRepository implements VehicleInfoRepositoryPort {
         const entity = await repository.findOne({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entity ? entity : null;
     }

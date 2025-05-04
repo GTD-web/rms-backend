@@ -7431,6 +7431,16 @@ let ReservationUsecase = class ReservationUsecase {
         if (createDto.startDate > createDto.endDate) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         }
+        const [resources] = await this.eventEmitter.emitAsync('find.resource', {
+            repositoryOptions: {
+                where: { resourceId: createDto.resourceId },
+                relations: ['vehicleInfo'],
+            },
+        });
+        const resource = resources[0];
+        if (!resource.isAvailable) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.RESOURCE_UNAVAILABLE);
+        }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -7440,13 +7450,6 @@ let ReservationUsecase = class ReservationUsecase {
                 queryRunner,
             });
             if (createDto.resourceType === resource_type_enum_1.ResourceType.VEHICLE) {
-                const [resources] = await this.eventEmitter.emitAsync('find.resource', {
-                    repositoryOptions: {
-                        where: { resourceId: createDto.resourceId },
-                        relations: ['vehicleInfo'],
-                    },
-                });
-                const resource = resources[0];
                 const reservationVehicle = new entities_1.ReservationVehicle();
                 reservationVehicle.reservationId = savedReservation.reservationId;
                 reservationVehicle.vehicleInfoId = resource.vehicleInfo.vehicleInfoId;
@@ -14093,10 +14096,12 @@ let MaintenanceUsecase = class MaintenanceUsecase {
             relations: ['resource', 'consumables', 'consumables.maintenances'],
             withDeleted: true,
         });
+        console.log(vehicleInfo);
         const options = {
             where: {
                 maintenanceId: (0, typeorm_1.In)(vehicleInfo.consumables.flatMap((consumable) => consumable.maintenances.map((maintenance) => maintenance.maintenanceId))),
             },
+            withDeleted: true,
         };
         const count = await this.maintenanceService.count(options);
         if (page && limit) {
@@ -15350,6 +15355,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ConsumableRepository = class ConsumableRepository {
     constructor(repository) {
         this.repository = repository;
@@ -15371,6 +15377,7 @@ let ConsumableRepository = class ConsumableRepository {
             order: repositoryOptions?.order,
             skip: repositoryOptions?.skip,
             take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entities;
     }
@@ -15381,6 +15388,7 @@ let ConsumableRepository = class ConsumableRepository {
         const entity = await repository.findOne({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entity ? entity : null;
     }
@@ -15398,6 +15406,11 @@ let ConsumableRepository = class ConsumableRepository {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Consumable)
             : this.repository;
+        const consumable = await repository.findOne({ where: { consumableId: id }, withDeleted: true });
+        if (!consumable)
+            throw new common_1.NotFoundException('Consumable not found');
+        const deletedName = `${consumable.name}_deleted_${date_util_1.DateUtil.now().format('YYYYMMDDHHmmss')}`;
+        await repository.update({ consumableId: id }, { name: deletedName });
         await repository.softDelete({ consumableId: id });
     }
 };
@@ -15458,6 +15471,7 @@ let MaintenanceRepository = class MaintenanceRepository {
             order: repositoryOptions?.order,
             skip: repositoryOptions?.skip,
             take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
         });
     }
     async findOne(repositoryOptions) {
@@ -15468,6 +15482,7 @@ let MaintenanceRepository = class MaintenanceRepository {
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
             order: repositoryOptions?.order,
+            withDeleted: repositoryOptions?.withDeleted,
         });
     }
     async update(id, updateMaintenanceDto, repositoryOptions) {
@@ -15547,6 +15562,7 @@ let VehicleInfoRepository = class VehicleInfoRepository {
         const entity = await repository.findOne({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
+            withDeleted: repositoryOptions?.withDeleted,
         });
         return entity ? entity : null;
     }
@@ -16392,6 +16408,7 @@ const BusinessErrorMessage = {
         VEHICLE_NOT_FOUND: '예약된 차량을 찾을 수 없습니다.',
         VEHICLE_ALREADY_RETURNED: '이미 반납된 차량입니다.',
         INVALID_MILEAGE: '반납 주행거리는 이전 주행거리보다 작을 수 없습니다.',
+        RESOURCE_UNAVAILABLE: '예약 가능한 자원이 아닙니다.',
     },
     FILE: {
         NOT_FOUND: '요청한 파일을 찾을 수 없습니다.',

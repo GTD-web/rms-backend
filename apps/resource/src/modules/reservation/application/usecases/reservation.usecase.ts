@@ -591,6 +591,17 @@ export class ReservationUsecase {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         }
 
+        const [resources] = await this.eventEmitter.emitAsync('find.resource', {
+            repositoryOptions: {
+                where: { resourceId: createDto.resourceId },
+                relations: ['vehicleInfo'],
+            },
+        });
+        const resource = resources[0];
+        if (!resource.isAvailable) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.RESOURCE_UNAVAILABLE);
+        }
+
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -604,13 +615,6 @@ export class ReservationUsecase {
 
             // 차량 예약 정보 생성
             if (createDto.resourceType === ResourceType.VEHICLE) {
-                const [resources] = await this.eventEmitter.emitAsync('find.resource', {
-                    repositoryOptions: {
-                        where: { resourceId: createDto.resourceId },
-                        relations: ['vehicleInfo'],
-                    },
-                });
-                const resource = resources[0];
                 const reservationVehicle = new ReservationVehicle();
                 reservationVehicle.reservationId = savedReservation.reservationId!;
                 reservationVehicle.vehicleInfoId = resource.vehicleInfo.vehicleInfoId;

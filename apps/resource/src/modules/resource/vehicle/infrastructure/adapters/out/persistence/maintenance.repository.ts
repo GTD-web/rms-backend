@@ -36,6 +36,7 @@ export class MaintenanceRepository implements MaintenanceRepositoryPort {
             order: repositoryOptions?.order,
             skip: repositoryOptions?.skip,
             take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
         });
     }
 
@@ -47,6 +48,7 @@ export class MaintenanceRepository implements MaintenanceRepositoryPort {
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
             order: repositoryOptions?.order,
+            withDeleted: repositoryOptions?.withDeleted,
         });
     }
 
