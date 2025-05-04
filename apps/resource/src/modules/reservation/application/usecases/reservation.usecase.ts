@@ -1014,6 +1014,10 @@ export class ReservationUsecase {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_RETURN_STATUS(reservation.status));
         }
 
+        if (reservation.resource.vehicleInfo.totalMileage > returnDto.totalMileage) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_MILEAGE);
+        }
+
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();

@@ -88,6 +88,7 @@ const BusinessErrorMessage = {
         CANNOT_RETURN_STATUS: (status: string) => `${status} 상태의 예약은 차량을 반납할 수 없습니다.`,
         VEHICLE_NOT_FOUND: '예약된 차량을 찾을 수 없습니다.',
         VEHICLE_ALREADY_RETURNED: '이미 반납된 차량입니다.',
+        INVALID_MILEAGE: '반납 주행거리는 이전 주행거리보다 작을 수 없습니다.',
     },
     FILE: {
         NOT_FOUND: '요청한 파일을 찾을 수 없습니다.',
