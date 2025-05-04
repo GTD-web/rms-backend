@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
     PushNotificationPort,
     PushNotificationSubscription,
@@ -19,6 +19,10 @@ export class AdapterService {
         const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
             employeeId,
         });
+
+        if (!subscription) {
+            throw new NotFoundException('Subscription not found');
+        }
 
         await this.pushNotificationService.bulkSendNotification(subscription as PushNotificationSubscription[], {
             title: notification.title,

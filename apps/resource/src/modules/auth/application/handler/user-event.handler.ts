@@ -98,10 +98,9 @@ export class UserEventHandler {
         console.log(`Find subscription for user ${payload.employeeId}`);
         // 구독 정보 제거 이벤트에 대한 처리 로직
         const user = await this.userService.findByEmployeeId(payload.employeeId);
-        if (!user) {
-            throw new NotFoundException('User not found');
+        if (user && user.isPushNotificationEnabled && user.subscriptions) {
+            return user.subscriptions;
         }
-
-        return user.subscriptions;
+        return null;
     }
 }

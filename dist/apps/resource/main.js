@@ -959,10 +959,10 @@ let UserEventHandler = class UserEventHandler {
     async handleUserSubscriptionGetEvent(payload) {
         console.log(`Find subscription for user ${payload.employeeId}`);
         const user = await this.userService.findByEmployeeId(payload.employeeId);
-        if (!user) {
-            throw new common_1.NotFoundException('User not found');
+        if (user && user.isPushNotificationEnabled && user.subscriptions) {
+            return user.subscriptions;
         }
-        return user.subscriptions;
+        return null;
     }
 };
 exports.UserEventHandler = UserEventHandler;
@@ -4260,6 +4260,9 @@ let AdapterService = class AdapterService {
         const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
             employeeId,
         });
+        if (!subscription) {
+            throw new common_1.NotFoundException('Subscription not found');
+        }
         await this.pushNotificationService.bulkSendNotification(subscription, {
             title: notification.title,
             body: notification.body,
