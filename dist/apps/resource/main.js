@@ -11064,7 +11064,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -11077,7 +11077,6 @@ const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const resource_usecase_1 = __webpack_require__(/*! @resource/modules/resource/common/application/usecases/resource.usecase */ "./apps/resource/src/modules/resource/common/application/usecases/resource.usecase.ts");
 const resource_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/resource-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/resource-response.dto.ts");
-const update_resource_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/update-resource.dto */ "./apps/resource/src/modules/resource/common/application/dtos/update-resource.dto.ts");
 const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const check_availability_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/check-availability.dto */ "./apps/resource/src/modules/resource/common/application/dtos/check-availability.dto.ts");
@@ -11100,9 +11099,6 @@ let UserResourceController = class UserResourceController {
     }
     async findOne(user, resourceId) {
         return this.resourceUsecase.findResourceDetailForUser(user.employeeId, resourceId);
-    }
-    async returnVehicle(user, resourceId, returnDto) {
-        return this.resourceUsecase.returnVehicle(user, resourceId, returnDto);
     }
 };
 exports.UserResourceController = UserResourceController;
@@ -11180,20 +11176,6 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String]),
     __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], UserResourceController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':resourceId/return-vehicle'),
-    (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '차량 반납 성공',
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('resourceId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_l = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _l : Object, String, typeof (_m = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
-], UserResourceController.prototype, "returnVehicle", null);
 exports.UserResourceController = UserResourceController = __decorate([
     (0, swagger_1.ApiTags)('3. 자원 - 사용자 페이지'),
     (0, common_1.Controller)('v1/resources'),
