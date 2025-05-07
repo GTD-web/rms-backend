@@ -98,12 +98,12 @@ export class UpdateReservationCcReceipientDto {
 
 // 예약 수정
 export class UpdateReservationDto {
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') })
     @IsOptional()
     resourceId?: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('제목') })
     @IsOptional()
     @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) })
@@ -112,6 +112,7 @@ export class UpdateReservationDto {
     @ApiProperty({
         example: '2025-01-01 00:00:00',
         description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+        required: false,
     })
     @IsDateString()
     @Matches(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
@@ -123,6 +124,7 @@ export class UpdateReservationDto {
     @ApiProperty({
         example: '2025-01-01 00:00:00',
         description: '예약 종료 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+        required: false,
     })
     @IsDateString()
     @Matches(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
@@ -131,12 +133,12 @@ export class UpdateReservationDto {
     @IsOptional()
     endDate?: string;
 
-    @ApiProperty({ example: false })
+    @ApiProperty({ example: false, required: false })
     @IsBoolean({ message: ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') })
     @IsOptional()
     isAllDay?: boolean;
 
-    @ApiProperty({ example: false })
+    @ApiProperty({ example: false, required: false })
     @IsBoolean({ message: ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('시작 전 알림 여부') })
     @IsOptional()
     notifyBeforeStart?: boolean;
@@ -146,7 +148,7 @@ export class UpdateReservationDto {
     @IsOptional()
     notifyMinutesBeforeStart?: number[];
 
-    @ApiProperty({ type: [String] })
+    @ApiProperty({ type: [String], required: false })
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') })
     @IsOptional()
     @IsString({ each: true, message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') })

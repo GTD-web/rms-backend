@@ -710,14 +710,20 @@ export class ReservationUsecase {
     async updateReservation(reservationId: string, updateDto: UpdateReservationDto): Promise<ReservationResponseDto> {
         const reservation = await this.reservationService.findOne({
             where: { reservationId, status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED]) },
-            relations: ['resource'],
+            relations: ['resource', 'participants'],
             withDeleted: true,
         });
         if (!reservation) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         let hasUpdateTime = false;
-        const hasUpdateParticipants = updateDto.participantIds.length > 0;
+        let hasUpdateParticipants = false;
+        // 참가자 변경 여부 확인
+        if (updateDto.participantIds) {
+            hasUpdateParticipants = updateDto.participantIds.some(
+                (participantId) => !reservation.participants.some((p) => p.employeeId === participantId),
+            );
+        }
 
         if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
             hasUpdateTime = true;
@@ -740,24 +746,16 @@ export class ReservationUsecase {
         }
         const participantIds = updateDto.participantIds;
         delete updateDto.participantIds;
+
         let updatedReservation = await this.reservationService.update(reservationId, {
             ...updateDto,
             startDate: updateDto.startDate ? DateUtil.date(updateDto.startDate).toDate() : undefined,
             endDate: updateDto.endDate ? DateUtil.date(updateDto.endDate).toDate() : undefined,
         });
 
-        // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
-        if (hasUpdateTime && reservation.status === ReservationStatus.CONFIRMED) {
-            // 기존 Job 삭제
-            this.deleteReservationClosingJob(reservationId);
-            this.createReservationClosingJob(reservation);
-        }
-
         if (hasUpdateParticipants) {
             // 기존 참가자 조회
-            const participants = await this.participantService.findAll({
-                where: { reservationId, type: ParticipantsType.PARTICIPANT },
-            });
+            const participants = reservation.participants;
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
 
@@ -806,6 +804,38 @@ export class ReservationUsecase {
                     console.log(error);
                     console.log('Notification creation failed in updateParticipants');
                 }
+            }
+        }
+
+        // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
+        if (hasUpdateTime) {
+            if (reservation.status === ReservationStatus.CONFIRMED) {
+                // 기존 Job 삭제
+                this.deleteReservationClosingJob(reservationId);
+                this.createReservationClosingJob(reservation);
+            }
+
+            try {
+                const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+
+                this.eventEmitter.emit('create.notification', {
+                    notificationType: NotificationType.RESERVATION_TIME_CHANGED,
+                    notificationData: {
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
+                        reservationDate: DateUtil.toAlarmRangeString(
+                            DateUtil.format(updatedReservation.startDate),
+                            DateUtil.format(updatedReservation.endDate),
+                        ),
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
+                    },
+                    notiTarget,
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Notification creation failed in updateTime');
             }
         }
 

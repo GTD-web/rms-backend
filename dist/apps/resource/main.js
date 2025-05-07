@@ -4141,8 +4141,8 @@ let NotificationUsecase = class NotificationUsecase {
                 createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
                 break;
-            case notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED:
-                createNotificationDto.title = `[참가자 변경] ${createNotificationDatatDto.reservationTitle}`;
+            case notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED:
+                createNotificationDto.title = `[예약 시간 변경] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
                 break;
             case notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED:
@@ -4155,6 +4155,10 @@ let NotificationUsecase = class NotificationUsecase {
                 break;
             case notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED:
                 createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
+                createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED:
+                createNotificationDto.title = `[정비 완료] ${createNotificationDatatDto.consumableName}`;
                 createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
                 break;
         }
@@ -5972,13 +5976,13 @@ class UpdateReservationDto {
 }
 exports.UpdateReservationDto = UpdateReservationDto;
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateReservationDto.prototype, "resourceId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
@@ -5988,6 +5992,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({
         example: '2025-01-01 00:00:00',
         description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+        required: false,
     }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
@@ -6000,6 +6005,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({
         example: '2025-01-01 00:00:00',
         description: '예약 종료 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+        required: false,
     }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
@@ -6009,13 +6015,13 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateReservationDto.prototype, "endDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: false }),
+    (0, swagger_1.ApiProperty)({ example: false, required: false }),
     (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateReservationDto.prototype, "isAllDay", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: false }),
+    (0, swagger_1.ApiProperty)({ example: false, required: false }),
     (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('시작 전 알림 여부') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
@@ -6027,7 +6033,7 @@ __decorate([
     __metadata("design:type", Array)
 ], UpdateReservationDto.prototype, "notifyMinutesBeforeStart", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: [String] }),
+    (0, swagger_1.ApiProperty)({ type: [String], required: false }),
     (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
@@ -6983,14 +6989,17 @@ let ReservationUsecase = class ReservationUsecase {
     async updateReservation(reservationId, updateDto) {
         const reservation = await this.reservationService.findOne({
             where: { reservationId, status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED]) },
-            relations: ['resource'],
+            relations: ['resource', 'participants'],
             withDeleted: true,
         });
         if (!reservation) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         let hasUpdateTime = false;
-        const hasUpdateParticipants = updateDto.participantIds.length > 0;
+        let hasUpdateParticipants = false;
+        if (updateDto.participantIds) {
+            hasUpdateParticipants = updateDto.participantIds.some((participantId) => !reservation.participants.some((p) => p.employeeId === participantId));
+        }
         if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
             hasUpdateTime = true;
             const conflicts = await this.reservationService.findConflictingReservations(updateDto.resourceId, date_util_1.DateUtil.date(updateDto.startDate).toDate(), date_util_1.DateUtil.date(updateDto.endDate).toDate(), reservationId);
@@ -7009,14 +7018,8 @@ let ReservationUsecase = class ReservationUsecase {
             startDate: updateDto.startDate ? date_util_1.DateUtil.date(updateDto.startDate).toDate() : undefined,
             endDate: updateDto.endDate ? date_util_1.DateUtil.date(updateDto.endDate).toDate() : undefined,
         });
-        if (hasUpdateTime && reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
-            this.deleteReservationClosingJob(reservationId);
-            this.createReservationClosingJob(reservation);
-        }
         if (hasUpdateParticipants) {
-            const participants = await this.participantService.findAll({
-                where: { reservationId, type: reservation_type_enum_1.ParticipantsType.PARTICIPANT },
-            });
+            const participants = reservation.participants;
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
             await Promise.all(deletedParticipants.map((participant) => this.participantService.delete(participant.participantId)));
@@ -7050,6 +7053,31 @@ let ReservationUsecase = class ReservationUsecase {
                     console.log(error);
                     console.log('Notification creation failed in updateParticipants');
                 }
+            }
+        }
+        if (hasUpdateTime) {
+            if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                this.deleteReservationClosingJob(reservationId);
+                this.createReservationClosingJob(reservation);
+            }
+            try {
+                const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+                this.eventEmitter.emit('create.notification', {
+                    notificationType: notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED,
+                    notificationData: {
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
+                    },
+                    notiTarget,
+                });
+            }
+            catch (error) {
+                console.log(error);
+                console.log('Notification creation failed in updateTime');
             }
         }
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
