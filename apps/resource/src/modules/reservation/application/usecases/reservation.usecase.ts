@@ -753,6 +753,19 @@ export class ReservationUsecase {
             relations: ['participants', 'resource'],
             withDeleted: true,
         });
+
+        const hasUpdateTings =
+            updateDto.title || updateDto.isAllDay || updateDto.notifyBeforeStart || updateDto.notifyMinutesBeforeStart;
+
+        if (hasUpdateTings) {
+            updatedReservation = await this.reservationService.update(reservationId, {
+                title: updateDto?.title || undefined,
+                isAllDay: updateDto?.isAllDay || undefined,
+                notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
+                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
+            });
+        }
+
         if (hasUpdateParticipants) {
             // 기존 참가자 조회
             console.log('hasUpdateParticipants');
@@ -854,17 +867,7 @@ export class ReservationUsecase {
                 }
             }
         }
-        const hasUpdateTings =
-            updateDto.title || updateDto.isAllDay || updateDto.notifyBeforeStart || updateDto.notifyMinutesBeforeStart;
 
-        if (hasUpdateTings) {
-            updatedReservation = await this.reservationService.update(reservationId, {
-                title: updateDto?.title || undefined,
-                isAllDay: updateDto?.isAllDay || undefined,
-                notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
-                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
-            });
-        }
         return new ReservationResponseDto(updatedReservation);
     }
 

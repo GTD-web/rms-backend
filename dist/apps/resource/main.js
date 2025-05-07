@@ -7062,6 +7062,15 @@ let ReservationUsecase = class ReservationUsecase {
             relations: ['participants', 'resource'],
             withDeleted: true,
         });
+        const hasUpdateTings = updateDto.title || updateDto.isAllDay || updateDto.notifyBeforeStart || updateDto.notifyMinutesBeforeStart;
+        if (hasUpdateTings) {
+            updatedReservation = await this.reservationService.update(reservationId, {
+                title: updateDto?.title || undefined,
+                isAllDay: updateDto?.isAllDay || undefined,
+                notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
+                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
+            });
+        }
         if (hasUpdateParticipants) {
             console.log('hasUpdateParticipants');
             const participants = reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
@@ -7141,15 +7150,6 @@ let ReservationUsecase = class ReservationUsecase {
                     console.log('Notification creation failed in updateTime');
                 }
             }
-        }
-        const hasUpdateTings = updateDto.title || updateDto.isAllDay || updateDto.notifyBeforeStart || updateDto.notifyMinutesBeforeStart;
-        if (hasUpdateTings) {
-            updatedReservation = await this.reservationService.update(reservationId, {
-                title: updateDto?.title || undefined,
-                isAllDay: updateDto?.isAllDay || undefined,
-                notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
-                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
-            });
         }
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
