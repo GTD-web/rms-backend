@@ -72,6 +72,7 @@ const BusinessErrorMessage = {
     CONSUMABLE: {
         NOT_FOUND: '요청한 소모품 정보를 찾을 수 없습니다.',
         UNAUTHORIZED: '소모품 관리 권한이 없습니다.',
+        ALREADY_EXISTS: '이미 존재하는 소모품입니다.',
     },
     MAINTENANCE: {
         NOT_FOUND: '요청한 정비 정보를 찾을 수 없습니다.',

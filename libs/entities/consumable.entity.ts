@@ -12,7 +12,7 @@ export class Consumable {
     @Column()
     vehicleInfoId: string;
 
-    @Column({ unique: true })
+    @Column()
     name: string;
 
     @Column({ default: 0 })

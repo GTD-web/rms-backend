@@ -12680,10 +12680,16 @@ let ConsumableUsecase = class ConsumableUsecase {
             where: {
                 vehicleInfoId: createConsumableDto.vehicleInfoId,
             },
+            relations: ['consumables'],
         });
         if (!vehicleInfo)
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         createConsumableDto.initMileage = vehicleInfo.totalMileage;
+        if (vehicleInfo.consumables.length > 0) {
+            const hasSameName = vehicleInfo.consumables.some((consumable) => consumable.name === createConsumableDto.name);
+            if (hasSameName)
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.ALREADY_EXISTS);
+        }
         return this.consumableService.save(createConsumableDto, repositoryOptions);
     }
     async findAll(user, repositoryOptions) {
@@ -12702,6 +12708,19 @@ let ConsumableUsecase = class ConsumableUsecase {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
         if (!result)
             throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
+        const vehicleInfo = await this.vehicleInfoService.findOne({
+            where: {
+                vehicleInfoId: updateData.vehicleInfoId,
+            },
+            relations: ['consumables'],
+        });
+        if (!vehicleInfo)
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        if (vehicleInfo.consumables.length > 0) {
+            const hasSameName = vehicleInfo.consumables.some((consumable) => consumable.name === updateData.name && consumable.consumableId !== id);
+            if (hasSameName)
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.ALREADY_EXISTS);
+        }
         return this.consumableService.update(id, updateData, repositoryOptions);
     }
     async delete(user, id, repositoryOptions) {
@@ -14663,6 +14682,7 @@ const BusinessErrorMessage = {
     CONSUMABLE: {
         NOT_FOUND: '요청한 소모품 정보를 찾을 수 없습니다.',
         UNAUTHORIZED: '소모품 관리 권한이 없습니다.',
+        ALREADY_EXISTS: '이미 존재하는 소모품입니다.',
     },
     MAINTENANCE: {
         NOT_FOUND: '요청한 정비 정보를 찾을 수 없습니다.',
@@ -15085,7 +15105,7 @@ __decorate([
     __metadata("design:type", String)
 ], Consumable.prototype, "vehicleInfoId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ unique: true }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Consumable.prototype, "name", void 0);
 __decorate([

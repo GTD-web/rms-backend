@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ConsumableService } from '@resource/modules/resource/vehicle/application/services/consumable.service';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { Consumable, User } from '@libs/entities';
@@ -26,9 +26,16 @@ export class ConsumableUsecase {
             where: {
                 vehicleInfoId: createConsumableDto.vehicleInfoId,
             },
+            relations: ['consumables'],
         });
         if (!vehicleInfo) throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         createConsumableDto.initMileage = vehicleInfo.totalMileage;
+        if (vehicleInfo.consumables.length > 0) {
+            const hasSameName = vehicleInfo.consumables.some(
+                (consumable) => consumable.name === createConsumableDto.name,
+            );
+            if (hasSameName) throw new BadRequestException(ERROR_MESSAGE.BUSINESS.CONSUMABLE.ALREADY_EXISTS);
+        }
 
         return this.consumableService.save(createConsumableDto, repositoryOptions);
     }
@@ -53,6 +60,21 @@ export class ConsumableUsecase {
     ): Promise<Consumable> {
         const result = await this.checkRole(repositoryOptions?.where.vehicleInfoId, user);
         if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.CONSUMABLE.UNAUTHORIZED);
+
+        const vehicleInfo = await this.vehicleInfoService.findOne({
+            where: {
+                vehicleInfoId: updateData.vehicleInfoId,
+            },
+            relations: ['consumables'],
+        });
+        if (!vehicleInfo) throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        if (vehicleInfo.consumables.length > 0) {
+            const hasSameName = vehicleInfo.consumables.some(
+                (consumable) => consumable.name === updateData.name && consumable.consumableId !== id,
+            );
+            if (hasSameName) throw new BadRequestException(ERROR_MESSAGE.BUSINESS.CONSUMABLE.ALREADY_EXISTS);
+        }
+
         return this.consumableService.update(id, updateData, repositoryOptions);
     }
 
