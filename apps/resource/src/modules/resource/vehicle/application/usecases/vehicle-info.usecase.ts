@@ -83,7 +83,7 @@ export class VehicleInfoUsecase {
                 try {
                     const notiTarget = afterVehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
 
-                    await this.eventEmitter.emit('create.notification', {
+                    this.eventEmitter.emit('create.notification', {
                         notificationType: NotificationType.RESOURCE_CONSUMABLE_REPLACING,
                         notificationData: {
                             resourceId: afterVehicleInfo.resource.resourceId,

@@ -1002,7 +1002,7 @@ export class ReservationUsecase {
     async returnVehicle(user: User, reservationId: string, returnDto: ReturnVehicleDto): Promise<boolean> {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['resource', 'resource.vehicleInfo'],
+            relations: ['resource', 'resource.vehicleInfo', 'resource.resourceManagers'],
             withDeleted: true,
         });
 
@@ -1068,6 +1068,20 @@ export class ReservationUsecase {
                     odometerImages: returnDto.odometerImages,
                 },
                 repositoryOptions: { queryRunner },
+            });
+
+            const notiTarget = [
+                ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
+                user.employeeId,
+            ];
+            this.eventEmitter.emit('create.notification', {
+                notificationType: NotificationType.RESOURCE_VEHICLE_RETURNED,
+                notificationData: {
+                    resourceId: reservation.resource.resourceId,
+                    resourceName: reservation.resource.name,
+                    resourceType: reservation.resource.type,
+                },
+                notiTarget,
             });
 
             await queryRunner.commitTransaction();

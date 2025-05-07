@@ -7186,7 +7186,7 @@ let ReservationUsecase = class ReservationUsecase {
     async returnVehicle(user, reservationId, returnDto) {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['resource', 'resource.vehicleInfo'],
+            relations: ['resource', 'resource.vehicleInfo', 'resource.resourceManagers'],
             withDeleted: true,
         });
         if (!reservation) {
@@ -7235,6 +7235,19 @@ let ReservationUsecase = class ReservationUsecase {
                     odometerImages: returnDto.odometerImages,
                 },
                 repositoryOptions: { queryRunner },
+            });
+            const notiTarget = [
+                ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
+                user.employeeId,
+            ];
+            this.eventEmitter.emit('create.notification', {
+                notificationType: notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED,
+                notificationData: {
+                    resourceId: reservation.resource.resourceId,
+                    resourceName: reservation.resource.name,
+                    resourceType: reservation.resource.type,
+                },
+                notiTarget,
             });
             await queryRunner.commitTransaction();
             return true;
@@ -13001,7 +13014,7 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
             if (isReplace) {
                 try {
                     const notiTarget = afterVehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
-                    await this.eventEmitter.emit('create.notification', {
+                    this.eventEmitter.emit('create.notification', {
                         notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING,
                         notificationData: {
                             resourceId: afterVehicleInfo.resource.resourceId,
