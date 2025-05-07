@@ -2033,6 +2033,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
             where: { userId: payload.userId },
             relations: ['employee'],
         });
+        console.log('user', user);
         if (!user || user.userId !== payload.userId) {
             throw new common_1.UnauthorizedException();
         }
@@ -4547,7 +4548,6 @@ let UserNotificationController = class UserNotificationController {
 exports.UserNotificationController = UserNotificationController;
 __decorate([
     (0, common_1.Post)('subscribe'),
-    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -4561,7 +4561,6 @@ __decorate([
 ], UserNotificationController.prototype, "subscribe", null);
 __decorate([
     (0, common_1.Post)('send'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '웹 푸시 알림 전송' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -4574,7 +4573,6 @@ __decorate([
 ], UserNotificationController.prototype, "send", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '알람 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -4600,7 +4598,6 @@ __decorate([
 ], UserNotificationController.prototype, "findAllByEmployeeId", null);
 __decorate([
     (0, common_1.Patch)(':notificationId/read'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '알람 읽음 처리' }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('notificationId')),
@@ -4620,6 +4617,7 @@ __decorate([
 exports.UserNotificationController = UserNotificationController = __decorate([
     (0, swagger_1.ApiTags)('5. 알림 - 사용자 페이지'),
     (0, common_1.Controller)('v1/notifications'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof notification_usecase_1.NotificationUsecase !== "undefined" && notification_usecase_1.NotificationUsecase) === "function" ? _a : Object])
 ], UserNotificationController);
