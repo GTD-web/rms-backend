@@ -14,4 +14,6 @@ export interface EmployeeNotificationRepositoryPort {
         updateEmployeeNotificationDto: Partial<EmployeeNotification>,
         repositoryOptions?: RepositoryOptions,
     ): Promise<EmployeeNotification>;
+    delete(employeeNotificationId: string, repositoryOptions?: RepositoryOptions): Promise<void>;
+    deleteByNotificationId(notificationId: string, repositoryOptions?: RepositoryOptions): Promise<void>;
 }

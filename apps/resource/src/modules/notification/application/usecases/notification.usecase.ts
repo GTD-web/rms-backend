@@ -15,7 +15,7 @@ import { NotificationDataDto, ResponseNotificationDto } from '../dto/response-no
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { LessThan, MoreThanOrEqual } from 'typeorm';
+import { LessThan, MoreThanOrEqual, Raw } from 'typeorm';
 
 @Injectable()
 export class NotificationUsecase {
@@ -189,13 +189,15 @@ export class NotificationUsecase {
                 const notis = await this.notificationService.findAll({
                     where: {
                         notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
-                        notificationData: { reservationId: createNotificationDatatDto.reservationId },
+                        notificationData: Raw(
+                            (alias) => `${alias} ->> 'reservationId' = '${createNotificationDatatDto.reservationId}'`,
+                        ),
                         isSent: false,
                     },
                 });
-
                 for (const noti of notis) {
                     this.deleteReservationUpcomingNotification(noti);
+                    await this.employeeNotificationService.deleteByNotificationId(noti.notificationId);
                     await this.notificationService.delete(noti.notificationId);
                 }
 
@@ -232,15 +234,19 @@ export class NotificationUsecase {
     }
 
     private async deleteReservationUpcomingNotification(notification: Notification) {
-        const jobName = `upcoming-${notification.notificationId}-${DateUtil.date(notification.createdAt).format('YYYYMMDDHHmm')}`;
-        this.schedulerRegistry.deleteCronJob(jobName);
+        try {
+            const jobName = `upcoming-${notification.notificationId}}`;
+            this.schedulerRegistry.deleteCronJob(jobName);
+        } catch (error) {
+            console.error(`Failed to delete cron job ${notification.notificationId}: ${error}`);
+        }
     }
 
     private async createReservationUpcomingNotification(
         notification: Notification,
         notiTarget: string[],
     ): Promise<void> {
-        const jobName = `upcoming-${notification.notificationId}-${DateUtil.now().format('YYYYMMDDHHmm')}`;
+        const jobName = `upcoming-${notification.notificationId}`;
         const notificationDate = new Date(notification.createdAt);
 
         // 과거 시간 체크

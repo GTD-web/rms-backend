@@ -55,4 +55,18 @@ export class EmployeeNotificationRepository implements EmployeeNotificationRepos
         const result = await repository.update(employeeNotificationId, updateEmployeeNotificationDto);
         return await repository.findOne({ where: { employeeNotificationId } });
     }
+
+    async delete(employeeNotificationId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(EmployeeNotification)
+            : this.repository;
+        await repository.delete(employeeNotificationId);
+    }
+
+    async deleteByNotificationId(notificationId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(EmployeeNotification)
+            : this.repository;
+        await repository.delete({ notificationId });
+    }
 }

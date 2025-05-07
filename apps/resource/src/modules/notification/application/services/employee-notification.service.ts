@@ -37,4 +37,12 @@ export class EmployeeNotificationService {
             repositoryOptions,
         );
     }
+
+    async delete(employeeNotificationId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
+        return await this.employeeNotificationRepository.delete(employeeNotificationId, repositoryOptions);
+    }
+
+    async deleteByNotificationId(notificationId: string, repositoryOptions?: RepositoryOptions): Promise<void> {
+        return await this.employeeNotificationRepository.deleteByNotificationId(notificationId, repositoryOptions);
+    }
 }

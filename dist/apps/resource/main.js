@@ -3912,6 +3912,12 @@ let EmployeeNotificationService = class EmployeeNotificationService {
     async update(employeeNotificationId, updateEmployeeNotificationDto, repositoryOptions) {
         return await this.employeeNotificationRepository.update(employeeNotificationId, updateEmployeeNotificationDto, repositoryOptions);
     }
+    async delete(employeeNotificationId, repositoryOptions) {
+        return await this.employeeNotificationRepository.delete(employeeNotificationId, repositoryOptions);
+    }
+    async deleteByNotificationId(notificationId, repositoryOptions) {
+        return await this.employeeNotificationRepository.deleteByNotificationId(notificationId, repositoryOptions);
+    }
 };
 exports.EmployeeNotificationService = EmployeeNotificationService;
 exports.EmployeeNotificationService = EmployeeNotificationService = __decorate([
@@ -3974,6 +3980,7 @@ let NotificationService = class NotificationService {
     async markAllAsRead() {
     }
     async delete(id) {
+        await this.notificationRepository.delete(id);
     }
     async count(options) {
         return await this.notificationRepository.count(options);
@@ -4171,12 +4178,13 @@ let NotificationUsecase = class NotificationUsecase {
                 const notis = await this.notificationService.findAll({
                     where: {
                         notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
-                        notificationData: { reservationId: createNotificationDatatDto.reservationId },
+                        notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${createNotificationDatatDto.reservationId}'`),
                         isSent: false,
                     },
                 });
                 for (const noti of notis) {
                     this.deleteReservationUpcomingNotification(noti);
+                    await this.employeeNotificationService.deleteByNotificationId(noti.notificationId);
                     await this.notificationService.delete(noti.notificationId);
                 }
             default:
@@ -4203,11 +4211,16 @@ let NotificationUsecase = class NotificationUsecase {
         return notification;
     }
     async deleteReservationUpcomingNotification(notification) {
-        const jobName = `upcoming-${notification.notificationId}-${date_util_1.DateUtil.date(notification.createdAt).format('YYYYMMDDHHmm')}`;
-        this.schedulerRegistry.deleteCronJob(jobName);
+        try {
+            const jobName = `upcoming-${notification.notificationId}}`;
+            this.schedulerRegistry.deleteCronJob(jobName);
+        }
+        catch (error) {
+            console.error(`Failed to delete cron job ${notification.notificationId}: ${error}`);
+        }
     }
     async createReservationUpcomingNotification(notification, notiTarget) {
-        const jobName = `upcoming-${notification.notificationId}-${date_util_1.DateUtil.now().format('YYYYMMDDHHmm')}`;
+        const jobName = `upcoming-${notification.notificationId}`;
         const notificationDate = new Date(notification.createdAt);
         if (notificationDate.getTime() <= Date.now()) {
             console.log(`Notification time ${notificationDate} is in the past, skipping cron job creation`);
@@ -4889,6 +4902,18 @@ let EmployeeNotificationRepository = class EmployeeNotificationRepository {
             : this.repository;
         const result = await repository.update(employeeNotificationId, updateEmployeeNotificationDto);
         return await repository.findOne({ where: { employeeNotificationId } });
+    }
+    async delete(employeeNotificationId, repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(entities_1.EmployeeNotification)
+            : this.repository;
+        await repository.delete(employeeNotificationId);
+    }
+    async deleteByNotificationId(notificationId, repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(entities_1.EmployeeNotification)
+            : this.repository;
+        await repository.delete({ notificationId });
     }
 };
 exports.EmployeeNotificationRepository = EmployeeNotificationRepository;
