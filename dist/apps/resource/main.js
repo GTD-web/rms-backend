@@ -7140,13 +7140,13 @@ let ReservationUsecase = class ReservationUsecase {
                     console.log('Notification creation failed in updateTime');
                 }
             }
-            updatedReservation = await this.reservationService.update(reservationId, {
-                title: updateDto?.title,
-                isAllDay: updateDto?.isAllDay,
-                notifyBeforeStart: updateDto?.notifyBeforeStart,
-                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart,
-            });
         }
+        updatedReservation = await this.reservationService.update(reservationId, {
+            title: updateDto?.title,
+            isAllDay: updateDto?.isAllDay,
+            notifyBeforeStart: updateDto?.notifyBeforeStart,
+            notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart,
+        });
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
     async updateTitle(reservationId, updateDto, repositoryOptions) {

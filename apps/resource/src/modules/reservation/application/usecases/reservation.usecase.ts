@@ -854,15 +854,14 @@ export class ReservationUsecase {
                 }
             }
 
-            updatedReservation = await this.reservationService.update(reservationId, {
-                title: updateDto?.title,
-                isAllDay: updateDto?.isAllDay,
-                notifyBeforeStart: updateDto?.notifyBeforeStart,
-                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart,
-            });
             // upcoming-${notification.notificationId}
         }
-
+        updatedReservation = await this.reservationService.update(reservationId, {
+            title: updateDto?.title,
+            isAllDay: updateDto?.isAllDay,
+            notifyBeforeStart: updateDto?.notifyBeforeStart,
+            notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart,
+        });
         return new ReservationResponseDto(updatedReservation);
     }
 
