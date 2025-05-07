@@ -7057,7 +7057,13 @@ let ReservationUsecase = class ReservationUsecase {
         }
         const participantIds = updateDto.participantIds;
         delete updateDto.participantIds;
+        let updatedReservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['participants', 'resource'],
+            withDeleted: true,
+        });
         if (hasUpdateParticipants) {
+            console.log('hasUpdateParticipants');
             const participants = reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
@@ -7067,11 +7073,6 @@ let ReservationUsecase = class ReservationUsecase {
                 employeeId,
                 type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
             })));
-            const updatedReservation = await this.reservationService.findOne({
-                where: { reservationId },
-                relations: ['participants', 'resource'],
-                withDeleted: true,
-            });
             if (updatedReservation.resource.notifyParticipantChange) {
                 try {
                     const notiTarget = [...newParticipants, ...deletedParticipants.map((p) => p.employeeId)];
@@ -7094,7 +7095,7 @@ let ReservationUsecase = class ReservationUsecase {
                 }
             }
         }
-        let updatedReservation;
+        console.log('hasUpdateTime', hasUpdateTime);
         if (hasUpdateTime) {
             if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
                 this.deleteReservationClosingJob(reservationId);
@@ -7141,12 +7142,15 @@ let ReservationUsecase = class ReservationUsecase {
                 }
             }
         }
-        updatedReservation = await this.reservationService.update(reservationId, {
-            title: updateDto?.title,
-            isAllDay: updateDto?.isAllDay,
-            notifyBeforeStart: updateDto?.notifyBeforeStart,
-            notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart,
-        });
+        const hasUpdateTings = updateDto.title || updateDto.isAllDay || updateDto.notifyBeforeStart || updateDto.notifyMinutesBeforeStart;
+        if (hasUpdateTings) {
+            updatedReservation = await this.reservationService.update(reservationId, {
+                title: updateDto?.title || undefined,
+                isAllDay: updateDto?.isAllDay || undefined,
+                notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
+                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
+            });
+        }
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
     async updateTitle(reservationId, updateDto, repositoryOptions) {

@@ -748,9 +748,14 @@ export class ReservationUsecase {
         }
         const participantIds = updateDto.participantIds;
         delete updateDto.participantIds;
-
+        let updatedReservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['participants', 'resource'],
+            withDeleted: true,
+        });
         if (hasUpdateParticipants) {
             // 기존 참가자 조회
+            console.log('hasUpdateParticipants');
             const participants = reservation.participants.filter((p) => p.type === ParticipantsType.PARTICIPANT);
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
@@ -770,11 +775,6 @@ export class ReservationUsecase {
                 ),
             );
 
-            const updatedReservation = await this.reservationService.findOne({
-                where: { reservationId },
-                relations: ['participants', 'resource'],
-                withDeleted: true,
-            });
             if (updatedReservation.resource.notifyParticipantChange) {
                 try {
                     const notiTarget = [...newParticipants, ...deletedParticipants.map((p) => p.employeeId)];
@@ -800,8 +800,8 @@ export class ReservationUsecase {
                 }
             }
         }
+        console.log('hasUpdateTime', hasUpdateTime);
 
-        let updatedReservation;
         // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
         if (hasUpdateTime) {
             if (reservation.status === ReservationStatus.CONFIRMED) {
@@ -853,15 +853,18 @@ export class ReservationUsecase {
                     console.log('Notification creation failed in updateTime');
                 }
             }
-
-            // upcoming-${notification.notificationId}
         }
-        updatedReservation = await this.reservationService.update(reservationId, {
-            title: updateDto?.title,
-            isAllDay: updateDto?.isAllDay,
-            notifyBeforeStart: updateDto?.notifyBeforeStart,
-            notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart,
-        });
+        const hasUpdateTings =
+            updateDto.title || updateDto.isAllDay || updateDto.notifyBeforeStart || updateDto.notifyMinutesBeforeStart;
+
+        if (hasUpdateTings) {
+            updatedReservation = await this.reservationService.update(reservationId, {
+                title: updateDto?.title || undefined,
+                isAllDay: updateDto?.isAllDay || undefined,
+                notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
+                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
+            });
+        }
         return new ReservationResponseDto(updatedReservation);
     }
 
