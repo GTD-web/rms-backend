@@ -7072,7 +7072,6 @@ let ReservationUsecase = class ReservationUsecase {
             });
         }
         if (hasUpdateParticipants) {
-            console.log('hasUpdateParticipants');
             const participants = reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
@@ -7104,7 +7103,6 @@ let ReservationUsecase = class ReservationUsecase {
                 }
             }
         }
-        console.log('hasUpdateTime', hasUpdateTime);
         if (hasUpdateTime) {
             if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
                 this.deleteReservationClosingJob(reservationId);
@@ -17409,7 +17407,11 @@ let RolesGuard = class RolesGuard {
             context.getHandler(),
             context.getClass(),
         ]);
-        return true;
+        if (!requiredRoles) {
+            return true;
+        }
+        const { user } = context.switchToHttp().getRequest();
+        return requiredRoles.some((role) => user.roles?.includes(role));
     }
 };
 exports.RolesGuard = RolesGuard;

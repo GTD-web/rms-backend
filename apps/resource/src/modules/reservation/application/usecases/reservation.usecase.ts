@@ -768,7 +768,6 @@ export class ReservationUsecase {
 
         if (hasUpdateParticipants) {
             // 기존 참가자 조회
-            console.log('hasUpdateParticipants');
             const participants = reservation.participants.filter((p) => p.type === ParticipantsType.PARTICIPANT);
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
@@ -813,7 +812,6 @@ export class ReservationUsecase {
                 }
             }
         }
-        console.log('hasUpdateTime', hasUpdateTime);
 
         // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
         if (hasUpdateTime) {
