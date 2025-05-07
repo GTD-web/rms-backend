@@ -151,6 +151,7 @@ export class MaintenanceUsecase {
         const maintenance = await this.maintenanceService.findOne({
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
+            withDeleted: true,
         });
         const previousMaintenance = await this.maintenanceService.findOne({
             where: { consumableId: maintenance.consumableId, createdAt: LessThan(maintenance.createdAt) },
@@ -192,7 +193,7 @@ export class MaintenanceUsecase {
                 where: {
                     maintenanceId: Not(maintenanceId),
                     consumableId: updateMaintenanceDto.consumableId,
-                    date: MoreThanOrEqual(updateMaintenanceDto.date),
+                    date: MoreThan(updateMaintenanceDto.date),
                 },
             });
             if (existingMaintenance) {
@@ -213,6 +214,7 @@ export class MaintenanceUsecase {
                     where: { maintenanceId: maintenance.maintenanceId },
                     relations: ['consumable', 'consumable.vehicleInfo'],
                     order: { createdAt: 'DESC' },
+                    withDeleted: true,
                 });
                 if (savedMaintenance.consumable.vehicleInfo.totalMileage < updateMaintenanceDto.mileage) {
                     await this.vehicleInfoService.update(
