@@ -157,6 +157,10 @@ export class NotificationUsecase {
                 createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
                 break;
+            case NotificationType.RESERVATION_TIME_CHANGED:
+                createNotificationDto.title = `[예약 시간 변경] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
             case NotificationType.RESERVATION_PARTICIPANT_CHANGED:
                 createNotificationDto.title = `[참가자 변경] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
@@ -167,6 +171,10 @@ export class NotificationUsecase {
                 break;
             case NotificationType.RESOURCE_VEHICLE_RETURNED:
                 createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
+                createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                break;
+            case NotificationType.RESOURCE_MAINTENANCE_COMPLETED:
+                createNotificationDto.title = `[정비 완료] ${createNotificationDatatDto.consumableName}`;
                 createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
                 break;
         }

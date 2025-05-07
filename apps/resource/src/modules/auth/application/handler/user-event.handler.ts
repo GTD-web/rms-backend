@@ -4,6 +4,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { UserService } from '../services/user.service';
 import { PushNotificationSubscription } from '@resource/modules/notification/domain/ports/push-notification.port';
+import { In, Raw } from 'typeorm';
 
 @Injectable()
 export class UserEventHandler {
@@ -102,5 +103,15 @@ export class UserEventHandler {
             return user.subscriptions;
         }
         return null;
+    }
+
+    @OnEvent('find.user.system.admin')
+    async handleFindSystemAdminEvent() {
+        const systemAdmin = await this.userService.findAll({
+            where: {
+                roles: Raw(() => `'${Role.SYSTEM_ADMIN}' = ANY("roles")`),
+            },
+        });
+        return systemAdmin;
     }
 }

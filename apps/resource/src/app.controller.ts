@@ -17,16 +17,19 @@ import {
 } from './app.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
-
+import { EventEmitter2 } from '@nestjs/event-emitter';
 @ApiTags('6. 통계 - 관리자 페이지')
 @Controller('v1/statistics')
 // @Roles(Role.SYSTEM_ADMIN)
 export class AppController {
-    constructor(private readonly appService: AppService) {}
+    constructor(
+        private readonly appService: AppService,
+        private readonly eventEmitter: EventEmitter2,
+    ) {}
 
     @Public()
     @Get('version')
-    getVersion(): { version: string; date: string } {
+    async getVersion(): Promise<{ version: string; date: string }> {
         return {
             version: '1.0.0',
             date: DateUtil.now().format(),

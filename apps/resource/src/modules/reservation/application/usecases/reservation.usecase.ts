@@ -833,7 +833,7 @@ export class ReservationUsecase {
     async updateTime(reservationId: string, updateDto: UpdateReservationTimeDto): Promise<ReservationResponseDto> {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['resource'],
+            relations: ['resource', 'participants'],
             withDeleted: true,
         });
         if (!reservation) {
@@ -868,6 +868,29 @@ export class ReservationUsecase {
             this.createReservationClosingJob(updatedReservation);
         }
 
+        try {
+            const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+
+            this.eventEmitter.emit('create.notification', {
+                notificationType: NotificationType.RESERVATION_TIME_CHANGED,
+                notificationData: {
+                    reservationId: updatedReservation.reservationId,
+                    reservationTitle: updatedReservation.title,
+                    reservationDate: DateUtil.toAlarmRangeString(
+                        DateUtil.format(updatedReservation.startDate),
+                        DateUtil.format(updatedReservation.endDate),
+                    ),
+                    resourceId: updatedReservation.resource.resourceId,
+                    resourceName: updatedReservation.resource.name,
+                    resourceType: updatedReservation.resource.type,
+                },
+                notiTarget,
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Notification creation failed in updateTime');
+        }
+
         return new ReservationResponseDto(updatedReservation);
     }
 
@@ -898,6 +921,13 @@ export class ReservationUsecase {
             where: { reservationId, type: ParticipantsType.PARTICIPANT },
         });
 
+        // 기존 및 새로운 참가자 배열, 중복 제거
+        const allParticipants = [
+            ...participants.map((participant) => participant.employeeId),
+            ...updateDto.participantIds,
+        ];
+        const uniqueParticipants = [...new Set(allParticipants)];
+
         // 기존 참가자 삭제
         await Promise.all(participants.map((participant) => this.participantService.delete(participant.participantId)));
 
@@ -920,7 +950,7 @@ export class ReservationUsecase {
 
         if (updatedReservation.resource.notifyParticipantChange) {
             try {
-                const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+                const notiTarget = uniqueParticipants;
 
                 this.eventEmitter.emit('create.notification', {
                     notificationType: NotificationType.RESERVATION_PARTICIPANT_CHANGED,
@@ -949,7 +979,7 @@ export class ReservationUsecase {
     async updateStatus(reservationId: string, updateDto: UpdateReservationStatusDto): Promise<ReservationResponseDto> {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['resource'],
+            relations: ['resource', 'resource.resourceManagers'],
             withDeleted: true,
         });
         if (!reservation) {
@@ -972,7 +1002,10 @@ export class ReservationUsecase {
                 const reservers = await this.participantService.findAll({
                     where: { reservationId },
                 });
-                const notiTarget = reservers.map((reserver) => reserver.employeeId);
+                const notiTarget = [
+                    ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
+                    ...reservers.map((reserver) => reserver.employeeId),
+                ];
 
                 let notificationType: NotificationType;
                 switch (updateDto.status) {

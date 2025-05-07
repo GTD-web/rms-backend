@@ -12,6 +12,8 @@ import { User as UserEntity } from '@libs/entities';
 import { DataSource, In, LessThan, MoreThan, MoreThanOrEqual, Not } from 'typeorm';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
+import { NotificationType } from '@libs/enums/notification-type.enum';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class MaintenanceUsecase {
@@ -20,6 +22,7 @@ export class MaintenanceUsecase {
         private readonly consumableService: ConsumableService,
         private readonly vehicleInfoService: VehicleInfoService,
         private readonly dataSource: DataSource,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async save(user: UserEntity, createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
@@ -60,6 +63,25 @@ export class MaintenanceUsecase {
                 }
             }
             await queryRunner.commitTransaction();
+
+            const [systemAdmins] = await this.eventEmitter.emitAsync('find.user.system.admin');
+
+            const consumable = await this.consumableService.findOne({
+                where: { consumableId: maintenance.consumableId },
+                relations: ['vehicleInfo', 'vehicleInfo.resource'],
+                withDeleted: true,
+            });
+            this.eventEmitter.emit('create.notification', {
+                notificationType: NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
+                notificationData: {
+                    resourceId: consumable.vehicleInfo.resource.resourceId,
+                    resourceType: consumable.vehicleInfo.resource.type,
+                    consumableName: consumable.name,
+                    resourceName: consumable.vehicleInfo.resource.name,
+                },
+                notiTarget: systemAdmins.map((admin) => admin.employeeId),
+            });
+
             return maintenance;
         } catch (error) {
             await queryRunner.rollbackTransaction();

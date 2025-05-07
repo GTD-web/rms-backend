@@ -21,7 +21,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -30,11 +30,13 @@ const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decor
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const app_service_1 = __webpack_require__(/*! ./app.service */ "./apps/resource/src/app.service.ts");
 const app_dto_1 = __webpack_require__(/*! ./app.dto */ "./apps/resource/src/app.dto.ts");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 let AppController = class AppController {
-    constructor(appService) {
+    constructor(appService, eventEmitter) {
         this.appService = appService;
+        this.eventEmitter = eventEmitter;
     }
-    getVersion() {
+    async getVersion() {
         return {
             version: '1.0.0',
             date: date_util_1.DateUtil.now().format(),
@@ -77,7 +79,7 @@ __decorate([
     (0, common_1.Get)('version'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
 ], AppController.prototype, "getVersion", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -88,8 +90,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof app_dto_1.ResourceUsageStatsFilterDto !== "undefined" && app_dto_1.ResourceUsageStatsFilterDto) === "function" ? _b : Object]),
-    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+    __metadata("design:paramtypes", [typeof (_d = typeof app_dto_1.ResourceUsageStatsFilterDto !== "undefined" && app_dto_1.ResourceUsageStatsFilterDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], AppController.prototype, "getResourceUsageStats", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -100,8 +102,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof app_dto_1.VehicleMaintenanceHistoryFilterDto !== "undefined" && app_dto_1.VehicleMaintenanceHistoryFilterDto) === "function" ? _d : Object]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+    __metadata("design:paramtypes", [typeof (_f = typeof app_dto_1.VehicleMaintenanceHistoryFilterDto !== "undefined" && app_dto_1.VehicleMaintenanceHistoryFilterDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], AppController.prototype, "getVehicleMaintenanceHistory", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -112,8 +114,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof app_dto_1.ConsumableMaintenanceStatsFilterDto !== "undefined" && app_dto_1.ConsumableMaintenanceStatsFilterDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [typeof (_h = typeof app_dto_1.ConsumableMaintenanceStatsFilterDto !== "undefined" && app_dto_1.ConsumableMaintenanceStatsFilterDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], AppController.prototype, "getConsumableMaintenanceStats", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -124,8 +126,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof app_dto_1.EmployeeReservationStatsFilterDto !== "undefined" && app_dto_1.EmployeeReservationStatsFilterDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:paramtypes", [typeof (_k = typeof app_dto_1.EmployeeReservationStatsFilterDto !== "undefined" && app_dto_1.EmployeeReservationStatsFilterDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], AppController.prototype, "getEmployeeReservationStats", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -136,12 +138,12 @@ __decorate([
     }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], AppController.prototype, "getAllStatistics", null);
 exports.AppController = AppController = __decorate([
     (0, swagger_1.ApiTags)('6. 통계 - 관리자 페이지'),
     (0, common_1.Controller)('v1/statistics'),
-    __metadata("design:paramtypes", [typeof (_a = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _a : Object, typeof (_b = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _b : Object])
 ], AppController);
 
 
@@ -894,8 +896,10 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserEventHandler = void 0;
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let UserEventHandler = class UserEventHandler {
     constructor(userService) {
         this.userService = userService;
@@ -964,6 +968,14 @@ let UserEventHandler = class UserEventHandler {
         }
         return null;
     }
+    async handleFindSystemAdminEvent() {
+        const systemAdmin = await this.userService.findAll({
+            where: {
+                roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.SYSTEM_ADMIN}' = ANY("roles")`),
+            },
+        });
+        return systemAdmin;
+    }
 };
 exports.UserEventHandler = UserEventHandler;
 __decorate([
@@ -1002,6 +1014,12 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserEventHandler.prototype, "handleUserSubscriptionGetEvent", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('find.user.system.admin'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserEventHandler.prototype, "handleFindSystemAdminEvent", null);
 exports.UserEventHandler = UserEventHandler = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
@@ -4127,6 +4145,10 @@ let NotificationUsecase = class NotificationUsecase {
                 createNotificationDto.title = `[참가자 변경] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
                 break;
+            case notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED:
+                createNotificationDto.title = `[참가자 변경] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
             case notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING:
                 createNotificationDto.title = `[교체 주기 알림] ${createNotificationDatatDto.consumableName}`;
                 createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
@@ -7046,7 +7068,7 @@ let ReservationUsecase = class ReservationUsecase {
     async updateTime(reservationId, updateDto) {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['resource'],
+            relations: ['resource', 'participants'],
             withDeleted: true,
         });
         if (!reservation) {
@@ -7070,6 +7092,25 @@ let ReservationUsecase = class ReservationUsecase {
             this.deleteReservationClosingJob(reservationId);
             this.createReservationClosingJob(updatedReservation);
         }
+        try {
+            const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+            this.eventEmitter.emit('create.notification', {
+                notificationType: notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED,
+                notificationData: {
+                    reservationId: updatedReservation.reservationId,
+                    reservationTitle: updatedReservation.title,
+                    reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
+                    resourceId: updatedReservation.resource.resourceId,
+                    resourceName: updatedReservation.resource.name,
+                    resourceType: updatedReservation.resource.type,
+                },
+                notiTarget,
+            });
+        }
+        catch (error) {
+            console.log(error);
+            console.log('Notification creation failed in updateTime');
+        }
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
     async updateParticipants(reservationId, updateDto) {
@@ -7089,6 +7130,11 @@ let ReservationUsecase = class ReservationUsecase {
         const participants = await this.participantService.findAll({
             where: { reservationId, type: reservation_type_enum_1.ParticipantsType.PARTICIPANT },
         });
+        const allParticipants = [
+            ...participants.map((participant) => participant.employeeId),
+            ...updateDto.participantIds,
+        ];
+        const uniqueParticipants = [...new Set(allParticipants)];
         await Promise.all(participants.map((participant) => this.participantService.delete(participant.participantId)));
         await Promise.all(updateDto.participantIds.map((employeeId) => this.participantService.save({
             reservationId,
@@ -7102,7 +7148,7 @@ let ReservationUsecase = class ReservationUsecase {
         });
         if (updatedReservation.resource.notifyParticipantChange) {
             try {
-                const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+                const notiTarget = uniqueParticipants;
                 this.eventEmitter.emit('create.notification', {
                     notificationType: notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED,
                     notificationData: {
@@ -7126,7 +7172,7 @@ let ReservationUsecase = class ReservationUsecase {
     async updateStatus(reservationId, updateDto) {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['resource'],
+            relations: ['resource', 'resource.resourceManagers'],
             withDeleted: true,
         });
         if (!reservation) {
@@ -7144,7 +7190,10 @@ let ReservationUsecase = class ReservationUsecase {
                 const reservers = await this.participantService.findAll({
                     where: { reservationId },
                 });
-                const notiTarget = reservers.map((reserver) => reserver.employeeId);
+                const notiTarget = [
+                    ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
+                    ...reservers.map((reserver) => reserver.employeeId),
+                ];
                 let notificationType;
                 switch (updateDto.status) {
                     case reservation_type_enum_1.ReservationStatus.CONFIRMED:
@@ -12758,7 +12807,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceUsecase = void 0;
 const vehicle_info_service_1 = __webpack_require__(/*! ../services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
@@ -12768,12 +12817,15 @@ const consumable_service_1 = __webpack_require__(/*! @resource/modules/resource/
 const maintenance_service_1 = __webpack_require__(/*! ../services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 let MaintenanceUsecase = class MaintenanceUsecase {
-    constructor(maintenanceService, consumableService, vehicleInfoService, dataSource) {
+    constructor(maintenanceService, consumableService, vehicleInfoService, dataSource, eventEmitter) {
         this.maintenanceService = maintenanceService;
         this.consumableService = consumableService;
         this.vehicleInfoService = vehicleInfoService;
         this.dataSource = dataSource;
+        this.eventEmitter = eventEmitter;
     }
     async save(user, createMaintenanceDto) {
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
@@ -12805,6 +12857,22 @@ let MaintenanceUsecase = class MaintenanceUsecase {
                 }
             }
             await queryRunner.commitTransaction();
+            const [systemAdmins] = await this.eventEmitter.emitAsync('find.user.system.admin');
+            const consumable = await this.consumableService.findOne({
+                where: { consumableId: maintenance.consumableId },
+                relations: ['vehicleInfo', 'vehicleInfo.resource'],
+                withDeleted: true,
+            });
+            this.eventEmitter.emit('create.notification', {
+                notificationType: notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
+                notificationData: {
+                    resourceId: consumable.vehicleInfo.resource.resourceId,
+                    resourceType: consumable.vehicleInfo.resource.type,
+                    consumableName: consumable.name,
+                    resourceName: consumable.vehicleInfo.resource.name,
+                },
+                notiTarget: systemAdmins.map((admin) => admin.employeeId),
+            });
             return maintenance;
         }
         catch (error) {
@@ -12961,7 +13029,7 @@ let MaintenanceUsecase = class MaintenanceUsecase {
 exports.MaintenanceUsecase = MaintenanceUsecase;
 exports.MaintenanceUsecase = MaintenanceUsecase = __decorate([
     (0, common_2.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.ConsumableService !== "undefined" && consumable_service_1.ConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.ConsumableService !== "undefined" && consumable_service_1.ConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object, typeof (_e = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _e : Object])
 ], MaintenanceUsecase);
 
 
@@ -17085,9 +17153,11 @@ var NotificationType;
     NotificationType["RESERVATION_STATUS_CANCELLED"] = "RESERVATION_STATUS_CANCELLED";
     NotificationType["RESERVATION_STATUS_REJECTED"] = "RESERVATION_STATUS_REJECTED";
     NotificationType["RESERVATION_DATE_UPCOMING"] = "RESERVATION_DATE_UPCOMING";
+    NotificationType["RESERVATION_TIME_CHANGED"] = "RESERVATION_TIME_CHANGED";
     NotificationType["RESERVATION_PARTICIPANT_CHANGED"] = "RESERVATION_PARTICIPANT_CHANGED";
     NotificationType["RESOURCE_CONSUMABLE_REPLACING"] = "RESOURCE_CONSUMABLE_REPLACING";
     NotificationType["RESOURCE_VEHICLE_RETURNED"] = "RESOURCE_VEHICLE_RETURNED";
+    NotificationType["RESOURCE_MAINTENANCE_COMPLETED"] = "RESOURCE_MAINTENANCE_COMPLETED";
 })(NotificationType || (exports.NotificationType = NotificationType = {}));
 
 
