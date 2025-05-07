@@ -7556,6 +7556,7 @@ const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.d
 const reservation_snapshot_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/reservation-snapshot.dto */ "./apps/resource/src/modules/reservation/application/dtos/reservation-snapshot.dto.ts");
 const reservation_snapshot_usecase_1 = __webpack_require__(/*! @resource/modules/reservation/application/usecases/reservation-snapshot.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation-snapshot.usecase.ts");
 const update_reservation_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/update-reservation.dto */ "./apps/resource/src/modules/reservation/application/dtos/update-reservation.dto.ts");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
 let UserReservationController = class UserReservationController {
     constructor(reservationUsecase, reservationSnapshotUsecase) {
         this.reservationUsecase = reservationUsecase;
@@ -7619,6 +7620,9 @@ let UserReservationController = class UserReservationController {
     }
     async returnVehicle(user, reservationId, returnDto) {
         return this.reservationUsecase.returnVehicle(user, reservationId, returnDto);
+    }
+    async closeReservation() {
+        return this.reservationUsecase.handleCron();
     }
 };
 exports.UserReservationController = UserReservationController;
@@ -7861,6 +7865,14 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_24 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _24 : Object, String, typeof (_25 = typeof dtos_index_1.ReturnVehicleDto !== "undefined" && dtos_index_1.ReturnVehicleDto) === "function" ? _25 : Object]),
     __metadata("design:returntype", typeof (_26 = typeof Promise !== "undefined" && Promise) === "function" ? _26 : Object)
 ], UserReservationController.prototype, "returnVehicle", null);
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('cron-job/close'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserReservationController.prototype, "closeReservation", null);
 exports.UserReservationController = UserReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 - 사용자 페이지'),
     (0, common_1.Controller)('v1/reservations'),
