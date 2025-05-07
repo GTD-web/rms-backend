@@ -12,7 +12,7 @@ import { ReservationModule } from '@resource/modules/reservation/reservation.mod
 import { NotificationModule } from '@resource/modules/notification/notification.module';
 import { FileModule } from '@resource/modules/file/file.module';
 import { VehicleResourceModule } from '@resource/modules/resource/vehicle/vehicle-resource.module';
-
+import { AppModule } from '@resource/app.module';
 export function setupSwagger(app: INestApplication, dtos: any[]) {
     const config = new DocumentBuilder()
         .setTitle('Resource Management API')
@@ -23,6 +23,7 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
 
     const document = SwaggerModule.createDocument(app, config, {
         include: [
+            AppModule,
             AuthModule,
             EmployeeModule,
             ResourceModule,

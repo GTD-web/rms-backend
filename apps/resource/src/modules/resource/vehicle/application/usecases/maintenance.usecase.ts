@@ -23,7 +23,6 @@ export class MaintenanceUsecase {
     ) {}
 
     async save(user: UserEntity, createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
-        console.log(user);
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result) throw new ForbiddenException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
 
@@ -50,7 +49,6 @@ export class MaintenanceUsecase {
                     where: { consumableId: maintenance.consumableId },
                     relations: ['vehicleInfo'],
                 });
-                console.log(consumable);
                 if (consumable.vehicleInfo.totalMileage < createMaintenanceDto.mileage) {
                     await this.vehicleInfoService.update(
                         consumable.vehicleInfo.vehicleInfoId,
@@ -85,15 +83,6 @@ export class MaintenanceUsecase {
             relations: ['resource', 'consumables', 'consumables.maintenances'],
             withDeleted: true,
         });
-        console.log(vehicleInfo);
-        // const consumables = await this.consumableService.findAll({
-        //     where: {
-        //         vehicleInfoId,
-        //     },
-        //     relations: ['vehicleInfo', 'vehicleInfo.resource', 'maintenances'],
-        //     withDeleted: true,
-        // });
-        // console.log(consumables);
         const options: RepositoryOptions = {
             where: {
                 maintenanceId: In(

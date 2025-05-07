@@ -14069,7 +14069,6 @@ let MaintenanceUsecase = class MaintenanceUsecase {
                     where: { consumableId: maintenance.consumableId },
                     relations: ['vehicleInfo'],
                 });
-                console.log(consumable);
                 if (consumable.vehicleInfo.totalMileage < createMaintenanceDto.mileage) {
                     await this.vehicleInfoService.update(consumable.vehicleInfo.vehicleInfoId, {
                         totalMileage: createMaintenanceDto.mileage,
@@ -14096,7 +14095,6 @@ let MaintenanceUsecase = class MaintenanceUsecase {
             relations: ['resource', 'consumables', 'consumables.maintenances'],
             withDeleted: true,
         });
-        console.log(vehicleInfo);
         const options = {
             where: {
                 maintenanceId: (0, typeorm_1.In)(vehicleInfo.consumables.flatMap((consumable) => consumable.maintenances.map((maintenance) => maintenance.maintenanceId))),
@@ -19116,6 +19114,7 @@ const reservation_module_1 = __webpack_require__(/*! @resource/modules/reservati
 const notification_module_1 = __webpack_require__(/*! @resource/modules/notification/notification.module */ "./apps/resource/src/modules/notification/notification.module.ts");
 const file_module_1 = __webpack_require__(/*! @resource/modules/file/file.module */ "./apps/resource/src/modules/file/file.module.ts");
 const vehicle_resource_module_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/vehicle-resource.module */ "./apps/resource/src/modules/resource/vehicle/vehicle-resource.module.ts");
+const app_module_1 = __webpack_require__(/*! @resource/app.module */ "./apps/resource/src/app.module.ts");
 function setupSwagger(app, dtos) {
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Resource Management API')
@@ -19125,6 +19124,7 @@ function setupSwagger(app, dtos) {
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config, {
         include: [
+            app_module_1.AppModule,
             auth_module_1.AuthModule,
             employee_module_1.EmployeeModule,
             resource_module_1.ResourceModule,
