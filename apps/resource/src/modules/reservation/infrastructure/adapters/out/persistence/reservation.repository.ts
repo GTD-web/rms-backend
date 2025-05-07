@@ -84,7 +84,7 @@ export class ReservationRepository implements ReservationRepositoryPort {
             ? repositoryOptions.queryRunner.manager.getRepository(Reservation)
             : this.repository;
         await repository.update(id, reservation);
-        const updated = await repository.findOne({ where: { reservationId: id } });
+        const updated = await repository.findOne({ where: { reservationId: id }, relations: ['resource'] });
         return updated!;
     }
 
