@@ -7107,7 +7107,7 @@ let ReservationUsecase = class ReservationUsecase {
             if (updatedReservation.resource.notifyReservationChange) {
                 try {
                     const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
-                    this.eventEmitter.emit('create.notification', {
+                    await this.eventEmitter.emitAsync('create.notification', {
                         notificationType: notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED,
                         notificationData: {
                             reservationId: updatedReservation.reservationId,

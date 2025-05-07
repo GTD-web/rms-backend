@@ -817,7 +817,7 @@ export class ReservationUsecase {
                 try {
                     const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
 
-                    this.eventEmitter.emit('create.notification', {
+                    await this.eventEmitter.emitAsync('create.notification', {
                         notificationType: NotificationType.RESERVATION_TIME_CHANGED,
                         notificationData: {
                             reservationId: updatedReservation.reservationId,
@@ -832,6 +832,7 @@ export class ReservationUsecase {
                         },
                         notiTarget,
                     });
+
                     for (const beforeMinutes of updatedReservation.notifyMinutesBeforeStart) {
                         this.eventEmitter.emit('create.notification', {
                             notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
