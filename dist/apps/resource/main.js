@@ -4167,6 +4167,17 @@ let NotificationUsecase = class NotificationUsecase {
             case notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING:
                 this.createReservationUpcomingNotification(notification, notiTarget);
                 break;
+            case notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED:
+                const notis = await this.notificationService.findAll({
+                    where: {
+                        notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
+                        notificationData: { reservationId: createNotificationDatatDto.reservationId },
+                        isSent: false,
+                    },
+                });
+                for (const noti of notis) {
+                    this.deleteReservationUpcomingNotification(noti);
+                }
             default:
                 for (const employeeId of notiTarget) {
                     try {
@@ -4190,8 +4201,12 @@ let NotificationUsecase = class NotificationUsecase {
         }
         return notification;
     }
+    async deleteReservationUpcomingNotification(notification) {
+        const jobName = `upcoming-${notification.notificationId}-${date_util_1.DateUtil.date(notification.createdAt).format('YYYYMMDDHHmm')}`;
+        this.schedulerRegistry.deleteCronJob(jobName);
+    }
     async createReservationUpcomingNotification(notification, notiTarget) {
-        const jobName = `upcoming-${notification.notificationId}-${date_util_1.DateUtil.now().format('YYYYMMDDHHmmssSSS')}`;
+        const jobName = `upcoming-${notification.notificationId}-${date_util_1.DateUtil.now().format('YYYYMMDDHHmm')}`;
         const notificationDate = new Date(notification.createdAt);
         if (notificationDate.getTime() <= Date.now()) {
             console.log(`Notification time ${notificationDate} is in the past, skipping cron job creation`);
@@ -7019,7 +7034,7 @@ let ReservationUsecase = class ReservationUsecase {
             endDate: updateDto.endDate ? date_util_1.DateUtil.date(updateDto.endDate).toDate() : undefined,
         });
         if (hasUpdateParticipants) {
-            const participants = reservation.participants;
+            const participants = reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
             await Promise.all(deletedParticipants.map((participant) => this.participantService.delete(participant.participantId)));
@@ -7060,24 +7075,40 @@ let ReservationUsecase = class ReservationUsecase {
                 this.deleteReservationClosingJob(reservationId);
                 this.createReservationClosingJob(reservation);
             }
-            try {
-                const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
-                this.eventEmitter.emit('create.notification', {
-                    notificationType: notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED,
-                    notificationData: {
-                        reservationId: updatedReservation.reservationId,
-                        reservationTitle: updatedReservation.title,
-                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
-                        resourceId: updatedReservation.resource.resourceId,
-                        resourceName: updatedReservation.resource.name,
-                        resourceType: updatedReservation.resource.type,
-                    },
-                    notiTarget,
-                });
-            }
-            catch (error) {
-                console.log(error);
-                console.log('Notification creation failed in updateTime');
+            if (updatedReservation.resource.notifyReservationChange) {
+                try {
+                    const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+                    this.eventEmitter.emit('create.notification', {
+                        notificationType: notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED,
+                        notificationData: {
+                            reservationId: updatedReservation.reservationId,
+                            reservationTitle: updatedReservation.title,
+                            reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
+                            resourceId: updatedReservation.resource.resourceId,
+                            resourceName: updatedReservation.resource.name,
+                            resourceType: updatedReservation.resource.type,
+                        },
+                        notiTarget,
+                    });
+                    for (const beforeMinutes of updatedReservation.notifyMinutesBeforeStart) {
+                        this.eventEmitter.emit('create.notification', {
+                            notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
+                            notificationData: {
+                                reservationId: updatedReservation.reservationId,
+                                reservationTitle: updatedReservation.title,
+                                resourceId: updatedReservation.resource.resourceId,
+                                resourceName: updatedReservation.resource.name,
+                                resourceType: updatedReservation.resource.type,
+                                beforeMinutes: beforeMinutes,
+                            },
+                            notiTarget,
+                        });
+                    }
+                }
+                catch (error) {
+                    console.log(error);
+                    console.log('Notification creation failed in updateTime');
+                }
             }
         }
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);

@@ -185,6 +185,19 @@ export class NotificationUsecase {
             case NotificationType.RESERVATION_DATE_UPCOMING:
                 this.createReservationUpcomingNotification(notification, notiTarget);
                 break;
+            case NotificationType.RESERVATION_TIME_CHANGED:
+                const notis = await this.notificationService.findAll({
+                    where: {
+                        notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
+                        notificationData: { reservationId: createNotificationDatatDto.reservationId },
+                        isSent: false,
+                    },
+                });
+
+                for (const noti of notis) {
+                    this.deleteReservationUpcomingNotification(noti);
+                }
+
             default:
                 for (const employeeId of notiTarget) {
                     try {
@@ -217,11 +230,16 @@ export class NotificationUsecase {
         return notification;
     }
 
+    private async deleteReservationUpcomingNotification(notification: Notification) {
+        const jobName = `upcoming-${notification.notificationId}-${DateUtil.date(notification.createdAt).format('YYYYMMDDHHmm')}`;
+        this.schedulerRegistry.deleteCronJob(jobName);
+    }
+
     private async createReservationUpcomingNotification(
         notification: Notification,
         notiTarget: string[],
     ): Promise<void> {
-        const jobName = `upcoming-${notification.notificationId}-${DateUtil.now().format('YYYYMMDDHHmmssSSS')}`;
+        const jobName = `upcoming-${notification.notificationId}-${DateUtil.now().format('YYYYMMDDHHmm')}`;
         const notificationDate = new Date(notification.createdAt);
 
         // 과거 시간 체크
