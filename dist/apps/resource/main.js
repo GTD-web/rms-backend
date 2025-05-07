@@ -4539,7 +4539,6 @@ let UserNotificationController = class UserNotificationController {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
     }
     async sendTest(body) {
-        console.log(body);
         const employeeId = body.data.employeeId;
         const payload = body.notification;
         await this.notificationUsecase.sendTestNotification(employeeId, payload);
@@ -6925,7 +6924,7 @@ let ReservationUsecase = class ReservationUsecase {
                         notificationData: {
                             reservationId: reservationWithResource.reservationId,
                             reservationTitle: reservationWithResource.title,
-                            reservationDate: date_util_1.DateUtil.format(reservationWithResource.startDate),
+                            reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(reservationWithResource.startDate), date_util_1.DateUtil.format(reservationWithResource.endDate)),
                             resourceId: reservationWithResource.resource.resourceId,
                             resourceName: reservationWithResource.resource.name,
                             resourceType: reservationWithResource.resource.type,
@@ -7022,7 +7021,7 @@ let ReservationUsecase = class ReservationUsecase {
                         notificationData: {
                             reservationId: updatedReservation.reservationId,
                             reservationTitle: updatedReservation.title,
-                            reservationDate: date_util_1.DateUtil.format(updatedReservation.startDate),
+                            reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
                             resourceId: updatedReservation.resource.resourceId,
                             resourceName: updatedReservation.resource.name,
                             resourceType: updatedReservation.resource.type,
@@ -7114,7 +7113,7 @@ let ReservationUsecase = class ReservationUsecase {
                     notificationData: {
                         reservationId: updatedReservation.reservationId,
                         reservationTitle: updatedReservation.title,
-                        reservationDate: date_util_1.DateUtil.format(updatedReservation.startDate),
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
                         resourceId: updatedReservation.resource.resourceId,
                         resourceName: updatedReservation.resource.name,
                         resourceType: updatedReservation.resource.type,
@@ -7168,7 +7167,7 @@ let ReservationUsecase = class ReservationUsecase {
                     notificationData: {
                         reservationId: reservation.reservationId,
                         reservationTitle: reservation.title,
-                        reservationDate: date_util_1.DateUtil.format(reservation.startDate),
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(reservation.startDate), date_util_1.DateUtil.format(reservation.endDate)),
                         resourceId: reservation.resource.resourceId,
                         resourceName: reservation.resource.name,
                         resourceType: reservation.resource.type,
@@ -17950,6 +17949,24 @@ class DateUtil {
     }
     static getLastDayOfMonth(date = new Date()) {
         return this.date(date).getLastDayOfMonth();
+    }
+    static toAlarmRangeString(startDate, endDate) {
+        const start = dayjs(startDate);
+        const end = dayjs(endDate);
+        if (start.isSame(end, 'day')) {
+            return `${this.replaceWeekday(start.format('YY.MM.DD(ddd) HH:mm'))} ~ ${end.format('HH:mm')}`;
+        }
+        return `${this.replaceWeekday(start.format('YY.MM.DD(ddd) HH:mm'))} ~ ${this.replaceWeekday(end.format('YY.MM.DD(ddd) HH:mm'))}`;
+    }
+    static replaceWeekday(str) {
+        return str
+            .replace('Mon', '월')
+            .replace('Tue', '화')
+            .replace('Wed', '수')
+            .replace('Thu', '목')
+            .replace('Fri', '금')
+            .replace('Sat', '토')
+            .replace('Sun', '일');
     }
 }
 exports.DateUtil = DateUtil;

@@ -666,7 +666,10 @@ export class ReservationUsecase {
                         notificationData: {
                             reservationId: reservationWithResource.reservationId,
                             reservationTitle: reservationWithResource.title,
-                            reservationDate: DateUtil.format(reservationWithResource.startDate),
+                            reservationDate: DateUtil.toAlarmRangeString(
+                                DateUtil.format(reservationWithResource.startDate),
+                                DateUtil.format(reservationWithResource.endDate),
+                            ),
                             resourceId: reservationWithResource.resource.resourceId,
                             resourceName: reservationWithResource.resource.name,
                             resourceType: reservationWithResource.resource.type,
@@ -789,7 +792,10 @@ export class ReservationUsecase {
                         notificationData: {
                             reservationId: updatedReservation.reservationId,
                             reservationTitle: updatedReservation.title,
-                            reservationDate: DateUtil.format(updatedReservation.startDate),
+                            reservationDate: DateUtil.toAlarmRangeString(
+                                DateUtil.format(updatedReservation.startDate),
+                                DateUtil.format(updatedReservation.endDate),
+                            ),
                             resourceId: updatedReservation.resource.resourceId,
                             resourceName: updatedReservation.resource.name,
                             resourceType: updatedReservation.resource.type,
@@ -921,7 +927,10 @@ export class ReservationUsecase {
                     notificationData: {
                         reservationId: updatedReservation.reservationId,
                         reservationTitle: updatedReservation.title,
-                        reservationDate: DateUtil.format(updatedReservation.startDate),
+                        reservationDate: DateUtil.toAlarmRangeString(
+                            DateUtil.format(updatedReservation.startDate),
+                            DateUtil.format(updatedReservation.endDate),
+                        ),
                         resourceId: updatedReservation.resource.resourceId,
                         resourceName: updatedReservation.resource.name,
                         resourceType: updatedReservation.resource.type,
@@ -983,7 +992,10 @@ export class ReservationUsecase {
                     notificationData: {
                         reservationId: reservation.reservationId,
                         reservationTitle: reservation.title,
-                        reservationDate: DateUtil.format(reservation.startDate),
+                        reservationDate: DateUtil.toAlarmRangeString(
+                            DateUtil.format(reservation.startDate),
+                            DateUtil.format(reservation.endDate),
+                        ),
                         resourceId: reservation.resource.resourceId,
                         resourceName: reservation.resource.name,
                         resourceType: reservation.resource.type,

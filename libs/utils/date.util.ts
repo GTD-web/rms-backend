@@ -154,4 +154,27 @@ export class DateUtil {
     static getLastDayOfMonth(date: Date | string | number = new Date()) {
         return this.date(date).getLastDayOfMonth();
     }
+
+    // 알람용 범위에 대한 문자열로 변경
+    static toAlarmRangeString(startDate: string, endDate: string) {
+        const start = dayjs(startDate);
+        const end = dayjs(endDate);
+        // 날짜가 다르다면 YY.MM.DD(요일) HH:mm ~ YY.MM.DD(요일) HH:mm
+        // 날짜가 같다면 YY.MM.DD(요일) HH:mm ~ HH:mm
+        if (start.isSame(end, 'day')) {
+            return `${this.replaceWeekday(start.format('YY.MM.DD(ddd) HH:mm'))} ~ ${end.format('HH:mm')}`;
+        }
+
+        return `${this.replaceWeekday(start.format('YY.MM.DD(ddd) HH:mm'))} ~ ${this.replaceWeekday(end.format('YY.MM.DD(ddd) HH:mm'))}`;
+    }
+    static replaceWeekday(str: string) {
+        return str
+            .replace('Mon', '월')
+            .replace('Tue', '화')
+            .replace('Wed', '수')
+            .replace('Thu', '목')
+            .replace('Fri', '금')
+            .replace('Sat', '토')
+            .replace('Sun', '일');
+    }
 }

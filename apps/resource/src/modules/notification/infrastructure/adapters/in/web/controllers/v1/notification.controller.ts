@@ -15,6 +15,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
+import { DateUtil } from '@libs/utils/date.util';
 @ApiTags('5. 알림 - 사용자 페이지')
 @Controller('v1/notifications')
 @Roles(Role.USER)
@@ -87,7 +88,6 @@ export class UserNotificationController {
     @ApiTags('알림테스트')
     @Post('send/test')
     async sendTest(@Body() body: any) {
-        console.log(body);
         const employeeId = body.data.employeeId;
         const payload = body.notification;
         await this.notificationUsecase.sendTestNotification(employeeId, payload);
