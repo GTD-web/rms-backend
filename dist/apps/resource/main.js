@@ -7015,7 +7015,9 @@ let ReservationUsecase = class ReservationUsecase {
         let hasUpdateTime = false;
         let hasUpdateParticipants = false;
         if (updateDto.participantIds) {
-            hasUpdateParticipants = updateDto.participantIds.some((participantId) => !reservation.participants.some((p) => p.employeeId === participantId));
+            hasUpdateParticipants =
+                updateDto.participantIds.length !== reservation.participants.length ||
+                    updateDto.participantIds.some((id) => !reservation.participants.some((p) => p.employeeId === id));
         }
         if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
             hasUpdateTime = true;
@@ -7030,15 +7032,10 @@ let ReservationUsecase = class ReservationUsecase {
         }
         const participantIds = updateDto.participantIds;
         delete updateDto.participantIds;
-        console.log('updateDto', updateDto);
         if (hasUpdateParticipants) {
-            console.log('hasUpdateParticipants');
             const participants = reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
-            console.log('participants', participants);
-            console.log('newParticipants', newParticipants);
-            console.log('deletedParticipants', deletedParticipants);
             await Promise.all(deletedParticipants.map((participant) => this.participantService.delete(participant.participantId)));
             await Promise.all(newParticipants.map((employeeId) => this.participantService.save({
                 reservationId,
@@ -7050,7 +7047,6 @@ let ReservationUsecase = class ReservationUsecase {
                 relations: ['participants', 'resource'],
                 withDeleted: true,
             });
-            console.log('updatedReservation', updatedReservation.participants);
             if (updatedReservation.resource.notifyParticipantChange) {
                 try {
                     const notiTarget = [...newParticipants, ...deletedParticipants.map((p) => p.employeeId)];

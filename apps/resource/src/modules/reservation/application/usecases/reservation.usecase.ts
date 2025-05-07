@@ -721,9 +721,10 @@ export class ReservationUsecase {
         let hasUpdateParticipants = false;
         // 참가자 변경 여부 확인
         if (updateDto.participantIds) {
-            hasUpdateParticipants = updateDto.participantIds.some(
-                (participantId) => !reservation.participants.some((p) => p.employeeId === participantId),
-            );
+            // 참가자 변경 여부 확인 => 배열길이 확인, 배열 요소 비교
+            hasUpdateParticipants =
+                updateDto.participantIds.length !== reservation.participants.length ||
+                updateDto.participantIds.some((id) => !reservation.participants.some((p) => p.employeeId === id));
         }
 
         if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
@@ -747,17 +748,12 @@ export class ReservationUsecase {
         }
         const participantIds = updateDto.participantIds;
         delete updateDto.participantIds;
-        console.log('updateDto', updateDto);
 
         if (hasUpdateParticipants) {
-            console.log('hasUpdateParticipants');
             // 기존 참가자 조회
             const participants = reservation.participants.filter((p) => p.type === ParticipantsType.PARTICIPANT);
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
-            console.log('participants', participants);
-            console.log('newParticipants', newParticipants);
-            console.log('deletedParticipants', deletedParticipants);
             // 기존 참가자 삭제
             await Promise.all(
                 deletedParticipants.map((participant) => this.participantService.delete(participant.participantId)),
@@ -779,7 +775,6 @@ export class ReservationUsecase {
                 relations: ['participants', 'resource'],
                 withDeleted: true,
             });
-            console.log('updatedReservation', updatedReservation.participants);
             if (updatedReservation.resource.notifyParticipantChange) {
                 try {
                     const notiTarget = [...newParticipants, ...deletedParticipants.map((p) => p.employeeId)];
