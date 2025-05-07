@@ -7030,26 +7030,27 @@ let ReservationUsecase = class ReservationUsecase {
         }
         const participantIds = updateDto.participantIds;
         delete updateDto.participantIds;
-        let updatedReservation = await this.reservationService.update(reservationId, {
-            ...updateDto,
-            startDate: updateDto.startDate ? date_util_1.DateUtil.date(updateDto.startDate).toDate() : undefined,
-            endDate: updateDto.endDate ? date_util_1.DateUtil.date(updateDto.endDate).toDate() : undefined,
-        });
+        console.log('updateDto', updateDto);
         if (hasUpdateParticipants) {
+            console.log('hasUpdateParticipants');
             const participants = reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
+            console.log('participants', participants);
+            console.log('newParticipants', newParticipants);
+            console.log('deletedParticipants', deletedParticipants);
             await Promise.all(deletedParticipants.map((participant) => this.participantService.delete(participant.participantId)));
             await Promise.all(newParticipants.map((employeeId) => this.participantService.save({
                 reservationId,
                 employeeId,
                 type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
             })));
-            updatedReservation = await this.reservationService.findOne({
+            const updatedReservation = await this.reservationService.findOne({
                 where: { reservationId },
                 relations: ['participants', 'resource'],
                 withDeleted: true,
             });
+            console.log('updatedReservation', updatedReservation.participants);
             if (updatedReservation.resource.notifyParticipantChange) {
                 try {
                     const notiTarget = [...newParticipants, ...deletedParticipants.map((p) => p.employeeId)];
@@ -7077,6 +7078,11 @@ let ReservationUsecase = class ReservationUsecase {
                 this.deleteReservationClosingJob(reservationId);
                 this.createReservationClosingJob(reservation);
             }
+            const updatedReservation = await this.reservationService.update(reservationId, {
+                ...updateDto,
+                startDate: updateDto.startDate ? date_util_1.DateUtil.date(updateDto.startDate).toDate() : undefined,
+                endDate: updateDto.endDate ? date_util_1.DateUtil.date(updateDto.endDate).toDate() : undefined,
+            });
             if (updatedReservation.resource.notifyReservationChange) {
                 try {
                     const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
@@ -7114,6 +7120,11 @@ let ReservationUsecase = class ReservationUsecase {
                 }
             }
         }
+        const updatedReservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['participants', 'resource'],
+            withDeleted: true,
+        });
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
     async updateTitle(reservationId, updateDto, repositoryOptions) {

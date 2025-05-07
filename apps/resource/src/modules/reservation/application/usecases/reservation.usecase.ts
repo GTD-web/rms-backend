@@ -747,19 +747,17 @@ export class ReservationUsecase {
         }
         const participantIds = updateDto.participantIds;
         delete updateDto.participantIds;
-
-        let updatedReservation = await this.reservationService.update(reservationId, {
-            ...updateDto,
-            startDate: updateDto.startDate ? DateUtil.date(updateDto.startDate).toDate() : undefined,
-            endDate: updateDto.endDate ? DateUtil.date(updateDto.endDate).toDate() : undefined,
-        });
+        console.log('updateDto', updateDto);
 
         if (hasUpdateParticipants) {
+            console.log('hasUpdateParticipants');
             // 기존 참가자 조회
             const participants = reservation.participants.filter((p) => p.type === ParticipantsType.PARTICIPANT);
             const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
             const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
-
+            console.log('participants', participants);
+            console.log('newParticipants', newParticipants);
+            console.log('deletedParticipants', deletedParticipants);
             // 기존 참가자 삭제
             await Promise.all(
                 deletedParticipants.map((participant) => this.participantService.delete(participant.participantId)),
@@ -776,12 +774,12 @@ export class ReservationUsecase {
                 ),
             );
 
-            updatedReservation = await this.reservationService.findOne({
+            const updatedReservation = await this.reservationService.findOne({
                 where: { reservationId },
                 relations: ['participants', 'resource'],
                 withDeleted: true,
             });
-
+            console.log('updatedReservation', updatedReservation.participants);
             if (updatedReservation.resource.notifyParticipantChange) {
                 try {
                     const notiTarget = [...newParticipants, ...deletedParticipants.map((p) => p.employeeId)];
@@ -815,7 +813,11 @@ export class ReservationUsecase {
                 this.deleteReservationClosingJob(reservationId);
                 this.createReservationClosingJob(reservation);
             }
-
+            const updatedReservation = await this.reservationService.update(reservationId, {
+                ...updateDto,
+                startDate: updateDto.startDate ? DateUtil.date(updateDto.startDate).toDate() : undefined,
+                endDate: updateDto.endDate ? DateUtil.date(updateDto.endDate).toDate() : undefined,
+            });
             if (updatedReservation.resource.notifyReservationChange) {
                 try {
                     const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
@@ -858,7 +860,11 @@ export class ReservationUsecase {
 
             // upcoming-${notification.notificationId}
         }
-
+        const updatedReservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['participants', 'resource'],
+            withDeleted: true,
+        });
         return new ReservationResponseDto(updatedReservation);
     }
 
