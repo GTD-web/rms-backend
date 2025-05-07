@@ -7094,13 +7094,13 @@ let ReservationUsecase = class ReservationUsecase {
                 }
             }
         }
+        let updatedReservation;
         if (hasUpdateTime) {
             if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
                 this.deleteReservationClosingJob(reservationId);
                 this.createReservationClosingJob(reservation);
             }
-            const updatedReservation = await this.reservationService.update(reservationId, {
-                ...updateDto,
+            updatedReservation = await this.reservationService.update(reservationId, {
                 startDate: updateDto.startDate ? date_util_1.DateUtil.date(updateDto.startDate).toDate() : undefined,
                 endDate: updateDto.endDate ? date_util_1.DateUtil.date(updateDto.endDate).toDate() : undefined,
             });
@@ -7140,12 +7140,13 @@ let ReservationUsecase = class ReservationUsecase {
                     console.log('Notification creation failed in updateTime');
                 }
             }
+            updatedReservation = await this.reservationService.update(reservationId, {
+                title: updateDto?.title,
+                isAllDay: updateDto?.isAllDay,
+                notifyBeforeStart: updateDto?.notifyBeforeStart,
+                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart,
+            });
         }
-        const updatedReservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['participants', 'resource'],
-            withDeleted: true,
-        });
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
     }
     async updateTitle(reservationId, updateDto, repositoryOptions) {

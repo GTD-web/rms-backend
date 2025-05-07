@@ -801,6 +801,7 @@ export class ReservationUsecase {
             }
         }
 
+        let updatedReservation;
         // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
         if (hasUpdateTime) {
             if (reservation.status === ReservationStatus.CONFIRMED) {
@@ -808,8 +809,7 @@ export class ReservationUsecase {
                 this.deleteReservationClosingJob(reservationId);
                 this.createReservationClosingJob(reservation);
             }
-            const updatedReservation = await this.reservationService.update(reservationId, {
-                ...updateDto,
+            updatedReservation = await this.reservationService.update(reservationId, {
                 startDate: updateDto.startDate ? DateUtil.date(updateDto.startDate).toDate() : undefined,
                 endDate: updateDto.endDate ? DateUtil.date(updateDto.endDate).toDate() : undefined,
             });
@@ -854,13 +854,15 @@ export class ReservationUsecase {
                 }
             }
 
+            updatedReservation = await this.reservationService.update(reservationId, {
+                title: updateDto?.title,
+                isAllDay: updateDto?.isAllDay,
+                notifyBeforeStart: updateDto?.notifyBeforeStart,
+                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart,
+            });
             // upcoming-${notification.notificationId}
         }
-        const updatedReservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['participants', 'resource'],
-            withDeleted: true,
-        });
+
         return new ReservationResponseDto(updatedReservation);
     }
 
