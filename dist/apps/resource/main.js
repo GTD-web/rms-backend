@@ -8396,7 +8396,10 @@ let ReservationRepository = class ReservationRepository {
             ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Reservation)
             : this.repository;
         await repository.update(id, reservation);
-        const updated = await repository.findOne({ where: { reservationId: id }, relations: ['resource'] });
+        const updated = await repository.findOne({
+            where: { reservationId: id },
+            relations: ['resource', 'participants'],
+        });
         return updated;
     }
     async delete(id, repositoryOptions) {
