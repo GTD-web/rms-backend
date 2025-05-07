@@ -24,7 +24,6 @@ export class WebPushAdapter implements PushNotificationPort {
         payload: PushNotificationPayload,
     ): Promise<PushNotificationSendResult> {
         const result = await webPush.sendNotification(subscription.webPush, JSON.stringify(payload));
-        console.log(result);
         return {
             success: true,
             message: 'success',

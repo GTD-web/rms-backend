@@ -519,7 +519,7 @@ export class ReservationUsecase {
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where: FindOptionsWhere<Reservation> = {};
-        console.log(startDate, endDate, resourceType, resourceId, status);
+
         if (status && status.length > 0) {
             where.status = In(status);
         }

@@ -2033,7 +2033,6 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
             where: { userId: payload.userId },
             relations: ['employee'],
         });
-        console.log('user', user);
         if (!user || user.userId !== payload.userId) {
             throw new common_1.UnauthorizedException();
         }
@@ -2406,7 +2405,6 @@ let EmployeeEventHandler = class EmployeeEventHandler {
         this.employeeUseCase = employeeUseCase;
     }
     async handleFindEmployee(payload) {
-        console.log('payload', payload);
         return await this.employeeUseCase.findEmployee(payload.employeeNumber, { queryRunner: payload.queryRunner });
     }
     async handleUpdateEmployee(payload) {
@@ -2586,7 +2584,6 @@ let EmployeeUseCase = class EmployeeUseCase {
             }
         }
         catch (error) {
-            console.log(error_message_1.ERROR_MESSAGE.BUSINESS.EMPLOYEE.SYNC_FAILED);
             console.log(error);
         }
     }
@@ -2613,7 +2610,6 @@ let EmployeeUseCase = class EmployeeUseCase {
                 }
             }
             catch (error) {
-                console.log(error_message_1.ERROR_MESSAGE.BUSINESS.EMPLOYEE.SYNC_FAILED);
                 console.log(error);
             }
         }
@@ -6811,7 +6807,6 @@ let ReservationUsecase = class ReservationUsecase {
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where = {};
-        console.log(startDate, endDate, resourceType, resourceId, status);
         if (status && status.length > 0) {
             where.status = (0, typeorm_1.In)(status);
         }
@@ -7593,7 +7588,6 @@ let UserReservationController = class UserReservationController {
     }
     async findResourceReservationList(user, resourceId, query, month, isMine) {
         const { page, limit } = query;
-        console.log(page, limit);
         return this.reservationUsecase.findResourceReservationList(user.employeeId, resourceId, page, limit, month, isMine);
     }
     async findMyUsingReservationList(user) {
@@ -10292,7 +10286,6 @@ let ResourceUsecase = class ResourceUsecase {
                 },
             });
             resource.reservations = reservations;
-            console.log(resource.reservations);
         }
         const result = [];
         if (!resources || (resources && resources.length === 0)) {
@@ -10342,7 +10335,6 @@ let ResourceUsecase = class ResourceUsecase {
         return result;
     }
     calculateAvailableTimeSlots(resource, startDate, endDate, am, pm, timeUnit, isSameDay) {
-        console.log(am, pm);
         const availableSlots = [];
         const existingReservations = resource.reservations || [];
         const confirmedReservations = existingReservations;
@@ -10504,7 +10496,6 @@ let ResourceUsecase = class ResourceUsecase {
             await handler.createTypeInfo(savedResource, typeInfo, { queryRunner });
             await Promise.all([
                 ...managers.map((manager) => {
-                    console.log(manager);
                     return this.resourceManagerService.save({
                         resourceId: savedResource.resourceId,
                         employeeId: manager.employeeId,
@@ -11406,7 +11397,6 @@ let ResourceRepository = class ResourceRepository {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Resource)
             : this.repository;
-        console.log(repositoryOptions);
         return await repository.find({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,
@@ -12579,14 +12569,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VehicleInfoService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const vehicle_info_repository_port_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/domain/ports/vehicle-info.repository.port */ "./apps/resource/src/modules/resource/vehicle/domain/ports/vehicle-info.repository.port.ts");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 let VehicleInfoService = class VehicleInfoService {
-    constructor(vehicleInfoRepository) {
+    constructor(vehicleInfoRepository, eventEmitter) {
         this.vehicleInfoRepository = vehicleInfoRepository;
+        this.eventEmitter = eventEmitter;
     }
     async save(vehicleInfo, repositoryOptions) {
         return this.vehicleInfoRepository.save(vehicleInfo, repositoryOptions);
@@ -12595,7 +12588,47 @@ let VehicleInfoService = class VehicleInfoService {
         return this.vehicleInfoRepository.findOne(repositoryOptions);
     }
     async update(vehicleInfoId, updateData, repositoryOptions) {
-        return this.vehicleInfoRepository.update(vehicleInfoId, updateData, repositoryOptions);
+        try {
+            return await this.vehicleInfoRepository.update(vehicleInfoId, updateData, repositoryOptions);
+        }
+        catch (error) {
+            console.log(error);
+            throw error;
+        }
+        finally {
+            this.createNotification(vehicleInfoId);
+        }
+    }
+    async createNotification(vehicleInfoId) {
+        const vehicleInfo = await this.vehicleInfoRepository.findOne({
+            where: { vehicleInfoId },
+            relations: ['resource', 'resource.resourceManagers', 'consumables', 'consumables.maintenances'],
+        });
+        const notiTarget = vehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
+        for (const consumable of vehicleInfo.consumables) {
+            if (!consumable.notifyReplacementCycle)
+                continue;
+            const replaceCycle = Number(consumable.replaceCycle);
+            const initMileage = Number(consumable.initMileage);
+            const totalMileage = Number(vehicleInfo.totalMileage);
+            const lastMaintenanceMileage = consumable.maintenances[0]?.mileage;
+            const standardMileage = totalMileage - initMileage;
+            const isReplace = lastMaintenanceMileage && lastMaintenanceMileage > 0
+                ? totalMileage - lastMaintenanceMileage >= replaceCycle
+                : standardMileage >= replaceCycle;
+            if (isReplace) {
+                this.eventEmitter.emit('create.notification', {
+                    notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING,
+                    notificationData: {
+                        resourceId: vehicleInfo.resource.resourceId,
+                        resourceName: vehicleInfo.resource.name,
+                        resourceType: vehicleInfo.resource.type,
+                        consumableName: consumable.name,
+                    },
+                    notiTarget,
+                });
+            }
+        }
     }
     async checkRole(vehicleInfoId, user) {
         return true;
@@ -12605,7 +12638,7 @@ exports.VehicleInfoService = VehicleInfoService;
 exports.VehicleInfoService = VehicleInfoService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)('VehicleInfoRepositoryPort')),
-    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_repository_port_1.VehicleInfoRepositoryPort !== "undefined" && vehicle_info_repository_port_1.VehicleInfoRepositoryPort) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_repository_port_1.VehicleInfoRepositoryPort !== "undefined" && vehicle_info_repository_port_1.VehicleInfoRepositoryPort) === "function" ? _a : Object, typeof (_b = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _b : Object])
 ], VehicleInfoService);
 
 
@@ -12937,7 +12970,6 @@ exports.VehicleInfoUsecase = void 0;
 const vehicle_info_service_1 = __webpack_require__(/*! ../services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let VehicleInfoUsecase = class VehicleInfoUsecase {
@@ -12978,41 +13010,6 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
         }
         const previousTotalMileage = Number(previousVehicleInfo.totalMileage);
         const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, repositoryOptions);
-        const afterVehicleInfo = await this.vehicleInfoService.findOne({
-            where: {
-                vehicleInfoId: vehicleInfoId,
-            },
-            relations: ['consumables', 'resource', 'resource.resourceManagers'],
-            withDeleted: true,
-        });
-        const afterTotalMileage = Number(afterVehicleInfo.totalMileage);
-        const consumables = afterVehicleInfo.consumables;
-        for (const consumable of consumables) {
-            if (!consumable.notifyReplacementCycle)
-                continue;
-            const replaceCycle = Number(consumable.replaceCycle);
-            const isReplace = Math.floor(afterTotalMileage / replaceCycle) > Math.floor(previousTotalMileage / replaceCycle);
-            if (isReplace) {
-                try {
-                    const notiTarget = afterVehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
-                    this.eventEmitter.emit('create.notification', {
-                        notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING,
-                        notificationData: {
-                            resourceId: afterVehicleInfo.resource.resourceId,
-                            resourceName: afterVehicleInfo.resource.name,
-                            resourceType: afterVehicleInfo.resource.type,
-                            consumableName: consumable.name,
-                        },
-                        notiTarget,
-                        repositoryOptions,
-                    });
-                }
-                catch (error) {
-                    console.log(error);
-                    console.log('Notification creation failed in updateVehicleInfo');
-                }
-            }
-        }
         return {
             vehicleInfoId: vehicleInfo.vehicleInfoId,
             resourceId: vehicleInfo.resourceId,

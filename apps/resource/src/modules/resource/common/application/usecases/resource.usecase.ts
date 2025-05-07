@@ -386,7 +386,6 @@ export class ResourceUsecase {
                 },
             });
             resource.reservations = reservations;
-            console.log(resource.reservations);
         }
         const result: ResourceAvailabilityDto[] = [];
 
@@ -487,7 +486,6 @@ export class ResourceUsecase {
         timeUnit: number,
         isSameDay: boolean,
     ): TimeSlotDto[] {
-        console.log(am, pm);
         const availableSlots: TimeSlotDto[] = [];
         const existingReservations = resource.reservations || [];
 
@@ -711,7 +709,6 @@ export class ResourceUsecase {
         //     where: { employeeId: managers[0].employeeId },
         //     relations: ['employee', 'employee.user'],
         // });
-        // console.log(manager);
         // if (!manager.employee.user.roles.includes(Role.RESOURCE_ADMIN)) {
         //     throw new BadRequestException('The manager is not a resource admin');
         // }
@@ -755,7 +752,6 @@ export class ResourceUsecase {
             // 5. 자원 관리자 정보 저장
             await Promise.all([
                 ...managers.map((manager) => {
-                    console.log(manager);
                     return this.resourceManagerService.save(
                         {
                             resourceId: savedResource.resourceId,

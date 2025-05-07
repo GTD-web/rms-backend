@@ -38,7 +38,6 @@ export class ResourceRepository implements ResourceRepositoryPort {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(ResourceEntity)
             : this.repository;
-        console.log(repositoryOptions);
         return await repository.find({
             where: repositoryOptions?.where,
             relations: repositoryOptions?.relations,

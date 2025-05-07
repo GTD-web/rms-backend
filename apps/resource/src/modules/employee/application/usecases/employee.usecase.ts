@@ -86,7 +86,6 @@ export class EmployeeUseCase {
                 });
             }
         } catch (error) {
-            console.log(ERROR_MESSAGE.BUSINESS.EMPLOYEE.SYNC_FAILED);
             console.log(error);
         }
     }
@@ -112,7 +111,6 @@ export class EmployeeUseCase {
                     });
                 }
             } catch (error) {
-                console.log(ERROR_MESSAGE.BUSINESS.EMPLOYEE.SYNC_FAILED);
                 console.log(error);
             }
         }

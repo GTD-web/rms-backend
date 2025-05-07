@@ -54,7 +54,7 @@ export class VehicleInfoUsecase {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
 
-        const previousTotalMileage = Number(previousVehicleInfo.totalMileage);
+        // const previousTotalMileage = Number(previousVehicleInfo.totalMileage);
 
         // 실제 업데이트
         const vehicleInfo = await this.vehicleInfoService.update(
@@ -63,43 +63,43 @@ export class VehicleInfoUsecase {
             repositoryOptions,
         );
 
-        const afterVehicleInfo = await this.vehicleInfoService.findOne({
-            where: {
-                vehicleInfoId: vehicleInfoId,
-            },
-            relations: ['consumables', 'resource', 'resource.resourceManagers'],
-            withDeleted: true,
-        });
+        // const afterVehicleInfo = await this.vehicleInfoService.findOne({
+        //     where: {
+        //         vehicleInfoId: vehicleInfoId,
+        //     },
+        //     relations: ['consumables', 'resource', 'resource.resourceManagers'],
+        //     withDeleted: true,
+        // });
 
-        const afterTotalMileage = Number(afterVehicleInfo.totalMileage);
-        const consumables = afterVehicleInfo.consumables;
+        // const afterTotalMileage = Number(afterVehicleInfo.totalMileage);
+        // const consumables = afterVehicleInfo.consumables;
 
-        for (const consumable of consumables) {
-            if (!consumable.notifyReplacementCycle) continue;
-            const replaceCycle = Number(consumable.replaceCycle);
-            const isReplace =
-                Math.floor(afterTotalMileage / replaceCycle) > Math.floor(previousTotalMileage / replaceCycle);
-            if (isReplace) {
-                try {
-                    const notiTarget = afterVehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
+        // for (const consumable of consumables) {
+        //     if (!consumable.notifyReplacementCycle) continue;
+        //     const replaceCycle = Number(consumable.replaceCycle);
+        //     const isReplace =
+        //         Math.floor(afterTotalMileage / replaceCycle) > Math.floor(previousTotalMileage / replaceCycle);
+        //     if (isReplace) {
+        //         try {
+        //             const notiTarget = afterVehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
 
-                    this.eventEmitter.emit('create.notification', {
-                        notificationType: NotificationType.RESOURCE_CONSUMABLE_REPLACING,
-                        notificationData: {
-                            resourceId: afterVehicleInfo.resource.resourceId,
-                            resourceName: afterVehicleInfo.resource.name,
-                            resourceType: afterVehicleInfo.resource.type,
-                            consumableName: consumable.name,
-                        },
-                        notiTarget,
-                        repositoryOptions,
-                    });
-                } catch (error) {
-                    console.log(error);
-                    console.log('Notification creation failed in updateVehicleInfo');
-                }
-            }
-        }
+        //             this.eventEmitter.emit('create.notification', {
+        //                 notificationType: NotificationType.RESOURCE_CONSUMABLE_REPLACING,
+        //                 notificationData: {
+        //                     resourceId: afterVehicleInfo.resource.resourceId,
+        //                     resourceName: afterVehicleInfo.resource.name,
+        //                     resourceType: afterVehicleInfo.resource.type,
+        //                     consumableName: consumable.name,
+        //                 },
+        //                 notiTarget,
+        //                 repositoryOptions,
+        //             });
+        //         } catch (error) {
+        //             console.log(error);
+        //             console.log('Notification creation failed in updateVehicleInfo');
+        //         }
+        //     }
+        // }
 
         return {
             vehicleInfoId: vehicleInfo.vehicleInfoId,

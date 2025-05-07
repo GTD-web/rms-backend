@@ -8,7 +8,6 @@ export class EmployeeEventHandler {
 
     @OnEvent('find.employee')
     async handleFindEmployee(payload: any): Promise<Employee> {
-        console.log('payload', payload);
         return await this.employeeUseCase.findEmployee(payload.employeeNumber, { queryRunner: payload.queryRunner });
     }
 

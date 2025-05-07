@@ -134,7 +134,6 @@ export class UserReservationController {
         @Query('isMine') isMine?: boolean,
     ): Promise<GroupedReservationWithResourceResponseDto> {
         const { page, limit } = query;
-        console.log(page, limit);
         return this.reservationUsecase.findResourceReservationList(
             user.employeeId,
             resourceId,

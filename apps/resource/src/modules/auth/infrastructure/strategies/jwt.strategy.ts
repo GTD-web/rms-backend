@@ -25,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             where: { userId: payload.userId },
             relations: ['employee'],
         });
-        console.log('user', user);
+
         if (!user || user.userId !== payload.userId) {
             throw new UnauthorizedException();
         }
