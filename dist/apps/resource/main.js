@@ -13008,7 +13008,6 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
         if (!previousVehicleInfo) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
-        const previousTotalMileage = Number(previousVehicleInfo.totalMileage);
         const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, repositoryOptions);
         return {
             vehicleInfoId: vehicleInfo.vehicleInfoId,
