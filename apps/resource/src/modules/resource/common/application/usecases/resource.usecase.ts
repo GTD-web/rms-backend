@@ -211,7 +211,7 @@ export class ResourceUsecase {
         if (resource.vehicleInfo && resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
             resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
                 where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
-                withDeleted: true,
+                // withDeleted: true,
             });
             if (resource.vehicleInfo.consumables && resource.vehicleInfo.consumables.length > 0) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
@@ -230,14 +230,6 @@ export class ResourceUsecase {
                             };
                         });
                     }
-                    // else {
-                    //     consumable.maintenances = [
-                    //         {
-                    //             mileageFromLastMaintenance: mileage - Number(consumable.initMileage),
-                    //             maintanceRequired: mileage - Number(consumable.initMileage) > replaceCycle,
-                    //         } as unknown as Maintenance,
-                    //     ];
-                    // }
                 }
                 resource.vehicleInfo.consumables.sort((a, b) => {
                     // Check if both consumables have maintenance records
@@ -515,9 +507,8 @@ export class ResourceUsecase {
                       ? '09:00:00'
                       : '13:00:00';
             const endTime = pm ? '18:00:00' : '12:00:00';
-           
-            this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
 
+            this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
         } else {
             // 여러 일 예약건 처리 - 시작일부터 종료일까지 일별로 처리
             let currentDate = DateUtil.date(startDate);

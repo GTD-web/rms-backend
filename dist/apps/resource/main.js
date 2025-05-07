@@ -11048,7 +11048,6 @@ let ResourceUsecase = class ResourceUsecase {
         if (resource.vehicleInfo && resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
             resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
                 where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
-                withDeleted: true,
             });
             if (resource.vehicleInfo.consumables && resource.vehicleInfo.consumables.length > 0) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
@@ -14046,7 +14045,6 @@ let MaintenanceUsecase = class MaintenanceUsecase {
         this.dataSource = dataSource;
     }
     async save(user, createMaintenanceDto) {
-        console.log(user);
         const result = await this.consumableService.checkRole(createMaintenanceDto.consumableId, user);
         if (!result)
             throw new common_1.ForbiddenException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.UNAUTHORIZED);
