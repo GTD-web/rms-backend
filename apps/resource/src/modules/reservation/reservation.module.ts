@@ -52,7 +52,7 @@ import { ReservationVehicleRepository } from './infrastructure/adapters/out/pers
         ReservationEventHandler,
         ReservationSnapshotUsecase,
     ],
-    controllers: [ReservationController, AdminReservationController, UserReservationController],
+    controllers: [AdminReservationController, UserReservationController],
     exports: [ReservationService, ReservationSnapshotUsecase, ReservationVehicleService],
 })
 export class ReservationModule {}

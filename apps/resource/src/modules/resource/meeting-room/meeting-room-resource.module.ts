@@ -7,24 +7,17 @@ import { MeetingRoomInfoRepository } from './infrastructure/adapters/out/persist
 import { MeetingRoomInfoController } from './infrastructure/adapters/in/web/controllers/meeting-room-info.controller';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([MeetingRoomInfo]),
-  ],
-  providers: [
-    MeetingRoomResourceHandler,
-    MeetingRoomInfoService,
-    MeetingRoomInfoRepository,
-    {
-      provide: 'MeetingRoomInfoRepositoryPort',
-      useExisting: MeetingRoomInfoRepository,
-    },
-  ],
-  controllers: [
-    MeetingRoomInfoController,
-  ],
-  exports: [
-    MeetingRoomResourceHandler,
-    MeetingRoomInfoService,
-  ],
+    imports: [TypeOrmModule.forFeature([MeetingRoomInfo])],
+    providers: [
+        MeetingRoomResourceHandler,
+        MeetingRoomInfoService,
+        MeetingRoomInfoRepository,
+        {
+            provide: 'MeetingRoomInfoRepositoryPort',
+            useExisting: MeetingRoomInfoRepository,
+        },
+    ],
+    controllers: [],
+    exports: [MeetingRoomResourceHandler, MeetingRoomInfoService],
 })
 export class MeetingRoomResourceModule {}

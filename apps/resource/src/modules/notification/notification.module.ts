@@ -46,7 +46,7 @@ import { UserNotificationController } from './infrastructure/adapters/in/web/con
         },
         NotificationEventHandler,
     ],
-    controllers: [NotificationController, UserNotificationController],
+    controllers: [UserNotificationController],
     exports: [
         NotificationService,
         AdapterService,

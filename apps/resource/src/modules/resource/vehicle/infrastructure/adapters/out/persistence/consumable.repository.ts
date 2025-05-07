@@ -73,7 +73,7 @@ export class ConsumableRepository implements ConsumableRepositoryPort {
         if (!consumable) throw new NotFoundException('Consumable not found');
 
         // 고유값(타임스탬프) 추가
-        const deletedName = `${consumable.name}_deleted_${DateUtil.now().format('YYYYMMDDHHmmss')}`;
+        const deletedName = `${consumable.name}(삭제된 소모품-${DateUtil.now().format('YYYY.MM.DD HH:mm:ss')})`;
 
         await repository.update({ consumableId: id }, { name: deletedName });
         await repository.softDelete({ consumableId: id });

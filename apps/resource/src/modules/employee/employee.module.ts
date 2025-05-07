@@ -19,7 +19,7 @@ import { UserEmployeeController } from './infrastructure/adapters/in/web/control
         EmployeeUseCase,
         EmployeeEventHandler,
     ],
-    controllers: [EmployeeController, UserEmployeeController],
+    controllers: [UserEmployeeController],
     exports: [EmployeeService, EmployeeUseCase],
 })
 export class EmployeeModule {}

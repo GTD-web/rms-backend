@@ -12,7 +12,7 @@ import { CommonFileController } from './infrastructure/adapters/in/web/controlle
 
 @Module({
     imports: [TypeOrmModule.forFeature([File]), ConfigModule.forFeature(APP_CONFIG)],
-    controllers: [FileController, CommonFileController],
+    controllers: [CommonFileController],
     providers: [
         ConfigService,
         FileService,

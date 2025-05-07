@@ -48,9 +48,6 @@ import { UserMaintenanceController } from './infrastructure/adapters/in/web/cont
         VehicleEventHandler,
     ],
     controllers: [
-        VehicleInfoController,
-        ConsumableController,
-        MaintenanceController,
         AdminVehicleInfoController,
         AdminConsumableController,
         AdminMaintenanceController,

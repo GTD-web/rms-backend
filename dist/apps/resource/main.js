@@ -1427,18 +1427,15 @@ const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const jwt_auth_usecase_1 = __webpack_require__(/*! ./application/usecases/jwt-auth.usecase */ "./apps/resource/src/modules/auth/application/usecases/jwt-auth.usecase.ts");
 const sso_auth_usecase_1 = __webpack_require__(/*! ./application/usecases/sso-auth.usecase */ "./apps/resource/src/modules/auth/application/usecases/sso-auth.usecase.ts");
-const auth_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/auth.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/auth.controller.ts");
 const user_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/user.repository */ "./apps/resource/src/modules/auth/infrastructure/adapters/out/user.repository.ts");
 const jwt_strategy_1 = __webpack_require__(/*! ./infrastructure/strategies/jwt.strategy */ "./apps/resource/src/modules/auth/infrastructure/strategies/jwt.strategy.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const user_service_1 = __webpack_require__(/*! ./application/services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
-const user_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/user.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/user.controller.ts");
 const user_usecase_1 = __webpack_require__(/*! ./application/usecases/user.usecase */ "./apps/resource/src/modules/auth/application/usecases/user.usecase.ts");
 const user_event_handler_1 = __webpack_require__(/*! ./application/handler/user-event.handler */ "./apps/resource/src/modules/auth/application/handler/user-event.handler.ts");
-const resource_manager_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/resource-manager.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/resource-manager.controller.ts");
 const resource_manager_usecase_1 = __webpack_require__(/*! ./application/usecases/resource-manager.usecase */ "./apps/resource/src/modules/auth/application/usecases/resource-manager.usecase.ts");
-const auth_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/auth.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/v1/auth.controller.ts");
-const user_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/user.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/v1/user.controller.ts");
+const auth_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/auth.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/v1/auth.controller.ts");
+const user_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/user.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/v1/user.controller.ts");
 const admin_user_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.user.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.user.controller.ts");
 const admin_resource_manager_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller */ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller.ts");
 let AuthModule = class AuthModule {
@@ -1463,15 +1460,7 @@ exports.AuthModule = AuthModule = __decorate([
             user_event_handler_1.UserEventHandler,
             resource_manager_usecase_1.ResourceManagerUseCase,
         ],
-        controllers: [
-            auth_controller_1.AuthController,
-            user_controller_1.UserController,
-            resource_manager_controller_1.ResourceManagerController,
-            auth_controller_2.UserAuthController,
-            user_controller_2.UserUserController,
-            admin_user_controller_1.AdminUserController,
-            admin_resource_manager_controller_1.AdminResourceManagerController,
-        ],
+        controllers: [auth_controller_1.UserAuthController, user_controller_1.UserUserController, admin_user_controller_1.AdminUserController, admin_resource_manager_controller_1.AdminResourceManagerController],
         exports: [
             jwt_strategy_1.JwtStrategy,
             {
@@ -1622,207 +1611,6 @@ exports.UserDomainController = UserDomainController = __decorate([
     (0, public_decorator_1.Public)(),
     __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
 ], UserDomainController);
-
-
-/***/ }),
-
-/***/ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/auth.controller.ts":
-/*!******************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/auth.controller.ts ***!
-  \******************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AuthController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const login_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/login.dto */ "./apps/resource/src/modules/auth/application/dto/login.dto.ts");
-const auth_service_port_1 = __webpack_require__(/*! @resource/modules/auth/domain/ports/auth.service.port */ "./apps/resource/src/modules/auth/domain/ports/auth.service.port.ts");
-const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const login_response_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/login-response.dto */ "./apps/resource/src/modules/auth/application/dto/login-response.dto.ts");
-let AuthController = class AuthController {
-    constructor(authService) {
-        this.authService = authService;
-    }
-    login(loginDto) {
-        return this.authService.login(loginDto);
-    }
-};
-exports.AuthController = AuthController;
-__decorate([
-    (0, common_1.Post)('login'),
-    (0, swagger_1.ApiOperation)({ summary: '로그인' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '로그인 성공', type: login_response_dto_1.LoginResponseDto }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof login_dto_1.LoginDto !== "undefined" && login_dto_1.LoginDto) === "function" ? _b : Object]),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "login", null);
-exports.AuthController = AuthController = __decorate([
-    (0, public_decorator_1.Public)(),
-    (0, swagger_1.ApiTags)('인증'),
-    (0, common_1.Controller)('auth'),
-    __param(0, (0, common_1.Inject)('AuthService')),
-    __metadata("design:paramtypes", [typeof (_a = typeof auth_service_port_1.AuthService !== "undefined" && auth_service_port_1.AuthService) === "function" ? _a : Object])
-], AuthController);
-
-
-/***/ }),
-
-/***/ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/resource-manager.controller.ts":
-/*!******************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/resource-manager.controller.ts ***!
-  \******************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ResourceManagerController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const resource_manager_usecase_1 = __webpack_require__(/*! @resource/modules/auth/application/usecases/resource-manager.usecase */ "./apps/resource/src/modules/auth/application/usecases/resource-manager.usecase.ts");
-const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
-let ResourceManagerController = class ResourceManagerController {
-    constructor(resourceManagerUseCase) {
-        this.resourceManagerUseCase = resourceManagerUseCase;
-    }
-    async findAllResourceManagers() {
-        return this.resourceManagerUseCase.findAllResourceManagers();
-    }
-};
-exports.ResourceManagerController = ResourceManagerController;
-__decorate([
-    (0, common_1.Get)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 관리자 목록 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원 관리자 목록 조회 성공',
-        type: [dtos_index_1.EmplyeesByDepartmentResponseDto],
-    }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
-], ResourceManagerController.prototype, "findAllResourceManagers", null);
-exports.ResourceManagerController = ResourceManagerController = __decorate([
-    (0, swagger_1.ApiTags)('자원 관리자'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.Controller)('resource-managers'),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_manager_usecase_1.ResourceManagerUseCase !== "undefined" && resource_manager_usecase_1.ResourceManagerUseCase) === "function" ? _a : Object])
-], ResourceManagerController);
-
-
-/***/ }),
-
-/***/ "./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/user.controller.ts":
-/*!******************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/auth/infrastructure/adapters/in/web/controllers/user.controller.ts ***!
-  \******************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UserController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const user_usecase_1 = __webpack_require__(/*! @resource/modules/auth/application/usecases/user.usecase */ "./apps/resource/src/modules/auth/application/usecases/user.usecase.ts");
-const user_response_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/user-response.dto */ "./apps/resource/src/modules/auth/application/dto/user-response.dto.ts");
-const check_password_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/check-password.dto */ "./apps/resource/src/modules/auth/application/dto/check-password.dto.ts");
-const change_password_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/change-password.dto */ "./apps/resource/src/modules/auth/application/dto/change-password.dto.ts");
-let UserController = class UserController {
-    constructor(userUsecase) {
-        this.userUsecase = userUsecase;
-    }
-    findUser(user) {
-        return this.userUsecase.findByUserId(user.userId);
-    }
-    checkPassword(user, checkPasswordDto) {
-        return this.userUsecase.checkPassword(user.userId, checkPasswordDto.password);
-    }
-    changePassword(user, changePasswordDto) {
-        return this.userUsecase.changePassword(user.userId, changePasswordDto.newPassword);
-    }
-};
-exports.UserController = UserController;
-__decorate([
-    (0, common_1.Get)('me'),
-    (0, swagger_1.ApiOperation)({ summary: '내 상세 정보 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '내 상세 정보 조회 성공', type: user_response_dto_1.UserResponseDto }),
-    __param(0, (0, user_decorator_1.User)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object]),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "findUser", null);
-__decorate([
-    (0, common_1.Post)('check-password'),
-    (0, swagger_1.ApiOperation)({ summary: '비밀번호 확인' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '비밀번호 확인 성공' }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _c : Object, typeof (_d = typeof check_password_dto_1.CheckPasswordDto !== "undefined" && check_password_dto_1.CheckPasswordDto) === "function" ? _d : Object]),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "checkPassword", null);
-__decorate([
-    (0, common_1.Post)('change-password'),
-    (0, swagger_1.ApiOperation)({ summary: '비밀번호 변경' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '비밀번호 변경 성공' }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, typeof (_f = typeof change_password_dto_1.ChangePasswordDto !== "undefined" && change_password_dto_1.ChangePasswordDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "changePassword", null);
-exports.UserController = UserController = __decorate([
-    (0, swagger_1.ApiTags)('유저'),
-    (0, common_1.Controller)('users'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_usecase_1.UserUsecase !== "undefined" && user_usecase_1.UserUsecase) === "function" ? _a : Object])
-], UserController);
 
 
 /***/ }),
@@ -2913,11 +2701,10 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const employee_service_1 = __webpack_require__(/*! ./application/services/employee.service */ "./apps/resource/src/modules/employee/application/services/employee.service.ts");
-const employee_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/employee.controller */ "./apps/resource/src/modules/employee/infrastructure/adapters/in/web/controllers/employee.controller.ts");
 const employee_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/employee.repository */ "./apps/resource/src/modules/employee/infrastructure/adapters/out/persistence/employee.repository.ts");
 const employee_usecase_1 = __webpack_require__(/*! ./application/usecases/employee.usecase */ "./apps/resource/src/modules/employee/application/usecases/employee.usecase.ts");
 const employee_event_handler_1 = __webpack_require__(/*! ./application/handler/employee-event.handler */ "./apps/resource/src/modules/employee/application/handler/employee-event.handler.ts");
-const employee_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/employee.controller */ "./apps/resource/src/modules/employee/infrastructure/adapters/in/web/controllers/v1/employee.controller.ts");
+const employee_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/employee.controller */ "./apps/resource/src/modules/employee/infrastructure/adapters/in/web/controllers/v1/employee.controller.ts");
 let EmployeeModule = class EmployeeModule {
 };
 exports.EmployeeModule = EmployeeModule;
@@ -2933,7 +2720,7 @@ exports.EmployeeModule = EmployeeModule = __decorate([
             employee_usecase_1.EmployeeUseCase,
             employee_event_handler_1.EmployeeEventHandler,
         ],
-        controllers: [employee_controller_1.EmployeeController, employee_controller_2.UserEmployeeController],
+        controllers: [employee_controller_1.UserEmployeeController],
         exports: [employee_service_1.EmployeeService, employee_usecase_1.EmployeeUseCase],
     })
 ], EmployeeModule);
@@ -3031,137 +2818,6 @@ exports.EmployeeDomainController = EmployeeDomainController = __decorate([
     (0, public_decorator_1.Public)(),
     __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
 ], EmployeeDomainController);
-
-
-/***/ }),
-
-/***/ "./apps/resource/src/modules/employee/infrastructure/adapters/in/web/controllers/employee.controller.ts":
-/*!**************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/employee/infrastructure/adapters/in/web/controllers/employee.controller.ts ***!
-  \**************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EmployeeController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const employees_by_department_response_dto_1 = __webpack_require__(/*! @resource/modules/employee/application/dtos/employees-by-department-response.dto */ "./apps/resource/src/modules/employee/application/dtos/employees-by-department-response.dto.ts");
-const employee_usecase_1 = __webpack_require__(/*! @resource/modules/employee/application/usecases/employee.usecase */ "./apps/resource/src/modules/employee/application/usecases/employee.usecase.ts");
-let EmployeeController = class EmployeeController {
-    constructor(employeeUseCase) {
-        this.employeeUseCase = employeeUseCase;
-    }
-    async findAllEmplyeesByDepartment() {
-        return this.employeeUseCase.findAllEmplyeesByDepartment();
-    }
-    async syncEmployees() {
-        return await this.employeeUseCase.syncEmployees();
-    }
-    async webhookCreate(body) {
-        console.log('created employee', body);
-        await this.employeeUseCase.syncEmployees();
-    }
-    async webhookUpdate(body) {
-        console.log('updated employee', body);
-        await this.employeeUseCase.syncEmployees();
-    }
-    async webhookPositionChanged(body) {
-        console.log('position changed', body);
-        await this.employeeUseCase.syncEmployees();
-    }
-    async webhookDepartmentChanged(body) {
-        console.log('department changed', body);
-        await this.employeeUseCase.syncEmployees();
-    }
-    async webhookDelete(body) {
-        console.log('deleted employee', body);
-        await this.employeeUseCase.syncEmployees();
-    }
-};
-exports.EmployeeController = EmployeeController;
-__decorate([
-    (0, common_1.Get)('department'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '부서별 직원 목록 조회 #사용자/참석자설정/모달' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '부서별 직원 목록을 성공적으로 조회했습니다.',
-        type: [employees_by_department_response_dto_1.EmplyeesByDepartmentResponseDto],
-    }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
-], EmployeeController.prototype, "findAllEmplyeesByDepartment", null);
-__decorate([
-    (0, common_1.Get)('sync'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], EmployeeController.prototype, "syncEmployees", null);
-__decorate([
-    (0, common_1.Post)('webhook/create'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeController.prototype, "webhookCreate", null);
-__decorate([
-    (0, common_1.Post)('webhook/update'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeController.prototype, "webhookUpdate", null);
-__decorate([
-    (0, common_1.Post)('webhook/position_changed'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeController.prototype, "webhookPositionChanged", null);
-__decorate([
-    (0, common_1.Post)('webhook/department_changed'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeController.prototype, "webhookDepartmentChanged", null);
-__decorate([
-    (0, common_1.Post)('webhook/delete'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeController.prototype, "webhookDelete", null);
-exports.EmployeeController = EmployeeController = __decorate([
-    (0, swagger_1.ApiTags)('직원'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.Controller)('employees'),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_usecase_1.EmployeeUseCase !== "undefined" && employee_usecase_1.EmployeeUseCase) === "function" ? _a : Object])
-], EmployeeController);
 
 
 /***/ }),
@@ -3555,21 +3211,20 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const file_service_1 = __webpack_require__(/*! ./application/services/file.service */ "./apps/resource/src/modules/file/application/services/file.service.ts");
-const file_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/file.controller */ "./apps/resource/src/modules/file/infrastructure/adapters/in/web/controllers/file.controller.ts");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const file_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/file.repository */ "./apps/resource/src/modules/file/infrastructure/adapters/out/persistence/file.repository.ts");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
 const s3_stroage_adapter_1 = __webpack_require__(/*! ./infrastructure/adapters/out/storage/s3-stroage.adapter */ "./apps/resource/src/modules/file/infrastructure/adapters/out/storage/s3-stroage.adapter.ts");
-const file_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/file.controller */ "./apps/resource/src/modules/file/infrastructure/adapters/in/web/controllers/v1/file.controller.ts");
+const file_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/file.controller */ "./apps/resource/src/modules/file/infrastructure/adapters/in/web/controllers/v1/file.controller.ts");
 let FileModule = class FileModule {
 };
 exports.FileModule = FileModule;
 exports.FileModule = FileModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.File]), config_1.ConfigModule.forFeature(env_config_1.APP_CONFIG)],
-        controllers: [file_controller_1.FileController, file_controller_2.CommonFileController],
+        controllers: [file_controller_1.CommonFileController],
         providers: [
             config_1.ConfigService,
             file_service_1.FileService,
@@ -3585,89 +3240,6 @@ exports.FileModule = FileModule = __decorate([
         exports: [file_service_1.FileService],
     })
 ], FileModule);
-
-
-/***/ }),
-
-/***/ "./apps/resource/src/modules/file/infrastructure/adapters/in/web/controllers/file.controller.ts":
-/*!******************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/file/infrastructure/adapters/in/web/controllers/file.controller.ts ***!
-  \******************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FileController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
-const file_service_1 = __webpack_require__(/*! @resource/modules/file/application/services/file.service */ "./apps/resource/src/modules/file/application/services/file.service.ts");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const file_response_dto_1 = __webpack_require__(/*! @resource/modules/file/application/dtos/file-response.dto */ "./apps/resource/src/modules/file/application/dtos/file-response.dto.ts");
-let FileController = class FileController {
-    constructor(fileService) {
-        this.fileService = fileService;
-    }
-    async uploadFile(file) {
-        return this.fileService.uploadFile(file);
-    }
-    async deleteFile(fileId) {
-        await this.fileService.deleteFile({ fileId });
-    }
-};
-exports.FileController = FileController;
-__decorate([
-    (0, common_1.Post)('upload'),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                file: {
-                    type: 'string',
-                    format: 'binary',
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiOperation)({ summary: '파일 업로드' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 업로드 성공', type: file_response_dto_1.FileResponseDto }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    __param(0, (0, common_1.UploadedFile)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof Express !== "undefined" && (_b = Express.Multer) !== void 0 && _b.File) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
-], FileController.prototype, "uploadFile", null);
-__decorate([
-    (0, common_1.Delete)(':fileId'),
-    (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 삭제 성공' }),
-    __param(0, (0, common_1.Param)('fileId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], FileController.prototype, "deleteFile", null);
-exports.FileController = FileController = __decorate([
-    (0, swagger_1.ApiTags)('파일'),
-    (0, common_1.Controller)('files'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, public_decorator_1.Public)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _a : Object])
-], FileController);
 
 
 /***/ }),
@@ -4914,140 +4486,6 @@ exports.NotificationDomainController = NotificationDomainController = __decorate
 
 /***/ }),
 
-/***/ "./apps/resource/src/modules/notification/infrastructure/adapters/in/web/controllers/notification.controller.ts":
-/*!**********************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/notification/infrastructure/adapters/in/web/controllers/notification.controller.ts ***!
-  \**********************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.NotificationController = void 0;
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const notification_usecase_1 = __webpack_require__(/*! @resource/modules/notification/application/usecases/notification.usecase */ "./apps/resource/src/modules/notification/application/usecases/notification.usecase.ts");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const push_subscription_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/push-subscription.dto */ "./apps/resource/src/modules/notification/application/dto/push-subscription.dto.ts");
-const response_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/response-notification.dto */ "./apps/resource/src/modules/notification/application/dto/response-notification.dto.ts");
-const create_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/create-notification.dto */ "./apps/resource/src/modules/notification/application/dto/create-notification.dto.ts");
-const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
-let NotificationController = class NotificationController {
-    constructor(notificationUsecase) {
-        this.notificationUsecase = notificationUsecase;
-    }
-    async subscribe(user, subscription) {
-        await this.notificationUsecase.subscribe(user, subscription);
-    }
-    async unsubscribe(user) {
-        await this.notificationUsecase.unsubscribe(user);
-    }
-    async send(sendNotificationDto) {
-        await this.notificationUsecase.createNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
-    }
-    async findAllByEmployeeId(employeeId, query) {
-        return await this.notificationUsecase.findMyNotifications(employeeId, query);
-    }
-    async markAsRead(user, notificationId) {
-        await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
-    }
-};
-exports.NotificationController = NotificationController;
-__decorate([
-    (0, common_1.Post)('subscribe'),
-    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '웹 푸시 구독 성공',
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], NotificationController.prototype, "subscribe", null);
-__decorate([
-    (0, common_1.Post)('unsubscribe'),
-    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독 취소' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '웹 푸시 구독 취소 성공',
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "unsubscribe", null);
-__decorate([
-    (0, common_1.Post)('send'),
-    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 알림 전송' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '웹 푸시 알림 전송 성공',
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "send", null);
-__decorate([
-    (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: '알람 목록 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '알람 목록 조회 성공',
-        type: [response_notification_dto_1.ResponseNotificationDto],
-        isPaginated: true,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'page',
-        type: Number,
-        required: false,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'limit',
-        type: Number,
-        required: false,
-    }),
-    __param(0, (0, user_decorator_1.User)('employeeId')),
-    __param(1, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
-], NotificationController.prototype, "findAllByEmployeeId", null);
-__decorate([
-    (0, common_1.Patch)(':notificationId/read'),
-    (0, swagger_1.ApiOperation)({ summary: '알람 읽음 처리' }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('notificationId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "markAsRead", null);
-exports.NotificationController = NotificationController = __decorate([
-    (0, swagger_1.ApiTags)('알림'),
-    (0, common_1.Controller)('notifications'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof notification_usecase_1.NotificationUsecase !== "undefined" && notification_usecase_1.NotificationUsecase) === "function" ? _a : Object])
-], NotificationController);
-
-
-/***/ }),
-
 /***/ "./apps/resource/src/modules/notification/infrastructure/adapters/in/web/controllers/v1/notification.controller.ts":
 /*!*************************************************************************************************************************!*\
   !*** ./apps/resource/src/modules/notification/infrastructure/adapters/in/web/controllers/v1/notification.controller.ts ***!
@@ -5109,6 +4547,7 @@ let UserNotificationController = class UserNotificationController {
 exports.UserNotificationController = UserNotificationController;
 __decorate([
     (0, common_1.Post)('subscribe'),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -5122,6 +4561,7 @@ __decorate([
 ], UserNotificationController.prototype, "subscribe", null);
 __decorate([
     (0, common_1.Post)('send'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '웹 푸시 알림 전송' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -5134,6 +4574,7 @@ __decorate([
 ], UserNotificationController.prototype, "send", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '알람 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -5159,6 +4600,7 @@ __decorate([
 ], UserNotificationController.prototype, "findAllByEmployeeId", null);
 __decorate([
     (0, common_1.Patch)(':notificationId/read'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '알람 읽음 처리' }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('notificationId')),
@@ -5179,7 +4621,6 @@ exports.UserNotificationController = UserNotificationController = __decorate([
     (0, swagger_1.ApiTags)('5. 알림 - 사용자 페이지'),
     (0, common_1.Controller)('v1/notifications'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof notification_usecase_1.NotificationUsecase !== "undefined" && notification_usecase_1.NotificationUsecase) === "function" ? _a : Object])
 ], UserNotificationController);
 
@@ -5584,7 +5025,6 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const notification_entity_1 = __webpack_require__(/*! @libs/entities/notification.entity */ "./libs/entities/notification.entity.ts");
 const notification_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/notification.repository */ "./apps/resource/src/modules/notification/infrastructure/adapters/out/persistence/notification.repository.ts");
-const notification_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/notification.controller */ "./apps/resource/src/modules/notification/infrastructure/adapters/in/web/controllers/notification.controller.ts");
 const notification_service_1 = __webpack_require__(/*! ./application/services/notification.service */ "./apps/resource/src/modules/notification/application/services/notification.service.ts");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
@@ -5597,7 +5037,7 @@ const employee_notification_service_1 = __webpack_require__(/*! ./application/se
 const employee_notification_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/employee-notification.repository */ "./apps/resource/src/modules/notification/infrastructure/adapters/out/persistence/employee-notification.repository.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const notification_event_handler_1 = __webpack_require__(/*! ./application/handler/notification-event.handler */ "./apps/resource/src/modules/notification/application/handler/notification-event.handler.ts");
-const notification_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/notification.controller */ "./apps/resource/src/modules/notification/infrastructure/adapters/in/web/controllers/v1/notification.controller.ts");
+const notification_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/notification.controller */ "./apps/resource/src/modules/notification/infrastructure/adapters/in/web/controllers/v1/notification.controller.ts");
 let NotificationModule = class NotificationModule {
 };
 exports.NotificationModule = NotificationModule;
@@ -5630,7 +5070,7 @@ exports.NotificationModule = NotificationModule = __decorate([
             },
             notification_event_handler_1.NotificationEventHandler,
         ],
-        controllers: [notification_controller_1.NotificationController, notification_controller_2.UserNotificationController],
+        controllers: [notification_controller_1.UserNotificationController],
         exports: [
             notification_service_1.NotificationService,
             adapter_service_1.AdapterService,
@@ -7896,312 +7336,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
-/***/ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/reservation.controller.ts":
-/*!********************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/reservation.controller.ts ***!
-  \********************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReservationController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const create_reservation_dto_1 = __webpack_require__(/*! ../../../../../application/dtos/create-reservation.dto */ "./apps/resource/src/modules/reservation/application/dtos/create-reservation.dto.ts");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
-const reservation_usecase_1 = __webpack_require__(/*! ../../../../../application/usecases/reservation.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation.usecase.ts");
-const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
-const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
-const reservation_response_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/reservation-response.dto */ "./apps/resource/src/modules/reservation/application/dtos/reservation-response.dto.ts");
-const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
-const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
-const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
-let ReservationController = class ReservationController {
-    constructor(reservationUsecase) {
-        this.reservationUsecase = reservationUsecase;
-    }
-    async create(user, createDto) {
-        return this.reservationUsecase.makeReservation(user, createDto);
-    }
-    async findMyReservationList(user, startDate, resourceType, query) {
-        const { page, limit } = query;
-        return this.reservationUsecase.findMyReservationList(user.employeeId, page, limit, resourceType, startDate);
-    }
-    async findMyCurrentReservation(user, resourceType) {
-        return this.reservationUsecase.findMyCurrentReservation(user.employeeId, resourceType);
-    }
-    async findMyAllReservations(user, type, query) {
-        if (type !== reservation_type_enum_1.ParticipantsType.RESERVER && type !== reservation_type_enum_1.ParticipantsType.PARTICIPANT) {
-            throw new common_1.BadRequestException('지원하지 않는 타입입니다.');
-        }
-        const { page, limit } = query;
-        return await this.reservationUsecase.findMyAllReservations(user.employeeId, page, limit, type);
-    }
-    async findOne(user, reservationId) {
-        return this.reservationUsecase.findReservationDetail(user, reservationId);
-    }
-    async findReservationList(startDate, endDate, resourceType, resourceId, status) {
-        return this.reservationUsecase.findReservationList(startDate, endDate, resourceType, resourceId, status);
-    }
-    async updateTitle(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateTitle(reservationId, updateDto);
-    }
-    async update(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateTime(reservationId, updateDto);
-    }
-    async updateStatus(reservationId, updateDto) {
-        return this.reservationUsecase.updateStatus(reservationId, updateDto);
-    }
-    async updateStatusCancel(user, reservationId) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateStatus(reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELLED });
-    }
-    async updateParticipants(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateParticipants(reservationId, updateDto);
-    }
-    async closeReservation() {
-        return this.reservationUsecase.handleCron();
-    }
-};
-exports.ReservationController = ReservationController;
-__decorate([
-    (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '예약 생성' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 생성 성공',
-        type: dtos_index_1.CreateReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof create_reservation_dto_1.CreateReservationDto !== "undefined" && create_reservation_dto_1.CreateReservationDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], ReservationController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)('me'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회, 시간 별, 자원 타입별 쿼리 가능 #사용자/홈 ' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '내 예약 리스트 조회 성공',
-        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'startDate', type: String, required: false, example: '2025-01-01' }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
-    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Query)('startDate')),
-    __param(2, (0, common_1.Query)('resourceType')),
-    __param(3, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, String, typeof (_f = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _f : Object, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
-], ReservationController.prototype, "findMyReservationList", null);
-__decorate([
-    (0, common_1.Get)('me/current'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '내 예약 현재 예약 조회, 자원 타입별 쿼리 가능 #사용자/자원예약/이용중 ' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '내 예약 현재 예약 조회 성공',
-        type: reservation_response_dto_1.ReservationWithRelationsResponseDto,
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Query)('resourceType')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, typeof (_k = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
-], ReservationController.prototype, "findMyCurrentReservation", null);
-__decorate([
-    (0, common_1.Get)('me/all'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '내 예약 및 참여 예약 조회, 타입별 쿼리 가능 #사용자/홈/추가기획사항 ' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '내 예약 및 참여 예약 조회 성공',
-        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
-    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
-    (0, swagger_1.ApiQuery)({
-        name: 'type',
-        enum: reservation_type_enum_1.ParticipantsType,
-        example: reservation_type_enum_1.ParticipantsType.RESERVER,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Query)('type')),
-    __param(2, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_m = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _m : Object, typeof (_o = typeof reservation_type_enum_1.ParticipantsType !== "undefined" && reservation_type_enum_1.ParticipantsType) === "function" ? _o : Object, typeof (_p = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _p : Object]),
-    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
-], ReservationController.prototype, "findMyAllReservations", null);
-__decorate([
-    (0, common_1.Get)(':reservationId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 상세 조회 성공',
-        type: reservation_response_dto_1.ReservationWithRelationsResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_r = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _r : Object, String]),
-    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
-], ReservationController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Get)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({
-        summary: '예약 리스트 조회 #관리자/예약관리',
-    }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 리스트 조회 성공',
-        type: [reservation_response_dto_1.ReservationWithResourceResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'startDate',
-        type: String,
-        required: false,
-        example: date_util_1.DateUtil.now().addDays(-20).format('YYYY-MM-DD'),
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'endDate',
-        type: String,
-        required: false,
-        example: date_util_1.DateUtil.now().addDays(30).format('YYYY-MM-DD'),
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceId', type: String, required: false, example: '78117aaf-a203-43a3-bb38-51ec91ca935a' }),
-    (0, swagger_1.ApiQuery)({
-        name: 'status',
-        enum: reservation_type_enum_1.ReservationStatus,
-        description: `Available values : ${Object.values(reservation_type_enum_1.ReservationStatus).join(', ')}`,
-        isArray: true,
-        required: false,
-        example: [reservation_type_enum_1.ReservationStatus.CONFIRMED],
-    }),
-    __param(0, (0, common_1.Query)('startDate')),
-    __param(1, (0, common_1.Query)('endDate')),
-    __param(2, (0, common_1.Query)('resourceType')),
-    __param(3, (0, common_1.Query)('resourceId')),
-    __param(4, (0, common_1.Query)('status', new common_1.ParseArrayPipe({ optional: true, separator: ',' }))),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, typeof (_t = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _t : Object, String, Array]),
-    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
-], ReservationController.prototype, "findReservationList", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/title'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '예약 제목 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 제목 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_v = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _v : Object, String, typeof (_w = typeof dtos_index_1.UpdateReservationTitleDto !== "undefined" && dtos_index_1.UpdateReservationTitleDto) === "function" ? _w : Object]),
-    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
-], ReservationController.prototype, "updateTitle", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/time'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '예약 시간 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 시간 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_y = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _y : Object, String, typeof (_z = typeof dtos_index_1.UpdateReservationTimeDto !== "undefined" && dtos_index_1.UpdateReservationTimeDto) === "function" ? _z : Object]),
-    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
-], ReservationController.prototype, "update", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/status'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 상태 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, common_1.Param)('reservationId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_1 = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _1 : Object]),
-    __metadata("design:returntype", typeof (_2 = typeof Promise !== "undefined" && Promise) === "function" ? _2 : Object)
-], ReservationController.prototype, "updateStatus", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/status/cancel'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '예약 취소 #사용자/예약상세페이지' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 상태 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_3 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _3 : Object, String]),
-    __metadata("design:returntype", typeof (_4 = typeof Promise !== "undefined" && Promise) === "function" ? _4 : Object)
-], ReservationController.prototype, "updateStatusCancel", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/participants'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '예약 참가자 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 참가자 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_5 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _5 : Object, String, typeof (_6 = typeof dtos_index_1.UpdateReservationParticipantsDto !== "undefined" && dtos_index_1.UpdateReservationParticipantsDto) === "function" ? _6 : Object]),
-    __metadata("design:returntype", typeof (_7 = typeof Promise !== "undefined" && Promise) === "function" ? _7 : Object)
-], ReservationController.prototype, "updateParticipants", null);
-__decorate([
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('cron-job/close'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], ReservationController.prototype, "closeReservation", null);
-exports.ReservationController = ReservationController = __decorate([
-    (0, swagger_1.ApiTags)('예약'),
-    (0, common_1.Controller)('reservations'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_usecase_1.ReservationUsecase !== "undefined" && reservation_usecase_1.ReservationUsecase) === "function" ? _a : Object])
-], ReservationController);
-
-
-/***/ }),
-
 /***/ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/admin.reservation.controller.ts":
 /*!*****************************************************************************************************************************!*\
   !*** ./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/admin.reservation.controller.ts ***!
@@ -9185,14 +8319,13 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const reservation_service_1 = __webpack_require__(/*! ./application/services/reservation.service */ "./apps/resource/src/modules/reservation/application/services/reservation.service.ts");
-const reservation_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/reservation.controller */ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/reservation.controller.ts");
 const reservation_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/reservation.repository */ "./apps/resource/src/modules/reservation/infrastructure/adapters/out/persistence/reservation.repository.ts");
 const reservation_participant_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/reservation-participant.repository */ "./apps/resource/src/modules/reservation/infrastructure/adapters/out/persistence/reservation-participant.repository.ts");
 const participant_service_1 = __webpack_require__(/*! ./application/services/participant.service */ "./apps/resource/src/modules/reservation/application/services/participant.service.ts");
 const reservation_usecase_1 = __webpack_require__(/*! ./application/usecases/reservation.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation.usecase.ts");
 const reservation_event_handler_1 = __webpack_require__(/*! ./application/handler/reservation-event.handler */ "./apps/resource/src/modules/reservation/application/handler/reservation-event.handler.ts");
 const admin_reservation_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.reservation.controller */ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/admin.reservation.controller.ts");
-const reservation_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/reservation.controller */ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/reservation.controller.ts");
+const reservation_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/reservation.controller */ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/reservation.controller.ts");
 const reservation_snapshot_usecase_1 = __webpack_require__(/*! ./application/usecases/reservation-snapshot.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation-snapshot.usecase.ts");
 const reservation_snapshot_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/reservation-snapshot.repository */ "./apps/resource/src/modules/reservation/infrastructure/adapters/out/persistence/reservation-snapshot.repository.ts");
 const reservation_snapshot_service_1 = __webpack_require__(/*! ./application/services/reservation-snapshot.service */ "./apps/resource/src/modules/reservation/application/services/reservation-snapshot.service.ts");
@@ -9237,7 +8370,7 @@ exports.ReservationModule = ReservationModule = __decorate([
             reservation_event_handler_1.ReservationEventHandler,
             reservation_snapshot_usecase_1.ReservationSnapshotUsecase,
         ],
-        controllers: [reservation_controller_1.ReservationController, admin_reservation_controller_1.AdminReservationController, reservation_controller_2.UserReservationController],
+        controllers: [admin_reservation_controller_1.AdminReservationController, reservation_controller_1.UserReservationController],
         exports: [reservation_service_1.ReservationService, reservation_snapshot_usecase_1.ReservationSnapshotUsecase, reservation_vehicle_service_1.ReservationVehicleService],
     })
 ], ReservationModule);
@@ -9264,7 +8397,6 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const accommodation_info_service_1 = __webpack_require__(/*! ./application/services/accommodation-info.service */ "./apps/resource/src/modules/resource/accommodation/application/services/accommodation-info.service.ts");
-const accommodation_info_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/accommodation-info.controller */ "./apps/resource/src/modules/resource/accommodation/infrastructure/adapters/in/web/controllers/accommodation-info.controller.ts");
 const accommodation_info_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/accommodation-info.repository */ "./apps/resource/src/modules/resource/accommodation/infrastructure/adapters/out/persistence/accommodation-info.repository.ts");
 const accommodation_resource_handler_1 = __webpack_require__(/*! ./application/handlers/accommodation-resource.handler */ "./apps/resource/src/modules/resource/accommodation/application/handlers/accommodation-resource.handler.ts");
 let AccommodationResourceModule = class AccommodationResourceModule {
@@ -9272,9 +8404,7 @@ let AccommodationResourceModule = class AccommodationResourceModule {
 exports.AccommodationResourceModule = AccommodationResourceModule;
 exports.AccommodationResourceModule = AccommodationResourceModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            typeorm_1.TypeOrmModule.forFeature([entities_1.AccommodationInfo]),
-        ],
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.AccommodationInfo])],
         providers: [
             accommodation_info_service_1.AccommodationInfoService,
             accommodation_resource_handler_1.AccommodationResourceHandler,
@@ -9283,7 +8413,7 @@ exports.AccommodationResourceModule = AccommodationResourceModule = __decorate([
                 useClass: accommodation_info_repository_1.AccommodationInfoRepository,
             },
         ],
-        controllers: [accommodation_info_controller_1.AccommodationInfoController],
+        controllers: [],
         exports: [accommodation_resource_handler_1.AccommodationResourceHandler],
     })
 ], AccommodationResourceModule);
@@ -9521,43 +8651,6 @@ exports.AccommodationInfo = AccommodationInfo;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-
-/***/ }),
-
-/***/ "./apps/resource/src/modules/resource/accommodation/infrastructure/adapters/in/web/controllers/accommodation-info.controller.ts":
-/*!**************************************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/resource/accommodation/infrastructure/adapters/in/web/controllers/accommodation-info.controller.ts ***!
-  \**************************************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AccommodationInfoController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const accommodation_info_service_1 = __webpack_require__(/*! @resource/modules/resource/accommodation/application/services/accommodation-info.service */ "./apps/resource/src/modules/resource/accommodation/application/services/accommodation-info.service.ts");
-let AccommodationInfoController = class AccommodationInfoController {
-    constructor(accommodationInfoService) {
-        this.accommodationInfoService = accommodationInfoService;
-    }
-};
-exports.AccommodationInfoController = AccommodationInfoController;
-exports.AccommodationInfoController = AccommodationInfoController = __decorate([
-    (0, swagger_1.ApiTags)('accommodation-info'),
-    (0, common_1.Controller)('resources/:resourceId/accommodation-info'),
-    __metadata("design:paramtypes", [typeof (_a = typeof accommodation_info_service_1.AccommodationInfoService !== "undefined" && accommodation_info_service_1.AccommodationInfoService) === "function" ? _a : Object])
-], AccommodationInfoController);
 
 
 /***/ }),
@@ -11551,375 +10644,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
-/***/ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/resource-group.controller.ts":
-/*!***************************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/resource-group.controller.ts ***!
-  \***************************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ResourceGroupController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const create_resource_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/create-resource.dto */ "./apps/resource/src/modules/resource/common/application/dtos/create-resource.dto.ts");
-const resource_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/resource-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/resource-response.dto.ts");
-const update_resource_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/update-resource.dto */ "./apps/resource/src/modules/resource/common/application/dtos/update-resource.dto.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const resource_group_usecase_1 = __webpack_require__(/*! @resource/modules/resource/common/application/usecases/resource-group.usecase */ "./apps/resource/src/modules/resource/common/application/usecases/resource-group.usecase.ts");
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
-const update_resource_dto_2 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/update-resource.dto */ "./apps/resource/src/modules/resource/common/application/dtos/update-resource.dto.ts");
-let ResourceGroupController = class ResourceGroupController {
-    constructor(resourceGroupUsecase) {
-        this.resourceGroupUsecase = resourceGroupUsecase;
-    }
-    async findParentResourceGroups() {
-        return this.resourceGroupUsecase.findParentResourceGroups();
-    }
-    async findAll(type) {
-        return this.resourceGroupUsecase.findResourceGroupsWithResourceData(type);
-    }
-    async create(createResourceGroupDto) {
-        return this.resourceGroupUsecase.createResourceGroup(createResourceGroupDto);
-    }
-    async updateOrder(updateResourceGroupOrdersDto) {
-        return this.resourceGroupUsecase.reorderResourceGroups(updateResourceGroupOrdersDto);
-    }
-    async update(resourceGroupId, updateResourceGroupDto) {
-        return this.resourceGroupUsecase.updateResourceGroup(resourceGroupId, updateResourceGroupDto);
-    }
-    async remove(resourceGroupId) {
-        return this.resourceGroupUsecase.deleteResourceGroup(resourceGroupId);
-    }
-};
-exports.ResourceGroupController = ResourceGroupController;
-__decorate([
-    (0, common_1.Get)('parents'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '상위그룹 목록 조회 #사용자/자원구분/모달' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '상위 자원 그룹 목록을 조회했습니다.',
-        type: [resource_response_dto_1.ResourceGroupResponseDto],
-    }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
-], ResourceGroupController.prototype, "findParentResourceGroups", null);
-__decorate([
-    (0, common_1.Get)('resources'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '상위그룹-하위그룹-자원 목록 조회 #사용자/자원선택/모달 #관리자/자원관리/자원목록' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '자원 그룹들과 각 그룹에 속한 자원 목록을 조회했습니다.',
-        type: [resource_response_dto_1.ResourceGroupWithResourcesResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'type', enum: resource_type_enum_1.ResourceType, required: false }),
-    __param(0, (0, common_1.Query)('type')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], ResourceGroupController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 생성' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 201,
-        description: '자원 그룹이 생성되었습니다.',
-        type: resource_response_dto_1.ResourceGroupResponseDto,
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof create_resource_dto_1.CreateResourceGroupDto !== "undefined" && create_resource_dto_1.CreateResourceGroupDto) === "function" ? _e : Object]),
-    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
-], ResourceGroupController.prototype, "create", null);
-__decorate([
-    (0, common_1.Patch)('order'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 순서 변경' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원 그룹 순서가 성공적으로 변경되었습니다.',
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof update_resource_dto_2.UpdateResourceGroupOrdersDto !== "undefined" && update_resource_dto_2.UpdateResourceGroupOrdersDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", Promise)
-], ResourceGroupController.prototype, "updateOrder", null);
-__decorate([
-    (0, common_1.Patch)(':resourceGroupId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '자원 그룹이 수정되었습니다.',
-        type: resource_response_dto_1.ResourceGroupResponseDto,
-    }),
-    __param(0, (0, common_1.Param)('resourceGroupId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_h = typeof update_resource_dto_1.UpdateResourceGroupDto !== "undefined" && update_resource_dto_1.UpdateResourceGroupDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
-], ResourceGroupController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':resourceGroupId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 삭제' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '자원 그룹이 삭제되었습니다.',
-    }),
-    __param(0, (0, common_1.Param)('resourceGroupId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
-], ResourceGroupController.prototype, "remove", null);
-exports.ResourceGroupController = ResourceGroupController = __decorate([
-    (0, swagger_1.ApiTags)('자원 그룹'),
-    (0, common_1.Controller)('resource-groups'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_group_usecase_1.ResourceGroupUsecase !== "undefined" && resource_group_usecase_1.ResourceGroupUsecase) === "function" ? _a : Object])
-], ResourceGroupController);
-
-
-/***/ }),
-
-/***/ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/resource.controller.ts":
-/*!*********************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/resource.controller.ts ***!
-  \*********************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ResourceController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./apps/resource/src/dtos.index.ts");
-const resource_query_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/resource-query.dto */ "./apps/resource/src/modules/resource/common/application/dtos/resource-query.dto.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
-const resource_usecase_1 = __webpack_require__(/*! @resource/modules/resource/common/application/usecases/resource.usecase */ "./apps/resource/src/modules/resource/common/application/usecases/resource.usecase.ts");
-const resource_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/resource-response.dto */ "./apps/resource/src/modules/resource/common/application/dtos/resource-response.dto.ts");
-const update_resource_dto_1 = __webpack_require__(/*! @resource/modules/resource/common/application/dtos/update-resource.dto */ "./apps/resource/src/modules/resource/common/application/dtos/update-resource.dto.ts");
-const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-let ResourceController = class ResourceController {
-    constructor(resourceUsecase) {
-        this.resourceUsecase = resourceUsecase;
-    }
-    async findAll(type) {
-        return this.resourceUsecase.findResources(type);
-    }
-    async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate) {
-        return this.resourceUsecase.findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate);
-    }
-    async findAvailableTime(query) {
-        return this.resourceUsecase.findAvailableTime(query);
-    }
-    async returnVehicle(user, resourceId, returnDto) {
-        return this.resourceUsecase.returnVehicle(user, resourceId, returnDto);
-    }
-    async createWithInfos(createResourceInfo) {
-        return this.resourceUsecase.createResourceWithInfos(createResourceInfo);
-    }
-    async findOne(resourceId) {
-        return this.resourceUsecase.findResourceDetailForAdmin(resourceId);
-    }
-    async reorder(updateResourceOrdersDto) {
-        return this.resourceUsecase.reorderResources(updateResourceOrdersDto);
-    }
-    async update(resourceId, updateResourceInfoDto) {
-        return this.resourceUsecase.updateResource(resourceId, updateResourceInfoDto);
-    }
-    async remove(resourceId) {
-        return this.resourceUsecase.deleteResource(resourceId);
-    }
-};
-exports.ResourceController = ResourceController;
-__decorate([
-    (0, common_1.Get)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 목록 조회 #관리자/자원관리/자원리스트' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원 목록을 성공적으로 조회했습니다.',
-        type: [dtos_index_1.ResourceResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'type', enum: resource_type_enum_1.ResourceType }),
-    __param(0, (0, common_1.Query)('type')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _b : Object]),
-    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
-], ResourceController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)('reservations'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '자원 별 예약 목록 조회 #사용자/자원예약/리스트 #사용자/세부예약내역' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원 목록을 성공적으로 조회했습니다.',
-        type: [resource_response_dto_1.ResourceGroupWithResourcesAndReservationsResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'type', enum: resource_type_enum_1.ResourceType }),
-    (0, swagger_1.ApiQuery)({ name: 'startDate', example: '2025-01-01 or 2025-01-01 00:00:00' }),
-    (0, swagger_1.ApiQuery)({ name: 'endDate', example: '2025-01-01 or 2025-01-01 00:00:00' }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Query)('type')),
-    __param(2, (0, common_1.Query)('startDate')),
-    __param(3, (0, common_1.Query)('endDate')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _d : Object, typeof (_e = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _e : Object, String, String]),
-    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
-], ResourceController.prototype, "findResourcesByTypeAndDateWithReservations", null);
-__decorate([
-    (0, common_1.Get)('availability'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 가능 시간 조회 성공',
-        type: dtos_index_1.ResourceAvailabilityDto,
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: true, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    (0, swagger_1.ApiQuery)({
-        name: 'resourceGroupId',
-        type: String,
-        required: true,
-        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'startDate', type: String, required: false, example: '2025-01-01' }),
-    (0, swagger_1.ApiQuery)({ name: 'endDate', type: String, required: false, example: '2025-01-01' }),
-    (0, swagger_1.ApiQuery)({ name: 'startTime', type: String, required: false, example: '09:00:00' }),
-    (0, swagger_1.ApiQuery)({ name: 'endTime', type: String, required: false, example: '18:00:00' }),
-    (0, swagger_1.ApiQuery)({ name: 'am', type: Boolean, required: false, example: true }),
-    (0, swagger_1.ApiQuery)({ name: 'pm', type: Boolean, required: false, example: true }),
-    (0, swagger_1.ApiQuery)({ name: 'timeUnit', type: Number, required: false, example: 30 }),
-    __param(0, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof resource_query_dto_1.ResourceQueryDto !== "undefined" && resource_query_dto_1.ResourceQueryDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
-], ResourceController.prototype, "findAvailableTime", null);
-__decorate([
-    (0, common_1.Patch)(':resourceId/return-vehicle'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '차량 반납 성공',
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('resourceId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String, typeof (_k = typeof update_resource_dto_1.ReturnVehicleDto !== "undefined" && update_resource_dto_1.ReturnVehicleDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
-], ResourceController.prototype, "returnVehicle", null);
-__decorate([
-    (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 생성 #관리자/자원관리/생성' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 201,
-        description: '자원이 성공적으로 생성되었습니다.',
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_m = typeof dtos_index_1.CreateResourceInfoDto !== "undefined" && dtos_index_1.CreateResourceInfoDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
-], ResourceController.prototype, "createWithInfos", null);
-__decorate([
-    (0, common_1.Get)(':resourceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 상세 조회 #관리자/자원관리/상세' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원을 성공적으로 조회했습니다.',
-        type: dtos_index_1.ResourceResponseDto,
-    }),
-    __param(0, (0, common_1.Param)('resourceId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
-], ResourceController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)('order'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 순서 변경' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원 순서가 성공적으로 변경되었습니다.',
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_q = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _q : Object]),
-    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
-], ResourceController.prototype, "reorder", null);
-__decorate([
-    (0, common_1.Patch)(':resourceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원이 성공적으로 수정되었습니다.',
-        type: dtos_index_1.ResourceResponseDto,
-    }),
-    __param(0, (0, common_1.Param)('resourceId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_s = typeof dtos_index_1.UpdateResourceInfoDto !== "undefined" && dtos_index_1.UpdateResourceInfoDto) === "function" ? _s : Object]),
-    __metadata("design:returntype", typeof (_t = typeof Promise !== "undefined" && Promise) === "function" ? _t : Object)
-], ResourceController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':resourceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '자원 삭제' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원이 성공적으로 삭제되었습니다.',
-    }),
-    __param(0, (0, common_1.Param)('resourceId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
-], ResourceController.prototype, "remove", null);
-exports.ResourceController = ResourceController = __decorate([
-    (0, swagger_1.ApiTags)('자원'),
-    (0, common_1.Controller)('resources'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_usecase_1.ResourceUsecase !== "undefined" && resource_usecase_1.ResourceUsecase) === "function" ? _a : Object])
-], ResourceController);
-
-
-/***/ }),
-
 /***/ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/v1/admin.resource-group.controller.ts":
 /*!************************************************************************************************************************************!*\
   !*** ./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/v1/admin.resource-group.controller.ts ***!
@@ -12957,43 +11681,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
-/***/ "./apps/resource/src/modules/resource/meeting-room/infrastructure/adapters/in/web/controllers/meeting-room-info.controller.ts":
-/*!************************************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/resource/meeting-room/infrastructure/adapters/in/web/controllers/meeting-room-info.controller.ts ***!
-  \************************************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MeetingRoomInfoController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const meeting_room_info_service_1 = __webpack_require__(/*! @resource/modules/resource/meeting-room/application/services/meeting-room-info.service */ "./apps/resource/src/modules/resource/meeting-room/application/services/meeting-room-info.service.ts");
-let MeetingRoomInfoController = class MeetingRoomInfoController {
-    constructor(meetingRoomInfoService) {
-        this.meetingRoomInfoService = meetingRoomInfoService;
-    }
-};
-exports.MeetingRoomInfoController = MeetingRoomInfoController;
-exports.MeetingRoomInfoController = MeetingRoomInfoController = __decorate([
-    (0, swagger_1.ApiTags)('meeting-room-info'),
-    (0, common_1.Controller)('resources/:resourceId/meeting-room-info'),
-    __metadata("design:paramtypes", [typeof (_a = typeof meeting_room_info_service_1.MeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.MeetingRoomInfoService) === "function" ? _a : Object])
-], MeetingRoomInfoController);
-
-
-/***/ }),
-
 /***/ "./apps/resource/src/modules/resource/meeting-room/infrastructure/adapters/out/persistence/meeting-room-info.repository.ts":
 /*!*********************************************************************************************************************************!*\
   !*** ./apps/resource/src/modules/resource/meeting-room/infrastructure/adapters/out/persistence/meeting-room-info.repository.ts ***!
@@ -13093,15 +11780,12 @@ const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/in
 const meeting_room_resource_handler_1 = __webpack_require__(/*! ./application/handlers/meeting-room-resource.handler */ "./apps/resource/src/modules/resource/meeting-room/application/handlers/meeting-room-resource.handler.ts");
 const meeting_room_info_service_1 = __webpack_require__(/*! ./application/services/meeting-room-info.service */ "./apps/resource/src/modules/resource/meeting-room/application/services/meeting-room-info.service.ts");
 const meeting_room_info_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/meeting-room-info.repository */ "./apps/resource/src/modules/resource/meeting-room/infrastructure/adapters/out/persistence/meeting-room-info.repository.ts");
-const meeting_room_info_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/meeting-room-info.controller */ "./apps/resource/src/modules/resource/meeting-room/infrastructure/adapters/in/web/controllers/meeting-room-info.controller.ts");
 let MeetingRoomResourceModule = class MeetingRoomResourceModule {
 };
 exports.MeetingRoomResourceModule = MeetingRoomResourceModule;
 exports.MeetingRoomResourceModule = MeetingRoomResourceModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            typeorm_1.TypeOrmModule.forFeature([entities_1.MeetingRoomInfo]),
-        ],
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.MeetingRoomInfo])],
         providers: [
             meeting_room_resource_handler_1.MeetingRoomResourceHandler,
             meeting_room_info_service_1.MeetingRoomInfoService,
@@ -13111,13 +11795,8 @@ exports.MeetingRoomResourceModule = MeetingRoomResourceModule = __decorate([
                 useExisting: meeting_room_info_repository_1.MeetingRoomInfoRepository,
             },
         ],
-        controllers: [
-            meeting_room_info_controller_1.MeetingRoomInfoController,
-        ],
-        exports: [
-            meeting_room_resource_handler_1.MeetingRoomResourceHandler,
-            meeting_room_info_service_1.MeetingRoomInfoService,
-        ],
+        controllers: [],
+        exports: [meeting_room_resource_handler_1.MeetingRoomResourceHandler, meeting_room_info_service_1.MeetingRoomInfoService],
     })
 ], MeetingRoomResourceModule);
 
@@ -13145,8 +11824,6 @@ const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/in
 const resource_service_1 = __webpack_require__(/*! ./common/application/services/resource.service */ "./apps/resource/src/modules/resource/common/application/services/resource.service.ts");
 const resource_group_service_1 = __webpack_require__(/*! ./common/application/services/resource-group.service */ "./apps/resource/src/modules/resource/common/application/services/resource-group.service.ts");
 const resource_manager_service_1 = __webpack_require__(/*! ./common/application/services/resource-manager.service */ "./apps/resource/src/modules/resource/common/application/services/resource-manager.service.ts");
-const resource_controller_1 = __webpack_require__(/*! ./common/infrastructure/adapters/in/web/controllers/resource.controller */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/resource.controller.ts");
-const resource_group_controller_1 = __webpack_require__(/*! ./common/infrastructure/adapters/in/web/controllers/resource-group.controller */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/resource-group.controller.ts");
 const resource_repository_1 = __webpack_require__(/*! ./common/infrastructure/adapters/out/persistence/resource.repository */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/out/persistence/resource.repository.ts");
 const resource_group_repository_1 = __webpack_require__(/*! ./common/infrastructure/adapters/out/persistence/resource-group.repository */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/out/persistence/resource-group.repository.ts");
 const resource_manager_repository_1 = __webpack_require__(/*! ./common/infrastructure/adapters/out/persistence/resource-manager.repository */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/out/persistence/resource-manager.repository.ts");
@@ -13162,8 +11839,8 @@ const resource_usecase_1 = __webpack_require__(/*! ./common/application/usecases
 const file_module_1 = __webpack_require__(/*! ../file/file.module */ "./apps/resource/src/modules/file/file.module.ts");
 const admin_resource_controller_1 = __webpack_require__(/*! ./common/infrastructure/adapters/in/web/controllers/v1/admin.resource.controller */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/v1/admin.resource.controller.ts");
 const admin_resource_group_controller_1 = __webpack_require__(/*! ./common/infrastructure/adapters/in/web/controllers/v1/admin.resource-group.controller */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/v1/admin.resource-group.controller.ts");
-const resource_group_controller_2 = __webpack_require__(/*! ./common/infrastructure/adapters/in/web/controllers/v1/resource-group.controller */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/v1/resource-group.controller.ts");
-const resource_controller_2 = __webpack_require__(/*! ./common/infrastructure/adapters/in/web/controllers/v1/resource.controller */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/v1/resource.controller.ts");
+const resource_group_controller_1 = __webpack_require__(/*! ./common/infrastructure/adapters/in/web/controllers/v1/resource-group.controller */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/v1/resource-group.controller.ts");
+const resource_controller_1 = __webpack_require__(/*! ./common/infrastructure/adapters/in/web/controllers/v1/resource.controller */ "./apps/resource/src/modules/resource/common/infrastructure/adapters/in/web/controllers/v1/resource.controller.ts");
 const resource_event_handler_1 = __webpack_require__(/*! ./common/application/handler/resource-event.handler */ "./apps/resource/src/modules/resource/common/application/handler/resource-event.handler.ts");
 let ResourceModule = class ResourceModule {
 };
@@ -13209,12 +11886,10 @@ exports.ResourceModule = ResourceModule = __decorate([
             resource_event_handler_1.ResourceEventHandler,
         ],
         controllers: [
-            resource_controller_1.ResourceController,
-            resource_group_controller_1.ResourceGroupController,
             admin_resource_controller_1.AdminResourceController,
             admin_resource_group_controller_1.AdminResourceGroupController,
-            resource_group_controller_2.UserResourceGroupController,
-            resource_controller_2.UserResourceController,
+            resource_group_controller_1.UserResourceGroupController,
+            resource_controller_1.UserResourceController,
         ],
         exports: [resource_service_1.ResourceService, resource_group_service_1.ResourceGroupService, resource_manager_service_1.ResourceManagerService],
     })
@@ -14391,324 +13066,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 
-/***/ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/consumable.controller.ts":
-/*!************************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/consumable.controller.ts ***!
-  \************************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ConsumableController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const create_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/create-vehicle-info.dto.ts");
-const update_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/update-vehicle-info.dto.ts");
-const vehicle_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/vehicle-response.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/vehicle-response.dto.ts");
-const consumable_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/consumable.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/consumable.usecase.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-let ConsumableController = class ConsumableController {
-    constructor(consumableUsecase) {
-        this.consumableUsecase = consumableUsecase;
-    }
-    async create(user, createConsumableDto) {
-        const consumable = await this.consumableUsecase.save(user, createConsumableDto);
-        return consumable;
-    }
-    async findAll(user, vehicleInfoId) {
-        const consumables = await this.consumableUsecase.findAll(user, {
-            where: {
-                vehicleInfoId: vehicleInfoId,
-            },
-        });
-        return consumables.map((consumable) => ({
-            consumableId: consumable.consumableId,
-            vehicleInfoId: consumable.vehicleInfoId,
-            name: consumable.name,
-            replaceCycle: consumable.replaceCycle,
-            notifyReplacementCycle: consumable.notifyReplacementCycle,
-        }));
-    }
-    async findOne(user, consumableId) {
-        const consumable = await this.consumableUsecase.findOne(user, {
-            where: {
-                consumableId: consumableId,
-            },
-            relations: ['maintenances'],
-        });
-        return {
-            consumableId: consumable.consumableId,
-            vehicleInfoId: consumable.vehicleInfoId,
-            name: consumable.name,
-            replaceCycle: consumable.replaceCycle,
-            notifyReplacementCycle: consumable.notifyReplacementCycle,
-            maintenances: consumable.maintenances.map((maintenance) => ({
-                maintenanceId: maintenance.maintenanceId,
-                consumableId: maintenance.consumableId,
-                date: maintenance.date,
-                mileage: maintenance.mileage,
-                cost: maintenance.cost,
-                images: maintenance.images,
-            })),
-        };
-    }
-    async update(consumableId, user, updateConsumableDto) {
-        const consumable = await this.consumableUsecase.update(user, consumableId, updateConsumableDto);
-        return {
-            consumableId: consumable.consumableId,
-            vehicleInfoId: consumable.vehicleInfoId,
-            name: consumable.name,
-            replaceCycle: consumable.replaceCycle,
-            notifyReplacementCycle: consumable.notifyReplacementCycle,
-        };
-    }
-    async remove(user, consumableId) {
-        await this.consumableUsecase.delete(user, consumableId);
-    }
-};
-exports.ConsumableController = ConsumableController;
-__decorate([
-    (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '소모품 등록' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 201,
-        description: '소모품이 성공적으로 등록되었습니다.',
-        type: vehicle_response_dto_1.ConsumableResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof create_vehicle_info_dto_1.CreateConsumableDto !== "undefined" && create_vehicle_info_dto_1.CreateConsumableDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], ConsumableController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)('vehicle/:vehicleInfoId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '소모품 목록 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '소모품 목록을 성공적으로 조회했습니다.',
-        type: [vehicle_response_dto_1.ConsumableResponseDto],
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('vehicleInfoId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, String]),
-    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
-], ConsumableController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':consumableId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '소모품 상세 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '소모품을 성공적으로 조회했습니다.',
-        type: vehicle_response_dto_1.ConsumableResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('consumableId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _g : Object, String]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
-], ConsumableController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':consumableId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '소모품 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '소모품이 성공적으로 수정되었습니다.',
-        type: vehicle_response_dto_1.ConsumableResponseDto,
-    }),
-    __param(0, (0, common_1.Param)('consumableId')),
-    __param(1, (0, user_decorator_1.User)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, typeof (_k = typeof update_vehicle_info_dto_1.UpdateConsumableDto !== "undefined" && update_vehicle_info_dto_1.UpdateConsumableDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
-], ConsumableController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':consumableId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '소모품 삭제' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '소모품이 성공적으로 삭제되었습니다.',
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('consumableId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_m = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _m : Object, String]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
-], ConsumableController.prototype, "remove", null);
-exports.ConsumableController = ConsumableController = __decorate([
-    (0, swagger_1.ApiTags)('차량 소모품'),
-    (0, common_1.Controller)('consumables'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof consumable_usecase_1.ConsumableUsecase !== "undefined" && consumable_usecase_1.ConsumableUsecase) === "function" ? _a : Object])
-], ConsumableController);
-
-
-/***/ }),
-
-/***/ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/maintenance.controller.ts":
-/*!*************************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/maintenance.controller.ts ***!
-  \*************************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MaintenanceController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const create_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/create-vehicle-info.dto.ts");
-const update_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/update-vehicle-info.dto.ts");
-const vehicle_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/vehicle-response.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/vehicle-response.dto.ts");
-const maintenance_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/maintenance.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/maintenance.usecase.ts");
-const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
-let MaintenanceController = class MaintenanceController {
-    constructor(maintenanceUsecase) {
-        this.maintenanceUsecase = maintenanceUsecase;
-    }
-    async create(user, createMaintenanceDto) {
-        return this.maintenanceUsecase.save(user, createMaintenanceDto);
-    }
-    async findAll(user, vehicleInfoId, query) {
-        const { page, limit } = query;
-        return this.maintenanceUsecase.findAllByVehicleInfoId(user, vehicleInfoId, page, limit);
-    }
-    async findOne(user, maintenanceId) {
-        return this.maintenanceUsecase.findOne(user, maintenanceId);
-    }
-    async update(maintenanceId, updateMaintenanceDto, user) {
-        return this.maintenanceUsecase.update(user, maintenanceId, updateMaintenanceDto);
-    }
-    async remove(user, maintenanceId) {
-        return this.maintenanceUsecase.delete(user, maintenanceId);
-    }
-};
-exports.MaintenanceController = MaintenanceController;
-__decorate([
-    (0, common_1.Post)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '정비 이력 생성' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 201,
-        description: '정비 이력이 생성되었습니다.',
-        type: vehicle_response_dto_1.MaintenanceResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object, typeof (_c = typeof create_vehicle_info_dto_1.CreateMaintenanceDto !== "undefined" && create_vehicle_info_dto_1.CreateMaintenanceDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], MaintenanceController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)('vehicle/:vehicleInfoId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '정비 이력 목록 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '정비 이력 목록을 조회했습니다.',
-        type: [vehicle_response_dto_1.MaintenanceResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
-    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('vehicleInfoId')),
-    __param(2, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, String, typeof (_f = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
-], MaintenanceController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':maintenanceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '정비 상세 이력 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '정비 상세 이력을 조회했습니다.',
-        type: vehicle_response_dto_1.MaintenanceResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('maintenanceId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _h : Object, String]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
-], MaintenanceController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':maintenanceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '정비 이력 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '정비 이력이 수정되었습니다.',
-        type: vehicle_response_dto_1.MaintenanceResponseDto,
-    }),
-    __param(0, (0, common_1.Param)('maintenanceId')),
-    __param(1, (0, common_1.Body)()),
-    __param(2, (0, user_decorator_1.User)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_k = typeof update_vehicle_info_dto_1.UpdateMaintenanceDto !== "undefined" && update_vehicle_info_dto_1.UpdateMaintenanceDto) === "function" ? _k : Object, typeof (_l = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _l : Object]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
-], MaintenanceController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':maintenanceId'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN, role_type_enum_1.Role.SYSTEM_ADMIN),
-    (0, swagger_1.ApiOperation)({ summary: '정비 이력 삭제' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '정비 이력이 삭제되었습니다.',
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('maintenanceId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_o = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _o : Object, String]),
-    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
-], MaintenanceController.prototype, "remove", null);
-exports.MaintenanceController = MaintenanceController = __decorate([
-    (0, swagger_1.ApiTags)('차량 정비 이력'),
-    (0, common_1.Controller)('maintenances'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_usecase_1.MaintenanceUsecase !== "undefined" && maintenance_usecase_1.MaintenanceUsecase) === "function" ? _a : Object])
-], MaintenanceController);
-
-
-/***/ }),
-
 /***/ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/admin.consumable.controller.ts":
 /*!*********************************************************************************************************************************!*\
   !*** ./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/admin.consumable.controller.ts ***!
@@ -15250,83 +13607,6 @@ exports.UserMaintenanceController = UserMaintenanceController = __decorate([
 
 /***/ }),
 
-/***/ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/vehicle-info.controller.ts":
-/*!**************************************************************************************************************************!*\
-  !*** ./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/vehicle-info.controller.ts ***!
-  \**************************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.VehicleInfoController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const update_vehicle_info_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/update-vehicle-info.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/update-vehicle-info.dto.ts");
-const vehicle_response_dto_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/dtos/vehicle-response.dto */ "./apps/resource/src/modules/resource/vehicle/application/dtos/vehicle-response.dto.ts");
-const vehicle_info_usecase_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/application/usecases/vehicle-info.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/vehicle-info.usecase.ts");
-let VehicleInfoController = class VehicleInfoController {
-    constructor(vehicleInfoUsecase) {
-        this.vehicleInfoUsecase = vehicleInfoUsecase;
-    }
-    async findVehicleInfo(vehicleInfoId) {
-        return this.vehicleInfoUsecase.findVehicleInfo(vehicleInfoId);
-    }
-    async update(vehicleInfoId, updateVehicleInfoDto) {
-        return this.vehicleInfoUsecase.updateVehicleInfo(vehicleInfoId, updateVehicleInfoDto);
-    }
-};
-exports.VehicleInfoController = VehicleInfoController;
-__decorate([
-    (0, common_1.Get)(':vehicleInfoId'),
-    (0, swagger_1.ApiOperation)({ summary: '차량 정보 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '차량 정보를 성공적으로 조회했습니다.',
-        type: vehicle_response_dto_1.VehicleInfoResponseDto,
-    }),
-    __param(0, (0, common_1.Param)('vehicleInfoId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
-], VehicleInfoController.prototype, "findVehicleInfo", null);
-__decorate([
-    (0, common_1.Patch)(':vehicleInfoId'),
-    (0, swagger_1.ApiOperation)({ summary: '차량 정보 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '차량 정보가 성공적으로 수정되었습니다.',
-        type: vehicle_response_dto_1.VehicleInfoResponseDto,
-    }),
-    __param(0, (0, common_1.Param)('vehicleInfoId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_c = typeof update_vehicle_info_dto_1.UpdateVehicleInfoDto !== "undefined" && update_vehicle_info_dto_1.UpdateVehicleInfoDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], VehicleInfoController.prototype, "update", null);
-exports.VehicleInfoController = VehicleInfoController = __decorate([
-    (0, swagger_1.ApiTags)('차량 정보'),
-    (0, common_1.Controller)('vehicle-info'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_usecase_1.VehicleInfoUsecase !== "undefined" && vehicle_info_usecase_1.VehicleInfoUsecase) === "function" ? _a : Object])
-], VehicleInfoController);
-
-
-/***/ }),
-
 /***/ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/consumable.repository.ts":
 /*!*********************************************************************************************************************!*\
   !*** ./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/consumable.repository.ts ***!
@@ -15407,7 +13687,7 @@ let ConsumableRepository = class ConsumableRepository {
         const consumable = await repository.findOne({ where: { consumableId: id }, withDeleted: true });
         if (!consumable)
             throw new common_1.NotFoundException('Consumable not found');
-        const deletedName = `${consumable.name}_deleted_${date_util_1.DateUtil.now().format('YYYYMMDDHHmmss')}`;
+        const deletedName = `${consumable.name}(삭제된 소모품-${date_util_1.DateUtil.now().format('YYYY.MM.DD HH:mm:ss')})`;
         await repository.update({ consumableId: id }, { name: deletedName });
         await repository.softDelete({ consumableId: id });
     }
@@ -15607,12 +13887,9 @@ const vehicle_resource_handler_1 = __webpack_require__(/*! ./application/handler
 const vehicle_info_service_1 = __webpack_require__(/*! ./application/services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 const consumable_service_1 = __webpack_require__(/*! ./application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
 const maintenance_service_1 = __webpack_require__(/*! ./application/services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
-const consumable_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/consumable.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/consumable.controller.ts");
-const maintenance_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/maintenance.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/maintenance.controller.ts");
 const vehicle_info_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/vehicle-info.repository */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/vehicle-info.repository.ts");
 const consumable_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/consumable.repository */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/consumable.repository.ts");
 const maintenance_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/maintenance.repository */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/maintenance.repository.ts");
-const vehicle_info_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/vehicle-info.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/vehicle-info.controller.ts");
 const vehicle_info_usecase_1 = __webpack_require__(/*! ./application/usecases/vehicle-info.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/vehicle-info.usecase.ts");
 const consumable_usecase_1 = __webpack_require__(/*! ./application/usecases/consumable.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/consumable.usecase.ts");
 const maintenance_usecase_1 = __webpack_require__(/*! ./application/usecases/maintenance.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/maintenance.usecase.ts");
@@ -15620,8 +13897,8 @@ const admin_vehicle_info_controller_1 = __webpack_require__(/*! ./infrastructure
 const admin_consumable_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.consumable.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/admin.consumable.controller.ts");
 const admin_maintenance_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.maintenance.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/admin.maintenance.controller.ts");
 const vehicle_event_handler_1 = __webpack_require__(/*! ./application/handlers/vehicle-event.handler */ "./apps/resource/src/modules/resource/vehicle/application/handlers/vehicle-event.handler.ts");
-const consumable_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/consumable.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/consumable.controller.ts");
-const maintenance_controller_2 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/maintenance.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/maintenance.controller.ts");
+const consumable_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/consumable.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/consumable.controller.ts");
+const maintenance_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/maintenance.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/maintenance.controller.ts");
 let VehicleResourceModule = class VehicleResourceModule {
 };
 exports.VehicleResourceModule = VehicleResourceModule;
@@ -15654,14 +13931,11 @@ exports.VehicleResourceModule = VehicleResourceModule = __decorate([
             vehicle_event_handler_1.VehicleEventHandler,
         ],
         controllers: [
-            vehicle_info_controller_1.VehicleInfoController,
-            consumable_controller_1.ConsumableController,
-            maintenance_controller_1.MaintenanceController,
             admin_vehicle_info_controller_1.AdminVehicleInfoController,
             admin_consumable_controller_1.AdminConsumableController,
             admin_maintenance_controller_1.AdminMaintenanceController,
-            consumable_controller_2.UserConsumableController,
-            maintenance_controller_2.UserMaintenanceController,
+            consumable_controller_1.UserConsumableController,
+            maintenance_controller_1.UserMaintenanceController,
         ],
         exports: [
             vehicle_resource_handler_1.VehicleResourceHandler,

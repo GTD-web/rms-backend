@@ -68,8 +68,6 @@ import { ResourceEventHandler } from './common/application/handler/resource-even
         ResourceEventHandler,
     ],
     controllers: [
-        ResourceController,
-        ResourceGroupController,
         AdminResourceController,
         AdminResourceGroupController,
         UserResourceGroupController,

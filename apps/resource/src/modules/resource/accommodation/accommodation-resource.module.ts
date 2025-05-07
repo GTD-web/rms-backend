@@ -7,18 +7,16 @@ import { AccommodationInfoRepository } from './infrastructure/adapters/out/persi
 import { AccommodationResourceHandler } from './application/handlers/accommodation-resource.handler';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([AccommodationInfo]),
-  ],
-  providers: [
-    AccommodationInfoService,
-    AccommodationResourceHandler,
-    {
-      provide: 'AccommodationInfoRepositoryPort',
-      useClass: AccommodationInfoRepository,
-    },
-  ],
-  controllers: [AccommodationInfoController],
-  exports: [AccommodationResourceHandler],
+    imports: [TypeOrmModule.forFeature([AccommodationInfo])],
+    providers: [
+        AccommodationInfoService,
+        AccommodationResourceHandler,
+        {
+            provide: 'AccommodationInfoRepositoryPort',
+            useClass: AccommodationInfoRepository,
+        },
+    ],
+    controllers: [],
+    exports: [AccommodationResourceHandler],
 })
-export class AccommodationResourceModule {} 
+export class AccommodationResourceModule {}

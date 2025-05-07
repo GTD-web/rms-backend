@@ -18,11 +18,11 @@ import { Public } from '@libs/decorators/public.decorator';
 @ApiTags('5. 알림 - 사용자 페이지')
 @Controller('v1/notifications')
 @ApiBearerAuth()
-@Roles(Role.USER)
 export class UserNotificationController {
     constructor(private readonly notificationUsecase: NotificationUsecase) {}
 
     @Post('subscribe')
+    @Public()
     @ApiOperation({ summary: '웹 푸시 구독' })
     @ApiDataResponse({
         status: 200,
@@ -33,6 +33,7 @@ export class UserNotificationController {
     }
 
     @Post('send')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '웹 푸시 알림 전송' })
     @ApiDataResponse({
         status: 200,
@@ -47,6 +48,7 @@ export class UserNotificationController {
     }
 
     @Get()
+    @Roles(Role.USER)
     @ApiOperation({ summary: '알람 목록 조회' })
     @ApiDataResponse({
         status: 200,
@@ -72,6 +74,7 @@ export class UserNotificationController {
     }
 
     @Patch(':notificationId/read')
+    @Roles(Role.USER)
     @ApiOperation({ summary: '알람 읽음 처리' })
     async markAsRead(@User() user: UserEntity, @Param('notificationId') notificationId: string) {
         await this.notificationUsecase.markAsRead(user.employeeId, notificationId);
