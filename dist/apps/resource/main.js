@@ -4177,6 +4177,7 @@ let NotificationUsecase = class NotificationUsecase {
                 });
                 for (const noti of notis) {
                     this.deleteReservationUpcomingNotification(noti);
+                    await this.notificationService.delete(noti.notificationId);
                 }
             default:
                 for (const employeeId of notiTarget) {

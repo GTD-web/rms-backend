@@ -196,6 +196,7 @@ export class NotificationUsecase {
 
                 for (const noti of notis) {
                     this.deleteReservationUpcomingNotification(noti);
+                    await this.notificationService.delete(noti.notificationId);
                 }
 
             default:
