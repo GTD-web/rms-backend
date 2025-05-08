@@ -32,7 +32,14 @@ export class EmployeeRepository implements EmployeeRepositoryPort {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(Employee)
             : this.repository;
-        const entities = await repository.find();
+        const entities = await repository.find({
+            where: repositoryOptions?.where,
+            order: repositoryOptions?.order,
+            skip: repositoryOptions?.skip,
+            take: repositoryOptions?.take,
+            relations: repositoryOptions?.relations,
+            withDeleted: repositoryOptions?.withDeleted,
+        });
         return entities;
     }
 

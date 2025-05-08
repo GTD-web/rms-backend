@@ -24,15 +24,15 @@ export class EmployeeService {
         return this.employeeRepository.save(employee, repositoryOptions);
     }
 
-    async findAll(): Promise<Employee[]> {
-        return this.employeeRepository.findAll();
+    async findAll(repositoryOptions?: RepositoryOptions): Promise<Employee[]> {
+        return this.employeeRepository.findAll(repositoryOptions);
     }
 
-    async findByEmployeeNumber(employeeNumber: string): Promise<Employee> {
-        return this.employeeRepository.findByEmployeeNumber(employeeNumber);
+    async findByEmployeeNumber(employeeNumber: string, repositoryOptions?: RepositoryOptions): Promise<Employee> {
+        return this.employeeRepository.findByEmployeeNumber(employeeNumber, repositoryOptions);
     }
 
-    async update(employee: Employee, repositoryOptions?: RepositoryOptions): Promise<Employee> {
+    async update(employee: Partial<Employee>, repositoryOptions?: RepositoryOptions): Promise<Employee> {
         return this.employeeRepository.update(employee.employeeId, employee, repositoryOptions);
     }
 }

@@ -2283,7 +2283,7 @@ class MMSEmployeeResponseDto {
         this.gender = employee.gender;
         this.hire_date = employee.hire_date;
         this.status = employee.status;
-        this.department = employee.department?.department_name;
+        this.department = employee.department?.department_code;
         this.position = employee.position?.position_title;
         this.rank = employee.rank?.rank_name;
     }
@@ -2505,11 +2505,11 @@ let EmployeeService = class EmployeeService {
     async save(employee, repositoryOptions) {
         return this.employeeRepository.save(employee, repositoryOptions);
     }
-    async findAll() {
-        return this.employeeRepository.findAll();
+    async findAll(repositoryOptions) {
+        return this.employeeRepository.findAll(repositoryOptions);
     }
-    async findByEmployeeNumber(employeeNumber) {
-        return this.employeeRepository.findByEmployeeNumber(employeeNumber);
+    async findByEmployeeNumber(employeeNumber, repositoryOptions) {
+        return this.employeeRepository.findByEmployeeNumber(employeeNumber, repositoryOptions);
     }
     async update(employee, repositoryOptions) {
         return this.employeeRepository.update(employee.employeeId, employee, repositoryOptions);
@@ -2550,6 +2550,8 @@ const mms_employee_response_dto_1 = __webpack_require__(/*! ../dtos/mms-employee
 const axios_1 = __webpack_require__(/*! axios */ "axios");
 const dist_1 = __webpack_require__(/*! @nestjs/event-emitter/dist */ "@nestjs/event-emitter/dist");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 let EmployeeUseCase = class EmployeeUseCase {
     constructor(employeeService, eventEmitter) {
         this.employeeService = employeeService;
@@ -2567,7 +2569,11 @@ let EmployeeUseCase = class EmployeeUseCase {
         return employee;
     }
     async findAllEmplyeesByDepartment() {
-        const employees = await this.employeeService.findAll();
+        const employees = await this.employeeService.findAll({
+            where: {
+                department: (0, typeorm_2.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+            },
+        });
         const departments = new Map();
         employees.forEach((employee) => {
             if (!departments.has(employee.department)) {
@@ -2575,10 +2581,12 @@ let EmployeeUseCase = class EmployeeUseCase {
             }
             departments.get(employee.department)?.push(employee);
         });
-        return Array.from(departments.entries()).map(([department, employees]) => ({
+        return Array.from(departments.entries())
+            .map(([department, employees]) => ({
             department,
             employees,
-        }));
+        }))
+            .sort((a, b) => a.department.localeCompare(b.department));
     }
     async updateEmployee(employee, repositoryOptions) {
         return await this.employeeService.update(employee, repositoryOptions);
@@ -2624,6 +2632,17 @@ let EmployeeUseCase = class EmployeeUseCase {
         const employees = await this.getEmployees();
         for (const employee of employees) {
             const user = await this.employeeService.findByEmployeeNumber(employee.employee_number);
+            if (employee.status === '퇴사') {
+                if (user) {
+                    await this.employeeService.update({
+                        userId: null,
+                        employeeId: user.employeeId,
+                        department: employee.status,
+                        position: employee.status,
+                    });
+                }
+                continue;
+            }
             try {
                 if (user) {
                     user.name = employee.name;
@@ -3043,7 +3062,14 @@ let EmployeeRepository = class EmployeeRepository {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(entities_1.Employee)
             : this.repository;
-        const entities = await repository.find();
+        const entities = await repository.find({
+            where: repositoryOptions?.where,
+            order: repositoryOptions?.order,
+            skip: repositoryOptions?.skip,
+            take: repositoryOptions?.take,
+            relations: repositoryOptions?.relations,
+            withDeleted: repositoryOptions?.withDeleted,
+        });
         return entities;
     }
     async update(id, employee, repositoryOptions) {

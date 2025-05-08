@@ -8,6 +8,8 @@ import { Employee } from '@libs/entities';
 import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter/dist';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
+import { In } from 'typeorm';
+import { Not } from 'typeorm';
 
 @Injectable()
 export class EmployeeUseCase {
@@ -29,7 +31,11 @@ export class EmployeeUseCase {
     }
 
     async findAllEmplyeesByDepartment(): Promise<EmplyeesByDepartmentResponseDto[]> {
-        const employees = await this.employeeService.findAll();
+        const employees = await this.employeeService.findAll({
+            where: {
+                department: Not(In(['퇴사', '관리자'])),
+            },
+        });
         const departments = new Map<string, EmployeeResponseDto[]>();
 
         employees.forEach((employee) => {
@@ -39,10 +45,12 @@ export class EmployeeUseCase {
             departments.get(employee.department)?.push(employee);
         });
 
-        return Array.from(departments.entries()).map(([department, employees]) => ({
-            department,
-            employees,
-        }));
+        return Array.from(departments.entries())
+            .map(([department, employees]) => ({
+                department,
+                employees,
+            }))
+            .sort((a, b) => a.department.localeCompare(b.department));
     }
 
     async updateEmployee(employee: Employee, repositoryOptions?: RepositoryOptions): Promise<Employee> {
@@ -94,6 +102,19 @@ export class EmployeeUseCase {
         const employees = await this.getEmployees();
         for (const employee of employees) {
             const user = await this.employeeService.findByEmployeeNumber(employee.employee_number);
+
+            if (employee.status === '퇴사') {
+                if (user) {
+                    await this.employeeService.update({
+                        userId: null,
+                        employeeId: user.employeeId,
+                        department: employee.status,
+                        position: employee.status,
+                    });
+                }
+                continue;
+            }
+
             try {
                 if (user) {
                     user.name = employee.name;
