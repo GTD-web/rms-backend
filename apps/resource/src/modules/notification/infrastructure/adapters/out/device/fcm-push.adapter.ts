@@ -92,8 +92,8 @@ export class FCMAdapter implements PushNotificationPort {
                     //     body: 'notification : ' + payload.body,
                     // },
                     data: {
-                        title: 'data : ' + payload.title,
-                        body: 'data : ' + payload.body,
+                        title: payload.title,
+                        body: payload.body,
                     },
                 })
                 .then((response) => {

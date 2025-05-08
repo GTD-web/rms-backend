@@ -3877,8 +3877,11 @@ let AdapterService = class AdapterService {
                     failedTokens.push(subscription[i].fcm.token);
                 }
             }
+            await this.eventEmitter.emitAsync('filter.user.subscription', {
+                employeeId,
+                subscriptions: subscription.filter((s) => !failedTokens.includes(s.fcm.token)),
+            });
         }
-        console.log(failedTokens);
     }
     async sendTestNotification(user, payload) {
         const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
@@ -4791,8 +4794,8 @@ let FCMAdapter = class FCMAdapter {
                 .sendEachForMulticast({
                 tokens: tokens,
                 data: {
-                    title: 'data : ' + payload.title,
-                    body: 'data : ' + payload.body,
+                    title: payload.title,
+                    body: payload.body,
                 },
             })
                 .then((response) => {
