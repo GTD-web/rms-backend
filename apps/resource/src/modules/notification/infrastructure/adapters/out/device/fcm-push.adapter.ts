@@ -7,7 +7,7 @@ import {
     PushNotificationSendResult,
 } from '@resource/modules/notification/domain/ports/push-notification.port';
 import { initializeApp, cert } from 'firebase-admin/app';
-import { getMessaging } from 'firebase-admin/messaging';
+import { getMessaging, BatchResponse } from 'firebase-admin/messaging';
 
 @Injectable()
 export class FCMAdapter implements PushNotificationPort {
@@ -77,15 +77,16 @@ export class FCMAdapter implements PushNotificationPort {
     async bulkSendNotification(
         subscriptions: PushNotificationSubscription[],
         payload: PushNotificationPayload,
-    ): Promise<PushNotificationSendResult> {
+    ): Promise<BatchResponse> {
         try {
             // 동일 토큰 제거
-            const messages = subscriptions.map((subscription) => subscription.fcm.token);
-            const set = new Set(messages);
-            const uniqueMessages = Array.from(set);
+            const tokens = subscriptions.map((subscription) => subscription.fcm.token);
+            // const set = new Set(messages);
+            // const uniqueMessages = Array.from(set);
+            // console.log(uniqueMessages);
             const response = await getMessaging()
                 .sendEachForMulticast({
-                    tokens: uniqueMessages,
+                    tokens: tokens,
                     notification: {
                         title: payload.title,
                         body: payload.body,
@@ -93,26 +94,11 @@ export class FCMAdapter implements PushNotificationPort {
                 })
                 .then((response) => {
                     console.log('FCM send successful. Message ID:', response);
-                    return { success: true, message: response, error: null };
-                })
-                .catch((error) => {
-                    console.error('FCM send error:', {
-                        code: error.code,
-                        message: error.message,
-                        details: error.details,
-                        stack: error.stack,
-                    });
-                    return { success: false, message: 'failed', error: error.message };
+                    return response;
                 });
             return response;
         } catch (error) {
-            console.error('FCM send error:', {
-                code: error.code,
-                message: error.message,
-                details: error.details,
-                stack: error.stack,
-            });
-            return { success: false, message: 'failed', error: error.message };
+            return { responses: [], successCount: -1, failureCount: -1 };
         }
     }
 

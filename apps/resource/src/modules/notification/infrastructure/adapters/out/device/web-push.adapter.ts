@@ -8,6 +8,7 @@ import {
 } from '@resource/modules/notification/domain/ports/push-notification.port';
 import * as webPush from 'web-push';
 import { User } from '@libs/entities/user.entity';
+import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api';
 
 @Injectable()
 export class WebPushAdapter implements PushNotificationPort {
@@ -34,11 +35,11 @@ export class WebPushAdapter implements PushNotificationPort {
     async bulkSendNotification(
         subscriptions: PushNotificationSubscription[],
         payload: PushNotificationPayload,
-    ): Promise<PushNotificationSendResult> {
+    ): Promise<BatchResponse> {
         return {
-            success: true,
-            message: 'success',
-            error: 'success',
+            responses: [],
+            successCount: 0,
+            failureCount: 0,
         };
     }
     async sendTestNotification(subscription: PushNotificationSubscription, payload: any): Promise<any> {

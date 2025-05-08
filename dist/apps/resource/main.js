@@ -941,6 +941,15 @@ let UserEventHandler = class UserEventHandler {
         }
         await this.userService.update(user);
     }
+    async handleUserSubscriptionFilterEvent(payload) {
+        console.log(`Subscription filtered for user ${payload.employeeId} ${payload.subscriptions}`);
+        const user = await this.userService.findByEmployeeId(payload.employeeId);
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        user.subscriptions = payload.subscriptions;
+        await this.userService.update(user);
+    }
     async handleUserMobileUpdateEvent(payload) {
         console.log(`Mobile updated for user ${payload.employeeId} ${payload.mobile}`);
         const user = await this.userService.findByEmployeeId(payload.employeeId);
@@ -996,6 +1005,12 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserEventHandler.prototype, "handleUserSubscriptionUpdateEvent", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('filter.user.subscription'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserEventHandler.prototype, "handleUserSubscriptionFilterEvent", null);
 __decorate([
     (0, event_emitter_1.OnEvent)('update.user.mobile'),
     __metadata("design:type", Function),
@@ -3850,10 +3865,23 @@ let AdapterService = class AdapterService {
         if (!subscription) {
             throw new common_1.NotFoundException('Subscription not found');
         }
-        await this.pushNotificationService.bulkSendNotification(subscription, {
+        const result = await this.pushNotificationService.bulkSendNotification(subscription, {
             title: notification.title,
             body: notification.body,
         });
+        const failedTokens = [];
+        if (result.failureCount > 0) {
+            for (let i = 0; i < result.responses.length; i++) {
+                const response = result.responses[i];
+                if (!response.success) {
+                    failedTokens.push(subscription[i].fcm.token);
+                }
+            }
+            await this.eventEmitter.emitAsync('filter.user.subscription', {
+                employeeId,
+                subscriptions: subscription.filter((s) => !failedTokens.includes(s.fcm.token)),
+            });
+        }
     }
     async sendTestNotification(user, payload) {
         const [subscription] = await this.eventEmitter.emitAsync('find.user.subscription', {
@@ -4761,12 +4789,10 @@ let FCMAdapter = class FCMAdapter {
     }
     async bulkSendNotification(subscriptions, payload) {
         try {
-            const messages = subscriptions.map((subscription) => subscription.fcm.token);
-            const set = new Set(messages);
-            const uniqueMessages = Array.from(set);
+            const tokens = subscriptions.map((subscription) => subscription.fcm.token);
             const response = await (0, messaging_1.getMessaging)()
                 .sendEachForMulticast({
-                tokens: uniqueMessages,
+                tokens: tokens,
                 notification: {
                     title: payload.title,
                     body: payload.body,
@@ -4774,27 +4800,12 @@ let FCMAdapter = class FCMAdapter {
             })
                 .then((response) => {
                 console.log('FCM send successful. Message ID:', response);
-                return { success: true, message: response, error: null };
-            })
-                .catch((error) => {
-                console.error('FCM send error:', {
-                    code: error.code,
-                    message: error.message,
-                    details: error.details,
-                    stack: error.stack,
-                });
-                return { success: false, message: 'failed', error: error.message };
+                return response;
             });
             return response;
         }
         catch (error) {
-            console.error('FCM send error:', {
-                code: error.code,
-                message: error.message,
-                details: error.details,
-                stack: error.stack,
-            });
-            return { success: false, message: 'failed', error: error.message };
+            return { responses: [], successCount: -1, failureCount: -1 };
         }
     }
     async sendTestNotification(subscription, payload) {

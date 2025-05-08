@@ -24,10 +24,26 @@ export class AdapterService {
             throw new NotFoundException('Subscription not found');
         }
 
-        await this.pushNotificationService.bulkSendNotification(subscription as PushNotificationSubscription[], {
-            title: notification.title,
-            body: notification.body,
-        });
+        const result = await this.pushNotificationService.bulkSendNotification(
+            subscription as PushNotificationSubscription[],
+            {
+                title: notification.title,
+                body: notification.body,
+            },
+        );
+        const failedTokens: string[] = [];
+        if (result.failureCount > 0) {
+            for (let i = 0; i < result.responses.length; i++) {
+                const response = result.responses[i];
+                if (!response.success) {
+                    failedTokens.push(subscription[i].fcm.token);
+                }
+            }
+            await this.eventEmitter.emitAsync('filter.user.subscription', {
+                employeeId,
+                subscriptions: subscription.filter((s) => !failedTokens.includes(s.fcm.token)),
+            });
+        }
     }
 
     async sendTestNotification(user: User, payload: any) {

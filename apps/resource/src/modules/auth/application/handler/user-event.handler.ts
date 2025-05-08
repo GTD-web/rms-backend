@@ -64,6 +64,23 @@ export class UserEventHandler {
         await this.userService.update(user);
     }
 
+    @OnEvent('filter.user.subscription')
+    async handleUserSubscriptionFilterEvent(payload: {
+        employeeId: string;
+        subscriptions: PushNotificationSubscription[];
+        // repositoryOptions?: RepositoryOptions;
+    }) {
+        console.log(`Subscription filtered for user ${payload.employeeId} ${payload.subscriptions}`);
+        // 구독 정보 업데이트 이벤트에 대한 처리 로직
+        const user = await this.userService.findByEmployeeId(payload.employeeId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        user.subscriptions = payload.subscriptions;
+        await this.userService.update(user);
+    }
+
     @OnEvent('update.user.mobile')
     async handleUserMobileUpdateEvent(payload: {
         employeeId: string;

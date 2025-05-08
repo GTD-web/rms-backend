@@ -1,5 +1,5 @@
 import { User } from '@libs/entities/user.entity';
-
+import { BatchResponse } from 'firebase-admin/messaging';
 export interface FCM {
     token: string;
 }
@@ -36,7 +36,7 @@ export interface PushNotificationPort {
     bulkSendNotification(
         subscriptions: PushNotificationSubscription[],
         payload: PushNotificationPayload,
-    ): Promise<PushNotificationSendResult>;
+    ): Promise<BatchResponse>;
 
     sendTestNotification(subscription: PushNotificationSubscription, payload: any): Promise<any>;
 }
