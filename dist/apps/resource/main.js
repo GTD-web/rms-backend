@@ -4793,7 +4793,7 @@ let FCMAdapter = class FCMAdapter {
             const response = await (0, messaging_1.getMessaging)()
                 .sendEachForMulticast({
                 tokens: tokens,
-                notification: {
+                data: {
                     title: payload.title,
                     body: payload.body,
                 },

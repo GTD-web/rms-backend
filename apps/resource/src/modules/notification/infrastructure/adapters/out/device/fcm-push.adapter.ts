@@ -87,7 +87,11 @@ export class FCMAdapter implements PushNotificationPort {
             const response = await getMessaging()
                 .sendEachForMulticast({
                     tokens: tokens,
-                    notification: {
+                    // notification: {
+                    //     title: payload.title,
+                    //     body: payload.body,
+                    // },
+                    data: {
                         title: payload.title,
                         body: payload.body,
                     },
