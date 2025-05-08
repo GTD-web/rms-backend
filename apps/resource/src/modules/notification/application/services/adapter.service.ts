@@ -39,11 +39,12 @@ export class AdapterService {
                     failedTokens.push(subscription[i].fcm.token);
                 }
             }
-            await this.eventEmitter.emitAsync('filter.user.subscription', {
-                employeeId,
-                subscriptions: subscription.filter((s) => !failedTokens.includes(s.fcm.token)),
-            });
+            // await this.eventEmitter.emitAsync('filter.user.subscription', {
+            //     employeeId,
+            //     subscriptions: subscription.filter((s) => !failedTokens.includes(s.fcm.token)),
+            // });
         }
+        console.log(failedTokens);
     }
 
     async sendTestNotification(user: User, payload: any) {
