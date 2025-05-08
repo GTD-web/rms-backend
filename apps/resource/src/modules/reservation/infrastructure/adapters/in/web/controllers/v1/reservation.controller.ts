@@ -101,7 +101,7 @@ export class UserReservationController {
     @ApiOperation({ summary: '내 예약 리스트 조회, 자원 타입별 ' })
     @ApiDataResponse({
         description: '내 예약 리스트 조회',
-        type: [ReservationWithRelationsResponseDto],
+        type: [GroupedReservationResponseDto],
     })
     @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
     @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
@@ -110,7 +110,7 @@ export class UserReservationController {
         @User() user: UserEntity,
         @Query('resourceType') resourceType?: ResourceType,
         @Query() query?: PaginationQueryDto,
-    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+    ): Promise<PaginationData<GroupedReservationResponseDto>> {
         const { page, limit } = query;
         return this.reservationUsecase.findMyReservationList(user.employeeId, page, limit, resourceType);
     }

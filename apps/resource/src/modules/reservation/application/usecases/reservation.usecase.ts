@@ -99,7 +99,7 @@ export class ReservationUsecase {
         limit?: number,
         resourceType?: ResourceType,
         startDate?: string,
-    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+    ): Promise<PaginationData<GroupedReservationResponseDto>> {
         const where: FindOptionsWhere<Reservation> = { participants: { employeeId, type: ParticipantsType.RESERVER } };
         // if (startDate) {
         //     where.startDate = Between(
@@ -134,10 +134,25 @@ export class ReservationUsecase {
                 reservationId: In(reservations.map((r) => r.reservationId)),
             },
         });
-        return {
-            items: reservationWithParticipants.map(
+
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: (reservations as Reservation[]).map(
                 (reservation) => new ReservationWithRelationsResponseDto(reservation),
             ),
+        }));
+
+        return {
+            items: groupedReservationsResponse,
             meta: {
                 total: count,
                 page,

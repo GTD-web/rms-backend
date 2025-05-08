@@ -6597,8 +6597,20 @@ let ReservationUsecase = class ReservationUsecase {
                 reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
             },
         });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }));
         return {
-            items: reservationWithParticipants.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+            items: groupedReservationsResponse,
             meta: {
                 total: count,
                 page,
@@ -7853,7 +7865,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회, 자원 타입별 ' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         description: '내 예약 리스트 조회',
-        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+        type: [reservation_response_dto_1.GroupedReservationResponseDto],
     }),
     (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
     (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),

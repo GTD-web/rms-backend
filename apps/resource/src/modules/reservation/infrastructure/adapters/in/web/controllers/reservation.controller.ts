@@ -33,6 +33,7 @@ import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-typ
 import {
     ReservationWithResourceResponseDto,
     ReservationWithRelationsResponseDto,
+    GroupedReservationResponseDto,
 } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
 import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
@@ -65,7 +66,7 @@ export class ReservationController {
     @ApiOperation({ summary: '내 예약 리스트 조회, 시간 별, 자원 타입별 쿼리 가능 #사용자/홈 ' })
     @ApiDataResponse({
         description: '내 예약 리스트 조회 성공',
-        type: [ReservationWithRelationsResponseDto],
+        type: [GroupedReservationResponseDto],
     })
     @ApiQuery({ name: 'startDate', type: String, required: false, example: '2025-01-01' })
     @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
@@ -76,7 +77,7 @@ export class ReservationController {
         @Query('startDate') startDate?: string,
         @Query('resourceType') resourceType?: ResourceType,
         @Query() query?: PaginationQueryDto,
-    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+    ): Promise<PaginationData<GroupedReservationResponseDto>> {
         const { page, limit } = query;
         return this.reservationUsecase.findMyReservationList(user.employeeId, page, limit, resourceType, startDate);
     }
