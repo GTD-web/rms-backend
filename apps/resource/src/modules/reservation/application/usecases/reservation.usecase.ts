@@ -723,7 +723,8 @@ export class ReservationUsecase {
         if (updateDto.participantIds) {
             // 참가자 변경 여부 확인 => 배열길이 확인, 배열 요소 비교
             hasUpdateParticipants =
-                updateDto.participantIds.length !== reservation.participants.length ||
+                updateDto.participantIds.length !==
+                    reservation.participants.filter((p) => p.type === ParticipantsType.PARTICIPANT).length ||
                 updateDto.participantIds.some((id) => !reservation.participants.some((p) => p.employeeId === id));
         }
 
@@ -789,7 +790,7 @@ export class ReservationUsecase {
 
             if (updatedReservation.resource.notifyParticipantChange) {
                 try {
-                    const notiTarget = [...newParticipants, ...deletedParticipants.map((p) => p.employeeId)];
+                    const notiTarget = [...newParticipants, ...participants.map((p) => p.employeeId)];
 
                     this.eventEmitter.emit('create.notification', {
                         notificationType: NotificationType.RESERVATION_PARTICIPANT_CHANGED,

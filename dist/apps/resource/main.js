@@ -7041,7 +7041,8 @@ let ReservationUsecase = class ReservationUsecase {
         let hasUpdateParticipants = false;
         if (updateDto.participantIds) {
             hasUpdateParticipants =
-                updateDto.participantIds.length !== reservation.participants.length ||
+                updateDto.participantIds.length !==
+                    reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT).length ||
                     updateDto.participantIds.some((id) => !reservation.participants.some((p) => p.employeeId === id));
         }
         if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
@@ -7083,7 +7084,7 @@ let ReservationUsecase = class ReservationUsecase {
             })));
             if (updatedReservation.resource.notifyParticipantChange) {
                 try {
-                    const notiTarget = [...newParticipants, ...deletedParticipants.map((p) => p.employeeId)];
+                    const notiTarget = [...newParticipants, ...participants.map((p) => p.employeeId)];
                     this.eventEmitter.emit('create.notification', {
                         notificationType: notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED,
                         notificationData: {
