@@ -4,8 +4,6 @@ import { Employee, Resource, ResourceGroup, ResourceManager, User } from '@libs/
 import { ResourceService } from './common/application/services/resource.service';
 import { ResourceGroupService } from './common/application/services/resource-group.service';
 import { ResourceManagerService } from './common/application/services/resource-manager.service';
-import { ResourceController } from './common/infrastructure/adapters/in/web/controllers/resource.controller';
-import { ResourceGroupController } from './common/infrastructure/adapters/in/web/controllers/resource-group.controller';
 import { ResourceRepository } from './common/infrastructure/adapters/out/persistence/resource.repository';
 import { ResourceGroupRepository } from './common/infrastructure/adapters/out/persistence/resource-group.repository';
 import { ResourceManagerRepository } from './common/infrastructure/adapters/out/persistence/resource-manager.repository';

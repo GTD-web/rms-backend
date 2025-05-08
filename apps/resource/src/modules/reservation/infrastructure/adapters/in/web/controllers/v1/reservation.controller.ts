@@ -96,7 +96,7 @@ export class UserReservationController {
         return this.reservationUsecase.makeReservation(user, createDto);
     }
 
-    // 현재 쓰이는 곳 없음
+    // 내 모든 예약
     @Get('me')
     @ApiOperation({ summary: '내 예약 리스트 조회, 자원 타입별 ' })
     @ApiDataResponse({
@@ -218,35 +218,35 @@ export class UserReservationController {
         return this.reservationUsecase.updateReservation(reservationId, updateDto);
     }
 
-    @Patch(':reservationId/title')
-    @ApiOperation({ summary: '예약 제목 수정' })
-    @ApiDataResponse({
-        description: '예약 제목 수정 성공',
-        type: ReservationResponseDto,
-    })
-    async updateTitle(
-        @User() user: UserEntity,
-        @Param('reservationId') reservationId: string,
-        @Body() updateDto: UpdateReservationTitleDto,
-    ): Promise<ReservationResponseDto> {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateTitle(reservationId, updateDto);
-    }
+    // @Patch(':reservationId/title')
+    // @ApiOperation({ summary: '예약 제목 수정' })
+    // @ApiDataResponse({
+    //     description: '예약 제목 수정 성공',
+    //     type: ReservationResponseDto,
+    // })
+    // async updateTitle(
+    //     @User() user: UserEntity,
+    //     @Param('reservationId') reservationId: string,
+    //     @Body() updateDto: UpdateReservationTitleDto,
+    // ): Promise<ReservationResponseDto> {
+    //     await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
+    //     return this.reservationUsecase.updateTitle(reservationId, updateDto);
+    // }
 
-    @Patch(':reservationId/time')
-    @ApiOperation({ summary: '예약 시간 수정' })
-    @ApiDataResponse({
-        description: '예약 시간 수정 성공',
-        type: ReservationResponseDto,
-    })
-    async update(
-        @User() user: UserEntity,
-        @Param('reservationId') reservationId: string,
-        @Body() updateDto: UpdateReservationTimeDto,
-    ): Promise<ReservationResponseDto> {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateTime(reservationId, updateDto);
-    }
+    // @Patch(':reservationId/time')
+    // @ApiOperation({ summary: '예약 시간 수정' })
+    // @ApiDataResponse({
+    //     description: '예약 시간 수정 성공',
+    //     type: ReservationResponseDto,
+    // })
+    // async update(
+    //     @User() user: UserEntity,
+    //     @Param('reservationId') reservationId: string,
+    //     @Body() updateDto: UpdateReservationTimeDto,
+    // ): Promise<ReservationResponseDto> {
+    //     await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
+    //     return this.reservationUsecase.updateTime(reservationId, updateDto);
+    // }
 
     @Patch(':reservationId/status/cancel')
     @ApiOperation({ summary: '예약 취소 #사용자/예약상세페이지' })
@@ -263,20 +263,20 @@ export class UserReservationController {
         return this.reservationUsecase.updateStatus(reservationId, { status: ReservationStatus.CANCELLED });
     }
 
-    @Patch(':reservationId/participants')
-    @ApiOperation({ summary: '예약 참가자 수정' })
-    @ApiDataResponse({
-        description: '예약 참가자 수정 성공',
-        type: ReservationResponseDto,
-    })
-    async updateParticipants(
-        @User() user: UserEntity,
-        @Param('reservationId') reservationId: string,
-        @Body() updateDto: UpdateReservationParticipantsDto,
-    ): Promise<ReservationResponseDto> {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateParticipants(reservationId, updateDto);
-    }
+    // @Patch(':reservationId/participants')
+    // @ApiOperation({ summary: '예약 참가자 수정' })
+    // @ApiDataResponse({
+    //     description: '예약 참가자 수정 성공',
+    //     type: ReservationResponseDto,
+    // })
+    // async updateParticipants(
+    //     @User() user: UserEntity,
+    //     @Param('reservationId') reservationId: string,
+    //     @Body() updateDto: UpdateReservationParticipantsDto,
+    // ): Promise<ReservationResponseDto> {
+    //     await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
+    //     return this.reservationUsecase.updateParticipants(reservationId, updateDto);
+    // }
 
     // check api
     @Patch(':reservationId/return-vehicle')

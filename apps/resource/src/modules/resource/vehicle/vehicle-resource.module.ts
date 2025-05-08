@@ -5,12 +5,8 @@ import { VehicleResourceHandler } from './application/handlers/vehicle-resource.
 import { VehicleInfoService } from './application/services/vehicle-info.service';
 import { ConsumableService } from './application/services/consumable.service';
 import { MaintenanceService } from './application/services/maintenance.service';
-import { ConsumableController } from './infrastructure/adapters/in/web/controllers/consumable.controller';
-import { MaintenanceController } from './infrastructure/adapters/in/web/controllers/maintenance.controller';
-import { VehicleInfoRepository } from './infrastructure/adapters/out/persistence/vehicle-info.repository';
 import { ConsumableRepository } from './infrastructure/adapters/out/persistence/consumable.repository';
 import { MaintenanceRepository } from './infrastructure/adapters/out/persistence/maintenance.repository';
-import { VehicleInfoController } from './infrastructure/adapters/in/web/controllers/vehicle-info.controller';
 import { VehicleInfoUsecase } from './application/usecases/vehicle-info.usecase';
 import { ConsumableUsecase } from './application/usecases/consumable.usecase';
 import { MaintenanceUsecase } from './application/usecases/maintenance.usecase';
@@ -20,6 +16,7 @@ import { AdminMaintenanceController } from './infrastructure/adapters/in/web/con
 import { VehicleEventHandler } from './application/handlers/vehicle-event.handler';
 import { UserConsumableController } from './infrastructure/adapters/in/web/controllers/v1/consumable.controller';
 import { UserMaintenanceController } from './infrastructure/adapters/in/web/controllers/v1/maintenance.controller';
+import { VehicleInfoRepository } from './infrastructure/adapters/out/persistence/vehicle-info.repository';
 @Module({
     imports: [TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance])],
     providers: [

@@ -60,6 +60,9 @@ export class ReservationUsecase {
         const notClosedReservations = await this.reservationService.findAll({
             where: {
                 status: ReservationStatus.CONFIRMED,
+                resource: {
+                    type: Not(ResourceType.VEHICLE),
+                },
                 endDate: LessThanOrEqual(DateUtil.date(now).toDate()),
             },
         });
@@ -70,9 +73,14 @@ export class ReservationUsecase {
         const reservations = await this.reservationService.findAll({
             where: {
                 status: ReservationStatus.CONFIRMED,
+                resource: {
+                    type: Not(ResourceType.VEHICLE),
+                },
                 endDate: MoreThan(DateUtil.date(now).toDate()),
             },
         });
+        console.log(reservations);
+
         for (const reservation of reservations) {
             this.createReservationClosingJob(reservation);
         }
@@ -83,6 +91,9 @@ export class ReservationUsecase {
         const notClosedReservations = await this.reservationService.findAll({
             where: {
                 status: ReservationStatus.CONFIRMED,
+                resource: {
+                    type: Not(ResourceType.VEHICLE),
+                },
                 endDate: LessThanOrEqual(DateUtil.date(now).toDate()),
             },
         });
@@ -252,30 +263,7 @@ export class ReservationUsecase {
         };
     }
 
-    /** 내가 만든 예약들 중 현재 진행중인 예약 하나 */
-    // Deprecated
-    async findMyCurrentReservation(
-        employeeId: string,
-        resourceType: ResourceType,
-    ): Promise<ReservationWithRelationsResponseDto> {
-        const now = DateUtil.now().format();
-
-        const where: FindOptionsWhere<Reservation> = {
-            participants: { employeeId, type: ParticipantsType.RESERVER },
-            status: ReservationStatus.CONFIRMED,
-            resource: { type: resourceType as ResourceType },
-            startDate: LessThan(DateUtil.date(now).toDate()),
-            endDate: MoreThan(DateUtil.date(now).toDate()),
-        };
-
-        const reservation = await this.reservationService.findOne({
-            where,
-            relations: ['resource'],
-            withDeleted: true,
-        });
-        return reservation ? new ReservationWithRelationsResponseDto(reservation) : null;
-    }
-
+    // 홈화면 이용중 예약
     async findMyUsingReservationList(employeeId: string): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
         // 현재 이용중인 예약 조회
         const where: FindOptionsWhere<Reservation>[] = [
@@ -478,46 +466,6 @@ export class ReservationUsecase {
         return reservationResponseDto;
     }
 
-    async findMyAllReservations(
-        employeeId: string,
-        page?: number,
-        limit?: number,
-        type?: ParticipantsType,
-    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
-        const today = DateUtil.now().toDate();
-        const where: FindOptionsWhere<Reservation> = {
-            participants: { employeeId, type },
-            status: type === ParticipantsType.RESERVER ? Not(ReservationStatus.CLOSED) : ReservationStatus.CONFIRMED,
-            // startDate: LessThanOrEqual(today),
-            endDate: MoreThanOrEqual(today),
-        };
-        const options: RepositoryOptions = {
-            where,
-            relations: ['participants', 'participants.employee'],
-        };
-        const reservations = await this.reservationService.findAll(options);
-        const count = reservations.length;
-
-        const reservationWithParticipants = await this.reservationService.findAll({
-            where: {
-                reservationId: In(reservations.map((r) => r.reservationId)),
-            },
-            skip: (page - 1) * limit,
-            take: limit,
-        });
-        return {
-            items: reservationWithParticipants.map(
-                (reservation) => new ReservationWithRelationsResponseDto(reservation),
-            ),
-            meta: {
-                total: count,
-                page,
-                limit,
-                hasNext: page * limit < count,
-            },
-        };
-    }
-
     // v1 관리자 예약 리스트 조회
     async findReservationList(
         startDate?: string,
@@ -557,17 +505,18 @@ export class ReservationUsecase {
                 endDate: MoreThan(DateUtil.date(regex.test(startDate) ? startDate : startDate + ' 00:00:00').toDate()),
             };
         }
-        if (!startDate && !endDate) {
-            const thisMonth = DateUtil.format(new Date(), 'YYYY-MM');
-            const startDate = `${thisMonth}-01 00:00:00`;
-            const endDate = `${thisMonth}-31 23:59:59`;
+        // 날짜 쿼리 없을 시 전체 조회
+        // if (!startDate && !endDate) {
+        //     const thisMonth = DateUtil.format(new Date(), 'YYYY-MM');
+        //     const startDate = `${thisMonth}-01 00:00:00`;
+        //     const endDate = `${thisMonth}-31 23:59:59`;
 
-            where = {
-                ...where,
-                startDate: MoreThan(DateUtil.date(startDate).toDate()),
-                endDate: LessThan(DateUtil.date(endDate).toDate()),
-            };
-        }
+        //     where = {
+        //         ...where,
+        //         startDate: MoreThan(DateUtil.date(startDate).toDate()),
+        //         endDate: LessThan(DateUtil.date(endDate).toDate()),
+        //     };
+        // }
 
         const reservations = await this.reservationService.findAll({
             where,
@@ -578,6 +527,53 @@ export class ReservationUsecase {
             (reservation) => new ReservationWithRelationsResponseDto(reservation),
         );
         return reservationResponseDtos;
+    }
+
+    // 관리자 - 확인이필요한 예약
+    async findCheckReservationList(
+        query: PaginationQueryDto,
+    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+        const { page, limit } = query;
+        // 숙소 - 예약 승인 대기
+        // 차량 - 예약 확정, 반납 완료
+        const where: FindOptionsWhere<Reservation>[] = [
+            {
+                status: ReservationStatus.PENDING,
+                resource: {
+                    type: ResourceType.ACCOMMODATION,
+                },
+            },
+            {
+                status: ReservationStatus.CONFIRMED,
+                resource: {
+                    type: ResourceType.VEHICLE,
+                },
+                reservationVehicles: {
+                    isReturned: true,
+                },
+            },
+        ];
+
+        const options: RepositoryOptions = {
+            where,
+            relations: ['resource', 'reservationVehicles'],
+            withDeleted: true,
+        };
+
+        const reservations = await this.reservationService.findAll(options);
+        const reservationResponseDtos = reservations.map(
+            (reservation) => new ReservationWithRelationsResponseDto(reservation),
+        );
+
+        return {
+            items: reservationResponseDtos,
+            meta: {
+                total: reservations.length,
+                page: 1,
+                limit: reservations.length,
+                hasNext: false,
+            },
+        };
     }
 
     async checkReservationAccess(reservationId: string, employeeId: string): Promise<boolean> {
@@ -674,7 +670,9 @@ export class ReservationUsecase {
                 });
 
                 if (reservationWithResource.status === ReservationStatus.CONFIRMED) {
-                    this.createReservationClosingJob(reservationWithResource);
+                    if (reservationWithResource.resource.type !== ResourceType.VEHICLE) {
+                        this.createReservationClosingJob(reservationWithResource);
+                    }
                     const notiTarget = [...createDto.participantIds, user.employeeId];
                     this.eventEmitter.emit('create.notification', {
                         notificationType: NotificationType.RESERVATION_STATUS_CONFIRMED,
@@ -831,7 +829,10 @@ export class ReservationUsecase {
 
         // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
         if (hasUpdateTime) {
-            if (reservation.status === ReservationStatus.CONFIRMED) {
+            if (
+                reservation.status === ReservationStatus.CONFIRMED &&
+                reservation.resource.type !== ResourceType.VEHICLE
+            ) {
                 // 기존 Job 삭제
                 this.deleteReservationClosingJob(reservationId);
                 this.createReservationClosingJob(reservation);
@@ -1188,9 +1189,11 @@ export class ReservationUsecase {
                 repositoryOptions: { queryRunner },
             });
 
+            const [systemUser] = await this.eventEmitter.emitAsync('find.user.system.admin');
             const notiTarget = [
                 ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
                 user.employeeId,
+                ...systemUser.map((user) => user.employeeId),
             ];
             this.eventEmitter.emit('create.notification', {
                 notificationType: NotificationType.RESOURCE_VEHICLE_RETURNED,
@@ -1211,6 +1214,14 @@ export class ReservationUsecase {
         } finally {
             await queryRunner.release();
         }
+    }
+
+    async returnVehicleCheck(reservationId: string): Promise<boolean> {
+        // const reservation = await this.reservationService.findOne(reservationId);
+        // if (reservation.status !== ReservationStatus.USING) {
+        //     return false;
+        // }
+        return true;
     }
 
     // 이 아래에 Job 삭제 메서드 추가

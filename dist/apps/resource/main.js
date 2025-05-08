@@ -6542,6 +6542,9 @@ let ReservationUsecase = class ReservationUsecase {
         const notClosedReservations = await this.reservationService.findAll({
             where: {
                 status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                resource: {
+                    type: (0, typeorm_1.Not)(resource_type_enum_1.ResourceType.VEHICLE),
+                },
                 endDate: (0, typeorm_1.LessThanOrEqual)(date_util_1.DateUtil.date(now).toDate()),
             },
         });
@@ -6551,9 +6554,13 @@ let ReservationUsecase = class ReservationUsecase {
         const reservations = await this.reservationService.findAll({
             where: {
                 status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                resource: {
+                    type: (0, typeorm_1.Not)(resource_type_enum_1.ResourceType.VEHICLE),
+                },
                 endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(now).toDate()),
             },
         });
+        console.log(reservations);
         for (const reservation of reservations) {
             this.createReservationClosingJob(reservation);
         }
@@ -6563,6 +6570,9 @@ let ReservationUsecase = class ReservationUsecase {
         const notClosedReservations = await this.reservationService.findAll({
             where: {
                 status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                resource: {
+                    type: (0, typeorm_1.Not)(resource_type_enum_1.ResourceType.VEHICLE),
+                },
                 endDate: (0, typeorm_1.LessThanOrEqual)(date_util_1.DateUtil.date(now).toDate()),
             },
         });
@@ -6676,22 +6686,6 @@ let ReservationUsecase = class ReservationUsecase {
             resource: new dtos_index_1.ResourceResponseDto(resource),
             groupedReservations: groupedReservationsResponse,
         };
-    }
-    async findMyCurrentReservation(employeeId, resourceType) {
-        const now = date_util_1.DateUtil.now().format();
-        const where = {
-            participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
-            status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
-            resource: { type: resourceType },
-            startDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.date(now).toDate()),
-            endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(now).toDate()),
-        };
-        const reservation = await this.reservationService.findOne({
-            where,
-            relations: ['resource'],
-            withDeleted: true,
-        });
-        return reservation ? new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation) : null;
     }
     async findMyUsingReservationList(employeeId) {
         const where = [
@@ -6860,36 +6854,6 @@ let ReservationUsecase = class ReservationUsecase {
         reservationResponseDto.isMine = reservationResponseDto.reservers.some((reserver) => reserver.employeeId === user.employeeId);
         return reservationResponseDto;
     }
-    async findMyAllReservations(employeeId, page, limit, type) {
-        const today = date_util_1.DateUtil.now().toDate();
-        const where = {
-            participants: { employeeId, type },
-            status: type === reservation_type_enum_1.ParticipantsType.RESERVER ? (0, typeorm_1.Not)(reservation_type_enum_1.ReservationStatus.CLOSED) : reservation_type_enum_1.ReservationStatus.CONFIRMED,
-            endDate: (0, typeorm_1.MoreThanOrEqual)(today),
-        };
-        const options = {
-            where,
-            relations: ['participants', 'participants.employee'],
-        };
-        const reservations = await this.reservationService.findAll(options);
-        const count = reservations.length;
-        const reservationWithParticipants = await this.reservationService.findAll({
-            where: {
-                reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
-            },
-            skip: (page - 1) * limit,
-            take: limit,
-        });
-        return {
-            items: reservationWithParticipants.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
-            meta: {
-                total: count,
-                page,
-                limit,
-                hasNext: page * limit < count,
-            },
-        };
-    }
     async findReservationList(startDate, endDate, resourceType, resourceId, status) {
         if (startDate && endDate && startDate > endDate) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
@@ -6919,16 +6883,6 @@ let ReservationUsecase = class ReservationUsecase {
                 endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(regex.test(startDate) ? startDate : startDate + ' 00:00:00').toDate()),
             };
         }
-        if (!startDate && !endDate) {
-            const thisMonth = date_util_1.DateUtil.format(new Date(), 'YYYY-MM');
-            const startDate = `${thisMonth}-01 00:00:00`;
-            const endDate = `${thisMonth}-31 23:59:59`;
-            where = {
-                ...where,
-                startDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(startDate).toDate()),
-                endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.date(endDate).toDate()),
-            };
-        }
         const reservations = await this.reservationService.findAll({
             where,
             relations: ['resource', 'participants', 'participants.employee'],
@@ -6936,6 +6890,42 @@ let ReservationUsecase = class ReservationUsecase {
         });
         const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation));
         return reservationResponseDtos;
+    }
+    async findCheckReservationList(query) {
+        const { page, limit } = query;
+        const where = [
+            {
+                status: reservation_type_enum_1.ReservationStatus.PENDING,
+                resource: {
+                    type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                },
+            },
+            {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                resource: {
+                    type: resource_type_enum_1.ResourceType.VEHICLE,
+                },
+                reservationVehicles: {
+                    isReturned: true,
+                },
+            },
+        ];
+        const options = {
+            where,
+            relations: ['resource', 'reservationVehicles'],
+            withDeleted: true,
+        };
+        const reservations = await this.reservationService.findAll(options);
+        const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation));
+        return {
+            items: reservationResponseDtos,
+            meta: {
+                total: reservations.length,
+                page: 1,
+                limit: reservations.length,
+                hasNext: false,
+            },
+        };
     }
     async checkReservationAccess(reservationId, employeeId) {
         const reservation = await this.reservationService.findOne({
@@ -7004,7 +6994,9 @@ let ReservationUsecase = class ReservationUsecase {
                     withDeleted: true,
                 });
                 if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
-                    this.createReservationClosingJob(reservationWithResource);
+                    if (reservationWithResource.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
+                        this.createReservationClosingJob(reservationWithResource);
+                    }
                     const notiTarget = [...createDto.participantIds, user.employeeId];
                     this.eventEmitter.emit('create.notification', {
                         notificationType: notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED,
@@ -7128,7 +7120,8 @@ let ReservationUsecase = class ReservationUsecase {
             }
         }
         if (hasUpdateTime) {
-            if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+            if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED &&
+                reservation.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
                 this.deleteReservationClosingJob(reservationId);
                 this.createReservationClosingJob(reservation);
             }
@@ -7400,9 +7393,11 @@ let ReservationUsecase = class ReservationUsecase {
                 },
                 repositoryOptions: { queryRunner },
             });
+            const [systemUser] = await this.eventEmitter.emitAsync('find.user.system.admin');
             const notiTarget = [
                 ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
                 user.employeeId,
+                ...systemUser.map((user) => user.employeeId),
             ];
             this.eventEmitter.emit('create.notification', {
                 notificationType: notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED,
@@ -7424,6 +7419,9 @@ let ReservationUsecase = class ReservationUsecase {
         finally {
             await queryRunner.release();
         }
+    }
+    async returnVehicleCheck(reservationId) {
+        return true;
     }
     deleteReservationClosingJob(reservationId) {
         const jobName = `closing-${reservationId}`;
@@ -7530,7 +7528,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdminReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -7546,6 +7544,7 @@ const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.e
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const reservation_response_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/reservation-response.dto */ "./apps/resource/src/modules/reservation/application/dtos/reservation-response.dto.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
 let AdminReservationController = class AdminReservationController {
     constructor(reservationUsecase) {
         this.reservationUsecase = reservationUsecase;
@@ -7553,23 +7552,14 @@ let AdminReservationController = class AdminReservationController {
     async findReservationList(startDate, endDate, resourceType, resourceId, status) {
         return this.reservationUsecase.findReservationList(startDate, endDate, resourceType, resourceId, status);
     }
+    async findCheckReservationList(query) {
+        return this.reservationUsecase.findCheckReservationList(query);
+    }
     async findOne(user, reservationId) {
         return this.reservationUsecase.findReservationDetail(user, reservationId);
     }
-    async updateTitle(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateTitle(reservationId, updateDto);
-    }
-    async update(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateTime(reservationId, updateDto);
-    }
     async updateStatus(reservationId, updateDto) {
         return this.reservationUsecase.updateStatus(reservationId, updateDto);
-    }
-    async updateParticipants(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateParticipants(reservationId, updateDto);
     }
 };
 exports.AdminReservationController = AdminReservationController;
@@ -7614,6 +7604,18 @@ __decorate([
     __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
 ], AdminReservationController.prototype, "findReservationList", null);
 __decorate([
+    (0, common_1.Get)('check'),
+    (0, swagger_1.ApiOperation)({ summary: '확인이 필요한 예약들' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '확인이 필요한 예약들 조회 성공',
+        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], AdminReservationController.prototype, "findCheckReservationList", null);
+__decorate([
     (0, common_1.Get)(':reservationId'),
     (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -7623,37 +7625,9 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _d : Object, String]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _f : Object, String]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], AdminReservationController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/title'),
-    (0, swagger_1.ApiOperation)({ summary: '예약 제목 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 제목 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _f : Object, String, typeof (_g = typeof dtos_index_1.UpdateReservationTitleDto !== "undefined" && dtos_index_1.UpdateReservationTitleDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
-], AdminReservationController.prototype, "updateTitle", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/time'),
-    (0, swagger_1.ApiOperation)({ summary: '예약 시간 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 시간 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String, typeof (_k = typeof dtos_index_1.UpdateReservationTimeDto !== "undefined" && dtos_index_1.UpdateReservationTimeDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
-], AdminReservationController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/status'),
     (0, swagger_1.ApiOperation)({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' }),
@@ -7664,23 +7638,9 @@ __decorate([
     __param(0, (0, common_1.Param)('reservationId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_m = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [String, typeof (_h = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], AdminReservationController.prototype, "updateStatus", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/participants'),
-    (0, swagger_1.ApiOperation)({ summary: '예약 참가자 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 참가자 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_p = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _p : Object, String, typeof (_q = typeof dtos_index_1.UpdateReservationParticipantsDto !== "undefined" && dtos_index_1.UpdateReservationParticipantsDto) === "function" ? _q : Object]),
-    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
-], AdminReservationController.prototype, "updateParticipants", null);
 exports.AdminReservationController = AdminReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 - 관리자 페이지'),
     (0, common_1.Controller)('v1/admin/reservations'),
@@ -7711,7 +7671,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -7776,21 +7736,9 @@ let UserReservationController = class UserReservationController {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateReservation(reservationId, updateDto);
     }
-    async updateTitle(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateTitle(reservationId, updateDto);
-    }
-    async update(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateTime(reservationId, updateDto);
-    }
     async updateStatusCancel(user, reservationId) {
         await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
         return this.reservationUsecase.updateStatus(reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELLED });
-    }
-    async updateParticipants(user, reservationId, updateDto) {
-        await this.reservationUsecase.checkReservationAccess(reservationId, user.employeeId);
-        return this.reservationUsecase.updateParticipants(reservationId, updateDto);
     }
     async returnVehicle(user, reservationId, returnDto) {
         return this.reservationUsecase.returnVehicle(user, reservationId, returnDto);
@@ -7971,34 +7919,6 @@ __decorate([
     __metadata("design:returntype", typeof (_12 = typeof Promise !== "undefined" && Promise) === "function" ? _12 : Object)
 ], UserReservationController.prototype, "updateReservation", null);
 __decorate([
-    (0, common_1.Patch)(':reservationId/title'),
-    (0, swagger_1.ApiOperation)({ summary: '예약 제목 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 제목 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_13 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _13 : Object, String, typeof (_14 = typeof dtos_index_1.UpdateReservationTitleDto !== "undefined" && dtos_index_1.UpdateReservationTitleDto) === "function" ? _14 : Object]),
-    __metadata("design:returntype", typeof (_15 = typeof Promise !== "undefined" && Promise) === "function" ? _15 : Object)
-], UserReservationController.prototype, "updateTitle", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/time'),
-    (0, swagger_1.ApiOperation)({ summary: '예약 시간 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 시간 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_16 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _16 : Object, String, typeof (_17 = typeof dtos_index_1.UpdateReservationTimeDto !== "undefined" && dtos_index_1.UpdateReservationTimeDto) === "function" ? _17 : Object]),
-    __metadata("design:returntype", typeof (_18 = typeof Promise !== "undefined" && Promise) === "function" ? _18 : Object)
-], UserReservationController.prototype, "update", null);
-__decorate([
     (0, common_1.Patch)(':reservationId/status/cancel'),
     (0, swagger_1.ApiOperation)({ summary: '예약 취소 #사용자/예약상세페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -8008,23 +7928,9 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_19 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _19 : Object, String]),
-    __metadata("design:returntype", typeof (_20 = typeof Promise !== "undefined" && Promise) === "function" ? _20 : Object)
+    __metadata("design:paramtypes", [typeof (_13 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _13 : Object, String]),
+    __metadata("design:returntype", typeof (_14 = typeof Promise !== "undefined" && Promise) === "function" ? _14 : Object)
 ], UserReservationController.prototype, "updateStatusCancel", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/participants'),
-    (0, swagger_1.ApiOperation)({ summary: '예약 참가자 수정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        description: '예약 참가자 수정 성공',
-        type: dtos_index_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_21 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _21 : Object, String, typeof (_22 = typeof dtos_index_1.UpdateReservationParticipantsDto !== "undefined" && dtos_index_1.UpdateReservationParticipantsDto) === "function" ? _22 : Object]),
-    __metadata("design:returntype", typeof (_23 = typeof Promise !== "undefined" && Promise) === "function" ? _23 : Object)
-], UserReservationController.prototype, "updateParticipants", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/return-vehicle'),
     (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
@@ -8036,8 +7942,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_24 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _24 : Object, String, typeof (_25 = typeof dtos_index_1.ReturnVehicleDto !== "undefined" && dtos_index_1.ReturnVehicleDto) === "function" ? _25 : Object]),
-    __metadata("design:returntype", typeof (_26 = typeof Promise !== "undefined" && Promise) === "function" ? _26 : Object)
+    __metadata("design:paramtypes", [typeof (_15 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _15 : Object, String, typeof (_16 = typeof dtos_index_1.ReturnVehicleDto !== "undefined" && dtos_index_1.ReturnVehicleDto) === "function" ? _16 : Object]),
+    __metadata("design:returntype", typeof (_17 = typeof Promise !== "undefined" && Promise) === "function" ? _17 : Object)
 ], UserReservationController.prototype, "returnVehicle", null);
 __decorate([
     (0, swagger_1.ApiExcludeEndpoint)(),
@@ -14098,7 +14004,6 @@ const vehicle_resource_handler_1 = __webpack_require__(/*! ./application/handler
 const vehicle_info_service_1 = __webpack_require__(/*! ./application/services/vehicle-info.service */ "./apps/resource/src/modules/resource/vehicle/application/services/vehicle-info.service.ts");
 const consumable_service_1 = __webpack_require__(/*! ./application/services/consumable.service */ "./apps/resource/src/modules/resource/vehicle/application/services/consumable.service.ts");
 const maintenance_service_1 = __webpack_require__(/*! ./application/services/maintenance.service */ "./apps/resource/src/modules/resource/vehicle/application/services/maintenance.service.ts");
-const vehicle_info_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/vehicle-info.repository */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/vehicle-info.repository.ts");
 const consumable_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/consumable.repository */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/consumable.repository.ts");
 const maintenance_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/maintenance.repository */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/maintenance.repository.ts");
 const vehicle_info_usecase_1 = __webpack_require__(/*! ./application/usecases/vehicle-info.usecase */ "./apps/resource/src/modules/resource/vehicle/application/usecases/vehicle-info.usecase.ts");
@@ -14110,6 +14015,7 @@ const admin_maintenance_controller_1 = __webpack_require__(/*! ./infrastructure/
 const vehicle_event_handler_1 = __webpack_require__(/*! ./application/handlers/vehicle-event.handler */ "./apps/resource/src/modules/resource/vehicle/application/handlers/vehicle-event.handler.ts");
 const consumable_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/consumable.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/consumable.controller.ts");
 const maintenance_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/maintenance.controller */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/in/web/controllers/v1/maintenance.controller.ts");
+const vehicle_info_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/vehicle-info.repository */ "./apps/resource/src/modules/resource/vehicle/infrastructure/adapters/out/persistence/vehicle-info.repository.ts");
 let VehicleResourceModule = class VehicleResourceModule {
 };
 exports.VehicleResourceModule = VehicleResourceModule;
