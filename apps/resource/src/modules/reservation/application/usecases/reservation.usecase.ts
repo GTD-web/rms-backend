@@ -556,7 +556,7 @@ export class ReservationUsecase {
 
         const options: RepositoryOptions = {
             where,
-            relations: ['resource', 'reservationVehicles'],
+            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
             withDeleted: true,
         };
 

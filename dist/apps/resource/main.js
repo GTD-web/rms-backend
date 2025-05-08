@@ -6938,7 +6938,7 @@ let ReservationUsecase = class ReservationUsecase {
         ];
         const options = {
             where,
-            relations: ['resource', 'reservationVehicles'],
+            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
             withDeleted: true,
         };
         const reservations = await this.reservationService.findAll(options);
