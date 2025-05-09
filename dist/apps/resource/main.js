@@ -3155,6 +3155,9 @@ let FileService = class FileService {
         return file;
     }
     async findAllFilesByFilePath(filePath) {
+        if (filePath.length === 0) {
+            return [];
+        }
         const files = await this.fileRepository.findAllByFilePath(filePath);
         return files;
     }
