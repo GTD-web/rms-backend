@@ -463,14 +463,22 @@ __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ReturnVehicleDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = void 0;
+exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ReturnVehicleDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UpdateNotificationSettingsDto = exports.CheckPasswordDto = exports.ChangePasswordDto = exports.ChangeRoleDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
+exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login.dto */ "./apps/resource/src/modules/auth/application/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login-response.dto */ "./apps/resource/src/modules/auth/application/dto/login-response.dto.ts");
 Object.defineProperty(exports, "LoginResponseDto", ({ enumerable: true, get: function () { return login_response_dto_1.LoginResponseDto; } }));
 var user_response_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/user-response.dto */ "./apps/resource/src/modules/auth/application/dto/user-response.dto.ts");
 Object.defineProperty(exports, "UserResponseDto", ({ enumerable: true, get: function () { return user_response_dto_1.UserResponseDto; } }));
+var change_role_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/change-role.dto */ "./apps/resource/src/modules/auth/application/dto/change-role.dto.ts");
+Object.defineProperty(exports, "ChangeRoleDto", ({ enumerable: true, get: function () { return change_role_dto_1.ChangeRoleDto; } }));
+var change_password_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/change-password.dto */ "./apps/resource/src/modules/auth/application/dto/change-password.dto.ts");
+Object.defineProperty(exports, "ChangePasswordDto", ({ enumerable: true, get: function () { return change_password_dto_1.ChangePasswordDto; } }));
+var check_password_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/check-password.dto */ "./apps/resource/src/modules/auth/application/dto/check-password.dto.ts");
+Object.defineProperty(exports, "CheckPasswordDto", ({ enumerable: true, get: function () { return check_password_dto_1.CheckPasswordDto; } }));
+var notification_settings_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/notification-settings.dto */ "./apps/resource/src/modules/auth/application/dto/notification-settings.dto.ts");
+Object.defineProperty(exports, "UpdateNotificationSettingsDto", ({ enumerable: true, get: function () { return notification_settings_dto_1.UpdateNotificationSettingsDto; } }));
 var create_resource_dto_1 = __webpack_require__(/*! ./modules/resource/common/application/dtos/create-resource.dto */ "./apps/resource/src/modules/resource/common/application/dtos/create-resource.dto.ts");
 Object.defineProperty(exports, "CreateResourceDto", ({ enumerable: true, get: function () { return create_resource_dto_1.CreateResourceDto; } }));
 Object.defineProperty(exports, "CreateResourceGroupDto", ({ enumerable: true, get: function () { return create_resource_dto_1.CreateResourceGroupDto; } }));
@@ -626,6 +634,51 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], ChangePasswordDto.prototype, "newPassword", void 0);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/auth/application/dto/change-role.dto.ts":
+/*!***************************************************************************!*\
+  !*** ./apps/resource/src/modules/auth/application/dto/change-role.dto.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ChangeRoleDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class ChangeRoleDto {
+}
+exports.ChangeRoleDto = ChangeRoleDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'userId',
+        description: '유저 아이디',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ChangeRoleDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: true,
+        description: '자원 담당자 여부',
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Boolean)
+], ChangeRoleDto.prototype, "isResourceAdmin", void 0);
 
 
 /***/ }),
@@ -1208,6 +1261,9 @@ let ResourceManagerUseCase = class ResourceManagerUseCase {
         const resourceManagers = await this.userService.findAll({
             where: {
                 roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.RESOURCE_ADMIN}' = ANY("roles")`),
+                employee: {
+                    department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+                },
             },
             relations: ['employee'],
         });
@@ -1386,6 +1442,9 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
 const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let UserUsecase = class UserUsecase {
     constructor(userService) {
         this.userService = userService;
@@ -1429,6 +1488,41 @@ let UserUsecase = class UserUsecase {
         user.isPushNotificationEnabled = updateDto.isPushNotificationEnabled;
         await this.userService.update(user);
         return this.findByUserId(userId);
+    }
+    async findAll() {
+        const users = await this.userService.findAll({
+            where: {
+                employee: {
+                    department: (0, typeorm_1.Not)((0, typeorm_2.In)(['퇴사', '관리자'])),
+                },
+            },
+            relations: ['employee'],
+        });
+        const departments = new Map();
+        users.forEach((resourceManager) => {
+            if (!departments.has(resourceManager.employee.department)) {
+                departments.set(resourceManager.employee.department, []);
+            }
+            const data = {
+                ...resourceManager.employee,
+                isResourceAdmin: resourceManager.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN),
+            };
+            departments.get(resourceManager.employee.department)?.push(data);
+        });
+        return Array.from(departments.entries()).map(([department, employees]) => ({
+            department,
+            employees,
+        }));
+    }
+    async changeRole(changeRoleDto) {
+        const user = await this.userService.findByUserId(changeRoleDto.userId);
+        if (!user) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
+        }
+        user.roles = changeRoleDto.isResourceAdmin
+            ? [...user.roles, role_type_enum_1.Role.RESOURCE_ADMIN]
+            : user.roles.filter((role) => role !== role_type_enum_1.Role.RESOURCE_ADMIN);
+        await this.userService.update(user);
     }
 };
 exports.UserUsecase = UserUsecase;
@@ -1725,28 +1819,26 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdminUserController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const user_usecase_1 = __webpack_require__(/*! @resource/modules/auth/application/usecases/user.usecase */ "./apps/resource/src/modules/auth/application/usecases/user.usecase.ts");
 const user_response_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/user-response.dto */ "./apps/resource/src/modules/auth/application/dto/user-response.dto.ts");
-const check_password_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/check-password.dto */ "./apps/resource/src/modules/auth/application/dto/check-password.dto.ts");
 const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const change_role_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/change-role.dto */ "./apps/resource/src/modules/auth/application/dto/change-role.dto.ts");
 let AdminUserController = class AdminUserController {
     constructor(userUsecase) {
         this.userUsecase = userUsecase;
     }
-    findUser(user) {
-        return null;
+    findUser() {
+        return this.userUsecase.findAll();
     }
-    changeRole(user, checkPasswordDto) {
-        return null;
+    changeRole(changeRoleDto) {
+        return this.userUsecase.changeRole(changeRoleDto);
     }
 };
 exports.AdminUserController = AdminUserController;
@@ -1754,19 +1846,17 @@ __decorate([
     (0, common_1.Get)(''),
     (0, swagger_1.ApiOperation)({ summary: '직원 목록 조회	자원담당자로 설정하기 위한 직원 목록' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '내 상세 정보 조회 성공', type: user_response_dto_1.UserResponseDto }),
-    __param(0, (0, user_decorator_1.User)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AdminUserController.prototype, "findUser", null);
 __decorate([
     (0, common_1.Patch)('change/role'),
     (0, swagger_1.ApiOperation)({ summary: '자원 담당자 설정	자원별 담당자 설정 또는 토글 방식' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '비밀번호 확인 성공' }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '자원 담당자 설정 성공' }),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _c : Object, typeof (_d = typeof check_password_dto_1.CheckPasswordDto !== "undefined" && check_password_dto_1.CheckPasswordDto) === "function" ? _d : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof change_role_dto_1.ChangeRoleDto !== "undefined" && change_role_dto_1.ChangeRoleDto) === "function" ? _b : Object]),
     __metadata("design:returntype", void 0)
 ], AdminUserController.prototype, "changeRole", null);
 exports.AdminUserController = AdminUserController = __decorate([

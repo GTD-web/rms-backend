@@ -9,6 +9,7 @@ import { CheckPasswordDto } from '@resource/modules/auth/application/dto/check-p
 import { ChangePasswordDto } from '@resource/modules/auth/application/dto/change-password.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
+import { ChangeRoleDto } from '@resource/modules/auth/application/dto/change-role.dto';
 
 @ApiTags('5. 유저 - 관리자 페이지')
 @ApiBearerAuth()
@@ -20,14 +21,14 @@ export class AdminUserController {
     @Get('')
     @ApiOperation({ summary: '직원 목록 조회	자원담당자로 설정하기 위한 직원 목록' })
     @ApiDataResponse({ status: 200, description: '내 상세 정보 조회 성공', type: UserResponseDto })
-    findUser(@User() user: UserEntity) {
-        return null;
+    findUser() {
+        return this.userUsecase.findAll();
     }
     // check api - url
     @Patch('change/role')
     @ApiOperation({ summary: '자원 담당자 설정	자원별 담당자 설정 또는 토글 방식' })
-    @ApiDataResponse({ status: 200, description: '비밀번호 확인 성공' })
-    changeRole(@User() user: UserEntity, @Body() checkPasswordDto: CheckPasswordDto) {
-        return null;
+    @ApiDataResponse({ status: 200, description: '자원 담당자 설정 성공' })
+    changeRole(@Body() changeRoleDto: ChangeRoleDto) {
+        return this.userUsecase.changeRole(changeRoleDto);
     }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { Role } from '@libs/enums/role-type.enum';
-import { In, Raw } from 'typeorm';
+import { In, Not, Raw } from 'typeorm';
 import { EmployeeResponseDto } from '@resource/modules/employee/application/dtos/employee-response.dto';
 import { EmplyeesByDepartmentResponseDto } from '@resource/dtos.index';
 
@@ -13,6 +13,9 @@ export class ResourceManagerUseCase {
         const resourceManagers = await this.userService.findAll({
             where: {
                 roles: Raw(() => `'${Role.RESOURCE_ADMIN}' = ANY("roles")`),
+                employee: {
+                    department: Not(In(['퇴사', '관리자'])),
+                },
             },
             relations: ['employee'],
         });

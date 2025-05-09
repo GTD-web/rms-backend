@@ -4,6 +4,10 @@
 export { LoginDto } from './modules/auth/application/dto/login.dto';
 export { LoginResponseDto } from './modules/auth/application/dto/login-response.dto';
 export { UserResponseDto } from './modules/auth/application/dto/user-response.dto';
+export { ChangeRoleDto } from './modules/auth/application/dto/change-role.dto';
+export { ChangePasswordDto } from './modules/auth/application/dto/change-password.dto';
+export { CheckPasswordDto } from './modules/auth/application/dto/check-password.dto';
+export { UpdateNotificationSettingsDto } from './modules/auth/application/dto/notification-settings.dto';
 
 // Common
 export {
