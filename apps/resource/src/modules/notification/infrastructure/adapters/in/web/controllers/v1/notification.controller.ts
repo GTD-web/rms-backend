@@ -16,6 +16,7 @@ import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
 import { DateUtil } from '@libs/utils/date.util';
+import { PushNotificationDto } from '@resource/modules/notification/application/dto/send-notification.dto';
 @ApiTags('5. 알림 - 사용자 페이지')
 @Controller('v1/notifications')
 @Roles(Role.USER)
@@ -31,6 +32,16 @@ export class UserNotificationController {
     })
     async subscribe(@User() user: UserEntity, @Body() subscription: PushSubscriptionDto): Promise<void> {
         await this.notificationUsecase.subscribe(user, subscription);
+    }
+
+    @Post('subscribe/success')
+    @ApiOperation({ summary: '웹 푸시 구독 성공' })
+    @ApiDataResponse({
+        status: 200,
+        description: '웹 푸시 구독 성공',
+    })
+    async sendSuccess(@Body() body: PushNotificationDto) {
+        await this.notificationUsecase.sendDirectNotification(body.subscription, body.payload);
     }
 
     @Post('send')

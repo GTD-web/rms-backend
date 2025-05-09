@@ -497,6 +497,7 @@ export class ResourceUsecase {
             const dateStr = startDate; // YYYY-MM-DD 형식
             const currentMinute = DateUtil.now().toDate().getMinutes();
             const currentHour = DateUtil.now().toDate().getHours();
+            console.log(currentHour, currentMinute);
             // 현재 시간을 30분 단위로 반올림
             const roundedHour = DateUtil.now().format(
                 `${currentHour < 9 ? '09' : 'HH'}:${currentMinute < 30 ? '00' : '30'}:00`,

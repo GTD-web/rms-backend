@@ -124,6 +124,10 @@ export {
 export { PushSubscriptionDto } from './modules/notification/application/dto/push-subscription.dto';
 export { ResponseNotificationDto } from './modules/notification/application/dto/response-notification.dto';
 export { NotificationDataDto } from './modules/notification/application/dto/response-notification.dto';
+export {
+    PushNotificationDto,
+    PushNotificationPayload,
+} from './modules/notification/application/dto/send-notification.dto';
 
 // Statistics
 export {

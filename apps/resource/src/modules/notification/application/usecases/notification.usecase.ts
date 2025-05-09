@@ -19,7 +19,7 @@ import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LessThan, MoreThanOrEqual, Raw } from 'typeorm';
-
+import { PushNotificationPayload } from '../dto/send-notification.dto';
 @Injectable()
 export class NotificationUsecase {
     constructor(
@@ -52,17 +52,23 @@ export class NotificationUsecase {
     }
 
     async subscribe(user: User, subscription: PushNotificationSubscription): Promise<void> {
-        const [result] = await this.eventEmitter.emitAsync('update.user.subscription', {
+        await this.eventEmitter.emitAsync('update.user.subscription', {
             userId: user.userId,
             subscription: subscription,
         });
-        console.log('구독 결과', result);
-        if (result) {
-            await this.pushNotificationService.bulkSendNotification([subscription], {
-                title: '[알림 구독 완료]',
-                body: '알림 구독이 정상적으로 완료되었습니다.',
-            });
-        }
+        // if (result) {
+        //     await this.pushNotificationService.bulkSendNotification([subscription], {
+        //         title: '[알림 구독 완료]',
+        //         body: '알림 구독이 정상적으로 완료되었습니다.',
+        //     });
+        // }
+    }
+
+    async sendDirectNotification(
+        subscription: PushNotificationSubscription,
+        payload: PushNotificationPayload,
+    ): Promise<void> {
+        await this.pushNotificationService.bulkSendNotification([subscription], payload);
     }
 
     async unsubscribe(user: User): Promise<void> {

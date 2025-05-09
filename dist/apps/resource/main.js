@@ -464,7 +464,7 @@ __decorate([
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ReturnVehicleDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UpdateNotificationSettingsDto = exports.CheckPasswordDto = exports.ChangePasswordDto = exports.ChangeRoleDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = void 0;
+exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.PushNotificationPayload = exports.PushNotificationDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login.dto */ "./apps/resource/src/modules/auth/application/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./modules/auth/application/dto/login-response.dto */ "./apps/resource/src/modules/auth/application/dto/login-response.dto.ts");
@@ -584,6 +584,9 @@ var response_notification_dto_1 = __webpack_require__(/*! ./modules/notification
 Object.defineProperty(exports, "ResponseNotificationDto", ({ enumerable: true, get: function () { return response_notification_dto_1.ResponseNotificationDto; } }));
 var response_notification_dto_2 = __webpack_require__(/*! ./modules/notification/application/dto/response-notification.dto */ "./apps/resource/src/modules/notification/application/dto/response-notification.dto.ts");
 Object.defineProperty(exports, "NotificationDataDto", ({ enumerable: true, get: function () { return response_notification_dto_2.NotificationDataDto; } }));
+var send_notification_dto_1 = __webpack_require__(/*! ./modules/notification/application/dto/send-notification.dto */ "./apps/resource/src/modules/notification/application/dto/send-notification.dto.ts");
+Object.defineProperty(exports, "PushNotificationDto", ({ enumerable: true, get: function () { return send_notification_dto_1.PushNotificationDto; } }));
+Object.defineProperty(exports, "PushNotificationPayload", ({ enumerable: true, get: function () { return send_notification_dto_1.PushNotificationPayload; } }));
 var employee_reservation_stats_dto_1 = __webpack_require__(/*! ./statistics/employee-reservation-stats.dto */ "./apps/resource/src/statistics/employee-reservation-stats.dto.ts");
 Object.defineProperty(exports, "EmployeeReservationStatsFilterDto", ({ enumerable: true, get: function () { return employee_reservation_stats_dto_1.EmployeeReservationStatsFilterDto; } }));
 Object.defineProperty(exports, "EmployeeReservationStatsResponseDto", ({ enumerable: true, get: function () { return employee_reservation_stats_dto_1.EmployeeReservationStatsResponseDto; } }));
@@ -3907,6 +3910,53 @@ __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/notification/application/dto/send-notification.dto.ts":
+/*!*****************************************************************************************!*\
+  !*** ./apps/resource/src/modules/notification/application/dto/send-notification.dto.ts ***!
+  \*****************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PushNotificationDto = exports.PushNotificationPayload = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const push_subscription_dto_1 = __webpack_require__(/*! ./push-subscription.dto */ "./apps/resource/src/modules/notification/application/dto/push-subscription.dto.ts");
+class PushNotificationPayload {
+}
+exports.PushNotificationPayload = PushNotificationPayload;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], PushNotificationPayload.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], PushNotificationPayload.prototype, "body", void 0);
+class PushNotificationDto {
+}
+exports.PushNotificationDto = PushNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: PushNotificationPayload }),
+    __metadata("design:type", PushNotificationPayload)
+], PushNotificationDto.prototype, "payload", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: push_subscription_dto_1.PushSubscriptionDto }),
+    __metadata("design:type", typeof (_a = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _a : Object)
+], PushNotificationDto.prototype, "subscription", void 0);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/notification/application/handler/notification-event.handler.ts":
 /*!**************************************************************************************************!*\
   !*** ./apps/resource/src/modules/notification/application/handler/notification-event.handler.ts ***!
@@ -4209,17 +4259,13 @@ let NotificationUsecase = class NotificationUsecase {
         console.log('after module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
     }
     async subscribe(user, subscription) {
-        const [result] = await this.eventEmitter.emitAsync('update.user.subscription', {
+        await this.eventEmitter.emitAsync('update.user.subscription', {
             userId: user.userId,
             subscription: subscription,
         });
-        console.log('구독 결과', result);
-        if (result) {
-            await this.pushNotificationService.bulkSendNotification([subscription], {
-                title: '[알림 구독 완료]',
-                body: '알림 구독이 정상적으로 완료되었습니다.',
-            });
-        }
+    }
+    async sendDirectNotification(subscription, payload) {
+        await this.pushNotificationService.bulkSendNotification([subscription], payload);
     }
     async unsubscribe(user) {
         this.eventEmitter.emit('update.user.subscription', {
@@ -4723,7 +4769,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserNotificationController = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -4739,12 +4785,16 @@ const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.d
 const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const send_notification_dto_1 = __webpack_require__(/*! @resource/modules/notification/application/dto/send-notification.dto */ "./apps/resource/src/modules/notification/application/dto/send-notification.dto.ts");
 let UserNotificationController = class UserNotificationController {
     constructor(notificationUsecase) {
         this.notificationUsecase = notificationUsecase;
     }
     async subscribe(user, subscription) {
         await this.notificationUsecase.subscribe(user, subscription);
+    }
+    async sendSuccess(body) {
+        await this.notificationUsecase.sendDirectNotification(body.subscription, body.payload);
     }
     async send(sendNotificationDto) {
         await this.notificationUsecase.createNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
@@ -4776,6 +4826,18 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], UserNotificationController.prototype, "subscribe", null);
 __decorate([
+    (0, common_1.Post)('subscribe/success'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독 성공' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '웹 푸시 구독 성공',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof send_notification_dto_1.PushNotificationDto !== "undefined" && send_notification_dto_1.PushNotificationDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", Promise)
+], UserNotificationController.prototype, "sendSuccess", null);
+__decorate([
     (0, common_1.Post)('send'),
     (0, swagger_1.ApiOperation)({ summary: '웹 푸시 알림 전송' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -4784,7 +4846,7 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _e : Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], UserNotificationController.prototype, "send", null);
 __decorate([
@@ -4809,8 +4871,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)('employeeId')),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_f = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [String, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], UserNotificationController.prototype, "findAllByEmployeeId", null);
 __decorate([
     (0, common_1.Patch)(':notificationId/read'),
@@ -4818,7 +4880,7 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('notificationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _h : Object, String]),
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _j : Object, String]),
     __metadata("design:returntype", Promise)
 ], UserNotificationController.prototype, "markAsRead", null);
 __decorate([
@@ -10444,6 +10506,7 @@ let ResourceUsecase = class ResourceUsecase {
             const dateStr = startDate;
             const currentMinute = date_util_1.DateUtil.now().toDate().getMinutes();
             const currentHour = date_util_1.DateUtil.now().toDate().getHours();
+            console.log(currentHour, currentMinute);
             const roundedHour = date_util_1.DateUtil.now().format(`${currentHour < 9 ? '09' : 'HH'}:${currentMinute < 30 ? '00' : '30'}:00`);
             const startTime = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD')
                 ? roundedHour
