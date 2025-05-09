@@ -2,11 +2,20 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedService } from './seed.service';
 
-import { ResourceGroup, ResourceManager } from '@libs/entities';
+import { AccommodationInfo, MeetingRoomInfo, ResourceGroup, ResourceManager, VehicleInfo } from '@libs/entities';
 import { Resource } from '@libs/entities';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([ResourceGroup, Resource, ResourceManager])],
+    imports: [
+        TypeOrmModule.forFeature([
+            ResourceGroup,
+            Resource,
+            ResourceManager,
+            VehicleInfo,
+            AccommodationInfo,
+            MeetingRoomInfo,
+        ]),
+    ],
     providers: [SeedService],
     exports: [SeedService],
 })

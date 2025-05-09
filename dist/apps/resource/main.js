@@ -14262,7 +14262,16 @@ let SeedModule = class SeedModule {
 exports.SeedModule = SeedModule;
 exports.SeedModule = SeedModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.ResourceGroup, entities_2.Resource, entities_1.ResourceManager])],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([
+                entities_1.ResourceGroup,
+                entities_2.Resource,
+                entities_1.ResourceManager,
+                entities_1.VehicleInfo,
+                entities_1.AccommodationInfo,
+                entities_1.MeetingRoomInfo,
+            ]),
+        ],
         providers: [seed_service_1.SeedService],
         exports: [seed_service_1.SeedService],
     })
@@ -14290,7 +14299,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SeedService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -14299,11 +14308,15 @@ const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const entities_2 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const seed_data_1 = __webpack_require__(/*! ./seed.data */ "./apps/resource/src/modules/seed/seed.data.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 let SeedService = class SeedService {
-    constructor(resourceGroupRepository, resourceRepository, resourceManagerRepository) {
+    constructor(resourceGroupRepository, resourceRepository, resourceManagerRepository, vehicleInfoRepository, accommodationInfoRepository, meetingRoomInfoRepository) {
         this.resourceGroupRepository = resourceGroupRepository;
         this.resourceRepository = resourceRepository;
         this.resourceManagerRepository = resourceManagerRepository;
+        this.vehicleInfoRepository = vehicleInfoRepository;
+        this.accommodationInfoRepository = accommodationInfoRepository;
+        this.meetingRoomInfoRepository = meetingRoomInfoRepository;
     }
     async onModuleInit() {
     }
@@ -14328,6 +14341,21 @@ let SeedService = class SeedService {
                         order: resource.order,
                         resourceGroupId: savedGroup.resourceGroupId,
                     });
+                    if (resource.type === resource_type_enum_1.ResourceType.VEHICLE) {
+                        await this.vehicleInfoRepository.save({
+                            resourceId: savedResource.resourceId,
+                        });
+                    }
+                    else if (resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+                        await this.accommodationInfoRepository.save({
+                            resourceId: savedResource.resourceId,
+                        });
+                    }
+                    else if (resource.type === resource_type_enum_1.ResourceType.MEETING_ROOM) {
+                        await this.meetingRoomInfoRepository.save({
+                            resourceId: savedResource.resourceId,
+                        });
+                    }
                     await this.resourceManagerRepository.save({
                         resourceId: savedResource.resourceId,
                         employeeId: 'bedf827a-a374-4549-9c84-90698fbd9d51',
@@ -14343,7 +14371,10 @@ exports.SeedService = SeedService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(entities_1.ResourceGroup)),
     __param(1, (0, typeorm_1.InjectRepository)(entities_2.Resource)),
     __param(2, (0, typeorm_1.InjectRepository)(entities_1.ResourceManager)),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _c : Object])
+    __param(3, (0, typeorm_1.InjectRepository)(entities_1.VehicleInfo)),
+    __param(4, (0, typeorm_1.InjectRepository)(entities_1.AccommodationInfo)),
+    __param(5, (0, typeorm_1.InjectRepository)(entities_1.MeetingRoomInfo)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _c : Object, typeof (_d = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _d : Object, typeof (_e = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _e : Object, typeof (_f = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _f : Object])
 ], SeedService);
 
 

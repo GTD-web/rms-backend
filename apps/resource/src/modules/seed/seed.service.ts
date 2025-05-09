@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
-import { ResourceGroup, ResourceManager } from '@libs/entities';
+import { ResourceGroup, ResourceManager, VehicleInfo, AccommodationInfo, MeetingRoomInfo } from '@libs/entities';
 import { Resource } from '@libs/entities';
 import { seedData } from './seed.data';
 import { ResourceType } from '@libs/enums/resource-type.enum';
@@ -15,6 +15,12 @@ export class SeedService implements OnModuleInit {
         private readonly resourceRepository: Repository<Resource>,
         @InjectRepository(ResourceManager)
         private readonly resourceManagerRepository: Repository<ResourceManager>,
+        @InjectRepository(VehicleInfo)
+        private readonly vehicleInfoRepository: Repository<VehicleInfo>,
+        @InjectRepository(AccommodationInfo)
+        private readonly accommodationInfoRepository: Repository<AccommodationInfo>,
+        @InjectRepository(MeetingRoomInfo)
+        private readonly meetingRoomInfoRepository: Repository<MeetingRoomInfo>,
     ) {}
 
     async onModuleInit() {
@@ -45,6 +51,19 @@ export class SeedService implements OnModuleInit {
                         order: resource.order,
                         resourceGroupId: savedGroup.resourceGroupId,
                     });
+                    if (resource.type === ResourceType.VEHICLE) {
+                        await this.vehicleInfoRepository.save({
+                            resourceId: savedResource.resourceId,
+                        });
+                    } else if (resource.type === ResourceType.ACCOMMODATION) {
+                        await this.accommodationInfoRepository.save({
+                            resourceId: savedResource.resourceId,
+                        });
+                    } else if (resource.type === ResourceType.MEETING_ROOM) {
+                        await this.meetingRoomInfoRepository.save({
+                            resourceId: savedResource.resourceId,
+                        });
+                    }
                     await this.resourceManagerRepository.save({
                         resourceId: savedResource.resourceId,
                         employeeId: 'bedf827a-a374-4549-9c84-90698fbd9d51',
