@@ -496,8 +496,11 @@ export class ResourceUsecase {
             // 당일 예약건 처리
             const dateStr = startDate; // YYYY-MM-DD 형식
             const currentMinute = DateUtil.now().toDate().getMinutes();
-            const roundedHour =
-                currentMinute < 30 ? DateUtil.now().format('HH:00:00') : DateUtil.now().format('HH:30:00');
+            const currentHour = DateUtil.now().toDate().getHours();
+            // 현재 시간을 30분 단위로 반올림
+            const roundedHour = DateUtil.now().format(
+                `${currentHour < 9 ? '09' : 'HH'}:${currentMinute < 30 ? '00' : '30'}:00`,
+            );
             const startTime =
                 DateUtil.date(startDate).format('YYYY-MM-DD') === DateUtil.now().format('YYYY-MM-DD')
                     ? roundedHour

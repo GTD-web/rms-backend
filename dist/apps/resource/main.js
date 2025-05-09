@@ -10446,7 +10446,8 @@ let ResourceUsecase = class ResourceUsecase {
         if (isSameDay) {
             const dateStr = startDate;
             const currentMinute = date_util_1.DateUtil.now().toDate().getMinutes();
-            const roundedHour = currentMinute < 30 ? date_util_1.DateUtil.now().format('HH:00:00') : date_util_1.DateUtil.now().format('HH:30:00');
+            const currentHour = date_util_1.DateUtil.now().toDate().getHours();
+            const roundedHour = date_util_1.DateUtil.now().format(`${currentHour < 9 ? '09' : 'HH'}:${currentMinute < 30 ? '00' : '30'}:00`);
             const startTime = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD')
                 ? roundedHour
                 : am
