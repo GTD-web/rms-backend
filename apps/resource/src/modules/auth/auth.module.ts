@@ -22,7 +22,8 @@ import { AdminResourceManagerController } from './infrastructure/adapters/in/web
         JwtStrategy,
         {
             provide: 'AuthService',
-            useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
+            // useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
+            useClass: JwtAuthUsecase,
         },
         UserService,
         UserRepository,
@@ -39,7 +40,8 @@ import { AdminResourceManagerController } from './infrastructure/adapters/in/web
         JwtStrategy,
         {
             provide: 'AuthService',
-            useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
+            // useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
+            useClass: JwtAuthUsecase,
         },
         UserService,
         UserUsecase,

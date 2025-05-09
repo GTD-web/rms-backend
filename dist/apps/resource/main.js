@@ -214,6 +214,7 @@ const db_doc_service_1 = __webpack_require__(/*! @libs/utils/db-doc.service */ "
 const user_domain_module_1 = __webpack_require__(/*! ./modules/auth/user.domain.module */ "./apps/resource/src/modules/auth/user.domain.module.ts");
 const employee_domain_module_1 = __webpack_require__(/*! ./modules/employee/employee.domain.module */ "./apps/resource/src/modules/employee/employee.domain.module.ts");
 const notification_domain_module_1 = __webpack_require__(/*! ./modules/notification/notification.domain.module */ "./apps/resource/src/modules/notification/notification.domain.module.ts");
+const seed_module_1 = __webpack_require__(/*! ./modules/seed/seed.module */ "./apps/resource/src/modules/seed/seed.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -244,6 +245,7 @@ exports.AppModule = AppModule = __decorate([
             user_domain_module_1.UserDomainModule,
             employee_domain_module_1.EmployeeDomainModule,
             notification_domain_module_1.NotificationDomainModule,
+            seed_module_1.SeedModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, api_doc_service_1.ApiDocService, db_doc_service_1.DbDocService],
@@ -1299,137 +1301,6 @@ exports.ResourceManagerUseCase = ResourceManagerUseCase = __decorate([
 
 /***/ }),
 
-/***/ "./apps/resource/src/modules/auth/application/usecases/sso-auth.usecase.ts":
-/*!*********************************************************************************!*\
-  !*** ./apps/resource/src/modules/auth/application/usecases/sso-auth.usecase.ts ***!
-  \*********************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b, _c, _d;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SsoAuthUsecase = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const axios_1 = __webpack_require__(/*! axios */ "axios");
-const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
-const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
-const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
-const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
-const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
-const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
-let SsoAuthUsecase = class SsoAuthUsecase {
-    constructor(userService, jwtService, eventEmitter, dataSource) {
-        this.userService = userService;
-        this.jwtService = jwtService;
-        this.eventEmitter = eventEmitter;
-        this.dataSource = dataSource;
-    }
-    async validateUser(email, password) {
-        let user = await this.userService.findByEmail(email);
-        if (!user) {
-            const client_id = process.env.SSO_CLIENT_ID;
-            const ssoApiUrl = process.env.SSO_API_URL;
-            console.log(ssoApiUrl);
-            const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
-                client_id,
-                email: email,
-                password: password,
-            });
-            const queryRunner = this.dataSource.createQueryRunner();
-            await queryRunner.connect();
-            await queryRunner.startTransaction();
-            try {
-                const data = response.data.data;
-                const newUser = new entities_1.User();
-                newUser.email = data.email;
-                newUser.password = data.password;
-                newUser.mobile = data.phoneNumber;
-                user = await this.userService.save(newUser, { queryRunner });
-                const [result] = await this.eventEmitter.emitAsync('find.employee', {
-                    employeeNumber: data.employeeNumber,
-                    queryRunner,
-                });
-                if (result) {
-                    user.employee = result;
-                    await this.userService.update(user, { queryRunner });
-                }
-                else {
-                    throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
-                }
-                await queryRunner.commitTransaction();
-            }
-            catch (error) {
-                console.log(error);
-                await queryRunner.rollbackTransaction();
-                throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
-            }
-            finally {
-                await queryRunner.release();
-            }
-        }
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.INVALID_PASSWORD);
-        }
-        return user;
-    }
-    async login(loginDto) {
-        const user = await this.validateUser(loginDto.email, loginDto.password);
-        if (!user.employee.userId) {
-            await this.eventEmitter.emitAsync('update.employee', {
-                employee: {
-                    employeeId: user.employee.employeeId,
-                    user: user,
-                },
-            });
-        }
-        const result = {
-            accessToken: null,
-            email: user.email,
-            name: user.employee?.name,
-            department: user.employee?.department,
-            position: user.employee?.position,
-            roles: user.roles,
-        };
-        if (user.accessToken && user.expiredAt && date_util_1.DateUtil.now().format() < user.expiredAt) {
-            result.accessToken = user.accessToken;
-        }
-        else {
-            const payload = {
-                userId: user.userId,
-                employeeId: user.employeeId,
-                roles: user.roles,
-            };
-            const accessToken = this.jwtService.sign(payload);
-            const expiredAt = date_util_1.DateUtil.now().addDays(1).format();
-            user.accessToken = accessToken;
-            user.expiredAt = expiredAt;
-            await this.userService.update(user);
-            result.accessToken = accessToken;
-        }
-        return result;
-    }
-};
-exports.SsoAuthUsecase = SsoAuthUsecase;
-exports.SsoAuthUsecase = SsoAuthUsecase = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object, typeof (_c = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object])
-], SsoAuthUsecase);
-
-
-/***/ }),
-
 /***/ "./apps/resource/src/modules/auth/application/usecases/user.usecase.ts":
 /*!*****************************************************************************!*\
   !*** ./apps/resource/src/modules/auth/application/usecases/user.usecase.ts ***!
@@ -1564,7 +1435,6 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const jwt_auth_usecase_1 = __webpack_require__(/*! ./application/usecases/jwt-auth.usecase */ "./apps/resource/src/modules/auth/application/usecases/jwt-auth.usecase.ts");
-const sso_auth_usecase_1 = __webpack_require__(/*! ./application/usecases/sso-auth.usecase */ "./apps/resource/src/modules/auth/application/usecases/sso-auth.usecase.ts");
 const user_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/user.repository */ "./apps/resource/src/modules/auth/infrastructure/adapters/out/user.repository.ts");
 const jwt_strategy_1 = __webpack_require__(/*! ./infrastructure/strategies/jwt.strategy */ "./apps/resource/src/modules/auth/infrastructure/strategies/jwt.strategy.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
@@ -1586,7 +1456,7 @@ exports.AuthModule = AuthModule = __decorate([
             jwt_strategy_1.JwtStrategy,
             {
                 provide: 'AuthService',
-                useClass: process.env.USE_SSO === 'true' ? sso_auth_usecase_1.SsoAuthUsecase : jwt_auth_usecase_1.JwtAuthUsecase,
+                useClass: jwt_auth_usecase_1.JwtAuthUsecase,
             },
             user_service_1.UserService,
             user_repository_1.UserRepository,
@@ -1603,7 +1473,7 @@ exports.AuthModule = AuthModule = __decorate([
             jwt_strategy_1.JwtStrategy,
             {
                 provide: 'AuthService',
-                useClass: process.env.USE_SSO === 'true' ? sso_auth_usecase_1.SsoAuthUsecase : jwt_auth_usecase_1.JwtAuthUsecase,
+                useClass: jwt_auth_usecase_1.JwtAuthUsecase,
             },
             user_service_1.UserService,
             user_usecase_1.UserUsecase,
@@ -14153,6 +14023,328 @@ exports.VehicleResourceModule = VehicleResourceModule = __decorate([
         ],
     })
 ], VehicleResourceModule);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/seed/seed.data.ts":
+/*!*****************************************************!*\
+  !*** ./apps/resource/src/modules/seed/seed.data.ts ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.seedData = void 0;
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+exports.seedData = [
+    {
+        title: '법인차량 ',
+        type: resource_type_enum_1.ResourceType.VEHICLE,
+        resources: [
+            {
+                name: '싼타페(25어5677)',
+                location: {
+                    address: 'B3',
+                    detailAddress: 'A01',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.VEHICLE,
+                order: 0,
+            },
+            {
+                name: '셀토스(126서1152)',
+                location: {
+                    address: 'B3',
+                    detailAddress: 'B01',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.VEHICLE,
+                order: 1,
+            },
+            {
+                name: '카니발(116너 5351)',
+                location: {
+                    address: 'B3',
+                    detailAddress: 'C01',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.VEHICLE,
+                order: 2,
+            },
+            {
+                name: '카니발(161라 4762)',
+                location: {
+                    address: 'B3',
+                    detailAddress: 'D01',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.VEHICLE,
+                order: 3,
+            },
+        ],
+    },
+    {
+        title: '대전숙소',
+        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+        resources: [
+            {
+                name: '럭셔리모텔1',
+                location: {
+                    address: '대전광역시 유성구',
+                    detailAddress: '온천서로 30-10',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                order: 0,
+            },
+            {
+                name: '럭셔리모텔2',
+                location: {
+                    address: '대전광역시 유성구',
+                    detailAddress: '온천서로 30-10',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                order: 1,
+            },
+            {
+                name: '럭셔리모텔3',
+                location: {
+                    address: '대전광역시 유성구',
+                    detailAddress: '온천서로 30-10',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                order: 2,
+            },
+            {
+                name: '럭셔리모텔4',
+                location: {
+                    address: '대전광역시 유성구',
+                    detailAddress: '온천서로 30-10',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                order: 3,
+            },
+            {
+                name: '럭셔리모텔5',
+                location: {
+                    address: '대전광역시 유성구',
+                    detailAddress: '온천서로 30-10',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                order: 4,
+            },
+            {
+                name: '럭셔리모텔6',
+                location: {
+                    address: '대전광역시 유성구',
+                    detailAddress: '온천서로 30-10',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                order: 5,
+            },
+        ],
+    },
+    {
+        title: '11층 회의실',
+        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
+        resources: [
+            {
+                name: '11층 대회의실',
+                location: {
+                    address: '11층',
+                    detailAddress: '',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
+                order: 0,
+            },
+            {
+                name: '11층 중회의실',
+                location: {
+                    address: '11층',
+                    detailAddress: '',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
+                order: 1,
+            },
+            {
+                name: '11층 소회의실',
+                location: {
+                    address: '11층',
+                    detailAddress: '',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
+                order: 2,
+            },
+            {
+                name: '대표이사실',
+                location: {
+                    address: '11층',
+                    detailAddress: '',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
+                order: 3,
+            },
+        ],
+    },
+    {
+        title: '5층 회의실',
+        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
+        resources: [
+            {
+                name: '5층 회의실',
+                location: {
+                    address: '5층',
+                    detailAddress: '',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
+                order: 0,
+            },
+            {
+                name: '5층 중회의실',
+                location: {
+                    address: '5층',
+                    detailAddress: '',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
+                order: 1,
+            },
+            {
+                name: '5층 소회의실',
+                location: {
+                    address: '5층',
+                    detailAddress: '',
+                },
+                images: [],
+                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
+                order: 2,
+            },
+        ],
+    },
+];
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/seed/seed.module.ts":
+/*!*******************************************************!*\
+  !*** ./apps/resource/src/modules/seed/seed.module.ts ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SeedModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const seed_service_1 = __webpack_require__(/*! ./seed.service */ "./apps/resource/src/modules/seed/seed.service.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const entities_2 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+let SeedModule = class SeedModule {
+};
+exports.SeedModule = SeedModule;
+exports.SeedModule = SeedModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.ResourceGroup, entities_2.Resource, entities_1.ResourceManager])],
+        providers: [seed_service_1.SeedService],
+        exports: [seed_service_1.SeedService],
+    })
+], SeedModule);
+
+
+/***/ }),
+
+/***/ "./apps/resource/src/modules/seed/seed.service.ts":
+/*!********************************************************!*\
+  !*** ./apps/resource/src/modules/seed/seed.service.ts ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SeedService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const entities_2 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const seed_data_1 = __webpack_require__(/*! ./seed.data */ "./apps/resource/src/modules/seed/seed.data.ts");
+let SeedService = class SeedService {
+    constructor(resourceGroupRepository, resourceRepository, resourceManagerRepository) {
+        this.resourceGroupRepository = resourceGroupRepository;
+        this.resourceRepository = resourceRepository;
+        this.resourceManagerRepository = resourceManagerRepository;
+    }
+    async onModuleInit() {
+    }
+    async seed() {
+        const defaultResourceGroup = await this.resourceGroupRepository.find();
+        const categories = defaultResourceGroup.filter((group) => group.parentResourceGroupId === null);
+        const groups = defaultResourceGroup.filter((group) => group.parentResourceGroupId !== null);
+        if (groups.length === 0) {
+            for (const group of seed_data_1.seedData) {
+                const parentGroup = categories.find((c) => c.type === group.type);
+                const savedGroup = await this.resourceGroupRepository.save({
+                    title: group.title,
+                    type: group.type,
+                    parentResourceGroupId: parentGroup.resourceGroupId,
+                });
+                for (const resource of group.resources) {
+                    const savedResource = await this.resourceRepository.save({
+                        name: resource.name,
+                        location: resource.location,
+                        images: resource.images,
+                        type: resource.type,
+                        order: resource.order,
+                        resourceGroupId: savedGroup.resourceGroupId,
+                    });
+                    await this.resourceManagerRepository.save({
+                        resourceId: savedResource.resourceId,
+                        employeeId: 'bedf827a-a374-4549-9c84-90698fbd9d51',
+                    });
+                }
+            }
+        }
+    }
+};
+exports.SeedService = SeedService;
+exports.SeedService = SeedService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(entities_1.ResourceGroup)),
+    __param(1, (0, typeorm_1.InjectRepository)(entities_2.Resource)),
+    __param(2, (0, typeorm_1.InjectRepository)(entities_1.ResourceManager)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _c : Object])
+], SeedService);
 
 
 /***/ }),

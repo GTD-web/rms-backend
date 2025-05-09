@@ -29,6 +29,8 @@ import { DbDocService } from '@libs/utils/db-doc.service';
 import { UserDomainModule } from './modules/auth/user.domain.module';
 import { EmployeeDomainModule } from './modules/employee/employee.domain.module';
 import { NotificationDomainModule } from './modules/notification/notification.domain.module';
+import { SeedModule } from './modules/seed/seed.module';
+
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -56,6 +58,7 @@ import { NotificationDomainModule } from './modules/notification/notification.do
         UserDomainModule,
         EmployeeDomainModule,
         NotificationDomainModule,
+        SeedModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],
