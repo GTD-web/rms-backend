@@ -25,7 +25,7 @@ export class FileService {
     }
 
     async findAllFilesByFilePath(filePath: string[]): Promise<File[]> {
-        if (filePath.length === 0) {
+        if (!filePath || filePath.length === 0) {
             return [];
         }
         const files = await this.fileRepository.findAllByFilePath(filePath);
