@@ -27,6 +27,7 @@ export class SsoAuthUsecase implements AuthService {
         if (!user) {
             const client_id = process.env.SSO_CLIENT_ID;
             const ssoApiUrl = process.env.SSO_API_URL;
+            console.log(ssoApiUrl);
             const response = await axios.post(`${ssoApiUrl}/api/auth/login`, {
                 client_id,
                 email: email,

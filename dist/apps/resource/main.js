@@ -978,21 +978,28 @@ let UserEventHandler = class UserEventHandler {
         await this.userService.update(user, payload.repositoryOptions);
     }
     async handleUserSubscriptionUpdateEvent(payload) {
-        console.log(`Subscription updated for user ${payload.userId} ${payload.subscription}`);
-        const user = await this.userService.findByUserId(payload.userId);
-        if (!user) {
-            throw new common_1.NotFoundException('User not found');
-        }
-        if (user.subscriptions) {
-            if (user.subscriptions.length > 4) {
-                user.subscriptions.shift();
+        try {
+            console.log(`Subscription updated for user ${payload.userId} ${payload.subscription}`);
+            const user = await this.userService.findByUserId(payload.userId);
+            if (!user) {
+                throw new common_1.NotFoundException('User not found');
             }
-            user.subscriptions.push(payload.subscription);
+            if (user.subscriptions) {
+                if (user.subscriptions.length > 4) {
+                    user.subscriptions.shift();
+                }
+                user.subscriptions.push(payload.subscription);
+            }
+            else {
+                user.subscriptions = [payload.subscription];
+            }
+            await this.userService.update(user);
+            return true;
         }
-        else {
-            user.subscriptions = [payload.subscription];
+        catch (error) {
+            console.log(error);
+            return false;
         }
-        await this.userService.update(user);
     }
     async handleUserSubscriptionFilterEvent(payload) {
         console.log(`Subscription filtered for user ${payload.employeeId} ${payload.subscriptions}`);
@@ -1330,6 +1337,7 @@ let SsoAuthUsecase = class SsoAuthUsecase {
         if (!user) {
             const client_id = process.env.SSO_CLIENT_ID;
             const ssoApiUrl = process.env.SSO_API_URL;
+            console.log(ssoApiUrl);
             const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
                 client_id,
                 email: email,
@@ -4156,12 +4164,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e;
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const adapter_service_1 = __webpack_require__(/*! ../services/adapter.service */ "./apps/resource/src/modules/notification/application/services/adapter.service.ts");
 const notification_service_1 = __webpack_require__(/*! ../services/notification.service */ "./apps/resource/src/modules/notification/application/services/notification.service.ts");
+const push_notification_port_1 = __webpack_require__(/*! @resource/modules/notification/domain/ports/push-notification.port */ "./apps/resource/src/modules/notification/domain/ports/push-notification.port.ts");
 const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
@@ -4170,12 +4182,13 @@ const cron_1 = __webpack_require__(/*! cron */ "cron");
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let NotificationUsecase = class NotificationUsecase {
-    constructor(adapterService, notificationService, employeeNotificationService, schedulerRegistry, eventEmitter) {
+    constructor(adapterService, notificationService, employeeNotificationService, schedulerRegistry, eventEmitter, pushNotificationService) {
         this.adapterService = adapterService;
         this.notificationService = notificationService;
         this.employeeNotificationService = employeeNotificationService;
         this.schedulerRegistry = schedulerRegistry;
         this.eventEmitter = eventEmitter;
+        this.pushNotificationService = pushNotificationService;
     }
     async onModuleInit() {
         console.log('before module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
@@ -4196,10 +4209,17 @@ let NotificationUsecase = class NotificationUsecase {
         console.log('after module init', Array.from(this.schedulerRegistry.getCronJobs().keys()));
     }
     async subscribe(user, subscription) {
-        this.eventEmitter.emit('update.user.subscription', {
+        const [result] = await this.eventEmitter.emitAsync('update.user.subscription', {
             userId: user.userId,
             subscription: subscription,
         });
+        console.log('구독 결과', result);
+        if (result) {
+            await this.pushNotificationService.bulkSendNotification([subscription], {
+                title: '[알림 구독 완료]',
+                body: '알림 구독이 정상적으로 완료되었습니다.',
+            });
+        }
     }
     async unsubscribe(user) {
         this.eventEmitter.emit('update.user.subscription', {
@@ -4263,6 +4283,7 @@ let NotificationUsecase = class NotificationUsecase {
         };
     }
     async createNotification(notificationType, createNotificationDatatDto, notiTarget, repositoryOptions) {
+        notiTarget = Array.from(new Set(notiTarget));
         const createNotificationDto = {
             title: '',
             body: '',
@@ -4411,7 +4432,8 @@ let NotificationUsecase = class NotificationUsecase {
 exports.NotificationUsecase = NotificationUsecase;
 exports.NotificationUsecase = NotificationUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof adapter_service_1.AdapterService !== "undefined" && adapter_service_1.AdapterService) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _b : Object, typeof (_c = typeof employee_notification_service_1.EmployeeNotificationService !== "undefined" && employee_notification_service_1.EmployeeNotificationService) === "function" ? _c : Object, typeof (_d = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _d : Object, typeof (_e = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _e : Object])
+    __param(5, (0, common_1.Inject)('PushNotificationServicePort')),
+    __metadata("design:paramtypes", [typeof (_a = typeof adapter_service_1.AdapterService !== "undefined" && adapter_service_1.AdapterService) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _b : Object, typeof (_c = typeof employee_notification_service_1.EmployeeNotificationService !== "undefined" && employee_notification_service_1.EmployeeNotificationService) === "function" ? _c : Object, typeof (_d = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _d : Object, typeof (_e = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _e : Object, typeof (_f = typeof push_notification_port_1.PushNotificationPort !== "undefined" && push_notification_port_1.PushNotificationPort) === "function" ? _f : Object])
 ], NotificationUsecase);
 
 
@@ -6715,7 +6737,7 @@ let ReservationUsecase = class ReservationUsecase {
             where: {
                 reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
             },
-            relations: ['resource', 'participants', 'participants.employee'],
+            relations: ['resource', 'participants', 'participants.employee', 'reservationVehicles'],
             withDeleted: true,
         });
         const count = await this.reservationService.count({
@@ -7280,121 +7302,6 @@ let ReservationUsecase = class ReservationUsecase {
                     console.log(error);
                     console.log('Notification creation failed in updateTime');
                 }
-            }
-        }
-        return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
-    }
-    async updateTitle(reservationId, updateDto, repositoryOptions) {
-        const reservation = await this.reservationService.findOne({ where: { reservationId } });
-        if (!reservation) {
-            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
-        }
-        if (reservation.status !== reservation_type_enum_1.ReservationStatus.PENDING) {
-            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
-        }
-        const updatedReservation = await this.reservationService.update(reservationId, updateDto, repositoryOptions);
-        return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
-    }
-    async updateTime(reservationId, updateDto) {
-        const reservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['resource', 'participants'],
-            withDeleted: true,
-        });
-        if (!reservation) {
-            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
-        }
-        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
-            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
-            reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
-            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
-        }
-        if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED &&
-            reservation.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
-            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_ACCOMMODATION_TIME);
-        }
-        const updatedReservation = await this.reservationService.update(reservationId, {
-            ...updateDto,
-            startDate: date_util_1.DateUtil.date(updateDto.startDate).toDate(),
-            endDate: date_util_1.DateUtil.date(updateDto.endDate).toDate(),
-        });
-        if (updatedReservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
-            this.deleteReservationClosingJob(reservationId);
-            this.createReservationClosingJob(updatedReservation);
-        }
-        try {
-            const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
-            this.eventEmitter.emit('create.notification', {
-                notificationType: notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED,
-                notificationData: {
-                    reservationId: updatedReservation.reservationId,
-                    reservationTitle: updatedReservation.title,
-                    reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
-                    resourceId: updatedReservation.resource.resourceId,
-                    resourceName: updatedReservation.resource.name,
-                    resourceType: updatedReservation.resource.type,
-                },
-                notiTarget,
-            });
-        }
-        catch (error) {
-            console.log(error);
-            console.log('Notification creation failed in updateTime');
-        }
-        return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
-    }
-    async updateParticipants(reservationId, updateDto) {
-        const reservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['resource'],
-            withDeleted: true,
-        });
-        if (!reservation) {
-            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
-        }
-        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED ||
-            reservation.status === reservation_type_enum_1.ReservationStatus.CANCELLED ||
-            reservation.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
-            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
-        }
-        const participants = await this.participantService.findAll({
-            where: { reservationId, type: reservation_type_enum_1.ParticipantsType.PARTICIPANT },
-        });
-        const allParticipants = [
-            ...participants.map((participant) => participant.employeeId),
-            ...updateDto.participantIds,
-        ];
-        const uniqueParticipants = [...new Set(allParticipants)];
-        await Promise.all(participants.map((participant) => this.participantService.delete(participant.participantId)));
-        await Promise.all(updateDto.participantIds.map((employeeId) => this.participantService.save({
-            reservationId,
-            employeeId,
-            type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
-        })));
-        const updatedReservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['participants', 'resource'],
-            withDeleted: true,
-        });
-        if (updatedReservation.resource.notifyParticipantChange) {
-            try {
-                const notiTarget = uniqueParticipants;
-                this.eventEmitter.emit('create.notification', {
-                    notificationType: notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED,
-                    notificationData: {
-                        reservationId: updatedReservation.reservationId,
-                        reservationTitle: updatedReservation.title,
-                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
-                        resourceId: updatedReservation.resource.resourceId,
-                        resourceName: updatedReservation.resource.name,
-                        resourceType: updatedReservation.resource.type,
-                    },
-                    notiTarget,
-                });
-            }
-            catch (error) {
-                console.log(error);
-                console.log('Notification creation failed in updateParticipants');
             }
         }
         return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);

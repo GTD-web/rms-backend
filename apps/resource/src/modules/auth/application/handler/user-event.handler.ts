@@ -46,22 +46,28 @@ export class UserEventHandler {
         subscription: PushNotificationSubscription | null;
         // repositoryOptions?: RepositoryOptions;
     }) {
-        console.log(`Subscription updated for user ${payload.userId} ${payload.subscription}`);
-        // 구독 정보 업데이트 이벤트에 대한 처리 로직
-        const user = await this.userService.findByUserId(payload.userId);
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        if (user.subscriptions) {
-            if (user.subscriptions.length > 4) {
-                user.subscriptions.shift();
+        try {
+            console.log(`Subscription updated for user ${payload.userId} ${payload.subscription}`);
+            // 구독 정보 업데이트 이벤트에 대한 처리 로직
+            const user = await this.userService.findByUserId(payload.userId);
+            if (!user) {
+                throw new NotFoundException('User not found');
             }
-            user.subscriptions.push(payload.subscription);
-        } else {
-            user.subscriptions = [payload.subscription];
+
+            if (user.subscriptions) {
+                if (user.subscriptions.length > 4) {
+                    user.subscriptions.shift();
+                }
+                user.subscriptions.push(payload.subscription);
+            } else {
+                user.subscriptions = [payload.subscription];
+            }
+            await this.userService.update(user);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
         }
-        await this.userService.update(user);
     }
 
     @OnEvent('filter.user.subscription')

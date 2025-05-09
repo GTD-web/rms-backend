@@ -137,7 +137,7 @@ export class ReservationUsecase {
             where: {
                 reservationId: In(reservations.map((r) => r.reservationId)),
             },
-            relations: ['resource', 'participants', 'participants.employee'],
+            relations: ['resource', 'participants', 'participants.employee', 'reservationVehicles'],
             withDeleted: true,
         });
         const count = await this.reservationService.count({
@@ -886,169 +886,169 @@ export class ReservationUsecase {
         return new ReservationResponseDto(updatedReservation);
     }
 
-    async updateTitle(
-        reservationId: string,
-        updateDto: UpdateReservationTitleDto,
-        repositoryOptions?: RepositoryOptions,
-    ): Promise<ReservationResponseDto> {
-        const reservation = await this.reservationService.findOne({ where: { reservationId } });
-        if (!reservation) {
-            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
-        }
+    // async updateTitle(
+    //     reservationId: string,
+    //     updateDto: UpdateReservationTitleDto,
+    //     repositoryOptions?: RepositoryOptions,
+    // ): Promise<ReservationResponseDto> {
+    //     const reservation = await this.reservationService.findOne({ where: { reservationId } });
+    //     if (!reservation) {
+    //         throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+    //     }
 
-        if (reservation.status !== ReservationStatus.PENDING) {
-            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
-        }
+    //     if (reservation.status !== ReservationStatus.PENDING) {
+    //         throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+    //     }
 
-        const updatedReservation = await this.reservationService.update(reservationId, updateDto, repositoryOptions);
-        return new ReservationResponseDto(updatedReservation);
-    }
+    //     const updatedReservation = await this.reservationService.update(reservationId, updateDto, repositoryOptions);
+    //     return new ReservationResponseDto(updatedReservation);
+    // }
 
-    async updateTime(reservationId: string, updateDto: UpdateReservationTimeDto): Promise<ReservationResponseDto> {
-        const reservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['resource', 'participants'],
-            withDeleted: true,
-        });
-        if (!reservation) {
-            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
-        }
+    // async updateTime(reservationId: string, updateDto: UpdateReservationTimeDto): Promise<ReservationResponseDto> {
+    //     const reservation = await this.reservationService.findOne({
+    //         where: { reservationId },
+    //         relations: ['resource', 'participants'],
+    //         withDeleted: true,
+    //     });
+    //     if (!reservation) {
+    //         throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+    //     }
 
-        if (
-            reservation.status === ReservationStatus.CLOSED ||
-            reservation.status === ReservationStatus.CANCELLED ||
-            reservation.status === ReservationStatus.REJECTED
-        ) {
-            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
-        }
+    //     if (
+    //         reservation.status === ReservationStatus.CLOSED ||
+    //         reservation.status === ReservationStatus.CANCELLED ||
+    //         reservation.status === ReservationStatus.REJECTED
+    //     ) {
+    //         throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+    //     }
 
-        if (
-            reservation.status === ReservationStatus.CONFIRMED &&
-            reservation.resource.type === ResourceType.ACCOMMODATION
-        ) {
-            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_ACCOMMODATION_TIME);
-        }
+    //     if (
+    //         reservation.status === ReservationStatus.CONFIRMED &&
+    //         reservation.resource.type === ResourceType.ACCOMMODATION
+    //     ) {
+    //         throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_ACCOMMODATION_TIME);
+    //     }
 
-        const updatedReservation = await this.reservationService.update(reservationId, {
-            ...updateDto,
-            startDate: DateUtil.date(updateDto.startDate).toDate(),
-            endDate: DateUtil.date(updateDto.endDate).toDate(),
-        });
+    //     const updatedReservation = await this.reservationService.update(reservationId, {
+    //         ...updateDto,
+    //         startDate: DateUtil.date(updateDto.startDate).toDate(),
+    //         endDate: DateUtil.date(updateDto.endDate).toDate(),
+    //     });
 
-        // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
-        if (updatedReservation.status === ReservationStatus.CONFIRMED) {
-            // 기존 Job 삭제
-            this.deleteReservationClosingJob(reservationId);
-            this.createReservationClosingJob(updatedReservation);
-        }
+    //     // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
+    //     if (updatedReservation.status === ReservationStatus.CONFIRMED) {
+    //         // 기존 Job 삭제
+    //         this.deleteReservationClosingJob(reservationId);
+    //         this.createReservationClosingJob(updatedReservation);
+    //     }
 
-        try {
-            const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+    //     try {
+    //         const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
 
-            this.eventEmitter.emit('create.notification', {
-                notificationType: NotificationType.RESERVATION_TIME_CHANGED,
-                notificationData: {
-                    reservationId: updatedReservation.reservationId,
-                    reservationTitle: updatedReservation.title,
-                    reservationDate: DateUtil.toAlarmRangeString(
-                        DateUtil.format(updatedReservation.startDate),
-                        DateUtil.format(updatedReservation.endDate),
-                    ),
-                    resourceId: updatedReservation.resource.resourceId,
-                    resourceName: updatedReservation.resource.name,
-                    resourceType: updatedReservation.resource.type,
-                },
-                notiTarget,
-            });
-        } catch (error) {
-            console.log(error);
-            console.log('Notification creation failed in updateTime');
-        }
+    //         this.eventEmitter.emit('create.notification', {
+    //             notificationType: NotificationType.RESERVATION_TIME_CHANGED,
+    //             notificationData: {
+    //                 reservationId: updatedReservation.reservationId,
+    //                 reservationTitle: updatedReservation.title,
+    //                 reservationDate: DateUtil.toAlarmRangeString(
+    //                     DateUtil.format(updatedReservation.startDate),
+    //                     DateUtil.format(updatedReservation.endDate),
+    //                 ),
+    //                 resourceId: updatedReservation.resource.resourceId,
+    //                 resourceName: updatedReservation.resource.name,
+    //                 resourceType: updatedReservation.resource.type,
+    //             },
+    //             notiTarget,
+    //         });
+    //     } catch (error) {
+    //         console.log(error);
+    //         console.log('Notification creation failed in updateTime');
+    //     }
 
-        return new ReservationResponseDto(updatedReservation);
-    }
+    //     return new ReservationResponseDto(updatedReservation);
+    // }
 
-    async updateParticipants(
-        reservationId: string,
-        updateDto: UpdateReservationParticipantsDto,
-    ): Promise<ReservationResponseDto> {
-        const reservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['resource'],
-            withDeleted: true,
-        });
+    // async updateParticipants(
+    //     reservationId: string,
+    //     updateDto: UpdateReservationParticipantsDto,
+    // ): Promise<ReservationResponseDto> {
+    //     const reservation = await this.reservationService.findOne({
+    //         where: { reservationId },
+    //         relations: ['resource'],
+    //         withDeleted: true,
+    //     });
 
-        if (!reservation) {
-            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
-        }
+    //     if (!reservation) {
+    //         throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+    //     }
 
-        if (
-            reservation.status === ReservationStatus.CLOSED ||
-            reservation.status === ReservationStatus.CANCELLED ||
-            reservation.status === ReservationStatus.REJECTED
-        ) {
-            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
-        }
+    //     if (
+    //         reservation.status === ReservationStatus.CLOSED ||
+    //         reservation.status === ReservationStatus.CANCELLED ||
+    //         reservation.status === ReservationStatus.REJECTED
+    //     ) {
+    //         throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+    //     }
 
-        // 기존 참가자 조회
-        const participants = await this.participantService.findAll({
-            where: { reservationId, type: ParticipantsType.PARTICIPANT },
-        });
+    //     // 기존 참가자 조회
+    //     const participants = await this.participantService.findAll({
+    //         where: { reservationId, type: ParticipantsType.PARTICIPANT },
+    //     });
 
-        // 기존 및 새로운 참가자 배열, 중복 제거
-        const allParticipants = [
-            ...participants.map((participant) => participant.employeeId),
-            ...updateDto.participantIds,
-        ];
-        const uniqueParticipants = [...new Set(allParticipants)];
+    //     // 기존 및 새로운 참가자 배열, 중복 제거
+    //     const allParticipants = [
+    //         ...participants.map((participant) => participant.employeeId),
+    //         ...updateDto.participantIds,
+    //     ];
+    //     const uniqueParticipants = [...new Set(allParticipants)];
 
-        // 기존 참가자 삭제
-        await Promise.all(participants.map((participant) => this.participantService.delete(participant.participantId)));
+    //     // 기존 참가자 삭제
+    //     await Promise.all(participants.map((participant) => this.participantService.delete(participant.participantId)));
 
-        // 새로운 참가자 저장
-        await Promise.all(
-            updateDto.participantIds.map((employeeId) =>
-                this.participantService.save({
-                    reservationId,
-                    employeeId,
-                    type: ParticipantsType.PARTICIPANT,
-                } as ReservationParticipant),
-            ),
-        );
+    //     // 새로운 참가자 저장
+    //     await Promise.all(
+    //         updateDto.participantIds.map((employeeId) =>
+    //             this.participantService.save({
+    //                 reservationId,
+    //                 employeeId,
+    //                 type: ParticipantsType.PARTICIPANT,
+    //             } as ReservationParticipant),
+    //         ),
+    //     );
 
-        const updatedReservation = await this.reservationService.findOne({
-            where: { reservationId },
-            relations: ['participants', 'resource'],
-            withDeleted: true,
-        });
+    //     const updatedReservation = await this.reservationService.findOne({
+    //         where: { reservationId },
+    //         relations: ['participants', 'resource'],
+    //         withDeleted: true,
+    //     });
 
-        if (updatedReservation.resource.notifyParticipantChange) {
-            try {
-                const notiTarget = uniqueParticipants;
+    //     if (updatedReservation.resource.notifyParticipantChange) {
+    //         try {
+    //             const notiTarget = uniqueParticipants;
 
-                this.eventEmitter.emit('create.notification', {
-                    notificationType: NotificationType.RESERVATION_PARTICIPANT_CHANGED,
-                    notificationData: {
-                        reservationId: updatedReservation.reservationId,
-                        reservationTitle: updatedReservation.title,
-                        reservationDate: DateUtil.toAlarmRangeString(
-                            DateUtil.format(updatedReservation.startDate),
-                            DateUtil.format(updatedReservation.endDate),
-                        ),
-                        resourceId: updatedReservation.resource.resourceId,
-                        resourceName: updatedReservation.resource.name,
-                        resourceType: updatedReservation.resource.type,
-                    },
-                    notiTarget,
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Notification creation failed in updateParticipants');
-            }
-        }
+    //             this.eventEmitter.emit('create.notification', {
+    //                 notificationType: NotificationType.RESERVATION_PARTICIPANT_CHANGED,
+    //                 notificationData: {
+    //                     reservationId: updatedReservation.reservationId,
+    //                     reservationTitle: updatedReservation.title,
+    //                     reservationDate: DateUtil.toAlarmRangeString(
+    //                         DateUtil.format(updatedReservation.startDate),
+    //                         DateUtil.format(updatedReservation.endDate),
+    //                     ),
+    //                     resourceId: updatedReservation.resource.resourceId,
+    //                     resourceName: updatedReservation.resource.name,
+    //                     resourceType: updatedReservation.resource.type,
+    //                 },
+    //                 notiTarget,
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Notification creation failed in updateParticipants');
+    //         }
+    //     }
 
-        return new ReservationResponseDto(updatedReservation);
-    }
+    //     return new ReservationResponseDto(updatedReservation);
+    // }
 
     async updateStatus(reservationId: string, updateDto: UpdateReservationStatusDto): Promise<ReservationResponseDto> {
         const reservation = await this.reservationService.findOne({

@@ -1,8 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { AdapterService } from '../services/adapter.service';
 import { NotificationService } from '../services/notification.service';
 import { User } from '@libs/entities';
-import { PushNotificationSubscription } from '@resource/modules/notification/domain/ports/push-notification.port';
+import {
+    PushNotificationPort,
+    PushNotificationSubscription,
+} from '@resource/modules/notification/domain/ports/push-notification.port';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { CreateNotificationDatatDto, CreateNotificationDto } from '../dto/create-notification.dto';
@@ -25,6 +28,8 @@ export class NotificationUsecase {
         private readonly employeeNotificationService: EmployeeNotificationService,
         private readonly schedulerRegistry: SchedulerRegistry,
         private readonly eventEmitter: EventEmitter2,
+        @Inject('PushNotificationServicePort')
+        private readonly pushNotificationService: PushNotificationPort,
     ) {}
 
     async onModuleInit() {
@@ -47,10 +52,17 @@ export class NotificationUsecase {
     }
 
     async subscribe(user: User, subscription: PushNotificationSubscription): Promise<void> {
-        this.eventEmitter.emit('update.user.subscription', {
+        const [result] = await this.eventEmitter.emitAsync('update.user.subscription', {
             userId: user.userId,
             subscription: subscription,
         });
+        console.log('구독 결과', result);
+        if (result) {
+            await this.pushNotificationService.bulkSendNotification([subscription], {
+                title: '[알림 구독 완료]',
+                body: '알림 구독이 정상적으로 완료되었습니다.',
+            });
+        }
     }
 
     async unsubscribe(user: User): Promise<void> {
@@ -128,6 +140,8 @@ export class NotificationUsecase {
         notiTarget: string[],
         repositoryOptions?: RepositoryOptions,
     ): Promise<void> {
+        notiTarget = Array.from(new Set(notiTarget));
+
         const createNotificationDto: CreateNotificationDto = {
             title: '',
             body: '',
