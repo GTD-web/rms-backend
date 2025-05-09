@@ -1071,7 +1071,7 @@ export class ReservationUsecase {
             this.createReservationClosingJob(updatedReservation);
         }
 
-        if (reservation.resource.notifyReservationChange) {
+        if (reservation.resource.notifyReservationChange && updateDto.status !== ReservationStatus.CLOSED) {
             try {
                 const reservers = await this.participantService.findAll({
                     where: { reservationId },

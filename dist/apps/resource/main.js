@@ -7415,7 +7415,7 @@ let ReservationUsecase = class ReservationUsecase {
         if (updateDto.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
             this.createReservationClosingJob(updatedReservation);
         }
-        if (reservation.resource.notifyReservationChange) {
+        if (reservation.resource.notifyReservationChange && updateDto.status !== reservation_type_enum_1.ReservationStatus.CLOSED) {
             try {
                 const reservers = await this.participantService.findAll({
                     where: { reservationId },
