@@ -3790,11 +3790,11 @@ class PushSubscriptionDto {
 }
 exports.PushSubscriptionDto = PushSubscriptionDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: FCMDto }),
+    (0, swagger_1.ApiProperty)({ type: FCMDto, required: false }),
     __metadata("design:type", FCMDto)
 ], PushSubscriptionDto.prototype, "fcm", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: WebPushDto }),
+    (0, swagger_1.ApiProperty)({ type: WebPushDto, required: false }),
     __metadata("design:type", WebPushDto)
 ], PushSubscriptionDto.prototype, "webPush", void 0);
 
@@ -10504,9 +10504,10 @@ let ResourceUsecase = class ResourceUsecase {
         const confirmedReservations = existingReservations;
         if (isSameDay) {
             const dateStr = startDate;
+            const currentUTCHour = new Date().getUTCHours();
+            const currentServerHour = date_util_1.DateUtil.now().toDate().getHours();
             const currentMinute = date_util_1.DateUtil.now().toDate().getMinutes();
-            const currentHour = date_util_1.DateUtil.now().toDate().getHours();
-            console.log(currentHour, currentMinute);
+            const currentHour = currentServerHour === currentUTCHour ? currentServerHour + 9 : currentServerHour;
             const roundedHour = date_util_1.DateUtil.now().format(`${currentHour < 9 ? '09' : 'HH'}:${currentMinute < 30 ? '00' : '30'}:00`);
             const startTime = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD')
                 ? roundedHour

@@ -28,9 +28,9 @@ export class WebPushDto implements WebPush {
 }
 
 export class PushSubscriptionDto implements PushNotificationSubscription {
-    @ApiProperty({ type: FCMDto })
+    @ApiProperty({ type: FCMDto, required: false })
     fcm: FCMDto;
 
-    @ApiProperty({ type: WebPushDto })
+    @ApiProperty({ type: WebPushDto, required: false })
     webPush: WebPushDto;
 }
