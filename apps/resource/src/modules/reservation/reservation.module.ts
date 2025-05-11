@@ -14,7 +14,7 @@ import { ReservationSnapshotRepository } from './infrastructure/adapters/out/per
 import { ReservationSnapshotService } from './application/services/reservation-snapshot.service';
 import { ReservationVehicleService } from './application/services/reservation-vehicle.service';
 import { ReservationVehicleRepository } from './infrastructure/adapters/out/persistence/reservation-vehicle.repository';
-
+import { CronReservationController } from './infrastructure/adapters/in/web/controllers/v1/cron.reservation.controller';
 @Module({
     imports: [
         TypeOrmModule.forFeature([
@@ -51,7 +51,7 @@ import { ReservationVehicleRepository } from './infrastructure/adapters/out/pers
         ReservationEventHandler,
         ReservationSnapshotUsecase,
     ],
-    controllers: [AdminReservationController, UserReservationController],
+    controllers: [AdminReservationController, UserReservationController, CronReservationController],
     exports: [ReservationService, ReservationSnapshotUsecase, ReservationVehicleService],
 })
 export class ReservationModule {}

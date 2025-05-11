@@ -293,10 +293,10 @@ export class UserReservationController {
         return this.reservationUsecase.returnVehicle(user, reservationId, returnDto);
     }
 
-    @ApiExcludeEndpoint()
-    @Public()
-    @Get('cron-job/close')
-    async closeReservation() {
-        return this.reservationUsecase.handleCron();
-    }
+    // @ApiExcludeEndpoint()
+    // @Public()
+    // @Get('cron-job/close')
+    // async closeReservation() {
+    //     return this.reservationUsecase.handleCron();
+    // }
 }

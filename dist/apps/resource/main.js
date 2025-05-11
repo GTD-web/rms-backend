@@ -7610,6 +7610,55 @@ exports.AdminReservationController = AdminReservationController = __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/cron.reservation.controller.ts":
+/*!****************************************************************************************************************************!*\
+  !*** ./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/cron.reservation.controller.ts ***!
+  \****************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronReservationController = void 0;
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const reservation_usecase_1 = __webpack_require__(/*! @resource/modules/reservation/application/usecases/reservation.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation.usecase.ts");
+let CronReservationController = class CronReservationController {
+    constructor(reservationUsecase) {
+        this.reservationUsecase = reservationUsecase;
+    }
+    async closeReservation() {
+        return this.reservationUsecase.handleCron();
+    }
+};
+exports.CronReservationController = CronReservationController;
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/close'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronReservationController.prototype, "closeReservation", null);
+exports.CronReservationController = CronReservationController = __decorate([
+    (0, swagger_1.ApiTags)('2. 예약 - 사용자 페이지'),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Controller)('v1/reservations'),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_usecase_1.ReservationUsecase !== "undefined" && reservation_usecase_1.ReservationUsecase) === "function" ? _a : Object])
+], CronReservationController);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/reservation.controller.ts":
 /*!***********************************************************************************************************************!*\
   !*** ./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/reservation.controller.ts ***!
@@ -7649,7 +7698,6 @@ const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.d
 const reservation_snapshot_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/reservation-snapshot.dto */ "./apps/resource/src/modules/reservation/application/dtos/reservation-snapshot.dto.ts");
 const reservation_snapshot_usecase_1 = __webpack_require__(/*! @resource/modules/reservation/application/usecases/reservation-snapshot.usecase */ "./apps/resource/src/modules/reservation/application/usecases/reservation-snapshot.usecase.ts");
 const update_reservation_dto_1 = __webpack_require__(/*! @resource/modules/reservation/application/dtos/update-reservation.dto */ "./apps/resource/src/modules/reservation/application/dtos/update-reservation.dto.ts");
-const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
 let UserReservationController = class UserReservationController {
     constructor(reservationUsecase, reservationSnapshotUsecase) {
         this.reservationUsecase = reservationUsecase;
@@ -7700,9 +7748,6 @@ let UserReservationController = class UserReservationController {
     }
     async returnVehicle(user, reservationId, returnDto) {
         return this.reservationUsecase.returnVehicle(user, reservationId, returnDto);
-    }
-    async closeReservation() {
-        return this.reservationUsecase.handleCron();
     }
 };
 exports.UserReservationController = UserReservationController;
@@ -7903,14 +7948,6 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_15 = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _15 : Object, String, typeof (_16 = typeof dtos_index_1.ReturnVehicleDto !== "undefined" && dtos_index_1.ReturnVehicleDto) === "function" ? _16 : Object]),
     __metadata("design:returntype", typeof (_17 = typeof Promise !== "undefined" && Promise) === "function" ? _17 : Object)
 ], UserReservationController.prototype, "returnVehicle", null);
-__decorate([
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('cron-job/close'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], UserReservationController.prototype, "closeReservation", null);
 exports.UserReservationController = UserReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 - 사용자 페이지'),
     (0, common_1.Controller)('v1/reservations'),
@@ -8384,6 +8421,7 @@ const reservation_snapshot_repository_1 = __webpack_require__(/*! ./infrastructu
 const reservation_snapshot_service_1 = __webpack_require__(/*! ./application/services/reservation-snapshot.service */ "./apps/resource/src/modules/reservation/application/services/reservation-snapshot.service.ts");
 const reservation_vehicle_service_1 = __webpack_require__(/*! ./application/services/reservation-vehicle.service */ "./apps/resource/src/modules/reservation/application/services/reservation-vehicle.service.ts");
 const reservation_vehicle_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/reservation-vehicle.repository */ "./apps/resource/src/modules/reservation/infrastructure/adapters/out/persistence/reservation-vehicle.repository.ts");
+const cron_reservation_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/cron.reservation.controller */ "./apps/resource/src/modules/reservation/infrastructure/adapters/in/web/controllers/v1/cron.reservation.controller.ts");
 let ReservationModule = class ReservationModule {
 };
 exports.ReservationModule = ReservationModule;
@@ -8423,7 +8461,7 @@ exports.ReservationModule = ReservationModule = __decorate([
             reservation_event_handler_1.ReservationEventHandler,
             reservation_snapshot_usecase_1.ReservationSnapshotUsecase,
         ],
-        controllers: [admin_reservation_controller_1.AdminReservationController, reservation_controller_1.UserReservationController],
+        controllers: [admin_reservation_controller_1.AdminReservationController, reservation_controller_1.UserReservationController, cron_reservation_controller_1.CronReservationController],
         exports: [reservation_service_1.ReservationService, reservation_snapshot_usecase_1.ReservationSnapshotUsecase, reservation_vehicle_service_1.ReservationVehicleService],
     })
 ], ReservationModule);
