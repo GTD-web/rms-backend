@@ -543,15 +543,15 @@ export class ReservationUsecase {
                     type: ResourceType.ACCOMMODATION,
                 },
             },
-            {
-                status: ReservationStatus.CONFIRMED,
-                resource: {
-                    type: ResourceType.VEHICLE,
-                },
-                reservationVehicles: {
-                    isReturned: true,
-                },
-            },
+            // {
+            //     status: ReservationStatus.CONFIRMED,
+            //     resource: {
+            //         type: ResourceType.VEHICLE,
+            //     },
+            //     reservationVehicles: {
+            //         isReturned: true,
+            //     },
+            // },
         ];
 
         const options: RepositoryOptions = {

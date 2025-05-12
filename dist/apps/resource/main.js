@@ -6973,15 +6973,6 @@ let ReservationUsecase = class ReservationUsecase {
                     type: resource_type_enum_1.ResourceType.ACCOMMODATION,
                 },
             },
-            {
-                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
-                resource: {
-                    type: resource_type_enum_1.ResourceType.VEHICLE,
-                },
-                reservationVehicles: {
-                    isReturned: true,
-                },
-            },
         ];
         const options = {
             where,
