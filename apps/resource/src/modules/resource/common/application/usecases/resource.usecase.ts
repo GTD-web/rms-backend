@@ -499,17 +499,16 @@ export class ResourceUsecase {
             const currentServerHour = DateUtil.now().toDate().getHours();
             const currentMinute = DateUtil.now().toDate().getMinutes();
             const currentHour = currentServerHour === currentUTCHour ? currentServerHour + 9 : currentServerHour;
+
             // 현재 시간을 30분 단위로 반올림
-            const roundedHour = DateUtil.now().format(
-                `${currentHour < 9 ? '09' : 'HH'}:${currentMinute < 30 ? '00' : '30'}:00`,
-            );
+            const roundedHour = DateUtil.now().format(`HH:${currentMinute < 30 ? '00' : '30'}:00`);
             const startTime =
                 DateUtil.date(startDate).format('YYYY-MM-DD') === DateUtil.now().format('YYYY-MM-DD')
                     ? roundedHour
                     : am
-                      ? '09:00:00'
-                      : '13:00:00';
-            const endTime = pm ? '18:00:00' : '12:00:00';
+                      ? '00:00:00'
+                      : '12:00:00';
+            const endTime = pm ? '23:59:59' : '12:00:00';
 
             this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
         } else {
@@ -522,7 +521,7 @@ export class ResourceUsecase {
                 const dateStr = currentDate.format('YYYY-MM-DD');
 
                 // 하루 전체 시간대 처리 (09:00 ~ 18:00)
-                this.processTimeRange(dateStr, '09:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, '00:00:00', '23:59:59', timeUnit, confirmedReservations, availableSlots);
                 // 점심시간 제외
                 // this.processTimeRange(dateStr, '13:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
 

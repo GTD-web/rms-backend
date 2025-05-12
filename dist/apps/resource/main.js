@@ -10419,13 +10419,13 @@ let ResourceUsecase = class ResourceUsecase {
             const currentServerHour = date_util_1.DateUtil.now().toDate().getHours();
             const currentMinute = date_util_1.DateUtil.now().toDate().getMinutes();
             const currentHour = currentServerHour === currentUTCHour ? currentServerHour + 9 : currentServerHour;
-            const roundedHour = date_util_1.DateUtil.now().format(`${currentHour < 9 ? '09' : 'HH'}:${currentMinute < 30 ? '00' : '30'}:00`);
+            const roundedHour = date_util_1.DateUtil.now().format(`HH:${currentMinute < 30 ? '00' : '30'}:00`);
             const startTime = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD')
                 ? roundedHour
                 : am
-                    ? '09:00:00'
-                    : '13:00:00';
-            const endTime = pm ? '18:00:00' : '12:00:00';
+                    ? '00:00:00'
+                    : '12:00:00';
+            const endTime = pm ? '23:59:59' : '12:00:00';
             this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
         }
         else {
@@ -10433,7 +10433,7 @@ let ResourceUsecase = class ResourceUsecase {
             const endDateObj = date_util_1.DateUtil.date(endDate);
             while (this.isSameOrBefore(currentDate, endDateObj)) {
                 const dateStr = currentDate.format('YYYY-MM-DD');
-                this.processTimeRange(dateStr, '09:00:00', '18:00:00', timeUnit, confirmedReservations, availableSlots);
+                this.processTimeRange(dateStr, '00:00:00', '23:59:59', timeUnit, confirmedReservations, availableSlots);
                 currentDate = currentDate.addDays(1);
             }
         }
