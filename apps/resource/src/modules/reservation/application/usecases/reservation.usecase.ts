@@ -1133,7 +1133,7 @@ export class ReservationUsecase {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_RESOURCE_TYPE);
         }
 
-        if (reservation.status !== ReservationStatus.CONFIRMED && reservation.status !== ReservationStatus.CLOSED) {
+        if (reservation.status !== ReservationStatus.CONFIRMED) {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_RETURN_STATUS(reservation.status));
         }
 
@@ -1159,6 +1159,14 @@ export class ReservationUsecase {
             if (reservationVehicle.isReturned) {
                 throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_ALREADY_RETURNED);
             }
+
+            await this.reservationService.update(
+                reservationId,
+                {
+                    status: ReservationStatus.CLOSED,
+                },
+                { queryRunner },
+            );
 
             await this.reservationVehicleService.update(
                 reservationVehicle.reservationVehicleId,

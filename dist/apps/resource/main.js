@@ -7310,7 +7310,7 @@ let ReservationUsecase = class ReservationUsecase {
         if (reservation.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_RESOURCE_TYPE);
         }
-        if (reservation.status !== reservation_type_enum_1.ReservationStatus.CONFIRMED && reservation.status !== reservation_type_enum_1.ReservationStatus.CLOSED) {
+        if (reservation.status !== reservation_type_enum_1.ReservationStatus.CONFIRMED) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_RETURN_STATUS(reservation.status));
         }
         if (reservation.resource.vehicleInfo.totalMileage > returnDto.totalMileage) {
@@ -7330,6 +7330,9 @@ let ReservationUsecase = class ReservationUsecase {
             if (reservationVehicle.isReturned) {
                 throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_ALREADY_RETURNED);
             }
+            await this.reservationService.update(reservationId, {
+                status: reservation_type_enum_1.ReservationStatus.CLOSED,
+            }, { queryRunner });
             await this.reservationVehicleService.update(reservationVehicle.reservationVehicleId, {
                 endOdometer: returnDto.totalMileage,
                 isReturned: true,
