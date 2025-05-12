@@ -81,7 +81,7 @@ const BusinessErrorMessage = {
     },
     RESERVATION: {
         NOT_FOUND: '요청한 예약 정보를 찾을 수 없습니다.',
-        TIME_CONFLICT: '예약 시간이 중복됩니다.',
+        TIME_CONFLICT: '해당 시간엔 이미 예약이 되어있습니다.',
         INVALID_DATE_RANGE: '시작 시간은 종료 시간보다 이전이어야 합니다.',
         CANNOT_UPDATE_ACCOMMODATION_TIME: '확정된 숙소 예약의 시간은 변경할 수 없습니다.',
         CANNOT_UPDATE_STATUS: (status: string) => `${status} 상태의 예약은 수정할 수 없습니다.`,

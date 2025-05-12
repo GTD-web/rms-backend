@@ -10373,7 +10373,7 @@ let ResourceUsecase = class ResourceUsecase {
         }
         else if (isAccommodation || !isSameDay) {
             const combinedStartDateTime = startTime ? `${startDate} ${startTime}` : `${startDate} 00:00:00`;
-            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 23:59:59`;
+            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 24:00:00`;
             const startDateObj = date_util_1.DateUtil.date(combinedStartDateTime);
             const endDateObj = date_util_1.DateUtil.date(combinedEndDateTime);
             for (const resource of resources) {
@@ -10409,17 +10409,45 @@ let ResourceUsecase = class ResourceUsecase {
         const confirmedReservations = existingReservations;
         if (isSameDay) {
             const dateStr = startDate;
-            const currentUTCHour = new Date().getUTCHours();
-            const currentServerHour = date_util_1.DateUtil.now().toDate().getHours();
             const currentMinute = date_util_1.DateUtil.now().toDate().getMinutes();
-            const currentHour = currentServerHour === currentUTCHour ? currentServerHour + 9 : currentServerHour;
             const roundedHour = date_util_1.DateUtil.now().format(`HH:${currentMinute < 30 ? '00' : '30'}:00`);
-            const startTime = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD')
-                ? roundedHour
-                : am
-                    ? '00:00:00'
-                    : '12:00:00';
-            const endTime = pm ? '23:59:59' : '12:00:00';
+            const isToday = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD');
+            const isAllDay = (am && pm) || (!am && !pm);
+            const isVehicle = resource.type === resource_type_enum_1.ResourceType.VEHICLE;
+            let startTime;
+            let endTime;
+            if (isVehicle) {
+                if (isToday) {
+                    startTime = roundedHour;
+                    endTime = '24:00:00';
+                }
+                else {
+                    if (isAllDay) {
+                        startTime = '00:00:00';
+                        endTime = '24:00:00';
+                    }
+                    else {
+                        startTime = am ? '00:00:00' : '12:00:00';
+                        endTime = am ? '12:00:00' : '24:00:00';
+                    }
+                }
+            }
+            else {
+                if (isToday) {
+                    startTime = roundedHour;
+                    endTime = '18:00:00';
+                }
+                else {
+                    if (isAllDay) {
+                        startTime = '09:00:00';
+                        endTime = '18:00:00';
+                    }
+                    else {
+                        startTime = am ? '09:00:00' : '12:00:00';
+                        endTime = am ? '12:00:00' : '18:00:00';
+                    }
+                }
+            }
             this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
         }
         else {
@@ -15135,7 +15163,7 @@ const BusinessErrorMessage = {
     },
     RESERVATION: {
         NOT_FOUND: '요청한 예약 정보를 찾을 수 없습니다.',
-        TIME_CONFLICT: '예약 시간이 중복됩니다.',
+        TIME_CONFLICT: '해당 시간엔 이미 예약이 되어있습니다.',
         INVALID_DATE_RANGE: '시작 시간은 종료 시간보다 이전이어야 합니다.',
         CANNOT_UPDATE_ACCOMMODATION_TIME: '확정된 숙소 예약의 시간은 변경할 수 없습니다.',
         CANNOT_UPDATE_STATUS: (status) => `${status} 상태의 예약은 수정할 수 없습니다.`,

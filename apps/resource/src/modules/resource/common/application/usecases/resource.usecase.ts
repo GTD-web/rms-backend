@@ -426,7 +426,7 @@ export class ResourceUsecase {
         else if (isAccommodation || !isSameDay) {
             const combinedStartDateTime = startTime ? `${startDate} ${startTime}` : `${startDate} 00:00:00`; // 기본 시작 시간은 09:00
 
-            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 23:59:59`; // 기본 종료 시간은 18:00
+            const combinedEndDateTime = endTime ? `${endDate} ${endTime}` : `${endDate} 24:00:00`; // 기본 종료 시간은 18:00
 
             const startDateObj = DateUtil.date(combinedStartDateTime);
             const endDateObj = DateUtil.date(combinedEndDateTime);
@@ -495,20 +495,50 @@ export class ResourceUsecase {
         if (isSameDay) {
             // 당일 예약건 처리
             const dateStr = startDate; // YYYY-MM-DD 형식
-            const currentUTCHour = new Date().getUTCHours();
-            const currentServerHour = DateUtil.now().toDate().getHours();
+            // const currentUTCHour = new Date().getUTCHours();
+            // const currentServerHour = DateUtil.now().toDate().getHours();
+            // const currentHour = currentServerHour === currentUTCHour ? currentServerHour + 9 : currentServerHour;
             const currentMinute = DateUtil.now().toDate().getMinutes();
-            const currentHour = currentServerHour === currentUTCHour ? currentServerHour + 9 : currentServerHour;
 
             // 현재 시간을 30분 단위로 반올림
             const roundedHour = DateUtil.now().format(`HH:${currentMinute < 30 ? '00' : '30'}:00`);
-            const startTime =
-                DateUtil.date(startDate).format('YYYY-MM-DD') === DateUtil.now().format('YYYY-MM-DD')
-                    ? roundedHour
-                    : am
-                      ? '00:00:00'
-                      : '12:00:00';
-            const endTime = pm ? '23:59:59' : '12:00:00';
+            // 오늘일 떄
+            const isToday = DateUtil.date(startDate).format('YYYY-MM-DD') === DateUtil.now().format('YYYY-MM-DD');
+            const isAllDay = (am && pm) || (!am && !pm);
+            const isVehicle = resource.type === ResourceType.VEHICLE;
+
+            let startTime: string;
+            let endTime: string;
+
+            if (isVehicle) {
+                // 차량의 경우 24시간 예약 가능
+                if (isToday) {
+                    startTime = roundedHour;
+                    endTime = '24:00:00';
+                } else {
+                    if (isAllDay) {
+                        startTime = '00:00:00';
+                        endTime = '24:00:00';
+                    } else {
+                        startTime = am ? '00:00:00' : '12:00:00';
+                        endTime = am ? '12:00:00' : '24:00:00';
+                    }
+                }
+            } else {
+                // 회의실의 경우 업무시간 내 예약
+                if (isToday) {
+                    startTime = roundedHour;
+                    endTime = '18:00:00';
+                } else {
+                    if (isAllDay) {
+                        startTime = '09:00:00';
+                        endTime = '18:00:00';
+                    } else {
+                        startTime = am ? '09:00:00' : '12:00:00';
+                        endTime = am ? '12:00:00' : '18:00:00';
+                    }
+                }
+            }
 
             this.processTimeRange(dateStr, startTime, endTime, timeUnit, confirmedReservations, availableSlots);
         } else {
