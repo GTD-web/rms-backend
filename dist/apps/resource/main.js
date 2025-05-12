@@ -8286,6 +8286,7 @@ const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/in
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let ReservationRepository = class ReservationRepository {
     constructor(repository) {
         this.repository = repository;
@@ -8317,7 +8318,7 @@ let ReservationRepository = class ReservationRepository {
         catch (error) {
             if (error.constraint === 'no_time_overlap') {
                 console.warn(date_util_1.DateUtil.now().toISOString(), reservation.startDate, reservation.endDate);
-                throw new common_1.BadRequestException('Reservation time conflict - check in database');
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
             }
             throw error;
         }

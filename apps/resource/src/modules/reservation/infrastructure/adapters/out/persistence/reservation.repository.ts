@@ -8,6 +8,8 @@ import { CreateReservationDto } from '@resource/modules/reservation/application/
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DateUtil } from '@libs/utils/date.util';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
+
 @Injectable()
 export class ReservationRepository implements ReservationRepositoryPort {
     constructor(
@@ -42,7 +44,7 @@ export class ReservationRepository implements ReservationRepositoryPort {
         } catch (error) {
             if (error.constraint === 'no_time_overlap') {
                 console.warn(DateUtil.now().toISOString(), reservation.startDate, reservation.endDate);
-                throw new BadRequestException('Reservation time conflict - check in database');
+                throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
             }
             throw error;
         }
