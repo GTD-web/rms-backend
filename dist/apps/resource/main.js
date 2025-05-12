@@ -10171,7 +10171,7 @@ let ResourceUsecase = class ResourceUsecase {
                 const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
                     repositoryOptions: {
                         where: where,
-                        relations: ['participants'],
+                        relations: ['participants', 'participants.employee'],
                         order: {
                             startDate: 'ASC',
                         },
@@ -10181,6 +10181,7 @@ let ResourceUsecase = class ResourceUsecase {
                     .map((reservation) => {
                     const isMine = reservation.participants.some((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER &&
                         participant.employeeId === user.employeeId);
+                    reservation.participants = reservation.participants.filter((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER);
                     return {
                         ...reservation,
                         startDate: date_util_1.DateUtil.date(reservation.startDate).format(),
@@ -10192,7 +10193,6 @@ let ResourceUsecase = class ResourceUsecase {
                     if (isMine) {
                         return reservation.participants.some((participant) => participant.employeeId === user.employeeId);
                     }
-                    delete reservation.participants;
                     return true;
                 });
                 return {

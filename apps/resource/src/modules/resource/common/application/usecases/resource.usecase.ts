@@ -141,7 +141,7 @@ export class ResourceUsecase {
                         const [reservations] = await this.eventEmitter.emitAsync('find.reservation', {
                             repositoryOptions: {
                                 where: where,
-                                relations: ['participants'],
+                                relations: ['participants', 'participants.employee'],
                                 order: {
                                     startDate: 'ASC',
                                 },
@@ -154,6 +154,9 @@ export class ResourceUsecase {
                                     (participant) =>
                                         participant.type === ParticipantsType.RESERVER &&
                                         participant.employeeId === user.employeeId,
+                                );
+                                reservation.participants = reservation.participants.filter(
+                                    (participant) => participant.type === ParticipantsType.RESERVER,
                                 );
                                 return {
                                     ...reservation,
@@ -168,7 +171,6 @@ export class ResourceUsecase {
                                         (participant) => participant.employeeId === user.employeeId,
                                     );
                                 }
-                                delete reservation.participants;
                                 return true;
                             });
 
