@@ -210,11 +210,14 @@ export class ResourceUsecase {
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
 
         //  소모품 현황과 정비내역 및 정비내역 추가 기능 필요
-        if (resource.vehicleInfo && resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
-            resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
-                where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
-                // withDeleted: true,
-            });
+        if (resource.vehicleInfo) {
+            if (resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
+                resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
+                    where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
+                    // withDeleted: true,
+                });
+            }
+
             if (resource.vehicleInfo.consumables && resource.vehicleInfo.consumables.length > 0) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
                 for (const consumable of resource.vehicleInfo.consumables) {

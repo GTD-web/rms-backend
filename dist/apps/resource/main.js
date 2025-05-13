@@ -10230,10 +10230,12 @@ let ResourceUsecase = class ResourceUsecase {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         resource['imageFiles'] = await this.fileService.findAllFilesByFilePath(resource.images);
-        if (resource.vehicleInfo && resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
-            resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
-                where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
-            });
+        if (resource.vehicleInfo) {
+            if (resource.resourceManagers.some((manager) => manager.employeeId === employeeId)) {
+                resource.vehicleInfo['consumables'] = await this.consumableService.findAll({
+                    where: { vehicleInfoId: resource.vehicleInfo.vehicleInfoId },
+                });
+            }
             if (resource.vehicleInfo.consumables && resource.vehicleInfo.consumables.length > 0) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
                 for (const consumable of resource.vehicleInfo.consumables) {
