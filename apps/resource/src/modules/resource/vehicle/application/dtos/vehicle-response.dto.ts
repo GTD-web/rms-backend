@@ -87,11 +87,17 @@ export class VehicleInfoResponseDto {
     @ApiProperty()
     odometerImages: string[];
 
+    @ApiProperty()
+    indoorImages: string[];
+
     @ApiProperty({ type: [FileResponseDto], required: false })
     parkingLocationFiles?: FileResponseDto[];
 
     @ApiProperty({ type: [FileResponseDto], required: false })
     odometerFiles?: FileResponseDto[];
+
+    @ApiProperty({ type: [FileResponseDto], required: false })
+    indoorFiles?: FileResponseDto[];
 
     @ApiProperty({ type: [ConsumableResponseDto], required: false })
     consumables?: ConsumableResponseDto[];

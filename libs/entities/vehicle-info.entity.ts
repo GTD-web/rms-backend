@@ -31,6 +31,9 @@ export class VehicleInfo {
     @Column({ type: 'jsonb', nullable: true, comment: '계기판 이미지 배열' })
     odometerImages: string[];
 
+    @Column({ type: 'jsonb', nullable: true, comment: '차량 실내 이미지 배열' })
+    indoorImages: string[];
+
     @OneToOne(() => Resource, (resource) => resource.vehicleInfo)
     @JoinColumn({ name: `resourceId` })
     resource: Resource;

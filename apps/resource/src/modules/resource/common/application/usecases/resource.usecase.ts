@@ -257,6 +257,9 @@ export class ResourceUsecase {
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(
                 resource.vehicleInfo.odometerImages,
             );
+            resource.vehicleInfo['indoorFiles'] = await this.fileService.findAllFilesByFilePath(
+                resource.vehicleInfo.indoorImages,
+            );
         }
         return new ResourceResponseDto(resource);
     }
@@ -323,6 +326,9 @@ export class ResourceUsecase {
             );
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(
                 resource.vehicleInfo.odometerImages,
+            );
+            resource.vehicleInfo['indoorFiles'] = await this.fileService.findAllFilesByFilePath(
+                resource.vehicleInfo.indoorImages,
             );
         }
 

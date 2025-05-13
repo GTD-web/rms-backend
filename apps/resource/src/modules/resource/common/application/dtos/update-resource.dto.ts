@@ -118,6 +118,11 @@ export class ReturnVehicleDto {
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') })
     @IsString({ each: true, message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지', '문자열') })
     odometerImages: string[];
+
+    @ApiProperty()
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('차량 실내 이미지') })
+    @IsString({ each: true, message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('차량 실내 이미지', '문자열') })
+    indoorImages: string[];
 }
 
 export class NewOrderResourceDto {

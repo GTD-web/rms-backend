@@ -35,6 +35,7 @@ export class VehicleInfoUsecase {
             insuranceNumber: vehicleInfo.insuranceNumber,
             parkingLocationImages: vehicleInfo.parkingLocationImages,
             odometerImages: vehicleInfo.odometerImages,
+            indoorImages: vehicleInfo.indoorImages,
         };
     }
 
@@ -110,6 +111,7 @@ export class VehicleInfoUsecase {
             insuranceNumber: vehicleInfo.insuranceNumber,
             parkingLocationImages: vehicleInfo.parkingLocationImages,
             odometerImages: vehicleInfo.odometerImages,
+            indoorImages: vehicleInfo.indoorImages,
         };
     }
 }

@@ -9611,6 +9611,12 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지', '문자열') }),
     __metadata("design:type", Array)
 ], ReturnVehicleDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('차량 실내 이미지') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('차량 실내 이미지', '문자열') }),
+    __metadata("design:type", Array)
+], ReturnVehicleDto.prototype, "indoorImages", void 0);
 class NewOrderResourceDto {
 }
 exports.NewOrderResourceDto = NewOrderResourceDto;
@@ -10261,6 +10267,7 @@ let ResourceUsecase = class ResourceUsecase {
             }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.odometerImages);
+            resource.vehicleInfo['indoorFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.indoorImages);
         }
         return new resource_response_dto_1.ResourceResponseDto(resource);
     }
@@ -10315,6 +10322,7 @@ let ResourceUsecase = class ResourceUsecase {
             }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.parkingLocationImages);
             resource.vehicleInfo['odometerFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.odometerImages);
+            resource.vehicleInfo['indoorFiles'] = await this.fileService.findAllFilesByFilePath(resource.vehicleInfo.indoorImages);
         }
         return new resource_response_dto_1.ResourceResponseDto(resource);
     }
@@ -12429,6 +12437,10 @@ __decorate([
     __metadata("design:type", Array)
 ], VehicleInfoResponseDto.prototype, "odometerImages", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "indoorImages", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: [file_response_dto_1.FileResponseDto], required: false }),
     __metadata("design:type", Array)
 ], VehicleInfoResponseDto.prototype, "parkingLocationFiles", void 0);
@@ -12436,6 +12448,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ type: [file_response_dto_1.FileResponseDto], required: false }),
     __metadata("design:type", Array)
 ], VehicleInfoResponseDto.prototype, "odometerFiles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [file_response_dto_1.FileResponseDto], required: false }),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "indoorFiles", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [ConsumableResponseDto], required: false }),
     __metadata("design:type", Array)
@@ -13134,6 +13150,7 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
             insuranceNumber: vehicleInfo.insuranceNumber,
             parkingLocationImages: vehicleInfo.parkingLocationImages,
             odometerImages: vehicleInfo.odometerImages,
+            indoorImages: vehicleInfo.indoorImages,
         };
     }
     async updateVehicleInfo(vehicleInfoId, updateVehicleInfoDto, repositoryOptions) {
@@ -13157,6 +13174,7 @@ let VehicleInfoUsecase = class VehicleInfoUsecase {
             insuranceNumber: vehicleInfo.insuranceNumber,
             parkingLocationImages: vehicleInfo.parkingLocationImages,
             odometerImages: vehicleInfo.odometerImages,
+            indoorImages: vehicleInfo.indoorImages,
         };
     }
 };
@@ -16894,6 +16912,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'jsonb', nullable: true, comment: '계기판 이미지 배열' }),
     __metadata("design:type", Array)
 ], VehicleInfo.prototype, "odometerImages", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true, comment: '차량 실내 이미지 배열' }),
+    __metadata("design:type", Array)
+], VehicleInfo.prototype, "indoorImages", void 0);
 __decorate([
     (0, typeorm_1.OneToOne)(() => resource_entity_1.Resource, (resource) => resource.vehicleInfo),
     (0, typeorm_1.JoinColumn)({ name: `resourceId` }),
