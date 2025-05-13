@@ -1193,6 +1193,7 @@ export class ReservationUsecase {
                     leftMileage: returnDto.leftMileage,
                     parkingLocationImages: returnDto.parkingLocationImages,
                     odometerImages: returnDto.odometerImages,
+                    indoorImages: returnDto.indoorImages,
                 },
                 repositoryOptions: { queryRunner },
             });
