@@ -2,17 +2,20 @@ import { IsString, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SsoResponseDto {
-    @ApiProperty({ description: '액세스 토큰', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOi...' })
-    accessToken: string;
+    @ApiProperty({ description: '토큰 타입', example: 'Bearer' })
+    tokenType: string;
 
-    @ApiProperty({
-        description: '시크릿 키',
-        example: '08c9124e08661f87e893544360d86d84de0154902fde79802d81ba7f0ec794a5',
-    })
-    secret: string;
+    @ApiProperty({ description: '액세스 토큰', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiO...' })
+    accessToken: string;
 
     @ApiProperty({ description: '토큰 만료 시간', example: '2025-03-26T00:00:00.000Z' })
     expiresAt: Date;
+
+    @ApiProperty({ description: '리프레시 토큰', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiO...' })
+    refreshToken: string;
+
+    @ApiProperty({ description: '리프레시 토큰 만료 시간', example: '2025-03-26T00:00:00.000Z' })
+    refreshTokenExpiresAt: Date;
 
     @ApiProperty({ description: '사용자 이름', example: '구석현' })
     name: string;

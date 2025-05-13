@@ -730,6 +730,10 @@ export class ReservationUsecase {
         if (!reservation) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
+        if (reservation.status === ReservationStatus.CLOSED) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+        }
+
         let hasUpdateTime = false;
         let hasUpdateParticipants = false;
         // 참가자 변경 여부 확인
@@ -1058,6 +1062,10 @@ export class ReservationUsecase {
         });
         if (!reservation) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+
+        if (reservation.status === ReservationStatus.CLOSED) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
 
         const updatedReservation = await this.reservationService.update(reservationId, updateDto);

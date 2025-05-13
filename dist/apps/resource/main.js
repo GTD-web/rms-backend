@@ -7116,6 +7116,9 @@ let ReservationUsecase = class ReservationUsecase {
         if (!reservation) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
+        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+        }
         let hasUpdateTime = false;
         let hasUpdateParticipants = false;
         if (updateDto.participantIds) {
@@ -7240,6 +7243,9 @@ let ReservationUsecase = class ReservationUsecase {
         });
         if (!reservation) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
         const updatedReservation = await this.reservationService.update(reservationId, updateDto);
         if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELLED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
