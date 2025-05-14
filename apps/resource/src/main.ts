@@ -14,8 +14,18 @@ import { ValidationPipe } from '@nestjs/common';
 import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const isProduction = process.env.NODE_ENV === 'production';
     app.enableCors({
-        origin: true,
+        origin: function (origin, callback) {
+            console.log('isProduction :', isProduction);
+            console.log('origin :', origin);
+            const whitelist = ['https://lrms.lumir.space'];
+            if (!isProduction || whitelist.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
     });
     app.setGlobalPrefix('api');
