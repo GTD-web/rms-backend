@@ -165,6 +165,10 @@ export class NotificationUsecase {
                     .format('YYYY-MM-DD HH:mm');
                 createNotificationDto.isSent = false;
                 break;
+            case NotificationType.RESERVATION_STATUS_PENDING:
+                createNotificationDto.title = `[숙소 확정 대기중] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
             case NotificationType.RESERVATION_STATUS_CONFIRMED:
                 createNotificationDto.title = `[예약 확정] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;

@@ -44,7 +44,11 @@ export class VehicleInfoService {
             where: { vehicleInfoId },
             relations: ['resource', 'resource.resourceManagers', 'consumables', 'consumables.maintenances'],
         });
-        const notiTarget = vehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
+        const [systemUser] = await this.eventEmitter.emitAsync('find.user.system.admin');
+        const notiTarget = [
+            ...vehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId),
+            ...systemUser.map((user) => user.employeeId),
+        ];
 
         for (const consumable of vehicleInfo.consumables) {
             if (!consumable.notifyReplacementCycle) continue;

@@ -704,6 +704,27 @@ export class ReservationUsecase {
                             notiTarget,
                         });
                     }
+                } else if (
+                    reservationWithResource.status === ReservationStatus.PENDING &&
+                    reservationWithResource.resource.type === ResourceType.ACCOMMODATION
+                ) {
+                    const [systemUser] = await this.eventEmitter.emitAsync('find.user.system.admin');
+
+                    this.eventEmitter.emit('create.notification', {
+                        notificationType: NotificationType.RESERVATION_STATUS_PENDING,
+                        notificationData: {
+                            reservationId: reservationWithResource.reservationId,
+                            reservationTitle: reservationWithResource.title,
+                            reservationDate: DateUtil.toAlarmRangeString(
+                                DateUtil.format(reservationWithResource.startDate),
+                                DateUtil.format(reservationWithResource.endDate),
+                            ),
+                            resourceId: reservationWithResource.resource.resourceId,
+                            resourceName: reservationWithResource.resource.name,
+                            resourceType: reservationWithResource.resource.type,
+                        },
+                        notiTarget: [...systemUser.map((user) => user.employeeId)],
+                    });
                 }
             } catch (error) {
                 console.log(error);
@@ -1206,11 +1227,11 @@ export class ReservationUsecase {
                 repositoryOptions: { queryRunner },
             });
 
-            const [systemUser] = await this.eventEmitter.emitAsync('find.user.system.admin');
+            // const [systemUser] = await this.eventEmitter.emitAsync('find.user.system.admin');
             const notiTarget = [
-                ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
+                // ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
                 user.employeeId,
-                ...systemUser.map((user) => user.employeeId),
+                // ...systemUser.map((user) => user.employeeId),
             ];
             this.eventEmitter.emit('create.notification', {
                 notificationType: NotificationType.RESOURCE_VEHICLE_RETURNED,
