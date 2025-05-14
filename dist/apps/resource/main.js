@@ -4220,6 +4220,10 @@ let NotificationUsecase = class NotificationUsecase {
                     .format('YYYY-MM-DD HH:mm');
                 createNotificationDto.isSent = false;
                 break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING:
+                createNotificationDto.title = `[숙소 확정 대기중] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
             case notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED:
                 createNotificationDto.title = `[예약 확정] ${createNotificationDatatDto.reservationTitle}`;
                 createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
@@ -7090,6 +7094,22 @@ let ReservationUsecase = class ReservationUsecase {
                         });
                     }
                 }
+                else if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.PENDING &&
+                    reservationWithResource.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+                    const [systemUser] = await this.eventEmitter.emitAsync('find.user.system.admin');
+                    this.eventEmitter.emit('create.notification', {
+                        notificationType: notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING,
+                        notificationData: {
+                            reservationId: reservationWithResource.reservationId,
+                            reservationTitle: reservationWithResource.title,
+                            reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(reservationWithResource.startDate), date_util_1.DateUtil.format(reservationWithResource.endDate)),
+                            resourceId: reservationWithResource.resource.resourceId,
+                            resourceName: reservationWithResource.resource.name,
+                            resourceType: reservationWithResource.resource.type,
+                        },
+                        notiTarget: [...systemUser.map((user) => user.employeeId)],
+                    });
+                }
             }
             catch (error) {
                 console.log(error);
@@ -7352,11 +7372,8 @@ let ReservationUsecase = class ReservationUsecase {
                 },
                 repositoryOptions: { queryRunner },
             });
-            const [systemUser] = await this.eventEmitter.emitAsync('find.user.system.admin');
             const notiTarget = [
-                ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
                 user.employeeId,
-                ...systemUser.map((user) => user.employeeId),
             ];
             this.eventEmitter.emit('create.notification', {
                 notificationType: notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED,
@@ -12730,7 +12747,11 @@ let VehicleInfoService = class VehicleInfoService {
             where: { vehicleInfoId },
             relations: ['resource', 'resource.resourceManagers', 'consumables', 'consumables.maintenances'],
         });
-        const notiTarget = vehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId);
+        const [systemUser] = await this.eventEmitter.emitAsync('find.user.system.admin');
+        const notiTarget = [
+            ...vehicleInfo.resource.resourceManagers.map((manager) => manager.employeeId),
+            ...systemUser.map((user) => user.employeeId),
+        ];
         for (const consumable of vehicleInfo.consumables) {
             if (!consumable.notifyReplacementCycle)
                 continue;
@@ -17585,6 +17606,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationType = void 0;
 var NotificationType;
 (function (NotificationType) {
+    NotificationType["RESERVATION_STATUS_PENDING"] = "RESERVATION_STATUS_PENDING";
     NotificationType["RESERVATION_STATUS_CONFIRMED"] = "RESERVATION_STATUS_CONFIRMED";
     NotificationType["RESERVATION_STATUS_CANCELLED"] = "RESERVATION_STATUS_CANCELLED";
     NotificationType["RESERVATION_STATUS_REJECTED"] = "RESERVATION_STATUS_REJECTED";
