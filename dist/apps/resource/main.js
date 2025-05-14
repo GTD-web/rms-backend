@@ -19052,7 +19052,7 @@ async function bootstrap() {
             console.log('isProduction :', isProduction);
             console.log('origin :', origin);
             const whitelist = ['https://lrms.lumir.space'];
-            if (!isProduction || whitelist.includes(origin)) {
+            if (!isProduction || !origin || whitelist.includes(origin)) {
                 callback(null, true);
             }
             else {
