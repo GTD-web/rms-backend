@@ -19046,8 +19046,19 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const request_interceptor_1 = __webpack_require__(/*! @libs/interceptors/request.interceptor */ "./libs/interceptors/request.interceptor.ts");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const isProduction = process.env.NODE_ENV === 'production';
     app.enableCors({
-        origin: true,
+        origin: function (origin, callback) {
+            console.log('isProduction :', isProduction);
+            console.log('origin :', origin);
+            const whitelist = ['https://lrms.lumir.space'];
+            if (!isProduction || whitelist.includes(origin)) {
+                callback(null, true);
+            }
+            else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
     });
     app.setGlobalPrefix('api');
