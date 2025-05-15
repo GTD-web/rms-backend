@@ -1301,6 +1301,137 @@ exports.ResourceManagerUseCase = ResourceManagerUseCase = __decorate([
 
 /***/ }),
 
+/***/ "./apps/resource/src/modules/auth/application/usecases/sso-auth.usecase.ts":
+/*!*********************************************************************************!*\
+  !*** ./apps/resource/src/modules/auth/application/usecases/sso-auth.usecase.ts ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SsoAuthUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const axios_1 = __webpack_require__(/*! axios */ "axios");
+const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./apps/resource/src/modules/auth/application/services/user.service.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
+const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+let SsoAuthUsecase = class SsoAuthUsecase {
+    constructor(userService, jwtService, eventEmitter, dataSource) {
+        this.userService = userService;
+        this.jwtService = jwtService;
+        this.eventEmitter = eventEmitter;
+        this.dataSource = dataSource;
+    }
+    async validateUser(email, password) {
+        let user = await this.userService.findByEmail(email);
+        if (!user) {
+            const client_id = process.env.SSO_CLIENT_ID;
+            const ssoApiUrl = process.env.SSO_API_URL;
+            console.log(ssoApiUrl);
+            const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
+                client_id,
+                email: email,
+                password: password,
+            });
+            const queryRunner = this.dataSource.createQueryRunner();
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+            try {
+                const data = response.data.data;
+                const newUser = new entities_1.User();
+                newUser.email = data.email;
+                newUser.password = data.password;
+                newUser.mobile = data.phoneNumber;
+                user = await this.userService.save(newUser, { queryRunner });
+                const [result] = await this.eventEmitter.emitAsync('find.employee', {
+                    employeeNumber: data.employeeNumber,
+                    queryRunner,
+                });
+                if (result) {
+                    user.employee = result;
+                    await this.userService.update(user, { queryRunner });
+                }
+                else {
+                    throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
+                }
+                await queryRunner.commitTransaction();
+            }
+            catch (error) {
+                console.log(error);
+                await queryRunner.rollbackTransaction();
+                throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
+            }
+            finally {
+                await queryRunner.release();
+            }
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.INVALID_PASSWORD);
+        }
+        return user;
+    }
+    async login(loginDto) {
+        const user = await this.validateUser(loginDto.email, loginDto.password);
+        if (!user.employee.userId) {
+            await this.eventEmitter.emitAsync('update.employee', {
+                employee: {
+                    employeeId: user.employee.employeeId,
+                    user: user,
+                },
+            });
+        }
+        const result = {
+            accessToken: null,
+            email: user.email,
+            name: user.employee?.name,
+            department: user.employee?.department,
+            position: user.employee?.position,
+            roles: user.roles,
+        };
+        if (user.accessToken && user.expiredAt && date_util_1.DateUtil.now().format() < user.expiredAt) {
+            result.accessToken = user.accessToken;
+        }
+        else {
+            const payload = {
+                userId: user.userId,
+                employeeId: user.employeeId,
+                roles: user.roles,
+            };
+            const accessToken = this.jwtService.sign(payload);
+            const expiredAt = date_util_1.DateUtil.now().addDays(1).format();
+            user.accessToken = accessToken;
+            user.expiredAt = expiredAt;
+            await this.userService.update(user);
+            result.accessToken = accessToken;
+        }
+        return result;
+    }
+};
+exports.SsoAuthUsecase = SsoAuthUsecase;
+exports.SsoAuthUsecase = SsoAuthUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object, typeof (_c = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object])
+], SsoAuthUsecase);
+
+
+/***/ }),
+
 /***/ "./apps/resource/src/modules/auth/application/usecases/user.usecase.ts":
 /*!*****************************************************************************!*\
   !*** ./apps/resource/src/modules/auth/application/usecases/user.usecase.ts ***!
@@ -1435,6 +1566,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const jwt_auth_usecase_1 = __webpack_require__(/*! ./application/usecases/jwt-auth.usecase */ "./apps/resource/src/modules/auth/application/usecases/jwt-auth.usecase.ts");
+const sso_auth_usecase_1 = __webpack_require__(/*! ./application/usecases/sso-auth.usecase */ "./apps/resource/src/modules/auth/application/usecases/sso-auth.usecase.ts");
 const user_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/user.repository */ "./apps/resource/src/modules/auth/infrastructure/adapters/out/user.repository.ts");
 const jwt_strategy_1 = __webpack_require__(/*! ./infrastructure/strategies/jwt.strategy */ "./apps/resource/src/modules/auth/infrastructure/strategies/jwt.strategy.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
@@ -1456,7 +1588,7 @@ exports.AuthModule = AuthModule = __decorate([
             jwt_strategy_1.JwtStrategy,
             {
                 provide: 'AuthService',
-                useClass: jwt_auth_usecase_1.JwtAuthUsecase,
+                useClass: process.env.USE_SSO === 'true' ? sso_auth_usecase_1.SsoAuthUsecase : jwt_auth_usecase_1.JwtAuthUsecase,
             },
             user_service_1.UserService,
             user_repository_1.UserRepository,
@@ -1473,7 +1605,7 @@ exports.AuthModule = AuthModule = __decorate([
             jwt_strategy_1.JwtStrategy,
             {
                 provide: 'AuthService',
-                useClass: jwt_auth_usecase_1.JwtAuthUsecase,
+                useClass: process.env.USE_SSO === 'true' ? sso_auth_usecase_1.SsoAuthUsecase : jwt_auth_usecase_1.JwtAuthUsecase,
             },
             user_service_1.UserService,
             user_usecase_1.UserUsecase,
@@ -19051,7 +19183,7 @@ async function bootstrap() {
         origin: function (origin, callback) {
             console.log('isProduction :', isProduction);
             console.log('origin :', origin);
-            const whitelist = ['https://lrms.lumir.space'];
+            const whitelist = ['https://lrms.lumir.space', 'https://rms-backend-iota.vercel.app'];
             if (!isProduction || !origin || whitelist.includes(origin)) {
                 callback(null, true);
             }
