@@ -1369,7 +1369,7 @@ let SsoAuthUsecase = class SsoAuthUsecase {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             try {
-                const data = response.data.data;
+                const data = response.data;
                 const newUser = new entities_1.User();
                 newUser.email = data.email;
                 newUser.password = bcrypt.hashSync(password, 10);

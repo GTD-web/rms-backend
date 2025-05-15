@@ -49,7 +49,7 @@ export class SsoAuthUsecase implements AuthService {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             try {
-                const data: SsoResponseDto = response.data.data;
+                const data: SsoResponseDto = response.data;
                 const newUser = new User();
                 newUser.email = data.email;
                 newUser.password = bcrypt.hashSync(password, 10);
