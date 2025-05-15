@@ -19197,17 +19197,19 @@ async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const isProduction = process.env.NODE_ENV === 'production';
     app.enableCors({
-        origin: function (origin, callback) {
-            console.log('isProduction :', isProduction);
-            console.log('origin :', origin);
-            const whitelist = ['https://lrms.lumir.space', 'https://rms-backend-iota.vercel.app'];
-            if (!isProduction || !origin || whitelist.includes(origin)) {
-                callback(null, true);
+        origin: isProduction
+            ? function (origin, callback) {
+                console.log('isProduction :', isProduction);
+                console.log('origin :', origin);
+                const whitelist = ['https://lrms.lumir.space', 'https://rms-backend-iota.vercel.app'];
+                if (!isProduction || !origin || whitelist.includes(origin)) {
+                    callback(null, true);
+                }
+                else {
+                    callback(new Error('Not allowed by CORS'));
+                }
             }
-            else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        },
+            : true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
