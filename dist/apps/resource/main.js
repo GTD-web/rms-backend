@@ -1341,12 +1341,18 @@ let SsoAuthUsecase = class SsoAuthUsecase {
         let user = await this.userService.findByEmail(email);
         if (!user) {
             const client_id = process.env.SSO_CLIENT_ID;
+            const client_secret = process.env.SSO_CLIENT_SECRET;
+            const basicAuth = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
             const ssoApiUrl = process.env.SSO_API_URL;
             console.log(ssoApiUrl);
             const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
-                client_id,
+                grant_type: 'password',
                 email: email,
                 password: password,
+            }, {
+                headers: {
+                    Authorization: `Basic ${basicAuth}`,
+                },
             });
             const queryRunner = this.dataSource.createQueryRunner();
             await queryRunner.connect();
@@ -1355,7 +1361,7 @@ let SsoAuthUsecase = class SsoAuthUsecase {
                 const data = response.data.data;
                 const newUser = new entities_1.User();
                 newUser.email = data.email;
-                newUser.password = data.password;
+                newUser.password = bcrypt.hashSync(password, 10);
                 newUser.mobile = data.phoneNumber;
                 user = await this.userService.save(newUser, { queryRunner });
                 const [result] = await this.eventEmitter.emitAsync('find.employee', {

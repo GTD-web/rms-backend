@@ -26,13 +26,24 @@ export class SsoAuthUsecase implements AuthService {
         let user = await this.userService.findByEmail(email);
         if (!user) {
             const client_id = process.env.SSO_CLIENT_ID;
+            const client_secret = process.env.SSO_CLIENT_SECRET;
+            const basicAuth = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
+
             const ssoApiUrl = process.env.SSO_API_URL;
             console.log(ssoApiUrl);
-            const response = await axios.post(`${ssoApiUrl}/api/auth/login`, {
-                client_id,
-                email: email,
-                password: password,
-            });
+            const response = await axios.post(
+                `${ssoApiUrl}/api/auth/login`,
+                {
+                    grant_type: 'password',
+                    email: email,
+                    password: password,
+                },
+                {
+                    headers: {
+                        Authorization: `Basic ${basicAuth}`,
+                    },
+                },
+            );
 
             const queryRunner = this.dataSource.createQueryRunner();
             await queryRunner.connect();
@@ -41,7 +52,7 @@ export class SsoAuthUsecase implements AuthService {
                 const data: SsoResponseDto = response.data.data;
                 const newUser = new User();
                 newUser.email = data.email;
-                newUser.password = data.password;
+                newUser.password = bcrypt.hashSync(password, 10);
                 newUser.mobile = data.phoneNumber;
                 user = await this.userService.save(newUser, { queryRunner });
 
