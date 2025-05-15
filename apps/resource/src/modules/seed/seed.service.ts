@@ -27,7 +27,7 @@ export class SeedService implements OnModuleInit {
         // await this.seed();
     }
 
-    private async seed() {
+    async seed(employeeId: string) {
         // 기본 리소스 그룹 생성
         const defaultResourceGroup = await this.resourceGroupRepository.find();
 
@@ -66,7 +66,7 @@ export class SeedService implements OnModuleInit {
                     }
                     await this.resourceManagerRepository.save({
                         resourceId: savedResource.resourceId,
-                        employeeId: 'bedf827a-a374-4549-9c84-90698fbd9d51',
+                        employeeId: employeeId,
                     });
                 }
             }

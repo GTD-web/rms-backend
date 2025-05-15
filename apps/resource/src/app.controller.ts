@@ -18,14 +18,22 @@ import {
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { SeedService } from './modules/seed/seed.service';
+
 @ApiTags('6. 통계 - 관리자 페이지')
 @Controller('v1/statistics')
 // @Roles(Role.SYSTEM_ADMIN)
 export class AppController {
     constructor(
         private readonly appService: AppService,
-        private readonly eventEmitter: EventEmitter2,
+        private readonly seedService: SeedService,
     ) {}
+
+    @Public()
+    @Get('seed')
+    async seed(@Query('employeeId') employeeId: string): Promise<void> {
+        return await this.seedService.seed(employeeId);
+    }
 
     @Public()
     @Get('version')

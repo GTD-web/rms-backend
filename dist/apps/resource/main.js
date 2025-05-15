@@ -21,7 +21,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -30,11 +30,14 @@ const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decor
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const app_service_1 = __webpack_require__(/*! ./app.service */ "./apps/resource/src/app.service.ts");
 const app_dto_1 = __webpack_require__(/*! ./app.dto */ "./apps/resource/src/app.dto.ts");
-const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
+const seed_service_1 = __webpack_require__(/*! ./modules/seed/seed.service */ "./apps/resource/src/modules/seed/seed.service.ts");
 let AppController = class AppController {
-    constructor(appService, eventEmitter) {
+    constructor(appService, seedService) {
         this.appService = appService;
-        this.eventEmitter = eventEmitter;
+        this.seedService = seedService;
+    }
+    async seed(employeeId) {
+        return await this.seedService.seed(employeeId);
     }
     async getVersion() {
         return {
@@ -76,10 +79,18 @@ let AppController = class AppController {
 exports.AppController = AppController;
 __decorate([
     (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('seed'),
+    __param(0, (0, common_1.Query)('employeeId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], AppController.prototype, "seed", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('version'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], AppController.prototype, "getVersion", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -90,8 +101,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof app_dto_1.ResourceUsageStatsFilterDto !== "undefined" && app_dto_1.ResourceUsageStatsFilterDto) === "function" ? _d : Object]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+    __metadata("design:paramtypes", [typeof (_e = typeof app_dto_1.ResourceUsageStatsFilterDto !== "undefined" && app_dto_1.ResourceUsageStatsFilterDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], AppController.prototype, "getResourceUsageStats", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -102,8 +113,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof app_dto_1.VehicleMaintenanceHistoryFilterDto !== "undefined" && app_dto_1.VehicleMaintenanceHistoryFilterDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [typeof (_g = typeof app_dto_1.VehicleMaintenanceHistoryFilterDto !== "undefined" && app_dto_1.VehicleMaintenanceHistoryFilterDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], AppController.prototype, "getVehicleMaintenanceHistory", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -114,8 +125,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof app_dto_1.ConsumableMaintenanceStatsFilterDto !== "undefined" && app_dto_1.ConsumableMaintenanceStatsFilterDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:paramtypes", [typeof (_j = typeof app_dto_1.ConsumableMaintenanceStatsFilterDto !== "undefined" && app_dto_1.ConsumableMaintenanceStatsFilterDto) === "function" ? _j : Object]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], AppController.prototype, "getConsumableMaintenanceStats", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -126,8 +137,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof app_dto_1.EmployeeReservationStatsFilterDto !== "undefined" && app_dto_1.EmployeeReservationStatsFilterDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:paramtypes", [typeof (_l = typeof app_dto_1.EmployeeReservationStatsFilterDto !== "undefined" && app_dto_1.EmployeeReservationStatsFilterDto) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], AppController.prototype, "getEmployeeReservationStats", null);
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -138,12 +149,12 @@ __decorate([
     }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], AppController.prototype, "getAllStatistics", null);
 exports.AppController = AppController = __decorate([
     (0, swagger_1.ApiTags)('6. 통계 - 관리자 페이지'),
     (0, common_1.Controller)('v1/statistics'),
-    __metadata("design:paramtypes", [typeof (_a = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _a : Object, typeof (_b = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _a : Object, typeof (_b = typeof seed_service_1.SeedService !== "undefined" && seed_service_1.SeedService) === "function" ? _b : Object])
 ], AppController);
 
 
@@ -14570,7 +14581,7 @@ let SeedService = class SeedService {
     }
     async onModuleInit() {
     }
-    async seed() {
+    async seed(employeeId) {
         const defaultResourceGroup = await this.resourceGroupRepository.find();
         const categories = defaultResourceGroup.filter((group) => group.parentResourceGroupId === null);
         const groups = defaultResourceGroup.filter((group) => group.parentResourceGroupId !== null);
@@ -14608,7 +14619,7 @@ let SeedService = class SeedService {
                     }
                     await this.resourceManagerRepository.save({
                         resourceId: savedResource.resourceId,
-                        employeeId: 'bedf827a-a374-4549-9c84-90698fbd9d51',
+                        employeeId: employeeId,
                     });
                 }
             }
