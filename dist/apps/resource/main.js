@@ -1355,7 +1355,6 @@ let SsoAuthUsecase = class SsoAuthUsecase {
             const client_secret = process.env.SSO_CLIENT_SECRET;
             const basicAuth = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
             const ssoApiUrl = process.env.SSO_API_URL;
-            console.log(ssoApiUrl);
             const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/login`, {
                 grant_type: 'password',
                 email: email,
