@@ -30,7 +30,6 @@ export class SsoAuthUsecase implements AuthService {
             const basicAuth = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
 
             const ssoApiUrl = process.env.SSO_API_URL;
-            console.log(ssoApiUrl);
             const response = await axios.post(
                 `${ssoApiUrl}/api/auth/login`,
                 {

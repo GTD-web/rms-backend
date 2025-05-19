@@ -10,6 +10,7 @@ export class RequestInterceptor implements NestInterceptor {
         const { method, url, body, query, params } = request;
         const now = Date.now();
         console.log(`[Request] ${DateUtil.now().toISOString()} ${method} ${url}`);
+        console.log(request.headers);
         if (Object.keys(body).length > 0) {
             console.log('Body:', body);
         }
