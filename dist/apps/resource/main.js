@@ -1403,7 +1403,8 @@ let SsoAuthUsecase = class SsoAuthUsecase {
         return user;
     }
     async login(loginDto) {
-        const user = await this.validateUser(loginDto.email, loginDto.password);
+        let user = await this.validateUser(loginDto.email, loginDto.password);
+        console.log('sso auth usecase login user', user);
         if (!user.employee.userId) {
             await this.eventEmitter.emitAsync('update.employee', {
                 employee: {
@@ -1411,6 +1412,7 @@ let SsoAuthUsecase = class SsoAuthUsecase {
                     user: user,
                 },
             });
+            user = await this.userService.findByUserId(user.userId);
         }
         const result = {
             accessToken: null,
@@ -2185,6 +2187,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
             where: { userId: payload.userId },
             relations: ['employee'],
         });
+        console.log('jwt strategy validate payload', payload);
         if (!user || user.userId !== payload.userId) {
             throw new common_1.UnauthorizedException();
         }
@@ -17867,6 +17870,7 @@ let JwtAuthGuard = class JwtAuthGuard extends (0, passport_1.AuthGuard)('jwt') {
             context.getHandler(),
             context.getClass(),
         ]);
+        console.log('jwt auth guard isPublic', isPublic);
         if (isPublic) {
             return true;
         }
@@ -17913,10 +17917,12 @@ let RolesGuard = class RolesGuard {
             context.getHandler(),
             context.getClass(),
         ]);
+        console.log('roles guard requiredRoles', requiredRoles);
         if (!requiredRoles) {
             return true;
         }
         const { user } = context.switchToHttp().getRequest();
+        console.log('roles guard user', user);
         return requiredRoles.some((role) => user.roles?.includes(role));
     }
 };
@@ -18006,6 +18012,7 @@ let RequestInterceptor = class RequestInterceptor {
         const { method, url, body, query, params } = request;
         const now = Date.now();
         console.log(`[Request] ${date_util_1.DateUtil.now().toISOString()} ${method} ${url}`);
+        console.log(request.headers);
         if (Object.keys(body).length > 0) {
             console.log('Body:', body);
         }
