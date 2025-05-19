@@ -84,8 +84,8 @@ export class SsoAuthUsecase implements AuthService {
     }
 
     async login(loginDto: LoginDto): Promise<LoginResponseDto> {
-        const user = await this.validateUser(loginDto.email, loginDto.password);
-
+        let user = await this.validateUser(loginDto.email, loginDto.password);
+        console.log('sso auth usecase login user', user);
         if (!user.employee.userId) {
             await this.eventEmitter.emitAsync('update.employee', {
                 employee: {
@@ -93,6 +93,8 @@ export class SsoAuthUsecase implements AuthService {
                     user: user,
                 },
             });
+
+            user = await this.userService.findByUserId(user.userId);
         }
 
         const result = {
