@@ -9134,7 +9134,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CreateResourceInfoDto = exports.CreateResourceDto = exports.ResourceLocation = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = void 0;
+exports.CreateResourceInfoDto = exports.CreateResourceDto = exports.ResourceLocationURL = exports.ResourceLocation = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = void 0;
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -9193,6 +9193,27 @@ __decorate([
     (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('상세 주소', 0, 100) }),
     __metadata("design:type", String)
 ], ResourceLocation.prototype, "detailAddress", void 0);
+class ResourceLocationURL {
+}
+exports.ResourceLocationURL = ResourceLocationURL;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('Tmap URL') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ResourceLocationURL.prototype, "tmap", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('Navermap URL') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ResourceLocationURL.prototype, "navermap", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('Kakaomap URL') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ResourceLocationURL.prototype, "kakaomap", void 0);
 class CreateResourceDto {
 }
 exports.CreateResourceDto = CreateResourceDto;
@@ -9219,6 +9240,11 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", ResourceLocation)
 ], CreateResourceDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ResourceLocationURL }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", ResourceLocationURL)
+], CreateResourceDto.prototype, "locationURLs", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [String] }),
     (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
@@ -9411,7 +9437,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -9476,6 +9502,7 @@ class ResourceResponseDto {
         this.name = resource?.name;
         this.description = resource?.description;
         this.location = resource?.location;
+        this.locationURLs = resource?.locationURLs;
         this.images = resource?.images;
         this.type = resource?.type;
         this.isAvailable = resource?.isAvailable;
@@ -9519,6 +9546,10 @@ __decorate([
     __metadata("design:type", typeof (_c = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _c : Object)
 ], ResourceResponseDto.prototype, "location", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: create_resource_dto_1.ResourceLocationURL }),
+    __metadata("design:type", typeof (_d = typeof create_resource_dto_1.ResourceLocationURL !== "undefined" && create_resource_dto_1.ResourceLocationURL) === "function" ? _d : Object)
+], ResourceResponseDto.prototype, "locationURLs", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
     __metadata("design:type", Array)
 ], ResourceResponseDto.prototype, "images", void 0);
@@ -9528,7 +9559,7 @@ __decorate([
 ], ResourceResponseDto.prototype, "imageFiles", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
-    __metadata("design:type", typeof (_d = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_e = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _e : Object)
 ], ResourceResponseDto.prototype, "type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -15252,6 +15283,7 @@ exports.jwtConfig = jwtConfig;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.typeOrmConfig = void 0;
 const entities_1 = __webpack_require__(/*! ../entities */ "./libs/entities/index.ts");
+const path_1 = __webpack_require__(/*! path */ "path");
 const typeOrmConfig = (configService) => {
     return {
         type: 'postgres',
@@ -15262,6 +15294,7 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
+        migrations: [(0, path_1.join)(__dirname, 'libs/migrations/*.ts')],
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
         extra: {
@@ -16818,6 +16851,10 @@ __decorate([
     (0, typeorm_1.Column)('jsonb', { nullable: true }),
     __metadata("design:type", Object)
 ], Resource.prototype, "location", void 0);
+__decorate([
+    (0, typeorm_1.Column)('jsonb', { nullable: true }),
+    __metadata("design:type", Object)
+], Resource.prototype, "locationURLs", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)

@@ -3,7 +3,7 @@ import { VehicleInfoResponseDto } from '@resource/modules/resource/vehicle/appli
 import { MeetingRoomInfoResponseDto } from '@resource/modules/resource/meeting-room/application/dtos/meeting-room-info-response.dto';
 import { AccommodationInfoResponseDto } from '@resource/modules/resource/accommodation/application/dtos/accommodation-info-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { ResourceLocation } from './create-resource.dto';
+import { ResourceLocation, ResourceLocationURL } from './create-resource.dto';
 import { ReservationResponseDto } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
 import { EmployeeResponseDto } from '@resource/modules/employee/application/dtos/employee-response.dto';
 import { Resource } from '@libs/entities/resource.entity';
@@ -49,6 +49,7 @@ export class ResourceResponseDto {
         this.name = resource?.name;
         this.description = resource?.description;
         this.location = resource?.location;
+        this.locationURLs = resource?.locationURLs;
         this.images = resource?.images;
         this.type = resource?.type;
         this.isAvailable = resource?.isAvailable;
@@ -83,6 +84,9 @@ export class ResourceResponseDto {
 
     @ApiProperty({ required: false, type: ResourceLocation })
     location?: ResourceLocation;
+
+    @ApiProperty({ required: false, type: ResourceLocationURL })
+    locationURLs?: ResourceLocationURL;
 
     @ApiProperty({ required: false, type: [String] })
     images?: string[];
