@@ -12,6 +12,12 @@ export interface ResourceLocation {
     detailAddress?: string;
 }
 
+export interface ResourceLocationURL {
+    tmap?: string;
+    navermap?: string;
+    kakaomap?: string;
+}
+
 @Entity('resources')
 export class Resource {
     @PrimaryColumn('uuid', {
@@ -30,6 +36,9 @@ export class Resource {
 
     @Column('jsonb', { nullable: true })
     location: ResourceLocation;
+
+    @Column('jsonb', { nullable: true })
+    locationURLs: ResourceLocationURL;
 
     @Column({ default: true })
     isAvailable: boolean;

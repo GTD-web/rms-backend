@@ -47,6 +47,23 @@ export class ResourceLocation {
     detailAddress?: string;
 }
 
+export class ResourceLocationURL {
+    @ApiProperty({ required: false })
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('Tmap URL') })
+    @IsOptional()
+    tmap?: string;
+
+    @ApiProperty()
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('Navermap URL') })
+    @IsOptional()
+    navermap?: string;
+
+    @ApiProperty()
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('Kakaomap URL') })
+    @IsOptional()
+    kakaomap?: string;
+}
+
 export class CreateResourceDto {
     @ApiProperty()
     @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('자원 그룹 ID') })
@@ -66,6 +83,10 @@ export class CreateResourceDto {
     @ApiProperty({ type: ResourceLocation })
     @IsOptional()
     location?: ResourceLocation;
+
+    @ApiProperty({ type: ResourceLocationURL })
+    @IsOptional()
+    locationURLs?: ResourceLocationURL;
 
     @ApiProperty({ type: [String] })
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') })
