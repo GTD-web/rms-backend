@@ -63,9 +63,6 @@
         "typeorm": "^0.3.20",
         "web-push": "^3.6.7"
     },
-    "optionalDependencies": {
-        "cpu-features": "^0.0.2"
-    },
     "devDependencies": {
         "@nestjs/cli": "^10.0.0",
         "@nestjs/schematics": "^10.0.0",
