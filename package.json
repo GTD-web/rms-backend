@@ -22,10 +22,10 @@
         "test:e2e": "jest --config ./apps/resource/test/jest-e2e.json",
         "test:unit": "jest",
         "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-        "migration:create": "pnpm typeorm migration:create",
-        "migration:generate": "pnpm typeorm migration:generate -d typeorm.config.ts",
-        "migration:run": "pnpm typeorm migration:run -d typeorm.config.ts",
-        "migration:revert": "pnpm typeorm migration:revert -d typeorm.config.ts"
+        "migration:create": "npm run typeorm -- migration:create",
+        "migration:generate": "npm run typeorm -- migration:generate -d ./typeorm.config.ts",
+        "migration:run": "npm run typeorm -- migration:run -d ./typeorm.config.ts",
+        "migration:revert": "npm run typeorm -- migration:revert -d ./typeorm.config.ts"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.758.0",
