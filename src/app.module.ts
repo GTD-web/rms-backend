@@ -14,14 +14,11 @@ import { Entities } from '@libs/entities';
 
 // 프로젝트 내부 모듈
 import { AuthModule } from './modules/auth/auth.module';
-import { JwtAuthGuard } from '../../../libs/guards/jwt-auth.guard';
 import { ResourceModule } from './modules/resource/resource.module';
 import { EmployeeModule } from './modules/employee/employee.module';
 import { ReservationModule } from './modules/reservation/reservation.module';
 import { AppService } from './app.service';
 import { NotificationModule } from './modules/notification/notification.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { FileModule } from './modules/file/file.module';
 import { AppController } from './app.controller';
 import { ApiDocService } from '@libs/utils/api-doc.service';
