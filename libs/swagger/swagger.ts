@@ -13,6 +13,8 @@ import { NotificationModule } from '@resource/modules/notification/notification.
 import { FileModule } from '@resource/modules/file/file.module';
 import { VehicleResourceModule } from '@resource/modules/resource/vehicle/vehicle-resource.module';
 import { AppModule } from '@resource/app.module';
+import { TaskModule } from '@resource/modules/task/task.module';
+
 export function setupSwagger(app: INestApplication, dtos: any[]) {
     const config = new DocumentBuilder()
         .setTitle('Resource Management API')
@@ -31,6 +33,7 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
             ReservationModule,
             NotificationModule,
             FileModule,
+            TaskModule,
         ],
         extraModels: [BaseResponseDto, PaginationData, ...dtos],
     });
