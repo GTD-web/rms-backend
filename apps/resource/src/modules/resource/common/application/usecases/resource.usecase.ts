@@ -746,18 +746,6 @@ export class ResourceUsecase {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.MANAGERS_REQUIRED);
         }
 
-        // if (managers.length > 1) {
-        //     throw new BadRequestException('Only one manager is allowed');
-        // }
-
-        // const manager = await this.resourceManagerService.findOne({
-        //     where: { employeeId: managers[0].employeeId },
-        //     relations: ['employee', 'employee.user'],
-        // });
-        // if (!manager.employee.user.roles.includes(Role.RESOURCE_ADMIN)) {
-        //     throw new BadRequestException('The manager is not a resource admin');
-        // }
-
         // 1. 그룹 존재 확인
         const group = await this.resourceGroupService.findOne({
             where: { resourceGroupId: resource.resourceGroupId },
@@ -805,13 +793,6 @@ export class ResourceUsecase {
                         { queryRunner },
                     );
                 }),
-                // ...managers.map((manager) =>
-                //     this.eventEmitter.emit('add.user.role', {
-                //         employeeId: manager.employeeId,
-                //         role: Role.RESOURCE_ADMIN,
-                //         repositoryOptions: { queryRunner },
-                //     }),
-                // ),
             ]);
 
             await queryRunner.commitTransaction();

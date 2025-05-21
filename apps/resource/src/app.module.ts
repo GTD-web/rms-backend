@@ -30,6 +30,7 @@ import { UserDomainModule } from './modules/auth/user.domain.module';
 import { EmployeeDomainModule } from './modules/employee/employee.domain.module';
 import { NotificationDomainModule } from './modules/notification/notification.domain.module';
 import { SeedModule } from './modules/seed/seed.module';
+import { TaskModule } from './modules/task/task.module';
 
 @Module({
     imports: [
@@ -59,6 +60,8 @@ import { SeedModule } from './modules/seed/seed.module';
         EmployeeDomainModule,
         NotificationDomainModule,
         SeedModule,
+
+        TaskModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],
