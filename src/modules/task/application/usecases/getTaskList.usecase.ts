@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ResourceService } from '../../../resource/common/application/services/resource.service';
 import { ReservationService } from '../../../reservation/application/services/reservation.service';
 import { DateUtil } from '@libs/utils/date.util';
-import { MoreThan } from 'typeorm';
+import { LessThan } from 'typeorm';
 import { Role } from '@libs/enums/role-type.enum';
 import { User as UserEntity } from '@libs/entities/user.entity';
+import { ParticipantsType } from '@libs/enums/reservation-type.enum';
 
 @Injectable()
 export class GetTaskListUsecase {
@@ -18,13 +19,14 @@ export class GetTaskListUsecase {
             where: {
                 participants: {
                     employeeId: user.employeeId,
+                    type: ParticipantsType.RESERVER,
                 },
-                endDate: MoreThan(DateUtil.now().toDate()),
+                endDate: LessThan(DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
                 },
             },
-            relations: ['participants', 'reservationVehicles'],
+            relations: ['participants', 'resource', 'reservationVehicles'],
         });
 
         const isResourceAdmin = user.roles.includes(Role.RESOURCE_ADMIN);
@@ -65,7 +67,20 @@ export class GetTaskListUsecase {
                 }
             }
         }
-        const items = [...delayedReturnReservations, ...needReplaceConsumable];
+        const items = [
+            ...delayedReturnReservations.map((reservation) => {
+                return {
+                    type: '반납지연',
+                    title: `${reservation.resource.name} 반납 지연 중`,
+                    reservationId: reservation.reservationId,
+                    resourceId: reservation.resource.resourceId,
+                    resourceName: reservation.resource.name,
+                    startDate: reservation.startDate,
+                    endDate: reservation.endDate,
+                };
+            }),
+            ...needReplaceConsumable,
+        ];
         return {
             totalCount: items.length,
             items,
