@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { GetTaskListUsecase } from './application/usecases/getTaskList.usecase';
-import { GetTaskStatusUsecase } from './application/usecases/getTaskStatus.usecase';
 import { User as UserEntity } from '@libs/entities/user.entity';
+import { ValidateUsecase } from './usecases/validate.usecase';
+import { LoginUsecase } from './usecases/login.usecase';
+import { LoginDto } from '@src/modules/auth/application/dto/login.dto';
+
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly getTaskListUsecase: GetTaskListUsecase,
-        private readonly getTaskStatusUsecase: GetTaskStatusUsecase,
+        private readonly validateUsecase: ValidateUsecase,
+        private readonly loginUsecase: LoginUsecase,
     ) {}
 
-    async validateUser(user: UserEntity) {
-        return this.getTaskListUsecase.execute(user);
-    }
-
-    async login(user: UserEntity) {
-        return this.getTaskStatusUsecase.execute(user);
+    async login(loginDto: LoginDto) {
+        const validatedUser = await this.validateUsecase.execute(loginDto.email, loginDto.password);
+        return this.loginUsecase.execute(validatedUser);
     }
 }

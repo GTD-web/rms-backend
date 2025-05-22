@@ -1,7 +1,7 @@
-import { Controller, Post, Body, Inject } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Post, Body } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { LoginDto } from '@resource/modules/auth/application/dto/login.dto';
-import { AuthService } from '@resource/modules/auth/domain/ports/auth.service.port';
+import { AuthService } from '@resource/application/auth/auth.service';
 import { Public } from '@libs/decorators/public.decorator';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-response.dto';
@@ -10,7 +10,7 @@ import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-r
 @Controller('v1/auth')
 @Public()
 export class AuthController {
-    constructor(@Inject('AuthService') private authService: AuthService) {}
+    constructor(private readonly authService: AuthService) {}
 
     @Post('login')
     @ApiOperation({ summary: '로그인' })

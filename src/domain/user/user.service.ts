@@ -11,17 +11,11 @@ export class UserService extends BaseService<User> {
 
     async findByEmail(email: string): Promise<User> {
         const user = await this.userRepository.findByEmail(email);
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
         return user;
     }
 
     async findByUserId(userId: string): Promise<User> {
         const user = await this.userRepository.findByUserId(userId);
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
         return user;
     }
 }

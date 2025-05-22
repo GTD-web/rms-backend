@@ -14,6 +14,7 @@ import { FileModule } from '@resource/modules/file/file.module';
 import { VehicleResourceModule } from '@resource/modules/resource/vehicle/vehicle-resource.module';
 import { AppModule } from '@resource/app.module';
 import { TaskModule } from '@resource/modules/task/task.module';
+import { AuthModule as AuthApplicationModule } from '@resource/application/auth/auth.module';
 
 export function setupSwagger(app: INestApplication, dtos: any[]) {
     const config = new DocumentBuilder()
@@ -26,7 +27,7 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
     const document = SwaggerModule.createDocument(app, config, {
         include: [
             AppModule,
-            AuthModule,
+            AuthApplicationModule,
             EmployeeModule,
             ResourceModule,
             VehicleResourceModule,

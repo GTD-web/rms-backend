@@ -29,6 +29,8 @@ import { NotificationDomainModule } from './modules/notification/notification.do
 import { SeedModule } from './modules/seed/seed.module';
 import { TaskModule } from './modules/task/task.module';
 
+import { AuthModule as AuthApplicationModule } from './application/auth/auth.module';
+
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -59,6 +61,8 @@ import { TaskModule } from './modules/task/task.module';
         SeedModule,
 
         TaskModule,
+
+        AuthApplicationModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],

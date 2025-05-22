@@ -24,11 +24,11 @@ export abstract class BaseService<T extends ObjectLiteral> implements IService<T
         return this.repository.findOne(options);
     }
 
-    async update(id: string, entity: Partial<T>, options?: IRepositoryOptions): Promise<T> {
-        return this.repository.update(id, entity, options);
+    async update(entityId: string, entity: Partial<T>, options?: IRepositoryOptions): Promise<T> {
+        return this.repository.update(entityId, entity, options);
     }
 
-    async delete(id: string, options?: IRepositoryOptions): Promise<void> {
-        return this.repository.delete(id, options);
+    async delete(entityId: string, options?: IRepositoryOptions): Promise<void> {
+        return this.repository.delete(entityId, options);
     }
 }
