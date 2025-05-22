@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IRepository, IRepositoryOptions } from '../interfaces/repository.interface';
 import { ObjectLiteral, Repository, DeepPartial, FindOptionsWhere } from 'typeorm';
 
@@ -62,7 +62,7 @@ export abstract class BaseRepository<T extends ObjectLiteral> implements IReposi
             withDeleted: repositoryOptions?.withDeleted,
         });
         if (!updated) {
-            throw new Error(`Entity with id ${entityId} not found`);
+            throw new NotFoundException(`${this.repository.metadata.name} Entity with id ${entityId} not found`);
         }
         return updated;
     }
