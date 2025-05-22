@@ -18384,6 +18384,7 @@ const reservation_service_1 = __webpack_require__(/*! ../../../reservation/appli
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 let GetTaskListUsecase = class GetTaskListUsecase {
     constructor(resourceService, reservationService) {
         this.resourceService = resourceService;
@@ -18394,14 +18395,16 @@ let GetTaskListUsecase = class GetTaskListUsecase {
             where: {
                 participants: {
                     employeeId: user.employeeId,
+                    type: reservation_type_enum_1.ParticipantsType.RESERVER,
                 },
-                endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.now().toDate()),
+                endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
                 },
             },
-            relations: ['participants', 'reservationVehicles'],
+            relations: ['participants', 'resource', 'reservationVehicles'],
         });
+        console.log(delayedReturnReservations);
         const isResourceAdmin = user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN);
         const isSystemAdmin = user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN);
         const needReplaceConsumable = [];

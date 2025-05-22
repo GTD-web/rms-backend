@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ResourceService } from '../../../resource/common/application/services/resource.service';
 import { ReservationService } from '../../../reservation/application/services/reservation.service';
 import { DateUtil } from '@libs/utils/date.util';
-import { MoreThan } from 'typeorm';
+import { LessThan, MoreThan } from 'typeorm';
 import { Role } from '@libs/enums/role-type.enum';
 import { User as UserEntity } from '@libs/entities/user.entity';
+import { ParticipantsType } from '@libs/enums/reservation-type.enum';
 
 @Injectable()
 export class GetTaskListUsecase {
@@ -18,15 +19,16 @@ export class GetTaskListUsecase {
             where: {
                 participants: {
                     employeeId: user.employeeId,
+                    type: ParticipantsType.RESERVER,
                 },
-                endDate: MoreThan(DateUtil.now().toDate()),
+                endDate: LessThan(DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
                 },
             },
-            relations: ['participants', 'reservationVehicles'],
+            relations: ['participants', 'resource', 'reservationVehicles'],
         });
-
+        console.log(delayedReturnReservations);
         const isResourceAdmin = user.roles.includes(Role.RESOURCE_ADMIN);
         const isSystemAdmin = user.roles.includes(Role.SYSTEM_ADMIN);
 
