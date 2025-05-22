@@ -18506,7 +18506,7 @@ let GetTaskStatusUsecase = class GetTaskStatusUsecase {
                 participants: {
                     employeeId: user.employeeId,
                 },
-                endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.now().toDate()),
+                endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
                 },
