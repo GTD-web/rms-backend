@@ -18,6 +18,9 @@ export class ValidateUsecase {
 
     async execute(email: string, password: string): Promise<User> {
         let user = await this.userService.findByEmail(email);
+        if (user.employee.position === '퇴사') {
+            throw new UnauthorizedException(ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
+        }
         if (!user) {
             const client_id = process.env.SSO_CLIENT_ID;
             const client_secret = process.env.SSO_CLIENT_SECRET;

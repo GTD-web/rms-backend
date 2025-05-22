@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ResourceService } from '../../../resource/common/application/services/resource.service';
 import { ReservationService } from '../../../reservation/application/services/reservation.service';
 import { User as UserEntity } from '@libs/entities/user.entity';
-import { MoreThan } from 'typeorm';
+import { LessThan } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { Role } from '@libs/enums/role-type.enum';
 
@@ -19,7 +19,7 @@ export class GetTaskStatusUsecase {
                 participants: {
                     employeeId: user.employeeId,
                 },
-                endDate: MoreThan(DateUtil.now().toDate()),
+                endDate: LessThan(DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
                 },
