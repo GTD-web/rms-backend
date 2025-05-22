@@ -65,7 +65,20 @@ export class GetTaskListUsecase {
                 }
             }
         }
-        const items = [...delayedReturnReservations, ...needReplaceConsumable];
+        const items = [
+            ...delayedReturnReservations.map((reservation) => {
+                return {
+                    type: '반납지연',
+                    title: `${reservation.resource.name} 반납 지연 중`,
+                    reservationId: reservation.reservationId,
+                    resourceId: reservation.resource.resourceId,
+                    resourceName: reservation.resource.name,
+                    startDate: reservation.startDate,
+                    endDate: reservation.endDate,
+                };
+            }),
+            ...needReplaceConsumable,
+        ];
         return {
             totalCount: items.length,
             items,
