@@ -9,11 +9,21 @@ import { EmployeeModule } from '@src/domain/employee/employee.module';
 import { AuthService } from './auth.service';
 import { ValidateUsecase } from './usecases/validate.usecase';
 import { SsoLoginUsecase } from './usecases/sso-login.usecase';
-import { UpdateUsecase } from './usecases/update.usecase';
+import { UpdateAuthInfoUsecase } from './usecases/update-auth-info.usecase';
+import { CheckSystemAdminUsecase } from './usecases/system-admin.usecase';
+import { GetTokenUsecase } from './usecases/get-token.usecase';
 
 @Module({
     imports: [PassportModule, EmployeeModule, TypeOrmModule.forFeature([Employee])],
-    providers: [JwtStrategy, AuthService, ValidateUsecase, SsoLoginUsecase, UpdateUsecase],
+    providers: [
+        JwtStrategy,
+        AuthService,
+        ValidateUsecase,
+        SsoLoginUsecase,
+        UpdateAuthInfoUsecase,
+        CheckSystemAdminUsecase,
+        GetTokenUsecase,
+    ],
     controllers: [AuthController],
     exports: [JwtStrategy],
 })

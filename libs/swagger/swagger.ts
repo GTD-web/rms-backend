@@ -27,6 +27,7 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
     const document = SwaggerModule.createDocument(app, config, {
         include: [
             AppModule,
+            AuthModule,
             AuthApplicationModule,
             EmployeeModule,
             ResourceModule,

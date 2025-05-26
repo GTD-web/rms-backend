@@ -5,11 +5,15 @@ import { SsoResponseDto } from '@src/application/auth/dto/sso-response.dto';
 import { EmployeeService } from '@src/domain/employee/employee.service';
 
 @Injectable()
-export class UpdateUsecase {
+export class UpdateAuthInfoUsecase {
     constructor(private readonly employeeService: EmployeeService) {}
 
     async execute(ssoResponse: SsoResponseDto): Promise<Employee> {
-        const employee = await this.employeeService.findByEmployeeNumber(ssoResponse.employeeNumber);
+        const employee = await this.employeeService.findOne({
+            where: {
+                employeeNumber: ssoResponse.employeeNumber,
+            },
+        });
         employee.password = ssoResponse.password;
         employee.mobile = ssoResponse.phoneNumber;
         employee.accessToken = ssoResponse.accessToken;

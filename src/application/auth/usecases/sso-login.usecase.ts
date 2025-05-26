@@ -33,6 +33,7 @@ export class SsoLoginUsecase {
 
             return data;
         } catch (error) {
+            console.log(error);
             throw new UnauthorizedException(ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
         }
     }

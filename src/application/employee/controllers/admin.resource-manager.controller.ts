@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { Roles } from '@libs/decorators/role.decorator';
-import { ResourceManagerUseCase } from '@resource/modules/auth/application/usecases/resource-manager.usecase';
+import { ResourceManagerUseCase } from '@resource/application/employee/usecases/resource-manager.usecase';
 import { EmplyeesByDepartmentResponseDto } from '@resource/dtos.index';
 
 @ApiTags('3. 자원 관리자 - 관리자 페이지')

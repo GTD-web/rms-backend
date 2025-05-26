@@ -30,7 +30,7 @@ import { SeedModule } from './modules/seed/seed.module';
 import { TaskModule } from './modules/task/task.module';
 
 import { AuthModule as AuthApplicationModule } from './application/auth/auth.module';
-
+import { EmployeeModule as EmployeeApplicationModule } from './application/employee/employee.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -63,6 +63,7 @@ import { AuthModule as AuthApplicationModule } from './application/auth/auth.mod
         TaskModule,
 
         AuthApplicationModule,
+        EmployeeApplicationModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],

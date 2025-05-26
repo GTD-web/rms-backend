@@ -5,6 +5,7 @@ import { User as UserEntity } from '@libs/entities/user.entity';
 import { LessThan } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { Role } from '@libs/enums/role-type.enum';
+import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 
 @Injectable()
 export class GetTaskStatusUsecase {
@@ -18,7 +19,9 @@ export class GetTaskStatusUsecase {
             where: {
                 participants: {
                     employeeId: user.employeeId,
+                    type: ParticipantsType.RESERVER,
                 },
+                status: ReservationStatus.CONFIRMED,
                 endDate: LessThan(DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,

@@ -15,6 +15,7 @@ import { ReservationSnapshotService } from './application/services/reservation-s
 import { ReservationVehicleService } from './application/services/reservation-vehicle.service';
 import { ReservationVehicleRepository } from './infrastructure/adapters/out/persistence/reservation-vehicle.repository';
 import { CronReservationController } from './infrastructure/adapters/in/web/controllers/v1/cron.reservation.controller';
+
 @Module({
     imports: [
         TypeOrmModule.forFeature([

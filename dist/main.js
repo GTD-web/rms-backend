@@ -793,7 +793,7 @@ __decorate([
     __metadata("design:type", Boolean)
 ], Employee.prototype, "isPushNotificationEnabled", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'enum', enum: role_type_enum_1.Role, default: [role_type_enum_1.Role.USER], comment: '사용자 역할' }),
+    (0, typeorm_1.Column)({ type: 'enum', enum: role_type_enum_1.Role, array: true, default: [role_type_enum_1.Role.USER], comment: '사용자 역할' }),
     __metadata("design:type", Array)
 ], Employee.prototype, "roles", void 0);
 __decorate([
@@ -2990,8 +2990,12 @@ let BaseRepository = class BaseRepository {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
             : this.repository;
-        return await this.repository.findOne({
+        return await repository.findOne({
             where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+            select: repositoryOptions?.select,
+            order: repositoryOptions?.order,
+            withDeleted: repositoryOptions?.withDeleted,
         });
     }
     async findAll(repositoryOptions) {
@@ -3110,6 +3114,7 @@ const paginate_response_dto_1 = __webpack_require__(/*! ../dtos/paginate-respons
 const user_domain_module_1 = __webpack_require__(/*! @resource/modules/auth/user.domain.module */ "./src/modules/auth/user.domain.module.ts");
 const employee_domain_module_1 = __webpack_require__(/*! @resource/modules/employee/employee.domain.module */ "./src/modules/employee/employee.domain.module.ts");
 const notification_domain_module_1 = __webpack_require__(/*! @resource/modules/notification/notification.domain.module */ "./src/modules/notification/notification.domain.module.ts");
+const auth_module_1 = __webpack_require__(/*! @resource/modules/auth/auth.module */ "./src/modules/auth/auth.module.ts");
 const employee_module_1 = __webpack_require__(/*! @resource/modules/employee/employee.module */ "./src/modules/employee/employee.module.ts");
 const resource_module_1 = __webpack_require__(/*! @resource/modules/resource/resource.module */ "./src/modules/resource/resource.module.ts");
 const reservation_module_1 = __webpack_require__(/*! @resource/modules/reservation/reservation.module */ "./src/modules/reservation/reservation.module.ts");
@@ -3118,7 +3123,7 @@ const file_module_1 = __webpack_require__(/*! @resource/modules/file/file.module
 const vehicle_resource_module_1 = __webpack_require__(/*! @resource/modules/resource/vehicle/vehicle-resource.module */ "./src/modules/resource/vehicle/vehicle-resource.module.ts");
 const app_module_1 = __webpack_require__(/*! @resource/app.module */ "./src/app.module.ts");
 const task_module_1 = __webpack_require__(/*! @resource/modules/task/task.module */ "./src/modules/task/task.module.ts");
-const auth_module_1 = __webpack_require__(/*! @resource/application/auth/auth.module */ "./src/application/auth/auth.module.ts");
+const auth_module_2 = __webpack_require__(/*! @resource/application/auth/auth.module */ "./src/application/auth/auth.module.ts");
 function setupSwagger(app, dtos) {
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Resource Management API')
@@ -3130,6 +3135,7 @@ function setupSwagger(app, dtos) {
         include: [
             app_module_1.AppModule,
             auth_module_1.AuthModule,
+            auth_module_2.AuthModule,
             employee_module_1.EmployeeModule,
             resource_module_1.ResourceModule,
             vehicle_resource_module_1.VehicleResourceModule,
@@ -4092,6 +4098,7 @@ const notification_domain_module_1 = __webpack_require__(/*! ./modules/notificat
 const seed_module_1 = __webpack_require__(/*! ./modules/seed/seed.module */ "./src/modules/seed/seed.module.ts");
 const task_module_1 = __webpack_require__(/*! ./modules/task/task.module */ "./src/modules/task/task.module.ts");
 const auth_module_2 = __webpack_require__(/*! ./application/auth/auth.module */ "./src/application/auth/auth.module.ts");
+const employee_module_2 = __webpack_require__(/*! ./application/employee/employee.module */ "./src/application/employee/employee.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -4125,6 +4132,7 @@ exports.AppModule = AppModule = __decorate([
             seed_module_1.SeedModule,
             task_module_1.TaskModule,
             auth_module_2.AuthModule,
+            employee_module_2.EmployeeModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, api_doc_service_1.ApiDocService, db_doc_service_1.DbDocService],
@@ -4342,14 +4350,24 @@ const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.
 const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./src/application/auth/auth.service.ts");
 const validate_usecase_1 = __webpack_require__(/*! ./usecases/validate.usecase */ "./src/application/auth/usecases/validate.usecase.ts");
 const sso_login_usecase_1 = __webpack_require__(/*! ./usecases/sso-login.usecase */ "./src/application/auth/usecases/sso-login.usecase.ts");
-const update_usecase_1 = __webpack_require__(/*! ./usecases/update.usecase */ "./src/application/auth/usecases/update.usecase.ts");
+const update_auth_info_usecase_1 = __webpack_require__(/*! ./usecases/update-auth-info.usecase */ "./src/application/auth/usecases/update-auth-info.usecase.ts");
+const system_admin_usecase_1 = __webpack_require__(/*! ./usecases/system-admin.usecase */ "./src/application/auth/usecases/system-admin.usecase.ts");
+const get_token_usecase_1 = __webpack_require__(/*! ./usecases/get-token.usecase */ "./src/application/auth/usecases/get-token.usecase.ts");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [passport_1.PassportModule, employee_module_1.EmployeeModule, typeorm_1.TypeOrmModule.forFeature([entities_1.Employee])],
-        providers: [jwt_strategy_1.JwtStrategy, auth_service_1.AuthService, validate_usecase_1.ValidateUsecase, sso_login_usecase_1.SsoLoginUsecase, update_usecase_1.UpdateUsecase],
+        providers: [
+            jwt_strategy_1.JwtStrategy,
+            auth_service_1.AuthService,
+            validate_usecase_1.ValidateUsecase,
+            sso_login_usecase_1.SsoLoginUsecase,
+            update_auth_info_usecase_1.UpdateAuthInfoUsecase,
+            system_admin_usecase_1.CheckSystemAdminUsecase,
+            get_token_usecase_1.GetTokenUsecase,
+        ],
         controllers: [auth_controller_1.AuthController],
         exports: [jwt_strategy_1.JwtStrategy],
     })
@@ -4374,39 +4392,55 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const validate_usecase_1 = __webpack_require__(/*! ./usecases/validate.usecase */ "./src/application/auth/usecases/validate.usecase.ts");
 const sso_login_usecase_1 = __webpack_require__(/*! ./usecases/sso-login.usecase */ "./src/application/auth/usecases/sso-login.usecase.ts");
-const update_usecase_1 = __webpack_require__(/*! ./usecases/update.usecase */ "./src/application/auth/usecases/update.usecase.ts");
+const update_auth_info_usecase_1 = __webpack_require__(/*! ./usecases/update-auth-info.usecase */ "./src/application/auth/usecases/update-auth-info.usecase.ts");
+const system_admin_usecase_1 = __webpack_require__(/*! ./usecases/system-admin.usecase */ "./src/application/auth/usecases/system-admin.usecase.ts");
+const get_token_usecase_1 = __webpack_require__(/*! ./usecases/get-token.usecase */ "./src/application/auth/usecases/get-token.usecase.ts");
 let AuthService = class AuthService {
-    constructor(validateUsecase, ssoLoginUsecase, updateUsecase) {
+    constructor(validateUsecase, ssoLoginUsecase, updateAuthInfoUsecase, checkSystemAdminUsecase, getTokenUsecase) {
         this.validateUsecase = validateUsecase;
         this.ssoLoginUsecase = ssoLoginUsecase;
-        this.updateUsecase = updateUsecase;
+        this.updateAuthInfoUsecase = updateAuthInfoUsecase;
+        this.checkSystemAdminUsecase = checkSystemAdminUsecase;
+        this.getTokenUsecase = getTokenUsecase;
     }
     async login(loginDto) {
-        let employee = await this.validateUsecase.execute(loginDto.email, loginDto.password);
-        if (!employee) {
+        const systemAdminResult = await this.checkSystemAdminUsecase.execute(loginDto.email, loginDto.password);
+        if (systemAdminResult.success) {
+            return await this.getTokenUsecase.execute(systemAdminResult.employee);
+        }
+        const validatedEmployee = await this.validateUsecase.execute(loginDto.email, loginDto.password);
+        if (!validatedEmployee) {
             const ssoResponse = await this.ssoLoginUsecase.execute(loginDto.email, loginDto.password);
-            employee = await this.updateUsecase.execute(ssoResponse);
+            const updatedEmployee = await this.updateAuthInfoUsecase.execute(ssoResponse);
+            return {
+                accessToken: updatedEmployee.accessToken,
+                email: updatedEmployee.email,
+                name: updatedEmployee.name,
+                department: updatedEmployee.department,
+                position: updatedEmployee.position,
+                roles: updatedEmployee.roles,
+            };
         }
         return {
-            accessToken: employee.accessToken,
-            email: employee.email,
-            name: employee.name,
-            department: employee.department,
-            position: employee.position,
-            roles: employee.roles,
+            accessToken: validatedEmployee.accessToken,
+            email: validatedEmployee.email,
+            name: validatedEmployee.name,
+            department: validatedEmployee.department,
+            position: validatedEmployee.position,
+            roles: validatedEmployee.roles,
         };
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof validate_usecase_1.ValidateUsecase !== "undefined" && validate_usecase_1.ValidateUsecase) === "function" ? _a : Object, typeof (_b = typeof sso_login_usecase_1.SsoLoginUsecase !== "undefined" && sso_login_usecase_1.SsoLoginUsecase) === "function" ? _b : Object, typeof (_c = typeof update_usecase_1.UpdateUsecase !== "undefined" && update_usecase_1.UpdateUsecase) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof validate_usecase_1.ValidateUsecase !== "undefined" && validate_usecase_1.ValidateUsecase) === "function" ? _a : Object, typeof (_b = typeof sso_login_usecase_1.SsoLoginUsecase !== "undefined" && sso_login_usecase_1.SsoLoginUsecase) === "function" ? _b : Object, typeof (_c = typeof update_auth_info_usecase_1.UpdateAuthInfoUsecase !== "undefined" && update_auth_info_usecase_1.UpdateAuthInfoUsecase) === "function" ? _c : Object, typeof (_d = typeof system_admin_usecase_1.CheckSystemAdminUsecase !== "undefined" && system_admin_usecase_1.CheckSystemAdminUsecase) === "function" ? _d : Object, typeof (_e = typeof get_token_usecase_1.GetTokenUsecase !== "undefined" && get_token_usecase_1.GetTokenUsecase) === "function" ? _e : Object])
 ], AuthService);
 
 
@@ -4462,6 +4496,60 @@ exports.JwtStrategy = JwtStrategy = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/auth/usecases/get-token.usecase.ts":
+/*!************************************************************!*\
+  !*** ./src/application/auth/usecases/get-token.usecase.ts ***!
+  \************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GetTokenUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
+let GetTokenUsecase = class GetTokenUsecase {
+    constructor(jwtService) {
+        this.jwtService = jwtService;
+    }
+    async execute(employee) {
+        const payload = {
+            sub: employee.employeeId,
+            employeeNumber: employee.employeeNumber,
+            type: 'access',
+        };
+        const accessToken = this.jwtService.sign(payload, {
+            expiresIn: '1d',
+            secret: process.env.GLOBAL_SECRET,
+        });
+        return {
+            accessToken,
+            email: employee.email,
+            name: employee.name,
+            department: employee.department,
+            position: employee.position,
+            roles: employee.roles,
+        };
+    }
+};
+exports.GetTokenUsecase = GetTokenUsecase;
+exports.GetTokenUsecase = GetTokenUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object])
+], GetTokenUsecase);
+
+
+/***/ }),
+
 /***/ "./src/application/auth/usecases/sso-login.usecase.ts":
 /*!************************************************************!*\
   !*** ./src/application/auth/usecases/sso-login.usecase.ts ***!
@@ -4506,6 +4594,7 @@ let SsoLoginUsecase = class SsoLoginUsecase {
             return data;
         }
         catch (error) {
+            console.log(error);
             throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
         }
     }
@@ -4519,10 +4608,10 @@ exports.SsoLoginUsecase = SsoLoginUsecase = __decorate([
 
 /***/ }),
 
-/***/ "./src/application/auth/usecases/update.usecase.ts":
-/*!*********************************************************!*\
-  !*** ./src/application/auth/usecases/update.usecase.ts ***!
-  \*********************************************************/
+/***/ "./src/application/auth/usecases/system-admin.usecase.ts":
+/*!***************************************************************!*\
+  !*** ./src/application/auth/usecases/system-admin.usecase.ts ***!
+  \***************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -4537,16 +4626,81 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UpdateUsecase = void 0;
+exports.CheckSystemAdminUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+let CheckSystemAdminUsecase = class CheckSystemAdminUsecase {
+    constructor(employeeService) {
+        this.employeeService = employeeService;
+    }
+    async execute(email, password) {
+        const admin = await this.employeeService.findOne({ where: { email } });
+        if (!admin || !admin.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN)) {
+            return {
+                success: false,
+                employee: null,
+                message: error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND,
+            };
+        }
+        const isPasswordValid = await bcrypt.compare(password, admin.password);
+        if (!isPasswordValid) {
+            return {
+                success: false,
+                employee: null,
+                message: error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.INVALID_PASSWORD,
+            };
+        }
+        return {
+            success: true,
+            employee: admin,
+            message: '로그인 성공',
+        };
+    }
+};
+exports.CheckSystemAdminUsecase = CheckSystemAdminUsecase;
+exports.CheckSystemAdminUsecase = CheckSystemAdminUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+], CheckSystemAdminUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/auth/usecases/update-auth-info.usecase.ts":
+/*!*******************************************************************!*\
+  !*** ./src/application/auth/usecases/update-auth-info.usecase.ts ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateAuthInfoUsecase = void 0;
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
-let UpdateUsecase = class UpdateUsecase {
+let UpdateAuthInfoUsecase = class UpdateAuthInfoUsecase {
     constructor(employeeService) {
         this.employeeService = employeeService;
     }
     async execute(ssoResponse) {
-        const employee = await this.employeeService.findByEmployeeNumber(ssoResponse.employeeNumber);
+        const employee = await this.employeeService.findOne({
+            where: {
+                employeeNumber: ssoResponse.employeeNumber,
+            },
+        });
         employee.password = ssoResponse.password;
         employee.mobile = ssoResponse.phoneNumber;
         employee.accessToken = ssoResponse.accessToken;
@@ -4556,11 +4710,11 @@ let UpdateUsecase = class UpdateUsecase {
         return await this.employeeService.update(employee.employeeId, employee);
     }
 };
-exports.UpdateUsecase = UpdateUsecase;
-exports.UpdateUsecase = UpdateUsecase = __decorate([
+exports.UpdateAuthInfoUsecase = UpdateAuthInfoUsecase;
+exports.UpdateAuthInfoUsecase = UpdateAuthInfoUsecase = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
-], UpdateUsecase);
+], UpdateAuthInfoUsecase);
 
 
 /***/ }),
@@ -4581,19 +4735,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ValidateUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
-const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ValidateUsecase = class ValidateUsecase {
-    constructor(employeeService, dataSource) {
+    constructor(employeeService) {
         this.employeeService = employeeService;
-        this.dataSource = dataSource;
     }
     async execute(email, password) {
         const employee = await this.employeeService.findByEmail(email);
@@ -4618,8 +4770,546 @@ let ValidateUsecase = class ValidateUsecase {
 exports.ValidateUsecase = ValidateUsecase;
 exports.ValidateUsecase = ValidateUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object, typeof (_b = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
 ], ValidateUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/employee/controllers/admin.resource-manager.controller.ts":
+/*!***********************************************************************************!*\
+  !*** ./src/application/employee/controllers/admin.resource-manager.controller.ts ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdminResourceManagerController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const resource_manager_usecase_1 = __webpack_require__(/*! @resource/application/employee/usecases/resource-manager.usecase */ "./src/application/employee/usecases/resource-manager.usecase.ts");
+const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./src/dtos.index.ts");
+let AdminResourceManagerController = class AdminResourceManagerController {
+    constructor(resourceManagerUseCase) {
+        this.resourceManagerUseCase = resourceManagerUseCase;
+    }
+    onModuleInit() {
+        console.log('AdminResourceManagerController - onModuleInit');
+    }
+    async findAllResourceManagers() {
+        return this.resourceManagerUseCase.findAllResourceManagers();
+    }
+};
+exports.AdminResourceManagerController = AdminResourceManagerController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '자원 관리자 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 관리자 목록 조회 성공',
+        type: [dtos_index_1.EmplyeesByDepartmentResponseDto],
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], AdminResourceManagerController.prototype, "findAllResourceManagers", null);
+exports.AdminResourceManagerController = AdminResourceManagerController = __decorate([
+    (0, swagger_1.ApiTags)('3. 자원 관리자 - 관리자 페이지'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Controller)('v1/admin/resource-managers'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_manager_usecase_1.ResourceManagerUseCase !== "undefined" && resource_manager_usecase_1.ResourceManagerUseCase) === "function" ? _a : Object])
+], AdminResourceManagerController);
+
+
+/***/ }),
+
+/***/ "./src/application/employee/controllers/webhook.controller.ts":
+/*!********************************************************************!*\
+  !*** ./src/application/employee/controllers/webhook.controller.ts ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeWebhookController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_service_1 = __webpack_require__(/*! ../employee.service */ "./src/application/employee/employee.service.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const throttler_decorator_1 = __webpack_require__(/*! @nestjs/throttler/dist/throttler.decorator */ "@nestjs/throttler/dist/throttler.decorator");
+const mms_employee_response_dto_1 = __webpack_require__(/*! @resource/modules/employee/application/dtos/mms-employee-response.dto */ "./src/modules/employee/application/dtos/mms-employee-response.dto.ts");
+let EmployeeWebhookController = class EmployeeWebhookController {
+    constructor(employeeService) {
+        this.employeeService = employeeService;
+    }
+    async syncEmployees() {
+        return await this.employeeService.syncEmployees();
+    }
+    async webhookCreate(body) {
+        console.log('created employee', body);
+        await this.employeeService.syncEmployees(body.payload.employee_number);
+    }
+    async webhookUpdate(body) {
+        console.log('updated employee', body);
+        await this.employeeService.syncEmployees(body.payload.employee_number);
+    }
+    async webhookPositionChanged(body) {
+        console.log('position changed', body);
+        await this.employeeService.syncEmployees(body.payload.employee_number);
+    }
+    async webhookDepartmentChanged(body) {
+        console.log('department changed', body);
+        await this.employeeService.syncEmployees(body.payload.employee_number);
+    }
+    async webhookDelete(body) {
+        console.log('deleted employee', body);
+    }
+};
+exports.EmployeeWebhookController = EmployeeWebhookController;
+__decorate([
+    (0, common_1.Get)('sync'),
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EmployeeWebhookController.prototype, "syncEmployees", null);
+__decorate([
+    (0, common_1.Post)('webhook/create'),
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeWebhookController.prototype, "webhookCreate", null);
+__decorate([
+    (0, common_1.Post)('webhook/update'),
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeWebhookController.prototype, "webhookUpdate", null);
+__decorate([
+    (0, common_1.Post)('webhook/position_changed'),
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeWebhookController.prototype, "webhookPositionChanged", null);
+__decorate([
+    (0, common_1.Post)('webhook/department_changed'),
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeWebhookController.prototype, "webhookDepartmentChanged", null);
+__decorate([
+    (0, common_1.Post)('webhook/delete'),
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, public_decorator_1.Public)(),
+    (0, throttler_decorator_1.Throttle)(5, 60),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeWebhookController.prototype, "webhookDelete", null);
+exports.EmployeeWebhookController = EmployeeWebhookController = __decorate([
+    (0, swagger_1.ApiTags)('5. 직원 - 사용자 페이지'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Controller)('v1/employees'),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+], EmployeeWebhookController);
+
+
+/***/ }),
+
+/***/ "./src/application/employee/dtos/mms-employee-response.dto.ts":
+/*!********************************************************************!*\
+  !*** ./src/application/employee/dtos/mms-employee-response.dto.ts ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MMSWebhookRequestDto = exports.MMSEmployeeResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class MMSEmployeeResponseDto {
+    constructor(employee) {
+        this.id = employee.id;
+        this.employee_number = employee.employee_number;
+        this.name = employee.name;
+        this.email = employee.email;
+        this.phone_number = employee.phone_number;
+        this.date_of_birth = employee.date_of_birth;
+        this.gender = employee.gender;
+        this.hire_date = employee.hire_date;
+        this.status = employee.status;
+        this.department = employee.department?.department_code;
+        this.position = employee.position?.position_title;
+        this.rank = employee.rank?.rank_name;
+    }
+}
+exports.MMSEmployeeResponseDto = MMSEmployeeResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직원 ID', example: '67d116b591e5366c327915d2' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '사번', example: '24020' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "employee_number", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이름', example: '구석현' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이메일', example: 'koo.sukhyun@lumir.space' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '전화번호', example: '010-1234-5678' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "phone_number", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '생년월일', example: '1980-07-04T00:00:00.000Z' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], MMSEmployeeResponseDto.prototype, "date_of_birth", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '성별', example: 'MALE' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "gender", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '입사일', example: '2024-05-21T00:00:00.000Z' }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], MMSEmployeeResponseDto.prototype, "hire_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '재직 상태', example: '재직중' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서', example: '대표이사' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직위', example: '대표이사' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "position", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직급', example: '대표이사' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "rank", void 0);
+class MMSWebhookRequestDto {
+}
+exports.MMSWebhookRequestDto = MMSWebhookRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이벤트 타입', example: 'employee.updated' }),
+    __metadata("design:type", String)
+], MMSWebhookRequestDto.prototype, "event_type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '엔티티 타입', example: 'employee' }),
+    __metadata("design:type", String)
+], MMSWebhookRequestDto.prototype, "entity_type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '타임스탬프', example: '2025-04-29T02:11:51.794Z' }),
+    __metadata("design:type", String)
+], MMSWebhookRequestDto.prototype, "timestamp", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '페이로드' }),
+    __metadata("design:type", MMSEmployeeResponseDto)
+], MMSWebhookRequestDto.prototype, "payload", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/employee/employee.module.ts":
+/*!*****************************************************!*\
+  !*** ./src/application/employee/employee.module.ts ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const webhook_controller_1 = __webpack_require__(/*! ./controllers/webhook.controller */ "./src/application/employee/controllers/webhook.controller.ts");
+const employee_service_1 = __webpack_require__(/*! ./employee.service */ "./src/application/employee/employee.service.ts");
+const admin_resource_manager_controller_1 = __webpack_require__(/*! ./controllers/admin.resource-manager.controller */ "./src/application/employee/controllers/admin.resource-manager.controller.ts");
+const syncEmployee_usecase_1 = __webpack_require__(/*! ./usecases/syncEmployee.usecase */ "./src/application/employee/usecases/syncEmployee.usecase.ts");
+const getEmployee_usecase_1 = __webpack_require__(/*! ./usecases/getEmployee.usecase */ "./src/application/employee/usecases/getEmployee.usecase.ts");
+const resource_manager_usecase_1 = __webpack_require__(/*! ./usecases/resource-manager.usecase */ "./src/application/employee/usecases/resource-manager.usecase.ts");
+const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+let EmployeeModule = class EmployeeModule {
+};
+exports.EmployeeModule = EmployeeModule;
+exports.EmployeeModule = EmployeeModule = __decorate([
+    (0, common_1.Module)({
+        imports: [employee_module_1.EmployeeModule, typeorm_1.TypeOrmModule.forFeature([entities_1.Employee])],
+        controllers: [webhook_controller_1.EmployeeWebhookController, admin_resource_manager_controller_1.AdminResourceManagerController],
+        providers: [employee_service_1.EmployeeService, getEmployee_usecase_1.GetEmployeeUsecase, syncEmployee_usecase_1.SyncEmployeeUsecase, resource_manager_usecase_1.ResourceManagerUseCase],
+        exports: [employee_service_1.EmployeeService],
+    })
+], EmployeeModule);
+
+
+/***/ }),
+
+/***/ "./src/application/employee/employee.service.ts":
+/*!******************************************************!*\
+  !*** ./src/application/employee/employee.service.ts ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const getEmployee_usecase_1 = __webpack_require__(/*! ./usecases/getEmployee.usecase */ "./src/application/employee/usecases/getEmployee.usecase.ts");
+const syncEmployee_usecase_1 = __webpack_require__(/*! ./usecases/syncEmployee.usecase */ "./src/application/employee/usecases/syncEmployee.usecase.ts");
+let EmployeeService = class EmployeeService {
+    constructor(getEmployeeUsecase, syncEmployeeUsecase) {
+        this.getEmployeeUsecase = getEmployeeUsecase;
+        this.syncEmployeeUsecase = syncEmployeeUsecase;
+    }
+    async syncEmployees(employeeNumber) {
+        const employees = await this.getEmployeeUsecase.execute(employeeNumber);
+        await this.syncEmployeeUsecase.execute(employees);
+    }
+};
+exports.EmployeeService = EmployeeService;
+exports.EmployeeService = EmployeeService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof getEmployee_usecase_1.GetEmployeeUsecase !== "undefined" && getEmployee_usecase_1.GetEmployeeUsecase) === "function" ? _a : Object, typeof (_b = typeof syncEmployee_usecase_1.SyncEmployeeUsecase !== "undefined" && syncEmployee_usecase_1.SyncEmployeeUsecase) === "function" ? _b : Object])
+], EmployeeService);
+
+
+/***/ }),
+
+/***/ "./src/application/employee/usecases/getEmployee.usecase.ts":
+/*!******************************************************************!*\
+  !*** ./src/application/employee/usecases/getEmployee.usecase.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GetEmployeeUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mms_employee_response_dto_1 = __webpack_require__(/*! @resource/application/employee/dtos/mms-employee-response.dto */ "./src/application/employee/dtos/mms-employee-response.dto.ts");
+const axios_1 = __webpack_require__(/*! axios */ "axios");
+let GetEmployeeUsecase = class GetEmployeeUsecase {
+    constructor() { }
+    async execute(employeeNumber) {
+        let url = `${process.env.METADATA_MANAGER_URL}/api/employees?detailed=true`;
+        if (employeeNumber) {
+            url += `&employeeNumber=${employeeNumber}`;
+        }
+        const result = await axios_1.default.get(url);
+        if (employeeNumber) {
+            return [new mms_employee_response_dto_1.MMSEmployeeResponseDto(result.data)];
+        }
+        return result.data.map((employee) => new mms_employee_response_dto_1.MMSEmployeeResponseDto(employee));
+    }
+};
+exports.GetEmployeeUsecase = GetEmployeeUsecase;
+exports.GetEmployeeUsecase = GetEmployeeUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], GetEmployeeUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/employee/usecases/resource-manager.usecase.ts":
+/*!***********************************************************************!*\
+  !*** ./src/application/employee/usecases/resource-manager.usecase.ts ***!
+  \***********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceManagerUseCase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+let ResourceManagerUseCase = class ResourceManagerUseCase {
+    constructor(employeeService) {
+        this.employeeService = employeeService;
+    }
+    async findAllResourceManagers() {
+        const resourceManagers = await this.employeeService.findAll({
+            where: {
+                roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.RESOURCE_ADMIN}' = ANY("roles")`),
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+            },
+        });
+        const departments = new Map();
+        resourceManagers.forEach((resourceManager) => {
+            if (!departments.has(resourceManager.department)) {
+                departments.set(resourceManager.department, []);
+            }
+            departments.get(resourceManager.department)?.push(resourceManager);
+        });
+        return Array.from(departments.entries()).map(([department, employees]) => ({
+            department,
+            employees,
+        }));
+    }
+};
+exports.ResourceManagerUseCase = ResourceManagerUseCase;
+exports.ResourceManagerUseCase = ResourceManagerUseCase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+], ResourceManagerUseCase);
+
+
+/***/ }),
+
+/***/ "./src/application/employee/usecases/syncEmployee.usecase.ts":
+/*!*******************************************************************!*\
+  !*** ./src/application/employee/usecases/syncEmployee.usecase.ts ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SyncEmployeeUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_service_1 = __webpack_require__(/*! @resource/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+let SyncEmployeeUsecase = class SyncEmployeeUsecase {
+    constructor(employeeService) {
+        this.employeeService = employeeService;
+    }
+    async execute(employees) {
+        for (const employee of employees) {
+            const existingEmployee = await this.employeeService.findByEmployeeNumber(employee.employee_number);
+            if (employee.status === '퇴사') {
+                if (existingEmployee) {
+                    await this.employeeService.update(existingEmployee.employeeId, {
+                        department: employee.status,
+                        position: employee.status,
+                    });
+                }
+                continue;
+            }
+            try {
+                if (existingEmployee) {
+                    existingEmployee.name = employee.name;
+                    existingEmployee.employeeNumber = employee.employee_number;
+                    existingEmployee.department = employee.department;
+                    existingEmployee.position = employee.rank;
+                    existingEmployee.mobile = employee.phone_number;
+                    await this.employeeService.save(existingEmployee);
+                }
+                else {
+                    await this.employeeService.save(await this.employeeService.create(employee));
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+    }
+};
+exports.SyncEmployeeUsecase = SyncEmployeeUsecase;
+exports.SyncEmployeeUsecase = SyncEmployeeUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+], SyncEmployeeUsecase);
 
 
 /***/ }),
@@ -5913,28 +6603,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const jwt_auth_usecase_1 = __webpack_require__(/*! ./application/usecases/jwt-auth.usecase */ "./src/modules/auth/application/usecases/jwt-auth.usecase.ts");
 const sso_auth_usecase_1 = __webpack_require__(/*! ./application/usecases/sso-auth.usecase */ "./src/modules/auth/application/usecases/sso-auth.usecase.ts");
 const user_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/user.repository */ "./src/modules/auth/infrastructure/adapters/out/user.repository.ts");
-const jwt_strategy_1 = __webpack_require__(/*! ./infrastructure/strategies/jwt.strategy */ "./src/modules/auth/infrastructure/strategies/jwt.strategy.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const user_service_1 = __webpack_require__(/*! ./application/services/user.service */ "./src/modules/auth/application/services/user.service.ts");
 const user_usecase_1 = __webpack_require__(/*! ./application/usecases/user.usecase */ "./src/modules/auth/application/usecases/user.usecase.ts");
 const user_event_handler_1 = __webpack_require__(/*! ./application/handler/user-event.handler */ "./src/modules/auth/application/handler/user-event.handler.ts");
 const resource_manager_usecase_1 = __webpack_require__(/*! ./application/usecases/resource-manager.usecase */ "./src/modules/auth/application/usecases/resource-manager.usecase.ts");
-const user_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/user.controller */ "./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/user.controller.ts");
-const admin_user_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.user.controller */ "./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.user.controller.ts");
-const admin_resource_manager_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller */ "./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller.ts");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [passport_1.PassportModule, typeorm_1.TypeOrmModule.forFeature([entities_1.User, entities_1.Employee])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.User, entities_1.Employee])],
         providers: [
-            jwt_strategy_1.JwtStrategy,
             {
                 provide: 'AuthService',
                 useClass: process.env.USE_SSO === 'true' ? sso_auth_usecase_1.SsoAuthUsecase : jwt_auth_usecase_1.JwtAuthUsecase,
@@ -5949,9 +6633,8 @@ exports.AuthModule = AuthModule = __decorate([
             user_event_handler_1.UserEventHandler,
             resource_manager_usecase_1.ResourceManagerUseCase,
         ],
-        controllers: [user_controller_1.UserUserController, admin_user_controller_1.AdminUserController, admin_resource_manager_controller_1.AdminResourceManagerController],
+        controllers: [],
         exports: [
-            jwt_strategy_1.JwtStrategy,
             {
                 provide: 'AuthService',
                 useClass: process.env.USE_SSO === 'true' ? sso_auth_usecase_1.SsoAuthUsecase : jwt_auth_usecase_1.JwtAuthUsecase,
@@ -6092,240 +6775,6 @@ exports.UserDomainController = UserDomainController = __decorate([
 
 /***/ }),
 
-/***/ "./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller.ts":
-/*!*************************************************************************************************************!*\
-  !*** ./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller.ts ***!
-  \*************************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AdminResourceManagerController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const resource_manager_usecase_1 = __webpack_require__(/*! @resource/modules/auth/application/usecases/resource-manager.usecase */ "./src/modules/auth/application/usecases/resource-manager.usecase.ts");
-const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./src/dtos.index.ts");
-let AdminResourceManagerController = class AdminResourceManagerController {
-    constructor(resourceManagerUseCase) {
-        this.resourceManagerUseCase = resourceManagerUseCase;
-    }
-    async findAllResourceManagers() {
-        return this.resourceManagerUseCase.findAllResourceManagers();
-    }
-};
-exports.AdminResourceManagerController = AdminResourceManagerController;
-__decorate([
-    (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: '자원 관리자 목록 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '자원 관리자 목록 조회 성공',
-        type: [dtos_index_1.EmplyeesByDepartmentResponseDto],
-    }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
-], AdminResourceManagerController.prototype, "findAllResourceManagers", null);
-exports.AdminResourceManagerController = AdminResourceManagerController = __decorate([
-    (0, swagger_1.ApiTags)('3. 자원 관리자 - 관리자 페이지'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.Controller)('v1/admin/resource-managers'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_manager_usecase_1.ResourceManagerUseCase !== "undefined" && resource_manager_usecase_1.ResourceManagerUseCase) === "function" ? _a : Object])
-], AdminResourceManagerController);
-
-
-/***/ }),
-
-/***/ "./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.user.controller.ts":
-/*!*************************************************************************************************!*\
-  !*** ./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.user.controller.ts ***!
-  \*************************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AdminUserController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const user_usecase_1 = __webpack_require__(/*! @resource/modules/auth/application/usecases/user.usecase */ "./src/modules/auth/application/usecases/user.usecase.ts");
-const user_response_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/user-response.dto */ "./src/modules/auth/application/dto/user-response.dto.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-const change_role_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/change-role.dto */ "./src/modules/auth/application/dto/change-role.dto.ts");
-let AdminUserController = class AdminUserController {
-    constructor(userUsecase) {
-        this.userUsecase = userUsecase;
-    }
-    findUser() {
-        return this.userUsecase.findAll();
-    }
-    changeRole(changeRoleDto) {
-        return this.userUsecase.changeRole(changeRoleDto);
-    }
-};
-exports.AdminUserController = AdminUserController;
-__decorate([
-    (0, common_1.Get)(''),
-    (0, swagger_1.ApiOperation)({ summary: '직원 목록 조회	자원담당자로 설정하기 위한 직원 목록' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '내 상세 정보 조회 성공', type: user_response_dto_1.UserResponseDto }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], AdminUserController.prototype, "findUser", null);
-__decorate([
-    (0, common_1.Patch)('change/role'),
-    (0, swagger_1.ApiOperation)({ summary: '자원 담당자 설정	자원별 담당자 설정 또는 토글 방식' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '자원 담당자 설정 성공' }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof change_role_dto_1.ChangeRoleDto !== "undefined" && change_role_dto_1.ChangeRoleDto) === "function" ? _b : Object]),
-    __metadata("design:returntype", void 0)
-], AdminUserController.prototype, "changeRole", null);
-exports.AdminUserController = AdminUserController = __decorate([
-    (0, swagger_1.ApiTags)('5. 유저 - 관리자 페이지'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.Controller)('v1/admin/users'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_usecase_1.UserUsecase !== "undefined" && user_usecase_1.UserUsecase) === "function" ? _a : Object])
-], AdminUserController);
-
-
-/***/ }),
-
-/***/ "./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/user.controller.ts":
-/*!*******************************************************************************************!*\
-  !*** ./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/user.controller.ts ***!
-  \*******************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UserUserController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const user_usecase_1 = __webpack_require__(/*! @resource/modules/auth/application/usecases/user.usecase */ "./src/modules/auth/application/usecases/user.usecase.ts");
-const user_response_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/user-response.dto */ "./src/modules/auth/application/dto/user-response.dto.ts");
-const check_password_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/check-password.dto */ "./src/modules/auth/application/dto/check-password.dto.ts");
-const change_password_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/change-password.dto */ "./src/modules/auth/application/dto/change-password.dto.ts");
-const notification_settings_dto_1 = __webpack_require__(/*! @resource/modules/auth/application/dto/notification-settings.dto */ "./src/modules/auth/application/dto/notification-settings.dto.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-let UserUserController = class UserUserController {
-    constructor(userUsecase) {
-        this.userUsecase = userUsecase;
-    }
-    findUser(user) {
-        return this.userUsecase.findByUserId(user.userId);
-    }
-    checkPassword(user, checkPasswordDto) {
-        return this.userUsecase.checkPassword(user.userId, checkPasswordDto.password);
-    }
-    changePassword(user, changePasswordDto) {
-        return this.userUsecase.changePassword(user.userId, changePasswordDto.newPassword);
-    }
-    async changeNotificationSettings(user, updateDto) {
-        return this.userUsecase.changeNotificationSettings(user.userId, updateDto);
-    }
-};
-exports.UserUserController = UserUserController;
-__decorate([
-    (0, common_1.Get)('me'),
-    (0, swagger_1.ApiOperation)({ summary: '내 상세 정보 조회' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '내 상세 정보 조회 성공', type: user_response_dto_1.UserResponseDto }),
-    __param(0, (0, user_decorator_1.User)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _b : Object]),
-    __metadata("design:returntype", void 0)
-], UserUserController.prototype, "findUser", null);
-__decorate([
-    (0, common_1.Post)('check-password'),
-    (0, swagger_1.ApiOperation)({ summary: '비밀번호 확인' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '비밀번호 확인 성공' }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _c : Object, typeof (_d = typeof check_password_dto_1.CheckPasswordDto !== "undefined" && check_password_dto_1.CheckPasswordDto) === "function" ? _d : Object]),
-    __metadata("design:returntype", void 0)
-], UserUserController.prototype, "checkPassword", null);
-__decorate([
-    (0, common_1.Post)('change-password'),
-    (0, swagger_1.ApiOperation)({ summary: '비밀번호 변경' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '비밀번호 변경 성공' }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _e : Object, typeof (_f = typeof change_password_dto_1.ChangePasswordDto !== "undefined" && change_password_dto_1.ChangePasswordDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", void 0)
-], UserUserController.prototype, "changePassword", null);
-__decorate([
-    (0, common_1.Patch)('me/notification-settings'),
-    (0, swagger_1.ApiOperation)({ summary: '알림 설정' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({
-        status: 200,
-        description: '알림 설정 성공',
-        type: user_response_dto_1.UserResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof entities_1.User !== "undefined" && entities_1.User) === "function" ? _g : Object, typeof (_h = typeof notification_settings_dto_1.UpdateNotificationSettingsDto !== "undefined" && notification_settings_dto_1.UpdateNotificationSettingsDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
-], UserUserController.prototype, "changeNotificationSettings", null);
-exports.UserUserController = UserUserController = __decorate([
-    (0, swagger_1.ApiTags)('5. 유저 - 사용자 페이지'),
-    (0, common_1.Controller)('v1/users'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_usecase_1.UserUsecase !== "undefined" && user_usecase_1.UserUsecase) === "function" ? _a : Object])
-], UserUserController);
-
-
-/***/ }),
-
 /***/ "./src/modules/auth/infrastructure/adapters/out/user.repository.ts":
 /*!*************************************************************************!*\
   !*** ./src/modules/auth/infrastructure/adapters/out/user.repository.ts ***!
@@ -6401,65 +6850,6 @@ exports.UserRepository = UserRepository = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(entities_1.User)),
     __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
 ], UserRepository);
-
-
-/***/ }),
-
-/***/ "./src/modules/auth/infrastructure/strategies/jwt.strategy.ts":
-/*!********************************************************************!*\
-  !*** ./src/modules/auth/infrastructure/strategies/jwt.strategy.ts ***!
-  \********************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.JwtStrategy = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport");
-const passport_jwt_1 = __webpack_require__(/*! passport-jwt */ "passport-jwt");
-const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
-const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
-let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
-    constructor(userRepository, configService) {
-        super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ignoreExpiration: false,
-            secretOrKey: configService.get('jwt.secret'),
-        });
-        this.userRepository = userRepository;
-    }
-    async validate(payload) {
-        const user = await this.userRepository.findOne({
-            where: { userId: payload.userId },
-            relations: ['employee'],
-        });
-        if (!user || user.userId !== payload.userId) {
-            throw new common_1.UnauthorizedException();
-        }
-        return payload;
-    }
-};
-exports.JwtStrategy = JwtStrategy;
-exports.JwtStrategy = JwtStrategy = __decorate([
-    (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(entities_1.User)),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
-], JwtStrategy);
 
 
 /***/ }),
@@ -18841,6 +19231,7 @@ let GetTaskListUsecase = class GetTaskListUsecase {
                     employeeId: user.employeeId,
                     type: reservation_type_enum_1.ParticipantsType.RESERVER,
                 },
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
                 endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
@@ -18938,6 +19329,7 @@ const reservation_service_1 = __webpack_require__(/*! ../../../reservation/appli
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 let GetTaskStatusUsecase = class GetTaskStatusUsecase {
     constructor(resourceService, reservationService) {
         this.resourceService = resourceService;
@@ -18948,7 +19340,9 @@ let GetTaskStatusUsecase = class GetTaskStatusUsecase {
             where: {
                 participants: {
                     employeeId: user.employeeId,
+                    type: reservation_type_enum_1.ParticipantsType.RESERVER,
                 },
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
                 endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
@@ -19830,6 +20224,16 @@ module.exports = require("@nestjs/schedule");
 /***/ ((module) => {
 
 module.exports = require("@nestjs/swagger");
+
+/***/ }),
+
+/***/ "@nestjs/throttler/dist/throttler.decorator":
+/*!*************************************************************!*\
+  !*** external "@nestjs/throttler/dist/throttler.decorator" ***!
+  \*************************************************************/
+/***/ ((module) => {
+
+module.exports = require("@nestjs/throttler/dist/throttler.decorator");
 
 /***/ }),
 

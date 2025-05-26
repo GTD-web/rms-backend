@@ -16,4 +16,8 @@ export class EmployeeService {
         const employees = await this.getEmployeeUsecase.execute(employeeNumber);
         await this.syncEmployeeUsecase.execute(employees);
     }
+
+    // async findAllEmplyeesByDepartment(): Promise<EmplyeesByDepartmentResponseDto[]> {
+    //     return this.employeeRepository.findAllEmplyeesByDepartment();
+    // }
 }

@@ -24,12 +24,12 @@ export abstract class BaseRepository<T extends ObjectLiteral> implements IReposi
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
             : this.repository;
-        return await this.repository.findOne({
+        return await repository.findOne({
             where: repositoryOptions?.where,
-            // relations: repositoryOptions?.relations,
-            // select: repositoryOptions?.select,
-            // order: repositoryOptions?.order,
-            // withDeleted: repositoryOptions?.withDeleted,
+            relations: repositoryOptions?.relations,
+            select: repositoryOptions?.select,
+            order: repositoryOptions?.order,
+            withDeleted: repositoryOptions?.withDeleted,
         });
     }
 

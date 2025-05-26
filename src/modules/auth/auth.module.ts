@@ -17,9 +17,8 @@ import { AdminUserController } from './infrastructure/adapters/in/web/controller
 import { AdminResourceManagerController } from './infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller';
 
 @Module({
-    imports: [PassportModule, TypeOrmModule.forFeature([User, Employee])],
+    imports: [TypeOrmModule.forFeature([User, Employee])],
     providers: [
-        JwtStrategy,
         {
             provide: 'AuthService',
             useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
@@ -35,9 +34,8 @@ import { AdminResourceManagerController } from './infrastructure/adapters/in/web
         UserEventHandler,
         ResourceManagerUseCase,
     ],
-    controllers: [UserUserController, AdminUserController, AdminResourceManagerController],
+    controllers: [],
     exports: [
-        JwtStrategy,
         {
             provide: 'AuthService',
             useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
