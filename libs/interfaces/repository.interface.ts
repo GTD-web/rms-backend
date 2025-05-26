@@ -1,6 +1,6 @@
 import { ObjectLiteral, QueryRunner, FindOptionsWhere, DeepPartial, FindOptionsOrder } from 'typeorm';
 
-export interface IRepositoryOptions<T = any> {
+export interface IRepositoryOptions<T> {
     queryRunner?: QueryRunner;
     where?: FindOptionsWhere<T>;
     relations?: string[];
@@ -12,10 +12,10 @@ export interface IRepositoryOptions<T = any> {
 }
 
 export interface IRepository<T extends ObjectLiteral> {
-    create(entity: DeepPartial<T>, repositoryOptions?: IRepositoryOptions): Promise<T>;
-    save(entity: DeepPartial<T>, repositoryOptions?: IRepositoryOptions): Promise<T>;
-    findOne(repositoryOptions?: IRepositoryOptions): Promise<T | null>;
-    findAll(repositoryOptions?: IRepositoryOptions): Promise<T[]>;
-    update(entityId: string, entity: Partial<T>, repositoryOptions?: IRepositoryOptions): Promise<T>;
-    delete(entityId: string, repositoryOptions?: IRepositoryOptions): Promise<void>;
+    create(entity: DeepPartial<T>, repositoryOptions?: IRepositoryOptions<T>): Promise<T>;
+    save(entity: DeepPartial<T>, repositoryOptions?: IRepositoryOptions<T>): Promise<T>;
+    findOne(repositoryOptions?: IRepositoryOptions<T>): Promise<T | null>;
+    findAll(repositoryOptions?: IRepositoryOptions<T>): Promise<T[]>;
+    update(entityId: string, entity: Partial<T>, repositoryOptions?: IRepositoryOptions<T>): Promise<T>;
+    delete(entityId: string, repositoryOptions?: IRepositoryOptions<T>): Promise<void>;
 }

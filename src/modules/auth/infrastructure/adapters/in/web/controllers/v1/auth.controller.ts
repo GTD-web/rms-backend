@@ -12,10 +12,10 @@ import { LoginResponseDto } from '@resource/modules/auth/application/dto/login-r
 export class UserAuthController {
     constructor(@Inject('AuthService') private authService: AuthService) {}
 
-    @Post('login')
-    @ApiOperation({ summary: '로그인' })
-    @ApiDataResponse({ status: 201, description: '로그인 성공', type: LoginResponseDto })
-    login(@Body() loginDto: LoginDto) {
-        return this.authService.login(loginDto);
-    }
+    // @Post('login')
+    // @ApiOperation({ summary: '로그인' })
+    // @ApiDataResponse({ status: 201, description: '로그인 성공', type: LoginResponseDto })
+    // login(@Body() loginDto: LoginDto) {
+    //     return this.authService.login(loginDto);
+    // }
 }

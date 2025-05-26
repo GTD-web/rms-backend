@@ -1,39 +1,39 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IRepository, IRepositoryOptions } from '../interfaces/repository.interface';
-import { ObjectLiteral, Repository, DeepPartial, FindOptionsWhere } from 'typeorm';
+import { ObjectLiteral, Repository, DeepPartial, FindOptionsWhere, FindOneOptions } from 'typeorm';
 
 @Injectable()
 export abstract class BaseRepository<T extends ObjectLiteral> implements IRepository<T> {
     protected constructor(protected readonly repository: Repository<T>) {}
 
-    async create(entity: DeepPartial<T>, repositoryOptions?: IRepositoryOptions): Promise<T> {
+    async create(entity: DeepPartial<T>, repositoryOptions?: IRepositoryOptions<T>): Promise<T> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
             : this.repository;
         return repository.create(entity);
     }
 
-    async save(entity: DeepPartial<T>, repositoryOptions?: IRepositoryOptions): Promise<T> {
+    async save(entity: DeepPartial<T>, repositoryOptions?: IRepositoryOptions<T>): Promise<T> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
             : this.repository;
         return repository.save(entity);
     }
 
-    async findOne(repositoryOptions?: IRepositoryOptions): Promise<T | null> {
+    async findOne(repositoryOptions?: IRepositoryOptions<T>): Promise<T | null> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
             : this.repository;
-        return repository.findOne({
+        return await this.repository.findOne({
             where: repositoryOptions?.where,
-            relations: repositoryOptions?.relations,
-            select: repositoryOptions?.select,
-            order: repositoryOptions?.order,
-            withDeleted: repositoryOptions?.withDeleted,
+            // relations: repositoryOptions?.relations,
+            // select: repositoryOptions?.select,
+            // order: repositoryOptions?.order,
+            // withDeleted: repositoryOptions?.withDeleted,
         });
     }
 
-    async findAll(repositoryOptions?: IRepositoryOptions): Promise<T[]> {
+    async findAll(repositoryOptions?: IRepositoryOptions<T>): Promise<T[]> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
             : this.repository;
@@ -48,7 +48,7 @@ export abstract class BaseRepository<T extends ObjectLiteral> implements IReposi
         });
     }
 
-    async update(entityId: string, entityData: Partial<T>, repositoryOptions?: IRepositoryOptions): Promise<T> {
+    async update(entityId: string, entityData: Partial<T>, repositoryOptions?: IRepositoryOptions<T>): Promise<T> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
             : this.repository;
@@ -67,7 +67,7 @@ export abstract class BaseRepository<T extends ObjectLiteral> implements IReposi
         return updated;
     }
 
-    async delete(entityId: string, repositoryOptions?: IRepositoryOptions): Promise<void> {
+    async delete(entityId: string, repositoryOptions?: IRepositoryOptions<T>): Promise<void> {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
             : this.repository;

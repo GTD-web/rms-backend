@@ -84,46 +84,47 @@ export class SsoAuthUsecase implements AuthService {
     }
 
     async login(loginDto: LoginDto): Promise<LoginResponseDto> {
-        let user = await this.validateUser(loginDto.email, loginDto.password);
-        console.log('sso auth usecase login user', user);
-        if (!user.employee.userId) {
-            await this.eventEmitter.emitAsync('update.employee', {
-                employee: {
-                    employeeId: user.employee.employeeId,
-                    user: user,
-                },
-            });
+        // let user = await this.validateUser(loginDto.email, loginDto.password);
+        // console.log('sso auth usecase login user', user);
+        // if (!user.employee.userId) {
+        //     await this.eventEmitter.emitAsync('update.employee', {
+        //         employee: {
+        //             employeeId: user.employee.employeeId,
+        //             user: user,
+        //         },
+        //     });
 
-            user = await this.userService.findByUserId(user.userId);
-        }
+        //     user = await this.userService.findByUserId(user.userId);
+        // }
 
-        const result = {
-            accessToken: null,
-            email: user.email,
-            name: user.employee?.name,
-            department: user.employee?.department,
-            position: user.employee?.position,
-            roles: user.roles,
-        };
-        if (user.accessToken && user.expiredAt && DateUtil.now().format() < user.expiredAt) {
-            result.accessToken = user.accessToken;
-        } else {
-            const payload = {
-                userId: user.userId,
-                employeeId: user.employeeId,
-                roles: user.roles,
-            };
+        // const result = {
+        //     accessToken: null,
+        //     email: user.email,
+        //     name: user.employee?.name,
+        //     department: user.employee?.department,
+        //     position: user.employee?.position,
+        //     roles: user.roles,
+        // };
+        // if (user.accessToken && user.expiredAt && DateUtil.now().format() < user.expiredAt) {
+        //     result.accessToken = user.accessToken;
+        // } else {
+        //     const payload = {
+        //         userId: user.userId,
+        //         employeeId: user.employeeId,
+        //         roles: user.roles,
+        //     };
 
-            const accessToken = this.jwtService.sign(payload);
-            const expiredAt = DateUtil.now().addDays(1).format();
+        //     const accessToken = this.jwtService.sign(payload);
+        //     const expiredAt = DateUtil.now().addDays(1).format();
 
-            user.accessToken = accessToken;
-            user.expiredAt = expiredAt;
-            await this.userService.update(user);
+        //     user.accessToken = accessToken;
+        //     user.expiredAt = expiredAt;
+        //     await this.userService.update(user);
 
-            result.accessToken = accessToken;
-        }
+        //     result.accessToken = accessToken;
+        // }
 
-        return result;
+        // return result;
+        return null;
     }
 }

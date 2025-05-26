@@ -12,6 +12,4 @@ export class EmployeeRepository extends BaseRepository<Employee> {
     ) {
         super(repository);
     }
-
-    // 필요에 따라 Employee 관련 메서드를 추가하세요.
 }

@@ -30,54 +30,54 @@ export class UserEmployeeController {
         return this.employeeUseCase.findAllEmplyeesByDepartment();
     }
 
-    @Get('sync')
-    @ApiExcludeEndpoint()
-    async syncEmployees() {
-        return await this.employeeUseCase.syncEmployees();
-    }
+    // @Get('sync')
+    // @ApiExcludeEndpoint()
+    // async syncEmployees() {
+    //     return await this.employeeUseCase.syncEmployees();
+    // }
 
-    @Post('webhook/create')
-    @ApiExcludeEndpoint()
-    @Public()
-    @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookCreate(@Body() body: MMSWebhookRequestDto) {
-        console.log('created employee', body);
-        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
-    }
+    // @Post('webhook/create')
+    // @ApiExcludeEndpoint()
+    // @Public()
+    // @Throttle(5, 60) // 60초 동안 5번만 허용
+    // async webhookCreate(@Body() body: MMSWebhookRequestDto) {
+    //     console.log('created employee', body);
+    //     await this.employeeUseCase.syncEmployee(body.payload.employee_number);
+    // }
 
-    @Post('webhook/update')
-    @ApiExcludeEndpoint()
-    @Public()
-    @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookUpdate(@Body() body: MMSWebhookRequestDto) {
-        console.log('updated employee', body);
-        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
-    }
+    // @Post('webhook/update')
+    // @ApiExcludeEndpoint()
+    // @Public()
+    // @Throttle(5, 60) // 60초 동안 5번만 허용
+    // async webhookUpdate(@Body() body: MMSWebhookRequestDto) {
+    //     console.log('updated employee', body);
+    //     await this.employeeUseCase.syncEmployee(body.payload.employee_number);
+    // }
 
-    @Post('webhook/position_changed')
-    @ApiExcludeEndpoint()
-    @Public()
-    @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookPositionChanged(@Body() body: MMSWebhookRequestDto) {
-        console.log('position changed', body);
-        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
-    }
+    // @Post('webhook/position_changed')
+    // @ApiExcludeEndpoint()
+    // @Public()
+    // @Throttle(5, 60) // 60초 동안 5번만 허용
+    // async webhookPositionChanged(@Body() body: MMSWebhookRequestDto) {
+    //     console.log('position changed', body);
+    //     await this.employeeUseCase.syncEmployee(body.payload.employee_number);
+    // }
 
-    @Post('webhook/department_changed')
-    @ApiExcludeEndpoint()
-    @Public()
-    @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookDepartmentChanged(@Body() body: MMSWebhookRequestDto) {
-        console.log('department changed', body);
-        await this.employeeUseCase.syncEmployee(body.payload.employee_number);
-    }
+    // @Post('webhook/department_changed')
+    // @ApiExcludeEndpoint()
+    // @Public()
+    // @Throttle(5, 60) // 60초 동안 5번만 허용
+    // async webhookDepartmentChanged(@Body() body: MMSWebhookRequestDto) {
+    //     console.log('department changed', body);
+    //     await this.employeeUseCase.syncEmployee(body.payload.employee_number);
+    // }
 
-    @Post('webhook/delete')
-    @ApiExcludeEndpoint()
-    @Public()
-    @Throttle(5, 60) // 60초 동안 5번만 허용
-    async webhookDelete(@Body() body: MMSWebhookRequestDto) {
-        console.log('deleted employee', body);
-        // await this.employeeUseCase.syncEmployee(body.payload.employee_number);
-    }
+    // @Post('webhook/delete')
+    // @ApiExcludeEndpoint()
+    // @Public()
+    // @Throttle(5, 60) // 60초 동안 5번만 허용
+    // async webhookDelete(@Body() body: MMSWebhookRequestDto) {
+    //     console.log('deleted employee', body);
+    //     // await this.employeeUseCase.syncEmployee(body.payload.employee_number);
+    // }
 }

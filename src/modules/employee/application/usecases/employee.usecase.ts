@@ -64,14 +64,14 @@ export class EmployeeUseCase {
         return new MMSEmployeeResponseDto(employee.data);
     }
 
-    async getEmployees(): Promise<MMSEmployeeResponseDto[]> {
-        const employees = await axios.get(`${process.env.METADATA_MANAGER_URL}/api/employees?detailed=true`);
-        const result: MMSEmployeeResponseDto[] = [];
-        employees.data.forEach((employee) => {
-            result.push(new MMSEmployeeResponseDto(employee));
-        });
-        return result;
-    }
+    // async getEmployees(): Promise<MMSEmployeeResponseDto[]> {
+    //     const employees = await axios.get(`${process.env.METADATA_MANAGER_URL}/api/employees?detailed=true`);
+    //     const result: MMSEmployeeResponseDto[] = [];
+    //     employees.data.forEach((employee) => {
+    //         result.push(new MMSEmployeeResponseDto(employee));
+    //     });
+    //     return result;
+    // }
 
     async syncEmployee(employeeNumber: string): Promise<void> {
         const employee = await this.getEmployee(employeeNumber);
@@ -98,42 +98,42 @@ export class EmployeeUseCase {
         }
     }
 
-    async syncEmployees(): Promise<void> {
-        const employees = await this.getEmployees();
-        for (const employee of employees) {
-            const user = await this.employeeService.findByEmployeeNumber(employee.employee_number);
+    // async syncEmployees(): Promise<void> {
+    //     const employees = await this.getEmployees();
+    //     for (const employee of employees) {
+    //         const user = await this.employeeService.findByEmployeeNumber(employee.employee_number);
 
-            if (employee.status === '퇴사') {
-                if (user) {
-                    await this.employeeService.update({
-                        userId: null,
-                        employeeId: user.employeeId,
-                        department: employee.status,
-                        position: employee.status,
-                    });
-                }
-                continue;
-            }
+    //         if (employee.status === '퇴사') {
+    //             if (user) {
+    //                 await this.employeeService.update({
+    //                     userId: null,
+    //                     employeeId: user.employeeId,
+    //                     department: employee.status,
+    //                     position: employee.status,
+    //                 });
+    //             }
+    //             continue;
+    //         }
 
-            try {
-                if (user) {
-                    user.name = employee.name;
-                    user.employeeNumber = employee.employee_number;
-                    user.department = employee.department;
-                    user.position = employee.rank;
-                    await this.employeeService.save(user);
-                } else {
-                    await this.employeeService.save(this.employeeService.create(employee));
-                }
-                if (employee.phone_number) {
-                    this.eventEmitter.emit('update.user.mobile', {
-                        employeeId: user.employeeId,
-                        mobile: employee.phone_number,
-                    });
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        }
-    }
+    //         try {
+    //             if (user) {
+    //                 user.name = employee.name;
+    //                 user.employeeNumber = employee.employee_number;
+    //                 user.department = employee.department;
+    //                 user.position = employee.rank;
+    //                 await this.employeeService.save(user);
+    //             } else {
+    //                 await this.employeeService.save(this.employeeService.create(employee));
+    //             }
+    //             if (employee.phone_number) {
+    //                 this.eventEmitter.emit('update.user.mobile', {
+    //                     employeeId: user.employeeId,
+    //                     mobile: employee.phone_number,
+    //                 });
+    //             }
+    //         } catch (error) {
+    //             console.log(error);
+    //         }
+    //     }
+    // }
 }
