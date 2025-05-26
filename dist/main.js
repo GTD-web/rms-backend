@@ -18397,6 +18397,7 @@ let GetTaskListUsecase = class GetTaskListUsecase {
                     employeeId: user.employeeId,
                     type: reservation_type_enum_1.ParticipantsType.RESERVER,
                 },
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
                 endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
@@ -18495,6 +18496,7 @@ const reservation_service_1 = __webpack_require__(/*! ../../../reservation/appli
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 let GetTaskStatusUsecase = class GetTaskStatusUsecase {
     constructor(resourceService, reservationService) {
         this.resourceService = resourceService;
@@ -18506,6 +18508,7 @@ let GetTaskStatusUsecase = class GetTaskStatusUsecase {
                 participants: {
                     employeeId: user.employeeId,
                 },
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
                 endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
