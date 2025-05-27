@@ -22,7 +22,6 @@ import { FileModule } from './modules/file/file.module';
 import { AppController } from './app.controller';
 import { ApiDocService } from '@libs/utils/api-doc.service';
 import { DbDocService } from '@libs/utils/db-doc.service';
-import { NotificationDomainModule } from './modules/notification/notification.domain.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { TaskModule } from './modules/task/task.module';
 
@@ -48,16 +47,11 @@ import { NotificationModule as NotificationApplicationModule } from './applicati
             useFactory: typeOrmConfig,
         }),
         TypeOrmModule.forFeature(Entities),
-        AuthModule,
-        // EmployeeModule,
+        // AuthModule,
         ResourceModule,
         ReservationModule,
-        // NotificationModule,
-        // FileModule,
 
-        NotificationDomainModule,
         SeedModule,
-
         TaskModule,
 
         AuthApplicationModule,

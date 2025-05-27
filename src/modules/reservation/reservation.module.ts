@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Reservation, ReservationParticipant, Schedule, ReservationSnapshot, ReservationVehicle } from '@libs/entities';
+import { Reservation, ReservationParticipant, ReservationSnapshot, ReservationVehicle } from '@libs/entities';
 import { ReservationService } from './application/services/reservation.service';
 import { ReservationRepository } from './infrastructure/adapters/out/persistence/reservation.repository';
 import { ReservationParticipantRepository } from './infrastructure/adapters/out/persistence/reservation-participant.repository';
@@ -17,15 +17,7 @@ import { ReservationVehicleRepository } from './infrastructure/adapters/out/pers
 import { CronReservationController } from './infrastructure/adapters/in/web/controllers/v1/cron.reservation.controller';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([
-            Reservation,
-            ReservationParticipant,
-            Schedule,
-            ReservationSnapshot,
-            ReservationVehicle,
-        ]),
-    ],
+    imports: [TypeOrmModule.forFeature([Reservation, ReservationParticipant, ReservationSnapshot, ReservationVehicle])],
     providers: [
         ReservationService,
         ParticipantService,

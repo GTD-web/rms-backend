@@ -7,7 +7,6 @@ import { MeetingRoomInfo } from './meeting-room-info.entity';
 import { AccommodationInfo } from './accommodation-info.entity';
 import { Reservation } from './reservation.entity';
 import { ReservationParticipant } from './reservation-participant.entity';
-import { Schedule } from './schedule.entity';
 import { ResourceManager } from './resource-manager.entity';
 import { Consumable } from './consumable.entity';
 import { Maintenance } from './maintenance.entity';
@@ -38,7 +37,6 @@ export const Entities = [
     ReservationVehicle,
     ReservationSnapshot,
     ReservationParticipant,
-    Schedule,
     ResourceManager,
     Consumable,
     Maintenance,
@@ -66,7 +64,6 @@ export const EntitiesMap = {
     ReservationVehicle,
     ReservationSnapshot,
     ReservationParticipant,
-    Schedule,
     ResourceManager,
     Consumable,
     Maintenance,
@@ -94,7 +91,6 @@ export {
     ReservationVehicle,
     ReservationSnapshot,
     ReservationParticipant,
-    Schedule,
     ResourceManager,
     Consumable,
     Maintenance,

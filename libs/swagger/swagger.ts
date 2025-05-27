@@ -2,17 +2,6 @@ import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { BaseResponseDto } from '../dtos/response.dto';
 import { PaginationData } from '../dtos/paginate-response.dto';
-import { NotificationDomainModule } from '@resource/modules/notification/notification.domain.module';
-import { AuthModule } from '@resource/modules/auth/auth.module';
-import { ResourceModule } from '@resource/modules/resource/resource.module';
-import { ReservationModule } from '@resource/modules/reservation/reservation.module';
-import { NotificationModule } from '@resource/modules/notification/notification.module';
-import { FileModule } from '@resource/modules/file/file.module';
-import { VehicleResourceModule } from '@resource/modules/resource/vehicle/vehicle-resource.module';
-import { AppModule } from '@resource/app.module';
-import { TaskModule } from '@resource/modules/task/task.module';
-import { AuthModule as AuthApplicationModule } from '@resource/application/auth/auth.module';
-import { EmployeeModule as EmployeeApplicationModule } from '@resource/application/employee/employee.module';
 
 export function setupSwagger(app: INestApplication, dtos: any[]) {
     const config = new DocumentBuilder()
@@ -23,17 +12,6 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
         .build();
 
     const document = SwaggerModule.createDocument(app, config, {
-        include: [
-            AppModule,
-            AuthApplicationModule,
-            EmployeeApplicationModule,
-            ResourceModule,
-            VehicleResourceModule,
-            ReservationModule,
-            NotificationModule,
-            FileModule,
-            TaskModule,
-        ],
         extraModels: [BaseResponseDto, PaginationData, ...dtos],
     });
 
