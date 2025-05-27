@@ -740,6 +740,7 @@ const employee_notification_entity_1 = __webpack_require__(/*! ./employee-notifi
 const reservation_participant_entity_1 = __webpack_require__(/*! ./reservation-participant.entity */ "./libs/entities/reservation-participant.entity.ts");
 const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./libs/entities/user.entity.ts");
 const resource_manager_entity_1 = __webpack_require__(/*! ./resource-manager.entity */ "./libs/entities/resource-manager.entity.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let Employee = class Employee {
 };
 exports.Employee = Employee;
@@ -765,6 +766,38 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Employee.prototype, "position", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Employee.prototype, "email", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Employee.prototype, "mobile", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Employee.prototype, "password", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Employee.prototype, "accessToken", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Employee.prototype, "expiredAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true, comment: '웹푸시 알림 관련 구독 정보 배열' }),
+    __metadata("design:type", Array)
+], Employee.prototype, "subscriptions", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: true, comment: '웹푸시 알림 설정 여부' }),
+    __metadata("design:type", Boolean)
+], Employee.prototype, "isPushNotificationEnabled", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'enum', enum: role_type_enum_1.Role, array: true, default: [role_type_enum_1.Role.USER], comment: '사용자 역할' }),
+    __metadata("design:type", Array)
+], Employee.prototype, "roles", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
@@ -4959,29 +4992,33 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceManagerUseCase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const user_service_1 = __webpack_require__(/*! ../services/user.service */ "./src/modules/auth/application/services/user.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const employee_service_1 = __webpack_require__(/*! @resource/modules/employee/application/services/employee.service */ "./src/modules/employee/application/services/employee.service.ts");
 let ResourceManagerUseCase = class ResourceManagerUseCase {
-    constructor(userService) {
-        this.userService = userService;
+    constructor(employeeService) {
+        this.employeeService = employeeService;
     }
     async findAllResourceManagers() {
-        const resourceManagers = await this.userService.findAll({
+        const resourceManagers = await this.employeeService.findAll({
             where: {
                 roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.RESOURCE_ADMIN}' = ANY("roles")`),
-                employee: {
-                    department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
-                },
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
             },
-            relations: ['employee'],
+            select: {
+                employeeId: true,
+                name: true,
+                employeeNumber: true,
+                department: true,
+                position: true,
+            },
         });
         const departments = new Map();
         resourceManagers.forEach((resourceManager) => {
-            if (!departments.has(resourceManager.employee.department)) {
-                departments.set(resourceManager.employee.department, []);
+            if (!departments.has(resourceManager.department)) {
+                departments.set(resourceManager.department, []);
             }
-            departments.get(resourceManager.employee.department)?.push(resourceManager.employee);
+            departments.get(resourceManager.department)?.push(resourceManager);
         });
         return Array.from(departments.entries()).map(([department, employees]) => ({
             department,
@@ -4992,7 +5029,7 @@ let ResourceManagerUseCase = class ResourceManagerUseCase {
 exports.ResourceManagerUseCase = ResourceManagerUseCase;
 exports.ResourceManagerUseCase = ResourceManagerUseCase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
 ], ResourceManagerUseCase);
 
 
@@ -5282,6 +5319,8 @@ const auth_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/w
 const user_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/user.controller */ "./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/user.controller.ts");
 const admin_user_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.user.controller */ "./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.user.controller.ts");
 const admin_resource_manager_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller */ "./src/modules/auth/infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller.ts");
+const employee_service_1 = __webpack_require__(/*! @resource/modules/employee/application/services/employee.service */ "./src/modules/employee/application/services/employee.service.ts");
+const employee_repository_1 = __webpack_require__(/*! @resource/modules/employee/infrastructure/adapters/out/persistence/employee.repository */ "./src/modules/employee/infrastructure/adapters/out/persistence/employee.repository.ts");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -5303,6 +5342,11 @@ exports.AuthModule = AuthModule = __decorate([
             user_usecase_1.UserUsecase,
             user_event_handler_1.UserEventHandler,
             resource_manager_usecase_1.ResourceManagerUseCase,
+            employee_service_1.EmployeeService,
+            {
+                provide: 'EmployeeRepositoryPort',
+                useClass: employee_repository_1.EmployeeRepository,
+            },
         ],
         controllers: [auth_controller_1.UserAuthController, user_controller_1.UserUserController, admin_user_controller_1.AdminUserController, admin_resource_manager_controller_1.AdminResourceManagerController],
         exports: [
@@ -6874,6 +6918,7 @@ let EmployeeRepository = class EmployeeRepository {
             order: repositoryOptions?.order,
             skip: repositoryOptions?.skip,
             take: repositoryOptions?.take,
+            select: repositoryOptions?.select,
             relations: repositoryOptions?.relations,
             withDeleted: repositoryOptions?.withDeleted,
         });

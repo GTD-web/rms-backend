@@ -37,6 +37,7 @@ export class EmployeeRepository implements EmployeeRepositoryPort {
             order: repositoryOptions?.order,
             skip: repositoryOptions?.skip,
             take: repositoryOptions?.take,
+            select: repositoryOptions?.select,
             relations: repositoryOptions?.relations,
             withDeleted: repositoryOptions?.withDeleted,
         });

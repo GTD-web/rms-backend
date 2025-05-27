@@ -15,7 +15,8 @@ import { UserAuthController } from './infrastructure/adapters/in/web/controllers
 import { UserUserController } from './infrastructure/adapters/in/web/controllers/v1/user.controller';
 import { AdminUserController } from './infrastructure/adapters/in/web/controllers/v1/admin.user.controller';
 import { AdminResourceManagerController } from './infrastructure/adapters/in/web/controllers/v1/admin.resource-manager.controller';
-
+import { EmployeeService } from '@resource/modules/employee/application/services/employee.service';
+import { EmployeeRepository } from '@resource/modules/employee/infrastructure/adapters/out/persistence/employee.repository';
 @Module({
     imports: [PassportModule, TypeOrmModule.forFeature([User, Employee])],
     providers: [
@@ -34,6 +35,11 @@ import { AdminResourceManagerController } from './infrastructure/adapters/in/web
         UserUsecase,
         UserEventHandler,
         ResourceManagerUseCase,
+        EmployeeService,
+        {
+            provide: 'EmployeeRepositoryPort',
+            useClass: EmployeeRepository,
+        },
     ],
     controllers: [UserAuthController, UserUserController, AdminUserController, AdminResourceManagerController],
     exports: [
