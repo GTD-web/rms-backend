@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Notification } from '@libs/entities/notification.entity';
 import { BaseService } from '@libs/services/base.service';
-import { NotificationRepository } from './notification.repository';
+import { DomainNotificationRepository } from './notification.repository';
 
 @Injectable()
-export class NotificationService extends BaseService<Notification> {
-    constructor(private readonly notificationRepository: NotificationRepository) {
+export class DomainNotificationService extends BaseService<Notification> {
+    constructor(private readonly notificationRepository: DomainNotificationRepository) {
         super(notificationRepository);
     }
 }

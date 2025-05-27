@@ -4,7 +4,7 @@ import { Employee } from '@libs/entities';
 import { EmployeeWebhookController } from './controllers/webhook.controller';
 import { EmployeeService } from './employee.service';
 import { AdminResourceManagerController } from './controllers/admin.resource-manager.controller';
-import { EmployeeModule as EmployeeDomainModule } from '@src/domain/employee/employee.module';
+import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
 import {
     GetEmployeeInfoUsecase,
     SyncEmployeeUsecase,
@@ -22,7 +22,7 @@ import { UserEmployeeController } from './controllers/employee.controller';
 import { UserUserController } from './controllers/user.controller';
 
 @Module({
-    imports: [EmployeeDomainModule, TypeOrmModule.forFeature([Employee])],
+    imports: [DomainEmployeeModule, TypeOrmModule.forFeature([Employee])],
     controllers: [
         EmployeeWebhookController,
         AdminResourceManagerController,

@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EmployeeService } from './employee.service';
-import { EmployeeRepository } from './employee.repository';
+import { DomainEmployeeService } from './employee.service';
+import { DomainEmployeeRepository } from './employee.repository';
 import { Employee } from '@libs/entities/employee.entity';
 
 @Module({
     imports: [TypeOrmModule.forFeature([Employee])],
-    providers: [EmployeeService, EmployeeRepository],
-    exports: [EmployeeService],
+    providers: [DomainEmployeeService, DomainEmployeeRepository],
+    exports: [DomainEmployeeService],
 })
-export class EmployeeModule {}
+export class DomainEmployeeModule {}

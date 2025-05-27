@@ -3,11 +3,11 @@ import { Role } from '@libs/enums/role-type.enum';
 import { In, Not } from 'typeorm';
 import { EmployeeResponseDto } from '@resource/application/employee/dtos/employee-response.dto';
 import { EmplyeesByDepartmentResponseDto } from '@resource/application/employee/dtos/employees-by-department-response.dto';
-import { EmployeeService as EmployeeServiceDomain } from '@src/domain/employee/employee.service';
+import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 
 @Injectable()
 export class GetManagerCandidatesUsecase {
-    constructor(private readonly employeeService: EmployeeServiceDomain) {}
+    constructor(private readonly employeeService: DomainEmployeeService) {}
 
     async execute(): Promise<EmplyeesByDepartmentResponseDto[]> {
         const resourceManagers = await this.employeeService.findAll({

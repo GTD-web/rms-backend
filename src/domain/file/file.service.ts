@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { File } from '@libs/entities/file.entity';
 import { BaseService } from '@libs/services/base.service';
-import { FileRepository } from './file.repository';
+import { DomainFileRepository } from './file.repository';
 import { In } from 'typeorm';
 
 @Injectable()
-export class FileService extends BaseService<File> {
-    constructor(private readonly fileRepository: FileRepository) {
+export class DomainFileService extends BaseService<File> {
+    constructor(private readonly fileRepository: DomainFileRepository) {
         super(fileRepository);
     }
 

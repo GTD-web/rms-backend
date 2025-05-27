@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Role } from '@libs/enums/role-type.enum';
 import { ChangeRoleDto } from '@resource/application/employee/dtos/change-role.dto';
-import { EmployeeService as EmployeeServiceDomain } from '@src/domain/employee/employee.service';
+import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { UserResponseDto } from '@resource/application/employee/dtos/user-response.dto';
 
 @Injectable()
 export class GetEmployeeDetailUsecase {
-    constructor(private readonly employeeService: EmployeeServiceDomain) {}
+    constructor(private readonly employeeService: DomainEmployeeService) {}
 
     async execute(employeeId: string): Promise<UserResponseDto> {
         const employee = await this.employeeService.findByEmployeeId(employeeId);

@@ -2,11 +2,11 @@ import { Employee } from '@libs/entities';
 import { DateUtil } from '@libs/utils/date.util';
 import { Injectable } from '@nestjs/common';
 import { SsoResponseDto } from '@src/application/auth/dto/sso-response.dto';
-import { EmployeeService } from '@src/domain/employee/employee.service';
+import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 
 @Injectable()
 export class UpdateAuthInfoUsecase {
-    constructor(private readonly employeeService: EmployeeService) {}
+    constructor(private readonly employeeService: DomainEmployeeService) {}
 
     async execute(ssoResponse: SsoResponseDto): Promise<Employee> {
         const employee = await this.employeeService.findOne({

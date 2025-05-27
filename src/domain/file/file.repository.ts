@@ -5,7 +5,7 @@ import { File } from '@libs/entities/file.entity';
 import { BaseRepository } from '@libs/repositories/base.repository';
 
 @Injectable()
-export class FileRepository extends BaseRepository<File> {
+export class DomainFileRepository extends BaseRepository<File> {
     constructor(
         @InjectRepository(File)
         repository: Repository<File>,

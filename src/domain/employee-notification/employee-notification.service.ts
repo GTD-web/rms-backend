@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EmployeeNotification } from '@libs/entities/employee-notification.entity';
 import { BaseService } from '@libs/services/base.service';
-import { EmployeeNotificationRepository } from './employee-notification.repository';
+import { DomainEmployeeNotificationRepository } from './employee-notification.repository';
 
 @Injectable()
-export class EmployeeNotificationService extends BaseService<EmployeeNotification> {
-    constructor(private readonly employeeNotificationRepository: EmployeeNotificationRepository) {
+export class DomainEmployeeNotificationService extends BaseService<EmployeeNotification> {
+    constructor(private readonly employeeNotificationRepository: DomainEmployeeNotificationRepository) {
         super(employeeNotificationRepository);
     }
 

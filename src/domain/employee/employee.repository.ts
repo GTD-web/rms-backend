@@ -5,7 +5,7 @@ import { Employee } from '@libs/entities/employee.entity';
 import { BaseRepository } from '@libs/repositories/base.repository';
 
 @Injectable()
-export class EmployeeRepository extends BaseRepository<Employee> {
+export class DomainEmployeeRepository extends BaseRepository<Employee> {
     constructor(
         @InjectRepository(Employee)
         repository: Repository<Employee>,

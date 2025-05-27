@@ -1,5 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { User as UserEntity } from '@libs/entities/user.entity';
+import { Injectable } from '@nestjs/common';
 import { ValidateUsecase } from './usecases/validate.usecase';
 import { LoginDto } from '@resource/application/auth/dto/login.dto';
 import { SsoLoginUsecase } from './usecases/sso-login.usecase';

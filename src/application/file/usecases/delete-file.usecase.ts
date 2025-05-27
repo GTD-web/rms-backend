@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { S3Service } from '../infrastructure/s3.service';
-import { FileService } from '@src/domain/file/file.service';
+import { DomainFileService } from '@src/domain/file/file.service';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { File } from '@libs/entities/file.entity';
 
@@ -8,7 +8,7 @@ import { File } from '@libs/entities/file.entity';
 export class DeleteFileUsecase {
     constructor(
         private readonly s3Service: S3Service,
-        private readonly fileService: FileService,
+        private readonly fileService: DomainFileService,
     ) {}
 
     async execute(fileId: string): Promise<void> {

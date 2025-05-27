@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { EmployeeService } from '@src/domain/employee/employee.service';
+import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import * as bcrypt from 'bcrypt';
 import { Employee } from '@libs/entities/employee.entity';
@@ -7,7 +7,7 @@ import { DateUtil } from '@libs/utils/date.util';
 
 @Injectable()
 export class ValidateUsecase {
-    constructor(private readonly employeeService: EmployeeService) {}
+    constructor(private readonly employeeService: DomainEmployeeService) {}
 
     async execute(email: string, password: string): Promise<Employee> {
         const employee = await this.employeeService.findByEmail(email);

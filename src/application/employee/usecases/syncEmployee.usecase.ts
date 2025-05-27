@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { EmployeeService } from '@resource/domain/employee/employee.service';
+import { DomainEmployeeService } from '@resource/domain/employee/employee.service';
 import { MMSEmployeeResponseDto } from '@resource/application/employee/dtos/mms-employee-response.dto';
 
 @Injectable()
 export class SyncEmployeeUsecase {
-    constructor(private readonly employeeService: EmployeeService) {}
+    constructor(private readonly employeeService: DomainEmployeeService) {}
 
     async execute(employees: MMSEmployeeResponseDto[]): Promise<void> {
         for (const employee of employees) {

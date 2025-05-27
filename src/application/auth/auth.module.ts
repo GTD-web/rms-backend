@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtStrategy } from '@resource/application/auth/strategies/jwt.strategy';
 import { Employee } from '@libs/entities';
 import { AuthController } from './controllers/auth.controller';
-import { EmployeeModule } from '@src/domain/employee/employee.module';
+import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
 import { AuthService } from './auth.service';
 import { ValidateUsecase } from './usecases/validate.usecase';
 import { SsoLoginUsecase } from './usecases/sso-login.usecase';
@@ -14,7 +14,7 @@ import { CheckSystemAdminUsecase } from './usecases/system-admin.usecase';
 import { GetTokenUsecase } from './usecases/get-token.usecase';
 
 @Module({
-    imports: [PassportModule, EmployeeModule, TypeOrmModule.forFeature([Employee])],
+    imports: [PassportModule, DomainEmployeeModule, TypeOrmModule.forFeature([Employee])],
     providers: [
         JwtStrategy,
         AuthService,

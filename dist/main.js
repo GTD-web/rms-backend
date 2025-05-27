@@ -4273,7 +4273,7 @@ let AuthModule = class AuthModule {
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [passport_1.PassportModule, employee_module_1.EmployeeModule, typeorm_1.TypeOrmModule.forFeature([entities_1.Employee])],
+        imports: [passport_1.PassportModule, employee_module_1.DomainEmployeeModule, typeorm_1.TypeOrmModule.forFeature([entities_1.Employee])],
         providers: [
             jwt_strategy_1.JwtStrategy,
             auth_service_1.AuthService,
@@ -4789,7 +4789,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
 exports.JwtStrategy = JwtStrategy;
 exports.JwtStrategy = JwtStrategy = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
 ], JwtStrategy);
 
 
@@ -4962,7 +4962,7 @@ let CheckSystemAdminUsecase = class CheckSystemAdminUsecase {
 exports.CheckSystemAdminUsecase = CheckSystemAdminUsecase;
 exports.CheckSystemAdminUsecase = CheckSystemAdminUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], CheckSystemAdminUsecase);
 
 
@@ -5012,7 +5012,7 @@ let UpdateAuthInfoUsecase = class UpdateAuthInfoUsecase {
 exports.UpdateAuthInfoUsecase = UpdateAuthInfoUsecase;
 exports.UpdateAuthInfoUsecase = UpdateAuthInfoUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], UpdateAuthInfoUsecase);
 
 
@@ -5069,7 +5069,7 @@ let ValidateUsecase = class ValidateUsecase {
 exports.ValidateUsecase = ValidateUsecase;
 exports.ValidateUsecase = ValidateUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], ValidateUsecase);
 
 
@@ -6033,7 +6033,7 @@ let EmployeeModule = class EmployeeModule {
 exports.EmployeeModule = EmployeeModule;
 exports.EmployeeModule = EmployeeModule = __decorate([
     (0, common_1.Module)({
-        imports: [employee_module_1.EmployeeModule, typeorm_1.TypeOrmModule.forFeature([entities_1.Employee])],
+        imports: [employee_module_1.DomainEmployeeModule, typeorm_1.TypeOrmModule.forFeature([entities_1.Employee])],
         controllers: [
             webhook_controller_1.EmployeeWebhookController,
             admin_resource_manager_controller_1.AdminResourceManagerController,
@@ -6172,7 +6172,7 @@ let ChangeNotificationSettingsUsecase = class ChangeNotificationSettingsUsecase 
 exports.ChangeNotificationSettingsUsecase = ChangeNotificationSettingsUsecase;
 exports.ChangeNotificationSettingsUsecase = ChangeNotificationSettingsUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], ChangeNotificationSettingsUsecase);
 
 
@@ -6217,7 +6217,7 @@ let ChangePasswordUsecase = class ChangePasswordUsecase {
 exports.ChangePasswordUsecase = ChangePasswordUsecase;
 exports.ChangePasswordUsecase = ChangePasswordUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], ChangePasswordUsecase);
 
 
@@ -6264,7 +6264,7 @@ let ChangeRoleUsecase = class ChangeRoleUsecase {
 exports.ChangeRoleUsecase = ChangeRoleUsecase;
 exports.ChangeRoleUsecase = ChangeRoleUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], ChangeRoleUsecase);
 
 
@@ -6308,7 +6308,7 @@ let CheckPasswordUsecase = class CheckPasswordUsecase {
 exports.CheckPasswordUsecase = CheckPasswordUsecase;
 exports.CheckPasswordUsecase = CheckPasswordUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], CheckPasswordUsecase);
 
 
@@ -6360,7 +6360,7 @@ let GetEmployeeDetailUsecase = class GetEmployeeDetailUsecase {
 exports.GetEmployeeDetailUsecase = GetEmployeeDetailUsecase;
 exports.GetEmployeeDetailUsecase = GetEmployeeDetailUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], GetEmployeeDetailUsecase);
 
 
@@ -6465,7 +6465,7 @@ let GetEmployeeListUsecase = class GetEmployeeListUsecase {
 exports.GetEmployeeListUsecase = GetEmployeeListUsecase;
 exports.GetEmployeeListUsecase = GetEmployeeListUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], GetEmployeeListUsecase);
 
 
@@ -6532,7 +6532,7 @@ let GetManagerCandidatesUsecase = class GetManagerCandidatesUsecase {
 exports.GetManagerCandidatesUsecase = GetManagerCandidatesUsecase;
 exports.GetManagerCandidatesUsecase = GetManagerCandidatesUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], GetManagerCandidatesUsecase);
 
 
@@ -6595,7 +6595,7 @@ let GetResourceManagersUsecase = class GetResourceManagersUsecase {
 exports.GetResourceManagersUsecase = GetResourceManagersUsecase;
 exports.GetResourceManagersUsecase = GetResourceManagersUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], GetResourceManagersUsecase);
 
 
@@ -6696,7 +6696,7 @@ let SyncEmployeeUsecase = class SyncEmployeeUsecase {
 exports.SyncEmployeeUsecase = SyncEmployeeUsecase;
 exports.SyncEmployeeUsecase = SyncEmployeeUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
 ], SyncEmployeeUsecase);
 
 
@@ -6855,7 +6855,7 @@ let FileModule = class FileModule {
 exports.FileModule = FileModule;
 exports.FileModule = FileModule = __decorate([
     (0, common_1.Module)({
-        imports: [file_module_1.FileModule, typeorm_1.TypeOrmModule.forFeature([file_entity_1.File]), config_1.ConfigModule.forFeature(env_config_1.APP_CONFIG)],
+        imports: [file_module_1.DomainFileModule, typeorm_1.TypeOrmModule.forFeature([file_entity_1.File]), config_1.ConfigModule.forFeature(env_config_1.APP_CONFIG)],
         controllers: [file_controller_1.FileController],
         providers: [file_service_1.FileService, upload_file_usecase_1.UploadFileUsecase, delete_file_usecase_1.DeleteFileUsecase, s3_service_1.S3Service],
         exports: [file_service_1.FileService],
@@ -7034,7 +7034,7 @@ let DeleteFileUsecase = class DeleteFileUsecase {
 exports.DeleteFileUsecase = DeleteFileUsecase;
 exports.DeleteFileUsecase = DeleteFileUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _a : Object, typeof (_b = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _a : Object, typeof (_b = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _b : Object])
 ], DeleteFileUsecase);
 
 
@@ -7076,7 +7076,7 @@ let UploadFileUsecase = class UploadFileUsecase {
 exports.UploadFileUsecase = UploadFileUsecase;
 exports.UploadFileUsecase = UploadFileUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _a : Object, typeof (_b = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _a : Object, typeof (_b = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _b : Object])
 ], UploadFileUsecase);
 
 
@@ -7096,22 +7096,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EmployeeModule = void 0;
+exports.DomainEmployeeModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const employee_service_1 = __webpack_require__(/*! ./employee.service */ "./src/domain/employee/employee.service.ts");
 const employee_repository_1 = __webpack_require__(/*! ./employee.repository */ "./src/domain/employee/employee.repository.ts");
 const employee_entity_1 = __webpack_require__(/*! @libs/entities/employee.entity */ "./libs/entities/employee.entity.ts");
-let EmployeeModule = class EmployeeModule {
+let DomainEmployeeModule = class DomainEmployeeModule {
 };
-exports.EmployeeModule = EmployeeModule;
-exports.EmployeeModule = EmployeeModule = __decorate([
+exports.DomainEmployeeModule = DomainEmployeeModule;
+exports.DomainEmployeeModule = DomainEmployeeModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([employee_entity_1.Employee])],
-        providers: [employee_service_1.EmployeeService, employee_repository_1.EmployeeRepository],
-        exports: [employee_service_1.EmployeeService],
+        providers: [employee_service_1.DomainEmployeeService, employee_repository_1.DomainEmployeeRepository],
+        exports: [employee_service_1.DomainEmployeeService],
     })
-], EmployeeModule);
+], DomainEmployeeModule);
 
 
 /***/ }),
@@ -7137,23 +7137,23 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EmployeeRepository = void 0;
+exports.DomainEmployeeRepository = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const employee_entity_1 = __webpack_require__(/*! @libs/entities/employee.entity */ "./libs/entities/employee.entity.ts");
 const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
-let EmployeeRepository = class EmployeeRepository extends base_repository_1.BaseRepository {
+let DomainEmployeeRepository = class DomainEmployeeRepository extends base_repository_1.BaseRepository {
     constructor(repository) {
         super(repository);
     }
 };
-exports.EmployeeRepository = EmployeeRepository;
-exports.EmployeeRepository = EmployeeRepository = __decorate([
+exports.DomainEmployeeRepository = DomainEmployeeRepository;
+exports.DomainEmployeeRepository = DomainEmployeeRepository = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(employee_entity_1.Employee)),
     __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
-], EmployeeRepository);
+], DomainEmployeeRepository);
 
 
 /***/ }),
@@ -7176,11 +7176,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EmployeeService = void 0;
+exports.DomainEmployeeService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_repository_1 = __webpack_require__(/*! ./employee.repository */ "./src/domain/employee/employee.repository.ts");
 const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
-let EmployeeService = class EmployeeService extends base_service_1.BaseService {
+let DomainEmployeeService = class DomainEmployeeService extends base_service_1.BaseService {
     constructor(employeeRepository) {
         super(employeeRepository);
         this.employeeRepository = employeeRepository;
@@ -7209,11 +7209,11 @@ let EmployeeService = class EmployeeService extends base_service_1.BaseService {
         return employee;
     }
 };
-exports.EmployeeService = EmployeeService;
-exports.EmployeeService = EmployeeService = __decorate([
+exports.DomainEmployeeService = DomainEmployeeService;
+exports.DomainEmployeeService = DomainEmployeeService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_repository_1.EmployeeRepository !== "undefined" && employee_repository_1.EmployeeRepository) === "function" ? _a : Object])
-], EmployeeService);
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_repository_1.DomainEmployeeRepository !== "undefined" && employee_repository_1.DomainEmployeeRepository) === "function" ? _a : Object])
+], DomainEmployeeService);
 
 
 /***/ }),
@@ -7232,22 +7232,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FileModule = void 0;
+exports.DomainFileModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const file_entity_1 = __webpack_require__(/*! @libs/entities/file.entity */ "./libs/entities/file.entity.ts");
 const file_service_1 = __webpack_require__(/*! ./file.service */ "./src/domain/file/file.service.ts");
 const file_repository_1 = __webpack_require__(/*! ./file.repository */ "./src/domain/file/file.repository.ts");
-let FileModule = class FileModule {
+let DomainFileModule = class DomainFileModule {
 };
-exports.FileModule = FileModule;
-exports.FileModule = FileModule = __decorate([
+exports.DomainFileModule = DomainFileModule;
+exports.DomainFileModule = DomainFileModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([file_entity_1.File])],
-        providers: [file_service_1.FileService, file_repository_1.FileRepository],
-        exports: [file_service_1.FileService],
+        providers: [file_service_1.DomainFileService, file_repository_1.DomainFileRepository],
+        exports: [file_service_1.DomainFileService],
     })
-], FileModule);
+], DomainFileModule);
 
 
 /***/ }),
@@ -7273,23 +7273,23 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FileRepository = void 0;
+exports.DomainFileRepository = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const file_entity_1 = __webpack_require__(/*! @libs/entities/file.entity */ "./libs/entities/file.entity.ts");
 const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
-let FileRepository = class FileRepository extends base_repository_1.BaseRepository {
+let DomainFileRepository = class DomainFileRepository extends base_repository_1.BaseRepository {
     constructor(repository) {
         super(repository);
     }
 };
-exports.FileRepository = FileRepository;
-exports.FileRepository = FileRepository = __decorate([
+exports.DomainFileRepository = DomainFileRepository;
+exports.DomainFileRepository = DomainFileRepository = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(file_entity_1.File)),
     __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
-], FileRepository);
+], DomainFileRepository);
 
 
 /***/ }),
@@ -7312,12 +7312,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FileService = void 0;
+exports.DomainFileService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
 const file_repository_1 = __webpack_require__(/*! ./file.repository */ "./src/domain/file/file.repository.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-let FileService = class FileService extends base_service_1.BaseService {
+let DomainFileService = class DomainFileService extends base_service_1.BaseService {
     constructor(fileRepository) {
         super(fileRepository);
         this.fileRepository = fileRepository;
@@ -7342,11 +7342,11 @@ let FileService = class FileService extends base_service_1.BaseService {
         return savedFile;
     }
 };
-exports.FileService = FileService;
-exports.FileService = FileService = __decorate([
+exports.DomainFileService = DomainFileService;
+exports.DomainFileService = DomainFileService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_1.FileRepository !== "undefined" && file_repository_1.FileRepository) === "function" ? _a : Object])
-], FileService);
+    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_1.DomainFileRepository !== "undefined" && file_repository_1.DomainFileRepository) === "function" ? _a : Object])
+], DomainFileService);
 
 
 /***/ }),

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { EmployeeService } from '@src/domain/employee/employee.service';
+import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 @Injectable()
 export class CheckSystemAdminUsecase {
-    constructor(private readonly employeeService: EmployeeService) {}
+    constructor(private readonly employeeService: DomainEmployeeService) {}
 
     async execute(email: string, password: string) {
         const admin = await this.employeeService.findOne({ where: { email } });

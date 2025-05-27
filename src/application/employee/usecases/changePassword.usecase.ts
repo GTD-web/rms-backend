@@ -1,13 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Role } from '@libs/enums/role-type.enum';
-import { ChangeRoleDto } from '@resource/application/employee/dtos/change-role.dto';
-import { EmployeeService } from '@src/domain/employee/employee.service';
+import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChangePasswordUsecase {
-    constructor(private readonly employeeService: EmployeeService) {}
+    constructor(private readonly employeeService: DomainEmployeeService) {}
 
     async execute(employeeId: string, password: string): Promise<void> {
         const employee = await this.employeeService.findByEmployeeId(employeeId);
