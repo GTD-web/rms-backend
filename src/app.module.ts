@@ -29,6 +29,7 @@ import { TaskModule } from './modules/task/task.module';
 import { AuthModule as AuthApplicationModule } from './application/auth/auth.module';
 import { EmployeeModule as EmployeeApplicationModule } from './application/employee/employee.module';
 import { FileModule as FileApplicationModule } from './application/file/file.module';
+import { NotificationModule as NotificationApplicationModule } from './application/notification/notification.module';
 
 @Module({
     imports: [
@@ -51,8 +52,8 @@ import { FileModule as FileApplicationModule } from './application/file/file.mod
         // EmployeeModule,
         ResourceModule,
         ReservationModule,
-        NotificationModule,
-        FileModule,
+        // NotificationModule,
+        // FileModule,
 
         NotificationDomainModule,
         SeedModule,
@@ -62,6 +63,7 @@ import { FileModule as FileApplicationModule } from './application/file/file.mod
         AuthApplicationModule,
         EmployeeApplicationModule,
         FileApplicationModule,
+        NotificationApplicationModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],

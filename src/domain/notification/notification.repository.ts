@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from '@libs/entities/notification.entity';
 import { BaseRepository } from '@libs/repositories/base.repository';
+import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 
 @Injectable()
 export class DomainNotificationRepository extends BaseRepository<Notification> {
@@ -11,5 +12,20 @@ export class DomainNotificationRepository extends BaseRepository<Notification> {
         repository: Repository<Notification>,
     ) {
         super(repository);
+    }
+
+    async count(repositoryOptions: IRepositoryOptions<Notification>): Promise<number> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
+            : this.repository;
+        return repository.count({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+            select: repositoryOptions?.select,
+            order: repositoryOptions?.order,
+            skip: repositoryOptions?.skip,
+            take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
+        });
     }
 }

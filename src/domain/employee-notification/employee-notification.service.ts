@@ -24,4 +24,8 @@ export class DomainEmployeeNotificationService extends BaseService<EmployeeNotif
         }
         return await this.update(employeeNotificationId, { isRead: true });
     }
+
+    async deleteByNotificationId(notificationId: string): Promise<void> {
+        await this.employeeNotificationRepository.deleteByNotificationId(notificationId);
+    }
 }

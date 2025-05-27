@@ -9,4 +9,4 @@ import { DomainEmployeeNotificationRepository } from './employee-notification.re
     providers: [DomainEmployeeNotificationService, DomainEmployeeNotificationRepository],
     exports: [DomainEmployeeNotificationService],
 })
-export class EmployeeNotificationModule {}
+export class DomainEmployeeNotificationModule {}

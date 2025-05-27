@@ -4062,8 +4062,6 @@ const auth_module_1 = __webpack_require__(/*! ./modules/auth/auth.module */ "./s
 const resource_module_1 = __webpack_require__(/*! ./modules/resource/resource.module */ "./src/modules/resource/resource.module.ts");
 const reservation_module_1 = __webpack_require__(/*! ./modules/reservation/reservation.module */ "./src/modules/reservation/reservation.module.ts");
 const app_service_1 = __webpack_require__(/*! ./app.service */ "./src/app.service.ts");
-const notification_module_1 = __webpack_require__(/*! ./modules/notification/notification.module */ "./src/modules/notification/notification.module.ts");
-const file_module_1 = __webpack_require__(/*! ./modules/file/file.module */ "./src/modules/file/file.module.ts");
 const app_controller_1 = __webpack_require__(/*! ./app.controller */ "./src/app.controller.ts");
 const api_doc_service_1 = __webpack_require__(/*! @libs/utils/api-doc.service */ "./libs/utils/api-doc.service.ts");
 const db_doc_service_1 = __webpack_require__(/*! @libs/utils/db-doc.service */ "./libs/utils/db-doc.service.ts");
@@ -4072,7 +4070,8 @@ const seed_module_1 = __webpack_require__(/*! ./modules/seed/seed.module */ "./s
 const task_module_1 = __webpack_require__(/*! ./modules/task/task.module */ "./src/modules/task/task.module.ts");
 const auth_module_2 = __webpack_require__(/*! ./application/auth/auth.module */ "./src/application/auth/auth.module.ts");
 const employee_module_1 = __webpack_require__(/*! ./application/employee/employee.module */ "./src/application/employee/employee.module.ts");
-const file_module_2 = __webpack_require__(/*! ./application/file/file.module */ "./src/application/file/file.module.ts");
+const file_module_1 = __webpack_require__(/*! ./application/file/file.module */ "./src/application/file/file.module.ts");
+const notification_module_1 = __webpack_require__(/*! ./application/notification/notification.module */ "./src/application/notification/notification.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -4097,14 +4096,13 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             resource_module_1.ResourceModule,
             reservation_module_1.ReservationModule,
-            notification_module_1.NotificationModule,
-            file_module_1.FileModule,
             notification_domain_module_1.NotificationDomainModule,
             seed_module_1.SeedModule,
             task_module_1.TaskModule,
             auth_module_2.AuthModule,
             employee_module_1.EmployeeModule,
-            file_module_2.FileModule,
+            file_module_1.FileModule,
+            notification_module_1.NotificationModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, api_doc_service_1.ApiDocService, db_doc_service_1.DbDocService],
@@ -7082,6 +7080,1502 @@ exports.UploadFileUsecase = UploadFileUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/notification/controllers/notification.controller.ts":
+/*!*****************************************************************************!*\
+  !*** ./src/application/notification/controllers/notification.controller.ts ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationController = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const push_subscription_dto_1 = __webpack_require__(/*! ../dtos/push-subscription.dto */ "./src/application/notification/dtos/push-subscription.dto.ts");
+const response_notification_dto_1 = __webpack_require__(/*! ../dtos/response-notification.dto */ "./src/application/notification/dtos/response-notification.dto.ts");
+const create_notification_dto_1 = __webpack_require__(/*! ../dtos/create-notification.dto */ "./src/application/notification/dtos/create-notification.dto.ts");
+const send_notification_dto_1 = __webpack_require__(/*! ../dtos/send-notification.dto */ "./src/application/notification/dtos/send-notification.dto.ts");
+const notification_service_1 = __webpack_require__(/*! ../notification.service */ "./src/application/notification/notification.service.ts");
+let NotificationController = class NotificationController {
+    constructor(notificationService) {
+        this.notificationService = notificationService;
+    }
+    async subscribe(user, subscription) {
+        await this.notificationService.subscribe(user, subscription);
+    }
+    async sendSuccess(body) {
+        await this.notificationService.sendDirectNotification(body.subscription, body.payload);
+    }
+    async send(sendNotificationDto) {
+        await this.notificationService.createNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
+    }
+    async findAllByEmployeeId(employeeId, query) {
+        return await this.notificationService.findMyNotifications(employeeId, query);
+    }
+    async markAsRead(user, notificationId) {
+        await this.notificationService.markAsRead(user.employeeId, notificationId);
+    }
+};
+exports.NotificationController = NotificationController;
+__decorate([
+    (0, common_1.Post)('subscribe'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '웹 푸시 구독 성공',
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object, typeof (_c = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], NotificationController.prototype, "subscribe", null);
+__decorate([
+    (0, common_1.Post)('subscribe/success'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독 성공' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '웹 푸시 구독 성공',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof send_notification_dto_1.PushNotificationDto !== "undefined" && send_notification_dto_1.PushNotificationDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "sendSuccess", null);
+__decorate([
+    (0, common_1.Post)('send'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 알림 전송' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '웹 푸시 알림 전송 성공',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "send", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '알람 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '알람 목록 조회 성공',
+        type: [response_notification_dto_1.ResponseNotificationDto],
+        isPaginated: true,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'page',
+        type: Number,
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'limit',
+        type: Number,
+        required: false,
+    }),
+    __param(0, (0, user_decorator_1.User)('employeeId')),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], NotificationController.prototype, "findAllByEmployeeId", null);
+__decorate([
+    (0, common_1.Patch)(':notificationId/read'),
+    (0, swagger_1.ApiOperation)({ summary: '알람 읽음 처리' }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('notificationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _j : Object, String]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "markAsRead", null);
+exports.NotificationController = NotificationController = __decorate([
+    (0, swagger_1.ApiTags)('5. 알림 - 사용자 페이지'),
+    (0, common_1.Controller)('v1/notifications'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _a : Object])
+], NotificationController);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/dtos/create-notification.dto.ts":
+/*!**********************************************************************!*\
+  !*** ./src/application/notification/dtos/create-notification.dto.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SendNotificationDto = exports.CreateEmployeeNotificationDto = exports.CreateNotificationDto = exports.CreateNotificationDataDto = void 0;
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class CreateNotificationDataDto {
+}
+exports.CreateNotificationDataDto = CreateNotificationDataDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '예약 ID, 예약 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '예약 제목, 예약 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "reservationTitle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '예약 날짜, 예약 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "reservationDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '예약 시작 전 분 수, 예약 시간 알림 시 필수' }),
+    __metadata("design:type", Number)
+], CreateNotificationDataDto.prototype, "beforeMinutes", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '자원 ID, 자원 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: true, description: '자원 이름' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, required: true, description: '자원 타입' }),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], CreateNotificationDataDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '소모품 이름, 소모품 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "consumableName", void 0);
+class CreateNotificationDto {
+}
+exports.CreateNotificationDto = CreateNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateNotificationDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateNotificationDto.prototype, "body", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", CreateNotificationDataDto)
+], CreateNotificationDto.prototype, "notificationData", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateNotificationDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], CreateNotificationDto.prototype, "isSent", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: notification_type_enum_1.NotificationType }),
+    __metadata("design:type", typeof (_b = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _b : Object)
+], CreateNotificationDto.prototype, "notificationType", void 0);
+class CreateEmployeeNotificationDto {
+}
+exports.CreateEmployeeNotificationDto = CreateEmployeeNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateEmployeeNotificationDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateEmployeeNotificationDto.prototype, "notificationId", void 0);
+class SendNotificationDto {
+}
+exports.SendNotificationDto = SendNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: notification_type_enum_1.NotificationType }),
+    __metadata("design:type", typeof (_c = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _c : Object)
+], SendNotificationDto.prototype, "notificationType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", CreateNotificationDataDto)
+], SendNotificationDto.prototype, "notificationData", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: ['1256124-ef14-4124-9124-124124124124'],
+        description: '알림 수신자 목록 (employeeId)',
+    }),
+    __metadata("design:type", Array)
+], SendNotificationDto.prototype, "notificationTarget", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/dtos/push-subscription.dto.ts":
+/*!********************************************************************!*\
+  !*** ./src/application/notification/dtos/push-subscription.dto.ts ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PushSubscriptionDto = exports.WebPushDto = exports.FCMDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class FCMDto {
+}
+exports.FCMDto = FCMDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], FCMDto.prototype, "token", void 0);
+class WebPushDto {
+}
+exports.WebPushDto = WebPushDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], WebPushDto.prototype, "endpoint", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'object',
+        properties: {
+            auth: { type: 'string' },
+            p256dh: { type: 'string' },
+        },
+    }),
+    __metadata("design:type", Object)
+], WebPushDto.prototype, "keys", void 0);
+class PushSubscriptionDto {
+}
+exports.PushSubscriptionDto = PushSubscriptionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: FCMDto, required: false }),
+    __metadata("design:type", FCMDto)
+], PushSubscriptionDto.prototype, "fcm", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: WebPushDto, required: false }),
+    __metadata("design:type", WebPushDto)
+], PushSubscriptionDto.prototype, "webPush", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/dtos/response-notification.dto.ts":
+/*!************************************************************************!*\
+  !*** ./src/application/notification/dtos/response-notification.dto.ts ***!
+  \************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PushNotificationSendResult = exports.ResponseNotificationDto = exports.NotificationDataDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class NotificationDataDto {
+}
+exports.NotificationDataDto = NotificationDataDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, required: false }),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], NotificationDataDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "consumableName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "reservationTitle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "reservationDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], NotificationDataDto.prototype, "beforeMinutes", void 0);
+class ResponseNotificationDto {
+}
+exports.ResponseNotificationDto = ResponseNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResponseNotificationDto.prototype, "notificationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResponseNotificationDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResponseNotificationDto.prototype, "body", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: NotificationDataDto }),
+    __metadata("design:type", NotificationDataDto)
+], ResponseNotificationDto.prototype, "notificationData", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResponseNotificationDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: notification_type_enum_1.NotificationType }),
+    __metadata("design:type", typeof (_b = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _b : Object)
+], ResponseNotificationDto.prototype, "notificationType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], ResponseNotificationDto.prototype, "isRead", void 0);
+class PushNotificationSendResult {
+}
+exports.PushNotificationSendResult = PushNotificationSendResult;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], PushNotificationSendResult.prototype, "success", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Object)
+], PushNotificationSendResult.prototype, "message", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], PushNotificationSendResult.prototype, "error", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/dtos/send-notification.dto.ts":
+/*!********************************************************************!*\
+  !*** ./src/application/notification/dtos/send-notification.dto.ts ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PushNotificationDto = exports.PushNotificationPayload = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const push_subscription_dto_1 = __webpack_require__(/*! ./push-subscription.dto */ "./src/application/notification/dtos/push-subscription.dto.ts");
+class PushNotificationPayload {
+}
+exports.PushNotificationPayload = PushNotificationPayload;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], PushNotificationPayload.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], PushNotificationPayload.prototype, "body", void 0);
+class PushNotificationDto {
+}
+exports.PushNotificationDto = PushNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: PushNotificationPayload }),
+    __metadata("design:type", PushNotificationPayload)
+], PushNotificationDto.prototype, "payload", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: push_subscription_dto_1.PushSubscriptionDto }),
+    __metadata("design:type", typeof (_a = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _a : Object)
+], PushNotificationDto.prototype, "subscription", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/infrastructure/fcm-push.adapter.ts":
+/*!*************************************************************************!*\
+  !*** ./src/application/notification/infrastructure/fcm-push.adapter.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FCMAdapter = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const app_1 = __webpack_require__(/*! firebase-admin/app */ "firebase-admin/app");
+const messaging_1 = __webpack_require__(/*! firebase-admin/messaging */ "firebase-admin/messaging");
+let FCMAdapter = class FCMAdapter {
+    constructor(configService) {
+        this.configService = configService;
+        try {
+            (0, app_1.initializeApp)({
+                credential: (0, app_1.cert)({
+                    clientEmail: this.configService.get('firebase.clientEmail'),
+                    privateKey: this.configService.get('firebase.privateKey').replace(/\\n/g, '\n'),
+                    projectId: this.configService.get('firebase.projectId'),
+                }),
+            });
+            console.log('Firebase Admin initialized successfully');
+        }
+        catch (error) {
+            console.error('Firebase initialization error:', error);
+            throw error;
+        }
+    }
+    async sendNotification(subscription, payload) {
+        try {
+            if (!subscription || !subscription.fcm || !subscription.fcm.token) {
+                throw new common_1.BadRequestException('FCM token is missing');
+            }
+            const message = {
+                token: subscription.fcm.token,
+                notification: {
+                    title: payload.title,
+                    body: payload.body,
+                },
+                data: {
+                    title: payload.title,
+                    body: payload.body,
+                },
+            };
+            const response = await (0, messaging_1.getMessaging)()
+                .send(message)
+                .then((response) => {
+                console.log('FCM send successful. Message ID:', response);
+                return { success: true, message: response, error: null };
+            })
+                .catch((error) => {
+                console.error('FCM send error:', {
+                    code: error.code,
+                    message: error.message,
+                    details: error.details,
+                    stack: error.stack,
+                });
+                return { success: false, message: 'failed', error: error.message };
+            });
+            return response;
+        }
+        catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
+            return { success: false, message: 'failed', error: error.message };
+        }
+    }
+    async sendBulkNotification(subscriptions, payload) {
+        try {
+            const tokens = subscriptions.map((subscription) => subscription.fcm.token);
+            const response = await (0, messaging_1.getMessaging)()
+                .sendEachForMulticast({
+                tokens: tokens,
+                data: {
+                    title: payload.title,
+                    body: payload.body,
+                },
+            })
+                .then((response) => {
+                console.log('FCM send successful. Message ID:', response);
+                return response;
+            });
+            return response;
+        }
+        catch (error) {
+            return { responses: [], successCount: -1, failureCount: -1 };
+        }
+    }
+    async sendTestNotification(subscription, payload) {
+        try {
+            const message = {
+                token: subscription.fcm.token,
+                ...payload,
+            };
+            const response = await (0, messaging_1.getMessaging)()
+                .send(message)
+                .then((response) => {
+                console.log('FCM send successful. Message ID:', response);
+                return { success: true, message: response, error: null };
+            })
+                .catch((error) => {
+                console.error('FCM send error:', {
+                    code: error.code,
+                    message: error.message,
+                    details: error.details,
+                    stack: error.stack,
+                });
+                return { success: false, message: 'failed', error: error.message };
+            });
+            return response;
+        }
+        catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
+            return { success: false, message: 'failed', error: error.message };
+        }
+    }
+};
+exports.FCMAdapter = FCMAdapter;
+exports.FCMAdapter = FCMAdapter = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
+], FCMAdapter);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/notification.module.ts":
+/*!*************************************************************!*\
+  !*** ./src/application/notification/notification.module.ts ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const notification_module_1 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
+const employee_notification_module_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.module */ "./src/domain/employee-notification/employee-notification.module.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const notification_controller_1 = __webpack_require__(/*! @src/application/notification/controllers/notification.controller */ "./src/application/notification/controllers/notification.controller.ts");
+const fcm_push_adapter_1 = __webpack_require__(/*! @src/application/notification/infrastructure/fcm-push.adapter */ "./src/application/notification/infrastructure/fcm-push.adapter.ts");
+const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+const usecases_1 = __webpack_require__(/*! ./usecases */ "./src/application/notification/usecases/index.ts");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
+let NotificationModule = class NotificationModule {
+};
+exports.NotificationModule = NotificationModule;
+exports.NotificationModule = NotificationModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([entities_1.Employee, entities_1.Notification, entities_1.EmployeeNotification]),
+            config_1.ConfigModule.forFeature(env_config_1.FIREBASE_CONFIG),
+            schedule_1.ScheduleModule.forRoot(),
+            employee_module_1.DomainEmployeeModule,
+            employee_notification_module_1.DomainEmployeeNotificationModule,
+            notification_module_1.DomainNotificationModule,
+        ],
+        providers: [
+            notification_service_1.NotificationService,
+            fcm_push_adapter_1.FCMAdapter,
+            usecases_1.SubscribeUsecase,
+            usecases_1.SendMultiNotificationUsecase,
+            usecases_1.GetMyNotificationUsecase,
+            usecases_1.MarkAsReadUsecase,
+            usecases_1.SaveNotificationUsecase,
+            usecases_1.CreateNotificationUsecase,
+            usecases_1.CreateScheduleJobUsecase,
+            usecases_1.GetSubscriptionsUsecase,
+            usecases_1.DeleteScheduleJobUsecase,
+        ],
+        controllers: [notification_controller_1.NotificationController],
+        exports: [notification_service_1.NotificationService],
+    })
+], NotificationModule);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/notification.service.ts":
+/*!**************************************************************!*\
+  !*** ./src/application/notification/notification.service.ts ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const subscribe_usecase_1 = __webpack_require__(/*! ./usecases/subscribe.usecase */ "./src/application/notification/usecases/subscribe.usecase.ts");
+const sendMultiNotification_usecase_1 = __webpack_require__(/*! ./usecases/sendMultiNotification.usecase */ "./src/application/notification/usecases/sendMultiNotification.usecase.ts");
+const getMyNotification_usecase_1 = __webpack_require__(/*! ./usecases/getMyNotification.usecase */ "./src/application/notification/usecases/getMyNotification.usecase.ts");
+const markAsRead_usecase_1 = __webpack_require__(/*! ./usecases/markAsRead.usecase */ "./src/application/notification/usecases/markAsRead.usecase.ts");
+const createNotification_usecase_1 = __webpack_require__(/*! ./usecases/createNotification.usecase */ "./src/application/notification/usecases/createNotification.usecase.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const saveNotification_usecase_1 = __webpack_require__(/*! ./usecases/saveNotification.usecase */ "./src/application/notification/usecases/saveNotification.usecase.ts");
+const createScheduleJob_usecase_1 = __webpack_require__(/*! ./usecases/createScheduleJob.usecase */ "./src/application/notification/usecases/createScheduleJob.usecase.ts");
+const getSubscriptions_usecase_1 = __webpack_require__(/*! ./usecases/getSubscriptions.usecase */ "./src/application/notification/usecases/getSubscriptions.usecase.ts");
+const deleteScheduleJob_usecase_1 = __webpack_require__(/*! ./usecases/deleteScheduleJob.usecase */ "./src/application/notification/usecases/deleteScheduleJob.usecase.ts");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+let NotificationService = class NotificationService {
+    constructor(subscribeUsecase, sendMultiNotificationUsecase, getMyNotificationUsecase, markAsReadUsecase, createNotificationUsecase, saveNotificationUsecase, createScheduleJobUsecase, getSubscriptionsUsecase, deleteScheduleJobUsecase, notificationService) {
+        this.subscribeUsecase = subscribeUsecase;
+        this.sendMultiNotificationUsecase = sendMultiNotificationUsecase;
+        this.getMyNotificationUsecase = getMyNotificationUsecase;
+        this.markAsReadUsecase = markAsReadUsecase;
+        this.createNotificationUsecase = createNotificationUsecase;
+        this.saveNotificationUsecase = saveNotificationUsecase;
+        this.createScheduleJobUsecase = createScheduleJobUsecase;
+        this.getSubscriptionsUsecase = getSubscriptionsUsecase;
+        this.deleteScheduleJobUsecase = deleteScheduleJobUsecase;
+        this.notificationService = notificationService;
+    }
+    async onModuleInit() {
+        const upcomingNotifications = await this.notificationService.findAll({
+            where: { isSent: false },
+            relations: ['employees'],
+        });
+        for (const notification of upcomingNotifications) {
+            const notiTarget = notification.employees.map((employee) => employee.employeeId);
+            const subscriptions = [];
+            for (const employeeId of notiTarget) {
+                const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
+                subscriptions.push(...subscriptions);
+            }
+            await this.createScheduleJobUsecase.execute(notification, subscriptions);
+        }
+    }
+    async subscribe(user, subscription) {
+        await this.subscribeUsecase.execute(user.employeeId, subscription);
+    }
+    async sendDirectNotification(subscription, payload) {
+        await this.sendMultiNotificationUsecase.execute([subscription], payload);
+    }
+    async findMyNotifications(employeeId, query) {
+        return await this.getMyNotificationUsecase.execute(employeeId, query);
+    }
+    async markAsRead(employeeId, notificationId) {
+        return await this.markAsReadUsecase.execute(employeeId, notificationId);
+    }
+    async createNotification(notificationType, createNotificationDatatDto, notiTarget, repositoryOptions) {
+        notiTarget = Array.from(new Set(notiTarget));
+        const notificationDto = await this.createNotificationUsecase.execute(notificationType, createNotificationDatatDto);
+        const notification = await this.saveNotificationUsecase.execute(notificationDto, notiTarget, repositoryOptions);
+        const subscriptions = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
+            subscriptions.push(...subscriptions);
+        }
+        switch (notificationType) {
+            case notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING:
+                this.createScheduleJobUsecase.execute(notification, subscriptions);
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED:
+                this.deleteScheduleJobUsecase.execute(createNotificationDatatDto);
+            default:
+                this.sendMultiNotificationUsecase.execute(subscriptions, {
+                    title: notification.title,
+                    body: notification.body,
+                });
+                break;
+        }
+    }
+};
+exports.NotificationService = NotificationService;
+exports.NotificationService = NotificationService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof subscribe_usecase_1.SubscribeUsecase !== "undefined" && subscribe_usecase_1.SubscribeUsecase) === "function" ? _a : Object, typeof (_b = typeof sendMultiNotification_usecase_1.SendMultiNotificationUsecase !== "undefined" && sendMultiNotification_usecase_1.SendMultiNotificationUsecase) === "function" ? _b : Object, typeof (_c = typeof getMyNotification_usecase_1.GetMyNotificationUsecase !== "undefined" && getMyNotification_usecase_1.GetMyNotificationUsecase) === "function" ? _c : Object, typeof (_d = typeof markAsRead_usecase_1.MarkAsReadUsecase !== "undefined" && markAsRead_usecase_1.MarkAsReadUsecase) === "function" ? _d : Object, typeof (_e = typeof createNotification_usecase_1.CreateNotificationUsecase !== "undefined" && createNotification_usecase_1.CreateNotificationUsecase) === "function" ? _e : Object, typeof (_f = typeof saveNotification_usecase_1.SaveNotificationUsecase !== "undefined" && saveNotification_usecase_1.SaveNotificationUsecase) === "function" ? _f : Object, typeof (_g = typeof createScheduleJob_usecase_1.CreateScheduleJobUsecase !== "undefined" && createScheduleJob_usecase_1.CreateScheduleJobUsecase) === "function" ? _g : Object, typeof (_h = typeof getSubscriptions_usecase_1.GetSubscriptionsUsecase !== "undefined" && getSubscriptions_usecase_1.GetSubscriptionsUsecase) === "function" ? _h : Object, typeof (_j = typeof deleteScheduleJob_usecase_1.DeleteScheduleJobUsecase !== "undefined" && deleteScheduleJob_usecase_1.DeleteScheduleJobUsecase) === "function" ? _j : Object, typeof (_k = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _k : Object])
+], NotificationService);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/createNotification.usecase.ts":
+/*!*****************************************************************************!*\
+  !*** ./src/application/notification/usecases/createNotification.usecase.ts ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateNotificationUsecase = void 0;
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+let CreateNotificationUsecase = class CreateNotificationUsecase {
+    constructor() { }
+    async execute(notificationType, createNotificationDatatDto) {
+        const createNotificationDto = {
+            title: '',
+            body: '',
+            notificationType: notificationType,
+            notificationData: createNotificationDatatDto,
+            createdAt: date_util_1.DateUtil.now().format('YYYY-MM-DD HH:mm'),
+            isSent: true,
+        };
+        switch (notificationType) {
+            case notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING:
+                createNotificationDto.title = `예약 시간이 ${createNotificationDatatDto.beforeMinutes}분 남았습니다.`;
+                createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                createNotificationDto.createdAt = date_util_1.DateUtil.parse(createNotificationDatatDto.reservationDate)
+                    .addMinutes(-createNotificationDatatDto.beforeMinutes)
+                    .format('YYYY-MM-DD HH:mm');
+                createNotificationDto.isSent = false;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING:
+                createNotificationDto.title = `[숙소 확정 대기중] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED:
+                createNotificationDto.title = `[예약 확정] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED:
+                createNotificationDto.title = `[예약 취소] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED:
+                createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED:
+                createNotificationDto.title = `[예약 시간 변경] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED:
+                createNotificationDto.title = `[참가자 변경] ${createNotificationDatatDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING:
+                createNotificationDto.title = `[교체 주기 알림] ${createNotificationDatatDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED:
+                createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
+                createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED:
+                createNotificationDto.title = `[정비 완료] ${createNotificationDatatDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                break;
+        }
+        return createNotificationDto;
+    }
+};
+exports.CreateNotificationUsecase = CreateNotificationUsecase;
+exports.CreateNotificationUsecase = CreateNotificationUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], CreateNotificationUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/createScheduleJob.usecase.ts":
+/*!****************************************************************************!*\
+  !*** ./src/application/notification/usecases/createScheduleJob.usecase.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateScheduleJobUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const dist_1 = __webpack_require__(/*! cron/dist */ "cron/dist");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const fcm_push_adapter_1 = __webpack_require__(/*! ../infrastructure/fcm-push.adapter */ "./src/application/notification/infrastructure/fcm-push.adapter.ts");
+let CreateScheduleJobUsecase = class CreateScheduleJobUsecase {
+    constructor(schedulerRegistry, notificationService, FCMAdapter) {
+        this.schedulerRegistry = schedulerRegistry;
+        this.notificationService = notificationService;
+        this.FCMAdapter = FCMAdapter;
+    }
+    async execute(notification, subscriptions) {
+        const jobName = `upcoming-${notification.notificationId}`;
+        const notificationDate = new Date(notification.createdAt);
+        if (notificationDate.getTime() <= Date.now()) {
+            console.log(`Notification time ${notificationDate} is in the past, skipping cron job creation`);
+            return;
+        }
+        const job = new dist_1.CronJob(notificationDate, async () => {
+            try {
+                await this.FCMAdapter.sendBulkNotification(subscriptions, {
+                    title: notification.title,
+                    body: notification.body,
+                });
+            }
+            catch (error) {
+                console.error(`Failed to send notification: ${error}`);
+            }
+            finally {
+                await this.notificationService.update(notification.notificationId, { isSent: true });
+            }
+        });
+        this.schedulerRegistry.addCronJob(jobName, job);
+        console.log(Array.from(this.schedulerRegistry.getCronJobs().keys()));
+        job.start();
+    }
+};
+exports.CreateScheduleJobUsecase = CreateScheduleJobUsecase;
+exports.CreateScheduleJobUsecase = CreateScheduleJobUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _b : Object, typeof (_c = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _c : Object])
+], CreateScheduleJobUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/deleteScheduleJob.usecase.ts":
+/*!****************************************************************************!*\
+  !*** ./src/application/notification/usecases/deleteScheduleJob.usecase.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeleteScheduleJobUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+let DeleteScheduleJobUsecase = class DeleteScheduleJobUsecase {
+    constructor(schedulerRegistry, notificationService, employeeNotificationService) {
+        this.schedulerRegistry = schedulerRegistry;
+        this.notificationService = notificationService;
+        this.employeeNotificationService = employeeNotificationService;
+    }
+    async execute(createNotificationData) {
+        const notifications = await this.notificationService.findAll({
+            where: {
+                notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${createNotificationData.reservationId}'`),
+                isSent: false,
+            },
+        });
+        for (const notification of notifications) {
+            try {
+                const jobName = `upcoming-${notification.notificationId}}`;
+                this.schedulerRegistry.deleteCronJob(jobName);
+            }
+            catch (error) {
+                console.error(`Failed to delete cron job ${notification.notificationId}: ${error}`);
+            }
+            await this.employeeNotificationService.deleteByNotificationId(notification.notificationId);
+            await this.notificationService.delete(notification.notificationId);
+        }
+    }
+};
+exports.DeleteScheduleJobUsecase = DeleteScheduleJobUsecase;
+exports.DeleteScheduleJobUsecase = DeleteScheduleJobUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _b : Object, typeof (_c = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _c : Object])
+], DeleteScheduleJobUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/getMyNotification.usecase.ts":
+/*!****************************************************************************!*\
+  !*** ./src/application/notification/usecases/getMyNotification.usecase.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GetMyNotificationUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+let GetMyNotificationUsecase = class GetMyNotificationUsecase {
+    constructor(notificationService) {
+        this.notificationService = notificationService;
+    }
+    async execute(employeeId, query) {
+        const options = {
+            where: {
+                employees: { employeeId },
+                isSent: true,
+            },
+        };
+        const total = await this.notificationService.count({
+            where: options.where,
+        });
+        if (query) {
+            options.skip = query.getOffset();
+            options.take = query.limit;
+        }
+        const notifications = await this.notificationService.findAll({
+            ...options,
+            relations: ['employees'],
+            order: {
+                createdAt: 'DESC',
+            },
+        });
+        return {
+            items: notifications.map((notification) => {
+                return {
+                    notificationId: notification.notificationId,
+                    title: notification.title,
+                    body: notification.body,
+                    notificationData: notification.notificationData,
+                    notificationType: notification.notificationType,
+                    createdAt: notification.createdAt,
+                    isRead: notification.employees.find((employee) => employee.employeeId === employeeId).isRead,
+                };
+            }),
+            meta: {
+                total,
+                page: query.page,
+                limit: query.limit,
+                hasNext: query.page * query.limit < total,
+            },
+        };
+    }
+};
+exports.GetMyNotificationUsecase = GetMyNotificationUsecase;
+exports.GetMyNotificationUsecase = GetMyNotificationUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _a : Object])
+], GetMyNotificationUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/getSubscriptions.usecase.ts":
+/*!***************************************************************************!*\
+  !*** ./src/application/notification/usecases/getSubscriptions.usecase.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GetSubscriptionsUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+let GetSubscriptionsUsecase = class GetSubscriptionsUsecase {
+    constructor(employeeService) {
+        this.employeeService = employeeService;
+    }
+    async execute(employeeId) {
+        const employee = await this.employeeService.findOne({
+            where: { employeeId },
+            select: { subscriptions: true },
+        });
+        if (!employee) {
+            return [];
+        }
+        return employee.subscriptions;
+    }
+};
+exports.GetSubscriptionsUsecase = GetSubscriptionsUsecase;
+exports.GetSubscriptionsUsecase = GetSubscriptionsUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
+], GetSubscriptionsUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/index.ts":
+/*!********************************************************!*\
+  !*** ./src/application/notification/usecases/index.ts ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./subscribe.usecase */ "./src/application/notification/usecases/subscribe.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./sendMultiNotification.usecase */ "./src/application/notification/usecases/sendMultiNotification.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./getMyNotification.usecase */ "./src/application/notification/usecases/getMyNotification.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./markAsRead.usecase */ "./src/application/notification/usecases/markAsRead.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./createNotification.usecase */ "./src/application/notification/usecases/createNotification.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./saveNotification.usecase */ "./src/application/notification/usecases/saveNotification.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./createScheduleJob.usecase */ "./src/application/notification/usecases/createScheduleJob.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./getSubscriptions.usecase */ "./src/application/notification/usecases/getSubscriptions.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./deleteScheduleJob.usecase */ "./src/application/notification/usecases/deleteScheduleJob.usecase.ts"), exports);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/markAsRead.usecase.ts":
+/*!*********************************************************************!*\
+  !*** ./src/application/notification/usecases/markAsRead.usecase.ts ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MarkAsReadUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
+let MarkAsReadUsecase = class MarkAsReadUsecase {
+    constructor(employeeNotificationService) {
+        this.employeeNotificationService = employeeNotificationService;
+    }
+    async execute(employeeId, notificationId) {
+        const employeeNotification = await this.employeeNotificationService.findOne({
+            where: {
+                employeeId,
+                notificationId,
+            },
+        });
+        if (!employeeNotification) {
+            throw new common_1.BadRequestException('There is no data');
+        }
+        await this.employeeNotificationService.update(employeeNotification.employeeNotificationId, {
+            isRead: true,
+        });
+    }
+};
+exports.MarkAsReadUsecase = MarkAsReadUsecase;
+exports.MarkAsReadUsecase = MarkAsReadUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _a : Object])
+], MarkAsReadUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/saveNotification.usecase.ts":
+/*!***************************************************************************!*\
+  !*** ./src/application/notification/usecases/saveNotification.usecase.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SaveNotificationUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+let SaveNotificationUsecase = class SaveNotificationUsecase {
+    constructor(notificationService, employeeNotificationService) {
+        this.notificationService = notificationService;
+        this.employeeNotificationService = employeeNotificationService;
+    }
+    async execute(createNotificationDto, notiTarget, repositoryOptions) {
+        const notification = await this.notificationService.save(createNotificationDto, repositoryOptions);
+        for (const employeeId of notiTarget) {
+            await this.employeeNotificationService.save({
+                employeeId: employeeId,
+                notificationId: notification.notificationId,
+            }, repositoryOptions);
+        }
+        return notification;
+    }
+};
+exports.SaveNotificationUsecase = SaveNotificationUsecase;
+exports.SaveNotificationUsecase = SaveNotificationUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _a : Object, typeof (_b = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _b : Object])
+], SaveNotificationUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/sendMultiNotification.usecase.ts":
+/*!********************************************************************************!*\
+  !*** ./src/application/notification/usecases/sendMultiNotification.usecase.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SendMultiNotificationUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const fcm_push_adapter_1 = __webpack_require__(/*! @src/application/notification/infrastructure/fcm-push.adapter */ "./src/application/notification/infrastructure/fcm-push.adapter.ts");
+let SendMultiNotificationUsecase = class SendMultiNotificationUsecase {
+    constructor(FCMAdapter) {
+        this.FCMAdapter = FCMAdapter;
+    }
+    async execute(subscriptions, payload) {
+        return await this.FCMAdapter.sendBulkNotification(subscriptions, payload);
+    }
+};
+exports.SendMultiNotificationUsecase = SendMultiNotificationUsecase;
+exports.SendMultiNotificationUsecase = SendMultiNotificationUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _a : Object])
+], SendMultiNotificationUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/subscribe.usecase.ts":
+/*!********************************************************************!*\
+  !*** ./src/application/notification/usecases/subscribe.usecase.ts ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscribeUsecase = void 0;
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+let SubscribeUsecase = class SubscribeUsecase {
+    constructor(employeeService) {
+        this.employeeService = employeeService;
+    }
+    async execute(employeeId, subscription) {
+        try {
+            const employee = await this.employeeService.findByEmployeeId(employeeId);
+            if (!employee) {
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.EMPLOYEE.NOT_FOUND);
+            }
+            if (employee.subscriptions) {
+                if (employee.subscriptions.length > 4) {
+                    employee.subscriptions.shift();
+                }
+                employee.subscriptions.push(subscription);
+            }
+            else {
+                employee.subscriptions = [subscription];
+            }
+            await this.employeeService.update(employee.employeeId, employee);
+            return true;
+        }
+        catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+};
+exports.SubscribeUsecase = SubscribeUsecase;
+exports.SubscribeUsecase = SubscribeUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
+], SubscribeUsecase);
+
+
+/***/ }),
+
+/***/ "./src/domain/employee-notification/employee-notification.module.ts":
+/*!**************************************************************************!*\
+  !*** ./src/domain/employee-notification/employee-notification.module.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainEmployeeNotificationModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const employee_notification_entity_1 = __webpack_require__(/*! @libs/entities/employee-notification.entity */ "./libs/entities/employee-notification.entity.ts");
+const employee_notification_service_1 = __webpack_require__(/*! ./employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
+const employee_notification_repository_1 = __webpack_require__(/*! ./employee-notification.repository */ "./src/domain/employee-notification/employee-notification.repository.ts");
+let DomainEmployeeNotificationModule = class DomainEmployeeNotificationModule {
+};
+exports.DomainEmployeeNotificationModule = DomainEmployeeNotificationModule;
+exports.DomainEmployeeNotificationModule = DomainEmployeeNotificationModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([employee_notification_entity_1.EmployeeNotification])],
+        providers: [employee_notification_service_1.DomainEmployeeNotificationService, employee_notification_repository_1.DomainEmployeeNotificationRepository],
+        exports: [employee_notification_service_1.DomainEmployeeNotificationService],
+    })
+], DomainEmployeeNotificationModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/employee-notification/employee-notification.repository.ts":
+/*!******************************************************************************!*\
+  !*** ./src/domain/employee-notification/employee-notification.repository.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainEmployeeNotificationRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const employee_notification_entity_1 = __webpack_require__(/*! @libs/entities/employee-notification.entity */ "./libs/entities/employee-notification.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainEmployeeNotificationRepository = class DomainEmployeeNotificationRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+    async deleteByNotificationId(notificationId) {
+        await this.repository.delete({ notificationId });
+    }
+};
+exports.DomainEmployeeNotificationRepository = DomainEmployeeNotificationRepository;
+exports.DomainEmployeeNotificationRepository = DomainEmployeeNotificationRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(employee_notification_entity_1.EmployeeNotification)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainEmployeeNotificationRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/employee-notification/employee-notification.service.ts":
+/*!***************************************************************************!*\
+  !*** ./src/domain/employee-notification/employee-notification.service.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainEmployeeNotificationService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const employee_notification_repository_1 = __webpack_require__(/*! ./employee-notification.repository */ "./src/domain/employee-notification/employee-notification.repository.ts");
+let DomainEmployeeNotificationService = class DomainEmployeeNotificationService extends base_service_1.BaseService {
+    constructor(employeeNotificationRepository) {
+        super(employeeNotificationRepository);
+        this.employeeNotificationRepository = employeeNotificationRepository;
+    }
+    async findByEmployeeId(employeeId) {
+        return await this.employeeNotificationRepository.findAll({
+            where: { employeeId },
+            relations: ['notification'],
+            order: { notification: { createdAt: 'DESC' } },
+        });
+    }
+    async markAsRead(employeeNotificationId) {
+        const notification = await this.findOne({ where: { employeeNotificationId } });
+        if (!notification) {
+            throw new common_1.NotFoundException('알림을 찾을 수 없습니다.');
+        }
+        return await this.update(employeeNotificationId, { isRead: true });
+    }
+    async deleteByNotificationId(notificationId) {
+        await this.employeeNotificationRepository.deleteByNotificationId(notificationId);
+    }
+};
+exports.DomainEmployeeNotificationService = DomainEmployeeNotificationService;
+exports.DomainEmployeeNotificationService = DomainEmployeeNotificationService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_notification_repository_1.DomainEmployeeNotificationRepository !== "undefined" && employee_notification_repository_1.DomainEmployeeNotificationRepository) === "function" ? _a : Object])
+], DomainEmployeeNotificationService);
+
+
+/***/ }),
+
 /***/ "./src/domain/employee/employee.module.ts":
 /*!************************************************!*\
   !*** ./src/domain/employee/employee.module.ts ***!
@@ -7347,6 +8841,136 @@ exports.DomainFileService = DomainFileService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof file_repository_1.DomainFileRepository !== "undefined" && file_repository_1.DomainFileRepository) === "function" ? _a : Object])
 ], DomainFileService);
+
+
+/***/ }),
+
+/***/ "./src/domain/notification/notification.module.ts":
+/*!********************************************************!*\
+  !*** ./src/domain/notification/notification.module.ts ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainNotificationModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const notification_entity_1 = __webpack_require__(/*! @libs/entities/notification.entity */ "./libs/entities/notification.entity.ts");
+const notification_service_1 = __webpack_require__(/*! ./notification.service */ "./src/domain/notification/notification.service.ts");
+const notification_repository_1 = __webpack_require__(/*! ./notification.repository */ "./src/domain/notification/notification.repository.ts");
+let DomainNotificationModule = class DomainNotificationModule {
+};
+exports.DomainNotificationModule = DomainNotificationModule;
+exports.DomainNotificationModule = DomainNotificationModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([notification_entity_1.Notification])],
+        providers: [notification_service_1.DomainNotificationService, notification_repository_1.DomainNotificationRepository],
+        exports: [notification_service_1.DomainNotificationService],
+    })
+], DomainNotificationModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/notification/notification.repository.ts":
+/*!************************************************************!*\
+  !*** ./src/domain/notification/notification.repository.ts ***!
+  \************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainNotificationRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const notification_entity_1 = __webpack_require__(/*! @libs/entities/notification.entity */ "./libs/entities/notification.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainNotificationRepository = class DomainNotificationRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+    async count(repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
+            : this.repository;
+        return repository.count({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+            select: repositoryOptions?.select,
+            order: repositoryOptions?.order,
+            skip: repositoryOptions?.skip,
+            take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
+        });
+    }
+};
+exports.DomainNotificationRepository = DomainNotificationRepository;
+exports.DomainNotificationRepository = DomainNotificationRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(notification_entity_1.Notification)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainNotificationRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/notification/notification.service.ts":
+/*!*********************************************************!*\
+  !*** ./src/domain/notification/notification.service.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainNotificationService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const notification_repository_1 = __webpack_require__(/*! ./notification.repository */ "./src/domain/notification/notification.repository.ts");
+let DomainNotificationService = class DomainNotificationService extends base_service_1.BaseService {
+    constructor(notificationRepository) {
+        super(notificationRepository);
+        this.notificationRepository = notificationRepository;
+    }
+    async count(repositoryOptions) {
+        return await this.notificationRepository.count(repositoryOptions);
+    }
+};
+exports.DomainNotificationService = DomainNotificationService;
+exports.DomainNotificationService = DomainNotificationService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_repository_1.DomainNotificationRepository !== "undefined" && notification_repository_1.DomainNotificationRepository) === "function" ? _a : Object])
+], DomainNotificationService);
 
 
 /***/ }),
@@ -11172,7 +12796,6 @@ let ReservationUsecase = class ReservationUsecase {
                 endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(now).toDate()),
             },
         });
-        console.log(reservations);
         for (const reservation of reservations) {
             this.createReservationClosingJob(reservation);
         }

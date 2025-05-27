@@ -12,4 +12,8 @@ export class DomainEmployeeNotificationRepository extends BaseRepository<Employe
     ) {
         super(repository);
     }
+
+    async deleteByNotificationId(notificationId: string): Promise<void> {
+        await this.repository.delete({ notificationId });
+    }
 }

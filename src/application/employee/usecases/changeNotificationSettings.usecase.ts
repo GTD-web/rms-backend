@@ -1,6 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Role } from '@libs/enums/role-type.enum';
-import { ChangeRoleDto } from '@resource/application/employee/dtos/change-role.dto';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { UserResponseDto } from '@resource/application/employee/dtos/user-response.dto';

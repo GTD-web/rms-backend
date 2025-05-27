@@ -79,7 +79,6 @@ export class ReservationUsecase {
                 endDate: MoreThan(DateUtil.date(now).toDate()),
             },
         });
-        console.log(reservations);
 
         for (const reservation of reservations) {
             this.createReservationClosingJob(reservation);
