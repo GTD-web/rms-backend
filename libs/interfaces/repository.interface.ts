@@ -1,10 +1,17 @@
-import { ObjectLiteral, QueryRunner, FindOptionsWhere, DeepPartial, FindOptionsOrder } from 'typeorm';
+import {
+    ObjectLiteral,
+    QueryRunner,
+    FindOptionsWhere,
+    DeepPartial,
+    FindOptionsOrder,
+    FindOptionsSelect,
+} from 'typeorm';
 
 export interface IRepositoryOptions<T> {
     queryRunner?: QueryRunner;
     where?: FindOptionsWhere<T>;
     relations?: string[];
-    select?: string[];
+    select?: FindOptionsSelect<T>;
     order?: FindOptionsOrder<T>;
     skip?: number;
     take?: number;

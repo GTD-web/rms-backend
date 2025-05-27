@@ -4,7 +4,7 @@ import { MMSEmployeeResponseDto } from '@resource/application/employee/dtos/mms-
 import axios from 'axios';
 
 @Injectable()
-export class GetEmployeeUsecase {
+export class GetEmployeeInfoUsecase {
     constructor() {}
 
     async execute(employeeNumber?: string): Promise<MMSEmployeeResponseDto[]> {

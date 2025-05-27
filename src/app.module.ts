@@ -49,7 +49,7 @@ import { EmployeeModule as EmployeeApplicationModule } from './application/emplo
         }),
         TypeOrmModule.forFeature(Entities),
         AuthModule,
-        EmployeeModule,
+        // EmployeeModule,
         ResourceModule,
         ReservationModule,
         NotificationModule,

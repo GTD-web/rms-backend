@@ -147,4 +147,4 @@ export {
     ConsumableMaintenanceStatsResponseDto,
 } from './statistics/consumable-maintenance-stats.dto';
 
-export { StatisticsResponseDto } from './common/base.dto';
+export { StatisticsResponseDto } from './statistics/base.dto';

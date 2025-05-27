@@ -19,30 +19,30 @@ import { AdminResourceManagerController } from './infrastructure/adapters/in/web
 @Module({
     imports: [TypeOrmModule.forFeature([User, Employee])],
     providers: [
-        {
-            provide: 'AuthService',
-            useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
-            // useClass: JwtAuthUsecase,
-        },
+        // {
+        //     provide: 'AuthService',
+        //     useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
+        //     // useClass: JwtAuthUsecase,
+        // },
         UserService,
         UserRepository,
         {
             provide: 'UserRepositoryPort',
             useClass: UserRepository,
         },
-        UserUsecase,
+        // UserUsecase,
         UserEventHandler,
-        ResourceManagerUseCase,
+        // ResourceManagerUseCase,
     ],
     controllers: [],
     exports: [
-        {
-            provide: 'AuthService',
-            useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
-            // useClass: JwtAuthUsecase,
-        },
+        // {
+        //     provide: 'AuthService',
+        //     useClass: process.env.USE_SSO === 'true' ? SsoAuthUsecase : JwtAuthUsecase,
+        //     // useClass: JwtAuthUsecase,
+        // },
         UserService,
-        UserUsecase,
+        // UserUsecase,
     ],
 })
 export class AuthModule {}
