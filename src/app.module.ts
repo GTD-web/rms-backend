@@ -28,6 +28,7 @@ import { TaskModule } from './modules/task/task.module';
 
 import { AuthModule as AuthApplicationModule } from './application/auth/auth.module';
 import { EmployeeModule as EmployeeApplicationModule } from './application/employee/employee.module';
+import { FileModule as FileApplicationModule } from './application/file/file.module';
 
 @Module({
     imports: [
@@ -60,6 +61,7 @@ import { EmployeeModule as EmployeeApplicationModule } from './application/emplo
 
         AuthApplicationModule,
         EmployeeApplicationModule,
+        FileApplicationModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],

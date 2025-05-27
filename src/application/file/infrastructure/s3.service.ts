@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { FileStoragePort, FileUploadOptions } from '@resource/modules/file/domain/ports/file-storage.port';
+import { File } from '@libs/entities/file.entity';
 import { DateUtil } from '@libs/utils/date.util';
-import { File } from '@libs/entities';
 
 @Injectable()
-export class S3StorageAdapter implements FileStoragePort {
+export class S3Service {
     private readonly s3Client: S3Client;
     private readonly bucketName: string;
 
@@ -24,7 +23,7 @@ export class S3StorageAdapter implements FileStoragePort {
         });
     }
 
-    async uploadFile(file: Express.Multer.File, options?: FileUploadOptions): Promise<File> {
+    async uploadFile(file: Express.Multer.File): Promise<File> {
         const fileExtension = file.originalname.split('.').pop();
         const fileName = `${DateUtil.now().format('YYYYMMDDHHmmss')}.${fileExtension}`;
 

@@ -4072,6 +4072,7 @@ const seed_module_1 = __webpack_require__(/*! ./modules/seed/seed.module */ "./s
 const task_module_1 = __webpack_require__(/*! ./modules/task/task.module */ "./src/modules/task/task.module.ts");
 const auth_module_2 = __webpack_require__(/*! ./application/auth/auth.module */ "./src/application/auth/auth.module.ts");
 const employee_module_1 = __webpack_require__(/*! ./application/employee/employee.module */ "./src/application/employee/employee.module.ts");
+const file_module_2 = __webpack_require__(/*! ./application/file/file.module */ "./src/application/file/file.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -4103,6 +4104,7 @@ exports.AppModule = AppModule = __decorate([
             task_module_1.TaskModule,
             auth_module_2.AuthModule,
             employee_module_1.EmployeeModule,
+            file_module_2.FileModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, api_doc_service_1.ApiDocService, db_doc_service_1.DbDocService],
@@ -6700,6 +6702,386 @@ exports.SyncEmployeeUsecase = SyncEmployeeUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/file/controllers/file.controller.ts":
+/*!*************************************************************!*\
+  !*** ./src/application/file/controllers/file.controller.ts ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
+const file_service_1 = __webpack_require__(/*! @resource/application/file/file.service */ "./src/application/file/file.service.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const file_response_dto_1 = __webpack_require__(/*! @resource/application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+let FileController = class FileController {
+    constructor(fileService) {
+        this.fileService = fileService;
+    }
+    async uploadFile(file) {
+        return this.fileService.uploadFile(file);
+    }
+    async deleteFile(fileId) {
+        await this.fileService.deleteFile(fileId);
+    }
+};
+exports.FileController = FileController;
+__decorate([
+    (0, common_1.Post)('upload'),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiOperation)({ summary: '파일 업로드' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 업로드 성공', type: file_response_dto_1.FileResponseDto }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof Express !== "undefined" && (_b = Express.Multer) !== void 0 && _b.File) === "function" ? _c : Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "uploadFile", null);
+__decorate([
+    (0, common_1.Delete)(':fileId'),
+    (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 삭제 성공' }),
+    __param(0, (0, common_1.Param)('fileId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "deleteFile", null);
+exports.FileController = FileController = __decorate([
+    (0, swagger_1.ApiTags)('0. 파일 - 공통 페이지'),
+    (0, common_1.Controller)('v1/files'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _a : Object])
+], FileController);
+
+
+/***/ }),
+
+/***/ "./src/application/file/dtos/file-response.dto.ts":
+/*!********************************************************!*\
+  !*** ./src/application/file/dtos/file-response.dto.ts ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class FileResponseDto {
+}
+exports.FileResponseDto = FileResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '123e4567-e89b-12d3-a456-426614174000' }),
+    __metadata("design:type", String)
+], FileResponseDto.prototype, "fileId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'image.jpg' }),
+    __metadata("design:type", String)
+], FileResponseDto.prototype, "fileName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'uploads/20250226123456-image.jpg' }),
+    __metadata("design:type", String)
+], FileResponseDto.prototype, "filePath", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/file/file.module.ts":
+/*!*********************************************!*\
+  !*** ./src/application/file/file.module.ts ***!
+  \*********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
+const upload_file_usecase_1 = __webpack_require__(/*! ./usecases/upload-file.usecase */ "./src/application/file/usecases/upload-file.usecase.ts");
+const delete_file_usecase_1 = __webpack_require__(/*! ./usecases/delete-file.usecase */ "./src/application/file/usecases/delete-file.usecase.ts");
+const s3_service_1 = __webpack_require__(/*! ./infrastructure/s3.service */ "./src/application/file/infrastructure/s3.service.ts");
+const file_controller_1 = __webpack_require__(/*! ./controllers/file.controller */ "./src/application/file/controllers/file.controller.ts");
+const file_service_1 = __webpack_require__(/*! ./file.service */ "./src/application/file/file.service.ts");
+const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const file_entity_1 = __webpack_require__(/*! @libs/entities/file.entity */ "./libs/entities/file.entity.ts");
+let FileModule = class FileModule {
+};
+exports.FileModule = FileModule;
+exports.FileModule = FileModule = __decorate([
+    (0, common_1.Module)({
+        imports: [file_module_1.FileModule, typeorm_1.TypeOrmModule.forFeature([file_entity_1.File]), config_1.ConfigModule.forFeature(env_config_1.APP_CONFIG)],
+        controllers: [file_controller_1.FileController],
+        providers: [file_service_1.FileService, upload_file_usecase_1.UploadFileUsecase, delete_file_usecase_1.DeleteFileUsecase, s3_service_1.S3Service],
+        exports: [file_service_1.FileService],
+    })
+], FileModule);
+
+
+/***/ }),
+
+/***/ "./src/application/file/file.service.ts":
+/*!**********************************************!*\
+  !*** ./src/application/file/file.service.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const upload_file_usecase_1 = __webpack_require__(/*! ./usecases/upload-file.usecase */ "./src/application/file/usecases/upload-file.usecase.ts");
+const delete_file_usecase_1 = __webpack_require__(/*! ./usecases/delete-file.usecase */ "./src/application/file/usecases/delete-file.usecase.ts");
+let FileService = class FileService {
+    constructor(uploadFileUsecase, deleteFileUsecase) {
+        this.uploadFileUsecase = uploadFileUsecase;
+        this.deleteFileUsecase = deleteFileUsecase;
+    }
+    async uploadFile(file) {
+        return await this.uploadFileUsecase.execute(file);
+    }
+    async deleteFile(fileId) {
+        await this.deleteFileUsecase.execute(fileId);
+    }
+};
+exports.FileService = FileService;
+exports.FileService = FileService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof upload_file_usecase_1.UploadFileUsecase !== "undefined" && upload_file_usecase_1.UploadFileUsecase) === "function" ? _a : Object, typeof (_b = typeof delete_file_usecase_1.DeleteFileUsecase !== "undefined" && delete_file_usecase_1.DeleteFileUsecase) === "function" ? _b : Object])
+], FileService);
+
+
+/***/ }),
+
+/***/ "./src/application/file/infrastructure/s3.service.ts":
+/*!***********************************************************!*\
+  !*** ./src/application/file/infrastructure/s3.service.ts ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.S3Service = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const client_s3_1 = __webpack_require__(/*! @aws-sdk/client-s3 */ "@aws-sdk/client-s3");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+let S3Service = class S3Service {
+    constructor(configService) {
+        this.configService = configService;
+        this.bucketName = this.configService.get('S3_BUCKET_NAME');
+        this.s3Client = new client_s3_1.S3Client({
+            region: this.configService.get('S3_REGION'),
+            endpoint: this.configService.get('S3_ENDPOINT'),
+            credentials: {
+                accessKeyId: this.configService.get('S3_ACCESS_KEY'),
+                secretAccessKey: this.configService.get('S3_SECRET_KEY'),
+            },
+            forcePathStyle: true,
+        });
+    }
+    async uploadFile(file) {
+        const fileExtension = file.originalname.split('.').pop();
+        const fileName = `${date_util_1.DateUtil.now().format('YYYYMMDDHHmmss')}.${fileExtension}`;
+        try {
+            await this.s3Client.send(new client_s3_1.PutObjectCommand({
+                Bucket: this.bucketName,
+                Key: fileName,
+                Body: file.buffer,
+                ContentType: file.mimetype,
+            }));
+            const newFile = {
+                fileName: fileName,
+                filePath: this.getFileUrl(fileName),
+            };
+            return newFile;
+        }
+        catch (error) {
+            throw new Error(`Failed to upload file to S3: ${error.message}`);
+        }
+    }
+    async deleteFile(file) {
+        try {
+            await this.s3Client.send(new client_s3_1.DeleteObjectCommand({
+                Bucket: this.bucketName,
+                Key: file.fileName,
+            }));
+        }
+        catch (error) {
+            throw new Error(`Failed to delete file from S3: ${error.message}`);
+        }
+    }
+    getFileUrl(fileKey) {
+        return `${this.configService.get('S3_ENDPOINT').replace('s3', 'object/public')}/${this.bucketName}/${fileKey}`;
+    }
+};
+exports.S3Service = S3Service;
+exports.S3Service = S3Service = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
+], S3Service);
+
+
+/***/ }),
+
+/***/ "./src/application/file/usecases/delete-file.usecase.ts":
+/*!**************************************************************!*\
+  !*** ./src/application/file/usecases/delete-file.usecase.ts ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeleteFileUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const s3_service_1 = __webpack_require__(/*! ../infrastructure/s3.service */ "./src/application/file/infrastructure/s3.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+let DeleteFileUsecase = class DeleteFileUsecase {
+    constructor(s3Service, fileService) {
+        this.s3Service = s3Service;
+        this.fileService = fileService;
+    }
+    async execute(fileId) {
+        let file;
+        if (fileId) {
+            file = await this.fileService.findFileById(fileId);
+            if (!file)
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.NOT_FOUND);
+        }
+        else {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.ID_OR_PATH_REQUIRED);
+        }
+        await this.s3Service.deleteFile(file);
+        await this.fileService.delete(file.fileId);
+    }
+};
+exports.DeleteFileUsecase = DeleteFileUsecase;
+exports.DeleteFileUsecase = DeleteFileUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _a : Object, typeof (_b = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _b : Object])
+], DeleteFileUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/file/usecases/upload-file.usecase.ts":
+/*!**************************************************************!*\
+  !*** ./src/application/file/usecases/upload-file.usecase.ts ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UploadFileUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const s3_service_1 = __webpack_require__(/*! ../infrastructure/s3.service */ "./src/application/file/infrastructure/s3.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+let UploadFileUsecase = class UploadFileUsecase {
+    constructor(s3Service, fileService) {
+        this.s3Service = s3Service;
+        this.fileService = fileService;
+    }
+    async execute(file) {
+        const newFile = await this.s3Service.uploadFile(file);
+        const savedFile = await this.fileService.saveFile(newFile);
+        return savedFile;
+    }
+};
+exports.UploadFileUsecase = UploadFileUsecase;
+exports.UploadFileUsecase = UploadFileUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _a : Object, typeof (_b = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _b : Object])
+], UploadFileUsecase);
+
+
+/***/ }),
+
 /***/ "./src/domain/employee/employee.module.ts":
 /*!************************************************!*\
   !*** ./src/domain/employee/employee.module.ts ***!
@@ -6832,6 +7214,139 @@ exports.EmployeeService = EmployeeService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof employee_repository_1.EmployeeRepository !== "undefined" && employee_repository_1.EmployeeRepository) === "function" ? _a : Object])
 ], EmployeeService);
+
+
+/***/ }),
+
+/***/ "./src/domain/file/file.module.ts":
+/*!****************************************!*\
+  !*** ./src/domain/file/file.module.ts ***!
+  \****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const file_entity_1 = __webpack_require__(/*! @libs/entities/file.entity */ "./libs/entities/file.entity.ts");
+const file_service_1 = __webpack_require__(/*! ./file.service */ "./src/domain/file/file.service.ts");
+const file_repository_1 = __webpack_require__(/*! ./file.repository */ "./src/domain/file/file.repository.ts");
+let FileModule = class FileModule {
+};
+exports.FileModule = FileModule;
+exports.FileModule = FileModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([file_entity_1.File])],
+        providers: [file_service_1.FileService, file_repository_1.FileRepository],
+        exports: [file_service_1.FileService],
+    })
+], FileModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/file/file.repository.ts":
+/*!********************************************!*\
+  !*** ./src/domain/file/file.repository.ts ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const file_entity_1 = __webpack_require__(/*! @libs/entities/file.entity */ "./libs/entities/file.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let FileRepository = class FileRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.FileRepository = FileRepository;
+exports.FileRepository = FileRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(file_entity_1.File)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], FileRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/file/file.service.ts":
+/*!*****************************************!*\
+  !*** ./src/domain/file/file.service.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const file_repository_1 = __webpack_require__(/*! ./file.repository */ "./src/domain/file/file.repository.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let FileService = class FileService extends base_service_1.BaseService {
+    constructor(fileRepository) {
+        super(fileRepository);
+        this.fileRepository = fileRepository;
+    }
+    async findFileById(fileId) {
+        const file = await this.fileRepository.findOne({ where: { fileId } });
+        return file;
+    }
+    async findFileByFilePath(filePath) {
+        const file = await this.fileRepository.findOne({ where: { filePath } });
+        return file;
+    }
+    async findAllFilesByFilePath(filePath) {
+        if (!filePath || filePath.length === 0) {
+            return [];
+        }
+        const files = await this.fileRepository.findAll({ where: { filePath: (0, typeorm_1.In)(filePath) } });
+        return files;
+    }
+    async saveFile(file) {
+        const savedFile = await this.fileRepository.save(file);
+        return savedFile;
+    }
+};
+exports.FileService = FileService;
+exports.FileService = FileService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_1.FileRepository !== "undefined" && file_repository_1.FileRepository) === "function" ? _a : Object])
+], FileService);
 
 
 /***/ }),
@@ -7368,17 +7883,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b;
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const file_repository_port_1 = __webpack_require__(/*! ../../domain/ports/file.repository.port */ "./src/modules/file/domain/ports/file.repository.port.ts");
-const file_storage_port_1 = __webpack_require__(/*! ../../domain/ports/file-storage.port */ "./src/modules/file/domain/ports/file-storage.port.ts");
-const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 let FileService = class FileService {
-    constructor(fileRepository, fileStorage) {
+    constructor(fileRepository) {
         this.fileRepository = fileRepository;
-        this.fileStorage = fileStorage;
     }
     async findFileById(fileId) {
         const file = await this.fileRepository.findById(fileId);
@@ -7395,53 +7907,13 @@ let FileService = class FileService {
         const files = await this.fileRepository.findAllByFilePath(filePath);
         return files;
     }
-    async saveFile(file) {
-        const savedFile = await this.fileRepository.save(file);
-        return savedFile;
-    }
-    async uploadFile(file) {
-        const newFile = await this.fileStorage.uploadFile(file);
-        const savedFile = await this.saveFile(newFile);
-        return savedFile;
-    }
-    async deleteFile({ fileId, filePath }) {
-        let file;
-        if (fileId) {
-            file = await this.findFileById(fileId);
-            if (!file)
-                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.NOT_FOUND);
-        }
-        else if (filePath) {
-            file = await this.findFileByFilePath(filePath);
-            if (!file)
-                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.NOT_FOUND);
-        }
-        else {
-            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.ID_OR_PATH_REQUIRED);
-        }
-        await this.fileStorage.deleteFile(file);
-        await this.fileRepository.delete(file.fileId);
-    }
 };
 exports.FileService = FileService;
 exports.FileService = FileService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)('FileRepositoryPort')),
-    __param(1, (0, common_1.Inject)('FileStoragePort')),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_port_1.FileRepositoryPort !== "undefined" && file_repository_port_1.FileRepositoryPort) === "function" ? _a : Object, typeof (_b = typeof file_storage_port_1.FileStoragePort !== "undefined" && file_storage_port_1.FileStoragePort) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_port_1.FileRepositoryPort !== "undefined" && file_repository_port_1.FileRepositoryPort) === "function" ? _a : Object])
 ], FileService);
-
-
-/***/ }),
-
-/***/ "./src/modules/file/domain/ports/file-storage.port.ts":
-/*!************************************************************!*\
-  !*** ./src/modules/file/domain/ports/file-storage.port.ts ***!
-  \************************************************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
@@ -7480,15 +7952,13 @@ const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/in
 const file_repository_1 = __webpack_require__(/*! ./infrastructure/adapters/out/persistence/file.repository */ "./src/modules/file/infrastructure/adapters/out/persistence/file.repository.ts");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
-const s3_stroage_adapter_1 = __webpack_require__(/*! ./infrastructure/adapters/out/storage/s3-stroage.adapter */ "./src/modules/file/infrastructure/adapters/out/storage/s3-stroage.adapter.ts");
-const file_controller_1 = __webpack_require__(/*! ./infrastructure/adapters/in/web/controllers/v1/file.controller */ "./src/modules/file/infrastructure/adapters/in/web/controllers/v1/file.controller.ts");
 let FileModule = class FileModule {
 };
 exports.FileModule = FileModule;
 exports.FileModule = FileModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.File]), config_1.ConfigModule.forFeature(env_config_1.APP_CONFIG)],
-        controllers: [file_controller_1.CommonFileController],
+        controllers: [],
         providers: [
             config_1.ConfigService,
             file_service_1.FileService,
@@ -7496,98 +7966,10 @@ exports.FileModule = FileModule = __decorate([
                 provide: 'FileRepositoryPort',
                 useClass: file_repository_1.FileRepository,
             },
-            {
-                provide: 'FileStoragePort',
-                useClass: s3_stroage_adapter_1.S3StorageAdapter,
-            },
         ],
         exports: [file_service_1.FileService],
     })
 ], FileModule);
-
-
-/***/ }),
-
-/***/ "./src/modules/file/infrastructure/adapters/in/web/controllers/v1/file.controller.ts":
-/*!*******************************************************************************************!*\
-  !*** ./src/modules/file/infrastructure/adapters/in/web/controllers/v1/file.controller.ts ***!
-  \*******************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CommonFileController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
-const file_service_1 = __webpack_require__(/*! @resource/modules/file/application/services/file.service */ "./src/modules/file/application/services/file.service.ts");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
-const file_response_dto_1 = __webpack_require__(/*! @resource/modules/file/application/dtos/file-response.dto */ "./src/modules/file/application/dtos/file-response.dto.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
-let CommonFileController = class CommonFileController {
-    constructor(fileService) {
-        this.fileService = fileService;
-    }
-    async uploadFile(file) {
-        return this.fileService.uploadFile(file);
-    }
-    async deleteFile(fileId) {
-        await this.fileService.deleteFile({ fileId });
-    }
-};
-exports.CommonFileController = CommonFileController;
-__decorate([
-    (0, common_1.Post)('upload'),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                file: {
-                    type: 'string',
-                    format: 'binary',
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiOperation)({ summary: '파일 업로드' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 업로드 성공', type: file_response_dto_1.FileResponseDto }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    __param(0, (0, common_1.UploadedFile)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof Express !== "undefined" && (_b = Express.Multer) !== void 0 && _b.File) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
-], CommonFileController.prototype, "uploadFile", null);
-__decorate([
-    (0, common_1.Delete)(':fileId'),
-    (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
-    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 삭제 성공' }),
-    __param(0, (0, common_1.Param)('fileId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], CommonFileController.prototype, "deleteFile", null);
-exports.CommonFileController = CommonFileController = __decorate([
-    (0, swagger_1.ApiTags)('0. 파일 - 공통 페이지'),
-    (0, common_1.Controller)('v1/files'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _a : Object])
-], CommonFileController);
 
 
 /***/ }),
@@ -7648,87 +8030,6 @@ exports.FileRepository = FileRepository = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(entities_1.File)),
     __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
 ], FileRepository);
-
-
-/***/ }),
-
-/***/ "./src/modules/file/infrastructure/adapters/out/storage/s3-stroage.adapter.ts":
-/*!************************************************************************************!*\
-  !*** ./src/modules/file/infrastructure/adapters/out/storage/s3-stroage.adapter.ts ***!
-  \************************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.S3StorageAdapter = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
-const client_s3_1 = __webpack_require__(/*! @aws-sdk/client-s3 */ "@aws-sdk/client-s3");
-const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
-let S3StorageAdapter = class S3StorageAdapter {
-    constructor(configService) {
-        this.configService = configService;
-        this.bucketName = this.configService.get('S3_BUCKET_NAME');
-        this.s3Client = new client_s3_1.S3Client({
-            region: this.configService.get('S3_REGION'),
-            endpoint: this.configService.get('S3_ENDPOINT'),
-            credentials: {
-                accessKeyId: this.configService.get('S3_ACCESS_KEY'),
-                secretAccessKey: this.configService.get('S3_SECRET_KEY'),
-            },
-            forcePathStyle: true,
-        });
-    }
-    async uploadFile(file, options) {
-        const fileExtension = file.originalname.split('.').pop();
-        const fileName = `${date_util_1.DateUtil.now().format('YYYYMMDDHHmmss')}.${fileExtension}`;
-        try {
-            await this.s3Client.send(new client_s3_1.PutObjectCommand({
-                Bucket: this.bucketName,
-                Key: fileName,
-                Body: file.buffer,
-                ContentType: file.mimetype,
-            }));
-            const newFile = {
-                fileName: fileName,
-                filePath: this.getFileUrl(fileName),
-            };
-            return newFile;
-        }
-        catch (error) {
-            throw new Error(`Failed to upload file to S3: ${error.message}`);
-        }
-    }
-    async deleteFile(file) {
-        try {
-            await this.s3Client.send(new client_s3_1.DeleteObjectCommand({
-                Bucket: this.bucketName,
-                Key: file.fileName,
-            }));
-        }
-        catch (error) {
-            throw new Error(`Failed to delete file from S3: ${error.message}`);
-        }
-    }
-    getFileUrl(fileKey) {
-        return `${this.configService.get('S3_ENDPOINT').replace('s3', 'object/public')}/${this.bucketName}/${fileKey}`;
-    }
-};
-exports.S3StorageAdapter = S3StorageAdapter;
-exports.S3StorageAdapter = S3StorageAdapter = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
-], S3StorageAdapter);
 
 
 /***/ }),
