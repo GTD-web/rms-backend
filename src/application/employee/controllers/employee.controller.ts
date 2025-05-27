@@ -6,7 +6,7 @@ import { EmplyeesByDepartmentResponseDto } from '@resource/application/employee/
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 
-@ApiTags('5. 직원 - 사용자 페이지')
+@ApiTags('5. 직원 ')
 @ApiBearerAuth()
 @Controller('v1/employees')
 export class UserEmployeeController {

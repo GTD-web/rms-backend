@@ -12,7 +12,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
-@ApiTags('4. 차량 정비 이력 - 관리자 페이지')
+@ApiTags('4. 차량 정비 이력 - 관리자 ')
 @Controller('v1/admin/maintenances')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)

@@ -17,7 +17,7 @@ import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
 import { DateUtil } from '@libs/utils/date.util';
 import { PushNotificationDto } from '@resource/modules/notification/application/dto/send-notification.dto';
-@ApiTags('5. 알림 - 사용자 페이지')
+@ApiTags('5. 알림 ')
 @Controller('v1/notifications')
 @Roles(Role.USER)
 @ApiBearerAuth()

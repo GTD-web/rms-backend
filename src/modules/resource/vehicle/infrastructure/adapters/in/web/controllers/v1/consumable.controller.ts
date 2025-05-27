@@ -8,7 +8,7 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 
-@ApiTags('4. 차량 소모품 - 사용자 페이지')
+@ApiTags('4. 차량 소모품 ')
 @Controller('v1/consumables')
 @ApiBearerAuth()
 @Roles(Role.RESOURCE_ADMIN)

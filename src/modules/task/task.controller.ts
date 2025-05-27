@@ -6,7 +6,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 
-@ApiTags('3. 자원 관리 - 태스크')
+@ApiTags('3. 태스크 관리 ')
 @ApiBearerAuth()
 @Roles(Role.USER)
 @Controller('v1/tasks')

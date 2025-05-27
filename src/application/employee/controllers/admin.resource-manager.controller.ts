@@ -6,7 +6,7 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { EmployeeService } from '@src/application/employee/employee.service';
 import { EmplyeesByDepartmentResponseDto } from '@resource/application/employee/dtos/employees-by-department-response.dto';
 
-@ApiTags('3. 자원 관리자 - 관리자 페이지')
+@ApiTags('3. 자원 관리자 - 관리자 ')
 @ApiBearerAuth()
 @Controller('v1/admin/resource-managers')
 @Roles(Role.SYSTEM_ADMIN)

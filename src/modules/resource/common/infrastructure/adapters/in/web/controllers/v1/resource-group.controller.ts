@@ -11,7 +11,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { ResourceGroupUsecase } from '@resource/modules/resource/common/application/usecases/resource-group.usecase';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 
-@ApiTags('3. 자원 그룹 - 사용자 페이지')
+@ApiTags('3. 자원 그룹 ')
 @Controller('v1/resource-groups')
 @ApiBearerAuth()
 @Roles(Role.USER)

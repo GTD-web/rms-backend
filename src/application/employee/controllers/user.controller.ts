@@ -11,7 +11,7 @@ import { ChangePasswordDto } from '@resource/application/employee/dtos/change-pa
 import { UpdateNotificationSettingsDto } from '@resource/application/employee/dtos/notification-settings.dto';
 import { EmployeeService } from '../employee.service';
 
-@ApiTags('5. 유저 - 사용자 페이지')
+@ApiTags('5. 유저 ')
 @Controller('v1/users')
 @ApiBearerAuth()
 @Roles(Role.USER)

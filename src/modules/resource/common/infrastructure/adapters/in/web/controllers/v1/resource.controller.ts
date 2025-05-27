@@ -14,7 +14,7 @@ import { User as UserEntity } from '@libs/entities';
 import { CheckAvailabilityQueryDto } from '@resource/modules/resource/common/application/dtos/check-availability.dto';
 import { CheckAvailabilityResponseDto } from '@resource/modules/resource/common/application/dtos/check-availability.dto';
 
-@ApiTags('3. 자원 - 사용자 페이지')
+@ApiTags('3. 자원 ')
 @Controller('v1/resources')
 @ApiBearerAuth()
 @Roles(Role.USER)

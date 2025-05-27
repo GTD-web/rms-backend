@@ -31,7 +31,7 @@ import { ReservationSnapshotUsecase } from '@resource/modules/reservation/applic
 import { UpdateReservationDto } from '@resource/modules/reservation/application/dtos/update-reservation.dto';
 import { Public } from '@libs/decorators/public.decorator';
 
-@ApiTags('2. 예약 - 사용자 페이지')
+@ApiTags('2. 예약 ')
 @Controller('v1/reservations')
 @ApiBearerAuth()
 @Roles(Role.USER)

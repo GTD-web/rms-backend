@@ -24,7 +24,7 @@ import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 
-@ApiTags('2. 예약 - 관리자 페이지')
+@ApiTags('2. 예약 - 관리자 ')
 @Controller('v1/admin/reservations')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)

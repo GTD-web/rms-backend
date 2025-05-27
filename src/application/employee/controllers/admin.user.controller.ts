@@ -7,7 +7,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { ChangeRoleDto } from '@resource/application/employee/dtos/change-role.dto';
 import { EmployeeService } from '../employee.service';
 
-@ApiTags('5. 유저 - 관리자 페이지')
+@ApiTags('5. 유저 - 관리자 ')
 @ApiBearerAuth()
 @Controller('v1/admin/users')
 @Roles(Role.SYSTEM_ADMIN)

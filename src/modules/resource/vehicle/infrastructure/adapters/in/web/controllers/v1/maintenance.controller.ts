@@ -9,7 +9,7 @@ import { User as UserEntity } from '@libs/entities';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 
-@ApiTags('4. 차량 정비 이력 - 사용자 페이지')
+@ApiTags('4. 차량 정비 이력 ')
 @Controller('v1/maintenances')
 @ApiBearerAuth()
 @Roles(Role.RESOURCE_ADMIN)

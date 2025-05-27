@@ -13,7 +13,7 @@ import { ResourceGroupUsecase } from '@resource/modules/resource/common/applicat
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { UpdateResourceGroupOrdersDto } from '@resource/modules/resource/common/application/dtos/update-resource.dto';
 
-@ApiTags('3. 자원 그룹 - 관리자 페이지')
+@ApiTags('3. 자원 그룹 - 관리자 ')
 @Controller('v1/admin/resource-groups')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)

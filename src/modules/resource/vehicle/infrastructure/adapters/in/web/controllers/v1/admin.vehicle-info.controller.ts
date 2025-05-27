@@ -7,7 +7,7 @@ import { VehicleInfoUsecase } from '@resource/modules/resource/vehicle/applicati
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 
-@ApiTags('4. 차량 정보 - 관리자 페이지')
+@ApiTags('4. 차량 정보 - 관리자 ')
 @Controller('v1/admin/vehicle-info')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)

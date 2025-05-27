@@ -5,7 +5,7 @@ import { Public } from '@libs/decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler/dist/throttler.decorator';
 import { MMSWebhookRequestDto } from '@resource/application/employee/dtos/mms-employee-response.dto';
 
-@ApiTags('5. 직원 - 사용자 페이지')
+@ApiTags('5. 직원 ')
 @ApiBearerAuth()
 @Controller('v1/employees')
 export class EmployeeWebhookController {

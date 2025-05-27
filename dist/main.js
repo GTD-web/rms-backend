@@ -3908,7 +3908,7 @@ __decorate([
     __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], AppController.prototype, "getAllStatistics", null);
 exports.AppController = AppController = __decorate([
-    (0, swagger_1.ApiTags)('6. 통계 - 관리자 페이지'),
+    (0, swagger_1.ApiTags)(`6. 통계 - 관리자 페이지`),
     (0, common_1.Controller)('v1/statistics'),
     __metadata("design:paramtypes", [typeof (_a = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _a : Object, typeof (_b = typeof seed_service_1.SeedService !== "undefined" && seed_service_1.SeedService) === "function" ? _b : Object])
 ], AppController);
@@ -4313,7 +4313,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "login", null);
 exports.AuthController = AuthController = __decorate([
-    (0, swagger_1.ApiTags)('1. 인증 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('1. 인증 '),
     (0, common_1.Controller)('v1/auth'),
     (0, public_decorator_1.Public)(),
     __metadata("design:paramtypes", [typeof (_a = typeof auth_service_1.AuthService !== "undefined" && auth_service_1.AuthService) === "function" ? _a : Object])
@@ -5027,7 +5027,7 @@ __decorate([
     __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
 ], AdminResourceManagerController.prototype, "findAllResourceManagers", null);
 exports.AdminResourceManagerController = AdminResourceManagerController = __decorate([
-    (0, swagger_1.ApiTags)('3. 자원 관리자 - 관리자 페이지'),
+    (0, swagger_1.ApiTags)('3. 자원 관리자 - 관리자 '),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('v1/admin/resource-managers'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
@@ -5097,7 +5097,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AdminUserController.prototype, "changeRole", null);
 exports.AdminUserController = AdminUserController = __decorate([
-    (0, swagger_1.ApiTags)('5. 유저 - 관리자 페이지'),
+    (0, swagger_1.ApiTags)('5. 유저 - 관리자 '),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('v1/admin/users'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
@@ -5156,7 +5156,7 @@ __decorate([
     __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
 ], UserEmployeeController.prototype, "findAllEmplyeesByDepartment", null);
 exports.UserEmployeeController = UserEmployeeController = __decorate([
-    (0, swagger_1.ApiTags)('5. 직원 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('5. 직원 '),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('v1/employees'),
     __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
@@ -5261,7 +5261,7 @@ __decorate([
     __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], UserUserController.prototype, "changeNotificationSettings", null);
 exports.UserUserController = UserUserController = __decorate([
-    (0, swagger_1.ApiTags)('5. 유저 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('5. 유저 '),
     (0, common_1.Controller)('v1/users'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
@@ -5385,7 +5385,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EmployeeWebhookController.prototype, "webhookDelete", null);
 exports.EmployeeWebhookController = EmployeeWebhookController = __decorate([
-    (0, swagger_1.ApiTags)('5. 직원 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('5. 직원 '),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('v1/employees'),
     __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
@@ -6680,7 +6680,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "deleteFile", null);
 exports.FileController = FileController = __decorate([
-    (0, swagger_1.ApiTags)('0. 파일 - 공통 페이지'),
+    (0, swagger_1.ApiTags)('0. 파일 - 공통 '),
     (0, common_1.Controller)('v1/files'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
@@ -7114,7 +7114,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAsRead", null);
 exports.NotificationController = NotificationController = __decorate([
-    (0, swagger_1.ApiTags)('5. 알림 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('5. 알림 '),
     (0, common_1.Controller)('v1/notifications'),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiBearerAuth)(),
@@ -11956,7 +11956,7 @@ __decorate([
     __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], AdminReservationController.prototype, "updateStatus", null);
 exports.AdminReservationController = AdminReservationController = __decorate([
-    (0, swagger_1.ApiTags)('2. 예약 - 관리자 페이지'),
+    (0, swagger_1.ApiTags)('2. 예약 - 관리자 '),
     (0, common_1.Controller)('v1/admin/reservations'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
@@ -12006,7 +12006,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CronReservationController.prototype, "closeReservation", null);
 exports.CronReservationController = CronReservationController = __decorate([
-    (0, swagger_1.ApiTags)('2. 예약 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('2. 예약 '),
     (0, public_decorator_1.Public)(),
     (0, common_1.Controller)('v1/reservations'),
     __metadata("design:paramtypes", [typeof (_a = typeof reservation_usecase_1.ReservationUsecase !== "undefined" && reservation_usecase_1.ReservationUsecase) === "function" ? _a : Object])
@@ -12305,7 +12305,7 @@ __decorate([
     __metadata("design:returntype", typeof (_17 = typeof Promise !== "undefined" && Promise) === "function" ? _17 : Object)
 ], UserReservationController.prototype, "returnVehicle", null);
 exports.UserReservationController = UserReservationController = __decorate([
-    (0, swagger_1.ApiTags)('2. 예약 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('2. 예약 '),
     (0, common_1.Controller)('v1/reservations'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
@@ -15284,7 +15284,7 @@ __decorate([
     __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], AdminResourceGroupController.prototype, "remove", null);
 exports.AdminResourceGroupController = AdminResourceGroupController = __decorate([
-    (0, swagger_1.ApiTags)('3. 자원 그룹 - 관리자 페이지'),
+    (0, swagger_1.ApiTags)('3. 자원 그룹 - 관리자 '),
     (0, common_1.Controller)('v1/admin/resource-groups'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
@@ -15444,7 +15444,7 @@ __decorate([
     __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], AdminResourceController.prototype, "remove", null);
 exports.AdminResourceController = AdminResourceController = __decorate([
-    (0, swagger_1.ApiTags)('3. 자원 - 관리자 페이지'),
+    (0, swagger_1.ApiTags)('3. 자원 - 관리자 '),
     (0, common_1.Controller)('v1/admin/resources'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
@@ -15521,7 +15521,7 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], UserResourceGroupController.prototype, "findAll", null);
 exports.UserResourceGroupController = UserResourceGroupController = __decorate([
-    (0, swagger_1.ApiTags)('3. 자원 그룹 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('3. 자원 그룹 '),
     (0, common_1.Controller)('v1/resource-groups'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
@@ -15663,7 +15663,7 @@ __decorate([
     __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], UserResourceController.prototype, "findOne", null);
 exports.UserResourceController = UserResourceController = __decorate([
-    (0, swagger_1.ApiTags)('3. 자원 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('3. 자원 '),
     (0, common_1.Controller)('v1/resources'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
@@ -17778,7 +17778,7 @@ __decorate([
     __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], AdminConsumableController.prototype, "remove", null);
 exports.AdminConsumableController = AdminConsumableController = __decorate([
-    (0, swagger_1.ApiTags)('4. 차량 소모품 - 관리자 페이지'),
+    (0, swagger_1.ApiTags)('4. 차량 소모품 - 관리자 '),
     (0, common_1.Controller)('v1/admin/consumables'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
@@ -17914,7 +17914,7 @@ __decorate([
     __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], AdminMaintenanceController.prototype, "remove", null);
 exports.AdminMaintenanceController = AdminMaintenanceController = __decorate([
-    (0, swagger_1.ApiTags)('4. 차량 정비 이력 - 관리자 페이지'),
+    (0, swagger_1.ApiTags)('4. 차량 정비 이력 - 관리자 '),
     (0, common_1.Controller)('v1/admin/maintenances'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
@@ -17994,7 +17994,7 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], AdminVehicleInfoController.prototype, "update", null);
 exports.AdminVehicleInfoController = AdminVehicleInfoController = __decorate([
-    (0, swagger_1.ApiTags)('4. 차량 정보 - 관리자 페이지'),
+    (0, swagger_1.ApiTags)('4. 차량 정보 - 관리자 '),
     (0, common_1.Controller)('v1/admin/vehicle-info'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
@@ -18079,7 +18079,7 @@ __decorate([
     __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
 ], UserConsumableController.prototype, "findOne", null);
 exports.UserConsumableController = UserConsumableController = __decorate([
-    (0, swagger_1.ApiTags)('4. 차량 소모품 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('4. 차량 소모품 '),
     (0, common_1.Controller)('v1/consumables'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN),
@@ -18145,7 +18145,7 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], UserMaintenanceController.prototype, "create", null);
 exports.UserMaintenanceController = UserMaintenanceController = __decorate([
-    (0, swagger_1.ApiTags)('4. 차량 정비 이력 - 사용자 페이지'),
+    (0, swagger_1.ApiTags)('4. 차량 정비 이력 '),
     (0, common_1.Controller)('v1/maintenances'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.RESOURCE_ADMIN),
@@ -19170,7 +19170,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TaskController.prototype, "getTaskStatus", null);
 exports.TaskController = TaskController = __decorate([
-    (0, swagger_1.ApiTags)('3. 자원 관리 - 태스크'),
+    (0, swagger_1.ApiTags)('3. 태스크 관리 '),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, common_1.Controller)('v1/tasks'),

@@ -3,7 +3,7 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { ReservationUsecase } from '@resource/modules/reservation/application/usecases/reservation.usecase';
 
-@ApiTags('2. 예약 - 사용자 페이지')
+@ApiTags('2. 예약 ')
 @Public()
 @Controller('v1/reservations')
 export class CronReservationController {

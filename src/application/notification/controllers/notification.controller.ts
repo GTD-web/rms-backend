@@ -16,7 +16,7 @@ import { PushNotificationDto } from '../dtos/send-notification.dto';
 
 import { NotificationService } from '../notification.service';
 
-@ApiTags('5. 알림 - 사용자 페이지')
+@ApiTags('5. 알림 ')
 @Controller('v1/notifications')
 @Roles(Role.USER)
 @ApiBearerAuth()

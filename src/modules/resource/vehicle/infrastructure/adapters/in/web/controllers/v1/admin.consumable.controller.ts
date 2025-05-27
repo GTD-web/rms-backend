@@ -10,7 +10,7 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { User } from '@libs/decorators/user.decorator';
 import { User as UserEntity } from '@libs/entities';
 
-@ApiTags('4. 차량 소모품 - 관리자 페이지')
+@ApiTags('4. 차량 소모품 - 관리자 ')
 @Controller('v1/admin/consumables')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)

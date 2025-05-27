@@ -6,7 +6,7 @@ import { Public } from '@libs/decorators/public.decorator';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { LoginResponseDto } from '@resource/application/auth/dto/login-response.dto';
 
-@ApiTags('1. 인증 - 사용자 페이지')
+@ApiTags('1. 인증 ')
 @Controller('v1/auth')
 @Public()
 export class AuthController {

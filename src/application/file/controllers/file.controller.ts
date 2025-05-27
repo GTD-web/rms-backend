@@ -7,7 +7,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { FileResponseDto } from '@resource/application/file/dtos/file-response.dto';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 
-@ApiTags('0. 파일 - 공통 페이지')
+@ApiTags('0. 파일 - 공통 ')
 @Controller('v1/files')
 @ApiBearerAuth()
 @Roles(Role.USER)

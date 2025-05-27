@@ -8,7 +8,7 @@ import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceUsecase } from '@resource/modules/resource/common/application/usecases/resource.usecase';
 import { UpdateResourceOrdersDto } from '@resource/modules/resource/common/application/dtos/update-resource.dto';
 
-@ApiTags('3. 자원 - 관리자 페이지')
+@ApiTags('3. 자원 - 관리자 ')
 @Controller('v1/admin/resources')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)
