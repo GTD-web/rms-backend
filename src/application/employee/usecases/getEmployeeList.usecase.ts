@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Role } from '@libs/enums/role-type.enum';
-import { In, Not, Raw } from 'typeorm';
-import { EmployeeResponseDto } from '@resource/modules/employee/application/dtos/employee-response.dto';
-import { EmplyeesByDepartmentResponseDto } from '@resource/dtos.index';
+import { In, Not } from 'typeorm';
+import { EmployeeResponseDto } from '@resource/application/employee/dtos/employee-response.dto';
+import { EmplyeesByDepartmentResponseDto } from '@resource/application/employee/dtos/employees-by-department-response.dto';
 import { EmployeeService as EmployeeServiceDomain } from '@src/domain/employee/employee.service';
 
 @Injectable()

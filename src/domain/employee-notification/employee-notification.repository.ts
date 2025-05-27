@@ -1,0 +1,15 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { EmployeeNotification } from '@libs/entities/employee-notification.entity';
+import { BaseRepository } from '@libs/repositories/base.repository';
+
+@Injectable()
+export class EmployeeNotificationRepository extends BaseRepository<EmployeeNotification> {
+    constructor(
+        @InjectRepository(EmployeeNotification)
+        repository: Repository<EmployeeNotification>,
+    ) {
+        super(repository);
+    }
+}

@@ -1,11 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { EmployeeService } from '../employee.service';
-import { Employee } from '@libs/entities';
 import { ApiBearerAuth, ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Public } from '@libs/decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler/dist/throttler.decorator';
-import { EmployeeUseCase } from '@src/modules/employee/application/usecases/employee.usecase';
-import { MMSWebhookRequestDto } from '@resource/modules/employee/application/dtos/mms-employee-response.dto';
+import { MMSWebhookRequestDto } from '@resource/application/employee/dtos/mms-employee-response.dto';
 
 @ApiTags('5. 직원 - 사용자 페이지')
 @ApiBearerAuth()

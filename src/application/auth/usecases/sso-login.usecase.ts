@@ -1,6 +1,6 @@
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { SsoResponseDto } from '@src/modules/auth/application/dto/sso-response.dto';
+import { SsoResponseDto } from '@resource/application/auth/dto/sso-response.dto';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 

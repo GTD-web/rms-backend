@@ -9,36 +9,6 @@ import { In, Raw } from 'typeorm';
 @Injectable()
 export class UserEventHandler {
     constructor(private readonly userService: UserService) {}
-    // 이벤트 수신 예시 메서드
-    @OnEvent('add.user.role')
-    async handleUserRoleAddedEvent(payload: { employeeId: string; role: Role; repositoryOptions?: RepositoryOptions }) {
-        console.log(`Role ${payload.role} added to user ${payload.employeeId}`);
-        // 역할 추가 이벤트에 대한 처리 로직
-        const user = await this.userService.findByEmployeeId(payload.employeeId);
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-        if (!user.roles.includes(payload.role)) {
-            user.roles.push(payload.role);
-            await this.userService.update(user, payload.repositoryOptions);
-        }
-    }
-
-    @OnEvent('remove.user.role')
-    async handleUserRoleRemovedEvent(payload: {
-        employeeId: string;
-        role: Role;
-        repositoryOptions?: RepositoryOptions;
-    }) {
-        console.log(`Role ${payload.role} removed from user ${payload.employeeId}`);
-        // 역할 제거 이벤트에 대한 처리 로직
-        const user = await this.userService.findByEmployeeId(payload.employeeId);
-        if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
-        }
-        user.roles = user.roles.filter((r) => r !== payload.role);
-        await this.userService.update(user, payload.repositoryOptions);
-    }
 
     @OnEvent('update.user.subscription')
     async handleUserSubscriptionUpdateEvent(payload: {
@@ -84,23 +54,6 @@ export class UserEventHandler {
         }
 
         user.subscriptions = payload.subscriptions;
-        await this.userService.update(user);
-    }
-
-    @OnEvent('update.user.mobile')
-    async handleUserMobileUpdateEvent(payload: {
-        employeeId: string;
-        mobile: string;
-        // repositoryOptions?: RepositoryOptions;
-    }) {
-        console.log(`Mobile updated for user ${payload.employeeId} ${payload.mobile}`);
-        // 구독 정보 업데이트 이벤트에 대한 처리 로직
-        const user = await this.userService.findByEmployeeId(payload.employeeId);
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        user.mobile = payload.mobile;
         await this.userService.update(user);
     }
 

@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { JwtStrategy } from '@resource/application/auth/strategies/jwt.strategy';
 import { Employee } from '@libs/entities';
-import { AuthController } from './auth.controller';
+import { AuthController } from './controllers/auth.controller';
 import { EmployeeModule } from '@src/domain/employee/employee.module';
 import { AuthService } from './auth.service';
 import { ValidateUsecase } from './usecases/validate.usecase';

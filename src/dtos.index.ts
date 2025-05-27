@@ -1,13 +1,13 @@
 // Resource Module DTOs
 
 // Auth Module DTOs
-export { LoginDto } from './modules/auth/application/dto/login.dto';
-export { LoginResponseDto } from './modules/auth/application/dto/login-response.dto';
-export { UserResponseDto } from './modules/auth/application/dto/user-response.dto';
-export { ChangeRoleDto } from './modules/auth/application/dto/change-role.dto';
-export { ChangePasswordDto } from './modules/auth/application/dto/change-password.dto';
-export { CheckPasswordDto } from './modules/auth/application/dto/check-password.dto';
-export { UpdateNotificationSettingsDto } from './modules/auth/application/dto/notification-settings.dto';
+export { LoginDto } from './application/auth/dto/login.dto';
+export { LoginResponseDto } from './application/auth/dto/login-response.dto';
+export { UserResponseDto } from './application/auth/dto/user-response.dto';
+export { ChangeRoleDto } from './application/auth/dto/change-role.dto';
+export { ChangePasswordDto } from './application/auth/dto/change-password.dto';
+export { CheckPasswordDto } from './application/auth/dto/check-password.dto';
+export { UpdateNotificationSettingsDto } from './application/auth/dto/notification-settings.dto';
 
 // Common
 export {
@@ -65,10 +65,10 @@ export { UpdateAccommodationInfoDto } from './modules/resource/accommodation/app
 export { AccommodationInfoResponseDto } from './modules/resource/accommodation/application/dtos/accommodation-info-response.dto';
 
 // Employee
-export { CreateEmployeeDto } from './modules/employee/application/dtos/create-employee.dto';
-export { UpdateEmployeeDto } from './modules/employee/application/dtos/update-employee.dto';
-export { EmployeeResponseDto } from './modules/employee/application/dtos/employee-response.dto';
-export { EmplyeesByDepartmentResponseDto } from './modules/employee/application/dtos/employees-by-department-response.dto';
+export { CreateEmployeeDto } from './application/employee/dtos/create-employee.dto';
+export { UpdateEmployeeDto } from './application/employee/dtos/update-employee.dto';
+export { EmployeeResponseDto } from './application/employee/dtos/employee-response.dto';
+export { EmplyeesByDepartmentResponseDto } from './application/employee/dtos/employees-by-department-response.dto';
 
 // Reservation Module DTOs (향후 추가될 수 있음)
 export { CreateReservationDto } from './modules/reservation/application/dtos/create-reservation.dto';

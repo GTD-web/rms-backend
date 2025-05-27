@@ -1,9 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { EmployeeService } from '@src/domain/employee/employee.service';
 import { Role } from '@libs/enums/role-type.enum';
-import { In } from 'typeorm';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 @Injectable()

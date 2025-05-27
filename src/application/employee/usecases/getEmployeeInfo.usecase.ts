@@ -1,5 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { EmployeeService } from '@src/modules/employee/application/services/employee.service';
+import { Injectable } from '@nestjs/common';
 import { MMSEmployeeResponseDto } from '@resource/application/employee/dtos/mms-employee-response.dto';
 import axios from 'axios';
 
