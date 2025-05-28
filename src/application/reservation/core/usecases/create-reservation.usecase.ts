@@ -59,6 +59,10 @@ export class CreateReservationUsecase {
         await queryRunner.startTransaction();
 
         try {
+            createDto.status =
+                createDto.resourceType === ResourceType.ACCOMMODATION
+                    ? ReservationStatus.PENDING
+                    : ReservationStatus.CONFIRMED;
             const reservation = await this.reservationService.create(createDto);
 
             const savedReservation = await this.reservationService.save(reservation, {

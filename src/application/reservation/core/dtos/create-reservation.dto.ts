@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsOptional, IsArray, IsDateString, IsEnum, Matches, Length } from 'class-validator';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 
 export class CreateReservationDto {
     @ApiProperty()
@@ -50,6 +51,12 @@ export class CreateReservationDto {
     @ApiProperty({ example: false })
     @IsBoolean({ message: ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('시작 전 알림 여부') })
     notifyBeforeStart: boolean;
+
+    @ApiProperty({ enum: ReservationStatus })
+    @IsEnum(ReservationStatus, {
+        message: ERROR_MESSAGE.VALIDATION.IS_ENUM('예약 상태', Object.values(ReservationStatus)),
+    })
+    status: ReservationStatus;
 
     @ApiProperty({ required: false, type: [Number], example: [10, 20] })
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('알림 시간') })
