@@ -9,7 +9,7 @@ import {
 
 export interface IRepositoryOptions<T> {
     queryRunner?: QueryRunner;
-    where?: FindOptionsWhere<T>;
+    where?: FindOptionsWhere<T> | FindOptionsWhere<T>[];
     relations?: string[];
     select?: FindOptionsSelect<T>;
     order?: FindOptionsOrder<T>;

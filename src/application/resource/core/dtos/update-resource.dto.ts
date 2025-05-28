@@ -92,39 +92,6 @@ export class UpdateResourceInfoDto {
     managers?: CreateResourceManagerDto[];
 }
 
-// 차량 반납
-export class ReturnVehicleDto {
-    @ApiProperty()
-    location: ResourceLocation;
-
-    @ApiProperty({ minimum: 0, maximum: 999999999 })
-    @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') })
-    @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') })
-    @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') })
-    leftMileage: number;
-
-    @ApiProperty({ minimum: 0, maximum: 999999999 })
-    @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') })
-    @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') })
-    @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') })
-    totalMileage: number;
-
-    @ApiProperty()
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') })
-    @IsString({ each: true, message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주차 위치 이미지', '문자열') })
-    parkingLocationImages: string[];
-
-    @ApiProperty()
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') })
-    @IsString({ each: true, message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지', '문자열') })
-    odometerImages: string[];
-
-    @ApiProperty()
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('차량 실내 이미지') })
-    @IsString({ each: true, message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('차량 실내 이미지', '문자열') })
-    indoorImages: string[];
-}
-
 export class NewOrderResourceDto {
     @ApiProperty()
     @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') })

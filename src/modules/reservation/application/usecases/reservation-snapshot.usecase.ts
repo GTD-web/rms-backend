@@ -22,7 +22,7 @@ export class ReservationSnapshotUsecase {
 
     async createSnapshot(user: User, dto: CreateReservationSnapshotDto): Promise<ReservationSnapshotResponseDto> {
         const snapshot = this.snapshotService.create(dto);
-        snapshot.userId = user.userId;
+        snapshot.employeeId = user.employeeId;
         const savedSnapshot = await this.snapshotService.save(snapshot);
         return this.toResponseDto(savedSnapshot);
     }
@@ -34,7 +34,7 @@ export class ReservationSnapshotUsecase {
 
     async findSnapshotByUserId(userId: string): Promise<ReservationSnapshotResponseDto> {
         const snapshot = await this.snapshotService.findOne({
-            where: { userId },
+            where: { employeeId: userId },
         });
         return snapshot ? this.toResponseDto(snapshot) : null;
     }
@@ -51,7 +51,7 @@ export class ReservationSnapshotUsecase {
     private toResponseDto(snapshot: ReservationSnapshot): ReservationSnapshotResponseDto {
         return {
             snapshotId: snapshot.snapshotId,
-            userId: snapshot.userId,
+            employeeId: snapshot.employeeId,
             step: snapshot.step,
             resourceType: snapshot.resourceType,
             droppableGroupData: snapshot.droppableGroupData,

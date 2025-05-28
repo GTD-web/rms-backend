@@ -1228,7 +1228,7 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationSnapshot = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./libs/entities/user.entity.ts");
+const employee_entity_1 = __webpack_require__(/*! ./employee.entity */ "./libs/entities/employee.entity.ts");
 let ReservationSnapshot = class ReservationSnapshot {
 };
 exports.ReservationSnapshot = ReservationSnapshot;
@@ -1241,7 +1241,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], ReservationSnapshot.prototype, "userId", void 0);
+], ReservationSnapshot.prototype, "employeeId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
@@ -1311,10 +1311,10 @@ __decorate([
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], ReservationSnapshot.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.User),
-    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
-    __metadata("design:type", typeof (_c = typeof user_entity_1.User !== "undefined" && user_entity_1.User) === "function" ? _c : Object)
-], ReservationSnapshot.prototype, "user", void 0);
+    (0, typeorm_1.ManyToOne)(() => employee_entity_1.Employee),
+    (0, typeorm_1.JoinColumn)({ name: 'employeeId' }),
+    __metadata("design:type", typeof (_c = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _c : Object)
+], ReservationSnapshot.prototype, "employee", void 0);
 exports.ReservationSnapshot = ReservationSnapshot = __decorate([
     (0, typeorm_1.Entity)('reservation_snapshots')
 ], ReservationSnapshot);
@@ -3968,7 +3968,6 @@ const typeorm_config_1 = __webpack_require__(/*! @libs/configs/typeorm.config */
 const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
 const jwt_config_1 = __webpack_require__(/*! @libs/configs/jwt.config */ "./libs/configs/jwt.config.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const reservation_module_1 = __webpack_require__(/*! ./modules/reservation/reservation.module */ "./src/modules/reservation/reservation.module.ts");
 const app_service_1 = __webpack_require__(/*! ./app.service */ "./src/app.service.ts");
 const app_controller_1 = __webpack_require__(/*! ./app.controller */ "./src/app.controller.ts");
 const api_doc_service_1 = __webpack_require__(/*! @libs/utils/api-doc.service */ "./libs/utils/api-doc.service.ts");
@@ -3981,6 +3980,8 @@ const file_module_1 = __webpack_require__(/*! ./application/file/file.module */ 
 const notification_module_1 = __webpack_require__(/*! ./application/notification/notification.module */ "./src/application/notification/notification.module.ts");
 const core_module_1 = __webpack_require__(/*! ./application/resource/core/core.module */ "./src/application/resource/core/core.module.ts");
 const vehicle_resource_module_1 = __webpack_require__(/*! ./modules/resource/vehicle/vehicle-resource.module */ "./src/modules/resource/vehicle/vehicle-resource.module.ts");
+const snapshot_module_1 = __webpack_require__(/*! ./application/reservation/snapshot/snapshot.module */ "./src/application/reservation/snapshot/snapshot.module.ts");
+const core_module_2 = __webpack_require__(/*! ./application/reservation/core/core.module */ "./src/application/reservation/core/core.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -4002,7 +4003,6 @@ exports.AppModule = AppModule = __decorate([
                 useFactory: typeorm_config_1.typeOrmConfig,
             }),
             typeorm_1.TypeOrmModule.forFeature(entities_1.Entities),
-            reservation_module_1.ReservationModule,
             seed_module_1.SeedModule,
             task_module_1.TaskModule,
             auth_module_1.AuthModule,
@@ -4011,6 +4011,8 @@ exports.AppModule = AppModule = __decorate([
             notification_module_1.NotificationModule,
             core_module_1.ResourceCoreModule,
             vehicle_resource_module_1.VehicleResourceModule,
+            snapshot_module_1.ReservationSnapshotModule,
+            core_module_2.ReservationCoreModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, api_doc_service_1.ApiDocService, db_doc_service_1.DbDocService],
@@ -4967,7 +4969,8 @@ let ValidateUsecase = class ValidateUsecase {
         }
         const isPasswordValid = await bcrypt.compare(password, employee.password);
         if (!isPasswordValid) {
-            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.INVALID_PASSWORD);
+            console.log('패스워드 불일치, SSO 비밀번호 확인 필요');
+            return null;
         }
         return employee;
     }
@@ -6107,6 +6110,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const axios_1 = __webpack_require__(/*! axios */ "axios");
 let ChangePasswordUsecase = class ChangePasswordUsecase {
     constructor(employeeService) {
         this.employeeService = employeeService;
@@ -6116,8 +6120,24 @@ let ChangePasswordUsecase = class ChangePasswordUsecase {
         if (!employee) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
         }
-        employee.password = await bcrypt.hash(password, 10);
-        await this.employeeService.update(employee.employeeId, employee);
+        try {
+            const ssoApiUrl = process.env.SSO_API_URL;
+            const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/change-password`, {
+                newPassword: password,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${employee.accessToken}`,
+                },
+            });
+            const data = response.data;
+            console.log(data);
+            employee.password = await bcrypt.hash(password, 10);
+            await this.employeeService.update(employee.employeeId, employee);
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
+        }
     }
 };
 exports.ChangePasswordUsecase = ChangePasswordUsecase;
@@ -6198,7 +6218,7 @@ exports.CheckPasswordUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
-const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const axios_1 = __webpack_require__(/*! axios */ "axios");
 let CheckPasswordUsecase = class CheckPasswordUsecase {
     constructor(employeeService) {
         this.employeeService = employeeService;
@@ -6208,7 +6228,22 @@ let CheckPasswordUsecase = class CheckPasswordUsecase {
         if (!employee) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
         }
-        return bcrypt.compare(password, employee.password);
+        try {
+            const ssoApiUrl = process.env.SSO_API_URL;
+            const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/check-password`, {
+                currentPassword: password,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${employee.accessToken}`,
+                },
+            });
+            const data = response.data;
+            return data.isValid;
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
+        }
     }
 };
 exports.CheckPasswordUsecase = CheckPasswordUsecase;
@@ -8351,6 +8386,3708 @@ exports.SubscribeUsecase = SubscribeUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/reservation/core/controllers/admin.reservation.controller.ts":
+/*!**************************************************************************************!*\
+  !*** ./src/application/reservation/core/controllers/admin.reservation.controller.ts ***!
+  \**************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdminReservationController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./src/dtos.index.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
+const admin_reservation_service_1 = __webpack_require__(/*! ../services/admin-reservation.service */ "./src/application/reservation/core/services/admin-reservation.service.ts");
+let AdminReservationController = class AdminReservationController {
+    constructor(adminReservationService) {
+        this.adminReservationService = adminReservationService;
+    }
+    async findReservationList(startDate, endDate, resourceType, resourceId, status) {
+        return this.adminReservationService.findReservationList(startDate, endDate, resourceType, resourceId, status);
+    }
+    async findCheckReservationList(query) {
+        return this.adminReservationService.findCheckReservationList(query);
+    }
+    async findOne(user, reservationId) {
+        return this.adminReservationService.findOne(user, reservationId);
+    }
+    async updateStatus(reservationId, updateDto) {
+        return this.adminReservationService.updateStatus(reservationId, updateDto);
+    }
+};
+exports.AdminReservationController = AdminReservationController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({
+        summary: '예약 리스트 조회 #관리자/예약관리',
+    }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 리스트 조회 성공',
+        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'startDate',
+        type: String,
+        required: false,
+        example: date_util_1.DateUtil.now().addDays(-20).format('YYYY-MM-DD'),
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'endDate',
+        type: String,
+        required: false,
+        example: date_util_1.DateUtil.now().addDays(30).format('YYYY-MM-DD'),
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceId', type: String, required: false, example: '78117aaf-a203-43a3-bb38-51ec91ca935a' }),
+    (0, swagger_1.ApiQuery)({
+        name: 'status',
+        enum: reservation_type_enum_1.ReservationStatus,
+        description: `Available values : ${Object.values(reservation_type_enum_1.ReservationStatus).join(', ')}`,
+        isArray: true,
+        required: false,
+        example: [reservation_type_enum_1.ReservationStatus.CONFIRMED],
+    }),
+    __param(0, (0, common_1.Query)('startDate')),
+    __param(1, (0, common_1.Query)('endDate')),
+    __param(2, (0, common_1.Query)('resourceType')),
+    __param(3, (0, common_1.Query)('resourceId')),
+    __param(4, (0, common_1.Query)('status', new common_1.ParseArrayPipe({ optional: true, separator: ',' }))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, typeof (_b = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _b : Object, String, Array]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], AdminReservationController.prototype, "findReservationList", null);
+__decorate([
+    (0, common_1.Get)('check'),
+    (0, swagger_1.ApiOperation)({ summary: '확인이 필요한 예약들' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '확인이 필요한 예약들 조회 성공',
+        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], AdminReservationController.prototype, "findCheckReservationList", null);
+__decorate([
+    (0, common_1.Get)(':reservationId'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 상세 조회 성공',
+        type: reservation_response_dto_1.ReservationWithRelationsResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _f : Object, String]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], AdminReservationController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId/status'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 상태 수정 성공',
+        type: dtos_index_1.ReservationResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('reservationId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], AdminReservationController.prototype, "updateStatus", null);
+exports.AdminReservationController = AdminReservationController = __decorate([
+    (0, swagger_1.ApiTags)('2. 예약 - 관리자 '),
+    (0, common_1.Controller)('v1/admin/reservations'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
+    __metadata("design:paramtypes", [typeof (_a = typeof admin_reservation_service_1.AdminReservationService !== "undefined" && admin_reservation_service_1.AdminReservationService) === "function" ? _a : Object])
+], AdminReservationController);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/controllers/cron.reservation.controller.ts":
+/*!*************************************************************************************!*\
+  !*** ./src/application/reservation/core/controllers/cron.reservation.controller.ts ***!
+  \*************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronReservationController = void 0;
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const cron_reservation_service_1 = __webpack_require__(/*! ../services/cron-reservation.service */ "./src/application/reservation/core/services/cron-reservation.service.ts");
+let CronReservationController = class CronReservationController {
+    constructor(cronReservationService) {
+        this.cronReservationService = cronReservationService;
+    }
+    async closeReservation() {
+        return this.cronReservationService.closeReservation();
+    }
+};
+exports.CronReservationController = CronReservationController;
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/close'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronReservationController.prototype, "closeReservation", null);
+exports.CronReservationController = CronReservationController = __decorate([
+    (0, swagger_1.ApiTags)('2. 예약 '),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Controller)('v1/reservations'),
+    __metadata("design:paramtypes", [typeof (_a = typeof cron_reservation_service_1.CronReservationService !== "undefined" && cron_reservation_service_1.CronReservationService) === "function" ? _a : Object])
+], CronReservationController);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/controllers/reservation.controller.ts":
+/*!********************************************************************************!*\
+  !*** ./src/application/reservation/core/controllers/reservation.controller.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserReservationController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const create_reservation_dto_1 = __webpack_require__(/*! ../dtos/create-reservation.dto */ "./src/application/reservation/core/dtos/create-reservation.dto.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
+const update_reservation_dto_1 = __webpack_require__(/*! ../dtos/update-reservation.dto */ "./src/application/reservation/core/dtos/update-reservation.dto.ts");
+const reservation_service_1 = __webpack_require__(/*! ../services/reservation.service */ "./src/application/reservation/core/services/reservation.service.ts");
+const reservation_response_dto_2 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+let UserReservationController = class UserReservationController {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async create(user, createDto) {
+        return this.reservationService.create(user, createDto);
+    }
+    async findMyReservationList(user, resourceType, query) {
+        const { page, limit } = query;
+        return this.reservationService.findMyReservationList(user.employeeId, page, limit, resourceType);
+    }
+    async findResourceReservationList(user, resourceId, query, month, isMine) {
+        const { page, limit } = query;
+        return this.reservationService.findResourceReservationList(user.employeeId, resourceId, page, limit, month, isMine);
+    }
+    async findMyUsingReservationList(user) {
+        return this.reservationService.findMyUsingReservationList(user.employeeId);
+    }
+    async findMyUpcomingReservationList(user, resourceType, query) {
+        return this.reservationService.findMyUpcomingReservationList(user.employeeId, query, resourceType);
+    }
+    async findMyUpcomingSchedules(user, resourceType, query) {
+        return this.reservationService.findMyAllSchedules(user.employeeId, query, resourceType);
+    }
+    async findOne(user, reservationId) {
+        return this.reservationService.findReservationDetail(user, reservationId);
+    }
+    async updateReservation(user, reservationId, updateDto) {
+        await this.reservationService.checkReservationAccess(reservationId, user.employeeId);
+        return this.reservationService.updateReservation(reservationId, updateDto);
+    }
+    async updateStatusCancel(user, reservationId) {
+        await this.reservationService.checkReservationAccess(reservationId, user.employeeId);
+        return this.reservationService.updateStatusCancel(reservationId);
+    }
+    async returnVehicle(user, reservationId, returnDto) {
+        return this.reservationService.returnVehicle(user, reservationId, returnDto);
+    }
+};
+exports.UserReservationController = UserReservationController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '예약 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 생성 성공',
+        type: reservation_response_dto_1.CreateReservationResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object, typeof (_c = typeof create_reservation_dto_1.CreateReservationDto !== "undefined" && create_reservation_dto_1.CreateReservationDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], UserReservationController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)('me'),
+    (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회, 자원 타입별 ' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '내 예약 리스트 조회',
+        type: [reservation_response_dto_1.GroupedReservationResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('resourceType')),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _e : Object, typeof (_f = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _f : Object, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], UserReservationController.prototype, "findMyReservationList", null);
+__decorate([
+    (0, common_1.Get)('resource/:resourceId'),
+    (0, swagger_1.ApiOperation)({ summary: '자원별 예약 리스트 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '자원별 예약 리스트 조회',
+        type: reservation_response_dto_1.GroupedReservationWithResourceResponseDto,
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    (0, swagger_1.ApiQuery)({ name: 'month', type: String, example: '2025-04' }),
+    (0, swagger_1.ApiQuery)({ name: 'isMine', type: Boolean, required: false, example: true }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('resourceId')),
+    __param(2, (0, common_1.Query)()),
+    __param(3, (0, common_1.Query)('month')),
+    __param(4, (0, common_1.Query)('isMine')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _j : Object, String, typeof (_k = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _k : Object, String, Boolean]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+], UserReservationController.prototype, "findResourceReservationList", null);
+__decorate([
+    (0, common_1.Get)('my-using'),
+    (0, swagger_1.ApiOperation)({ summary: '내 이용중인 예약 리스트 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '내 이용중인 예약 리스트 조회',
+        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_m = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+], UserReservationController.prototype, "findMyUsingReservationList", null);
+__decorate([
+    (0, common_1.Get)('my-upcoming'),
+    (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '내 예약 리스트 조회',
+        type: [reservation_response_dto_1.GroupedReservationResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('resourceType')),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_p = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _p : Object, typeof (_q = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _q : Object, typeof (_r = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _r : Object]),
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
+], UserReservationController.prototype, "findMyUpcomingReservationList", null);
+__decorate([
+    (0, common_1.Get)('my-upcoming-schedules'),
+    (0, swagger_1.ApiOperation)({ summary: '내 일정 리스트 조회 (예약자/참석자 모두 포함)' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '내 일정 리스트 조회 (예약자/참석자 모두 포함)',
+        type: [reservation_response_dto_1.GroupedReservationResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('resourceType')),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_t = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _t : Object, typeof (_u = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _u : Object, typeof (_v = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _v : Object]),
+    __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
+], UserReservationController.prototype, "findMyUpcomingSchedules", null);
+__decorate([
+    (0, common_1.Get)(':reservationId'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 상세 조회 성공',
+        type: reservation_response_dto_1.ReservationWithRelationsResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_x = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _x : Object, String]),
+    __metadata("design:returntype", typeof (_y = typeof Promise !== "undefined" && Promise) === "function" ? _y : Object)
+], UserReservationController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 수정' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 수정 성공',
+        type: reservation_response_dto_2.ReservationResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_z = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _z : Object, String, typeof (_0 = typeof update_reservation_dto_1.UpdateReservationDto !== "undefined" && update_reservation_dto_1.UpdateReservationDto) === "function" ? _0 : Object]),
+    __metadata("design:returntype", typeof (_1 = typeof Promise !== "undefined" && Promise) === "function" ? _1 : Object)
+], UserReservationController.prototype, "updateReservation", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId/status/cancel'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 취소 #사용자/예약상세페이지' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 상태 수정 성공',
+        type: reservation_response_dto_2.ReservationResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_2 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _2 : Object, String]),
+    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
+], UserReservationController.prototype, "updateStatusCancel", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId/return-vehicle'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '차량 반납 성공',
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_4 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _4 : Object, String, typeof (_5 = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _5 : Object]),
+    __metadata("design:returntype", typeof (_6 = typeof Promise !== "undefined" && Promise) === "function" ? _6 : Object)
+], UserReservationController.prototype, "returnVehicle", null);
+exports.UserReservationController = UserReservationController = __decorate([
+    (0, swagger_1.ApiTags)('2. 예약 '),
+    (0, common_1.Controller)('v1/reservations'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _a : Object])
+], UserReservationController);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/core.module.ts":
+/*!*********************************************************!*\
+  !*** ./src/application/reservation/core/core.module.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationCoreModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const reservation_controller_1 = __webpack_require__(/*! @src/application/reservation/core/controllers/reservation.controller */ "./src/application/reservation/core/controllers/reservation.controller.ts");
+const admin_reservation_controller_1 = __webpack_require__(/*! @src/application/reservation/core/controllers/admin.reservation.controller */ "./src/application/reservation/core/controllers/admin.reservation.controller.ts");
+const cron_reservation_controller_1 = __webpack_require__(/*! @src/application/reservation/core/controllers/cron.reservation.controller */ "./src/application/reservation/core/controllers/cron.reservation.controller.ts");
+const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
+const reservation_participant_module_1 = __webpack_require__(/*! @src/domain/reservation-participant/reservation-participant.module */ "./src/domain/reservation-participant/reservation-participant.module.ts");
+const reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.module */ "./src/domain/reservation-vehicle/reservation-vehicle.module.ts");
+const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
+const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
+const notification_module_1 = __webpack_require__(/*! @src/application/notification/notification.module */ "./src/application/notification/notification.module.ts");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const usecases_1 = __webpack_require__(/*! ./usecases */ "./src/application/reservation/core/usecases/index.ts");
+const admin_reservation_service_1 = __webpack_require__(/*! ./services/admin-reservation.service */ "./src/application/reservation/core/services/admin-reservation.service.ts");
+const reservation_service_1 = __webpack_require__(/*! ./services/reservation.service */ "./src/application/reservation/core/services/reservation.service.ts");
+const cron_reservation_service_1 = __webpack_require__(/*! ./services/cron-reservation.service */ "./src/application/reservation/core/services/cron-reservation.service.ts");
+let ReservationCoreModule = class ReservationCoreModule {
+};
+exports.ReservationCoreModule = ReservationCoreModule;
+exports.ReservationCoreModule = ReservationCoreModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([
+                entities_1.Reservation,
+                entities_1.ReservationParticipant,
+                entities_1.ReservationVehicle,
+                entities_1.Employee,
+                entities_1.Resource,
+                entities_1.VehicleInfo,
+                entities_1.Notification,
+            ]),
+            reservation_module_1.DomainReservationModule,
+            reservation_participant_module_1.DomainReservationParticipantModule,
+            reservation_vehicle_module_1.DomainReservationVehicleModule,
+            employee_module_1.DomainEmployeeModule,
+            resource_module_1.DomainResourceModule,
+            vehicle_info_module_1.DomainVehicleInfoModule,
+            notification_module_1.NotificationModule,
+            schedule_1.ScheduleModule.forRoot(),
+        ],
+        controllers: [admin_reservation_controller_1.AdminReservationController, reservation_controller_1.UserReservationController, cron_reservation_controller_1.CronReservationController],
+        providers: [
+            admin_reservation_service_1.AdminReservationService,
+            reservation_service_1.ReservationService,
+            cron_reservation_service_1.CronReservationService,
+            usecases_1.CheckReservationAccessUsecase,
+            usecases_1.CreateReservationClosingJobUsecase,
+            usecases_1.CreateReservationUsecase,
+            usecases_1.DeleteReservationClosingJobUsecase,
+            usecases_1.FindCheckReservationListUsecase,
+            usecases_1.FindConflictReservationUsecase,
+            usecases_1.FindMyAllSchedulesUsecase,
+            usecases_1.FindMyReservationListUsecase,
+            usecases_1.FindMyUpcomingReservationListUsecase,
+            usecases_1.FindMyUsingReservationListUsecase,
+            usecases_1.FindReservationDetailUsecase,
+            usecases_1.FindReservationListUsecase,
+            usecases_1.FindResourceReservationListUsecase,
+            usecases_1.HandleCronUsecase,
+            usecases_1.ReturnVehicleUsecase,
+            usecases_1.UpdateReservationStatusUsecase,
+            usecases_1.UpdateReservationUsecase,
+        ],
+        exports: [
+            admin_reservation_service_1.AdminReservationService,
+            reservation_service_1.ReservationService,
+            cron_reservation_service_1.CronReservationService,
+            usecases_1.CheckReservationAccessUsecase,
+            usecases_1.CreateReservationClosingJobUsecase,
+            usecases_1.CreateReservationUsecase,
+            usecases_1.DeleteReservationClosingJobUsecase,
+            usecases_1.FindCheckReservationListUsecase,
+            usecases_1.FindConflictReservationUsecase,
+            usecases_1.FindMyAllSchedulesUsecase,
+            usecases_1.FindMyReservationListUsecase,
+            usecases_1.FindMyUpcomingReservationListUsecase,
+            usecases_1.FindMyUsingReservationListUsecase,
+            usecases_1.FindReservationDetailUsecase,
+            usecases_1.FindReservationListUsecase,
+            usecases_1.FindResourceReservationListUsecase,
+            usecases_1.HandleCronUsecase,
+            usecases_1.ReturnVehicleUsecase,
+            usecases_1.UpdateReservationStatusUsecase,
+            usecases_1.UpdateReservationUsecase,
+        ],
+    })
+], ReservationCoreModule);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/dtos/create-reservation.dto.ts":
+/*!*************************************************************************!*\
+  !*** ./src/application/reservation/core/dtos/create-reservation.dto.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateReservationDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+class CreateReservationDto {
+}
+exports.CreateReservationDto = CreateReservationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('자원 타입', Object.values(resource_type_enum_1.ResourceType)) }),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], CreateReservationDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('설명') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('시작 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 종료 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('종료 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
+    __metadata("design:type", Boolean)
+], CreateReservationDto.prototype, "isAllDay", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('시작 전 알림 여부') }),
+    __metadata("design:type", Boolean)
+], CreateReservationDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [Number], example: [10, 20] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('알림 시간') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateReservationDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [String] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
+    __metadata("design:type", Array)
+], CreateReservationDto.prototype, "participantIds", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/dtos/reservation-response.dto.ts":
+/*!***************************************************************************!*\
+  !*** ./src/application/reservation/core/dtos/reservation-response.dto.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.CreateReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationVehicleResponseDto = exports.ReservationParticipantResponseDto = exports.ReservationResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const reservation_type_enum_2 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./src/dtos.index.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+class ReservationResponseDto {
+    constructor(reservation) {
+        this.reservationId = reservation?.reservationId;
+        this.resourceId = reservation?.resourceId;
+        this.title = reservation?.title;
+        this.description = reservation?.description;
+        this.rejectReason = reservation?.rejectReason;
+        this.startDate = date_util_1.DateUtil.format(reservation?.startDate);
+        this.endDate = date_util_1.DateUtil.format(reservation?.endDate);
+        this.status = reservation?.status;
+        this.isAllDay = reservation?.isAllDay;
+        this.notifyBeforeStart = reservation?.notifyBeforeStart;
+        this.notifyMinutesBeforeStart = reservation?.notifyMinutesBeforeStart;
+    }
+}
+exports.ReservationResponseDto = ReservationResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "rejectReason", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: reservation_type_enum_1.ReservationStatus, required: false }),
+    __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _a : Object)
+], ReservationResponseDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationResponseDto.prototype, "isAllDay", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationResponseDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [Number] }),
+    __metadata("design:type", Array)
+], ReservationResponseDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationResponseDto.prototype, "isMine", void 0);
+class ReservationParticipantResponseDto {
+}
+exports.ReservationParticipantResponseDto = ReservationParticipantResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationParticipantResponseDto.prototype, "participantId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationParticipantResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationParticipantResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => dtos_index_1.EmployeeResponseDto, required: false }),
+    __metadata("design:type", typeof (_b = typeof dtos_index_1.EmployeeResponseDto !== "undefined" && dtos_index_1.EmployeeResponseDto) === "function" ? _b : Object)
+], ReservationParticipantResponseDto.prototype, "employee", void 0);
+class ReservationVehicleResponseDto {
+}
+exports.ReservationVehicleResponseDto = ReservationVehicleResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationVehicleResponseDto.prototype, "reservationVehicleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationVehicleResponseDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReservationVehicleResponseDto.prototype, "startOdometer", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReservationVehicleResponseDto.prototype, "endOdometer", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReservationVehicleResponseDto.prototype, "startFuelLevel", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReservationVehicleResponseDto.prototype, "endFuelLevel", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], ReservationVehicleResponseDto.prototype, "isReturned", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], ReservationVehicleResponseDto.prototype, "returnedAt", void 0);
+class ReservationWithResourceResponseDto extends ReservationResponseDto {
+    constructor(reservation) {
+        super(reservation);
+        this.resource = reservation?.resource;
+    }
+}
+exports.ReservationWithResourceResponseDto = ReservationWithResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => dtos_index_1.ResourceResponseDto, required: false }),
+    __metadata("design:type", typeof (_d = typeof dtos_index_1.ResourceResponseDto !== "undefined" && dtos_index_1.ResourceResponseDto) === "function" ? _d : Object)
+], ReservationWithResourceResponseDto.prototype, "resource", void 0);
+class ReservationWithRelationsResponseDto extends ReservationResponseDto {
+    constructor(reservation) {
+        super(reservation);
+        this.resource = reservation?.resource;
+        this.reservers = reservation?.participants?.filter((participant) => participant.type === reservation_type_enum_2.ParticipantsType.RESERVER);
+        this.participants = reservation?.participants?.filter((participant) => participant.type === reservation_type_enum_2.ParticipantsType.PARTICIPANT);
+        this.reservationVehicles = reservation?.reservationVehicles;
+    }
+}
+exports.ReservationWithRelationsResponseDto = ReservationWithRelationsResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => dtos_index_1.ResourceResponseDto, required: false }),
+    __metadata("design:type", typeof (_e = typeof dtos_index_1.ResourceResponseDto !== "undefined" && dtos_index_1.ResourceResponseDto) === "function" ? _e : Object)
+], ReservationWithRelationsResponseDto.prototype, "resource", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [ReservationParticipantResponseDto], required: false }),
+    __metadata("design:type", Array)
+], ReservationWithRelationsResponseDto.prototype, "reservers", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [ReservationParticipantResponseDto], required: false }),
+    __metadata("design:type", Array)
+], ReservationWithRelationsResponseDto.prototype, "participants", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [ReservationVehicleResponseDto], required: false }),
+    __metadata("design:type", Array)
+], ReservationWithRelationsResponseDto.prototype, "reservationVehicles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "isMine", void 0);
+class CreateReservationResponseDto {
+}
+exports.CreateReservationResponseDto = CreateReservationResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '123e4567-e89b-12d3-a456-426614174000' }),
+    __metadata("design:type", String)
+], CreateReservationResponseDto.prototype, "reservationId", void 0);
+class GroupedReservationResponseDto {
+}
+exports.GroupedReservationResponseDto = GroupedReservationResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '날짜 (YYYY-MM-DD 형식)' }),
+    __metadata("design:type", String)
+], GroupedReservationResponseDto.prototype, "date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 날짜의 예약 목록',
+        type: [ReservationWithRelationsResponseDto],
+    }),
+    __metadata("design:type", Array)
+], GroupedReservationResponseDto.prototype, "reservations", void 0);
+class GroupedReservationWithResourceResponseDto {
+}
+exports.GroupedReservationWithResourceResponseDto = GroupedReservationWithResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 정보',
+        type: () => dtos_index_1.ResourceResponseDto,
+    }),
+    __metadata("design:type", typeof (_f = typeof dtos_index_1.ResourceResponseDto !== "undefined" && dtos_index_1.ResourceResponseDto) === "function" ? _f : Object)
+], GroupedReservationWithResourceResponseDto.prototype, "resource", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 목록',
+        required: false,
+        type: [GroupedReservationResponseDto],
+    }),
+    __metadata("design:type", Array)
+], GroupedReservationWithResourceResponseDto.prototype, "groupedReservations", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/dtos/update-reservation.dto.ts":
+/*!*************************************************************************!*\
+  !*** ./src/application/reservation/core/dtos/update-reservation.dto.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReturnVehicleDto = exports.UpdateReservationDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const resource_entity_1 = __webpack_require__(/*! @libs/entities/resource.entity */ "./libs/entities/resource.entity.ts");
+class UpdateReservationTitleDto {
+}
+exports.UpdateReservationTitleDto = UpdateReservationTitleDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateReservationTitleDto.prototype, "title", void 0);
+class UpdateReservationTimeDto {
+    constructor(reservation) {
+        this.startDate = date_util_1.DateUtil.format(reservation?.startDate);
+        this.endDate = date_util_1.DateUtil.format(reservation?.endDate);
+        this.isAllDay = reservation?.isAllDay;
+    }
+    getPropertiesAndTypes() {
+        return Object.getOwnPropertyNames(this).map((property) => ({
+            property,
+            type: Reflect.getMetadata('design:type', this, property),
+        }));
+    }
+}
+exports.UpdateReservationTimeDto = UpdateReservationTimeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('시작 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    __metadata("design:type", String)
+], UpdateReservationTimeDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 종료 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('종료 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    __metadata("design:type", String)
+], UpdateReservationTimeDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateReservationTimeDto.prototype, "isAllDay", void 0);
+class UpdateReservationStatusDto {
+}
+exports.UpdateReservationStatusDto = UpdateReservationStatusDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: reservation_type_enum_1.ReservationStatus }),
+    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('예약 상태', Object.values(reservation_type_enum_1.ReservationStatus)),
+    }),
+    __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _a : Object)
+], UpdateReservationStatusDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('거절 사유') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('거절 사유', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateReservationStatusDto.prototype, "rejectReason", void 0);
+class UpdateReservationParticipantsDto {
+}
+exports.UpdateReservationParticipantsDto = UpdateReservationParticipantsDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [String] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
+    __metadata("design:type", Array)
+], UpdateReservationParticipantsDto.prototype, "participantIds", void 0);
+class UpdateReservationCcReceipientDto {
+}
+exports.UpdateReservationCcReceipientDto = UpdateReservationCcReceipientDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [String] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('수신참조자 ID') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('수신참조자 ID', '문자열') }),
+    __metadata("design:type", Array)
+], UpdateReservationCcReceipientDto.prototype, "ccReceipientIds", void 0);
+class UpdateReservationDto {
+}
+exports.UpdateReservationDto = UpdateReservationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateReservationDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateReservationDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+        required: false,
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('시작 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateReservationDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 종료 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+        required: false,
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('종료 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateReservationDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false, required: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateReservationDto.prototype, "isAllDay", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false, required: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('시작 전 알림 여부') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateReservationDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [Number], example: [10, 20] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('알림 시간') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateReservationDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [String], required: false }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
+    __metadata("design:type", Array)
+], UpdateReservationDto.prototype, "participantIds", void 0);
+class ReturnVehicleDto {
+}
+exports.ReturnVehicleDto = ReturnVehicleDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_b = typeof resource_entity_1.ResourceLocation !== "undefined" && resource_entity_1.ResourceLocation) === "function" ? _b : Object)
+], ReturnVehicleDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    __metadata("design:type", Number)
+], ReturnVehicleDto.prototype, "leftMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    __metadata("design:type", Number)
+], ReturnVehicleDto.prototype, "totalMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주차 위치 이미지', '문자열') }),
+    __metadata("design:type", Array)
+], ReturnVehicleDto.prototype, "parkingLocationImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지', '문자열') }),
+    __metadata("design:type", Array)
+], ReturnVehicleDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('차량 실내 이미지') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('차량 실내 이미지', '문자열') }),
+    __metadata("design:type", Array)
+], ReturnVehicleDto.prototype, "indoorImages", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/services/admin-reservation.service.ts":
+/*!********************************************************************************!*\
+  !*** ./src/application/reservation/core/services/admin-reservation.service.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdminReservationService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const find_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-reservation-list.usecase.ts");
+const find_check_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-check-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-check-reservation-list.usecase.ts");
+const find_reservation_detail_usecase_1 = __webpack_require__(/*! ../usecases/find-reservation-detail.usecase */ "./src/application/reservation/core/usecases/find-reservation-detail.usecase.ts");
+const update_reservation_status_usecase_1 = __webpack_require__(/*! ../usecases/update-reservation-status.usecase */ "./src/application/reservation/core/usecases/update-reservation-status.usecase.ts");
+let AdminReservationService = class AdminReservationService {
+    constructor(findReservationListUsecase, findCheckReservationListUsecase, findReservationDetailUsecase, updateReservationStatusUsecase) {
+        this.findReservationListUsecase = findReservationListUsecase;
+        this.findCheckReservationListUsecase = findCheckReservationListUsecase;
+        this.findReservationDetailUsecase = findReservationDetailUsecase;
+        this.updateReservationStatusUsecase = updateReservationStatusUsecase;
+    }
+    async findReservationList(startDate, endDate, resourceType, resourceId, status) {
+        return this.findReservationListUsecase.execute(startDate, endDate, resourceType, resourceId, status);
+    }
+    async findCheckReservationList(query) {
+        return this.findCheckReservationListUsecase.execute(query);
+    }
+    async findOne(user, reservationId) {
+        return this.findReservationDetailUsecase.execute(user, reservationId);
+    }
+    async updateStatus(reservationId, updateDto) {
+        return this.updateReservationStatusUsecase.execute(reservationId, updateDto);
+    }
+};
+exports.AdminReservationService = AdminReservationService;
+exports.AdminReservationService = AdminReservationService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof find_reservation_list_usecase_1.FindReservationListUsecase !== "undefined" && find_reservation_list_usecase_1.FindReservationListUsecase) === "function" ? _a : Object, typeof (_b = typeof find_check_reservation_list_usecase_1.FindCheckReservationListUsecase !== "undefined" && find_check_reservation_list_usecase_1.FindCheckReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _c : Object, typeof (_d = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _d : Object])
+], AdminReservationService);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/services/cron-reservation.service.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/application/reservation/core/services/cron-reservation.service.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronReservationService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const handle_cron_usecase_1 = __webpack_require__(/*! ../usecases/handle-cron.usecase */ "./src/application/reservation/core/usecases/handle-cron.usecase.ts");
+let CronReservationService = class CronReservationService {
+    constructor(handleCronUsecase) {
+        this.handleCronUsecase = handleCronUsecase;
+    }
+    async closeReservation() {
+        return this.handleCronUsecase.execute();
+    }
+};
+exports.CronReservationService = CronReservationService;
+exports.CronReservationService = CronReservationService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof handle_cron_usecase_1.HandleCronUsecase !== "undefined" && handle_cron_usecase_1.HandleCronUsecase) === "function" ? _a : Object])
+], CronReservationService);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/services/reservation.service.ts":
+/*!**************************************************************************!*\
+  !*** ./src/application/reservation/core/services/reservation.service.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const create_reservation_usecase_1 = __webpack_require__(/*! ../usecases/create-reservation.usecase */ "./src/application/reservation/core/usecases/create-reservation.usecase.ts");
+const find_my_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-my-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-my-reservation-list.usecase.ts");
+const find_resource_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-resource-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-resource-reservation-list.usecase.ts");
+const find_my_using_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-my-using-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-my-using-reservation-list.usecase.ts");
+const find_my_upcoming_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-my-upcoming-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-my-upcoming-reservation-list.usecase.ts");
+const find_my_all_schedules_usecase_1 = __webpack_require__(/*! ../usecases/find-my-all-schedules.usecase */ "./src/application/reservation/core/usecases/find-my-all-schedules.usecase.ts");
+const find_reservation_detail_usecase_1 = __webpack_require__(/*! ../usecases/find-reservation-detail.usecase */ "./src/application/reservation/core/usecases/find-reservation-detail.usecase.ts");
+const update_reservation_usecase_1 = __webpack_require__(/*! ../usecases/update-reservation.usecase */ "./src/application/reservation/core/usecases/update-reservation.usecase.ts");
+const update_reservation_status_usecase_1 = __webpack_require__(/*! ../usecases/update-reservation-status.usecase */ "./src/application/reservation/core/usecases/update-reservation-status.usecase.ts");
+const return_vehicle_usecase_1 = __webpack_require__(/*! ../usecases/return-vehicle.usecase */ "./src/application/reservation/core/usecases/return-vehicle.usecase.ts");
+const check_reservation_access_usecase_1 = __webpack_require__(/*! ../usecases/check-reservation-access.usecase */ "./src/application/reservation/core/usecases/check-reservation-access.usecase.ts");
+let ReservationService = class ReservationService {
+    constructor(createReservationUsecase, findMyReservationListUsecase, findResourceReservationListUsecase, findMyUsingReservationListUsecase, findMyUpcomingReservationListUsecase, findMyAllSchedulesUsecase, findReservationDetailUsecase, updateReservationUsecase, updateReservationStatusUsecase, returnVehicleUsecase, checkReservationAccessUsecase) {
+        this.createReservationUsecase = createReservationUsecase;
+        this.findMyReservationListUsecase = findMyReservationListUsecase;
+        this.findResourceReservationListUsecase = findResourceReservationListUsecase;
+        this.findMyUsingReservationListUsecase = findMyUsingReservationListUsecase;
+        this.findMyUpcomingReservationListUsecase = findMyUpcomingReservationListUsecase;
+        this.findMyAllSchedulesUsecase = findMyAllSchedulesUsecase;
+        this.findReservationDetailUsecase = findReservationDetailUsecase;
+        this.updateReservationUsecase = updateReservationUsecase;
+        this.updateReservationStatusUsecase = updateReservationStatusUsecase;
+        this.returnVehicleUsecase = returnVehicleUsecase;
+        this.checkReservationAccessUsecase = checkReservationAccessUsecase;
+    }
+    async create(user, createDto) {
+        return this.createReservationUsecase.execute(user, createDto);
+    }
+    async findMyReservationList(employeeId, page, limit, resourceType) {
+        return this.findMyReservationListUsecase.execute(employeeId, page, limit, resourceType);
+    }
+    async findResourceReservationList(employeeId, resourceId, page, limit, month, isMine) {
+        return this.findResourceReservationListUsecase.execute(employeeId, resourceId, page, limit, month, isMine);
+    }
+    async findMyUsingReservationList(employeeId) {
+        return this.findMyUsingReservationListUsecase.execute(employeeId);
+    }
+    async findMyUpcomingReservationList(employeeId, query, resourceType) {
+        return this.findMyUpcomingReservationListUsecase.execute(employeeId, query, resourceType);
+    }
+    async findMyAllSchedules(employeeId, query, resourceType) {
+        return this.findMyAllSchedulesUsecase.execute(employeeId, query, resourceType);
+    }
+    async findReservationDetail(user, reservationId) {
+        return this.findReservationDetailUsecase.execute(user, reservationId);
+    }
+    async updateReservation(reservationId, updateDto) {
+        return this.updateReservationUsecase.execute(reservationId, updateDto);
+    }
+    async updateStatusCancel(reservationId) {
+        return this.updateReservationStatusUsecase.execute(reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELLED });
+    }
+    async returnVehicle(user, reservationId, returnDto) {
+        return this.returnVehicleUsecase.execute(user, reservationId, returnDto);
+    }
+    async checkReservationAccess(reservationId, employeeId) {
+        await this.checkReservationAccessUsecase.execute(reservationId, employeeId);
+    }
+};
+exports.ReservationService = ReservationService;
+exports.ReservationService = ReservationService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof create_reservation_usecase_1.CreateReservationUsecase !== "undefined" && create_reservation_usecase_1.CreateReservationUsecase) === "function" ? _a : Object, typeof (_b = typeof find_my_reservation_list_usecase_1.FindMyReservationListUsecase !== "undefined" && find_my_reservation_list_usecase_1.FindMyReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_resource_reservation_list_usecase_1.FindResourceReservationListUsecase !== "undefined" && find_resource_reservation_list_usecase_1.FindResourceReservationListUsecase) === "function" ? _c : Object, typeof (_d = typeof find_my_using_reservation_list_usecase_1.FindMyUsingReservationListUsecase !== "undefined" && find_my_using_reservation_list_usecase_1.FindMyUsingReservationListUsecase) === "function" ? _d : Object, typeof (_e = typeof find_my_upcoming_reservation_list_usecase_1.FindMyUpcomingReservationListUsecase !== "undefined" && find_my_upcoming_reservation_list_usecase_1.FindMyUpcomingReservationListUsecase) === "function" ? _e : Object, typeof (_f = typeof find_my_all_schedules_usecase_1.FindMyAllSchedulesUsecase !== "undefined" && find_my_all_schedules_usecase_1.FindMyAllSchedulesUsecase) === "function" ? _f : Object, typeof (_g = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _g : Object, typeof (_h = typeof update_reservation_usecase_1.UpdateReservationUsecase !== "undefined" && update_reservation_usecase_1.UpdateReservationUsecase) === "function" ? _h : Object, typeof (_j = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _j : Object, typeof (_k = typeof return_vehicle_usecase_1.ReturnVehicleUsecase !== "undefined" && return_vehicle_usecase_1.ReturnVehicleUsecase) === "function" ? _k : Object, typeof (_l = typeof check_reservation_access_usecase_1.CheckReservationAccessUsecase !== "undefined" && check_reservation_access_usecase_1.CheckReservationAccessUsecase) === "function" ? _l : Object])
+], ReservationService);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/check-reservation-access.usecase.ts":
+/*!***************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/check-reservation-access.usecase.ts ***!
+  \***************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CheckReservationAccessUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+let CheckReservationAccessUsecase = class CheckReservationAccessUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute(reservationId, employeeId) {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId, participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } },
+            relations: ['participants'],
+        });
+        if (!reservation) {
+            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.COMMON.UNAUTHORIZED);
+        }
+        return true;
+    }
+};
+exports.CheckReservationAccessUsecase = CheckReservationAccessUsecase;
+exports.CheckReservationAccessUsecase = CheckReservationAccessUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], CheckReservationAccessUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/create-reservation-closing-job.usecase.ts":
+/*!*********************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/create-reservation-closing-job.usecase.ts ***!
+  \*********************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateReservationClosingJobUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const cron_1 = __webpack_require__(/*! cron */ "cron");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const delete_reservation_closing_job_usecase_1 = __webpack_require__(/*! ./delete-reservation-closing-job.usecase */ "./src/application/reservation/core/usecases/delete-reservation-closing-job.usecase.ts");
+let CreateReservationClosingJobUsecase = class CreateReservationClosingJobUsecase {
+    constructor(schedulerRegistry, reservationService, deleteReservationClosingJob) {
+        this.schedulerRegistry = schedulerRegistry;
+        this.reservationService = reservationService;
+        this.deleteReservationClosingJob = deleteReservationClosingJob;
+    }
+    async execute(reservation) {
+        const jobName = `closing-${reservation.reservationId}`;
+        console.log('createReservationClosingJob', jobName);
+        const executeTime = date_util_1.DateUtil.date(reservation.endDate).toDate();
+        if (executeTime.getTime() <= Date.now()) {
+            console.log(`ExecuteTime time ${executeTime} is in the past, skipping cron job creation`);
+            await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+            return;
+        }
+        this.deleteReservationClosingJob.execute(reservation.reservationId);
+        const job = new cron_1.CronJob(executeTime, async () => {
+            await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+        });
+        this.schedulerRegistry.addCronJob(jobName, job);
+        job.start();
+    }
+};
+exports.CreateReservationClosingJobUsecase = CreateReservationClosingJobUsecase;
+exports.CreateReservationClosingJobUsecase = CreateReservationClosingJobUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _a : Object, typeof (_b = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _b : Object, typeof (_c = typeof delete_reservation_closing_job_usecase_1.DeleteReservationClosingJobUsecase !== "undefined" && delete_reservation_closing_job_usecase_1.DeleteReservationClosingJobUsecase) === "function" ? _c : Object])
+], CreateReservationClosingJobUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/create-reservation.usecase.ts":
+/*!*********************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/create-reservation.usecase.ts ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f, _g, _h;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateReservationUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_participant_service_1 = __webpack_require__(/*! @src/domain/reservation-participant/reservation-participant.service */ "./src/domain/reservation-participant/reservation-participant.service.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const find_conflict_reservation_usecase_1 = __webpack_require__(/*! ./find-conflict-reservation.usecase */ "./src/application/reservation/core/usecases/find-conflict-reservation.usecase.ts");
+let CreateReservationUsecase = class CreateReservationUsecase {
+    constructor(reservationService, participantService, reservationVehicleService, resourceService, employeeService, notificationService, dataSource, findConflictReservationUsecase) {
+        this.reservationService = reservationService;
+        this.participantService = participantService;
+        this.reservationVehicleService = reservationVehicleService;
+        this.resourceService = resourceService;
+        this.employeeService = employeeService;
+        this.notificationService = notificationService;
+        this.dataSource = dataSource;
+        this.findConflictReservationUsecase = findConflictReservationUsecase;
+    }
+    async execute(user, createDto) {
+        const conflicts = await this.findConflictReservationUsecase.execute(createDto.resourceId, date_util_1.DateUtil.date(createDto.startDate).toDate(), date_util_1.DateUtil.date(createDto.endDate).toDate());
+        if (conflicts.length > 0) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
+        }
+        if (createDto.startDate > createDto.endDate) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
+        }
+        const resource = await this.resourceService.findOne({
+            where: { resourceId: createDto.resourceId },
+            relations: ['vehicleInfo'],
+        });
+        if (!resource.isAvailable) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.RESOURCE_UNAVAILABLE);
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const reservation = await this.reservationService.create(createDto);
+            const savedReservation = await this.reservationService.save(reservation, {
+                queryRunner,
+            });
+            if (createDto.resourceType === resource_type_enum_1.ResourceType.VEHICLE) {
+                const reservationVehicle = new entities_1.ReservationVehicle();
+                reservationVehicle.reservationId = savedReservation.reservationId;
+                reservationVehicle.vehicleInfoId = resource.vehicleInfo.vehicleInfoId;
+                reservationVehicle.startOdometer = resource.vehicleInfo.totalMileage;
+                reservationVehicle.isReturned = false;
+                reservationVehicle.returnedAt = null;
+                await this.reservationVehicleService.save(reservationVehicle, {
+                    queryRunner,
+                });
+            }
+            await Promise.all([
+                this.participantService.save({
+                    reservationId: savedReservation.reservationId,
+                    employeeId: user.employeeId,
+                    type: reservation_type_enum_1.ParticipantsType.RESERVER,
+                }, { queryRunner }),
+                ...createDto.participantIds.map((employeeId) => this.participantService.save({
+                    reservationId: savedReservation.reservationId,
+                    employeeId,
+                    type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
+                }, { queryRunner })),
+            ]);
+            await queryRunner.commitTransaction();
+            try {
+                const reservationWithResource = await this.reservationService.findOne({
+                    where: { reservationId: savedReservation.reservationId },
+                    relations: ['resource'],
+                    withDeleted: true,
+                });
+                if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                    const notiTarget = [...createDto.participantIds, user.employeeId];
+                    await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, {
+                        reservationId: reservationWithResource.reservationId,
+                        reservationTitle: reservationWithResource.title,
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(reservationWithResource.startDate), date_util_1.DateUtil.format(reservationWithResource.endDate)),
+                        resourceId: reservationWithResource.resource.resourceId,
+                        resourceName: reservationWithResource.resource.name,
+                        resourceType: reservationWithResource.resource.type,
+                    }, notiTarget);
+                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
+                        await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+                            reservationId: reservationWithResource.reservationId,
+                            reservationTitle: reservationWithResource.title,
+                            resourceId: reservationWithResource.resource.resourceId,
+                            resourceName: reservationWithResource.resource.name,
+                            resourceType: reservationWithResource.resource.type,
+                            reservationDate: date_util_1.DateUtil.format(reservationWithResource.startDate),
+                            beforeMinutes: beforeMinutes,
+                        }, notiTarget);
+                    }
+                }
+                else if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.PENDING &&
+                    reservationWithResource.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+                    const systemAdmins = await this.employeeService.findAll({
+                        where: {
+                            roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.SYSTEM_ADMIN}' = ANY("roles")`),
+                        },
+                    });
+                    await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING, {
+                        reservationId: reservationWithResource.reservationId,
+                        reservationTitle: reservationWithResource.title,
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(reservationWithResource.startDate), date_util_1.DateUtil.format(reservationWithResource.endDate)),
+                        resourceId: reservationWithResource.resource.resourceId,
+                        resourceName: reservationWithResource.resource.name,
+                        resourceType: reservationWithResource.resource.type,
+                    }, systemAdmins.map((user) => user.employeeId));
+                }
+            }
+            catch (error) {
+                console.log(error);
+                console.log('Notification creation failed');
+            }
+            return {
+                reservationId: savedReservation.reservationId,
+            };
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+};
+exports.CreateReservationUsecase = CreateReservationUsecase;
+exports.CreateReservationUsecase = CreateReservationUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof reservation_participant_service_1.DomainReservationParticipantService !== "undefined" && reservation_participant_service_1.DomainReservationParticipantService) === "function" ? _b : Object, typeof (_c = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _c : Object, typeof (_d = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _d : Object, typeof (_e = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _e : Object, typeof (_f = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object, typeof (_h = typeof find_conflict_reservation_usecase_1.FindConflictReservationUsecase !== "undefined" && find_conflict_reservation_usecase_1.FindConflictReservationUsecase) === "function" ? _h : Object])
+], CreateReservationUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/delete-reservation-closing-job.usecase.ts":
+/*!*********************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/delete-reservation-closing-job.usecase.ts ***!
+  \*********************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeleteReservationClosingJobUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+let DeleteReservationClosingJobUsecase = class DeleteReservationClosingJobUsecase {
+    constructor(schedulerRegistry) {
+        this.schedulerRegistry = schedulerRegistry;
+    }
+    execute(reservationId) {
+        const jobName = `closing-${reservationId}`;
+        try {
+            if (this.schedulerRegistry.doesExist('cron', jobName)) {
+                this.schedulerRegistry.deleteCronJob(jobName);
+                console.log(`Job ${jobName} deleted successfully`);
+            }
+        }
+        catch (error) {
+            console.log(`Failed to delete job ${jobName}: ${error.message}`);
+        }
+    }
+};
+exports.DeleteReservationClosingJobUsecase = DeleteReservationClosingJobUsecase;
+exports.DeleteReservationClosingJobUsecase = DeleteReservationClosingJobUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _a : Object])
+], DeleteReservationClosingJobUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/find-check-reservation-list.usecase.ts":
+/*!******************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-check-reservation-list.usecase.ts ***!
+  \******************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindCheckReservationListUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+let FindCheckReservationListUsecase = class FindCheckReservationListUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute(query) {
+        const { page, limit } = query;
+        const where = [
+            {
+                status: reservation_type_enum_1.ReservationStatus.PENDING,
+                resource: {
+                    type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                },
+            },
+        ];
+        const options = {
+            where,
+            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
+            withDeleted: true,
+        };
+        const reservations = await this.reservationService.findAll(options);
+        const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation));
+        return {
+            items: reservationResponseDtos,
+            meta: {
+                total: reservations.length,
+                page: 1,
+                limit: reservations.length,
+                hasNext: false,
+            },
+        };
+    }
+};
+exports.FindCheckReservationListUsecase = FindCheckReservationListUsecase;
+exports.FindCheckReservationListUsecase = FindCheckReservationListUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], FindCheckReservationListUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/find-conflict-reservation.usecase.ts":
+/*!****************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-conflict-reservation.usecase.ts ***!
+  \****************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindConflictReservationUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+let FindConflictReservationUsecase = class FindConflictReservationUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute(resourceId, startDate, endDate, reservationId) {
+        return await this.reservationService.findAll({
+            where: {
+                resourceId,
+                ...(reservationId && { reservationId: (0, typeorm_1.Not)(reservationId) }),
+                startDate: (0, typeorm_1.LessThan)(endDate),
+                endDate: (0, typeorm_1.MoreThan)(startDate),
+                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+            },
+        });
+    }
+};
+exports.FindConflictReservationUsecase = FindConflictReservationUsecase;
+exports.FindConflictReservationUsecase = FindConflictReservationUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], FindConflictReservationUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/find-my-all-schedules.usecase.ts":
+/*!************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-my-all-schedules.usecase.ts ***!
+  \************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindMyAllSchedulesUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+let FindMyAllSchedulesUsecase = class FindMyAllSchedulesUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute(employeeId, query, resourceType) {
+        const { page, limit } = query;
+        const today = date_util_1.DateUtil.date(date_util_1.DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
+        const where = {
+            participants: { employeeId },
+            status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+            endDate: (0, typeorm_1.MoreThanOrEqual)(today),
+        };
+        if (resourceType) {
+            where.resource = {
+                type: resourceType,
+            };
+        }
+        const options = {
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+        };
+        const reservations = await this.reservationService.findAll(options);
+        const count = reservations.length;
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['resource', 'participants', 'participants.employee'],
+            order: {
+                startDate: 'ASC',
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+            withDeleted: true,
+        });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }));
+        return {
+            items: groupedReservationsResponse,
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+};
+exports.FindMyAllSchedulesUsecase = FindMyAllSchedulesUsecase;
+exports.FindMyAllSchedulesUsecase = FindMyAllSchedulesUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], FindMyAllSchedulesUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/find-my-reservation-list.usecase.ts":
+/*!***************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-my-reservation-list.usecase.ts ***!
+  \***************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindMyReservationListUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+let FindMyReservationListUsecase = class FindMyReservationListUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute(employeeId, page, limit, resourceType, startDate) {
+        const where = { participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } };
+        if (resourceType) {
+            where.resource = {
+                type: resourceType,
+            };
+        }
+        const options = {
+            where,
+        };
+        if (page && limit) {
+            options.skip = (page - 1) * limit;
+            options.take = limit;
+        }
+        const reservations = await this.reservationService.findAll(options);
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['resource', 'participants', 'participants.employee', 'reservationVehicles'],
+            withDeleted: true,
+        });
+        const count = await this.reservationService.count({
+            where: {
+                reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
+            },
+        });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }));
+        return {
+            items: groupedReservationsResponse,
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+};
+exports.FindMyReservationListUsecase = FindMyReservationListUsecase;
+exports.FindMyReservationListUsecase = FindMyReservationListUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], FindMyReservationListUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/find-my-upcoming-reservation-list.usecase.ts":
+/*!************************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-my-upcoming-reservation-list.usecase.ts ***!
+  \************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindMyUpcomingReservationListUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+let FindMyUpcomingReservationListUsecase = class FindMyUpcomingReservationListUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute(employeeId, query, resourceType) {
+        const { page, limit } = query;
+        const today = date_util_1.DateUtil.date(date_util_1.DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
+        const where = {
+            participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
+            endDate: (0, typeorm_1.MoreThanOrEqual)(today),
+        };
+        if (resourceType) {
+            where.resource = {
+                type: resourceType,
+            };
+        }
+        const options = {
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+        };
+        const reservations = await this.reservationService.findAll(options);
+        const count = reservations.length;
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['resource', 'participants', 'participants.employee'],
+            order: {
+                startDate: 'ASC',
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+            withDeleted: true,
+        });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }));
+        return {
+            items: groupedReservationsResponse,
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+};
+exports.FindMyUpcomingReservationListUsecase = FindMyUpcomingReservationListUsecase;
+exports.FindMyUpcomingReservationListUsecase = FindMyUpcomingReservationListUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], FindMyUpcomingReservationListUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/find-my-using-reservation-list.usecase.ts":
+/*!*********************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-my-using-reservation-list.usecase.ts ***!
+  \*********************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindMyUsingReservationListUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+let FindMyUsingReservationListUsecase = class FindMyUsingReservationListUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute(employeeId) {
+        const where = [
+            {
+                participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
+                resource: { type: resource_type_enum_1.ResourceType.VEHICLE },
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                startDate: (0, typeorm_1.LessThanOrEqual)(date_util_1.DateUtil.date(date_util_1.DateUtil.now().format()).toDate()),
+                endDate: (0, typeorm_1.MoreThanOrEqual)(date_util_1.DateUtil.date(date_util_1.DateUtil.now().format()).toDate()),
+            },
+            {
+                participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
+                status: reservation_type_enum_1.ReservationStatus.CLOSED,
+                reservationVehicles: {
+                    isReturned: false,
+                },
+            },
+        ];
+        const reservations = await this.reservationService.findAll({
+            where,
+            relations: ['resource', 'reservationVehicles', 'participants'],
+            order: {
+                startDate: 'ASC',
+            },
+            withDeleted: true,
+        });
+        reservations.sort((a, b) => {
+            if (a.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                return -1;
+            }
+            return 1;
+        });
+        return {
+            items: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+            meta: {
+                total: reservations.length,
+                page: 1,
+                limit: reservations.length,
+                hasNext: false,
+            },
+        };
+    }
+};
+exports.FindMyUsingReservationListUsecase = FindMyUsingReservationListUsecase;
+exports.FindMyUsingReservationListUsecase = FindMyUsingReservationListUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], FindMyUsingReservationListUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/find-reservation-detail.usecase.ts":
+/*!**************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-reservation-detail.usecase.ts ***!
+  \**************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindReservationDetailUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+let FindReservationDetailUsecase = class FindReservationDetailUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute(user, reservationId) {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: [
+                'resource',
+                'resource.vehicleInfo',
+                'resource.meetingRoomInfo',
+                'resource.accommodationInfo',
+                'participants',
+                'participants.employee',
+                'reservationVehicles',
+            ],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
+        reservationResponseDto.isMine = reservationResponseDto.reservers.some((reserver) => reserver.employeeId === user.employeeId);
+        return reservationResponseDto;
+    }
+};
+exports.FindReservationDetailUsecase = FindReservationDetailUsecase;
+exports.FindReservationDetailUsecase = FindReservationDetailUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], FindReservationDetailUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/find-reservation-list.usecase.ts":
+/*!************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-reservation-list.usecase.ts ***!
+  \************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindReservationListUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+let FindReservationListUsecase = class FindReservationListUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute(startDate, endDate, resourceType, resourceId, status) {
+        if (startDate && endDate && startDate > endDate) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
+        }
+        if (status && status.filter((s) => reservation_type_enum_1.ReservationStatus[s]).length === 0) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
+        }
+        const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+        let where = {};
+        if (status && status.length > 0) {
+            where.status = (0, typeorm_1.In)(status);
+        }
+        if (resourceType) {
+            where.resource = {
+                type: resourceType,
+            };
+        }
+        if (resourceId) {
+            where.resource = {
+                resourceId,
+            };
+        }
+        if (startDate && endDate) {
+            where = {
+                ...where,
+                startDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.date(regex.test(endDate) ? endDate : endDate + ' 23:59:59').toDate()),
+                endDate: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(regex.test(startDate) ? startDate : startDate + ' 00:00:00').toDate()),
+            };
+        }
+        const reservations = await this.reservationService.findAll({
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+            withDeleted: true,
+        });
+        const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation));
+        return reservationResponseDtos;
+    }
+};
+exports.FindReservationListUsecase = FindReservationListUsecase;
+exports.FindReservationListUsecase = FindReservationListUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], FindReservationListUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/find-resource-reservation-list.usecase.ts":
+/*!*********************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-resource-reservation-list.usecase.ts ***!
+  \*********************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindResourceReservationListUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./src/dtos.index.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+let FindResourceReservationListUsecase = class FindResourceReservationListUsecase {
+    constructor(reservationService, resourceService) {
+        this.reservationService = reservationService;
+        this.resourceService = resourceService;
+    }
+    async execute(employeeId, resourceId, page, limit, month, isMine) {
+        const monthStart = `${month}-01 00:00:00`;
+        const lastDay = date_util_1.DateUtil.date(month).getLastDayOfMonth().getDate();
+        const monthEnd = `${month}-${lastDay} 23:59:59`;
+        const monthStartDate = date_util_1.DateUtil.date(monthStart).toDate();
+        const monthEndDate = date_util_1.DateUtil.date(monthEnd).toDate();
+        const dateCondition = (0, typeorm_1.Raw)((alias) => `(${alias} BETWEEN :monthStartDate AND :monthEndDate OR
+              "Reservation"."endDate" BETWEEN :monthStartDate AND :monthEndDate OR
+              (${alias} <= :monthStartDate AND "Reservation"."endDate" >= :monthEndDate))`, { monthStartDate, monthEndDate });
+        const where = {
+            startDate: dateCondition,
+            resourceId: resourceId,
+        };
+        const resource = await this.resourceService.findOne({
+            where: { resourceId: resourceId },
+        });
+        if (!resource) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
+        }
+        if (isMine) {
+            where.participants = { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER };
+        }
+        const options = {
+            where,
+        };
+        if (page && limit) {
+            options.skip = (page - 1) * limit;
+            options.take = limit;
+        }
+        const reservations = await this.reservationService.findAll(options);
+        const count = await this.reservationService.count({ where });
+        const reservationWithParticipants = await this.reservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_1.In)(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['participants', 'participants.employee'],
+            withDeleted: true,
+        });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }));
+        return {
+            resource: new dtos_index_1.ResourceResponseDto(resource),
+            groupedReservations: groupedReservationsResponse,
+        };
+    }
+};
+exports.FindResourceReservationListUsecase = FindResourceReservationListUsecase;
+exports.FindResourceReservationListUsecase = FindResourceReservationListUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _b : Object])
+], FindResourceReservationListUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/handle-cron.usecase.ts":
+/*!**************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/handle-cron.usecase.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HandleCronUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+let HandleCronUsecase = class HandleCronUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute() {
+        const now = date_util_1.DateUtil.now().format();
+        const notClosedReservations = await this.reservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                resource: {
+                    type: (0, typeorm_1.Not)(resource_type_enum_1.ResourceType.VEHICLE),
+                },
+                endDate: (0, typeorm_1.LessThanOrEqual)(date_util_1.DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of notClosedReservations) {
+            await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+        }
+    }
+};
+exports.HandleCronUsecase = HandleCronUsecase;
+exports.HandleCronUsecase = HandleCronUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], HandleCronUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/index.ts":
+/*!************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/index.ts ***!
+  \************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./check-reservation-access.usecase */ "./src/application/reservation/core/usecases/check-reservation-access.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./create-reservation-closing-job.usecase */ "./src/application/reservation/core/usecases/create-reservation-closing-job.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./create-reservation.usecase */ "./src/application/reservation/core/usecases/create-reservation.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./delete-reservation-closing-job.usecase */ "./src/application/reservation/core/usecases/delete-reservation-closing-job.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-check-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-check-reservation-list.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-conflict-reservation.usecase */ "./src/application/reservation/core/usecases/find-conflict-reservation.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-my-all-schedules.usecase */ "./src/application/reservation/core/usecases/find-my-all-schedules.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-my-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-my-reservation-list.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-my-upcoming-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-my-upcoming-reservation-list.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-my-using-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-my-using-reservation-list.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-reservation-detail.usecase */ "./src/application/reservation/core/usecases/find-reservation-detail.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-reservation-list.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-resource-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-resource-reservation-list.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./handle-cron.usecase */ "./src/application/reservation/core/usecases/handle-cron.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./return-vehicle.usecase */ "./src/application/reservation/core/usecases/return-vehicle.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./update-reservation-status.usecase */ "./src/application/reservation/core/usecases/update-reservation-status.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./update-reservation.usecase */ "./src/application/reservation/core/usecases/update-reservation.usecase.ts"), exports);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/return-vehicle.usecase.ts":
+/*!*****************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/return-vehicle.usecase.ts ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReturnVehicleUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
+let ReturnVehicleUsecase = class ReturnVehicleUsecase {
+    constructor(reservationService, reservationVehicleService, resourceService, vehicleInfoService, notificationService, dataSource) {
+        this.reservationService = reservationService;
+        this.reservationVehicleService = reservationVehicleService;
+        this.resourceService = resourceService;
+        this.vehicleInfoService = vehicleInfoService;
+        this.notificationService = notificationService;
+        this.dataSource = dataSource;
+    }
+    async execute(user, reservationId, returnDto) {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['resource', 'resource.vehicleInfo', 'resource.resourceManagers'],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        if (reservation.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_RESOURCE_TYPE);
+        }
+        if (reservation.status !== reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_RETURN_STATUS(reservation.status));
+        }
+        if (reservation.resource.vehicleInfo.totalMileage > returnDto.totalMileage) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_MILEAGE);
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const reservationVehicles = await this.reservationVehicleService.findAll({
+                where: { reservationId },
+                relations: ['reservation', 'vehicleInfo'],
+            });
+            if (!reservationVehicles || reservationVehicles.length === 0) {
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_NOT_FOUND);
+            }
+            const reservationVehicle = reservationVehicles[0];
+            if (reservationVehicle.isReturned) {
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_ALREADY_RETURNED);
+            }
+            await this.reservationService.update(reservationId, {
+                status: reservation_type_enum_1.ReservationStatus.CLOSED,
+            }, { queryRunner });
+            await this.reservationVehicleService.update(reservationVehicle.reservationVehicleId, {
+                endOdometer: returnDto.totalMileage,
+                isReturned: true,
+                returnedAt: date_util_1.DateUtil.now().toDate(),
+            }, { queryRunner });
+            const vehicleInfoId = reservation.resource.vehicleInfo.vehicleInfoId;
+            await this.resourceService.update(reservation.resource.resourceId, { location: returnDto.location }, { queryRunner });
+            await this.vehicleInfoService.update(vehicleInfoId, {
+                totalMileage: returnDto.totalMileage,
+                leftMileage: returnDto.leftMileage,
+                parkingLocationImages: returnDto.parkingLocationImages,
+                odometerImages: returnDto.odometerImages,
+                indoorImages: returnDto.indoorImages,
+            }, { queryRunner });
+            const notiTarget = [user.employeeId];
+            this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED, {
+                resourceId: reservation.resource.resourceId,
+                resourceName: reservation.resource.name,
+                resourceType: reservation.resource.type,
+            }, notiTarget);
+            await queryRunner.commitTransaction();
+            return true;
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            console.error('Error in returnVehicle:', error);
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+};
+exports.ReturnVehicleUsecase = ReturnVehicleUsecase;
+exports.ReturnVehicleUsecase = ReturnVehicleUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object])
+], ReturnVehicleUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/update-reservation-status.usecase.ts":
+/*!****************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/update-reservation-status.usecase.ts ***!
+  \****************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateReservationStatusUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const reservation_participant_service_1 = __webpack_require__(/*! @src/domain/reservation-participant/reservation-participant.service */ "./src/domain/reservation-participant/reservation-participant.service.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const create_reservation_closing_job_usecase_1 = __webpack_require__(/*! ./create-reservation-closing-job.usecase */ "./src/application/reservation/core/usecases/create-reservation-closing-job.usecase.ts");
+const delete_reservation_closing_job_usecase_1 = __webpack_require__(/*! ./delete-reservation-closing-job.usecase */ "./src/application/reservation/core/usecases/delete-reservation-closing-job.usecase.ts");
+let UpdateReservationStatusUsecase = class UpdateReservationStatusUsecase {
+    constructor(reservationService, participantService, notificationService, createReservationClosingJob, deleteReservationClosingJob) {
+        this.reservationService = reservationService;
+        this.participantService = participantService;
+        this.notificationService = notificationService;
+        this.createReservationClosingJob = createReservationClosingJob;
+        this.deleteReservationClosingJob = deleteReservationClosingJob;
+    }
+    async execute(reservationId, updateDto) {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['resource', 'resource.resourceManagers'],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+        }
+        const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+        if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELLED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
+            this.deleteReservationClosingJob.execute(reservationId);
+        }
+        if (updateDto.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+            this.createReservationClosingJob.execute(updatedReservation);
+        }
+        if (reservation.resource.notifyReservationChange && updateDto.status !== reservation_type_enum_1.ReservationStatus.CLOSED) {
+            try {
+                const reservers = await this.participantService.findAll({
+                    where: { reservationId },
+                });
+                const notiTarget = [
+                    ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
+                    ...reservers.map((reserver) => reserver.employeeId),
+                ];
+                let notificationType;
+                switch (updateDto.status) {
+                    case reservation_type_enum_1.ReservationStatus.CONFIRMED:
+                        notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED;
+                        break;
+                    case reservation_type_enum_1.ReservationStatus.CANCELLED:
+                        notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED;
+                        break;
+                    case reservation_type_enum_1.ReservationStatus.REJECTED:
+                        notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED;
+                        break;
+                }
+                this.notificationService.createNotification(notificationType, {
+                    reservationId: reservation.reservationId,
+                    reservationTitle: reservation.title,
+                    reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(reservation.startDate), date_util_1.DateUtil.format(reservation.endDate)),
+                    resourceId: reservation.resource.resourceId,
+                    resourceName: reservation.resource.name,
+                    resourceType: reservation.resource.type,
+                }, notiTarget);
+            }
+            catch (error) {
+                console.log(error);
+                console.log('Notification creation failed in updateStatus');
+            }
+        }
+        return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
+    }
+};
+exports.UpdateReservationStatusUsecase = UpdateReservationStatusUsecase;
+exports.UpdateReservationStatusUsecase = UpdateReservationStatusUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof reservation_participant_service_1.DomainReservationParticipantService !== "undefined" && reservation_participant_service_1.DomainReservationParticipantService) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _c : Object, typeof (_d = typeof create_reservation_closing_job_usecase_1.CreateReservationClosingJobUsecase !== "undefined" && create_reservation_closing_job_usecase_1.CreateReservationClosingJobUsecase) === "function" ? _d : Object, typeof (_e = typeof delete_reservation_closing_job_usecase_1.DeleteReservationClosingJobUsecase !== "undefined" && delete_reservation_closing_job_usecase_1.DeleteReservationClosingJobUsecase) === "function" ? _e : Object])
+], UpdateReservationStatusUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/core/usecases/update-reservation.usecase.ts":
+/*!*********************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/update-reservation.usecase.ts ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateReservationUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const reservation_participant_service_1 = __webpack_require__(/*! @src/domain/reservation-participant/reservation-participant.service */ "./src/domain/reservation-participant/reservation-participant.service.ts");
+const find_conflict_reservation_usecase_1 = __webpack_require__(/*! ./find-conflict-reservation.usecase */ "./src/application/reservation/core/usecases/find-conflict-reservation.usecase.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const create_reservation_closing_job_usecase_1 = __webpack_require__(/*! ./create-reservation-closing-job.usecase */ "./src/application/reservation/core/usecases/create-reservation-closing-job.usecase.ts");
+const delete_reservation_closing_job_usecase_1 = __webpack_require__(/*! ./delete-reservation-closing-job.usecase */ "./src/application/reservation/core/usecases/delete-reservation-closing-job.usecase.ts");
+let UpdateReservationUsecase = class UpdateReservationUsecase {
+    constructor(reservationService, participantService, notificationService, findConflictReservationUsecase, createReservationClosingJob, deleteReservationClosingJob) {
+        this.reservationService = reservationService;
+        this.participantService = participantService;
+        this.notificationService = notificationService;
+        this.findConflictReservationUsecase = findConflictReservationUsecase;
+        this.createReservationClosingJob = createReservationClosingJob;
+        this.deleteReservationClosingJob = deleteReservationClosingJob;
+    }
+    async execute(reservationId, updateDto) {
+        const reservation = await this.reservationService.findOne({
+            where: { reservationId, status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED]) },
+            relations: ['resource', 'participants'],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+        }
+        let hasUpdateTime = false;
+        let hasUpdateParticipants = false;
+        if (updateDto.participantIds) {
+            hasUpdateParticipants =
+                updateDto.participantIds.length !==
+                    reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT).length ||
+                    updateDto.participantIds.some((id) => !reservation.participants.some((p) => p.employeeId === id));
+        }
+        if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
+            hasUpdateTime = true;
+            const conflicts = await this.findConflictReservationUsecase.execute(updateDto.resourceId, date_util_1.DateUtil.date(updateDto.startDate).toDate(), date_util_1.DateUtil.date(updateDto.endDate).toDate(), reservationId);
+            if (conflicts.length > 0) {
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
+            }
+            if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED &&
+                reservation.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_ACCOMMODATION_TIME);
+            }
+        }
+        const participantIds = updateDto.participantIds;
+        delete updateDto.participantIds;
+        let updatedReservation = await this.reservationService.findOne({
+            where: { reservationId },
+            relations: ['participants', 'resource'],
+            withDeleted: true,
+        });
+        const hasUpdateTings = updateDto.title || updateDto.isAllDay || updateDto.notifyBeforeStart || updateDto.notifyMinutesBeforeStart;
+        if (hasUpdateTings) {
+            updatedReservation = await this.reservationService.update(reservationId, {
+                title: updateDto?.title || undefined,
+                isAllDay: updateDto?.isAllDay || undefined,
+                notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
+                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
+            });
+        }
+        if (hasUpdateParticipants) {
+            const participants = reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
+            const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
+            const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
+            await Promise.all(deletedParticipants.map((participant) => this.participantService.delete(participant.participantId)));
+            await Promise.all(newParticipants.map((employeeId) => this.participantService.save({
+                reservationId,
+                employeeId,
+                type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
+            })));
+            if (updatedReservation.resource.notifyParticipantChange) {
+                try {
+                    const notiTarget = [...newParticipants, ...participants.map((p) => p.employeeId)];
+                    this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED, {
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
+                    }, notiTarget);
+                }
+                catch (error) {
+                    console.log(error);
+                    console.log('Notification creation failed in updateParticipants');
+                }
+            }
+        }
+        if (hasUpdateTime) {
+            if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED &&
+                reservation.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
+                this.deleteReservationClosingJob.execute(reservationId);
+                this.createReservationClosingJob.execute(reservation);
+            }
+            updatedReservation = await this.reservationService.update(reservationId, {
+                startDate: updateDto.startDate ? date_util_1.DateUtil.date(updateDto.startDate).toDate() : undefined,
+                endDate: updateDto.endDate ? date_util_1.DateUtil.date(updateDto.endDate).toDate() : undefined,
+            });
+            if (updatedReservation.resource.notifyReservationChange) {
+                try {
+                    const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+                    await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED, {
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
+                    }, notiTarget);
+                    for (const beforeMinutes of updatedReservation.notifyMinutesBeforeStart) {
+                        this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+                            reservationId: updatedReservation.reservationId,
+                            reservationTitle: updatedReservation.title,
+                            resourceId: updatedReservation.resource.resourceId,
+                            resourceName: updatedReservation.resource.name,
+                            resourceType: updatedReservation.resource.type,
+                            reservationDate: date_util_1.DateUtil.format(updatedReservation.startDate),
+                            beforeMinutes: beforeMinutes,
+                        }, notiTarget);
+                    }
+                }
+                catch (error) {
+                    console.log(error);
+                    console.log('Notification creation failed in updateTime');
+                }
+            }
+        }
+        return new reservation_response_dto_1.ReservationResponseDto(updatedReservation);
+    }
+};
+exports.UpdateReservationUsecase = UpdateReservationUsecase;
+exports.UpdateReservationUsecase = UpdateReservationUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof reservation_participant_service_1.DomainReservationParticipantService !== "undefined" && reservation_participant_service_1.DomainReservationParticipantService) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _c : Object, typeof (_d = typeof find_conflict_reservation_usecase_1.FindConflictReservationUsecase !== "undefined" && find_conflict_reservation_usecase_1.FindConflictReservationUsecase) === "function" ? _d : Object, typeof (_e = typeof create_reservation_closing_job_usecase_1.CreateReservationClosingJobUsecase !== "undefined" && create_reservation_closing_job_usecase_1.CreateReservationClosingJobUsecase) === "function" ? _e : Object, typeof (_f = typeof delete_reservation_closing_job_usecase_1.DeleteReservationClosingJobUsecase !== "undefined" && delete_reservation_closing_job_usecase_1.DeleteReservationClosingJobUsecase) === "function" ? _f : Object])
+], UpdateReservationUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/controllers/snapshot.controller.ts":
+/*!*********************************************************************************!*\
+  !*** ./src/application/reservation/snapshot/controllers/snapshot.controller.ts ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserReservationSnapshotController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const snapshot_service_1 = __webpack_require__(/*! ../snapshot.service */ "./src/application/reservation/snapshot/snapshot.service.ts");
+const reservation_snapshot_dto_1 = __webpack_require__(/*! ../dtos/reservation-snapshot.dto */ "./src/application/reservation/snapshot/dtos/reservation-snapshot.dto.ts");
+let UserReservationSnapshotController = class UserReservationSnapshotController {
+    constructor(snapshotService) {
+        this.snapshotService = snapshotService;
+    }
+    async createSnapshot(user, createSnapshotDto) {
+        return this.snapshotService.createSnapshot(user, createSnapshotDto);
+    }
+    async updateSnapshot(user, updateSnapshotDto) {
+        return this.snapshotService.updateSnapshot(user, updateSnapshotDto);
+    }
+    async findUserSnapshot(user) {
+        return this.snapshotService.findUserSnapshot(user);
+    }
+    async deleteSnapshot(user, snapshotId) {
+        await this.snapshotService.deleteSnapshot(user, snapshotId);
+    }
+};
+exports.UserReservationSnapshotController = UserReservationSnapshotController;
+__decorate([
+    (0, common_1.Post)('snapshot'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 스냅샷 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 스냅샷 생성 성공',
+        type: reservation_snapshot_dto_1.ReservationSnapshotResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object, typeof (_c = typeof reservation_snapshot_dto_1.CreateReservationSnapshotDto !== "undefined" && reservation_snapshot_dto_1.CreateReservationSnapshotDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], UserReservationSnapshotController.prototype, "createSnapshot", null);
+__decorate([
+    (0, common_1.Patch)('snapshot'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 스냅샷 업데이트' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 스냅샷 업데이트 성공',
+        type: reservation_snapshot_dto_1.ReservationSnapshotResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _e : Object, typeof (_f = typeof reservation_snapshot_dto_1.UpdateReservationSnapshotDto !== "undefined" && reservation_snapshot_dto_1.UpdateReservationSnapshotDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], UserReservationSnapshotController.prototype, "updateSnapshot", null);
+__decorate([
+    (0, common_1.Get)('snapshot/user'),
+    (0, swagger_1.ApiOperation)({ summary: '유저의 예약 스냅샷 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 스냅샷 조회 성공',
+        type: reservation_snapshot_dto_1.ReservationSnapshotResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_h = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], UserReservationSnapshotController.prototype, "findUserSnapshot", null);
+__decorate([
+    (0, common_1.Delete)('snapshot/:snapshotId'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 스냅샷 삭제' }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('snapshotId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _k : Object, String]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+], UserReservationSnapshotController.prototype, "deleteSnapshot", null);
+exports.UserReservationSnapshotController = UserReservationSnapshotController = __decorate([
+    (0, swagger_1.ApiTags)('2. 예약 '),
+    (0, common_1.Controller)('v1/reservations'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    __metadata("design:paramtypes", [typeof (_a = typeof snapshot_service_1.SnapshotService !== "undefined" && snapshot_service_1.SnapshotService) === "function" ? _a : Object])
+], UserReservationSnapshotController);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/dtos/reservation-snapshot.dto.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/application/reservation/snapshot/dtos/reservation-snapshot.dto.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationSnapshotResponseDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.ReminderTimeDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+class AttendeeDto {
+}
+exports.AttendeeDto = AttendeeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], AttendeeDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], AttendeeDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], AttendeeDto.prototype, "department", void 0);
+class DroppableGroupItemDto {
+}
+exports.DroppableGroupItemDto = DroppableGroupItemDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DroppableGroupItemDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DroppableGroupItemDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], DroppableGroupItemDto.prototype, "order", void 0);
+class DroppableGroupDataDto {
+}
+exports.DroppableGroupDataDto = DroppableGroupDataDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DroppableGroupDataDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DroppableGroupDataDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [DroppableGroupItemDto], required: false }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], DroppableGroupDataDto.prototype, "items", void 0);
+class DateRangeDto {
+}
+exports.DateRangeDto = DateRangeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DateRangeDto.prototype, "from", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DateRangeDto.prototype, "to", void 0);
+class TimeInfoDto {
+}
+exports.TimeInfoDto = TimeInfoDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], TimeInfoDto.prototype, "hour", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], TimeInfoDto.prototype, "minute", void 0);
+class TimeRangeDto {
+}
+exports.TimeRangeDto = TimeRangeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TimeRangeDto.prototype, "am", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TimeRangeDto.prototype, "pm", void 0);
+class SelectedResourceDto {
+}
+exports.SelectedResourceDto = SelectedResourceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SelectedResourceDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SelectedResourceDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SelectedResourceDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SelectedResourceDto.prototype, "endDate", void 0);
+class ReminderTimeDto {
+}
+exports.ReminderTimeDto = ReminderTimeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ReminderTimeDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], ReminderTimeDto.prototype, "time", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], ReminderTimeDto.prototype, "isSelected", void 0);
+class CreateReservationSnapshotDto {
+}
+exports.CreateReservationSnapshotDto = CreateReservationSnapshotDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: ['groups', 'date-time', 'resources', 'info'], required: false }),
+    (0, class_validator_1.IsEnum)(['groups', 'date-time', 'resources', 'info']),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateReservationSnapshotDto.prototype, "step", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateReservationSnapshotDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: DroppableGroupDataDto }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", DroppableGroupDataDto)
+], CreateReservationSnapshotDto.prototype, "droppableGroupData", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: DateRangeDto }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => DateRangeDto),
+    __metadata("design:type", DateRangeDto)
+], CreateReservationSnapshotDto.prototype, "dateRange", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: TimeInfoDto }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => TimeInfoDto),
+    __metadata("design:type", TimeInfoDto)
+], CreateReservationSnapshotDto.prototype, "startTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: TimeInfoDto }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => TimeInfoDto),
+    __metadata("design:type", TimeInfoDto)
+], CreateReservationSnapshotDto.prototype, "endTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: TimeRangeDto }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => TimeRangeDto),
+    __metadata("design:type", TimeRangeDto)
+], CreateReservationSnapshotDto.prototype, "timeRange", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateReservationSnapshotDto.prototype, "timeUnit", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: SelectedResourceDto }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => SelectedResourceDto),
+    __metadata("design:type", SelectedResourceDto)
+], CreateReservationSnapshotDto.prototype, "selectedResource", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateReservationSnapshotDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [ReminderTimeDto] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateReservationSnapshotDto.prototype, "reminderTimes", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, default: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateReservationSnapshotDto.prototype, "isAllDay", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, default: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateReservationSnapshotDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [Number] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateReservationSnapshotDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [AttendeeDto] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateReservationSnapshotDto.prototype, "attendees", void 0);
+class UpdateReservationSnapshotDto extends CreateReservationSnapshotDto {
+}
+exports.UpdateReservationSnapshotDto = UpdateReservationSnapshotDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], UpdateReservationSnapshotDto.prototype, "snapshotId", void 0);
+class DateRangeResponseDto {
+}
+exports.DateRangeResponseDto = DateRangeResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], DateRangeResponseDto.prototype, "from", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], DateRangeResponseDto.prototype, "to", void 0);
+class TimeInfoResponseDto {
+}
+exports.TimeInfoResponseDto = TimeInfoResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Number)
+], TimeInfoResponseDto.prototype, "hour", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Number)
+], TimeInfoResponseDto.prototype, "minute", void 0);
+class TimeRangeResponseDto {
+}
+exports.TimeRangeResponseDto = TimeRangeResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], TimeRangeResponseDto.prototype, "am", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], TimeRangeResponseDto.prototype, "pm", void 0);
+class SelectedResourceResponseDto {
+}
+exports.SelectedResourceResponseDto = SelectedResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], SelectedResourceResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], SelectedResourceResponseDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], SelectedResourceResponseDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], SelectedResourceResponseDto.prototype, "endDate", void 0);
+class ReservationSnapshotResponseDto {
+}
+exports.ReservationSnapshotResponseDto = ReservationSnapshotResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationSnapshotResponseDto.prototype, "snapshotId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationSnapshotResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: ['groups', 'date-time', 'resources', 'info'], required: false }),
+    __metadata("design:type", String)
+], ReservationSnapshotResponseDto.prototype, "step", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationSnapshotResponseDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: DroppableGroupDataDto }),
+    __metadata("design:type", DroppableGroupDataDto)
+], ReservationSnapshotResponseDto.prototype, "droppableGroupData", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: DateRangeResponseDto }),
+    __metadata("design:type", DateRangeResponseDto)
+], ReservationSnapshotResponseDto.prototype, "dateRange", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: TimeInfoResponseDto }),
+    __metadata("design:type", TimeInfoResponseDto)
+], ReservationSnapshotResponseDto.prototype, "startTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: TimeInfoResponseDto }),
+    __metadata("design:type", TimeInfoResponseDto)
+], ReservationSnapshotResponseDto.prototype, "endTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: TimeRangeResponseDto }),
+    __metadata("design:type", TimeRangeResponseDto)
+], ReservationSnapshotResponseDto.prototype, "timeRange", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Number)
+], ReservationSnapshotResponseDto.prototype, "timeUnit", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: SelectedResourceResponseDto }),
+    __metadata("design:type", SelectedResourceResponseDto)
+], ReservationSnapshotResponseDto.prototype, "selectedResource", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationSnapshotResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [ReminderTimeDto] }),
+    __metadata("design:type", Array)
+], ReservationSnapshotResponseDto.prototype, "reminderTimes", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationSnapshotResponseDto.prototype, "isAllDay", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationSnapshotResponseDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [Number] }),
+    __metadata("design:type", Array)
+], ReservationSnapshotResponseDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [AttendeeDto] }),
+    __metadata("design:type", Array)
+], ReservationSnapshotResponseDto.prototype, "attendees", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+], ReservationSnapshotResponseDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
+], ReservationSnapshotResponseDto.prototype, "updatedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/snapshot.module.ts":
+/*!*****************************************************************!*\
+  !*** ./src/application/reservation/snapshot/snapshot.module.ts ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationSnapshotModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const snapshot_service_1 = __webpack_require__(/*! ./snapshot.service */ "./src/application/reservation/snapshot/snapshot.service.ts");
+const snapshot_controller_1 = __webpack_require__(/*! ./controllers/snapshot.controller */ "./src/application/reservation/snapshot/controllers/snapshot.controller.ts");
+const reservation_snapshot_module_1 = __webpack_require__(/*! @src/domain/reservation-snapshot/reservation-snapshot.module */ "./src/domain/reservation-snapshot/reservation-snapshot.module.ts");
+const usecases_1 = __webpack_require__(/*! ./usecases */ "./src/application/reservation/snapshot/usecases/index.ts");
+let ReservationSnapshotModule = class ReservationSnapshotModule {
+};
+exports.ReservationSnapshotModule = ReservationSnapshotModule;
+exports.ReservationSnapshotModule = ReservationSnapshotModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([entities_1.ReservationSnapshot]), reservation_snapshot_module_1.DomainReservationSnapshotModule],
+        controllers: [snapshot_controller_1.UserReservationSnapshotController],
+        providers: [
+            snapshot_service_1.SnapshotService,
+            usecases_1.FindSnapshotUsecase,
+            usecases_1.UpsertSnapshotUsecase,
+            usecases_1.ConvertSnapshotUsecase,
+            usecases_1.CreateSnapshotUsecase,
+            usecases_1.DeleteSnapshotUsecase,
+            usecases_1.UpdateSnapshotUsecase,
+        ],
+        exports: [],
+    })
+], ReservationSnapshotModule);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/snapshot.service.ts":
+/*!******************************************************************!*\
+  !*** ./src/application/reservation/snapshot/snapshot.service.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SnapshotService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const update_snapshot_usecase_1 = __webpack_require__(/*! ./usecases/update-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/update-snapshot.usecase.ts");
+const find_snapshot_usecase_1 = __webpack_require__(/*! ./usecases/find-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/find-snapshot.usecase.ts");
+const delete_snapshot_usecase_1 = __webpack_require__(/*! ./usecases/delete-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/delete-snapshot.usecase.ts");
+const upsert_snapshot_usecase_1 = __webpack_require__(/*! ./usecases/upsert-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/upsert-snapshot.usecase.ts");
+let SnapshotService = class SnapshotService {
+    constructor(updateSnapshotUsecase, findSnapshotUsecase, deleteSnapshotUsecase, upsertSnapshotUsecase) {
+        this.updateSnapshotUsecase = updateSnapshotUsecase;
+        this.findSnapshotUsecase = findSnapshotUsecase;
+        this.deleteSnapshotUsecase = deleteSnapshotUsecase;
+        this.upsertSnapshotUsecase = upsertSnapshotUsecase;
+    }
+    async createSnapshot(user, createSnapshotDto) {
+        return this.upsertSnapshotUsecase.execute(user, createSnapshotDto);
+    }
+    async updateSnapshot(user, updateSnapshotDto) {
+        return this.updateSnapshotUsecase.execute(updateSnapshotDto);
+    }
+    async findUserSnapshot(user) {
+        return this.findSnapshotUsecase.execute(user.employeeId);
+    }
+    async deleteSnapshot(user, snapshotId) {
+        await this.deleteSnapshotUsecase.execute(snapshotId);
+    }
+};
+exports.SnapshotService = SnapshotService;
+exports.SnapshotService = SnapshotService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof update_snapshot_usecase_1.UpdateSnapshotUsecase !== "undefined" && update_snapshot_usecase_1.UpdateSnapshotUsecase) === "function" ? _a : Object, typeof (_b = typeof find_snapshot_usecase_1.FindSnapshotUsecase !== "undefined" && find_snapshot_usecase_1.FindSnapshotUsecase) === "function" ? _b : Object, typeof (_c = typeof delete_snapshot_usecase_1.DeleteSnapshotUsecase !== "undefined" && delete_snapshot_usecase_1.DeleteSnapshotUsecase) === "function" ? _c : Object, typeof (_d = typeof upsert_snapshot_usecase_1.UpsertSnapshotUsecase !== "undefined" && upsert_snapshot_usecase_1.UpsertSnapshotUsecase) === "function" ? _d : Object])
+], SnapshotService);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/usecases/convert-snapshot.usecase.ts":
+/*!***********************************************************************************!*\
+  !*** ./src/application/reservation/snapshot/usecases/convert-snapshot.usecase.ts ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConvertSnapshotUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+let ConvertSnapshotUsecase = class ConvertSnapshotUsecase {
+    execute(snapshot) {
+        return {
+            snapshotId: snapshot.snapshotId,
+            employeeId: snapshot.employeeId,
+            step: snapshot.step,
+            resourceType: snapshot.resourceType,
+            droppableGroupData: snapshot.droppableGroupData,
+            dateRange: snapshot.dateRange,
+            startTime: snapshot.startTime,
+            endTime: snapshot.endTime,
+            timeRange: snapshot.timeRange,
+            timeUnit: snapshot.timeUnit,
+            selectedResource: snapshot.selectedResource,
+            title: snapshot.title,
+            reminderTimes: snapshot.reminderTimes,
+            isAllDay: snapshot.isAllDay,
+            notifyBeforeStart: snapshot.notifyBeforeStart,
+            notifyMinutesBeforeStart: snapshot.notifyMinutesBeforeStart,
+            attendees: snapshot.attendees,
+            createdAt: snapshot.createdAt,
+            updatedAt: snapshot.updatedAt,
+        };
+    }
+};
+exports.ConvertSnapshotUsecase = ConvertSnapshotUsecase;
+exports.ConvertSnapshotUsecase = ConvertSnapshotUsecase = __decorate([
+    (0, common_1.Injectable)()
+], ConvertSnapshotUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/usecases/create-snapshot.usecase.ts":
+/*!**********************************************************************************!*\
+  !*** ./src/application/reservation/snapshot/usecases/create-snapshot.usecase.ts ***!
+  \**********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateSnapshotUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_snapshot_service_1 = __webpack_require__(/*! @src/domain/reservation-snapshot/reservation-snapshot.service */ "./src/domain/reservation-snapshot/reservation-snapshot.service.ts");
+const convert_snapshot_usecase_1 = __webpack_require__(/*! ./convert-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/convert-snapshot.usecase.ts");
+let CreateSnapshotUsecase = class CreateSnapshotUsecase {
+    constructor(snapshotService, convertSnapshotUsecase) {
+        this.snapshotService = snapshotService;
+        this.convertSnapshotUsecase = convertSnapshotUsecase;
+    }
+    async execute(user, dto) {
+        const snapshot = await this.snapshotService.create(dto);
+        snapshot.employeeId = user.employeeId;
+        const savedSnapshot = await this.snapshotService.save(snapshot);
+        return this.convertSnapshotUsecase.execute(savedSnapshot);
+    }
+};
+exports.CreateSnapshotUsecase = CreateSnapshotUsecase;
+exports.CreateSnapshotUsecase = CreateSnapshotUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_snapshot_service_1.DomainReservationSnapshotService !== "undefined" && reservation_snapshot_service_1.DomainReservationSnapshotService) === "function" ? _a : Object, typeof (_b = typeof convert_snapshot_usecase_1.ConvertSnapshotUsecase !== "undefined" && convert_snapshot_usecase_1.ConvertSnapshotUsecase) === "function" ? _b : Object])
+], CreateSnapshotUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/usecases/delete-snapshot.usecase.ts":
+/*!**********************************************************************************!*\
+  !*** ./src/application/reservation/snapshot/usecases/delete-snapshot.usecase.ts ***!
+  \**********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeleteSnapshotUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_snapshot_service_1 = __webpack_require__(/*! @src/domain/reservation-snapshot/reservation-snapshot.service */ "./src/domain/reservation-snapshot/reservation-snapshot.service.ts");
+let DeleteSnapshotUsecase = class DeleteSnapshotUsecase {
+    constructor(snapshotService) {
+        this.snapshotService = snapshotService;
+    }
+    async execute(snapshotId) {
+        await this.snapshotService.delete(snapshotId);
+    }
+};
+exports.DeleteSnapshotUsecase = DeleteSnapshotUsecase;
+exports.DeleteSnapshotUsecase = DeleteSnapshotUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_snapshot_service_1.DomainReservationSnapshotService !== "undefined" && reservation_snapshot_service_1.DomainReservationSnapshotService) === "function" ? _a : Object])
+], DeleteSnapshotUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/usecases/find-snapshot.usecase.ts":
+/*!********************************************************************************!*\
+  !*** ./src/application/reservation/snapshot/usecases/find-snapshot.usecase.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindSnapshotUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_snapshot_service_1 = __webpack_require__(/*! @src/domain/reservation-snapshot/reservation-snapshot.service */ "./src/domain/reservation-snapshot/reservation-snapshot.service.ts");
+const convert_snapshot_usecase_1 = __webpack_require__(/*! ./convert-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/convert-snapshot.usecase.ts");
+let FindSnapshotUsecase = class FindSnapshotUsecase {
+    constructor(snapshotService, convertSnapshotUsecase) {
+        this.snapshotService = snapshotService;
+        this.convertSnapshotUsecase = convertSnapshotUsecase;
+    }
+    async execute(employeeId) {
+        const snapshot = await this.snapshotService.findOne({
+            where: { employeeId },
+        });
+        return snapshot ? this.convertSnapshotUsecase.execute(snapshot) : null;
+    }
+};
+exports.FindSnapshotUsecase = FindSnapshotUsecase;
+exports.FindSnapshotUsecase = FindSnapshotUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_snapshot_service_1.DomainReservationSnapshotService !== "undefined" && reservation_snapshot_service_1.DomainReservationSnapshotService) === "function" ? _a : Object, typeof (_b = typeof convert_snapshot_usecase_1.ConvertSnapshotUsecase !== "undefined" && convert_snapshot_usecase_1.ConvertSnapshotUsecase) === "function" ? _b : Object])
+], FindSnapshotUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/usecases/index.ts":
+/*!****************************************************************!*\
+  !*** ./src/application/reservation/snapshot/usecases/index.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./create-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/create-snapshot.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/find-snapshot.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./update-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/update-snapshot.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./upsert-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/upsert-snapshot.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./delete-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/delete-snapshot.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./convert-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/convert-snapshot.usecase.ts"), exports);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/usecases/update-snapshot.usecase.ts":
+/*!**********************************************************************************!*\
+  !*** ./src/application/reservation/snapshot/usecases/update-snapshot.usecase.ts ***!
+  \**********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateSnapshotUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_snapshot_service_1 = __webpack_require__(/*! @src/domain/reservation-snapshot/reservation-snapshot.service */ "./src/domain/reservation-snapshot/reservation-snapshot.service.ts");
+const convert_snapshot_usecase_1 = __webpack_require__(/*! ./convert-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/convert-snapshot.usecase.ts");
+let UpdateSnapshotUsecase = class UpdateSnapshotUsecase {
+    constructor(snapshotService, convertSnapshotUsecase) {
+        this.snapshotService = snapshotService;
+        this.convertSnapshotUsecase = convertSnapshotUsecase;
+    }
+    async execute(dto) {
+        const updateData = {
+            ...dto,
+            dateRange: dto.dateRange
+                ? {
+                    from: new Date(dto.dateRange.from),
+                    to: new Date(dto.dateRange.to),
+                }
+                : undefined,
+            selectedResource: dto.selectedResource
+                ? {
+                    ...dto.selectedResource,
+                    startDate: new Date(dto.selectedResource.startDate),
+                    endDate: new Date(dto.selectedResource.endDate),
+                }
+                : undefined,
+        };
+        const updatedSnapshot = await this.snapshotService.update(dto.snapshotId, updateData);
+        return this.convertSnapshotUsecase.execute(updatedSnapshot);
+    }
+};
+exports.UpdateSnapshotUsecase = UpdateSnapshotUsecase;
+exports.UpdateSnapshotUsecase = UpdateSnapshotUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_snapshot_service_1.DomainReservationSnapshotService !== "undefined" && reservation_snapshot_service_1.DomainReservationSnapshotService) === "function" ? _a : Object, typeof (_b = typeof convert_snapshot_usecase_1.ConvertSnapshotUsecase !== "undefined" && convert_snapshot_usecase_1.ConvertSnapshotUsecase) === "function" ? _b : Object])
+], UpdateSnapshotUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/reservation/snapshot/usecases/upsert-snapshot.usecase.ts":
+/*!**********************************************************************************!*\
+  !*** ./src/application/reservation/snapshot/usecases/upsert-snapshot.usecase.ts ***!
+  \**********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpsertSnapshotUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const find_snapshot_usecase_1 = __webpack_require__(/*! ./find-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/find-snapshot.usecase.ts");
+const create_snapshot_usecase_1 = __webpack_require__(/*! ./create-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/create-snapshot.usecase.ts");
+const update_snapshot_usecase_1 = __webpack_require__(/*! ./update-snapshot.usecase */ "./src/application/reservation/snapshot/usecases/update-snapshot.usecase.ts");
+let UpsertSnapshotUsecase = class UpsertSnapshotUsecase {
+    constructor(findSnapshotUsecase, createSnapshotUsecase, updateSnapshotUsecase) {
+        this.findSnapshotUsecase = findSnapshotUsecase;
+        this.createSnapshotUsecase = createSnapshotUsecase;
+        this.updateSnapshotUsecase = updateSnapshotUsecase;
+    }
+    async execute(user, dto) {
+        const snapshot = await this.findSnapshotUsecase.execute(user.employeeId);
+        if (snapshot) {
+            return await this.updateSnapshotUsecase.execute({ ...dto, snapshotId: snapshot.snapshotId });
+        }
+        else {
+            return await this.createSnapshotUsecase.execute(user, dto);
+        }
+    }
+};
+exports.UpsertSnapshotUsecase = UpsertSnapshotUsecase;
+exports.UpsertSnapshotUsecase = UpsertSnapshotUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof find_snapshot_usecase_1.FindSnapshotUsecase !== "undefined" && find_snapshot_usecase_1.FindSnapshotUsecase) === "function" ? _a : Object, typeof (_b = typeof create_snapshot_usecase_1.CreateSnapshotUsecase !== "undefined" && create_snapshot_usecase_1.CreateSnapshotUsecase) === "function" ? _b : Object, typeof (_c = typeof update_snapshot_usecase_1.UpdateSnapshotUsecase !== "undefined" && update_snapshot_usecase_1.UpdateSnapshotUsecase) === "function" ? _c : Object])
+], UpsertSnapshotUsecase);
+
+
+/***/ }),
+
 /***/ "./src/application/resource/core/controllers/admin.resource-group.controller.ts":
 /*!**************************************************************************************!*\
   !*** ./src/application/resource/core/controllers/admin.resource-group.controller.ts ***!
@@ -9662,9 +13399,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UpdateResourceGroupOrdersDto = exports.NewOrderResourceGroupDto = exports.UpdateResourceOrdersDto = exports.NewOrderResourceDto = exports.ReturnVehicleDto = exports.UpdateResourceInfoDto = exports.UpdateResourceDto = exports.UpdateResourceGroupDto = void 0;
+exports.UpdateResourceGroupOrdersDto = exports.NewOrderResourceGroupDto = exports.UpdateResourceOrdersDto = exports.NewOrderResourceDto = exports.UpdateResourceInfoDto = exports.UpdateResourceDto = exports.UpdateResourceGroupDto = void 0;
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
@@ -9757,45 +13494,6 @@ __decorate([
     (0, class_transformer_1.Type)(() => create_resource_dto_1.CreateResourceManagerDto),
     __metadata("design:type", Array)
 ], UpdateResourceInfoDto.prototype, "managers", void 0);
-class ReturnVehicleDto {
-}
-exports.ReturnVehicleDto = ReturnVehicleDto;
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", typeof (_b = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _b : Object)
-], ReturnVehicleDto.prototype, "location", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
-    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') }),
-    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
-    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
-    __metadata("design:type", Number)
-], ReturnVehicleDto.prototype, "leftMileage", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
-    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') }),
-    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
-    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
-    __metadata("design:type", Number)
-], ReturnVehicleDto.prototype, "totalMileage", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') }),
-    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주차 위치 이미지', '문자열') }),
-    __metadata("design:type", Array)
-], ReturnVehicleDto.prototype, "parkingLocationImages", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') }),
-    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지', '문자열') }),
-    __metadata("design:type", Array)
-], ReturnVehicleDto.prototype, "odometerImages", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('차량 실내 이미지') }),
-    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('차량 실내 이미지', '문자열') }),
-    __metadata("design:type", Array)
-], ReturnVehicleDto.prototype, "indoorImages", void 0);
 class NewOrderResourceDto {
 }
 exports.NewOrderResourceDto = NewOrderResourceDto;
@@ -12396,6 +16094,401 @@ exports.DomainNotificationService = DomainNotificationService = __decorate([
 
 /***/ }),
 
+/***/ "./src/domain/reservation-participant/reservation-participant.module.ts":
+/*!******************************************************************************!*\
+  !*** ./src/domain/reservation-participant/reservation-participant.module.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainReservationParticipantModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const reservation_participant_service_1 = __webpack_require__(/*! ./reservation-participant.service */ "./src/domain/reservation-participant/reservation-participant.service.ts");
+const reservation_participant_repository_1 = __webpack_require__(/*! ./reservation-participant.repository */ "./src/domain/reservation-participant/reservation-participant.repository.ts");
+const reservation_participant_entity_1 = __webpack_require__(/*! @libs/entities/reservation-participant.entity */ "./libs/entities/reservation-participant.entity.ts");
+let DomainReservationParticipantModule = class DomainReservationParticipantModule {
+};
+exports.DomainReservationParticipantModule = DomainReservationParticipantModule;
+exports.DomainReservationParticipantModule = DomainReservationParticipantModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([reservation_participant_entity_1.ReservationParticipant])],
+        providers: [reservation_participant_service_1.DomainReservationParticipantService, reservation_participant_repository_1.DomainReservationParticipantRepository],
+        exports: [reservation_participant_service_1.DomainReservationParticipantService],
+    })
+], DomainReservationParticipantModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/reservation-participant/reservation-participant.repository.ts":
+/*!**********************************************************************************!*\
+  !*** ./src/domain/reservation-participant/reservation-participant.repository.ts ***!
+  \**********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainReservationParticipantRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const reservation_participant_entity_1 = __webpack_require__(/*! @libs/entities/reservation-participant.entity */ "./libs/entities/reservation-participant.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainReservationParticipantRepository = class DomainReservationParticipantRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainReservationParticipantRepository = DomainReservationParticipantRepository;
+exports.DomainReservationParticipantRepository = DomainReservationParticipantRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(reservation_participant_entity_1.ReservationParticipant)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainReservationParticipantRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/reservation-participant/reservation-participant.service.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/domain/reservation-participant/reservation-participant.service.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainReservationParticipantService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_participant_repository_1 = __webpack_require__(/*! ./reservation-participant.repository */ "./src/domain/reservation-participant/reservation-participant.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainReservationParticipantService = class DomainReservationParticipantService extends base_service_1.BaseService {
+    constructor(reservationParticipantRepository) {
+        super(reservationParticipantRepository);
+        this.reservationParticipantRepository = reservationParticipantRepository;
+    }
+    async findByParticipantId(participantId) {
+        const participant = await this.reservationParticipantRepository.findOne({
+            where: { participantId },
+            relations: ['reservation', 'employee'],
+        });
+        if (!participant) {
+            throw new common_1.NotFoundException('참가자를 찾을 수 없습니다.');
+        }
+        return participant;
+    }
+    async findByReservationId(reservationId) {
+        return this.reservationParticipantRepository.findAll({
+            where: { reservationId },
+            relations: ['reservation', 'employee'],
+        });
+    }
+    async findByEmployeeId(employeeId) {
+        return this.reservationParticipantRepository.findAll({
+            where: { employeeId },
+            relations: ['reservation', 'employee'],
+        });
+    }
+    async findByType(type) {
+        return this.reservationParticipantRepository.findAll({
+            where: { type },
+            relations: ['reservation', 'employee'],
+        });
+    }
+};
+exports.DomainReservationParticipantService = DomainReservationParticipantService;
+exports.DomainReservationParticipantService = DomainReservationParticipantService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_participant_repository_1.DomainReservationParticipantRepository !== "undefined" && reservation_participant_repository_1.DomainReservationParticipantRepository) === "function" ? _a : Object])
+], DomainReservationParticipantService);
+
+
+/***/ }),
+
+/***/ "./src/domain/reservation-snapshot/reservation-snapshot.module.ts":
+/*!************************************************************************!*\
+  !*** ./src/domain/reservation-snapshot/reservation-snapshot.module.ts ***!
+  \************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainReservationSnapshotModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const reservation_snapshot_service_1 = __webpack_require__(/*! ./reservation-snapshot.service */ "./src/domain/reservation-snapshot/reservation-snapshot.service.ts");
+const reservation_snapshot_repository_1 = __webpack_require__(/*! ./reservation-snapshot.repository */ "./src/domain/reservation-snapshot/reservation-snapshot.repository.ts");
+const reservation_snapshot_entity_1 = __webpack_require__(/*! @libs/entities/reservation-snapshot.entity */ "./libs/entities/reservation-snapshot.entity.ts");
+let DomainReservationSnapshotModule = class DomainReservationSnapshotModule {
+};
+exports.DomainReservationSnapshotModule = DomainReservationSnapshotModule;
+exports.DomainReservationSnapshotModule = DomainReservationSnapshotModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([reservation_snapshot_entity_1.ReservationSnapshot])],
+        providers: [reservation_snapshot_service_1.DomainReservationSnapshotService, reservation_snapshot_repository_1.DomainReservationSnapshotRepository],
+        exports: [reservation_snapshot_service_1.DomainReservationSnapshotService],
+    })
+], DomainReservationSnapshotModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/reservation-snapshot/reservation-snapshot.repository.ts":
+/*!****************************************************************************!*\
+  !*** ./src/domain/reservation-snapshot/reservation-snapshot.repository.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainReservationSnapshotRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const reservation_snapshot_entity_1 = __webpack_require__(/*! @libs/entities/reservation-snapshot.entity */ "./libs/entities/reservation-snapshot.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainReservationSnapshotRepository = class DomainReservationSnapshotRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainReservationSnapshotRepository = DomainReservationSnapshotRepository;
+exports.DomainReservationSnapshotRepository = DomainReservationSnapshotRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(reservation_snapshot_entity_1.ReservationSnapshot)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainReservationSnapshotRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/reservation-snapshot/reservation-snapshot.service.ts":
+/*!*************************************************************************!*\
+  !*** ./src/domain/reservation-snapshot/reservation-snapshot.service.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainReservationSnapshotService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_snapshot_repository_1 = __webpack_require__(/*! ./reservation-snapshot.repository */ "./src/domain/reservation-snapshot/reservation-snapshot.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainReservationSnapshotService = class DomainReservationSnapshotService extends base_service_1.BaseService {
+    constructor(reservationSnapshotRepository) {
+        super(reservationSnapshotRepository);
+        this.reservationSnapshotRepository = reservationSnapshotRepository;
+    }
+};
+exports.DomainReservationSnapshotService = DomainReservationSnapshotService;
+exports.DomainReservationSnapshotService = DomainReservationSnapshotService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_snapshot_repository_1.DomainReservationSnapshotRepository !== "undefined" && reservation_snapshot_repository_1.DomainReservationSnapshotRepository) === "function" ? _a : Object])
+], DomainReservationSnapshotService);
+
+
+/***/ }),
+
+/***/ "./src/domain/reservation-vehicle/reservation-vehicle.module.ts":
+/*!**********************************************************************!*\
+  !*** ./src/domain/reservation-vehicle/reservation-vehicle.module.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainReservationVehicleModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const reservation_vehicle_service_1 = __webpack_require__(/*! ./reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
+const reservation_vehicle_repository_1 = __webpack_require__(/*! ./reservation-vehicle.repository */ "./src/domain/reservation-vehicle/reservation-vehicle.repository.ts");
+const reservation_vehicle_entity_1 = __webpack_require__(/*! @libs/entities/reservation-vehicle.entity */ "./libs/entities/reservation-vehicle.entity.ts");
+let DomainReservationVehicleModule = class DomainReservationVehicleModule {
+};
+exports.DomainReservationVehicleModule = DomainReservationVehicleModule;
+exports.DomainReservationVehicleModule = DomainReservationVehicleModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([reservation_vehicle_entity_1.ReservationVehicle])],
+        providers: [reservation_vehicle_service_1.DomainReservationVehicleService, reservation_vehicle_repository_1.DomainReservationVehicleRepository],
+        exports: [reservation_vehicle_service_1.DomainReservationVehicleService],
+    })
+], DomainReservationVehicleModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/reservation-vehicle/reservation-vehicle.repository.ts":
+/*!**************************************************************************!*\
+  !*** ./src/domain/reservation-vehicle/reservation-vehicle.repository.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainReservationVehicleRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const reservation_vehicle_entity_1 = __webpack_require__(/*! @libs/entities/reservation-vehicle.entity */ "./libs/entities/reservation-vehicle.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainReservationVehicleRepository = class DomainReservationVehicleRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainReservationVehicleRepository = DomainReservationVehicleRepository;
+exports.DomainReservationVehicleRepository = DomainReservationVehicleRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(reservation_vehicle_entity_1.ReservationVehicle)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainReservationVehicleRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts":
+/*!***********************************************************************!*\
+  !*** ./src/domain/reservation-vehicle/reservation-vehicle.service.ts ***!
+  \***********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainReservationVehicleService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_vehicle_repository_1 = __webpack_require__(/*! ./reservation-vehicle.repository */ "./src/domain/reservation-vehicle/reservation-vehicle.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainReservationVehicleService = class DomainReservationVehicleService extends base_service_1.BaseService {
+    constructor(reservationVehicleRepository) {
+        super(reservationVehicleRepository);
+        this.reservationVehicleRepository = reservationVehicleRepository;
+    }
+    async findByReservationVehicleId(reservationVehicleId) {
+        const reservationVehicle = await this.reservationVehicleRepository.findOne({
+            where: { reservationVehicleId },
+            relations: ['reservation', 'vehicleInfo'],
+        });
+        if (!reservationVehicle) {
+            throw new common_1.NotFoundException('예약 차량을 찾을 수 없습니다.');
+        }
+        return reservationVehicle;
+    }
+    async findByReservationId(reservationId) {
+        return this.reservationVehicleRepository.findAll({
+            where: { reservationId },
+            relations: ['reservation', 'vehicleInfo'],
+        });
+    }
+    async findByVehicleInfoId(vehicleInfoId) {
+        return this.reservationVehicleRepository.findAll({
+            where: { vehicleInfoId },
+            relations: ['reservation', 'vehicleInfo'],
+        });
+    }
+    async findByIsReturned(isReturned) {
+        return this.reservationVehicleRepository.findAll({
+            where: { isReturned },
+            relations: ['reservation', 'vehicleInfo'],
+        });
+    }
+};
+exports.DomainReservationVehicleService = DomainReservationVehicleService;
+exports.DomainReservationVehicleService = DomainReservationVehicleService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_vehicle_repository_1.DomainReservationVehicleRepository !== "undefined" && reservation_vehicle_repository_1.DomainReservationVehicleRepository) === "function" ? _a : Object])
+], DomainReservationVehicleService);
+
+
+/***/ }),
+
 /***/ "./src/domain/reservation/reservation.module.ts":
 /*!******************************************************!*\
   !*** ./src/domain/reservation/reservation.module.ts ***!
@@ -12461,6 +16554,18 @@ let DomainReservationRepository = class DomainReservationRepository extends base
     constructor(repository) {
         super(repository);
     }
+    async count(repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
+            : this.repository;
+        return await repository.count({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+            select: repositoryOptions?.select,
+            order: repositoryOptions?.order,
+            withDeleted: repositoryOptions?.withDeleted,
+        });
+    }
 };
 exports.DomainReservationRepository = DomainReservationRepository;
 exports.DomainReservationRepository = DomainReservationRepository = __decorate([
@@ -12494,81 +16599,13 @@ exports.DomainReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const reservation_repository_1 = __webpack_require__(/*! ./reservation.repository */ "./src/domain/reservation/reservation.repository.ts");
 const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
-const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let DomainReservationService = class DomainReservationService extends base_service_1.BaseService {
     constructor(reservationRepository) {
         super(reservationRepository);
         this.reservationRepository = reservationRepository;
     }
-    async findByReservationId(reservationId) {
-        const reservation = await this.reservationRepository.findOne({
-            where: { reservationId },
-            relations: [
-                'resource',
-                'participants',
-                'participants.employee',
-                'reservationVehicles',
-                'reservationVehicles.vehicleInfo',
-            ],
-        });
-        if (!reservation) {
-            throw new common_1.NotFoundException('예약을 찾을 수 없습니다.');
-        }
-        return reservation;
-    }
-    async findByResourceId(resourceId) {
-        return this.reservationRepository.findAll({
-            where: { resourceId },
-            relations: [
-                'resource',
-                'participants',
-                'participants.employee',
-                'reservationVehicles',
-                'reservationVehicles.vehicleInfo',
-            ],
-        });
-    }
-    async findByStatus(status) {
-        return this.reservationRepository.findAll({
-            where: { status },
-            relations: [
-                'resource',
-                'participants',
-                'participants.employee',
-                'reservationVehicles',
-                'reservationVehicles.vehicleInfo',
-            ],
-        });
-    }
-    async findByDateRange(startDate, endDate) {
-        return this.reservationRepository.findAll({
-            where: {
-                startDate: (0, typeorm_1.Between)(startDate, endDate),
-            },
-            relations: [
-                'resource',
-                'participants',
-                'participants.employee',
-                'reservationVehicles',
-                'reservationVehicles.vehicleInfo',
-            ],
-        });
-    }
-    async findByEmployeeId(employeeId) {
-        return this.reservationRepository.findAll({
-            where: {
-                participants: {
-                    employeeId,
-                },
-            },
-            relations: [
-                'resource',
-                'participants',
-                'participants.employee',
-                'reservationVehicles',
-                'reservationVehicles.vehicleInfo',
-            ],
-        });
+    async count(repositoryOptions) {
+        return await this.reservationRepository.count(repositoryOptions);
     }
 };
 exports.DomainReservationService = DomainReservationService;
@@ -14464,7 +18501,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
-], ReservationSnapshotResponseDto.prototype, "userId", void 0);
+], ReservationSnapshotResponseDto.prototype, "employeeId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: ['groups', 'date-time', 'resources', 'info'], required: false }),
     __metadata("design:type", String)
@@ -15063,7 +19100,7 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
     }
     async createSnapshot(user, dto) {
         const snapshot = this.snapshotService.create(dto);
-        snapshot.userId = user.userId;
+        snapshot.employeeId = user.employeeId;
         const savedSnapshot = await this.snapshotService.save(snapshot);
         return this.toResponseDto(savedSnapshot);
     }
@@ -15073,7 +19110,7 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
     }
     async findSnapshotByUserId(userId) {
         const snapshot = await this.snapshotService.findOne({
-            where: { userId },
+            where: { employeeId: userId },
         });
         return snapshot ? this.toResponseDto(snapshot) : null;
     }
@@ -15087,7 +19124,7 @@ let ReservationSnapshotUsecase = class ReservationSnapshotUsecase {
     toResponseDto(snapshot) {
         return {
             snapshotId: snapshot.snapshotId,
-            userId: snapshot.userId,
+            employeeId: snapshot.employeeId,
             step: snapshot.step,
             resourceType: snapshot.resourceType,
             droppableGroupData: snapshot.droppableGroupData,
@@ -24219,6 +28256,16 @@ module.exports = require("class-transformer");
 /***/ ((module) => {
 
 module.exports = require("class-validator");
+
+/***/ }),
+
+/***/ "cron":
+/*!***********************!*\
+  !*** external "cron" ***!
+  \***********************/
+/***/ ((module) => {
+
+module.exports = require("cron");
 
 /***/ }),
 

@@ -12,7 +12,6 @@ import {
 } from '@src/application/resource/core/dtos/resource-response.dto';
 import { ResourceAvailabilityDto } from '@src/application/resource/core/dtos/available-time-response.dto';
 import { ResourceQueryDto } from '@src/application/resource/core/dtos/resource-query.dto';
-import { ReturnVehicleDto } from '@src/application/resource/core/dtos/update-resource.dto';
 import {
     CheckAvailabilityQueryDto,
     CheckAvailabilityResponseDto,

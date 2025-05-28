@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import * as bcrypt from 'bcrypt';
+import axios from 'axios';
 
 @Injectable()
 export class CheckPasswordUsecase {
@@ -12,6 +13,24 @@ export class CheckPasswordUsecase {
         if (!employee) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
         }
-        return bcrypt.compare(password, employee.password);
+        try {
+            const ssoApiUrl = process.env.SSO_API_URL;
+            const response = await axios.post(
+                `${ssoApiUrl}/api/auth/check-password`,
+                {
+                    currentPassword: password,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${employee.accessToken}`,
+                    },
+                },
+            );
+            const data = response.data;
+            return data.isValid;
+        } catch (error) {
+            console.log(error);
+            throw new UnauthorizedException(ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
+        }
     }
 }

@@ -28,6 +28,8 @@ import { FileModule as FileApplicationModule } from './application/file/file.mod
 import { NotificationModule as NotificationApplicationModule } from './application/notification/notification.module';
 import { ResourceCoreModule } from './application/resource/core/core.module';
 import { VehicleResourceModule } from './modules/resource/vehicle/vehicle-resource.module';
+import { ReservationSnapshotModule } from './application/reservation/snapshot/snapshot.module';
+import { ReservationCoreModule } from './application/reservation/core/core.module';
 
 @Module({
     imports: [
@@ -47,8 +49,6 @@ import { VehicleResourceModule } from './modules/resource/vehicle/vehicle-resour
         }),
         TypeOrmModule.forFeature(Entities),
 
-        ReservationModule,
-
         SeedModule,
         TaskModule,
 
@@ -58,6 +58,8 @@ import { VehicleResourceModule } from './modules/resource/vehicle/vehicle-resour
         NotificationApplicationModule,
         ResourceCoreModule,
         VehicleResourceModule,
+        ReservationSnapshotModule,
+        ReservationCoreModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],

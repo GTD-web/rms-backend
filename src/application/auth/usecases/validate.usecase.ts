@@ -26,7 +26,8 @@ export class ValidateUsecase {
         }
         const isPasswordValid = await bcrypt.compare(password, employee.password);
         if (!isPasswordValid) {
-            throw new UnauthorizedException(ERROR_MESSAGE.BUSINESS.AUTH.INVALID_PASSWORD);
+            console.log('패스워드 불일치, SSO 비밀번호 확인 필요');
+            return null;
         }
         return employee;
     }
