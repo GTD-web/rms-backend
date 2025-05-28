@@ -8919,10 +8919,7 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateReservationDto.prototype, "notifyBeforeStart", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: reservation_type_enum_1.ReservationStatus }),
-    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus, {
-        message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('예약 상태', Object.values(reservation_type_enum_1.ReservationStatus)),
-    }),
+    (0, swagger_1.ApiProperty)({ required: false, enum: reservation_type_enum_1.ReservationStatus }),
     __metadata("design:type", typeof (_b = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _b : Object)
 ], CreateReservationDto.prototype, "status", void 0);
 __decorate([
