@@ -26,6 +26,7 @@ export class UserConsumableController {
         @User() user: UserEntity,
         @Param('consumableId') consumableId: string,
     ): Promise<ConsumableResponseDto> {
+        console.log('consumableId', consumableId);
         const consumable = await this.consumableUsecase.findOne(user, {
             where: {
                 consumableId: consumableId,

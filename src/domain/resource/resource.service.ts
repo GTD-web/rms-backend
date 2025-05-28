@@ -11,47 +11,7 @@ export class DomainResourceService extends BaseService<Resource> {
         super(resourceRepository);
     }
 
-    async findByResourceId(resourceId: string): Promise<Resource> {
-        const resource = await this.resourceRepository.findOne({
-            where: { resourceId },
-        });
-        if (!resource) {
-            throw new NotFoundException('리소스를 찾을 수 없습니다.');
-        }
-        return resource;
-    }
-
-    async findByResourceGroupId(resourceGroupId: string): Promise<Resource[]> {
-        return this.resourceRepository.findAll({
-            where: { resourceGroupId },
-            relations: ['resourceGroup', 'vehicleInfo', 'meetingRoomInfo', 'accommodationInfo'],
-            order: { order: 'ASC' },
-        });
-    }
-
-    async findByType(type: ResourceType): Promise<Resource[]> {
-        return this.resourceRepository.findAll({
-            where: { type },
-            relations: ['resourceGroup', 'vehicleInfo', 'meetingRoomInfo', 'accommodationInfo'],
-            order: { order: 'ASC' },
-        });
-    }
-
-    async findAvailable(): Promise<Resource[]> {
-        return this.resourceRepository.findAll({
-            where: { isAvailable: true },
-            relations: ['resourceGroup', 'vehicleInfo', 'meetingRoomInfo', 'accommodationInfo'],
-            order: { order: 'ASC' },
-        });
-    }
-
-    async findByName(name: string): Promise<Resource> {
-        const resource = await this.resourceRepository.findOne({
-            where: { name },
-        });
-        if (!resource) {
-            throw new NotFoundException('리소스를 찾을 수 없습니다.');
-        }
-        return resource;
+    async softDelete(resourceId: string, options?: IRepositoryOptions<Resource>): Promise<void> {
+        await this.resourceRepository.softDelete(resourceId, options);
     }
 }
