@@ -13,7 +13,7 @@ export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOption
         database: configService.get('database.database'),
         entities: Entities,
         schema: 'public',
-        // synchronize: configService.get('NODE_ENV') === 'local',
+        synchronize: configService.get('NODE_ENV') === 'local',
         // logging: configService.get('NODE_ENV') === 'local',
         migrations: [join(__dirname, 'libs/migrations/*.ts')],
         migrationsRun: configService.get('database.port') === 6543,

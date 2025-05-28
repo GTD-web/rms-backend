@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Employee } from '@libs/entities';
-import { DomainMaintenanceService } from '@src/domain/maintenance/maintenance.service';
+import { DomainMaintenanceService } from '@resource/domain/maintenance/maintenance.service';
 
 @Injectable()
 export class DeleteMaintenanceUsecase {

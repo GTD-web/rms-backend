@@ -4,7 +4,7 @@ import { ReservationParticipant } from './reservation-participant.entity';
 import { ResourceManager } from './resource-manager.entity';
 import { Role } from '@libs/enums/role-type.enum';
 import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
-
+import { ReservationSnapshot } from './reservation-snapshot.entity';
 @Entity('employees')
 export class Employee {
     @PrimaryColumn('uuid', {
