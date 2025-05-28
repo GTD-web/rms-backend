@@ -7,7 +7,7 @@ import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
-import { MaintenanceService } from '../services/maintenance.service';
+import { MaintenanceService } from '@src/application/resource/vehicle/services/maintenance.service';
 
 @ApiTags('4. 차량 정비 이력 ')
 @Controller('v1/maintenances')

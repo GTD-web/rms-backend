@@ -2,9 +2,9 @@ import { IsString, IsOptional, IsEnum, IsBoolean, ValidateNested, IsArray, Lengt
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { CreateVehicleInfoDto } from '@resource/modules/resource/vehicle/application/dtos/create-vehicle-info.dto';
-import { CreateMeetingRoomInfoDto } from '@resource/modules/resource/meeting-room/application/dtos/create-meeting-room-info.dto';
-import { CreateAccommodationInfoDto } from '@resource/modules/resource/accommodation/application/dtos/create-accommodation-info.dto';
+import { CreateVehicleInfoDto } from '@src/application/resource/vehicle/dtos/create-vehicle-info.dto';
+import { CreateMeetingRoomInfoDto } from '@src/application/resource/meeting-room/dtos/create-meeting-room-info.dto';
+import { CreateAccommodationInfoDto } from '@src/application/resource/accommodation/dtos/create-accommodation-info.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 export class CreateResourceGroupDto {

@@ -10,7 +10,7 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
-import { MaintenanceService } from '../services/maintenance.service';
+import { MaintenanceService } from '@src/application/resource/vehicle/services/maintenance.service';
 
 @ApiTags('4. 차량 정비 이력 - 관리자 ')
 @Controller('v1/admin/maintenances')

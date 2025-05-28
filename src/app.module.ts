@@ -13,23 +13,22 @@ import { jwtConfig } from '@libs/configs/jwt.config';
 import { Entities } from '@libs/entities';
 
 // 프로젝트 내부 모듈
-import { ReservationModule } from './modules/reservation/reservation.module';
 import { AppService } from './app.service';
 
 import { AppController } from './app.controller';
 import { ApiDocService } from '@libs/utils/api-doc.service';
 import { DbDocService } from '@libs/utils/db-doc.service';
 import { SeedModule } from './modules/seed/seed.module';
-import { TaskModule } from './modules/task/task.module';
 
 import { AuthModule as AuthApplicationModule } from './application/auth/auth.module';
 import { EmployeeModule as EmployeeApplicationModule } from './application/employee/employee.module';
 import { FileModule as FileApplicationModule } from './application/file/file.module';
 import { NotificationModule as NotificationApplicationModule } from './application/notification/notification.module';
 import { ResourceCoreModule } from './application/resource/core/core.module';
-import { VehicleResourceModule } from './modules/resource/vehicle/vehicle-resource.module';
 import { ReservationSnapshotModule } from './application/reservation/snapshot/snapshot.module';
 import { ReservationCoreModule } from './application/reservation/core/core.module';
+import { VehicleResourceModule } from './application/resource/vehicle/vehicle.module';
+import { TaskModule } from './application/task/task.module';
 
 @Module({
     imports: [
@@ -57,9 +56,9 @@ import { ReservationCoreModule } from './application/reservation/core/core.modul
         FileApplicationModule,
         NotificationApplicationModule,
         ResourceCoreModule,
-        VehicleResourceModule,
         ReservationSnapshotModule,
         ReservationCoreModule,
+        VehicleResourceModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],

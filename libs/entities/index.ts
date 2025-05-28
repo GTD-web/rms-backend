@@ -1,5 +1,4 @@
 import { Employee } from './employee.entity';
-import { User } from './user.entity';
 import { Resource } from './resource.entity';
 import { ResourceGroup } from './resource-group.entity';
 import { VehicleInfo } from './vehicle-info.entity';
@@ -27,7 +26,6 @@ import { ConsumableItem } from './consumable-item.entity';
 
 export const Entities = [
     Employee,
-    User,
     Resource,
     ResourceGroup,
     VehicleInfo,
@@ -54,7 +52,6 @@ export const Entities = [
 
 export const EntitiesMap = {
     Employee,
-    User,
     Resource,
     ResourceGroup,
     VehicleInfo,
@@ -81,7 +78,6 @@ export const EntitiesMap = {
 
 export {
     Employee,
-    User,
     Resource,
     ResourceGroup,
     VehicleInfo,

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { SubscribeUsecase } from './usecases/subscribe.usecase';
 import { Employee, Notification } from '@libs/entities';
-import { PushNotificationPayload } from '@src/modules/notification/application/dto/send-notification.dto';
-import { PushSubscriptionDto } from '@src/modules/notification/application/dto/push-subscription.dto';
+import { PushNotificationPayload } from '@src/application/notification/dtos/send-notification.dto';
+import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
 import { SendMultiNotificationUsecase } from './usecases/sendMultiNotification.usecase';
-import { ResponseNotificationDto } from '@src/modules/notification/application/dto/response-notification.dto';
+import { ResponseNotificationDto } from '@src/application/notification/dtos/response-notification.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { GetMyNotificationUsecase } from './usecases/getMyNotification.usecase';

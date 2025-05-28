@@ -5,7 +5,7 @@ import { UpdateVehicleInfoDto } from '../dtos/update-vehicle-info.dto';
 import { VehicleInfoResponseDto } from '../dtos/vehicle-response.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
-import { VehicleInfoService } from '../services/vehicle-info.service';
+import { VehicleInfoService } from '@src/application/resource/vehicle/services/vehicle-info.service';
 
 @ApiTags('4. 차량 정보 - 관리자 ')
 @Controller('v1/admin/vehicle-info')

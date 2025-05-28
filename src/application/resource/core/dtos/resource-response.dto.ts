@@ -1,13 +1,13 @@
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
-import { VehicleInfoResponseDto } from '@resource/modules/resource/vehicle/application/dtos/vehicle-response.dto';
-import { MeetingRoomInfoResponseDto } from '@resource/modules/resource/meeting-room/application/dtos/meeting-room-info-response.dto';
-import { AccommodationInfoResponseDto } from '@resource/modules/resource/accommodation/application/dtos/accommodation-info-response.dto';
+import { VehicleInfoResponseDto } from '@src/application/resource/vehicle/dtos/vehicle-response.dto';
+import { MeetingRoomInfoResponseDto } from '@src/application/resource/meeting-room/dtos/meeting-room-info-response.dto';
+import { AccommodationInfoResponseDto } from '@src/application/resource/accommodation/dtos/accommodation-info-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceLocation, ResourceLocationURL } from './create-resource.dto';
-import { ReservationResponseDto } from '@resource/modules/reservation/application/dtos/reservation-response.dto';
-import { EmployeeResponseDto } from '@resource/application/employee/dtos/employee-response.dto';
+import { ReservationResponseDto } from '@src/application/reservation/core/dtos/reservation-response.dto';
+import { EmployeeResponseDto } from '@src/application/employee/dtos/employee-response.dto';
 import { Resource } from '@libs/entities/resource.entity';
-import { FileResponseDto } from '@resource/modules/file/application/dtos/file-response.dto';
+import { FileResponseDto } from '@src/application/file/dtos/file-response.dto';
 export class ResourceManagerResponseDto {
     @ApiProperty()
     resourceManagerId: string;

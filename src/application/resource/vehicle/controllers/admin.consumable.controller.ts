@@ -8,7 +8,7 @@ import { Role } from '@libs/enums/role-type.enum';
 import { Roles } from '@libs/decorators/role.decorator';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
-import { ConsumableService } from '../services/consumable.service';
+import { ConsumableService } from '@src/application/resource/vehicle/services/consumable.service';
 
 @ApiTags('4. 차량 소모품 - 관리자 ')
 @Controller('v1/admin/consumables')

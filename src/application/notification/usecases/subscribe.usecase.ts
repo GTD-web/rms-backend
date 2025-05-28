@@ -1,14 +1,13 @@
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DomainEmployeeNotificationService } from '@src/domain/employee-notification/employee-notification.service';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
-import { PushNotificationSubscription } from '@src/modules/notification/domain/ports/push-notification.port';
+import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
 
 @Injectable()
 export class SubscribeUsecase {
     constructor(private readonly employeeService: DomainEmployeeService) {}
 
-    async execute(employeeId: string, subscription: PushNotificationSubscription): Promise<boolean> {
+    async execute(employeeId: string, subscription: PushSubscriptionDto): Promise<boolean> {
         try {
             const employee = await this.employeeService.findByEmployeeId(employeeId);
             if (!employee) {

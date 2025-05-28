@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Employee, User as UserEntity } from '@libs/entities';
+import { Employee } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';

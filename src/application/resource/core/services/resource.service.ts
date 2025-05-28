@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { Employee, User } from '@libs/entities';
+import { Employee } from '@libs/entities';
 import {
     ResourceResponseDto,
     ResourceGroupWithResourcesAndReservationsResponseDto,
