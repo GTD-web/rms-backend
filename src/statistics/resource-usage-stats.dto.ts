@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional } from 'class-validator';
-import { YearMonthFilterDto } from '../common/base.dto';
+import { YearMonthFilterDto } from './base.dto';
 
 export class ResourceUsageStatsFilterDto extends YearMonthFilterDto {
     @ApiProperty({ required: false, description: '자원 ID' })

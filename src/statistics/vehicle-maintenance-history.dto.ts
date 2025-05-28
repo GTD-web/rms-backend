@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional } from 'class-validator';
-import { DateRangeFilterDto } from '../common/base.dto';
+import { DateRangeFilterDto } from './base.dto';
 
 export class VehicleMaintenanceHistoryFilterDto extends DateRangeFilterDto {
     @ApiProperty({ required: false, description: '자원 ID' })

@@ -13,21 +13,22 @@ import { jwtConfig } from '@libs/configs/jwt.config';
 import { Entities } from '@libs/entities';
 
 // 프로젝트 내부 모듈
-import { AuthModule } from './modules/auth/auth.module';
-import { ResourceModule } from './modules/resource/resource.module';
-import { EmployeeModule } from './modules/employee/employee.module';
-import { ReservationModule } from './modules/reservation/reservation.module';
 import { AppService } from './app.service';
-import { NotificationModule } from './modules/notification/notification.module';
-import { FileModule } from './modules/file/file.module';
+
 import { AppController } from './app.controller';
 import { ApiDocService } from '@libs/utils/api-doc.service';
 import { DbDocService } from '@libs/utils/db-doc.service';
-import { UserDomainModule } from './modules/auth/user.domain.module';
-import { EmployeeDomainModule } from './modules/employee/employee.domain.module';
-import { NotificationDomainModule } from './modules/notification/notification.domain.module';
 import { SeedModule } from './modules/seed/seed.module';
-import { TaskModule } from './modules/task/task.module';
+
+import { AuthModule as AuthApplicationModule } from './application/auth/auth.module';
+import { EmployeeModule as EmployeeApplicationModule } from './application/employee/employee.module';
+import { FileModule as FileApplicationModule } from './application/file/file.module';
+import { NotificationModule as NotificationApplicationModule } from './application/notification/notification.module';
+import { ResourceCoreModule } from './application/resource/core/core.module';
+import { ReservationSnapshotModule } from './application/reservation/snapshot/snapshot.module';
+import { ReservationCoreModule } from './application/reservation/core/core.module';
+import { VehicleResourceModule } from './application/resource/vehicle/vehicle.module';
+import { TaskModule } from './application/task/task.module';
 
 @Module({
     imports: [
@@ -46,19 +47,18 @@ import { TaskModule } from './modules/task/task.module';
             useFactory: typeOrmConfig,
         }),
         TypeOrmModule.forFeature(Entities),
-        AuthModule,
-        EmployeeModule,
-        ResourceModule,
-        ReservationModule,
-        NotificationModule,
-        FileModule,
 
-        UserDomainModule,
-        EmployeeDomainModule,
-        NotificationDomainModule,
         SeedModule,
-
         TaskModule,
+
+        AuthApplicationModule,
+        EmployeeApplicationModule,
+        FileApplicationModule,
+        NotificationApplicationModule,
+        ResourceCoreModule,
+        ReservationSnapshotModule,
+        ReservationCoreModule,
+        VehicleResourceModule,
     ],
     controllers: [AppController],
     providers: [AppService, ApiDocService, DbDocService],

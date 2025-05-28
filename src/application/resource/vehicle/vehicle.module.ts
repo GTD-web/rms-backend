@@ -1,0 +1,75 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { VehicleInfo, Consumable, Maintenance, Employee, Notification } from '@libs/entities';
+import { AdminVehicleInfoController } from './controllers/admin.vehicle-info.controller';
+import { AdminConsumableController } from './controllers/admin.consumable.controller';
+import { AdminMaintenanceController } from './controllers/admin.maintenance.controller';
+import { UserConsumableController } from './controllers/consumable.controller';
+import { UserMaintenanceController } from './controllers/maintenance.controller';
+import { DomainConsumableModule } from '@src/domain/consumable/consumable.module';
+import { DomainMaintenanceModule } from '@src/domain/maintenance/maintenance.module';
+import { DomainVehicleInfoModule } from '@src/domain/vehicle-info/vehicle-info.module';
+import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
+import { NotificationModule } from '@src/application/notification/notification.module';
+import { VehicleInfoService } from './services/vehicle-info.service';
+import { ConsumableService } from './services/consumable.service';
+import { MaintenanceService } from './services/maintenance.service';
+
+// Usecases
+import { FindVehicleInfoUsecase, UpdateVehicleInfoUsecase } from './usecases/vehicle-info';
+import {
+    SaveConsumableUsecase,
+    UpdateConsumableUsecase,
+    DeleteConsumableUsecase,
+    FindAllConsumablesUsecase,
+    FindOneConsumableUsecase,
+} from './usecases/consumable';
+import {
+    SaveMaintenanceUsecase,
+    UpdateMaintenanceUsecase,
+    DeleteMaintenanceUsecase,
+    FindAllMaintenancesUsecase,
+    FindOneMaintenanceUsecase,
+    FindAllMaintenancesByVehicleInfoIdUsecase,
+} from './usecases/maintenance';
+
+@Module({
+    imports: [
+        TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance, Employee, Notification]),
+        DomainVehicleInfoModule,
+        DomainConsumableModule,
+        DomainMaintenanceModule,
+        DomainEmployeeModule,
+        NotificationModule,
+    ],
+    controllers: [
+        AdminVehicleInfoController,
+        AdminConsumableController,
+        AdminMaintenanceController,
+        UserConsumableController,
+        UserMaintenanceController,
+    ],
+    providers: [
+        VehicleInfoService,
+        ConsumableService,
+        MaintenanceService,
+        // Vehicle Info Usecases
+        FindVehicleInfoUsecase,
+        UpdateVehicleInfoUsecase,
+        // Consumable Usecases
+        SaveConsumableUsecase,
+        UpdateConsumableUsecase,
+        DeleteConsumableUsecase,
+        FindAllConsumablesUsecase,
+        FindOneConsumableUsecase,
+        // Maintenance Usecases
+        SaveMaintenanceUsecase,
+        UpdateMaintenanceUsecase,
+        DeleteMaintenanceUsecase,
+        FindAllMaintenancesUsecase,
+        FindOneMaintenanceUsecase,
+        FindAllMaintenancesByVehicleInfoIdUsecase,
+    ],
+    exports: [VehicleInfoService, ConsumableService, MaintenanceService],
+})
+export class VehicleResourceModule {}
