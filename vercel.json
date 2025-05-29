@@ -21,6 +21,10 @@
         {
             "path": "/api/v1/reservations/cron-job/close",
             "schedule": "31 * * * *"
+        },
+        {
+            "path": "/api/v1/files/cron-job/delete-temporary-file",
+            "schedule": "0 0 * * *"
         }
     ]
 }

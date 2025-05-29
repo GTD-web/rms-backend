@@ -105,7 +105,6 @@ const typeOrmConfig = (configService) => {
         database: configService.get('database.database'),
         entities: entities_1.Entities,
         schema: 'public',
-        synchronize: configService.get('NODE_ENV') === 'local',
         migrations: [(0, path_1.join)(__dirname, 'libs/migrations/*.ts')],
         migrationsRun: configService.get('database.port') === 6543,
         ssl: configService.get('database.port') === 6543,
@@ -832,6 +831,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.File = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
@@ -850,6 +850,14 @@ __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], File.prototype, "filePath", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: true }),
+    __metadata("design:type", Boolean)
+], File.prototype, "isTemporary", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp with time zone' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], File.prototype, "createdAt", void 0);
 exports.File = File = __decorate([
     (0, typeorm_1.Entity)('files')
 ], File);
@@ -6556,6 +6564,55 @@ exports.SyncEmployeeUsecase = SyncEmployeeUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/file/controllers/cron.file.controller.ts":
+/*!******************************************************************!*\
+  !*** ./src/application/file/controllers/cron.file.controller.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronFileController = void 0;
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const file_service_1 = __webpack_require__(/*! ../file.service */ "./src/application/file/file.service.ts");
+let CronFileController = class CronFileController {
+    constructor(fileService) {
+        this.fileService = fileService;
+    }
+    async deleteTemporaryFile() {
+        return this.fileService.findTemporaryFiles();
+    }
+};
+exports.CronFileController = CronFileController;
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/delete-temporary-file'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronFileController.prototype, "deleteTemporaryFile", null);
+exports.CronFileController = CronFileController = __decorate([
+    (0, swagger_1.ApiTags)('0. 파일 - 공통 '),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Controller)('v1/files'),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _a : Object])
+], CronFileController);
+
+
+/***/ }),
+
 /***/ "./src/application/file/controllers/file.controller.ts":
 /*!*************************************************************!*\
   !*** ./src/application/file/controllers/file.controller.ts ***!
@@ -6732,14 +6789,16 @@ const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const file_entity_1 = __webpack_require__(/*! @libs/entities/file.entity */ "./libs/entities/file.entity.ts");
+const cron_file_controller_1 = __webpack_require__(/*! ./controllers/cron.file.controller */ "./src/application/file/controllers/cron.file.controller.ts");
+const find_temporary_file_usecase_1 = __webpack_require__(/*! ./usecases/find-temporary-file.usecase */ "./src/application/file/usecases/find-temporary-file.usecase.ts");
 let FileModule = class FileModule {
 };
 exports.FileModule = FileModule;
 exports.FileModule = FileModule = __decorate([
     (0, common_1.Module)({
         imports: [file_module_1.DomainFileModule, typeorm_1.TypeOrmModule.forFeature([file_entity_1.File]), config_1.ConfigModule.forFeature(env_config_1.APP_CONFIG)],
-        controllers: [file_controller_1.FileController],
-        providers: [file_service_1.FileService, upload_file_usecase_1.UploadFileUsecase, delete_file_usecase_1.DeleteFileUsecase, s3_service_1.S3Service],
+        controllers: [file_controller_1.FileController, cron_file_controller_1.CronFileController],
+        providers: [file_service_1.FileService, upload_file_usecase_1.UploadFileUsecase, delete_file_usecase_1.DeleteFileUsecase, s3_service_1.S3Service, find_temporary_file_usecase_1.FindTemporaryFileUsecase],
         exports: [file_service_1.FileService],
     })
 ], FileModule);
@@ -6763,16 +6822,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const upload_file_usecase_1 = __webpack_require__(/*! ./usecases/upload-file.usecase */ "./src/application/file/usecases/upload-file.usecase.ts");
 const delete_file_usecase_1 = __webpack_require__(/*! ./usecases/delete-file.usecase */ "./src/application/file/usecases/delete-file.usecase.ts");
+const find_temporary_file_usecase_1 = __webpack_require__(/*! ./usecases/find-temporary-file.usecase */ "./src/application/file/usecases/find-temporary-file.usecase.ts");
 let FileService = class FileService {
-    constructor(uploadFileUsecase, deleteFileUsecase) {
+    constructor(uploadFileUsecase, deleteFileUsecase, findTemporaryFileUsecase) {
         this.uploadFileUsecase = uploadFileUsecase;
         this.deleteFileUsecase = deleteFileUsecase;
+        this.findTemporaryFileUsecase = findTemporaryFileUsecase;
+    }
+    async findTemporaryFiles() {
+        const files = await this.findTemporaryFileUsecase.execute();
+        const deletePromises = files.map((file) => this.deleteFileUsecase.execute(file.fileId));
+        await Promise.all(deletePromises);
     }
     async uploadFile(file) {
         return await this.uploadFileUsecase.execute(file);
@@ -6788,7 +6854,7 @@ let FileService = class FileService {
 exports.FileService = FileService;
 exports.FileService = FileService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof upload_file_usecase_1.UploadFileUsecase !== "undefined" && upload_file_usecase_1.UploadFileUsecase) === "function" ? _a : Object, typeof (_b = typeof delete_file_usecase_1.DeleteFileUsecase !== "undefined" && delete_file_usecase_1.DeleteFileUsecase) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof upload_file_usecase_1.UploadFileUsecase !== "undefined" && upload_file_usecase_1.UploadFileUsecase) === "function" ? _a : Object, typeof (_b = typeof delete_file_usecase_1.DeleteFileUsecase !== "undefined" && delete_file_usecase_1.DeleteFileUsecase) === "function" ? _b : Object, typeof (_c = typeof find_temporary_file_usecase_1.FindTemporaryFileUsecase !== "undefined" && find_temporary_file_usecase_1.FindTemporaryFileUsecase) === "function" ? _c : Object])
 ], FileService);
 
 
@@ -6922,6 +6988,48 @@ exports.DeleteFileUsecase = DeleteFileUsecase = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _a : Object, typeof (_b = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _b : Object])
 ], DeleteFileUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/file/usecases/find-temporary-file.usecase.ts":
+/*!**********************************************************************!*\
+  !*** ./src/application/file/usecases/find-temporary-file.usecase.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindTemporaryFileUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+let FindTemporaryFileUsecase = class FindTemporaryFileUsecase {
+    constructor(fileService) {
+        this.fileService = fileService;
+    }
+    async execute() {
+        return await this.fileService.findAll({
+            where: { isTemporary: true, createdAt: (0, typeorm_1.LessThan)(date_util_1.DateUtil.now().addDays(-1).toDate()) },
+        });
+    }
+};
+exports.FindTemporaryFileUsecase = FindTemporaryFileUsecase;
+exports.FindTemporaryFileUsecase = FindTemporaryFileUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object])
+], FindTemporaryFileUsecase);
 
 
 /***/ }),

@@ -2,13 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { File } from '@libs/entities/file.entity';
 import { UploadFileUsecase } from './usecases/upload-file.usecase';
 import { DeleteFileUsecase } from './usecases/delete-file.usecase';
+import { FindTemporaryFileUsecase } from './usecases/find-temporary-file.usecase';
 
 @Injectable()
 export class FileService {
     constructor(
         private readonly uploadFileUsecase: UploadFileUsecase,
         private readonly deleteFileUsecase: DeleteFileUsecase,
+        private readonly findTemporaryFileUsecase: FindTemporaryFileUsecase,
     ) {}
+
+    async findTemporaryFiles(): Promise<void> {
+        const files = await this.findTemporaryFileUsecase.execute();
+        const deletePromises = files.map((file) => this.deleteFileUsecase.execute(file.fileId));
+        await Promise.all(deletePromises);
+    }
 
     async uploadFile(file: Express.Multer.File): Promise<File> {
         return await this.uploadFileUsecase.execute(file);
