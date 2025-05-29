@@ -172,3 +172,11 @@ export class GroupedReservationWithResourceResponseDto {
     })
     groupedReservations?: GroupedReservationResponseDto[];
 }
+
+export class CalendarResponseDto {
+    @ApiProperty({
+        description: '예약 캘린더',
+        type: [ReservationWithResourceResponseDto],
+    })
+    reservations: ReservationWithResourceResponseDto[];
+}

@@ -12,6 +12,7 @@ import {
     GroupedReservationResponseDto,
     GroupedReservationWithResourceResponseDto,
     CreateReservationResponseDto,
+    CalendarResponseDto,
 } from '../dtos/reservation-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
@@ -131,6 +132,21 @@ export class UserReservationController {
         @Query() query?: PaginationQueryDto,
     ): Promise<PaginationData<GroupedReservationResponseDto>> {
         return this.reservationService.findMyAllSchedules(user.employeeId, query, resourceType);
+    }
+
+    @Get('calendar')
+    @ApiOperation({ summary: '캘린더 조회' })
+    @ApiDataResponse({
+        description: '캘린더 조회 성공',
+        type: CalendarResponseDto,
+    })
+    @ApiQuery({ name: 'startDate', example: '2025-01-01' })
+    @ApiQuery({ name: 'endDate', example: '2025-12-31' })
+    async findCalendar(
+        @Query('startDate') startDate: string,
+        @Query('endDate') endDate: string,
+    ): Promise<CalendarResponseDto> {
+        return this.reservationService.findCalendar(startDate, endDate);
     }
 
     @Get(':reservationId')

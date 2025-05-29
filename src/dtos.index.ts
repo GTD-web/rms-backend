@@ -85,6 +85,7 @@ export {
     ReservationWithRelationsResponseDto,
     GroupedReservationResponseDto,
     GroupedReservationWithResourceResponseDto,
+    CalendarResponseDto,
 } from './application/reservation/core/dtos/reservation-response.dto';
 
 // Reservation Snapshot Module DTOs

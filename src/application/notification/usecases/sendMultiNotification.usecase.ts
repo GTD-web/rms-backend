@@ -10,9 +10,6 @@ export class SendMultiNotificationUsecase {
     constructor(private readonly FCMAdapter: FCMAdapter) {}
 
     async execute(subscriptions: PushSubscriptionDto[], payload: PushNotificationPayload): Promise<BatchResponse> {
-        console.log('알림 전송 계층 - subscriptions', subscriptions);
-        console.log('알림 전송 계층 - payload', payload);
-
         return await this.FCMAdapter.sendBulkNotification(subscriptions, payload);
     }
 }

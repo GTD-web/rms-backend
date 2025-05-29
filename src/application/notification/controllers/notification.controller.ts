@@ -50,7 +50,6 @@ export class NotificationController {
         description: '웹 푸시 알림 전송 성공',
     })
     async send(@Body() sendNotificationDto: SendNotificationDto) {
-        console.log('예약상세 - 알림 보내기', sendNotificationDto);
         await this.notificationService.createNotification(
             sendNotificationDto.notificationType,
             sendNotificationDto.notificationData,

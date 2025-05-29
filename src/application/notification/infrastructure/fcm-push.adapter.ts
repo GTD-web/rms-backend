@@ -24,6 +24,10 @@ export class FCMAdapter {
             console.error('Firebase initialization error:', error);
             throw error;
         }
+
+        process.on('unhandledRejection', (reason, promise) => {
+            console.error('🧨 Unhandled Rejection:', reason);
+        });
     }
 
     async sendNotification(
@@ -80,15 +84,19 @@ export class FCMAdapter {
         try {
             const tokens = subscriptions.map((subscription) => subscription.fcm.token);
             console.log('알림 전송 - tokens', tokens);
-            const response = await getMessaging().sendEachForMulticast({
-                tokens: tokens,
-                data: {
-                    title: payload.title,
-                    body: payload.body,
-                },
-            });
+            const response = await getMessaging()
+                .sendEachForMulticast({
+                    tokens: tokens,
+                    data: {
+                        title: payload.title,
+                        body: payload.body,
+                    },
+                })
+                .then((response) => {
+                    console.log('FCM send successful.', response);
+                    return response;
+                });
 
-            console.log('FCM send successful.', response);
             return response;
         } catch (error) {
             console.error('FCM send error:', {

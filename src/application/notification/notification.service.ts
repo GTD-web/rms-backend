@@ -95,7 +95,6 @@ export class NotificationService {
         repositoryOptions?: IRepositoryOptions<Notification>,
     ): Promise<void> {
         notiTarget = Array.from(new Set(notiTarget));
-        console.log('알림 보내는 대상', notiTarget);
         const notificationDto = await this.createNotificationUsecase.execute(
             notificationType,
             createNotificationDatatDto,
@@ -107,7 +106,6 @@ export class NotificationService {
             const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
             totalSubscriptions.push(...subscriptions);
         }
-        console.log('알림 구독 정보 - 최종', totalSubscriptions);
         switch (notificationType) {
             case NotificationType.RESERVATION_DATE_UPCOMING:
                 this.createScheduleJobUsecase.execute(notification, totalSubscriptions);

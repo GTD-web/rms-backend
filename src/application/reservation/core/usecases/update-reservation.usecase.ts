@@ -81,12 +81,20 @@ export class UpdateReservationUsecase {
             updateDto.title || updateDto.isAllDay || updateDto.notifyBeforeStart || updateDto.notifyMinutesBeforeStart;
 
         if (hasUpdateTings) {
-            updatedReservation = await this.reservationService.update(reservationId, {
-                title: updateDto?.title || undefined,
-                isAllDay: updateDto?.isAllDay || undefined,
-                notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
-                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
-            });
+            updatedReservation = await this.reservationService.update(
+                reservationId,
+                {
+                    title: updateDto?.title || undefined,
+                    isAllDay: updateDto?.isAllDay || undefined,
+                    notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
+                    notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
+                },
+                {
+                    where: { reservationId },
+                    relations: ['participants', 'resource'],
+                    withDeleted: true,
+                },
+            );
         }
 
         if (hasUpdateParticipants) {
@@ -146,10 +154,18 @@ export class UpdateReservationUsecase {
                 this.deleteReservationClosingJob.execute(reservationId);
                 this.createReservationClosingJob.execute(reservation);
             }
-            updatedReservation = await this.reservationService.update(reservationId, {
-                startDate: updateDto.startDate ? DateUtil.date(updateDto.startDate).toDate() : undefined,
-                endDate: updateDto.endDate ? DateUtil.date(updateDto.endDate).toDate() : undefined,
-            });
+            updatedReservation = await this.reservationService.update(
+                reservationId,
+                {
+                    startDate: updateDto.startDate ? DateUtil.date(updateDto.startDate).toDate() : undefined,
+                    endDate: updateDto.endDate ? DateUtil.date(updateDto.endDate).toDate() : undefined,
+                },
+                {
+                    where: { reservationId },
+                    relations: ['participants', 'resource'],
+                    withDeleted: true,
+                },
+            );
             if (updatedReservation.resource.notifyReservationChange) {
                 try {
                     const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);

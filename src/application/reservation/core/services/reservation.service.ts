@@ -5,7 +5,7 @@ import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
-import { CreateReservationResponseDto } from '../dtos/reservation-response.dto';
+import { CalendarResponseDto, CreateReservationResponseDto } from '../dtos/reservation-response.dto';
 import { ReservationResponseDto } from '../dtos/reservation-response.dto';
 import { UpdateReservationDto, ReturnVehicleDto } from '../dtos/update-reservation.dto';
 import { ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
@@ -24,6 +24,7 @@ import { UpdateReservationUsecase } from '../usecases/update-reservation.usecase
 import { UpdateReservationStatusUsecase } from '../usecases/update-reservation-status.usecase';
 import { ReturnVehicleUsecase } from '../usecases/return-vehicle.usecase';
 import { CheckReservationAccessUsecase } from '../usecases/check-reservation-access.usecase';
+import { FindCalendarUsecase } from '../usecases/find-calendar.usecase';
 
 @Injectable()
 export class ReservationService {
@@ -39,6 +40,7 @@ export class ReservationService {
         private readonly updateReservationStatusUsecase: UpdateReservationStatusUsecase,
         private readonly returnVehicleUsecase: ReturnVehicleUsecase,
         private readonly checkReservationAccessUsecase: CheckReservationAccessUsecase,
+        private readonly findCalendarUsecase: FindCalendarUsecase,
     ) {}
 
     async create(user: Employee, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
@@ -83,6 +85,10 @@ export class ReservationService {
         resourceType?: ResourceType,
     ): Promise<PaginationData<GroupedReservationResponseDto>> {
         return this.findMyAllSchedulesUsecase.execute(employeeId, query, resourceType);
+    }
+
+    async findCalendar(startDate: string, endDate: string): Promise<CalendarResponseDto> {
+        return this.findCalendarUsecase.execute(startDate, endDate);
     }
 
     async findReservationDetail(user: Employee, reservationId: string): Promise<ReservationWithRelationsResponseDto> {

@@ -41,6 +41,7 @@ import {
     ReturnVehicleUsecase,
     UpdateReservationStatusUsecase,
     UpdateReservationUsecase,
+    FindCalendarUsecase,
 } from './usecases';
 
 // Services
@@ -93,6 +94,7 @@ import { CronReservationService } from './services/cron-reservation.service';
         ReturnVehicleUsecase,
         UpdateReservationStatusUsecase,
         UpdateReservationUsecase,
+        FindCalendarUsecase,
     ],
     exports: [
         // Services
@@ -118,6 +120,7 @@ import { CronReservationService } from './services/cron-reservation.service';
         ReturnVehicleUsecase,
         UpdateReservationStatusUsecase,
         UpdateReservationUsecase,
+        FindCalendarUsecase,
     ],
 })
 export class ReservationCoreModule {}
