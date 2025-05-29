@@ -16,6 +16,7 @@ import { NotificationService } from '@src/application/notification/notification.
 import { Role } from '@libs/enums/role-type.enum';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { FindConflictReservationUsecase } from './find-conflict-reservation.usecase';
+import { CreateReservationClosingJobUsecase } from './create-reservation-closing-job.usecase';
 
 @Injectable()
 export class CreateReservationUsecase {
@@ -28,6 +29,7 @@ export class CreateReservationUsecase {
         private readonly notificationService: NotificationService,
         private readonly dataSource: DataSource,
         private readonly findConflictReservationUsecase: FindConflictReservationUsecase,
+        private readonly createReservationClosingJob: CreateReservationClosingJobUsecase,
     ) {}
 
     async execute(user: Employee, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
@@ -106,6 +108,10 @@ export class CreateReservationUsecase {
             ]);
 
             await queryRunner.commitTransaction();
+
+            if (resource.type !== ResourceType.VEHICLE) {
+                await this.createReservationClosingJob.execute(savedReservation);
+            }
 
             try {
                 const reservationWithResource = await this.reservationService.findOne({

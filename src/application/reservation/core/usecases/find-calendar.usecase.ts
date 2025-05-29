@@ -5,12 +5,13 @@ import { CalendarResponseDto } from '../dtos/reservation-response.dto';
 import { DateUtil } from '@libs/utils/date.util';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ReservationWithResourceResponseDto } from '../dtos/reservation-response.dto';
+import { ResourceType } from '@libs/enums/resource-type.enum';
 
 @Injectable()
 export class FindCalendarUsecase {
     constructor(private readonly reservationService: DomainReservationService) {}
 
-    async execute(startDate: string, endDate: string): Promise<CalendarResponseDto> {
+    async execute(startDate: string, endDate: string, resourceType?: ResourceType): Promise<CalendarResponseDto> {
         const startDateObj = DateUtil.date(startDate).toDate();
         const endDateObj = DateUtil.date(endDate).toDate();
 
@@ -25,6 +26,7 @@ export class FindCalendarUsecase {
         const where = {
             startDate: dateCondition,
             status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
+            ...(resourceType ? { resource: { type: resourceType } } : {}),
         };
 
         const reservations = await this.reservationService.findAll({

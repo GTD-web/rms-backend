@@ -142,11 +142,13 @@ export class UserReservationController {
     })
     @ApiQuery({ name: 'startDate', example: '2025-01-01' })
     @ApiQuery({ name: 'endDate', example: '2025-12-31' })
+    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
     async findCalendar(
         @Query('startDate') startDate: string,
         @Query('endDate') endDate: string,
+        @Query('resourceType') resourceType?: ResourceType,
     ): Promise<CalendarResponseDto> {
-        return this.reservationService.findCalendar(startDate, endDate);
+        return this.reservationService.findCalendar(startDate, endDate, resourceType);
     }
 
     @Get(':reservationId')
