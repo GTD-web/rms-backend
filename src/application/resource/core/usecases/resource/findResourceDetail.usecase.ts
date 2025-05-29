@@ -5,7 +5,7 @@ import { DomainConsumableService } from '@src/domain/consumable/consumable.servi
 import { DomainMaintenanceService } from '@src/domain/maintenance/maintenance.service';
 import { ResourceResponseDto } from '../../dtos/resource-response.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
-
+import { Maintenance } from '@libs/entities';
 @Injectable()
 export class FindResourceDetailUsecase {
     constructor(
@@ -107,6 +107,7 @@ export class FindResourceDetailUsecase {
             if (resource.vehicleInfo.consumables) {
                 const mileage = Number(resource.vehicleInfo.totalMileage);
                 for (const consumable of resource.vehicleInfo.consumables) {
+                    const initMileage = Number(consumable.initMileage);
                     const replaceCycle = Number(consumable.replaceCycle);
                     const latestMaintenance = await this.maintenanceService.findOne({
                         where: { consumableId: consumable.consumableId },
@@ -120,17 +121,33 @@ export class FindResourceDetailUsecase {
                                 maintanceRequired: mileage - Number(maintenance.mileage) > replaceCycle,
                             };
                         });
+                    } else {
+                        consumable['mileageFromLastMaintenance'] = mileage - initMileage;
+                        consumable['maintanceRequired'] = mileage - initMileage > replaceCycle;
                     }
                 }
                 resource.vehicleInfo.consumables.sort((a, b) => {
-                    if (!a.maintenances?.length && !b.maintenances?.length) {
-                        return a.name.localeCompare(b.name);
+                    const aRequired = !!a.maintenances?.[0]?.['maintanceRequired'] || !!a['maintanceRequired'];
+                    const bRequired = !!b.maintenances?.[0]?.['maintanceRequired'] || !!b['maintanceRequired'];
+                    if (aRequired !== bRequired) {
+                        return aRequired ? -1 : 1;
                     }
-                    if (!a.maintenances?.length) return -1;
-                    if (!b.maintenances?.length) return 1;
-                    const aMileage = a.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
-                    const bMileage = b.maintenances[0]?.['mileageFromLastMaintenance'] || 0;
-                    return aMileage - bMileage;
+
+                    const aReplaceCycle = a['replaceCycle'];
+                    const bReplaceCycle = b['replaceCycle'];
+                    const aMileage =
+                        ((a.maintenances?.[0]?.['mileageFromLastMaintenance'] || a['mileageFromLastMaintenance']) /
+                            aReplaceCycle) *
+                        100;
+                    const bMileage =
+                        ((b.maintenances?.[0]?.['mileageFromLastMaintenance'] || b['mileageFromLastMaintenance']) /
+                            bReplaceCycle) *
+                        100;
+
+                    if (bMileage !== aMileage) {
+                        return bMileage - aMileage;
+                    }
+                    return bReplaceCycle - aReplaceCycle;
                 });
             }
             resource.vehicleInfo['parkingLocationFiles'] = await this.fileService.findAllFilesByFilePath(
