@@ -25,7 +25,7 @@ export class S3Service {
 
     async uploadFile(file: Express.Multer.File): Promise<File> {
         const fileExtension = file.originalname.split('.').pop();
-        const fileName = `${DateUtil.now().format('YYYYMMDDHHmmss')}.${fileExtension}`;
+        const fileName = `${DateUtil.now().format('YYYYMMDDHHmmssSSS')}.${fileExtension}`;
 
         try {
             await this.s3Client.send(

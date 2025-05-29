@@ -6593,6 +6593,9 @@ let FileController = class FileController {
     async uploadFile(file) {
         return this.fileService.uploadFile(file);
     }
+    async uploadMultipleFiles(files) {
+        return this.fileService.uploadMultipleFiles(files);
+    }
     async deleteFile(fileId) {
         await this.fileService.deleteFile(fileId);
     }
@@ -6620,6 +6623,31 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_c = typeof Express !== "undefined" && (_b = Express.Multer) !== void 0 && _b.File) === "function" ? _c : Object]),
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "uploadFile", null);
+__decorate([
+    (0, common_1.Post)('upload/multiple'),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                files: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary',
+                    },
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiOperation)({ summary: '여러 파일 업로드' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '여러 파일 업로드 성공', type: [file_response_dto_1.FileResponseDto] }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files', 10)),
+    __param(0, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "uploadMultipleFiles", null);
 __decorate([
     (0, common_1.Delete)(':fileId'),
     (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
@@ -6749,6 +6777,10 @@ let FileService = class FileService {
     async uploadFile(file) {
         return await this.uploadFileUsecase.execute(file);
     }
+    async uploadMultipleFiles(files) {
+        const uploadPromises = files.map((file) => this.uploadFileUsecase.execute(file));
+        return await Promise.all(uploadPromises);
+    }
     async deleteFile(fileId) {
         await this.deleteFileUsecase.execute(fileId);
     }
@@ -6801,7 +6833,7 @@ let S3Service = class S3Service {
     }
     async uploadFile(file) {
         const fileExtension = file.originalname.split('.').pop();
-        const fileName = `${date_util_1.DateUtil.now().format('YYYYMMDDHHmmss')}.${fileExtension}`;
+        const fileName = `${date_util_1.DateUtil.now().format('YYYYMMDDHHmmssSSS')}.${fileExtension}`;
         try {
             await this.s3Client.send(new client_s3_1.PutObjectCommand({
                 Bucket: this.bucketName,

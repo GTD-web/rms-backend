@@ -1,5 +1,15 @@
-import { Controller, Post, Get, Delete, Param, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+    Controller,
+    Post,
+    Get,
+    Delete,
+    Param,
+    UseInterceptors,
+    UploadedFile,
+    UploadedFiles,
+    Query,
+} from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { FileService } from '@resource/application/file/file.service';
 import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
@@ -32,6 +42,29 @@ export class FileController {
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(@UploadedFile() file: Express.Multer.File) {
         return this.fileService.uploadFile(file);
+    }
+
+    @Post('upload/multiple')
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                files: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary',
+                    },
+                },
+            },
+        },
+    })
+    @ApiOperation({ summary: '여러 파일 업로드' })
+    @ApiDataResponse({ status: 200, description: '여러 파일 업로드 성공', type: [FileResponseDto] })
+    @UseInterceptors(FilesInterceptor('files', 10)) // 최대 10개 파일 업로드 가능
+    async uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
+        return this.fileService.uploadMultipleFiles(files);
     }
 
     @Delete(':fileId')
