@@ -10216,7 +10216,7 @@ let FindConflictReservationUsecase = class FindConflictReservationUsecase {
                 ...(reservationId && { reservationId: (0, typeorm_1.Not)(reservationId) }),
                 startDate: (0, typeorm_1.LessThan)(endDate),
                 endDate: (0, typeorm_1.MoreThan)(startDate),
-                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
             },
         });
     }
@@ -15046,7 +15046,11 @@ let FindResourcesByTypeAndDateWithReservationsUsecase = class FindResourcesByTyp
                 const where = {
                     startDate: dateCondition,
                     resourceId: resource.resourceId,
-                    status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+                    status: (0, typeorm_1.In)([
+                        reservation_type_enum_1.ReservationStatus.PENDING,
+                        reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                        reservation_type_enum_1.ReservationStatus.CLOSED,
+                    ]),
                 };
                 const reservations = await this.reservationService.findAll({
                     where: where,

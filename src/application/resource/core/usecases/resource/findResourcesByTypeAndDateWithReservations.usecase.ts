@@ -71,7 +71,11 @@ export class FindResourcesByTypeAndDateWithReservationsUsecase {
                         const where = {
                             startDate: dateCondition,
                             resourceId: resource.resourceId,
-                            status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
+                            status: In([
+                                ReservationStatus.PENDING,
+                                ReservationStatus.CONFIRMED,
+                                ReservationStatus.CLOSED,
+                            ]),
                         };
 
                         const reservations = await this.reservationService.findAll({

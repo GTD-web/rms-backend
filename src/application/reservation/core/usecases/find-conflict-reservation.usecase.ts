@@ -15,7 +15,7 @@ export class FindConflictReservationUsecase {
                 ...(reservationId && { reservationId: Not(reservationId) }),
                 startDate: LessThan(endDate),
                 endDate: MoreThan(startDate),
-                status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
+                status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
             },
         });
     }
