@@ -14663,10 +14663,11 @@ let FindAvailableTimeUsecase = class FindAvailableTimeUsecase {
         const existingReservations = resource.reservations || [];
         const confirmedReservations = existingReservations;
         if (isSameDay) {
+            const now = date_util_1.DateUtil.now();
             const dateStr = startDate;
-            const currentMinute = date_util_1.DateUtil.now().toDate().getMinutes();
-            const roundedHour = date_util_1.DateUtil.now().format(`HH:${currentMinute < 30 ? '00' : '30'}:00`);
-            const isToday = date_util_1.DateUtil.date(startDate).format('YYYY-MM-DD') === date_util_1.DateUtil.now().format('YYYY-MM-DD');
+            const currentMinute = now.toDate().getMinutes();
+            const roundedHour = now.format(`${now.format('HH') < '09' ? '09' : now.format('HH')}:${currentMinute < 30 ? '00' : '30'}:00`);
+            const isToday = startDate === now.format('YYYY-MM-DD');
             const isAllDay = (am && pm) || (!am && !pm);
             const isVehicle = resource.type === resource_type_enum_1.ResourceType.VEHICLE;
             let startTime;
