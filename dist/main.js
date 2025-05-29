@@ -7537,7 +7537,7 @@ let FCMAdapter = class FCMAdapter {
         try {
             const tokens = subscriptions.map((subscription) => subscription.fcm.token);
             console.log('알림 전송 - tokens', tokens);
-            const response = (0, messaging_1.getMessaging)().sendEachForMulticast({
+            const response = await (0, messaging_1.getMessaging)().sendEachForMulticast({
                 tokens: tokens,
                 data: {
                     title: payload.title,
