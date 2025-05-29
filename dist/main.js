@@ -8389,15 +8389,7 @@ let SubscribeUsecase = class SubscribeUsecase {
             if (!employee) {
                 throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.EMPLOYEE.NOT_FOUND);
             }
-            if (employee.subscriptions) {
-                if (employee.subscriptions.length > 4) {
-                    employee.subscriptions.shift();
-                }
-                employee.subscriptions.push(subscription);
-            }
-            else {
-                employee.subscriptions = [subscription];
-            }
+            employee.subscriptions = [subscription];
             await this.employeeService.update(employee.employeeId, employee);
             return true;
         }
