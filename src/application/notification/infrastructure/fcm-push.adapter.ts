@@ -79,6 +79,7 @@ export class FCMAdapter {
     ): Promise<BatchResponse> {
         try {
             const tokens = subscriptions.map((subscription) => subscription.fcm.token);
+            console.log('알림 전송 - tokens', tokens);
             const response = await getMessaging()
                 .sendEachForMulticast({
                     tokens: tokens,
@@ -93,6 +94,12 @@ export class FCMAdapter {
                 });
             return response;
         } catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
             return { responses: [], successCount: -1, failureCount: -1 };
         }
     }

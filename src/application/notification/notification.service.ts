@@ -95,7 +95,7 @@ export class NotificationService {
         repositoryOptions?: IRepositoryOptions<Notification>,
     ): Promise<void> {
         notiTarget = Array.from(new Set(notiTarget));
-
+        console.log('알림 보내는 대상', notiTarget);
         const notificationDto = await this.createNotificationUsecase.execute(
             notificationType,
             createNotificationDatatDto,

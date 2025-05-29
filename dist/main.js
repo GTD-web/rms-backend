@@ -6982,6 +6982,7 @@ let NotificationController = class NotificationController {
         await this.notificationService.sendDirectNotification(body.subscription, body.payload);
     }
     async send(sendNotificationDto) {
+        console.log('예약상세 - 알림 보내기', sendNotificationDto);
         await this.notificationService.createNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
     }
     async findAllByEmployeeId(employeeId, query) {
@@ -7535,6 +7536,7 @@ let FCMAdapter = class FCMAdapter {
     async sendBulkNotification(subscriptions, payload) {
         try {
             const tokens = subscriptions.map((subscription) => subscription.fcm.token);
+            console.log('알림 전송 - tokens', tokens);
             const response = await (0, messaging_1.getMessaging)()
                 .sendEachForMulticast({
                 tokens: tokens,
@@ -7550,6 +7552,12 @@ let FCMAdapter = class FCMAdapter {
             return response;
         }
         catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
             return { responses: [], successCount: -1, failureCount: -1 };
         }
     }
@@ -7745,6 +7753,7 @@ let NotificationService = class NotificationService {
     }
     async createNotification(notificationType, createNotificationDatatDto, notiTarget, repositoryOptions) {
         notiTarget = Array.from(new Set(notiTarget));
+        console.log('알림 보내는 대상', notiTarget);
         const notificationDto = await this.createNotificationUsecase.execute(notificationType, createNotificationDatatDto);
         const notification = await this.saveNotificationUsecase.execute(notificationDto, notiTarget, repositoryOptions);
         const subscriptions = [];
@@ -8334,6 +8343,8 @@ let SendMultiNotificationUsecase = class SendMultiNotificationUsecase {
         this.FCMAdapter = FCMAdapter;
     }
     async execute(subscriptions, payload) {
+        console.log('알림 전송 계층 - subscriptions', subscriptions);
+        console.log('알림 전송 계층 - payload', payload);
         return await this.FCMAdapter.sendBulkNotification(subscriptions, payload);
     }
 };
