@@ -102,20 +102,20 @@ export class NotificationService {
         );
         const notification = await this.saveNotificationUsecase.execute(notificationDto, notiTarget, repositoryOptions);
 
-        const subscriptions: PushSubscriptionDto[] = [];
+        const totalSubscriptions: PushSubscriptionDto[] = [];
         for (const employeeId of notiTarget) {
             const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
-            subscriptions.push(...subscriptions);
+            totalSubscriptions.push(...subscriptions);
         }
-        console.log('알림 구독 정보 - 최종', subscriptions);
+        console.log('알림 구독 정보 - 최종', totalSubscriptions);
         switch (notificationType) {
             case NotificationType.RESERVATION_DATE_UPCOMING:
-                this.createScheduleJobUsecase.execute(notification, subscriptions);
+                this.createScheduleJobUsecase.execute(notification, totalSubscriptions);
                 break;
             case NotificationType.RESERVATION_TIME_CHANGED:
                 this.deleteScheduleJobUsecase.execute(createNotificationDatatDto);
             default:
-                this.sendMultiNotificationUsecase.execute(subscriptions, {
+                this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
                     title: notification.title,
                     body: notification.body,
                 });
