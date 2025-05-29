@@ -6990,6 +6990,9 @@ let NotificationController = class NotificationController {
     async markAsRead(user, notificationId) {
         await this.notificationService.markAsRead(user.employeeId, notificationId);
     }
+    async findSubscription(token, employeeId) {
+        return await this.notificationService.findSubscription(token, employeeId);
+    }
 };
 exports.NotificationController = NotificationController;
 __decorate([
@@ -7063,6 +7066,31 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_j = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _j : Object, String]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAsRead", null);
+__decorate([
+    (0, common_1.Get)('subscription'),
+    (0, swagger_1.ApiOperation)({ summary: '구독 정보 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '구독 정보 조회 성공',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'token',
+        type: String,
+        required: false,
+        description: '구독 토큰',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'employeeId',
+        type: String,
+        required: false,
+        description: '직원 ID',
+    }),
+    __param(0, (0, common_1.Query)('token')),
+    __param(1, (0, common_1.Query)('employeeId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "findSubscription", null);
 exports.NotificationController = NotificationController = __decorate([
     (0, swagger_1.ApiTags)('5. 알림 '),
     (0, common_1.Controller)('v1/notifications'),
@@ -7621,6 +7649,7 @@ exports.NotificationModule = NotificationModule = __decorate([
             usecases_1.CreateScheduleJobUsecase,
             usecases_1.GetSubscriptionsUsecase,
             usecases_1.DeleteScheduleJobUsecase,
+            usecases_1.GetSubscriptionInfoUsecase,
         ],
         controllers: [notification_controller_1.NotificationController],
         exports: [notification_service_1.NotificationService],
@@ -7646,7 +7675,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -7661,8 +7690,9 @@ const createScheduleJob_usecase_1 = __webpack_require__(/*! ./usecases/createSch
 const getSubscriptions_usecase_1 = __webpack_require__(/*! ./usecases/getSubscriptions.usecase */ "./src/application/notification/usecases/getSubscriptions.usecase.ts");
 const deleteScheduleJob_usecase_1 = __webpack_require__(/*! ./usecases/deleteScheduleJob.usecase */ "./src/application/notification/usecases/deleteScheduleJob.usecase.ts");
 const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const getSubscriptionInfo_usecase_1 = __webpack_require__(/*! ./usecases/getSubscriptionInfo.usecase */ "./src/application/notification/usecases/getSubscriptionInfo.usecase.ts");
 let NotificationService = class NotificationService {
-    constructor(subscribeUsecase, sendMultiNotificationUsecase, getMyNotificationUsecase, markAsReadUsecase, createNotificationUsecase, saveNotificationUsecase, createScheduleJobUsecase, getSubscriptionsUsecase, deleteScheduleJobUsecase, notificationService) {
+    constructor(subscribeUsecase, sendMultiNotificationUsecase, getMyNotificationUsecase, markAsReadUsecase, createNotificationUsecase, saveNotificationUsecase, createScheduleJobUsecase, getSubscriptionsUsecase, deleteScheduleJobUsecase, notificationService, getSubscriptionInfoUsecase) {
         this.subscribeUsecase = subscribeUsecase;
         this.sendMultiNotificationUsecase = sendMultiNotificationUsecase;
         this.getMyNotificationUsecase = getMyNotificationUsecase;
@@ -7673,6 +7703,7 @@ let NotificationService = class NotificationService {
         this.getSubscriptionsUsecase = getSubscriptionsUsecase;
         this.deleteScheduleJobUsecase = deleteScheduleJobUsecase;
         this.notificationService = notificationService;
+        this.getSubscriptionInfoUsecase = getSubscriptionInfoUsecase;
     }
     async onModuleInit() {
         const upcomingNotifications = await this.notificationService.findAll({
@@ -7701,6 +7732,17 @@ let NotificationService = class NotificationService {
     async markAsRead(employeeId, notificationId) {
         return await this.markAsReadUsecase.execute(employeeId, notificationId);
     }
+    async findSubscription(token, employeeId) {
+        if (!token && !employeeId) {
+            return null;
+        }
+        if (employeeId) {
+            const subscriptions = await this.getSubscriptionInfoUsecase.executeByEmployeeId(employeeId);
+            return subscriptions;
+        }
+        const subscriptions = await this.getSubscriptionInfoUsecase.executeByToken(token);
+        return subscriptions;
+    }
     async createNotification(notificationType, createNotificationDatatDto, notiTarget, repositoryOptions) {
         notiTarget = Array.from(new Set(notiTarget));
         const notificationDto = await this.createNotificationUsecase.execute(notificationType, createNotificationDatatDto);
@@ -7728,7 +7770,7 @@ let NotificationService = class NotificationService {
 exports.NotificationService = NotificationService;
 exports.NotificationService = NotificationService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof subscribe_usecase_1.SubscribeUsecase !== "undefined" && subscribe_usecase_1.SubscribeUsecase) === "function" ? _a : Object, typeof (_b = typeof sendMultiNotification_usecase_1.SendMultiNotificationUsecase !== "undefined" && sendMultiNotification_usecase_1.SendMultiNotificationUsecase) === "function" ? _b : Object, typeof (_c = typeof getMyNotification_usecase_1.GetMyNotificationUsecase !== "undefined" && getMyNotification_usecase_1.GetMyNotificationUsecase) === "function" ? _c : Object, typeof (_d = typeof markAsRead_usecase_1.MarkAsReadUsecase !== "undefined" && markAsRead_usecase_1.MarkAsReadUsecase) === "function" ? _d : Object, typeof (_e = typeof createNotification_usecase_1.CreateNotificationUsecase !== "undefined" && createNotification_usecase_1.CreateNotificationUsecase) === "function" ? _e : Object, typeof (_f = typeof saveNotification_usecase_1.SaveNotificationUsecase !== "undefined" && saveNotification_usecase_1.SaveNotificationUsecase) === "function" ? _f : Object, typeof (_g = typeof createScheduleJob_usecase_1.CreateScheduleJobUsecase !== "undefined" && createScheduleJob_usecase_1.CreateScheduleJobUsecase) === "function" ? _g : Object, typeof (_h = typeof getSubscriptions_usecase_1.GetSubscriptionsUsecase !== "undefined" && getSubscriptions_usecase_1.GetSubscriptionsUsecase) === "function" ? _h : Object, typeof (_j = typeof deleteScheduleJob_usecase_1.DeleteScheduleJobUsecase !== "undefined" && deleteScheduleJob_usecase_1.DeleteScheduleJobUsecase) === "function" ? _j : Object, typeof (_k = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _k : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof subscribe_usecase_1.SubscribeUsecase !== "undefined" && subscribe_usecase_1.SubscribeUsecase) === "function" ? _a : Object, typeof (_b = typeof sendMultiNotification_usecase_1.SendMultiNotificationUsecase !== "undefined" && sendMultiNotification_usecase_1.SendMultiNotificationUsecase) === "function" ? _b : Object, typeof (_c = typeof getMyNotification_usecase_1.GetMyNotificationUsecase !== "undefined" && getMyNotification_usecase_1.GetMyNotificationUsecase) === "function" ? _c : Object, typeof (_d = typeof markAsRead_usecase_1.MarkAsReadUsecase !== "undefined" && markAsRead_usecase_1.MarkAsReadUsecase) === "function" ? _d : Object, typeof (_e = typeof createNotification_usecase_1.CreateNotificationUsecase !== "undefined" && createNotification_usecase_1.CreateNotificationUsecase) === "function" ? _e : Object, typeof (_f = typeof saveNotification_usecase_1.SaveNotificationUsecase !== "undefined" && saveNotification_usecase_1.SaveNotificationUsecase) === "function" ? _f : Object, typeof (_g = typeof createScheduleJob_usecase_1.CreateScheduleJobUsecase !== "undefined" && createScheduleJob_usecase_1.CreateScheduleJobUsecase) === "function" ? _g : Object, typeof (_h = typeof getSubscriptions_usecase_1.GetSubscriptionsUsecase !== "undefined" && getSubscriptions_usecase_1.GetSubscriptionsUsecase) === "function" ? _h : Object, typeof (_j = typeof deleteScheduleJob_usecase_1.DeleteScheduleJobUsecase !== "undefined" && deleteScheduleJob_usecase_1.DeleteScheduleJobUsecase) === "function" ? _j : Object, typeof (_k = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _k : Object, typeof (_l = typeof getSubscriptionInfo_usecase_1.GetSubscriptionInfoUsecase !== "undefined" && getSubscriptionInfo_usecase_1.GetSubscriptionInfoUsecase) === "function" ? _l : Object])
 ], NotificationService);
 
 
@@ -8026,6 +8068,71 @@ exports.GetMyNotificationUsecase = GetMyNotificationUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/notification/usecases/getSubscriptionInfo.usecase.ts":
+/*!******************************************************************************!*\
+  !*** ./src/application/notification/usecases/getSubscriptionInfo.usecase.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GetSubscriptionInfoUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let GetSubscriptionInfoUsecase = class GetSubscriptionInfoUsecase {
+    constructor(employeeService) {
+        this.employeeService = employeeService;
+    }
+    async executeByToken(token) {
+        const employee = await this.employeeService.findOne({
+            where: {
+                subscriptions: (0, typeorm_1.Raw)((alias) => `
+                EXISTS (
+                  SELECT 1 FROM jsonb_array_elements(${alias}) AS elem
+                  WHERE elem -> 'fcm' ->> 'token' = '${token}'
+                )
+              `),
+            },
+            select: { subscriptions: true },
+        });
+        return {
+            employeeId: employee.employeeId,
+            employeeName: employee.name,
+            subscriptions: employee.subscriptions,
+        };
+    }
+    async executeByEmployeeId(employeeId) {
+        const employee = await this.employeeService.findOne({
+            where: { employeeId },
+            select: { subscriptions: true },
+        });
+        return {
+            employeeId: employee.employeeId,
+            employeeName: employee.name,
+            subscriptions: employee.subscriptions,
+        };
+    }
+};
+exports.GetSubscriptionInfoUsecase = GetSubscriptionInfoUsecase;
+exports.GetSubscriptionInfoUsecase = GetSubscriptionInfoUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
+], GetSubscriptionInfoUsecase);
+
+
+/***/ }),
+
 /***/ "./src/application/notification/usecases/getSubscriptions.usecase.ts":
 /*!***************************************************************************!*\
   !*** ./src/application/notification/usecases/getSubscriptions.usecase.ts ***!
@@ -8102,6 +8209,7 @@ __exportStar(__webpack_require__(/*! ./saveNotification.usecase */ "./src/applic
 __exportStar(__webpack_require__(/*! ./createScheduleJob.usecase */ "./src/application/notification/usecases/createScheduleJob.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./getSubscriptions.usecase */ "./src/application/notification/usecases/getSubscriptions.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./deleteScheduleJob.usecase */ "./src/application/notification/usecases/deleteScheduleJob.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./getSubscriptionInfo.usecase */ "./src/application/notification/usecases/getSubscriptionInfo.usecase.ts"), exports);
 
 
 /***/ }),

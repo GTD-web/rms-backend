@@ -17,6 +17,7 @@ import {
     CreateScheduleJobUsecase,
     GetSubscriptionsUsecase,
     DeleteScheduleJobUsecase,
+    GetSubscriptionInfoUsecase,
 } from './usecases';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
@@ -43,6 +44,7 @@ import { FIREBASE_CONFIG } from '@libs/configs/env.config';
         CreateScheduleJobUsecase,
         GetSubscriptionsUsecase,
         DeleteScheduleJobUsecase,
+        GetSubscriptionInfoUsecase,
     ],
     controllers: [NotificationController],
     exports: [NotificationService],

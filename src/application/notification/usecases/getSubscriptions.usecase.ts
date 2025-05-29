@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
+import { Raw } from 'typeorm';
 
 @Injectable()
 export class GetSubscriptionsUsecase {

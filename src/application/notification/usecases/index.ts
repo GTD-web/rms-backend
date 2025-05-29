@@ -7,3 +7,4 @@ export * from './saveNotification.usecase';
 export * from './createScheduleJob.usecase';
 export * from './getSubscriptions.usecase';
 export * from './deleteScheduleJob.usecase';
+export * from './getSubscriptionInfo.usecase';

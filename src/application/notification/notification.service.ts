@@ -18,6 +18,7 @@ import { CreateScheduleJobUsecase } from './usecases/createScheduleJob.usecase';
 import { GetSubscriptionsUsecase } from './usecases/getSubscriptions.usecase';
 import { DeleteScheduleJobUsecase } from './usecases/deleteScheduleJob.usecase';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
+import { GetSubscriptionInfoUsecase } from './usecases/getSubscriptionInfo.usecase';
 
 @Injectable()
 export class NotificationService {
@@ -32,6 +33,7 @@ export class NotificationService {
         private readonly getSubscriptionsUsecase: GetSubscriptionsUsecase,
         private readonly deleteScheduleJobUsecase: DeleteScheduleJobUsecase,
         private readonly notificationService: DomainNotificationService,
+        private readonly getSubscriptionInfoUsecase: GetSubscriptionInfoUsecase,
     ) {}
 
     async onModuleInit() {
@@ -68,6 +70,22 @@ export class NotificationService {
 
     async markAsRead(employeeId: string, notificationId: string): Promise<void> {
         return await this.markAsReadUsecase.execute(employeeId, notificationId);
+    }
+
+    async findSubscription(token?: string, employeeId?: string) {
+        if (!token && !employeeId) {
+            return null;
+        }
+
+        if (employeeId) {
+            const subscriptions = await this.getSubscriptionInfoUsecase.executeByEmployeeId(employeeId);
+            return subscriptions;
+        }
+
+        // employeeId가 없는 경우, 토큰으로만 검색
+        // 토큰이 일치하는 구독 정보를 찾기 위해 모든 직원의 구독 정보를 검색
+        const subscriptions = await this.getSubscriptionInfoUsecase.executeByToken(token);
+        return subscriptions;
     }
 
     async createNotification(

@@ -87,4 +87,26 @@ export class NotificationController {
     async markAsRead(@User() user: Employee, @Param('notificationId') notificationId: string) {
         await this.notificationService.markAsRead(user.employeeId, notificationId);
     }
+
+    @Get('subscription')
+    @ApiOperation({ summary: '구독 정보 조회' })
+    @ApiDataResponse({
+        status: 200,
+        description: '구독 정보 조회 성공',
+    })
+    @ApiQuery({
+        name: 'token',
+        type: String,
+        required: false,
+        description: '구독 토큰',
+    })
+    @ApiQuery({
+        name: 'employeeId',
+        type: String,
+        required: false,
+        description: '직원 ID',
+    })
+    async findSubscription(@Query('token') token?: string, @Query('employeeId') employeeId?: string) {
+        return await this.notificationService.findSubscription(token, employeeId);
+    }
 }
