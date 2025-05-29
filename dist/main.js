@@ -8104,7 +8104,6 @@ let GetSubscriptionInfoUsecase = class GetSubscriptionInfoUsecase {
                 )
               `),
             },
-            select: { subscriptions: true },
         });
         return {
             employeeId: employee.employeeId,
@@ -8115,7 +8114,6 @@ let GetSubscriptionInfoUsecase = class GetSubscriptionInfoUsecase {
     async executeByEmployeeId(employeeId) {
         const employee = await this.employeeService.findOne({
             where: { employeeId },
-            select: { subscriptions: true },
         });
         return {
             employeeId: employee.employeeId,

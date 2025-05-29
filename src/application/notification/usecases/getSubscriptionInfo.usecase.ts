@@ -18,7 +18,7 @@ export class GetSubscriptionInfoUsecase {
               `,
                 ),
             },
-            select: { subscriptions: true },
+            // select: { subscriptions: true },
         });
 
         return {
@@ -31,7 +31,7 @@ export class GetSubscriptionInfoUsecase {
     async executeByEmployeeId(employeeId: string) {
         const employee = await this.employeeService.findOne({
             where: { employeeId },
-            select: { subscriptions: true },
+            // select: { subscriptions: true },
         });
         return {
             employeeId: employee.employeeId,
