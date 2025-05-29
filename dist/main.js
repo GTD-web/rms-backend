@@ -9121,6 +9121,14 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Boolean)
 ], ReservationWithRelationsResponseDto.prototype, "isMine", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "returnable", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "modifiable", void 0);
 class CreateReservationResponseDto {
 }
 exports.CreateReservationResponseDto = CreateReservationResponseDto;
@@ -10374,6 +10382,9 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
 const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 let FindReservationDetailUsecase = class FindReservationDetailUsecase {
     constructor(reservationService) {
         this.reservationService = reservationService;
@@ -10397,6 +10408,16 @@ let FindReservationDetailUsecase = class FindReservationDetailUsecase {
         }
         const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
         reservationResponseDto.isMine = reservationResponseDto.reservers.some((reserver) => reserver.employeeId === user.employeeId);
+        reservationResponseDto.returnable =
+            reservationResponseDto.resource.type === resource_type_enum_1.ResourceType.VEHICLE
+                ? reservationResponseDto.isMine &&
+                    reservationResponseDto.reservationVehicles.some((reservationVehicle) => !reservationVehicle.isReturned) &&
+                    reservationResponseDto.startDate <= date_util_1.DateUtil.now().format()
+                : null;
+        reservationResponseDto.modifiable =
+            [reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED].includes(reservation.status) &&
+                reservationResponseDto.isMine &&
+                reservationResponseDto.endDate > date_util_1.DateUtil.now().format();
         return reservationResponseDto;
     }
 };

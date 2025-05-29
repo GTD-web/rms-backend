@@ -100,18 +100,4 @@ export class UserResourceController {
     async findOne(@User() user: Employee, @Param('resourceId') resourceId: string): Promise<ResourceResponseDto> {
         return this.resourceService.findResourceDetailForUser(user.employeeId, resourceId);
     }
-
-    // @Patch(':resourceId/return-vehicle')
-    // @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })
-    // @ApiDataResponse({
-    //     status: 200,
-    //     description: '차량 반납 성공',
-    // })
-    // async returnVehicle(
-    //     @User() user: UserEntity,
-    //     @Param('resourceId') resourceId: string,
-    //     @Body() returnDto: ReturnVehicleDto,
-    // ): Promise<boolean> {
-    //     return this.resourceService.returnVehicle(user, resourceId, returnDto);
-    // }
 }

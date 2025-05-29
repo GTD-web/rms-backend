@@ -8,7 +8,6 @@ import {
 import { ParticipantsType } from '@libs/enums/reservation-type.enum';
 import { FindOptionsWhere, In, Raw } from 'typeorm';
 import { Reservation } from '@libs/entities';
-import { RepositoryOptions } from '@libs/interfaces/repository-option.interface';
 import { DateUtil } from '@libs/utils/date.util';
 import { ResourceResponseDto } from '@resource/dtos.index';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';

@@ -134,6 +134,12 @@ export class ReservationWithRelationsResponseDto extends ReservationResponseDto 
 
     @ApiProperty({ required: false })
     isMine?: boolean;
+
+    @ApiProperty({ required: false })
+    returnable?: boolean;
+
+    @ApiProperty({ required: false })
+    modifiable?: boolean;
 }
 
 export class CreateReservationResponseDto {

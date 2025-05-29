@@ -3,6 +3,9 @@ import { DomainReservationService } from '@src/domain/reservation/reservation.se
 import { ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { Employee } from '@libs/entities';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
+import { DateUtil } from '@libs/utils/date.util';
+import { ResourceType } from '@libs/enums/resource-type.enum';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 
 @Injectable()
 export class FindReservationDetailUsecase {
@@ -31,6 +34,20 @@ export class FindReservationDetailUsecase {
         reservationResponseDto.isMine = reservationResponseDto.reservers.some(
             (reserver) => reserver.employeeId === user.employeeId,
         );
+
+        reservationResponseDto.returnable =
+            reservationResponseDto.resource.type === ResourceType.VEHICLE
+                ? reservationResponseDto.isMine &&
+                  reservationResponseDto.reservationVehicles.some(
+                      (reservationVehicle) => !reservationVehicle.isReturned,
+                  ) &&
+                  reservationResponseDto.startDate <= DateUtil.now().format()
+                : null;
+
+        reservationResponseDto.modifiable =
+            [ReservationStatus.PENDING, ReservationStatus.CONFIRMED].includes(reservation.status) &&
+            reservationResponseDto.isMine &&
+            reservationResponseDto.endDate > DateUtil.now().format();
 
         return reservationResponseDto;
     }
