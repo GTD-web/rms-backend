@@ -12,6 +12,7 @@ export class GetSubscriptionsUsecase {
             where: { employeeId },
             select: { subscriptions: true },
         });
+        console.log('알림 구독 정보', employee);
         if (!employee) {
             return [];
         }

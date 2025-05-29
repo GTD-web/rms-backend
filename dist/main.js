@@ -7761,6 +7761,7 @@ let NotificationService = class NotificationService {
             const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
             subscriptions.push(...subscriptions);
         }
+        console.log('알림 구독 정보 - 최종', subscriptions);
         switch (notificationType) {
             case notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING:
                 this.createScheduleJobUsecase.execute(notification, subscriptions);
@@ -8170,6 +8171,7 @@ let GetSubscriptionsUsecase = class GetSubscriptionsUsecase {
             where: { employeeId },
             select: { subscriptions: true },
         });
+        console.log('알림 구독 정보', employee);
         if (!employee) {
             return [];
         }
@@ -21227,11 +21229,7 @@ async function bootstrap() {
             ? function (origin, callback) {
                 console.log('isProduction :', isProduction);
                 console.log('origin :', origin);
-                const whitelist = [
-                    'https://lrms.lumir.space',
-                    'https://rms-backend-iota.vercel.app',
-                    'https://lrms-dev.lumir.space',
-                ];
+                const whitelist = ['https://lrms.lumir.space', 'https://rms-backend-iota.vercel.app'];
                 if (!isProduction || !origin || whitelist.includes(origin)) {
                     callback(null, true);
                 }

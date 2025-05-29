@@ -107,6 +107,7 @@ export class NotificationService {
             const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
             subscriptions.push(...subscriptions);
         }
+        console.log('알림 구독 정보 - 최종', subscriptions);
         switch (notificationType) {
             case NotificationType.RESERVATION_DATE_UPCOMING:
                 this.createScheduleJobUsecase.execute(notification, subscriptions);
