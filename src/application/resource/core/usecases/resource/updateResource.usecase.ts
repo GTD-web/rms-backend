@@ -5,6 +5,7 @@ import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { DataSource } from 'typeorm';
 import { DomainResourceService } from '@src/domain/resource/resource.service';
 import { DomainResourceManagerService } from '@src/domain/resource-manager/resource-manager.service';
+import { DomainFileService } from '@src/domain/file/file.service';
 
 @Injectable()
 export class UpdateResourceUsecase {
@@ -12,6 +13,7 @@ export class UpdateResourceUsecase {
         private readonly resourceService: DomainResourceService,
         private readonly resourceManagerService: DomainResourceManagerService,
         private readonly dataSource: DataSource,
+        private readonly fileService: DomainFileService,
     ) {}
 
     async execute(resourceId: string, updateRequest: UpdateResourceInfoDto): Promise<ResourceResponseDto> {
@@ -33,6 +35,9 @@ export class UpdateResourceUsecase {
         try {
             if (updateRequest.resource) {
                 await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
+                if (updateRequest.resource.images && updateRequest.resource.images.length > 0) {
+                    await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
+                }
             }
 
             if (updateRequest.managers) {

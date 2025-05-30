@@ -115,4 +115,9 @@ export class UpdateVehicleInfoDto {
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') })
     @IsOptional()
     odometerImages?: string[];
+
+    @ApiProperty({ required: false })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') })
+    @IsOptional()
+    indoorImages?: string[];
 }

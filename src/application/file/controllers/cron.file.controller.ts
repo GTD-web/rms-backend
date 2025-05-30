@@ -12,6 +12,6 @@ export class CronFileController {
     @ApiExcludeEndpoint()
     @Get('cron-job/delete-temporary-file')
     async deleteTemporaryFile() {
-        return this.fileService.findTemporaryFiles();
+        return this.fileService.deleteTemporaryFile();
     }
 }

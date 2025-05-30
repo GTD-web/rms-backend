@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { VehicleInfo, Consumable, Maintenance, Employee, Notification } from '@libs/entities';
+import { VehicleInfo, Consumable, Maintenance, Employee, Notification, File } from '@libs/entities';
 import { AdminVehicleInfoController } from './controllers/admin.vehicle-info.controller';
 import { AdminConsumableController } from './controllers/admin.consumable.controller';
 import { AdminMaintenanceController } from './controllers/admin.maintenance.controller';
@@ -32,15 +32,16 @@ import {
     FindOneMaintenanceUsecase,
     FindAllMaintenancesByVehicleInfoIdUsecase,
 } from './usecases/maintenance';
-
+import { DomainFileModule } from '@src/domain/file/file.module';
 @Module({
     imports: [
-        TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance, Employee, Notification]),
+        TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance, Employee, Notification, File]),
         DomainVehicleInfoModule,
         DomainConsumableModule,
         DomainMaintenanceModule,
         DomainEmployeeModule,
         NotificationModule,
+        DomainFileModule,
     ],
     controllers: [
         AdminVehicleInfoController,

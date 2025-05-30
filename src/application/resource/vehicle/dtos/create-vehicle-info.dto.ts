@@ -54,6 +54,11 @@ export class CreateVehicleInfoDto {
     @IsOptional()
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('계기판 이미지') })
     odometerImages?: string[];
+
+    @ApiProperty({ required: false, type: [String], description: '실내 이미지 배열' })
+    @IsOptional()
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') })
+    indoorImages?: string[];
 }
 
 export class CreateConsumableDto {

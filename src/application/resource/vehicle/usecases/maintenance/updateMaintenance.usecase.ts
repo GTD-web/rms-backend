@@ -5,6 +5,7 @@ import { UpdateMaintenanceDto } from '../../dtos/update-vehicle-info.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { DomainMaintenanceService } from '@src/domain/maintenance/maintenance.service';
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
+import { DomainFileService } from '@src/domain/file/file.service';
 
 @Injectable()
 export class UpdateMaintenanceUsecase {
@@ -12,6 +13,7 @@ export class UpdateMaintenanceUsecase {
         private readonly maintenanceService: DomainMaintenanceService,
         private readonly vehicleInfoService: DomainVehicleInfoService,
         private readonly dataSource: DataSource,
+        private readonly fileService: DomainFileService,
     ) {}
 
     async execute(
@@ -37,6 +39,9 @@ export class UpdateMaintenanceUsecase {
         await queryRunner.startTransaction();
         try {
             const maintenance = await this.maintenanceService.update(maintenanceId, updateMaintenanceDto);
+            if (updateMaintenanceDto.images && updateMaintenanceDto.images.length > 0) {
+                await this.fileService.updateTemporaryFiles(updateMaintenanceDto.images, false, { queryRunner });
+            }
             if (updateMaintenanceDto.mileage) {
                 const savedMaintenance = await this.maintenanceService.findOne({
                     where: { maintenanceId: maintenance.maintenanceId },

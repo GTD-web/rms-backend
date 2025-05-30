@@ -6592,7 +6592,7 @@ let CronFileController = class CronFileController {
         this.fileService = fileService;
     }
     async deleteTemporaryFile() {
-        return this.fileService.findTemporaryFiles();
+        return this.fileService.deleteTemporaryFile();
     }
 };
 exports.CronFileController = CronFileController;
@@ -6835,7 +6835,7 @@ let FileService = class FileService {
         this.deleteFileUsecase = deleteFileUsecase;
         this.findTemporaryFileUsecase = findTemporaryFileUsecase;
     }
-    async findTemporaryFiles() {
+    async deleteTemporaryFile() {
         const files = await this.findTemporaryFileUsecase.execute();
         const deletePromises = files.map((file) => this.deleteFileUsecase.execute(file.fileId));
         await Promise.all(deletePromises);
@@ -7063,7 +7063,7 @@ let UploadFileUsecase = class UploadFileUsecase {
     }
     async execute(file) {
         const newFile = await this.s3Service.uploadFile(file);
-        const savedFile = await this.fileService.saveFile(newFile);
+        const savedFile = await this.fileService.save(newFile);
         return savedFile;
     }
 };
@@ -14504,7 +14504,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateResourceWithInfosUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -14517,14 +14517,16 @@ const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/
 const meeting_room_info_service_1 = __webpack_require__(/*! @src/domain/meeting-room-info/meeting-room-info.service */ "./src/domain/meeting-room-info/meeting-room-info.service.ts");
 const accommodation_info_service_1 = __webpack_require__(/*! @src/domain/accommodation-info/accommodation-info.service */ "./src/domain/accommodation-info/accommodation-info.service.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
-    constructor(resourceService, resourceGroupService, resourceManagerService, vehicleInfoService, meetingRoomInfoService, accommodationInfoService, dataSource) {
+    constructor(resourceService, resourceGroupService, resourceManagerService, vehicleInfoService, meetingRoomInfoService, accommodationInfoService, fileService, dataSource) {
         this.resourceService = resourceService;
         this.resourceGroupService = resourceGroupService;
         this.resourceManagerService = resourceManagerService;
         this.vehicleInfoService = vehicleInfoService;
         this.meetingRoomInfoService = meetingRoomInfoService;
         this.accommodationInfoService = accommodationInfoService;
+        this.fileService = fileService;
         this.dataSource = dataSource;
     }
     async execute(createResourceInfo) {
@@ -14554,6 +14556,7 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
             const savedResource = await this.resourceService.save({ ...resource, order: resourceOrder }, {
                 queryRunner,
             });
+            await this.fileService.updateTemporaryFiles(resource.images, false);
             switch (group.type) {
                 case resource_type_enum_1.ResourceType.VEHICLE:
                     await this.vehicleInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
@@ -14589,7 +14592,7 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
 exports.CreateResourceWithInfosUsecase = CreateResourceWithInfosUsecase;
 exports.CreateResourceWithInfosUsecase = CreateResourceWithInfosUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _g : Object, typeof (_h = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _h : Object])
 ], CreateResourceWithInfosUsecase);
 
 
@@ -15360,7 +15363,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateResourceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -15369,11 +15372,13 @@ const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
 const resource_manager_service_1 = __webpack_require__(/*! @src/domain/resource-manager/resource-manager.service */ "./src/domain/resource-manager/resource-manager.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 let UpdateResourceUsecase = class UpdateResourceUsecase {
-    constructor(resourceService, resourceManagerService, dataSource) {
+    constructor(resourceService, resourceManagerService, dataSource, fileService) {
         this.resourceService = resourceService;
         this.resourceManagerService = resourceManagerService;
         this.dataSource = dataSource;
+        this.fileService = fileService;
     }
     async execute(resourceId, updateRequest) {
         const resource = await this.resourceService.findOne({
@@ -15391,6 +15396,9 @@ let UpdateResourceUsecase = class UpdateResourceUsecase {
         try {
             if (updateRequest.resource) {
                 await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
+                if (updateRequest.resource.images && updateRequest.resource.images.length > 0) {
+                    await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
+                }
             }
             if (updateRequest.managers) {
                 const newManagerIds = updateRequest.managers.map((m) => m.employeeId);
@@ -15438,7 +15446,7 @@ let UpdateResourceUsecase = class UpdateResourceUsecase {
 exports.UpdateResourceUsecase = UpdateResourceUsecase;
 exports.UpdateResourceUsecase = UpdateResourceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object, typeof (_d = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _d : Object])
 ], UpdateResourceUsecase);
 
 
@@ -16065,6 +16073,12 @@ __decorate([
     (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('계기판 이미지') }),
     __metadata("design:type", Array)
 ], CreateVehicleInfoDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '실내 이미지 배열' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') }),
+    __metadata("design:type", Array)
+], CreateVehicleInfoDto.prototype, "indoorImages", void 0);
 class CreateConsumableDto {
 }
 exports.CreateConsumableDto = CreateConsumableDto;
@@ -16287,6 +16301,12 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateVehicleInfoDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateVehicleInfoDto.prototype, "indoorImages", void 0);
 
 
 /***/ }),
@@ -16912,23 +16932,44 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DeleteMaintenanceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const maintenance_service_1 = __webpack_require__(/*! @resource/domain/maintenance/maintenance.service */ "./src/domain/maintenance/maintenance.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let DeleteMaintenanceUsecase = class DeleteMaintenanceUsecase {
-    constructor(maintenanceService) {
+    constructor(maintenanceService, fileService, dataSource) {
         this.maintenanceService = maintenanceService;
+        this.fileService = fileService;
+        this.dataSource = dataSource;
     }
     async execute(user, maintenanceId) {
-        return this.maintenanceService.delete(maintenanceId);
+        const maintenance = await this.maintenanceService.findOne({
+            where: { maintenanceId },
+        });
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            await this.maintenanceService.delete(maintenanceId, { queryRunner });
+            await this.fileService.deleteFilesByFilePath(maintenance.images, { queryRunner });
+            await queryRunner.commitTransaction();
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw new common_1.InternalServerErrorException('Failed to delete maintenance');
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
 };
 exports.DeleteMaintenanceUsecase = DeleteMaintenanceUsecase;
 exports.DeleteMaintenanceUsecase = DeleteMaintenanceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object])
 ], DeleteMaintenanceUsecase);
 
 
@@ -17166,7 +17207,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SaveMaintenanceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -17179,14 +17220,16 @@ const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
-    constructor(maintenanceService, consumableService, vehicleInfoService, employeeService, notificationService, dataSource) {
+    constructor(maintenanceService, consumableService, vehicleInfoService, employeeService, notificationService, dataSource, fileService) {
         this.maintenanceService = maintenanceService;
         this.consumableService = consumableService;
         this.vehicleInfoService = vehicleInfoService;
         this.employeeService = employeeService;
         this.notificationService = notificationService;
         this.dataSource = dataSource;
+        this.fileService = fileService;
     }
     async execute(user, createMaintenanceDto) {
         const existingMaintenance = await this.maintenanceService.findOne({
@@ -17202,7 +17245,10 @@ let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            const maintenance = await this.maintenanceService.save(createMaintenanceDto);
+            const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
+            if (createMaintenanceDto.images && createMaintenanceDto.images.length > 0) {
+                await this.fileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
+            }
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
@@ -17245,7 +17291,7 @@ let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
 exports.SaveMaintenanceUsecase = SaveMaintenanceUsecase;
 exports.SaveMaintenanceUsecase = SaveMaintenanceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object, typeof (_g = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _g : Object])
 ], SaveMaintenanceUsecase);
 
 
@@ -17267,7 +17313,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateMaintenanceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -17275,11 +17321,13 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const maintenance_service_1 = __webpack_require__(/*! @src/domain/maintenance/maintenance.service */ "./src/domain/maintenance/maintenance.service.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 let UpdateMaintenanceUsecase = class UpdateMaintenanceUsecase {
-    constructor(maintenanceService, vehicleInfoService, dataSource) {
+    constructor(maintenanceService, vehicleInfoService, dataSource, fileService) {
         this.maintenanceService = maintenanceService;
         this.vehicleInfoService = vehicleInfoService;
         this.dataSource = dataSource;
+        this.fileService = fileService;
     }
     async execute(user, maintenanceId, updateMaintenanceDto) {
         if (updateMaintenanceDto.date) {
@@ -17299,6 +17347,9 @@ let UpdateMaintenanceUsecase = class UpdateMaintenanceUsecase {
         await queryRunner.startTransaction();
         try {
             const maintenance = await this.maintenanceService.update(maintenanceId, updateMaintenanceDto);
+            if (updateMaintenanceDto.images && updateMaintenanceDto.images.length > 0) {
+                await this.fileService.updateTemporaryFiles(updateMaintenanceDto.images, false, { queryRunner });
+            }
             if (updateMaintenanceDto.mileage) {
                 const savedMaintenance = await this.maintenanceService.findOne({
                     where: { maintenanceId: maintenance.maintenanceId },
@@ -17331,7 +17382,7 @@ let UpdateMaintenanceUsecase = class UpdateMaintenanceUsecase {
 exports.UpdateMaintenanceUsecase = UpdateMaintenanceUsecase;
 exports.UpdateMaintenanceUsecase = UpdateMaintenanceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object, typeof (_d = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _d : Object])
 ], UpdateMaintenanceUsecase);
 
 
@@ -17437,15 +17488,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateVehicleInfoUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
-    constructor(vehicleInfoService) {
+    constructor(vehicleInfoService, fileService, dataSource) {
         this.vehicleInfoService = vehicleInfoService;
+        this.fileService = fileService;
+        this.dataSource = dataSource;
     }
     async execute(vehicleInfoId, updateVehicleInfoDto) {
         const previousVehicleInfo = await this.vehicleInfoService.findOne({
@@ -17458,24 +17513,49 @@ let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
         if (!previousVehicleInfo) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
-        const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto);
-        return {
-            vehicleInfoId: vehicleInfo.vehicleInfoId,
-            resourceId: vehicleInfo.resourceId,
-            totalMileage: Number(vehicleInfo.totalMileage),
-            leftMileage: Number(vehicleInfo.leftMileage),
-            insuranceName: vehicleInfo.insuranceName,
-            insuranceNumber: vehicleInfo.insuranceNumber,
-            parkingLocationImages: vehicleInfo.parkingLocationImages,
-            odometerImages: vehicleInfo.odometerImages,
-            indoorImages: vehicleInfo.indoorImages,
-        };
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, {
+                queryRunner,
+            });
+            const images = [
+                ...(updateVehicleInfoDto.parkingLocationImages || []),
+                ...(updateVehicleInfoDto.odometerImages || []),
+                ...(updateVehicleInfoDto.indoorImages || []),
+            ];
+            if (images.length > 0) {
+                await this.fileService.updateTemporaryFiles(images, false, {
+                    queryRunner,
+                });
+            }
+            await queryRunner.commitTransaction();
+            return {
+                vehicleInfoId: vehicleInfo.vehicleInfoId,
+                resourceId: vehicleInfo.resourceId,
+                totalMileage: Number(vehicleInfo.totalMileage),
+                leftMileage: Number(vehicleInfo.leftMileage),
+                insuranceName: vehicleInfo.insuranceName,
+                insuranceNumber: vehicleInfo.insuranceNumber,
+                parkingLocationImages: vehicleInfo.parkingLocationImages,
+                odometerImages: vehicleInfo.odometerImages,
+                indoorImages: vehicleInfo.indoorImages,
+            };
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
 };
 exports.UpdateVehicleInfoUsecase = UpdateVehicleInfoUsecase;
 exports.UpdateVehicleInfoUsecase = UpdateVehicleInfoUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object])
 ], UpdateVehicleInfoUsecase);
 
 
@@ -17515,18 +17595,20 @@ const maintenance_service_1 = __webpack_require__(/*! ./services/maintenance.ser
 const vehicle_info_1 = __webpack_require__(/*! ./usecases/vehicle-info */ "./src/application/resource/vehicle/usecases/vehicle-info/index.ts");
 const consumable_1 = __webpack_require__(/*! ./usecases/consumable */ "./src/application/resource/vehicle/usecases/consumable/index.ts");
 const maintenance_1 = __webpack_require__(/*! ./usecases/maintenance */ "./src/application/resource/vehicle/usecases/maintenance/index.ts");
+const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
 let VehicleResourceModule = class VehicleResourceModule {
 };
 exports.VehicleResourceModule = VehicleResourceModule;
 exports.VehicleResourceModule = VehicleResourceModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([entities_1.VehicleInfo, entities_1.Consumable, entities_1.Maintenance, entities_1.Employee, entities_1.Notification]),
+            typeorm_1.TypeOrmModule.forFeature([entities_1.VehicleInfo, entities_1.Consumable, entities_1.Maintenance, entities_1.Employee, entities_1.Notification, entities_1.File]),
             vehicle_info_module_1.DomainVehicleInfoModule,
             consumable_module_1.DomainConsumableModule,
             maintenance_module_1.DomainMaintenanceModule,
             employee_module_1.DomainEmployeeModule,
             notification_module_1.NotificationModule,
+            file_module_1.DomainFileModule,
         ],
         controllers: [
             admin_vehicle_info_controller_1.AdminVehicleInfoController,
@@ -18621,9 +18703,13 @@ let DomainFileService = class DomainFileService extends base_service_1.BaseServi
         const files = await this.fileRepository.findAll({ where: { filePath: (0, typeorm_1.In)(filePath) } });
         return files;
     }
-    async saveFile(file) {
-        const savedFile = await this.fileRepository.save(file);
-        return savedFile;
+    async updateTemporaryFiles(filePaths, isTemporary, repositoryOptions) {
+        const files = await this.fileRepository.findAll({ where: { filePath: (0, typeorm_1.In)(filePaths) } });
+        await Promise.all(files.map((file) => this.fileRepository.update(file.fileId, { isTemporary }, repositoryOptions)));
+    }
+    async deleteFilesByFilePath(filePaths, repositoryOptions) {
+        const files = await this.fileRepository.findAll({ where: { filePath: (0, typeorm_1.In)(filePaths) } });
+        await Promise.all(files.map((file) => this.fileRepository.delete(file.fileId, repositoryOptions)));
     }
 };
 exports.DomainFileService = DomainFileService;

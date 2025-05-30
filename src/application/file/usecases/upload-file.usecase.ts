@@ -12,7 +12,7 @@ export class UploadFileUsecase {
 
     async execute(file: Express.Multer.File): Promise<File> {
         const newFile = await this.s3Service.uploadFile(file);
-        const savedFile = await this.fileService.saveFile(newFile);
+        const savedFile = await this.fileService.save(newFile);
         return savedFile;
     }
 }

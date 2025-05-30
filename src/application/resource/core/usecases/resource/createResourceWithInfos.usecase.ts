@@ -5,11 +5,12 @@ import { DomainResourceManagerService } from '@src/domain/resource-manager/resou
 import { CreateResourceInfoDto } from '../../dtos/create-resource.dto';
 import { Resource } from '@libs/entities/resource.entity';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
 import { DomainMeetingRoomInfoService } from '@src/domain/meeting-room-info/meeting-room-info.service';
 import { DomainAccommodationInfoService } from '@src/domain/accommodation-info/accommodation-info.service';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { DomainFileService } from '@src/domain/file/file.service';
 
 @Injectable()
 export class CreateResourceWithInfosUsecase {
@@ -20,6 +21,7 @@ export class CreateResourceWithInfosUsecase {
         private readonly vehicleInfoService: DomainVehicleInfoService,
         private readonly meetingRoomInfoService: DomainMeetingRoomInfoService,
         private readonly accommodationInfoService: DomainAccommodationInfoService,
+        private readonly fileService: DomainFileService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -57,6 +59,8 @@ export class CreateResourceWithInfosUsecase {
             const savedResource = await this.resourceService.save({ ...resource, order: resourceOrder } as Resource, {
                 queryRunner,
             });
+
+            await this.fileService.updateTemporaryFiles(resource.images, false);
 
             switch (group.type) {
                 case ResourceType.VEHICLE:

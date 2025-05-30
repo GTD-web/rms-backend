@@ -3,6 +3,7 @@ import { File } from '@libs/entities/file.entity';
 import { BaseService } from '@libs/services/base.service';
 import { DomainFileRepository } from './file.repository';
 import { In } from 'typeorm';
+import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 
 @Injectable()
 export class DomainFileService extends BaseService<File> {
@@ -28,8 +29,19 @@ export class DomainFileService extends BaseService<File> {
         return files;
     }
 
-    async saveFile(file: File): Promise<File> {
-        const savedFile = await this.fileRepository.save(file);
-        return savedFile;
+    async updateTemporaryFiles(
+        filePaths: string[],
+        isTemporary: boolean,
+        repositoryOptions?: IRepositoryOptions<File>,
+    ): Promise<void> {
+        const files = await this.fileRepository.findAll({ where: { filePath: In(filePaths) } });
+        await Promise.all(
+            files.map((file) => this.fileRepository.update(file.fileId, { isTemporary }, repositoryOptions)),
+        );
+    }
+
+    async deleteFilesByFilePath(filePaths: string[], repositoryOptions?: IRepositoryOptions<File>): Promise<void> {
+        const files = await this.fileRepository.findAll({ where: { filePath: In(filePaths) } });
+        await Promise.all(files.map((file) => this.fileRepository.delete(file.fileId, repositoryOptions)));
     }
 }

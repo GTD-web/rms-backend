@@ -10,6 +10,7 @@ import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { NotificationService } from '@src/application/notification/notification.service';
 import { Role } from '@libs/enums/role-type.enum';
+import { DomainFileService } from '@src/domain/file/file.service';
 
 @Injectable()
 export class SaveMaintenanceUsecase {
@@ -20,6 +21,7 @@ export class SaveMaintenanceUsecase {
         private readonly employeeService: DomainEmployeeService,
         private readonly notificationService: NotificationService,
         private readonly dataSource: DataSource,
+        private readonly fileService: DomainFileService,
     ) {}
 
     async execute(user: Employee, createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
@@ -37,7 +39,10 @@ export class SaveMaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            const maintenance = await this.maintenanceService.save(createMaintenanceDto);
+            const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
+            if (createMaintenanceDto.images && createMaintenanceDto.images.length > 0) {
+                await this.fileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
+            }
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },

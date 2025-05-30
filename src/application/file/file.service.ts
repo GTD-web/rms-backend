@@ -12,7 +12,7 @@ export class FileService {
         private readonly findTemporaryFileUsecase: FindTemporaryFileUsecase,
     ) {}
 
-    async findTemporaryFiles(): Promise<void> {
+    async deleteTemporaryFile(): Promise<void> {
         const files = await this.findTemporaryFileUsecase.execute();
         const deletePromises = files.map((file) => this.deleteFileUsecase.execute(file.fileId));
         await Promise.all(deletePromises);
