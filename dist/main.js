@@ -6709,7 +6709,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "uploadMultipleFiles", null);
 __decorate([
-    (0, common_1.Delete)('batch'),
+    (0, common_1.Delete)('multiple'),
     (0, swagger_1.ApiOperation)({ summary: '여러 파일 삭제' }),
     (0, swagger_1.ApiBody)({
         schema: {

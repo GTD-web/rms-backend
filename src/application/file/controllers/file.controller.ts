@@ -68,7 +68,7 @@ export class FileController {
         return this.fileService.uploadMultipleFiles(files);
     }
 
-    @Delete('batch')
+    @Delete('multiple')
     @ApiOperation({ summary: '여러 파일 삭제' })
     @ApiBody({
         schema: {
