@@ -3451,7 +3451,7 @@ class DateUtil {
         return new DateUtilWrapper(dayjs.tz(date, 'Asia/Seoul'));
     }
     static format(date, format = 'YYYY-MM-DD HH:mm:ss') {
-        return this.format(format);
+        return this.date(date).format(format);
     }
     static parse(dateString) {
         return this.date(dateString);
