@@ -8027,7 +8027,10 @@ let GetSubscriptionsUsecase = class GetSubscriptionsUsecase {
             where: { employeeId },
             select: { subscriptions: true },
         });
-        if (!employee) {
+        if (!employee ||
+            !employee.subscriptions ||
+            employee.subscriptions.length === 0 ||
+            !employee.isPushNotificationEnabled) {
             return [];
         }
         return employee.subscriptions;
