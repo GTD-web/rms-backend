@@ -4295,6 +4295,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         this.employeeService = employeeService;
     }
     async validate(payload) {
+        console.log(payload);
         const employee = await this.employeeService.findByEmployeeNumber(payload.employeeNumber);
         if (!employee || employee.employeeNumber !== payload.employeeNumber) {
             throw new common_1.UnauthorizedException();
@@ -8025,7 +8026,7 @@ let GetSubscriptionsUsecase = class GetSubscriptionsUsecase {
     async execute(employeeId) {
         const employee = await this.employeeService.findOne({
             where: { employeeId },
-            select: { subscriptions: true },
+            select: { subscriptions: true, isPushNotificationEnabled: true },
         });
         if (!employee ||
             !employee.subscriptions ||
@@ -9793,11 +9794,9 @@ let CreateReservationUsecase = class CreateReservationUsecase {
             const reservation = await this.reservationService.create(createDto);
             reservation.startDate = date_util_1.DateUtil.date(createDto.startDate).toDate();
             reservation.endDate = date_util_1.DateUtil.date(createDto.endDate).toDate();
-            console.log(reservation);
             const savedReservation = await this.reservationService.save(reservation, {
                 queryRunner,
             });
-            console.log(savedReservation);
             if (createDto.resourceType === resource_type_enum_1.ResourceType.VEHICLE) {
                 const reservationVehicle = new entities_1.ReservationVehicle();
                 reservationVehicle.reservationId = savedReservation.reservationId;

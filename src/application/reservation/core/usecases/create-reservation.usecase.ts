@@ -69,12 +69,10 @@ export class CreateReservationUsecase {
             const reservation = await this.reservationService.create(createDto);
             reservation.startDate = DateUtil.date(createDto.startDate).toDate();
             reservation.endDate = DateUtil.date(createDto.endDate).toDate();
-            console.log(reservation);
 
             const savedReservation = await this.reservationService.save(reservation, {
                 queryRunner,
             });
-            console.log(savedReservation);
             // 차량 예약 정보 생성
             if (createDto.resourceType === ResourceType.VEHICLE) {
                 const reservationVehicle = new ReservationVehicle();

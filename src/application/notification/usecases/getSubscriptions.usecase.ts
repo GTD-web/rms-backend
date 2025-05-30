@@ -10,8 +10,9 @@ export class GetSubscriptionsUsecase {
     async execute(employeeId: string): Promise<PushSubscriptionDto[]> {
         const employee = await this.employeeService.findOne({
             where: { employeeId },
-            select: { subscriptions: true },
+            select: { subscriptions: true, isPushNotificationEnabled: true },
         });
+
         if (
             !employee ||
             !employee.subscriptions ||
