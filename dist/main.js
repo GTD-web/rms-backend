@@ -14556,7 +14556,7 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
             const savedResource = await this.resourceService.save({ ...resource, order: resourceOrder }, {
                 queryRunner,
             });
-            await this.fileService.updateTemporaryFiles(resource.images, false);
+            await this.fileService.updateTemporaryFiles(resource.images, false, { queryRunner });
             switch (group.type) {
                 case resource_type_enum_1.ResourceType.VEHICLE:
                     await this.vehicleInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });

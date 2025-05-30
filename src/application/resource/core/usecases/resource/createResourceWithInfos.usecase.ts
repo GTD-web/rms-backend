@@ -60,7 +60,7 @@ export class CreateResourceWithInfosUsecase {
                 queryRunner,
             });
 
-            await this.fileService.updateTemporaryFiles(resource.images, false);
+            await this.fileService.updateTemporaryFiles(resource.images, false, { queryRunner });
 
             switch (group.type) {
                 case ResourceType.VEHICLE:
