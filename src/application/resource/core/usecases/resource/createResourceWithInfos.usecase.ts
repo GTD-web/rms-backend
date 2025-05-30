@@ -11,6 +11,7 @@ import { DomainMeetingRoomInfoService } from '@src/domain/meeting-room-info/meet
 import { DomainAccommodationInfoService } from '@src/domain/accommodation-info/accommodation-info.service';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DomainFileService } from '@src/domain/file/file.service';
+import { CreateResourceResponseDto } from '../../dtos/resource-response.dto';
 
 @Injectable()
 export class CreateResourceWithInfosUsecase {
@@ -25,7 +26,7 @@ export class CreateResourceWithInfosUsecase {
         private readonly dataSource: DataSource,
     ) {}
 
-    async execute(createResourceInfo: CreateResourceInfoDto): Promise<boolean> {
+    async execute(createResourceInfo: CreateResourceInfoDto): Promise<CreateResourceResponseDto> {
         const { resource, typeInfo, managers } = createResourceInfo;
 
         if (!resource.resourceGroupId) {
@@ -97,7 +98,18 @@ export class CreateResourceWithInfosUsecase {
 
             await queryRunner.commitTransaction();
 
-            return true;
+            const resourceWithTypeInfo = await this.resourceService.findOne({
+                where: { resourceId: savedResource.resourceId },
+                relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo'],
+            });
+            return {
+                resourceId: resourceWithTypeInfo.resourceId,
+                type: resourceWithTypeInfo.type,
+                typeInfoId:
+                    resourceWithTypeInfo.vehicleInfo?.vehicleInfoId ||
+                    resourceWithTypeInfo.meetingRoomInfo?.meetingRoomInfoId ||
+                    resourceWithTypeInfo.accommodationInfo?.accommodationInfoId,
+            };
         } catch (err) {
             console.error(err);
             await queryRunner.rollbackTransaction();

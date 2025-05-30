@@ -4,7 +4,10 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { ResourceResponseDto } from '@src/application/resource/core/dtos/resource-response.dto';
+import {
+    CreateResourceResponseDto,
+    ResourceResponseDto,
+} from '@src/application/resource/core/dtos/resource-response.dto';
 import { CreateResourceInfoDto } from '@src/application/resource/core/dtos/create-resource.dto';
 import {
     UpdateResourceInfoDto,
@@ -24,8 +27,9 @@ export class AdminResourceController {
     @ApiDataResponse({
         status: 201,
         description: '자원이 성공적으로 생성되었습니다.',
+        type: CreateResourceResponseDto,
     })
-    async createWithInfos(@Body() createResourceInfo: CreateResourceInfoDto): Promise<boolean> {
+    async createWithInfos(@Body() createResourceInfo: CreateResourceInfoDto): Promise<CreateResourceResponseDto> {
         return this.resourceService.createResourceWithInfos(createResourceInfo);
     }
 

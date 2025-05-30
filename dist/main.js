@@ -12434,6 +12434,7 @@ __decorate([
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 201,
         description: '자원이 성공적으로 생성되었습니다.',
+        type: resource_response_dto_1.CreateResourceResponseDto,
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -13288,9 +13289,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = void 0;
+exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = exports.CreateResourceResponseDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const vehicle_response_dto_1 = __webpack_require__(/*! @src/application/resource/vehicle/dtos/vehicle-response.dto */ "./src/application/resource/vehicle/dtos/vehicle-response.dto.ts");
 const meeting_room_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/meeting-room/dtos/meeting-room-info-response.dto */ "./src/application/resource/meeting-room/dtos/meeting-room-info-response.dto.ts");
@@ -13300,6 +13301,21 @@ const create_resource_dto_1 = __webpack_require__(/*! ./create-resource.dto */ "
 const reservation_response_dto_1 = __webpack_require__(/*! @src/application/reservation/core/dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
 const employee_response_dto_1 = __webpack_require__(/*! @src/application/employee/dtos/employee-response.dto */ "./src/application/employee/dtos/employee-response.dto.ts");
 const file_response_dto_1 = __webpack_require__(/*! @src/application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
+class CreateResourceResponseDto {
+}
+exports.CreateResourceResponseDto = CreateResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateResourceResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], CreateResourceResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateResourceResponseDto.prototype, "typeInfoId", void 0);
 class ResourceManagerResponseDto {
 }
 exports.ResourceManagerResponseDto = ResourceManagerResponseDto;
@@ -13317,7 +13333,7 @@ __decorate([
 ], ResourceManagerResponseDto.prototype, "employeeId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", typeof (_a = typeof employee_response_dto_1.EmployeeResponseDto !== "undefined" && employee_response_dto_1.EmployeeResponseDto) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof employee_response_dto_1.EmployeeResponseDto !== "undefined" && employee_response_dto_1.EmployeeResponseDto) === "function" ? _b : Object)
 ], ResourceManagerResponseDto.prototype, "employee", void 0);
 class ResourceGroupResponseDto {
 }
@@ -13336,7 +13352,7 @@ __decorate([
 ], ResourceGroupResponseDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
-    __metadata("design:type", typeof (_b = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object)
 ], ResourceGroupResponseDto.prototype, "type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -13394,11 +13410,11 @@ __decorate([
 ], ResourceResponseDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: create_resource_dto_1.ResourceLocation }),
-    __metadata("design:type", typeof (_c = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_d = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _d : Object)
 ], ResourceResponseDto.prototype, "location", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: create_resource_dto_1.ResourceLocationURL }),
-    __metadata("design:type", typeof (_d = typeof create_resource_dto_1.ResourceLocationURL !== "undefined" && create_resource_dto_1.ResourceLocationURL) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_e = typeof create_resource_dto_1.ResourceLocationURL !== "undefined" && create_resource_dto_1.ResourceLocationURL) === "function" ? _e : Object)
 ], ResourceResponseDto.prototype, "locationURLs", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
@@ -13410,7 +13426,7 @@ __decorate([
 ], ResourceResponseDto.prototype, "imageFiles", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
-    __metadata("design:type", typeof (_e = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _e : Object)
+    __metadata("design:type", typeof (_f = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _f : Object)
 ], ResourceResponseDto.prototype, "type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -14337,7 +14353,17 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
                 }),
             ]);
             await queryRunner.commitTransaction();
-            return true;
+            const resourceWithTypeInfo = await this.resourceService.findOne({
+                where: { resourceId: savedResource.resourceId },
+                relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo'],
+            });
+            return {
+                resourceId: resourceWithTypeInfo.resourceId,
+                type: resourceWithTypeInfo.type,
+                typeInfoId: resourceWithTypeInfo.vehicleInfo?.vehicleInfoId ||
+                    resourceWithTypeInfo.meetingRoomInfo?.meetingRoomInfoId ||
+                    resourceWithTypeInfo.accommodationInfo?.accommodationInfoId,
+            };
         }
         catch (err) {
             console.error(err);
@@ -20854,8 +20880,8 @@ exports.DomainVehicleInfoService = DomainVehicleInfoService = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UpdateNotificationSettingsDto = exports.CheckPasswordDto = exports.ChangePasswordDto = exports.ChangeRoleDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.PushNotificationPayload = exports.PushNotificationDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = void 0;
+exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.CreateResourceResponseDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UpdateNotificationSettingsDto = exports.CheckPasswordDto = exports.ChangePasswordDto = exports.ChangeRoleDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
+exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.PushNotificationPayload = exports.PushNotificationDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./application/auth/dto/login.dto */ "./src/application/auth/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./application/auth/dto/login-response.dto */ "./src/application/auth/dto/login-response.dto.ts");
@@ -20884,6 +20910,7 @@ Object.defineProperty(exports, "UpdateResourceOrdersDto", ({ enumerable: true, g
 Object.defineProperty(exports, "NewOrderResourceDto", ({ enumerable: true, get: function () { return update_resource_dto_1.NewOrderResourceDto; } }));
 Object.defineProperty(exports, "NewOrderResourceGroupDto", ({ enumerable: true, get: function () { return update_resource_dto_1.NewOrderResourceGroupDto; } }));
 var resource_response_dto_1 = __webpack_require__(/*! ./application/resource/core/dtos/resource-response.dto */ "./src/application/resource/core/dtos/resource-response.dto.ts");
+Object.defineProperty(exports, "CreateResourceResponseDto", ({ enumerable: true, get: function () { return resource_response_dto_1.CreateResourceResponseDto; } }));
 Object.defineProperty(exports, "ResourceResponseDto", ({ enumerable: true, get: function () { return resource_response_dto_1.ResourceResponseDto; } }));
 Object.defineProperty(exports, "ResourceSelectResponseDto", ({ enumerable: true, get: function () { return resource_response_dto_1.ResourceSelectResponseDto; } }));
 Object.defineProperty(exports, "ResourceWithReservationsResponseDto", ({ enumerable: true, get: function () { return resource_response_dto_1.ResourceWithReservationsResponseDto; } }));

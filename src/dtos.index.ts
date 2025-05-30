@@ -26,6 +26,7 @@ export {
     NewOrderResourceGroupDto,
 } from './application/resource/core/dtos/update-resource.dto';
 export {
+    CreateResourceResponseDto,
     ResourceResponseDto,
     ResourceSelectResponseDto,
     ResourceWithReservationsResponseDto,

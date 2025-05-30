@@ -4,6 +4,7 @@ import { Employee } from '@libs/entities';
 import {
     ResourceResponseDto,
     ResourceGroupWithResourcesAndReservationsResponseDto,
+    CreateResourceResponseDto,
 } from '@src/application/resource/core/dtos/resource-response.dto';
 import { ResourceAvailabilityDto } from '@src/application/resource/core/dtos/available-time-response.dto';
 import { ResourceQueryDto } from '@src/application/resource/core/dtos/resource-query.dto';
@@ -41,7 +42,7 @@ export class ResourceService {
         private readonly createResourceWithInfosUsecase: CreateResourceWithInfosUsecase,
     ) {}
     // Admin Resource Controller
-    async createResourceWithInfos(createResourceInfo: CreateResourceInfoDto): Promise<boolean> {
+    async createResourceWithInfos(createResourceInfo: CreateResourceInfoDto): Promise<CreateResourceResponseDto> {
         return this.createResourceWithInfosUsecase.execute(createResourceInfo);
     }
 

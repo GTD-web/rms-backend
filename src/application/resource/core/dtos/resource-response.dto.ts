@@ -8,6 +8,18 @@ import { ReservationResponseDto } from '@src/application/reservation/core/dtos/r
 import { EmployeeResponseDto } from '@src/application/employee/dtos/employee-response.dto';
 import { Resource } from '@libs/entities/resource.entity';
 import { FileResponseDto } from '@src/application/file/dtos/file-response.dto';
+
+export class CreateResourceResponseDto {
+    @ApiProperty()
+    resourceId: string;
+
+    @ApiProperty({ enum: ResourceType })
+    type: ResourceType;
+
+    @ApiProperty()
+    typeInfoId: string;
+}
+
 export class ResourceManagerResponseDto {
     @ApiProperty()
     resourceManagerId: string;
