@@ -8,6 +8,7 @@ import {
     UploadedFile,
     UploadedFiles,
     Query,
+    Body,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { FileService } from '@resource/application/file/file.service';
@@ -65,6 +66,26 @@ export class FileController {
     @UseInterceptors(FilesInterceptor('files', 10)) // 최대 10개 파일 업로드 가능
     async uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
         return this.fileService.uploadMultipleFiles(files);
+    }
+
+    @Delete('batch')
+    @ApiOperation({ summary: '여러 파일 삭제' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                fileIds: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                    },
+                },
+            },
+        },
+    })
+    @ApiDataResponse({ status: 200, description: '여러 파일 삭제 성공' })
+    async deleteMultipleFiles(@Body('fileIds') fileIds: string[]) {
+        await this.fileService.deleteMultipleFiles(fileIds);
     }
 
     @Delete(':fileId')

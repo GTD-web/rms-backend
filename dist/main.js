@@ -6653,6 +6653,9 @@ let FileController = class FileController {
     async uploadMultipleFiles(files) {
         return this.fileService.uploadMultipleFiles(files);
     }
+    async deleteMultipleFiles(fileIds) {
+        await this.fileService.deleteMultipleFiles(fileIds);
+    }
     async deleteFile(fileId) {
         await this.fileService.deleteFile(fileId);
     }
@@ -6705,6 +6708,28 @@ __decorate([
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "uploadMultipleFiles", null);
+__decorate([
+    (0, common_1.Delete)('batch'),
+    (0, swagger_1.ApiOperation)({ summary: '여러 파일 삭제' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                fileIds: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                    },
+                },
+            },
+        },
+    }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '여러 파일 삭제 성공' }),
+    __param(0, (0, common_1.Body)('fileIds')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "deleteMultipleFiles", null);
 __decorate([
     (0, common_1.Delete)(':fileId'),
     (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
@@ -6849,6 +6874,10 @@ let FileService = class FileService {
     }
     async deleteFile(fileId) {
         await this.deleteFileUsecase.execute(fileId);
+    }
+    async deleteMultipleFiles(fileIds) {
+        const deletePromises = fileIds.map((fileId) => this.deleteFileUsecase.execute(fileId));
+        await Promise.all(deletePromises);
     }
 };
 exports.FileService = FileService;

@@ -30,4 +30,9 @@ export class FileService {
     async deleteFile(fileId: string): Promise<void> {
         await this.deleteFileUsecase.execute(fileId);
     }
+
+    async deleteMultipleFiles(fileIds: string[]): Promise<void> {
+        const deletePromises = fileIds.map((fileId) => this.deleteFileUsecase.execute(fileId));
+        await Promise.all(deletePromises);
+    }
 }
