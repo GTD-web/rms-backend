@@ -14505,7 +14505,7 @@ let FindAvailableTimeUsecase = class FindAvailableTimeUsecase {
                 where: {
                     resourceId: resource.resourceId,
                     reservationId: reservationId ? (0, typeorm_1.Not)(reservationId) : undefined,
-                    status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+                    status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
                     startDate: startDateObj,
                     endDate: endDateObj,
                 },
@@ -14533,7 +14533,8 @@ let FindAvailableTimeUsecase = class FindAvailableTimeUsecase {
             const startDateObj = date_util_1.DateUtil.date(combinedStartDateTime);
             const endDateObj = date_util_1.DateUtil.date(combinedEndDateTime);
             for (const resource of resources) {
-                const confirmedReservations = resource.reservations.filter((reservation) => reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED);
+                const confirmedReservations = resource.reservations.filter((reservation) => reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED ||
+                    reservation.status === reservation_type_enum_1.ReservationStatus.PENDING);
                 const hasConflict = confirmedReservations.some((reservation) => {
                     const reserveStart = date_util_1.DateUtil.date(reservation.startDate);
                     const reserveEnd = date_util_1.DateUtil.date(reservation.endDate);

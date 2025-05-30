@@ -69,7 +69,7 @@ export class FindAvailableTimeUsecase {
                 where: {
                     resourceId: resource.resourceId,
                     reservationId: reservationId ? Not(reservationId) : undefined,
-                    status: In([ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
+                    status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
                     startDate: startDateObj,
                     endDate: endDateObj,
                 },
@@ -113,7 +113,9 @@ export class FindAvailableTimeUsecase {
 
             for (const resource of resources) {
                 const confirmedReservations = resource.reservations.filter(
-                    (reservation) => reservation.status === ReservationStatus.CONFIRMED,
+                    (reservation) =>
+                        reservation.status === ReservationStatus.CONFIRMED ||
+                        reservation.status === ReservationStatus.PENDING,
                 );
 
                 const hasConflict = confirmedReservations.some((reservation) => {
