@@ -9497,10 +9497,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const create_reservation_usecase_1 = __webpack_require__(/*! ../usecases/create-reservation.usecase */ "./src/application/reservation/core/usecases/create-reservation.usecase.ts");
 const find_my_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-my-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-my-reservation-list.usecase.ts");
@@ -9514,8 +9515,13 @@ const update_reservation_status_usecase_1 = __webpack_require__(/*! ../usecases/
 const return_vehicle_usecase_1 = __webpack_require__(/*! ../usecases/return-vehicle.usecase */ "./src/application/reservation/core/usecases/return-vehicle.usecase.ts");
 const check_reservation_access_usecase_1 = __webpack_require__(/*! ../usecases/check-reservation-access.usecase */ "./src/application/reservation/core/usecases/check-reservation-access.usecase.ts");
 const find_calendar_usecase_1 = __webpack_require__(/*! ../usecases/find-calendar.usecase */ "./src/application/reservation/core/usecases/find-calendar.usecase.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const create_reservation_closing_job_usecase_1 = __webpack_require__(/*! ../usecases/create-reservation-closing-job.usecase */ "./src/application/reservation/core/usecases/create-reservation-closing-job.usecase.ts");
 let ReservationService = class ReservationService {
-    constructor(createReservationUsecase, findMyReservationListUsecase, findResourceReservationListUsecase, findMyUsingReservationListUsecase, findMyUpcomingReservationListUsecase, findMyAllSchedulesUsecase, findReservationDetailUsecase, updateReservationUsecase, updateReservationStatusUsecase, returnVehicleUsecase, checkReservationAccessUsecase, findCalendarUsecase) {
+    constructor(createReservationUsecase, findMyReservationListUsecase, findResourceReservationListUsecase, findMyUsingReservationListUsecase, findMyUpcomingReservationListUsecase, findMyAllSchedulesUsecase, findReservationDetailUsecase, updateReservationUsecase, updateReservationStatusUsecase, returnVehicleUsecase, checkReservationAccessUsecase, findCalendarUsecase, reservationService, createReservationClosingJob) {
         this.createReservationUsecase = createReservationUsecase;
         this.findMyReservationListUsecase = findMyReservationListUsecase;
         this.findResourceReservationListUsecase = findResourceReservationListUsecase;
@@ -9528,6 +9534,36 @@ let ReservationService = class ReservationService {
         this.returnVehicleUsecase = returnVehicleUsecase;
         this.checkReservationAccessUsecase = checkReservationAccessUsecase;
         this.findCalendarUsecase = findCalendarUsecase;
+        this.reservationService = reservationService;
+        this.createReservationClosingJob = createReservationClosingJob;
+    }
+    async onModuleInit() {
+        const now = date_util_1.DateUtil.now().format();
+        const notClosedReservations = await this.reservationService.findAll({
+            where: {
+                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING]),
+                resource: {
+                    type: (0, typeorm_1.Not)(resource_type_enum_1.ResourceType.VEHICLE),
+                },
+                endDate: (0, typeorm_1.LessThanOrEqual)(date_util_1.DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of notClosedReservations) {
+            await this.reservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+        }
+        const reservations = await this.reservationService.findAll({
+            where: {
+                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING]),
+                resource: {
+                    type: (0, typeorm_1.Not)(resource_type_enum_1.ResourceType.VEHICLE),
+                },
+                endDate: (0, typeorm_2.MoreThan)(date_util_1.DateUtil.date(now).toDate()),
+            },
+        });
+        console.log(reservations);
+        for (const reservation of reservations) {
+            this.createReservationClosingJob.execute(reservation);
+        }
     }
     async create(user, createDto) {
         return this.createReservationUsecase.execute(user, createDto);
@@ -9569,7 +9605,7 @@ let ReservationService = class ReservationService {
 exports.ReservationService = ReservationService;
 exports.ReservationService = ReservationService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof create_reservation_usecase_1.CreateReservationUsecase !== "undefined" && create_reservation_usecase_1.CreateReservationUsecase) === "function" ? _a : Object, typeof (_b = typeof find_my_reservation_list_usecase_1.FindMyReservationListUsecase !== "undefined" && find_my_reservation_list_usecase_1.FindMyReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_resource_reservation_list_usecase_1.FindResourceReservationListUsecase !== "undefined" && find_resource_reservation_list_usecase_1.FindResourceReservationListUsecase) === "function" ? _c : Object, typeof (_d = typeof find_my_using_reservation_list_usecase_1.FindMyUsingReservationListUsecase !== "undefined" && find_my_using_reservation_list_usecase_1.FindMyUsingReservationListUsecase) === "function" ? _d : Object, typeof (_e = typeof find_my_upcoming_reservation_list_usecase_1.FindMyUpcomingReservationListUsecase !== "undefined" && find_my_upcoming_reservation_list_usecase_1.FindMyUpcomingReservationListUsecase) === "function" ? _e : Object, typeof (_f = typeof find_my_all_schedules_usecase_1.FindMyAllSchedulesUsecase !== "undefined" && find_my_all_schedules_usecase_1.FindMyAllSchedulesUsecase) === "function" ? _f : Object, typeof (_g = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _g : Object, typeof (_h = typeof update_reservation_usecase_1.UpdateReservationUsecase !== "undefined" && update_reservation_usecase_1.UpdateReservationUsecase) === "function" ? _h : Object, typeof (_j = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _j : Object, typeof (_k = typeof return_vehicle_usecase_1.ReturnVehicleUsecase !== "undefined" && return_vehicle_usecase_1.ReturnVehicleUsecase) === "function" ? _k : Object, typeof (_l = typeof check_reservation_access_usecase_1.CheckReservationAccessUsecase !== "undefined" && check_reservation_access_usecase_1.CheckReservationAccessUsecase) === "function" ? _l : Object, typeof (_m = typeof find_calendar_usecase_1.FindCalendarUsecase !== "undefined" && find_calendar_usecase_1.FindCalendarUsecase) === "function" ? _m : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof create_reservation_usecase_1.CreateReservationUsecase !== "undefined" && create_reservation_usecase_1.CreateReservationUsecase) === "function" ? _a : Object, typeof (_b = typeof find_my_reservation_list_usecase_1.FindMyReservationListUsecase !== "undefined" && find_my_reservation_list_usecase_1.FindMyReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_resource_reservation_list_usecase_1.FindResourceReservationListUsecase !== "undefined" && find_resource_reservation_list_usecase_1.FindResourceReservationListUsecase) === "function" ? _c : Object, typeof (_d = typeof find_my_using_reservation_list_usecase_1.FindMyUsingReservationListUsecase !== "undefined" && find_my_using_reservation_list_usecase_1.FindMyUsingReservationListUsecase) === "function" ? _d : Object, typeof (_e = typeof find_my_upcoming_reservation_list_usecase_1.FindMyUpcomingReservationListUsecase !== "undefined" && find_my_upcoming_reservation_list_usecase_1.FindMyUpcomingReservationListUsecase) === "function" ? _e : Object, typeof (_f = typeof find_my_all_schedules_usecase_1.FindMyAllSchedulesUsecase !== "undefined" && find_my_all_schedules_usecase_1.FindMyAllSchedulesUsecase) === "function" ? _f : Object, typeof (_g = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _g : Object, typeof (_h = typeof update_reservation_usecase_1.UpdateReservationUsecase !== "undefined" && update_reservation_usecase_1.UpdateReservationUsecase) === "function" ? _h : Object, typeof (_j = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _j : Object, typeof (_k = typeof return_vehicle_usecase_1.ReturnVehicleUsecase !== "undefined" && return_vehicle_usecase_1.ReturnVehicleUsecase) === "function" ? _k : Object, typeof (_l = typeof check_reservation_access_usecase_1.CheckReservationAccessUsecase !== "undefined" && check_reservation_access_usecase_1.CheckReservationAccessUsecase) === "function" ? _l : Object, typeof (_m = typeof find_calendar_usecase_1.FindCalendarUsecase !== "undefined" && find_calendar_usecase_1.FindCalendarUsecase) === "function" ? _m : Object, typeof (_o = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _o : Object, typeof (_p = typeof create_reservation_closing_job_usecase_1.CreateReservationClosingJobUsecase !== "undefined" && create_reservation_closing_job_usecase_1.CreateReservationClosingJobUsecase) === "function" ? _p : Object])
 ], ReservationService);
 
 
@@ -10717,7 +10753,7 @@ let HandleCronUsecase = class HandleCronUsecase {
         const now = date_util_1.DateUtil.now().format();
         const notClosedReservations = await this.reservationService.findAll({
             where: {
-                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING]),
                 resource: {
                     type: (0, typeorm_1.Not)(resource_type_enum_1.ResourceType.VEHICLE),
                 },

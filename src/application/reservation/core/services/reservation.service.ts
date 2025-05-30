@@ -25,7 +25,11 @@ import { UpdateReservationStatusUsecase } from '../usecases/update-reservation-s
 import { ReturnVehicleUsecase } from '../usecases/return-vehicle.usecase';
 import { CheckReservationAccessUsecase } from '../usecases/check-reservation-access.usecase';
 import { FindCalendarUsecase } from '../usecases/find-calendar.usecase';
-
+import { In, LessThanOrEqual, Not } from 'typeorm';
+import { MoreThan } from 'typeorm';
+import { DateUtil } from '@libs/utils/date.util';
+import { DomainReservationService } from '@src/domain/reservation/reservation.service';
+import { CreateReservationClosingJobUsecase } from '../usecases/create-reservation-closing-job.usecase';
 @Injectable()
 export class ReservationService {
     constructor(
@@ -41,7 +45,40 @@ export class ReservationService {
         private readonly returnVehicleUsecase: ReturnVehicleUsecase,
         private readonly checkReservationAccessUsecase: CheckReservationAccessUsecase,
         private readonly findCalendarUsecase: FindCalendarUsecase,
+        private readonly reservationService: DomainReservationService,
+        private readonly createReservationClosingJob: CreateReservationClosingJobUsecase,
     ) {}
+
+    async onModuleInit() {
+        const now = DateUtil.now().format();
+        const notClosedReservations = await this.reservationService.findAll({
+            where: {
+                status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
+                resource: {
+                    type: Not(ResourceType.VEHICLE),
+                },
+                endDate: LessThanOrEqual(DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of notClosedReservations) {
+            await this.reservationService.update(reservation.reservationId, { status: ReservationStatus.CLOSED });
+        }
+
+        const reservations = await this.reservationService.findAll({
+            where: {
+                status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
+                resource: {
+                    type: Not(ResourceType.VEHICLE),
+                },
+                endDate: MoreThan(DateUtil.date(now).toDate()),
+            },
+        });
+        console.log(reservations);
+
+        for (const reservation of reservations) {
+            this.createReservationClosingJob.execute(reservation);
+        }
+    }
 
     async create(user: Employee, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
         return this.createReservationUsecase.execute(user, createDto);

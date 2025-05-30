@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
-import { LessThanOrEqual, Not } from 'typeorm';
+import { LessThanOrEqual, Not, In } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 
@@ -13,7 +13,7 @@ export class HandleCronUsecase {
         const now = DateUtil.now().format();
         const notClosedReservations = await this.reservationService.findAll({
             where: {
-                status: ReservationStatus.CONFIRMED,
+                status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
                 resource: {
                     type: Not(ResourceType.VEHICLE),
                 },
