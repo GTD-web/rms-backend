@@ -65,8 +65,12 @@ export class CreateReservationUsecase {
                 createDto.resourceType === ResourceType.ACCOMMODATION
                     ? ReservationStatus.PENDING
                     : ReservationStatus.CONFIRMED;
+
             const reservation = await this.reservationService.create(createDto);
+            reservation.startDate = DateUtil.date(createDto.startDate).toDate();
+            reservation.endDate = DateUtil.date(createDto.endDate).toDate();
             console.log(reservation);
+
             const savedReservation = await this.reservationService.save(reservation, {
                 queryRunner,
             });

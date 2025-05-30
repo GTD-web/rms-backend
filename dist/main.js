@@ -9791,6 +9791,8 @@ let CreateReservationUsecase = class CreateReservationUsecase {
                     ? reservation_type_enum_1.ReservationStatus.PENDING
                     : reservation_type_enum_1.ReservationStatus.CONFIRMED;
             const reservation = await this.reservationService.create(createDto);
+            reservation.startDate = date_util_1.DateUtil.date(createDto.startDate).toDate();
+            reservation.endDate = date_util_1.DateUtil.date(createDto.endDate).toDate();
             console.log(reservation);
             const savedReservation = await this.reservationService.save(reservation, {
                 queryRunner,
