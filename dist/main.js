@@ -17517,31 +17517,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateVehicleInfoUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
-const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
-    constructor(vehicleInfoService, fileService, dataSource) {
+    constructor(vehicleInfoService, consumableService, fileService, dataSource) {
         this.vehicleInfoService = vehicleInfoService;
+        this.consumableService = consumableService;
         this.fileService = fileService;
         this.dataSource = dataSource;
     }
     async execute(vehicleInfoId, updateVehicleInfoDto) {
-        const previousVehicleInfo = await this.vehicleInfoService.findOne({
-            where: {
-                vehicleInfoId: vehicleInfoId,
-            },
-            relations: ['consumables'],
-            withDeleted: true,
-        });
-        if (!previousVehicleInfo) {
-            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
-        }
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -17556,6 +17548,31 @@ let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
             ];
             if (images.length > 0) {
                 await this.fileService.updateTemporaryFiles(images, false, {
+                    queryRunner,
+                });
+            }
+            const hasConsumables = await this.consumableService.count({
+                where: {
+                    vehicleInfoId: vehicleInfoId,
+                },
+            });
+            if (hasConsumables === 0) {
+                const sourceConsumables = await queryRunner.manager
+                    .createQueryBuilder(entities_1.Consumable, 'consumable')
+                    .select('DISTINCT ON (consumable.name) consumable.name, consumable.notifyReplacementCycle, consumable.replaceCycle')
+                    .where('consumable.vehicleInfoId != :vehicleInfoId', { vehicleInfoId })
+                    .orderBy('consumable.name', 'ASC')
+                    .getRawMany();
+                const newConsumables = sourceConsumables.map((consumable) => {
+                    const newConsumable = new entities_1.Consumable();
+                    newConsumable.vehicleInfoId = vehicleInfoId;
+                    newConsumable.name = consumable.name;
+                    newConsumable.notifyReplacementCycle = consumable.notifyReplacementCycle;
+                    newConsumable.replaceCycle = consumable.replaceCycle;
+                    newConsumable.initMileage = updateVehicleInfoDto.totalMileage || 0;
+                    return newConsumable;
+                });
+                await this.consumableService.bulkCreate(newConsumables, {
                     queryRunner,
                 });
             }
@@ -17584,7 +17601,7 @@ let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
 exports.UpdateVehicleInfoUsecase = UpdateVehicleInfoUsecase;
 exports.UpdateVehicleInfoUsecase = UpdateVehicleInfoUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object])
 ], UpdateVehicleInfoUsecase);
 
 
@@ -18275,6 +18292,15 @@ let DomainConsumableRepository = class DomainConsumableRepository extends base_r
     constructor(repository) {
         super(repository);
     }
+    async count(repositoryOptions) {
+        return this.repository.count(repositoryOptions);
+    }
+    async bulkCreate(consumables, repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
+            : this.repository;
+        return repository.save(consumables);
+    }
 };
 exports.DomainConsumableRepository = DomainConsumableRepository;
 exports.DomainConsumableRepository = DomainConsumableRepository = __decorate([
@@ -18333,6 +18359,12 @@ let DomainConsumableService = class DomainConsumableService extends base_service
             where: { notifyReplacementCycle: true },
             relations: ['vehicleInfo'],
         });
+    }
+    async bulkCreate(consumables, repositoryOptions) {
+        return this.consumableRepository.bulkCreate(consumables, repositoryOptions);
+    }
+    async count(repositoryOptions) {
+        return this.consumableRepository.count(repositoryOptions);
     }
 };
 exports.DomainConsumableService = DomainConsumableService;

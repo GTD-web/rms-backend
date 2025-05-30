@@ -33,4 +33,12 @@ export class DomainConsumableService extends BaseService<Consumable> {
             relations: ['vehicleInfo'],
         });
     }
+
+    async bulkCreate(consumables: Consumable[], repositoryOptions?: IRepositoryOptions<Consumable>) {
+        return this.consumableRepository.bulkCreate(consumables, repositoryOptions);
+    }
+
+    async count(repositoryOptions?: IRepositoryOptions<Consumable>) {
+        return this.consumableRepository.count(repositoryOptions);
+    }
 }
