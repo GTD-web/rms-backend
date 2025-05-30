@@ -18,7 +18,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any) {
-        console.log(payload);
         const employee = await this.employeeService.findByEmployeeNumber(payload.employeeNumber);
 
         if (!employee || employee.employeeNumber !== payload.employeeNumber) {

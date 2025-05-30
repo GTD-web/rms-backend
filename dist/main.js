@@ -4295,7 +4295,6 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         this.employeeService = employeeService;
     }
     async validate(payload) {
-        console.log(payload);
         const employee = await this.employeeService.findByEmployeeNumber(payload.employeeNumber);
         if (!employee || employee.employeeNumber !== payload.employeeNumber) {
             throw new common_1.UnauthorizedException();
@@ -7403,6 +7402,9 @@ let FCMAdapter = class FCMAdapter {
                     title: payload.title,
                     body: payload.body,
                 },
+                android: {
+                    priority: 'high',
+                },
             })
                 .then((response) => {
                 console.log('FCM send successful.', response);
@@ -9564,7 +9566,6 @@ let ReservationService = class ReservationService {
                 endDate: (0, typeorm_2.MoreThan)(date_util_1.DateUtil.date(now).toDate()),
             },
         });
-        console.log(reservations);
         for (const reservation of reservations) {
             this.createReservationClosingJob.execute(reservation);
         }

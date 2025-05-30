@@ -91,6 +91,9 @@ export class FCMAdapter {
                         title: payload.title,
                         body: payload.body,
                     },
+                    android: {
+                        priority: 'high',
+                    },
                 })
                 .then((response) => {
                     console.log('FCM send successful.', response);
