@@ -25,7 +25,7 @@ export class FindReservationDetailUsecase {
             ],
             withDeleted: true,
         });
-
+        console.log(reservation);
         if (!reservation) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }

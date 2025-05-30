@@ -3451,7 +3451,7 @@ class DateUtil {
         return new DateUtilWrapper(dayjs.tz(date, 'Asia/Seoul'));
     }
     static format(date, format = 'YYYY-MM-DD HH:mm:ss') {
-        return this.date(date).format(format);
+        return this.format(format);
     }
     static parse(dateString) {
         return this.date(dateString);
@@ -9791,9 +9791,11 @@ let CreateReservationUsecase = class CreateReservationUsecase {
                     ? reservation_type_enum_1.ReservationStatus.PENDING
                     : reservation_type_enum_1.ReservationStatus.CONFIRMED;
             const reservation = await this.reservationService.create(createDto);
+            console.log(reservation);
             const savedReservation = await this.reservationService.save(reservation, {
                 queryRunner,
             });
+            console.log(savedReservation);
             if (createDto.resourceType === resource_type_enum_1.ResourceType.VEHICLE) {
                 const reservationVehicle = new entities_1.ReservationVehicle();
                 reservationVehicle.reservationId = savedReservation.reservationId;
@@ -10521,6 +10523,7 @@ let FindReservationDetailUsecase = class FindReservationDetailUsecase {
             ],
             withDeleted: true,
         });
+        console.log(reservation);
         if (!reservation) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
