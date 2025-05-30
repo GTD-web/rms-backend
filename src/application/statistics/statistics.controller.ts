@@ -3,7 +3,7 @@ import { DateUtil } from '@libs/utils/date.util';
 import { Public } from '@libs/decorators/public.decorator';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
-import { AppService } from './app.service';
+import { StatisticsService } from './statistics.service';
 import {
     ConsumableMaintenanceStatsFilterDto,
     ConsumableMaintenanceStatsResponseDto,
@@ -14,26 +14,13 @@ import {
     StatisticsResponseDto,
     VehicleMaintenanceHistoryFilterDto,
     VehicleMaintenanceHistoryResponseDto,
-} from './app.dto';
-import { Roles } from '@libs/decorators/role.decorator';
-import { Role } from '@libs/enums/role-type.enum';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { SeedService } from './modules/seed/seed.service';
+} from './dtos';
 
 @ApiTags(`6. 통계 - 관리자 페이지`)
 @Controller('v1/statistics')
 // @Roles(Role.SYSTEM_ADMIN)
-export class AppController {
-    constructor(
-        private readonly appService: AppService,
-        private readonly seedService: SeedService,
-    ) {}
-
-    @Public()
-    @Get('seed')
-    async seed(@Query('employeeId') employeeId: string): Promise<void> {
-        return await this.seedService.seed(employeeId);
-    }
+export class StatisticsController {
+    constructor(private readonly statisticsService: StatisticsService) {}
 
     @Public()
     @Get('version')
@@ -53,7 +40,7 @@ export class AppController {
     async getResourceUsageStats(
         @Query() filter: ResourceUsageStatsFilterDto,
     ): Promise<ResourceUsageStatsResponseDto[]> {
-        const stats = await this.appService.getResourceUsageStats(filter);
+        const stats = await this.statisticsService.getResourceUsageStats(filter);
         return stats as unknown as ResourceUsageStatsResponseDto[];
     }
 
@@ -66,7 +53,7 @@ export class AppController {
     async getVehicleMaintenanceHistory(
         @Query() filter: VehicleMaintenanceHistoryFilterDto,
     ): Promise<VehicleMaintenanceHistoryResponseDto[]> {
-        const history = await this.appService.getVehicleMaintenanceHistory(filter);
+        const history = await this.statisticsService.getVehicleMaintenanceHistory(filter);
         return history as unknown as VehicleMaintenanceHistoryResponseDto[];
     }
 
@@ -79,7 +66,7 @@ export class AppController {
     async getConsumableMaintenanceStats(
         @Query() filter: ConsumableMaintenanceStatsFilterDto,
     ): Promise<ConsumableMaintenanceStatsResponseDto[]> {
-        const stats = await this.appService.getConsumableMaintenanceStats(filter);
+        const stats = await this.statisticsService.getConsumableMaintenanceStats(filter);
         return stats as unknown as ConsumableMaintenanceStatsResponseDto[];
     }
 
@@ -92,7 +79,7 @@ export class AppController {
     async getEmployeeReservationStats(
         @Query() filter: EmployeeReservationStatsFilterDto,
     ): Promise<EmployeeReservationStatsResponseDto[]> {
-        const stats = await this.appService.getEmployeeReservationStats(filter);
+        const stats = await this.statisticsService.getEmployeeReservationStats(filter);
         return stats as unknown as EmployeeReservationStatsResponseDto[];
     }
 
@@ -105,10 +92,10 @@ export class AppController {
     async getAllStatistics(): Promise<StatisticsResponseDto> {
         const [employeeReservationStats, resourceUsageStats, vehicleMaintenanceHistory, consumableMaintenanceStats] =
             await Promise.all([
-                this.appService.getEmployeeReservationStats({}),
-                this.appService.getResourceUsageStats({}),
-                this.appService.getVehicleMaintenanceHistory({}),
-                this.appService.getConsumableMaintenanceStats({}),
+                this.statisticsService.getEmployeeReservationStats({}),
+                this.statisticsService.getResourceUsageStats({}),
+                this.statisticsService.getVehicleMaintenanceHistory({}),
+                this.statisticsService.getConsumableMaintenanceStats({}),
             ]);
 
         return {

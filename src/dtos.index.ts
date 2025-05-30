@@ -127,18 +127,21 @@ export { PushNotificationDto, PushNotificationPayload } from './application/noti
 export {
     EmployeeReservationStatsFilterDto,
     EmployeeReservationStatsResponseDto,
-} from './statistics/employee-reservation-stats.dto';
+} from './application/statistics/dtos/employee-reservation-stats.dto';
 
-export { ResourceUsageStatsFilterDto, ResourceUsageStatsResponseDto } from './statistics/resource-usage-stats.dto';
+export {
+    ResourceUsageStatsFilterDto,
+    ResourceUsageStatsResponseDto,
+} from './application/statistics/dtos/resource-usage-stats.dto';
 
 export {
     VehicleMaintenanceHistoryFilterDto,
     VehicleMaintenanceHistoryResponseDto,
-} from './statistics/vehicle-maintenance-history.dto';
+} from './application/statistics/dtos/vehicle-maintenance-history.dto';
 
 export {
     ConsumableMaintenanceStatsFilterDto,
     ConsumableMaintenanceStatsResponseDto,
-} from './statistics/consumable-maintenance-stats.dto';
+} from './application/statistics/dtos/consumable-maintenance-stats.dto';
 
-export { StatisticsResponseDto } from './statistics/base.dto';
+export { StatisticsResponseDto } from './application/statistics/dtos/base.dto';

@@ -13,9 +13,6 @@ import { jwtConfig } from '@libs/configs/jwt.config';
 import { Entities } from '@libs/entities';
 
 // 프로젝트 내부 모듈
-import { AppService } from './app.service';
-
-import { AppController } from './app.controller';
 import { ApiDocService } from '@libs/utils/api-doc.service';
 import { DbDocService } from '@libs/utils/db-doc.service';
 import { SeedModule } from './modules/seed/seed.module';
@@ -29,6 +26,7 @@ import { ReservationSnapshotModule } from './application/reservation/snapshot/sn
 import { ReservationCoreModule } from './application/reservation/core/core.module';
 import { VehicleResourceModule } from './application/resource/vehicle/vehicle.module';
 import { TaskModule } from './application/task/task.module';
+import { StatisticsModule } from './application/statistics/statistics.module';
 
 @Module({
     imports: [
@@ -49,7 +47,6 @@ import { TaskModule } from './application/task/task.module';
         TypeOrmModule.forFeature(Entities),
 
         SeedModule,
-        TaskModule,
 
         AuthApplicationModule,
         EmployeeApplicationModule,
@@ -59,8 +56,9 @@ import { TaskModule } from './application/task/task.module';
         ReservationSnapshotModule,
         ReservationCoreModule,
         VehicleResourceModule,
+        TaskModule,
+        StatisticsModule,
     ],
-    controllers: [AppController],
-    providers: [AppService, ApiDocService, DbDocService],
+    providers: [ApiDocService, DbDocService],
 })
 export class AppModule {}

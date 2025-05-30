@@ -12,10 +12,10 @@ import {
     EmployeeReservationStatsFilterDto,
     ResourceUsageStatsFilterDto,
     VehicleMaintenanceHistoryFilterDto,
-} from './app.dto';
+} from './dtos';
 
 @Injectable()
-export class AppService {
+export class StatisticsService {
     constructor(
         @InjectRepository(ResourceUsageStats)
         private readonly resourceUsageStatsRepository: Repository<ResourceUsageStats>,

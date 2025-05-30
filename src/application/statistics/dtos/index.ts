@@ -11,3 +11,5 @@ export {
     ConsumableMaintenanceStatsFilterDto,
     ConsumableMaintenanceStatsResponseDto,
 } from './consumable-maintenance-stats.dto';
+
+export * from './base.dto';
