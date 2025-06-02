@@ -23,6 +23,8 @@ import {
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 import { FIREBASE_CONFIG } from '@libs/configs/env.config';
+import { CronNotificationController } from './controllers/cron.notification.controller';
+import { CronNotificationService } from './services/cron-notification.service';
 
 @Module({
     imports: [
@@ -35,6 +37,7 @@ import { FIREBASE_CONFIG } from '@libs/configs/env.config';
     ],
     providers: [
         NotificationService,
+        CronNotificationService,
         FCMAdapter,
         SubscribeUsecase,
         SendMultiNotificationUsecase,
@@ -48,7 +51,7 @@ import { FIREBASE_CONFIG } from '@libs/configs/env.config';
         GetSubscriptionInfoUsecase,
         CronSendUpcomingNotificationUsecase,
     ],
-    controllers: [NotificationController],
+    controllers: [NotificationController, CronNotificationController],
     exports: [NotificationService],
 })
 export class NotificationModule {}
