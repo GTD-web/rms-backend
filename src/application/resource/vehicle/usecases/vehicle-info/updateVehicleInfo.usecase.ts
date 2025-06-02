@@ -22,6 +22,10 @@ export class UpdateVehicleInfoUsecase {
         await queryRunner.startTransaction();
 
         try {
+            if (!updateVehicleInfoDto.parkingLocationImages) updateVehicleInfoDto.parkingLocationImages = [];
+            if (!updateVehicleInfoDto.odometerImages) updateVehicleInfoDto.odometerImages = [];
+            if (!updateVehicleInfoDto.indoorImages) updateVehicleInfoDto.indoorImages = [];
+
             const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, {
                 queryRunner,
             });

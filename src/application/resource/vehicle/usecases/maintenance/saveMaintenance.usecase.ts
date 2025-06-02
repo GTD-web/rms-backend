@@ -8,7 +8,7 @@ import { DomainMaintenanceService } from '@src/domain/maintenance/maintenance.se
 import { DomainConsumableService } from '@src/domain/consumable/consumable.service';
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
-import { NotificationService } from '@src/application/notification/notification.service';
+import { NotificationService } from '@src/application/notification/services/notification.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { DomainFileService } from '@src/domain/file/file.service';
 

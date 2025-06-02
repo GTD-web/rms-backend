@@ -10,7 +10,7 @@ import { DataSource } from 'typeorm';
 import { Employee } from '@libs/entities';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { DateUtil } from '@libs/utils/date.util';
-import { NotificationService } from '@src/application/notification/notification.service';
+import { NotificationService } from '@src/application/notification/services/notification.service';
 import { DomainResourceService } from '@src/domain/resource/resource.service';
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
 @Injectable()

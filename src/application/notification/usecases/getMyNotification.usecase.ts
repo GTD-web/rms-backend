@@ -1,6 +1,5 @@
 import { NotificationDataDto } from '../dtos/response-notification.dto';
 import { Injectable } from '@nestjs/common';
-import { NotificationService } from '../notification.service';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { ResponseNotificationDto } from '../dtos/response-notification.dto';

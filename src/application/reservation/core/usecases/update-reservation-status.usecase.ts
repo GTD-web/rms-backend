@@ -4,7 +4,7 @@ import { UpdateReservationStatusDto } from '../dtos/update-reservation.dto';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { DateUtil } from '@libs/utils/date.util';
-import { NotificationService } from '@src/application/notification/notification.service';
+import { NotificationService } from '@src/application/notification/services/notification.service';
 import { DomainReservationParticipantService } from '@src/domain/reservation-participant/reservation-participant.service';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ReservationResponseDto } from '../dtos/reservation-response.dto';

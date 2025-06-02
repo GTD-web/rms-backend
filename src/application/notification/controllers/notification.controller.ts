@@ -14,7 +14,7 @@ import { ResponseNotificationDto } from '../dtos/response-notification.dto';
 import { SendNotificationDto } from '../dtos/create-notification.dto';
 import { PushNotificationDto } from '../dtos/send-notification.dto';
 
-import { NotificationService } from '../notification.service';
+import { NotificationService } from '../services/notification.service';
 
 @ApiTags('5. 알림 ')
 @Controller('v1/notifications')

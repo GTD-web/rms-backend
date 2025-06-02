@@ -6826,7 +6826,7 @@ const push_subscription_dto_1 = __webpack_require__(/*! ../dtos/push-subscriptio
 const response_notification_dto_1 = __webpack_require__(/*! ../dtos/response-notification.dto */ "./src/application/notification/dtos/response-notification.dto.ts");
 const create_notification_dto_1 = __webpack_require__(/*! ../dtos/create-notification.dto */ "./src/application/notification/dtos/create-notification.dto.ts");
 const send_notification_dto_1 = __webpack_require__(/*! ../dtos/send-notification.dto */ "./src/application/notification/dtos/send-notification.dto.ts");
-const notification_service_1 = __webpack_require__(/*! ../notification.service */ "./src/application/notification/notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! ../services/notification.service */ "./src/application/notification/services/notification.service.ts");
 let NotificationController = class NotificationController {
     constructor(notificationService) {
         this.notificationService = notificationService;
@@ -7485,7 +7485,7 @@ const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const notification_module_1 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
 const employee_notification_module_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.module */ "./src/domain/employee-notification/employee-notification.module.ts");
-const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
 const notification_controller_1 = __webpack_require__(/*! @src/application/notification/controllers/notification.controller */ "./src/application/notification/controllers/notification.controller.ts");
 const fcm_push_adapter_1 = __webpack_require__(/*! @src/application/notification/infrastructure/fcm-push.adapter */ "./src/application/notification/infrastructure/fcm-push.adapter.ts");
 const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
@@ -7519,6 +7519,7 @@ exports.NotificationModule = NotificationModule = __decorate([
             usecases_1.GetSubscriptionsUsecase,
             usecases_1.DeleteScheduleJobUsecase,
             usecases_1.GetSubscriptionInfoUsecase,
+            usecases_1.CronSendUpcomingNotificationUsecase,
         ],
         controllers: [notification_controller_1.NotificationController],
         exports: [notification_service_1.NotificationService],
@@ -7528,10 +7529,10 @@ exports.NotificationModule = NotificationModule = __decorate([
 
 /***/ }),
 
-/***/ "./src/application/notification/notification.service.ts":
-/*!**************************************************************!*\
-  !*** ./src/application/notification/notification.service.ts ***!
-  \**************************************************************/
+/***/ "./src/application/notification/services/notification.service.ts":
+/*!***********************************************************************!*\
+  !*** ./src/application/notification/services/notification.service.ts ***!
+  \***********************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -7548,18 +7549,18 @@ var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const subscribe_usecase_1 = __webpack_require__(/*! ./usecases/subscribe.usecase */ "./src/application/notification/usecases/subscribe.usecase.ts");
-const sendMultiNotification_usecase_1 = __webpack_require__(/*! ./usecases/sendMultiNotification.usecase */ "./src/application/notification/usecases/sendMultiNotification.usecase.ts");
-const getMyNotification_usecase_1 = __webpack_require__(/*! ./usecases/getMyNotification.usecase */ "./src/application/notification/usecases/getMyNotification.usecase.ts");
-const markAsRead_usecase_1 = __webpack_require__(/*! ./usecases/markAsRead.usecase */ "./src/application/notification/usecases/markAsRead.usecase.ts");
-const createNotification_usecase_1 = __webpack_require__(/*! ./usecases/createNotification.usecase */ "./src/application/notification/usecases/createNotification.usecase.ts");
+const subscribe_usecase_1 = __webpack_require__(/*! ../usecases/subscribe.usecase */ "./src/application/notification/usecases/subscribe.usecase.ts");
+const sendMultiNotification_usecase_1 = __webpack_require__(/*! ../usecases/sendMultiNotification.usecase */ "./src/application/notification/usecases/sendMultiNotification.usecase.ts");
+const getMyNotification_usecase_1 = __webpack_require__(/*! ../usecases/getMyNotification.usecase */ "./src/application/notification/usecases/getMyNotification.usecase.ts");
+const markAsRead_usecase_1 = __webpack_require__(/*! ../usecases/markAsRead.usecase */ "./src/application/notification/usecases/markAsRead.usecase.ts");
+const createNotification_usecase_1 = __webpack_require__(/*! ../usecases/createNotification.usecase */ "./src/application/notification/usecases/createNotification.usecase.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
-const saveNotification_usecase_1 = __webpack_require__(/*! ./usecases/saveNotification.usecase */ "./src/application/notification/usecases/saveNotification.usecase.ts");
-const createScheduleJob_usecase_1 = __webpack_require__(/*! ./usecases/createScheduleJob.usecase */ "./src/application/notification/usecases/createScheduleJob.usecase.ts");
-const getSubscriptions_usecase_1 = __webpack_require__(/*! ./usecases/getSubscriptions.usecase */ "./src/application/notification/usecases/getSubscriptions.usecase.ts");
-const deleteScheduleJob_usecase_1 = __webpack_require__(/*! ./usecases/deleteScheduleJob.usecase */ "./src/application/notification/usecases/deleteScheduleJob.usecase.ts");
+const saveNotification_usecase_1 = __webpack_require__(/*! ../usecases/saveNotification.usecase */ "./src/application/notification/usecases/saveNotification.usecase.ts");
+const createScheduleJob_usecase_1 = __webpack_require__(/*! ../usecases/createScheduleJob.usecase */ "./src/application/notification/usecases/createScheduleJob.usecase.ts");
+const getSubscriptions_usecase_1 = __webpack_require__(/*! ../usecases/getSubscriptions.usecase */ "./src/application/notification/usecases/getSubscriptions.usecase.ts");
+const deleteScheduleJob_usecase_1 = __webpack_require__(/*! ../usecases/deleteScheduleJob.usecase */ "./src/application/notification/usecases/deleteScheduleJob.usecase.ts");
 const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
-const getSubscriptionInfo_usecase_1 = __webpack_require__(/*! ./usecases/getSubscriptionInfo.usecase */ "./src/application/notification/usecases/getSubscriptionInfo.usecase.ts");
+const getSubscriptionInfo_usecase_1 = __webpack_require__(/*! ../usecases/getSubscriptionInfo.usecase */ "./src/application/notification/usecases/getSubscriptionInfo.usecase.ts");
 let NotificationService = class NotificationService {
     constructor(subscribeUsecase, sendMultiNotificationUsecase, getMyNotificationUsecase, markAsReadUsecase, createNotificationUsecase, saveNotificationUsecase, createScheduleJobUsecase, getSubscriptionsUsecase, deleteScheduleJobUsecase, notificationService, getSubscriptionInfoUsecase) {
         this.subscribeUsecase = subscribeUsecase;
@@ -7796,6 +7797,77 @@ exports.CreateScheduleJobUsecase = CreateScheduleJobUsecase = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _b : Object, typeof (_c = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _c : Object])
 ], CreateScheduleJobUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/notification/usecases/cronSendUpcomingNotification.usecase.ts":
+/*!***************************************************************************************!*\
+  !*** ./src/application/notification/usecases/cronSendUpcomingNotification.usecase.ts ***!
+  \***************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronSendUpcomingNotificationUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const fcm_push_adapter_1 = __webpack_require__(/*! ../infrastructure/fcm-push.adapter */ "./src/application/notification/infrastructure/fcm-push.adapter.ts");
+const getSubscriptions_usecase_1 = __webpack_require__(/*! ./getSubscriptions.usecase */ "./src/application/notification/usecases/getSubscriptions.usecase.ts");
+let CronSendUpcomingNotificationUsecase = class CronSendUpcomingNotificationUsecase {
+    constructor(notificationService, FCMAdapter, getSubscriptionsUsecase) {
+        this.notificationService = notificationService;
+        this.FCMAdapter = FCMAdapter;
+        this.getSubscriptionsUsecase = getSubscriptionsUsecase;
+    }
+    async execute() {
+        const now = date_util_1.DateUtil.now().format('YYYY-MM-DD HH:mm');
+        const notifications = await this.notificationService.findAll({
+            where: {
+                isSent: false,
+                createdAt: (0, typeorm_1.LessThanOrEqual)(now),
+            },
+            relations: ['employees'],
+        });
+        for (const notification of notifications) {
+            const notiTarget = notification.employees.map((employee) => employee.employeeId);
+            const totalSubscriptions = [];
+            for (const employeeId of notiTarget) {
+                const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
+                totalSubscriptions.push(...subscriptions);
+            }
+            try {
+                await this.FCMAdapter.sendBulkNotification(totalSubscriptions, {
+                    title: notification.title,
+                    body: notification.body,
+                });
+            }
+            catch (error) {
+                console.error(`Failed to send notification: ${error}`);
+            }
+            finally {
+                await this.notificationService.update(notification.notificationId, { isSent: true });
+            }
+        }
+    }
+};
+exports.CronSendUpcomingNotificationUsecase = CronSendUpcomingNotificationUsecase;
+exports.CronSendUpcomingNotificationUsecase = CronSendUpcomingNotificationUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _a : Object, typeof (_b = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _b : Object, typeof (_c = typeof getSubscriptions_usecase_1.GetSubscriptionsUsecase !== "undefined" && getSubscriptions_usecase_1.GetSubscriptionsUsecase) === "function" ? _c : Object])
+], CronSendUpcomingNotificationUsecase);
 
 
 /***/ }),
@@ -8080,6 +8152,7 @@ __exportStar(__webpack_require__(/*! ./createScheduleJob.usecase */ "./src/appli
 __exportStar(__webpack_require__(/*! ./getSubscriptions.usecase */ "./src/application/notification/usecases/getSubscriptions.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./deleteScheduleJob.usecase */ "./src/application/notification/usecases/deleteScheduleJob.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./getSubscriptionInfo.usecase */ "./src/application/notification/usecases/getSubscriptionInfo.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./cronSendUpcomingNotification.usecase */ "./src/application/notification/usecases/cronSendUpcomingNotification.usecase.ts"), exports);
 
 
 /***/ }),
@@ -9755,7 +9828,7 @@ const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notificatio
 const reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
-const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const find_conflict_reservation_usecase_1 = __webpack_require__(/*! ./find-conflict-reservation.usecase */ "./src/application/reservation/core/usecases/find-conflict-reservation.usecase.ts");
@@ -10866,7 +10939,7 @@ const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.e
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
-const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
 const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
 let ReturnVehicleUsecase = class ReturnVehicleUsecase {
@@ -10980,7 +11053,7 @@ const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/re
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
-const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
 const reservation_participant_service_1 = __webpack_require__(/*! @src/domain/reservation-participant/reservation-participant.service */ "./src/domain/reservation-participant/reservation-participant.service.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
@@ -11098,7 +11171,7 @@ const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
-const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
 const reservation_participant_service_1 = __webpack_require__(/*! @src/domain/reservation-participant/reservation-participant.service */ "./src/domain/reservation-participant/reservation-participant.service.ts");
 const find_conflict_reservation_usecase_1 = __webpack_require__(/*! ./find-conflict-reservation.usecase */ "./src/application/reservation/core/usecases/find-conflict-reservation.usecase.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
@@ -17029,7 +17102,7 @@ const maintenance_service_1 = __webpack_require__(/*! @src/domain/maintenance/ma
 const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
-const notification_service_1 = __webpack_require__(/*! @src/application/notification/notification.service */ "./src/application/notification/notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
@@ -17320,6 +17393,12 @@ let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            if (!updateVehicleInfoDto.parkingLocationImages)
+                updateVehicleInfoDto.parkingLocationImages = [];
+            if (!updateVehicleInfoDto.odometerImages)
+                updateVehicleInfoDto.odometerImages = [];
+            if (!updateVehicleInfoDto.indoorImages)
+                updateVehicleInfoDto.indoorImages = [];
             const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, {
                 queryRunner,
             });

@@ -1,24 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { SubscribeUsecase } from './usecases/subscribe.usecase';
+import { SubscribeUsecase } from '../usecases/subscribe.usecase';
 import { Employee, Notification } from '@libs/entities';
 import { PushNotificationPayload } from '@src/application/notification/dtos/send-notification.dto';
 import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
-import { SendMultiNotificationUsecase } from './usecases/sendMultiNotification.usecase';
+import { SendMultiNotificationUsecase } from '../usecases/sendMultiNotification.usecase';
 import { ResponseNotificationDto } from '@src/application/notification/dtos/response-notification.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { GetMyNotificationUsecase } from './usecases/getMyNotification.usecase';
-import { MarkAsReadUsecase } from './usecases/markAsRead.usecase';
-import { CreateNotificationUsecase } from './usecases/createNotification.usecase';
+import { GetMyNotificationUsecase } from '../usecases/getMyNotification.usecase';
+import { MarkAsReadUsecase } from '../usecases/markAsRead.usecase';
+import { CreateNotificationUsecase } from '../usecases/createNotification.usecase';
 import { NotificationType } from '@libs/enums/notification-type.enum';
-import { SaveNotificationUsecase } from './usecases/saveNotification.usecase';
-import { CreateNotificationDataDto } from './dtos/create-notification.dto';
+import { SaveNotificationUsecase } from '../usecases/saveNotification.usecase';
+import { CreateNotificationDataDto } from '../dtos/create-notification.dto';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
-import { CreateScheduleJobUsecase } from './usecases/createScheduleJob.usecase';
-import { GetSubscriptionsUsecase } from './usecases/getSubscriptions.usecase';
-import { DeleteScheduleJobUsecase } from './usecases/deleteScheduleJob.usecase';
+import { CreateScheduleJobUsecase } from '../usecases/createScheduleJob.usecase';
+import { GetSubscriptionsUsecase } from '../usecases/getSubscriptions.usecase';
+import { DeleteScheduleJobUsecase } from '../usecases/deleteScheduleJob.usecase';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
-import { GetSubscriptionInfoUsecase } from './usecases/getSubscriptionInfo.usecase';
+import { GetSubscriptionInfoUsecase } from '../usecases/getSubscriptionInfo.usecase';
 
 @Injectable()
 export class NotificationService {

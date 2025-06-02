@@ -12,7 +12,7 @@ import { NotificationType } from '@libs/enums/notification-type.enum';
 import { DomainReservationVehicleService } from '@src/domain/reservation-vehicle/reservation-vehicle.service';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { DomainResourceService } from '@src/domain/resource/resource.service';
-import { NotificationService } from '@src/application/notification/notification.service';
+import { NotificationService } from '@src/application/notification/services/notification.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { FindConflictReservationUsecase } from './find-conflict-reservation.usecase';

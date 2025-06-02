@@ -6,7 +6,7 @@ import { UpdateReservationDto } from '../dtos/update-reservation.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { In } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
-import { NotificationService } from '@src/application/notification/notification.service';
+import { NotificationService } from '@src/application/notification/services/notification.service';
 import { DomainReservationParticipantService } from '@src/domain/reservation-participant/reservation-participant.service';
 import { FindConflictReservationUsecase } from './find-conflict-reservation.usecase';
 import { ResourceType } from '@libs/enums/resource-type.enum';

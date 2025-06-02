@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Employee, EmployeeNotification, Notification } from '@libs/entities';
 import { DomainNotificationModule } from '@src/domain/notification/notification.module';
 import { DomainEmployeeNotificationModule } from '@src/domain/employee-notification/employee-notification.module';
-import { NotificationService } from '@src/application/notification/notification.service';
+import { NotificationService } from '@src/application/notification/services/notification.service';
 import { NotificationController } from '@src/application/notification/controllers/notification.controller';
 import { FCMAdapter } from '@src/application/notification/infrastructure/fcm-push.adapter';
 import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
@@ -18,6 +18,7 @@ import {
     GetSubscriptionsUsecase,
     DeleteScheduleJobUsecase,
     GetSubscriptionInfoUsecase,
+    CronSendUpcomingNotificationUsecase,
 } from './usecases';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
@@ -45,6 +46,7 @@ import { FIREBASE_CONFIG } from '@libs/configs/env.config';
         GetSubscriptionsUsecase,
         DeleteScheduleJobUsecase,
         GetSubscriptionInfoUsecase,
+        CronSendUpcomingNotificationUsecase,
     ],
     controllers: [NotificationController],
     exports: [NotificationService],
