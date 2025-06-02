@@ -3845,26 +3845,15 @@ let AuthService = class AuthService {
         if (systemAdminResult.success) {
             return await this.getTokenUsecase.execute(systemAdminResult.employee);
         }
-        const validatedEmployee = await this.validateUsecase.execute(loginDto.email, loginDto.password);
-        if (!validatedEmployee) {
-            const ssoResponse = await this.ssoLoginUsecase.execute(loginDto.email, loginDto.password);
-            const updatedEmployee = await this.updateAuthInfoUsecase.execute(ssoResponse);
-            return {
-                accessToken: updatedEmployee.accessToken,
-                email: updatedEmployee.email,
-                name: updatedEmployee.name,
-                department: updatedEmployee.department,
-                position: updatedEmployee.position,
-                roles: updatedEmployee.roles,
-            };
-        }
+        const ssoResponse = await this.ssoLoginUsecase.execute(loginDto.email, loginDto.password);
+        const updatedEmployee = await this.updateAuthInfoUsecase.execute(ssoResponse);
         return {
-            accessToken: validatedEmployee.accessToken,
-            email: validatedEmployee.email,
-            name: validatedEmployee.name,
-            department: validatedEmployee.department,
-            position: validatedEmployee.position,
-            roles: validatedEmployee.roles,
+            accessToken: updatedEmployee.accessToken,
+            email: updatedEmployee.email,
+            name: updatedEmployee.name,
+            department: updatedEmployee.department,
+            position: updatedEmployee.position,
+            roles: updatedEmployee.roles,
         };
     }
 };
