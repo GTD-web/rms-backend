@@ -123,8 +123,14 @@ export class ReservationService {
         return this.findMyAllSchedulesUsecase.execute(employeeId, query, resourceType);
     }
 
-    async findCalendar(startDate: string, endDate: string, resourceType?: ResourceType): Promise<CalendarResponseDto> {
-        return this.findCalendarUsecase.execute(startDate, endDate, resourceType);
+    async findCalendar(
+        user: Employee,
+        startDate: string,
+        endDate: string,
+        resourceType?: ResourceType,
+        isMine?: boolean,
+    ): Promise<CalendarResponseDto> {
+        return this.findCalendarUsecase.execute(user, startDate, endDate, resourceType, isMine);
     }
 
     async findReservationDetail(user: Employee, reservationId: string): Promise<ReservationWithRelationsResponseDto> {

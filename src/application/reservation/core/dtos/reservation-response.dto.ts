@@ -176,7 +176,7 @@ export class GroupedReservationWithResourceResponseDto {
 export class CalendarResponseDto {
     @ApiProperty({
         description: '예약 캘린더',
-        type: [ReservationWithResourceResponseDto],
+        type: [ReservationWithRelationsResponseDto],
     })
-    reservations: ReservationWithResourceResponseDto[];
+    reservations: ReservationWithRelationsResponseDto[];
 }

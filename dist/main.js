@@ -8480,7 +8480,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -8521,8 +8521,8 @@ let UserReservationController = class UserReservationController {
     async findMyUpcomingSchedules(user, resourceType, query) {
         return this.reservationService.findMyAllSchedules(user.employeeId, query, resourceType);
     }
-    async findCalendar(startDate, endDate, resourceType) {
-        return this.reservationService.findCalendar(startDate, endDate, resourceType);
+    async findCalendar(user, startDate, endDate, resourceType, isMine) {
+        return this.reservationService.findCalendar(user, startDate, endDate, resourceType, isMine);
     }
     async findOne(user, reservationId) {
         return this.reservationService.findReservationDetail(user, reservationId);
@@ -8646,12 +8646,15 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'startDate', example: '2025-01-01' }),
     (0, swagger_1.ApiQuery)({ name: 'endDate', example: '2025-12-31' }),
     (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    __param(0, (0, common_1.Query)('startDate')),
-    __param(1, (0, common_1.Query)('endDate')),
-    __param(2, (0, common_1.Query)('resourceType')),
+    (0, swagger_1.ApiQuery)({ name: 'isMine', type: Boolean, required: false, example: true }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('startDate')),
+    __param(2, (0, common_1.Query)('endDate')),
+    __param(3, (0, common_1.Query)('resourceType')),
+    __param(4, (0, common_1.Query)('isMine')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, typeof (_x = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _x : Object]),
-    __metadata("design:returntype", typeof (_y = typeof Promise !== "undefined" && Promise) === "function" ? _y : Object)
+    __metadata("design:paramtypes", [typeof (_x = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _x : Object, String, String, typeof (_y = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _y : Object, Boolean]),
+    __metadata("design:returntype", typeof (_z = typeof Promise !== "undefined" && Promise) === "function" ? _z : Object)
 ], UserReservationController.prototype, "findCalendar", null);
 __decorate([
     (0, common_1.Get)(':reservationId'),
@@ -8663,8 +8666,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_z = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _z : Object, String]),
-    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
+    __metadata("design:paramtypes", [typeof (_0 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _0 : Object, String]),
+    __metadata("design:returntype", typeof (_1 = typeof Promise !== "undefined" && Promise) === "function" ? _1 : Object)
 ], UserReservationController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':reservationId'),
@@ -8677,8 +8680,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_1 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _1 : Object, String, typeof (_2 = typeof update_reservation_dto_1.UpdateReservationDto !== "undefined" && update_reservation_dto_1.UpdateReservationDto) === "function" ? _2 : Object]),
-    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
+    __metadata("design:paramtypes", [typeof (_2 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _2 : Object, String, typeof (_3 = typeof update_reservation_dto_1.UpdateReservationDto !== "undefined" && update_reservation_dto_1.UpdateReservationDto) === "function" ? _3 : Object]),
+    __metadata("design:returntype", typeof (_4 = typeof Promise !== "undefined" && Promise) === "function" ? _4 : Object)
 ], UserReservationController.prototype, "updateReservation", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/status/cancel'),
@@ -8690,8 +8693,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_4 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _4 : Object, String]),
-    __metadata("design:returntype", typeof (_5 = typeof Promise !== "undefined" && Promise) === "function" ? _5 : Object)
+    __metadata("design:paramtypes", [typeof (_5 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _5 : Object, String]),
+    __metadata("design:returntype", typeof (_6 = typeof Promise !== "undefined" && Promise) === "function" ? _6 : Object)
 ], UserReservationController.prototype, "updateStatusCancel", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/return-vehicle'),
@@ -8704,8 +8707,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_6 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _6 : Object, String, typeof (_7 = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _7 : Object]),
-    __metadata("design:returntype", typeof (_8 = typeof Promise !== "undefined" && Promise) === "function" ? _8 : Object)
+    __metadata("design:paramtypes", [typeof (_7 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _7 : Object, String, typeof (_8 = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _8 : Object]),
+    __metadata("design:returntype", typeof (_9 = typeof Promise !== "undefined" && Promise) === "function" ? _9 : Object)
 ], UserReservationController.prototype, "returnVehicle", null);
 exports.UserReservationController = UserReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 '),
@@ -9166,7 +9169,7 @@ exports.CalendarResponseDto = CalendarResponseDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '예약 캘린더',
-        type: [ReservationWithResourceResponseDto],
+        type: [ReservationWithRelationsResponseDto],
     }),
     __metadata("design:type", Array)
 ], CalendarResponseDto.prototype, "reservations", void 0);
@@ -9588,8 +9591,8 @@ let ReservationService = class ReservationService {
     async findMyAllSchedules(employeeId, query, resourceType) {
         return this.findMyAllSchedulesUsecase.execute(employeeId, query, resourceType);
     }
-    async findCalendar(startDate, endDate, resourceType) {
-        return this.findCalendarUsecase.execute(startDate, endDate, resourceType);
+    async findCalendar(user, startDate, endDate, resourceType, isMine) {
+        return this.findCalendarUsecase.execute(user, startDate, endDate, resourceType, isMine);
     }
     async findReservationDetail(user, reservationId) {
         return this.findReservationDetailUsecase.execute(user, reservationId);
@@ -9965,14 +9968,14 @@ exports.FindCalendarUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
-const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
 let FindCalendarUsecase = class FindCalendarUsecase {
     constructor(reservationService) {
         this.reservationService = reservationService;
     }
-    async execute(startDate, endDate, resourceType) {
+    async execute(user, startDate, endDate, resourceType, isMine) {
         const startDateObj = date_util_1.DateUtil.date(startDate).toDate();
         const endDateObj = date_util_1.DateUtil.date(endDate).toDate();
         const dateCondition = (0, typeorm_1.Raw)((alias) => `(${alias} BETWEEN :startDateObj AND :endDateObj OR
@@ -9982,10 +9985,11 @@ let FindCalendarUsecase = class FindCalendarUsecase {
             startDate: dateCondition,
             status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
             ...(resourceType ? { resource: { type: resourceType } } : {}),
+            ...(isMine ? { participants: { employeeId: user.employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } } : {}),
         };
         const reservations = await this.reservationService.findAll({
             where: where,
-            relations: ['resource'],
+            relations: ['resource', 'participants', 'participants.employee'],
             order: {
                 startDate: 'ASC',
             },
@@ -10000,10 +10004,18 @@ let FindCalendarUsecase = class FindCalendarUsecase {
                     name: true,
                     type: true,
                 },
+                participants: {
+                    employeeId: true,
+                    type: true,
+                    employee: {
+                        employeeId: true,
+                        name: true,
+                    },
+                },
             },
         });
         return {
-            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithResourceResponseDto(reservation)),
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
         };
     }
 };
@@ -10985,7 +10997,6 @@ let UpdateReservationStatusUsecase = class UpdateReservationStatusUsecase {
     async execute(reservationId, updateDto) {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['resource', 'resource.resourceManagers'],
             withDeleted: true,
         });
         if (!reservation) {
@@ -10994,22 +11005,22 @@ let UpdateReservationStatusUsecase = class UpdateReservationStatusUsecase {
         if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
-        const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+        const updatedReservation = await this.reservationService.update(reservationId, updateDto, {
+            relations: ['resource', 'resource.resourceManagers', 'participants', 'participants.employee'],
+            withDeleted: true,
+        });
         if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELLED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
             this.deleteReservationClosingJob.execute(reservationId);
         }
         if (updateDto.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
             this.createReservationClosingJob.execute(updatedReservation);
         }
-        if (reservation.resource.notifyReservationChange && updateDto.status !== reservation_type_enum_1.ReservationStatus.CLOSED) {
+        const notiTarget = [
+            ...updatedReservation.resource.resourceManagers.map((manager) => manager.employeeId),
+            ...updatedReservation.participants.map((reserver) => reserver.employeeId),
+        ];
+        if (updatedReservation.resource.notifyReservationChange && updateDto.status !== reservation_type_enum_1.ReservationStatus.CLOSED) {
             try {
-                const reservers = await this.participantService.findAll({
-                    where: { reservationId },
-                });
-                const notiTarget = [
-                    ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
-                    ...reservers.map((reserver) => reserver.employeeId),
-                ];
                 let notificationType;
                 switch (updateDto.status) {
                     case reservation_type_enum_1.ReservationStatus.CONFIRMED:
@@ -11022,14 +11033,27 @@ let UpdateReservationStatusUsecase = class UpdateReservationStatusUsecase {
                         notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED;
                         break;
                 }
-                this.notificationService.createNotification(notificationType, {
-                    reservationId: reservation.reservationId,
-                    reservationTitle: reservation.title,
-                    reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(reservation.startDate), date_util_1.DateUtil.format(reservation.endDate)),
-                    resourceId: reservation.resource.resourceId,
-                    resourceName: reservation.resource.name,
-                    resourceType: reservation.resource.type,
+                await this.notificationService.createNotification(notificationType, {
+                    reservationId: updatedReservation.reservationId,
+                    reservationTitle: updatedReservation.title,
+                    reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
+                    resourceId: updatedReservation.resource.resourceId,
+                    resourceName: updatedReservation.resource.name,
+                    resourceType: updatedReservation.resource.type,
                 }, notiTarget);
+                if (updateDto.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                    for (const beforeMinutes of updatedReservation.notifyMinutesBeforeStart) {
+                        await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+                            reservationId: updatedReservation.reservationId,
+                            reservationTitle: updatedReservation.title,
+                            resourceId: updatedReservation.resource.resourceId,
+                            resourceName: updatedReservation.resource.name,
+                            resourceType: updatedReservation.resource.type,
+                            reservationDate: date_util_1.DateUtil.format(updatedReservation.startDate),
+                            beforeMinutes: beforeMinutes,
+                        }, notiTarget);
+                    }
+                }
             }
             catch (error) {
                 console.log(error);

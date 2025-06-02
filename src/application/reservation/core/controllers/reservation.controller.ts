@@ -143,12 +143,15 @@ export class UserReservationController {
     @ApiQuery({ name: 'startDate', example: '2025-01-01' })
     @ApiQuery({ name: 'endDate', example: '2025-12-31' })
     @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    @ApiQuery({ name: 'isMine', type: Boolean, required: false, example: true })
     async findCalendar(
+        @User() user: Employee,
         @Query('startDate') startDate: string,
         @Query('endDate') endDate: string,
         @Query('resourceType') resourceType?: ResourceType,
+        @Query('isMine') isMine?: boolean,
     ): Promise<CalendarResponseDto> {
-        return this.reservationService.findCalendar(startDate, endDate, resourceType);
+        return this.reservationService.findCalendar(user, startDate, endDate, resourceType, isMine);
     }
 
     @Get(':reservationId')

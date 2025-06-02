@@ -1,17 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
 import { Between, In, Raw } from 'typeorm';
-import { CalendarResponseDto } from '../dtos/reservation-response.dto';
+import { CalendarResponseDto, ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { DateUtil } from '@libs/utils/date.util';
-import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-type.enum';
 import { ReservationWithResourceResponseDto } from '../dtos/reservation-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { Employee } from '@libs/entities/employee.entity';
 
 @Injectable()
 export class FindCalendarUsecase {
     constructor(private readonly reservationService: DomainReservationService) {}
 
-    async execute(startDate: string, endDate: string, resourceType?: ResourceType): Promise<CalendarResponseDto> {
+    async execute(
+        user: Employee,
+        startDate: string,
+        endDate: string,
+        resourceType?: ResourceType,
+        isMine?: boolean,
+    ): Promise<CalendarResponseDto> {
         const startDateObj = DateUtil.date(startDate).toDate();
         const endDateObj = DateUtil.date(endDate).toDate();
 
@@ -27,11 +34,12 @@ export class FindCalendarUsecase {
             startDate: dateCondition,
             status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
             ...(resourceType ? { resource: { type: resourceType } } : {}),
+            ...(isMine ? { participants: { employeeId: user.employeeId, type: ParticipantsType.RESERVER } } : {}),
         };
 
         const reservations = await this.reservationService.findAll({
             where: where,
-            relations: ['resource'],
+            relations: ['resource', 'participants', 'participants.employee'],
             order: {
                 startDate: 'ASC',
             },
@@ -46,11 +54,19 @@ export class FindCalendarUsecase {
                     name: true,
                     type: true,
                 },
+                participants: {
+                    employeeId: true,
+                    type: true,
+                    employee: {
+                        employeeId: true,
+                        name: true,
+                    },
+                },
             },
         });
 
         return {
-            reservations: reservations.map((reservation) => new ReservationWithResourceResponseDto(reservation)),
+            reservations: reservations.map((reservation) => new ReservationWithRelationsResponseDto(reservation)),
         };
     }
 }

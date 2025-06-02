@@ -24,7 +24,7 @@ export class UpdateReservationStatusUsecase {
     async execute(reservationId: string, updateDto: UpdateReservationStatusDto): Promise<ReservationResponseDto> {
         const reservation = await this.reservationService.findOne({
             where: { reservationId },
-            relations: ['resource', 'resource.resourceManagers'],
+            // relations: ['resource', 'resource.resourceManagers'],
             withDeleted: true,
         });
         if (!reservation) {
@@ -35,27 +35,28 @@ export class UpdateReservationStatusUsecase {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
         }
 
-        const updatedReservation = await this.reservationService.update(reservationId, updateDto);
+        const updatedReservation = await this.reservationService.update(reservationId, updateDto, {
+            relations: ['resource', 'resource.resourceManagers', 'participants', 'participants.employee'],
+            withDeleted: true,
+        });
 
         // 상태가 CANCELLED 또는 REJECTED인 경우 Job 삭제
         if (updateDto.status === ReservationStatus.CANCELLED || updateDto.status === ReservationStatus.REJECTED) {
             this.deleteReservationClosingJob.execute(reservationId);
         }
+
         // 상태가 CONFIRMED로 변경된 경우 새로운 Job 생성
         if (updateDto.status === ReservationStatus.CONFIRMED) {
             this.createReservationClosingJob.execute(updatedReservation);
         }
 
-        if (reservation.resource.notifyReservationChange && updateDto.status !== ReservationStatus.CLOSED) {
-            try {
-                const reservers = await this.participantService.findAll({
-                    where: { reservationId },
-                });
-                const notiTarget = [
-                    ...reservation.resource.resourceManagers.map((manager) => manager.employeeId),
-                    ...reservers.map((reserver) => reserver.employeeId),
-                ];
+        const notiTarget = [
+            ...updatedReservation.resource.resourceManagers.map((manager) => manager.employeeId),
+            ...updatedReservation.participants.map((reserver) => reserver.employeeId),
+        ];
 
+        if (updatedReservation.resource.notifyReservationChange && updateDto.status !== ReservationStatus.CLOSED) {
+            try {
                 let notificationType: NotificationType;
                 switch (updateDto.status) {
                     case ReservationStatus.CONFIRMED:
@@ -69,21 +70,38 @@ export class UpdateReservationStatusUsecase {
                         break;
                 }
 
-                this.notificationService.createNotification(
+                await this.notificationService.createNotification(
                     notificationType,
                     {
-                        reservationId: reservation.reservationId,
-                        reservationTitle: reservation.title,
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
                         reservationDate: DateUtil.toAlarmRangeString(
-                            DateUtil.format(reservation.startDate),
-                            DateUtil.format(reservation.endDate),
+                            DateUtil.format(updatedReservation.startDate),
+                            DateUtil.format(updatedReservation.endDate),
                         ),
-                        resourceId: reservation.resource.resourceId,
-                        resourceName: reservation.resource.name,
-                        resourceType: reservation.resource.type,
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
                     },
                     notiTarget,
                 );
+                if (updateDto.status === ReservationStatus.CONFIRMED) {
+                    for (const beforeMinutes of updatedReservation.notifyMinutesBeforeStart) {
+                        await this.notificationService.createNotification(
+                            NotificationType.RESERVATION_DATE_UPCOMING,
+                            {
+                                reservationId: updatedReservation.reservationId,
+                                reservationTitle: updatedReservation.title,
+                                resourceId: updatedReservation.resource.resourceId,
+                                resourceName: updatedReservation.resource.name,
+                                resourceType: updatedReservation.resource.type,
+                                reservationDate: DateUtil.format(updatedReservation.startDate),
+                                beforeMinutes: beforeMinutes,
+                            },
+                            notiTarget,
+                        );
+                    }
+                }
             } catch (error) {
                 console.log(error);
                 console.log('Notification creation failed in updateStatus');
