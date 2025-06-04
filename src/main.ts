@@ -20,7 +20,12 @@ async function bootstrap() {
             ? function (origin, callback) {
                   console.log('isProduction :', isProduction);
                   console.log('origin :', origin);
-                  const whitelist = ['https://lrms.lumir.space', 'https://rms-backend-iota.vercel.app'];
+                  const whitelist = [
+                      'https://lrms.lumir.space',
+                      'https://rms-backend-iota.vercel.app',
+                      'https://lrms-dev.lumir.space',
+                      'http://localhost:3002',
+                  ];
                   if (!isProduction || !origin || whitelist.includes(origin)) {
                       callback(null, true);
                   } else {
