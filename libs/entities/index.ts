@@ -4,7 +4,7 @@ import { ResourceGroup } from './resource-group.entity';
 import { VehicleInfo } from './vehicle-info.entity';
 import { MeetingRoomInfo } from './meeting-room-info.entity';
 import { AccommodationInfo } from './accommodation-info.entity';
-import { TesterInfo } from './tester-info.entity';
+import { EquipmentInfo } from './equipment-info.entity';
 import { Reservation } from './reservation.entity';
 import { ReservationParticipant } from './reservation-participant.entity';
 import { ResourceManager } from './resource-manager.entity';
@@ -32,7 +32,7 @@ export const Entities = [
     VehicleInfo,
     MeetingRoomInfo,
     AccommodationInfo,
-    TesterInfo,
+    EquipmentInfo,
     Reservation,
     ReservationVehicle,
     ReservationSnapshot,
@@ -59,7 +59,7 @@ export const EntitiesMap = {
     VehicleInfo,
     MeetingRoomInfo,
     AccommodationInfo,
-    TesterInfo,
+    EquipmentInfo,
     Reservation,
     ReservationVehicle,
     ReservationSnapshot,
@@ -86,7 +86,7 @@ export {
     VehicleInfo,
     MeetingRoomInfo,
     AccommodationInfo,
-    TesterInfo,
+    EquipmentInfo,
     Reservation,
     ReservationVehicle,
     ReservationSnapshot,

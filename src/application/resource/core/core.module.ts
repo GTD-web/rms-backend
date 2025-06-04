@@ -11,7 +11,7 @@ import {
     Reservation,
     Consumable,
     Maintenance,
-    TesterInfo,
+    EquipmentInfo,
 } from '@libs/entities';
 import { DomainAccommodationInfoModule } from '@src/domain/accommodation-info/accommodation-info.module';
 import { DomainMeetingRoomInfoModule } from '@src/domain/meeting-room-info/meeting-room-info.module';
@@ -19,7 +19,7 @@ import { DomainResourceGroupModule } from '@src/domain/resource-group/resource-g
 import { DomainResourceManagerModule } from '@src/domain/resource-manager/resource-manager.module';
 import { DomainResourceModule } from '@src/domain/resource/resource.module';
 import { DomainVehicleInfoModule } from '@src/domain/vehicle-info/vehicle-info.module';
-import { DomainTesterInfoModule } from '@src/domain/tester-info/tester-info.module';
+import { DomainEquipmentInfoModule } from '@src/domain/equipment-info/equipment-info.module';
 import { DomainFileModule } from '@src/domain/file/file.module';
 import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
 import { DomainConsumableModule } from '@src/domain/consumable/consumable.module';
@@ -64,7 +64,7 @@ import {
             Maintenance,
             MeetingRoomInfo,
             AccommodationInfo,
-            TesterInfo,
+            EquipmentInfo,
             File,
             Reservation,
         ]),
@@ -76,7 +76,7 @@ import {
         DomainMaintenanceModule,
         DomainMeetingRoomInfoModule,
         DomainAccommodationInfoModule,
-        DomainTesterInfoModule,
+        DomainEquipmentInfoModule,
         DomainFileModule,
         DomainReservationModule,
     ],

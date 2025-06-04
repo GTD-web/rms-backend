@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class TesterInfoResponseDto {
+export class EquipmentInfoResponseDto {
     @ApiProperty()
-    testerInfoId: string;
+    equipmentInfoId: string;
 
     @ApiProperty()
     resourceId: string;

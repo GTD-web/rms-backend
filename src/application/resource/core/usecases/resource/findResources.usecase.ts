@@ -15,8 +15,8 @@ export class FindResourcesUsecase {
             relations = ['meetingRoomInfo'];
         } else if (type === ResourceType.ACCOMMODATION) {
             relations = ['accommodationInfo'];
-        } else if (type === ResourceType.TESTER) {
-            relations = ['testerInfo'];
+        } else if (type === ResourceType.EQUIPMENT) {
+            relations = ['equipmentInfo'];
         }
         const resources = await this.resourceService.findAll({
             where: {

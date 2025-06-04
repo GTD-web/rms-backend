@@ -8,7 +8,7 @@ import { ReservationResponseDto } from '@src/application/reservation/core/dtos/r
 import { EmployeeResponseDto } from '@src/application/employee/dtos/employee-response.dto';
 import { Resource } from '@libs/entities/resource.entity';
 import { FileResponseDto } from '@src/application/file/dtos/file-response.dto';
-import { TesterInfoResponseDto } from '@src/application/resource/tester/dtos/tester-info-response.dto';
+import { EquipmentInfoResponseDto } from '@src/application/resource/equipment/dtos/equipment-info-response.dto';
 
 export class CreateResourceResponseDto {
     @ApiProperty()
@@ -80,8 +80,8 @@ export class ResourceResponseDto {
             this.typeInfo = resource.meetingRoomInfo as unknown as MeetingRoomInfoResponseDto;
         } else if (resource?.accommodationInfo) {
             this.typeInfo = resource.accommodationInfo as unknown as AccommodationInfoResponseDto;
-        } else if (resource?.testerInfo) {
-            this.typeInfo = resource.testerInfo as unknown as TesterInfoResponseDto;
+        } else if (resource?.equipmentInfo) {
+            this.typeInfo = resource.equipmentInfo as unknown as EquipmentInfoResponseDto;
         }
     }
 
@@ -133,14 +133,14 @@ export class ResourceResponseDto {
             { $ref: getSchemaPath(VehicleInfoResponseDto) },
             { $ref: getSchemaPath(MeetingRoomInfoResponseDto) },
             { $ref: getSchemaPath(AccommodationInfoResponseDto) },
-            { $ref: getSchemaPath(TesterInfoResponseDto) },
+            { $ref: getSchemaPath(EquipmentInfoResponseDto) },
         ],
     })
     typeInfo?:
         | VehicleInfoResponseDto
         | MeetingRoomInfoResponseDto
         | AccommodationInfoResponseDto
-        | TesterInfoResponseDto;
+        | EquipmentInfoResponseDto;
 
     @ApiProperty({ required: false, type: [ResourceManagerResponseDto] })
     managers?: ResourceManagerResponseDto[];
