@@ -12,7 +12,7 @@ import { DomainAccommodationInfoService } from '@src/domain/accommodation-info/a
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DomainFileService } from '@src/domain/file/file.service';
 import { CreateResourceResponseDto } from '../../dtos/resource-response.dto';
-import { DomainTesterInfoService } from '@src/domain/tester-info/tester-info.service';
+import { DomainEquipmentInfoService } from '@src/domain/equipment-info/equipment-info.service';
 
 @Injectable()
 export class CreateResourceWithInfosUsecase {
@@ -23,7 +23,7 @@ export class CreateResourceWithInfosUsecase {
         private readonly vehicleInfoService: DomainVehicleInfoService,
         private readonly meetingRoomInfoService: DomainMeetingRoomInfoService,
         private readonly accommodationInfoService: DomainAccommodationInfoService,
-        private readonly testerInfoService: DomainTesterInfoService,
+        private readonly equipmentInfoService: DomainEquipmentInfoService,
         private readonly fileService: DomainFileService,
         private readonly dataSource: DataSource,
     ) {}
@@ -84,8 +84,8 @@ export class CreateResourceWithInfosUsecase {
                         { queryRunner },
                     );
                     break;
-                case ResourceType.TESTER:
-                    await this.testerInfoService.save(
+                case ResourceType.EQUIPMENT:
+                    await this.equipmentInfoService.save(
                         { ...typeInfo, resourceId: savedResource.resourceId },
                         { queryRunner },
                     );
@@ -108,7 +108,7 @@ export class CreateResourceWithInfosUsecase {
 
             const resourceWithTypeInfo = await this.resourceService.findOne({
                 where: { resourceId: savedResource.resourceId },
-                relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo', 'testerInfo'],
+                relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo', 'equipmentInfo'],
             });
             return {
                 resourceId: resourceWithTypeInfo.resourceId,
@@ -117,7 +117,7 @@ export class CreateResourceWithInfosUsecase {
                     resourceWithTypeInfo.vehicleInfo?.vehicleInfoId ||
                     resourceWithTypeInfo.meetingRoomInfo?.meetingRoomInfoId ||
                     resourceWithTypeInfo.accommodationInfo?.accommodationInfoId ||
-                    resourceWithTypeInfo.testerInfo?.testerInfoId,
+                    resourceWithTypeInfo.equipmentInfo?.equipmentInfoId,
             };
         } catch (err) {
             console.error(err);

@@ -35,8 +35,8 @@ export class CreateReminderNotificationUsecase {
             case ResourceType.ACCOMMODATION:
                 parts.push('입실 까지');
                 break;
-            case ResourceType.TESTER:
-                parts.push('테스트 시작까지');
+            case ResourceType.EQUIPMENT:
+                parts.push('장비 이용 시작까지');
                 break;
         }
 

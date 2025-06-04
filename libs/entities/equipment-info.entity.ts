@@ -1,15 +1,15 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { Resource } from './resource.entity';
 
-@Entity('tester_infos')
-export class TesterInfo {
+@Entity('equipment_infos')
+export class EquipmentInfo {
     @PrimaryGeneratedColumn('uuid')
-    testerInfoId: string;
+    equipmentInfoId: string;
 
     @Column()
     resourceId: string;
 
-    @OneToOne(() => Resource, (resource) => resource.testerInfo)
+    @OneToOne(() => Resource, (resource) => resource.equipmentInfo)
     @JoinColumn({ name: 'resourceId' })
     resource: Resource;
 }
