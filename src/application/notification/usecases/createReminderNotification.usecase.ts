@@ -3,6 +3,7 @@ import { DomainReservationService } from '@src/domain/reservation/reservation.se
 import { DateUtil } from '@libs/utils/date.util';
 import { CreateNotificationDataDto, CreateNotificationDto } from '../dtos/create-notification.dto';
 import { NotificationType } from '@libs/enums/notification-type.enum';
+import { ResourceType } from '@libs/enums/resource-type.enum';
 
 @Injectable()
 export class CreateReminderNotificationUsecase {
@@ -24,6 +25,20 @@ export class CreateReminderNotificationUsecase {
 
         const parts: string[] = [];
 
+        switch (createNotificationDatatDto.resourceType) {
+            case ResourceType.MEETING_ROOM:
+                parts.push('회의 시작까지');
+                break;
+            case ResourceType.VEHICLE:
+                parts.push('차량 이용 시작까지');
+                break;
+            case ResourceType.ACCOMMODATION:
+                parts.push('입실 까지');
+                break;
+            // case ResourceType.TESTER:
+            //     break;
+        }
+
         if (days > 0) {
             parts.push(`${days}일`);
         }
@@ -34,10 +49,10 @@ export class CreateReminderNotificationUsecase {
             parts.push(`${minutes}분`);
         }
 
-        const timeDifference = parts.join(' ');
+        const timeDifferencePhrase = parts.join(' ');
 
         return {
-            title: `[${createNotificationDatatDto.reservationTitle}]\n예약시간이 ${timeDifference} 남았습니다.`,
+            title: `[${createNotificationDatatDto.reservationTitle}]\n${timeDifferencePhrase} 남았습니다.`,
             body: createNotificationDatatDto.reservationDate,
             notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
             notificationData: createNotificationDatatDto,

@@ -7840,6 +7840,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 let CreateReminderNotificationUsecase = class CreateReminderNotificationUsecase {
     constructor(reservationService) {
         this.reservationService = reservationService;
@@ -7857,6 +7858,17 @@ let CreateReminderNotificationUsecase = class CreateReminderNotificationUsecase 
         const hours = Math.floor((diffInMinutes % (24 * 60)) / 60);
         const minutes = diffInMinutes % 60;
         const parts = [];
+        switch (createNotificationDatatDto.resourceType) {
+            case resource_type_enum_1.ResourceType.MEETING_ROOM:
+                parts.push('회의 시작까지');
+                break;
+            case resource_type_enum_1.ResourceType.VEHICLE:
+                parts.push('차량 이용 시작까지');
+                break;
+            case resource_type_enum_1.ResourceType.ACCOMMODATION:
+                parts.push('입실 까지');
+                break;
+        }
         if (days > 0) {
             parts.push(`${days}일`);
         }
@@ -7866,9 +7878,9 @@ let CreateReminderNotificationUsecase = class CreateReminderNotificationUsecase 
         if (minutes > 0 || parts.length === 0) {
             parts.push(`${minutes}분`);
         }
-        const timeDifference = parts.join(' ');
+        const timeDifferencePhrase = parts.join(' ');
         return {
-            title: `[${createNotificationDatatDto.reservationTitle}]\n예약시간이 ${timeDifference} 남았습니다.`,
+            title: `[${createNotificationDatatDto.reservationTitle}]\n${timeDifferencePhrase} 남았습니다.`,
             body: createNotificationDatatDto.reservationDate,
             notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
             notificationData: createNotificationDatatDto,
