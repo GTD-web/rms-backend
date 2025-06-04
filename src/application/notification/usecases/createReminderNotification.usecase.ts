@@ -37,7 +37,7 @@ export class CreateReminderNotificationUsecase {
         const timeDifference = parts.join(' ');
 
         return {
-            title: createNotificationDatatDto.reservationTitle + ` 예약시간이 ${timeDifference} 남았습니다.`,
+            title: `[${createNotificationDatatDto.reservationTitle}]\n예약시간이 ${timeDifference} 남았습니다.`,
             body: createNotificationDatatDto.reservationDate,
             notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
             notificationData: createNotificationDatatDto,
