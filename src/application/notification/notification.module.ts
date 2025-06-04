@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Employee, EmployeeNotification, Notification } from '@libs/entities';
+import { Employee, EmployeeNotification, Notification, Reservation } from '@libs/entities';
 import { DomainNotificationModule } from '@src/domain/notification/notification.module';
 import { DomainEmployeeNotificationModule } from '@src/domain/employee-notification/employee-notification.module';
 import { NotificationService } from '@src/application/notification/services/notification.service';
@@ -19,21 +19,24 @@ import {
     DeleteScheduleJobUsecase,
     GetSubscriptionInfoUsecase,
     CronSendUpcomingNotificationUsecase,
+    CreateReminderNotificationUsecase,
 } from './usecases';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 import { FIREBASE_CONFIG } from '@libs/configs/env.config';
 import { CronNotificationController } from './controllers/cron.notification.controller';
 import { CronNotificationService } from './services/cron-notification.service';
+import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Employee, Notification, EmployeeNotification]),
+        TypeOrmModule.forFeature([Employee, Notification, EmployeeNotification, Reservation]),
         ConfigModule.forFeature(FIREBASE_CONFIG),
         ScheduleModule.forRoot(),
         DomainEmployeeModule,
         DomainEmployeeNotificationModule,
         DomainNotificationModule,
+        DomainReservationModule,
     ],
     providers: [
         NotificationService,
@@ -50,6 +53,7 @@ import { CronNotificationService } from './services/cron-notification.service';
         DeleteScheduleJobUsecase,
         GetSubscriptionInfoUsecase,
         CronSendUpcomingNotificationUsecase,
+        CreateReminderNotificationUsecase,
     ],
     controllers: [NotificationController, CronNotificationController],
     exports: [NotificationService],

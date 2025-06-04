@@ -50,33 +50,31 @@ export class ReservationService {
     ) {}
 
     async onModuleInit() {
-        const now = DateUtil.now().format();
-        const notClosedReservations = await this.reservationService.findAll({
-            where: {
-                status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
-                resource: {
-                    type: Not(ResourceType.VEHICLE),
-                },
-                endDate: LessThanOrEqual(DateUtil.date(now).toDate()),
-            },
-        });
-        for (const reservation of notClosedReservations) {
-            await this.reservationService.update(reservation.reservationId, { status: ReservationStatus.CLOSED });
-        }
-
-        const reservations = await this.reservationService.findAll({
-            where: {
-                status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
-                resource: {
-                    type: Not(ResourceType.VEHICLE),
-                },
-                endDate: MoreThan(DateUtil.date(now).toDate()),
-            },
-        });
-
-        for (const reservation of reservations) {
-            this.createReservationClosingJob.execute(reservation);
-        }
+        // const now = DateUtil.now().format();
+        // const notClosedReservations = await this.reservationService.findAll({
+        //     where: {
+        //         status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
+        //         resource: {
+        //             type: Not(ResourceType.VEHICLE),
+        //         },
+        //         endDate: LessThanOrEqual(DateUtil.date(now).toDate()),
+        //     },
+        // });
+        // for (const reservation of notClosedReservations) {
+        //     await this.reservationService.update(reservation.reservationId, { status: ReservationStatus.CLOSED });
+        // }
+        // const reservations = await this.reservationService.findAll({
+        //     where: {
+        //         status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
+        //         resource: {
+        //             type: Not(ResourceType.VEHICLE),
+        //         },
+        //         endDate: MoreThan(DateUtil.date(now).toDate()),
+        //     },
+        // });
+        // for (const reservation of reservations) {
+        //     this.createReservationClosingJob.execute(reservation);
+        // }
     }
 
     async create(user: Employee, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {

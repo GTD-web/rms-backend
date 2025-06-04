@@ -19,7 +19,7 @@ import { GetSubscriptionsUsecase } from '../usecases/getSubscriptions.usecase';
 import { DeleteScheduleJobUsecase } from '../usecases/deleteScheduleJob.usecase';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
 import { GetSubscriptionInfoUsecase } from '../usecases/getSubscriptionInfo.usecase';
-import { DateUtil } from '@libs/utils/date.util';
+import { CreateReminderNotificationUsecase } from '../usecases/createReminderNotification.usecase';
 
 @Injectable()
 export class NotificationService {
@@ -35,23 +35,23 @@ export class NotificationService {
         private readonly deleteScheduleJobUsecase: DeleteScheduleJobUsecase,
         private readonly notificationService: DomainNotificationService,
         private readonly getSubscriptionInfoUsecase: GetSubscriptionInfoUsecase,
+        private readonly createReminderNotificationUsecase: CreateReminderNotificationUsecase,
     ) {}
 
     async onModuleInit() {
-        const upcomingNotifications = await this.notificationService.findAll({
-            where: { isSent: false },
-            relations: ['employees'],
-        });
-
-        for (const notification of upcomingNotifications) {
-            const notiTarget = notification.employees.map((employee) => employee.employeeId);
-            const subscriptions: PushSubscriptionDto[] = [];
-            for (const employeeId of notiTarget) {
-                const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
-                subscriptions.push(...subscriptions);
-            }
-            await this.createScheduleJobUsecase.execute(notification, subscriptions);
-        }
+        // const upcomingNotifications = await this.notificationService.findAll({
+        //     where: { isSent: false },
+        //     relations: ['employees'],
+        // });
+        // for (const notification of upcomingNotifications) {
+        //     const notiTarget = notification.employees.map((employee) => employee.employeeId);
+        //     const subscriptions: PushSubscriptionDto[] = [];
+        //     for (const employeeId of notiTarget) {
+        //         const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
+        //         subscriptions.push(...subscriptions);
+        //     }
+        //     await this.createScheduleJobUsecase.execute(notification, subscriptions);
+        // }
     }
 
     async subscribe(user: Employee, subscription: PushSubscriptionDto): Promise<void> {
@@ -128,37 +128,7 @@ export class NotificationService {
         createNotificationDatatDto: CreateNotificationDataDto,
         notiTarget: string[],
     ): Promise<void> {
-        const now = DateUtil.now().toDate();
-        const reservationDate = DateUtil.date(createNotificationDatatDto.reservationDate).toDate();
-        const diffInMilliseconds = reservationDate.getTime() - now.getTime();
-        const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
-
-        const days = Math.floor(diffInMinutes / (24 * 60));
-        const hours = Math.floor((diffInMinutes % (24 * 60)) / 60);
-        const minutes = diffInMinutes % 60;
-
-        const parts: string[] = [];
-
-        if (days > 0) {
-            parts.push(`${days}일`);
-        }
-        if (hours > 0) {
-            parts.push(`${hours}시간`);
-        }
-        if (minutes > 0 || parts.length === 0) {
-            parts.push(`${minutes}분`);
-        }
-
-        const timeDifference = parts.join(' ');
-
-        const createNotificationDto: CreateNotificationDto = {
-            title: createNotificationDatatDto.reservationTitle + ` 예약시간이 ${timeDifference} 남았습니다.`,
-            body: createNotificationDatatDto.reservationDate,
-            notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
-            notificationData: createNotificationDatatDto,
-            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
-            isSent: true,
-        };
+        const createNotificationDto = await this.createReminderNotificationUsecase.execute(createNotificationDatatDto);
 
         const notification = await this.saveNotificationUsecase.execute(createNotificationDto, notiTarget);
 
