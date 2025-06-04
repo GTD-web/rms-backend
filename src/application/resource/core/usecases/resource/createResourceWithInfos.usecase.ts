@@ -12,6 +12,7 @@ import { DomainAccommodationInfoService } from '@src/domain/accommodation-info/a
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DomainFileService } from '@src/domain/file/file.service';
 import { CreateResourceResponseDto } from '../../dtos/resource-response.dto';
+import { DomainTesterInfoService } from '@src/domain/tester-info/tester-info.service';
 
 @Injectable()
 export class CreateResourceWithInfosUsecase {
@@ -22,6 +23,7 @@ export class CreateResourceWithInfosUsecase {
         private readonly vehicleInfoService: DomainVehicleInfoService,
         private readonly meetingRoomInfoService: DomainMeetingRoomInfoService,
         private readonly accommodationInfoService: DomainAccommodationInfoService,
+        private readonly testerInfoService: DomainTesterInfoService,
         private readonly fileService: DomainFileService,
         private readonly dataSource: DataSource,
     ) {}
@@ -82,6 +84,12 @@ export class CreateResourceWithInfosUsecase {
                         { queryRunner },
                     );
                     break;
+                case ResourceType.TESTER:
+                    await this.testerInfoService.save(
+                        { ...typeInfo, resourceId: savedResource.resourceId },
+                        { queryRunner },
+                    );
+                    break;
             }
 
             await Promise.all([
@@ -100,7 +108,7 @@ export class CreateResourceWithInfosUsecase {
 
             const resourceWithTypeInfo = await this.resourceService.findOne({
                 where: { resourceId: savedResource.resourceId },
-                relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo'],
+                relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo', 'testerInfo'],
             });
             return {
                 resourceId: resourceWithTypeInfo.resourceId,
@@ -108,7 +116,8 @@ export class CreateResourceWithInfosUsecase {
                 typeInfoId:
                     resourceWithTypeInfo.vehicleInfo?.vehicleInfoId ||
                     resourceWithTypeInfo.meetingRoomInfo?.meetingRoomInfoId ||
-                    resourceWithTypeInfo.accommodationInfo?.accommodationInfoId,
+                    resourceWithTypeInfo.accommodationInfo?.accommodationInfoId ||
+                    resourceWithTypeInfo.testerInfo?.testerInfoId,
             };
         } catch (err) {
             console.error(err);

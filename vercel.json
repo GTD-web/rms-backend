@@ -28,7 +28,7 @@
         },
         {
             "path": "/api/v1/notifications/cron-job/send-upcoming-notification",
-            "schedule": "* 7-19 * * 1-5"
+            "schedule": "* * * * 1-5"
         }
     ]
 }

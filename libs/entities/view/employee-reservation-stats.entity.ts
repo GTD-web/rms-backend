@@ -20,7 +20,7 @@ import { ViewEntity, ViewColumn, Connection } from 'typeorm';
     COUNT(DISTINCT CASE WHEN res.type = 'VEHICLE' THEN r."reservationId" END) AS "vehicleCount",
     COUNT(DISTINCT CASE WHEN res.type = 'MEETING_ROOM' THEN r."reservationId" END) AS "meetingRoomCount",
     COUNT(DISTINCT CASE WHEN res.type = 'ACCOMMODATION' THEN r."reservationId" END) AS "accommodationCount",
-    
+
     -- 취소 및 변경 빈도
     COUNT(DISTINCT CASE WHEN r.status = 'CANCELLED' THEN r."reservationId" END) AS "cancellationCount",
     
@@ -59,8 +59,9 @@ export class EmployeeReservationStats {
     @ViewColumn()
     employeeName: string;
 
-    @ViewColumn()
+    // @ViewColumn()
     // employeeEmail: string;
+
     @ViewColumn()
     reservationCount: number;
 
