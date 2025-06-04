@@ -48,15 +48,26 @@ export class UserReservationController {
         type: [GroupedReservationResponseDto],
     })
     @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    @ApiQuery({ name: 'startDate', required: false, example: '2025-01 / 2025-01-01' })
+    @ApiQuery({ name: 'endDate', required: false, example: '2025-12 / 2025-12-31' })
     @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
     @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
     async findMyReservationList(
         @User() user: Employee,
         @Query('resourceType') resourceType?: ResourceType,
+        @Query('startDate') startDate?: string,
+        @Query('endDate') endDate?: string,
         @Query() query?: PaginationQueryDto,
     ): Promise<PaginationData<GroupedReservationResponseDto>> {
         const { page, limit } = query;
-        return this.reservationService.findMyReservationList(user.employeeId, page, limit, resourceType);
+        return this.reservationService.findMyReservationList(
+            user.employeeId,
+            page,
+            limit,
+            resourceType,
+            startDate,
+            endDate,
+        );
     }
 
     // 햄버거 메뉴 -> 자원목록 -> 자원상세 -> 내예약으로 들어간 후 나오는 리스트

@@ -83,6 +83,7 @@ export class UserResourceController {
             query.resourceId,
             query.startDate,
             query.endDate,
+            query.reservationId,
         );
 
         return {

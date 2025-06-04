@@ -88,8 +88,10 @@ export class ReservationService {
         page: number,
         limit: number,
         resourceType?: ResourceType,
+        startDate?: string,
+        endDate?: string,
     ): Promise<PaginationData<GroupedReservationResponseDto>> {
-        return this.findMyReservationListUsecase.execute(employeeId, page, limit, resourceType);
+        return this.findMyReservationListUsecase.execute(employeeId, page, limit, resourceType, startDate, endDate);
     }
 
     async findResourceReservationList(

@@ -84,8 +84,13 @@ export class ResourceService {
         return this.findAvailableTimeUsecase.execute(query);
     }
 
-    async checkAvailability(resourceId: string, startDate: string, endDate: string): Promise<boolean> {
-        return this.checkAvailabilityUsecase.execute(resourceId, startDate, endDate);
+    async checkAvailability(
+        resourceId: string,
+        startDate: string,
+        endDate: string,
+        reservationId?: string,
+    ): Promise<boolean> {
+        return this.checkAvailabilityUsecase.execute(resourceId, startDate, endDate, reservationId);
     }
 
     async findResourceDetailForUser(employeeId: string, resourceId: string): Promise<ResourceResponseDto> {

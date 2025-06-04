@@ -12,13 +12,14 @@ import { MarkAsReadUsecase } from '../usecases/markAsRead.usecase';
 import { CreateNotificationUsecase } from '../usecases/createNotification.usecase';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { SaveNotificationUsecase } from '../usecases/saveNotification.usecase';
-import { CreateNotificationDataDto } from '../dtos/create-notification.dto';
+import { CreateNotificationDataDto, CreateNotificationDto } from '../dtos/create-notification.dto';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 import { CreateScheduleJobUsecase } from '../usecases/createScheduleJob.usecase';
 import { GetSubscriptionsUsecase } from '../usecases/getSubscriptions.usecase';
 import { DeleteScheduleJobUsecase } from '../usecases/deleteScheduleJob.usecase';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
 import { GetSubscriptionInfoUsecase } from '../usecases/getSubscriptionInfo.usecase';
+import { DateUtil } from '@libs/utils/date.util';
 
 @Injectable()
 export class NotificationService {
@@ -106,12 +107,13 @@ export class NotificationService {
             const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
             totalSubscriptions.push(...subscriptions);
         }
+
         switch (notificationType) {
             case NotificationType.RESERVATION_DATE_UPCOMING:
-                this.createScheduleJobUsecase.execute(notification, totalSubscriptions);
+                // this.createScheduleJobUsecase.execute(notification, totalSubscriptions);
                 break;
-            case NotificationType.RESERVATION_TIME_CHANGED:
-                this.deleteScheduleJobUsecase.execute(createNotificationDatatDto);
+            // case NotificationType.RESERVATION_TIME_CHANGED:
+            //     this.deleteScheduleJobUsecase.execute(createNotificationDatatDto);
             default:
                 this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
                     title: notification.title,
@@ -119,24 +121,56 @@ export class NotificationService {
                 });
                 break;
         }
-        // await this.markAsReadAfter3Days(notification);
     }
 
-    // async markAsReadAfter3Days(notification: Notification): Promise<void> {
-    //     const parsedDate = DateUtil.parse(notification.createdAt).addDays(3).toDate();
-    //     const notificationDate = new Date(parsedDate);
-    //     const jobName = `mark-as-read-${notification.notificationId}-${DateUtil.now().format('YYYYMMDDHHmmssSSS')}`;
-    //     const job = new CronJob(notificationDate, async () => {
-    //         const employeeNotifications = await this.employeeNotificationService.findAll({
-    //             where: { notificationId: notification.notificationId },
-    //         });
-    //         for (const employeeNotification of employeeNotifications) {
-    //             await this.employeeNotificationService.update(employeeNotification.employeeNotificationId, {
-    //                 isRead: true,
-    //             });
-    //         }
-    //     });
-    //     this.schedulerRegistry.addCronJob(jobName, job as any);
-    //     job.start();
-    // }
+    async sendReminderNotification(
+        notificationType: NotificationType,
+        createNotificationDatatDto: CreateNotificationDataDto,
+        notiTarget: string[],
+    ): Promise<void> {
+        const now = DateUtil.now().toDate();
+        const reservationDate = DateUtil.date(createNotificationDatatDto.reservationDate).toDate();
+        const diffInMilliseconds = reservationDate.getTime() - now.getTime();
+        const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+
+        const days = Math.floor(diffInMinutes / (24 * 60));
+        const hours = Math.floor((diffInMinutes % (24 * 60)) / 60);
+        const minutes = diffInMinutes % 60;
+
+        const parts: string[] = [];
+
+        if (days > 0) {
+            parts.push(`${days}일`);
+        }
+        if (hours > 0) {
+            parts.push(`${hours}시간`);
+        }
+        if (minutes > 0 || parts.length === 0) {
+            parts.push(`${minutes}분`);
+        }
+
+        const timeDifference = parts.join(' ');
+
+        const createNotificationDto: CreateNotificationDto = {
+            title: createNotificationDatatDto.reservationTitle + ` 예약시간이 ${timeDifference} 남았습니다.`,
+            body: createNotificationDatatDto.reservationDate,
+            notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
+            notificationData: createNotificationDatatDto,
+            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
+            isSent: true,
+        };
+
+        const notification = await this.saveNotificationUsecase.execute(createNotificationDto, notiTarget);
+
+        const totalSubscriptions: PushSubscriptionDto[] = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+
+        await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
+            title: notification.title,
+            body: notification.body,
+        });
+    }
 }

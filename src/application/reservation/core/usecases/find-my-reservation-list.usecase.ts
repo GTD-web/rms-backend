@@ -4,7 +4,7 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { GroupedReservationResponseDto, ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { FindOptionsWhere, In } from 'typeorm';
+import { FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Reservation } from '@libs/entities';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 import { DateUtil } from '@libs/utils/date.util';
@@ -19,6 +19,7 @@ export class FindMyReservationListUsecase {
         limit?: number,
         resourceType?: ResourceType,
         startDate?: string,
+        endDate?: string,
     ): Promise<PaginationData<GroupedReservationResponseDto>> {
         const where: FindOptionsWhere<Reservation> = { participants: { employeeId, type: ParticipantsType.RESERVER } };
         if (resourceType) {
@@ -26,8 +27,16 @@ export class FindMyReservationListUsecase {
                 type: resourceType as ResourceType,
             };
         }
+
+        if (startDate && endDate) {
+            where.startDate = MoreThanOrEqual(DateUtil.date(startDate).getFirstDayOfMonth().toDate());
+            where.endDate = LessThanOrEqual(DateUtil.date(endDate).getLastDayOfMonth().toDate());
+        }
         const options: IRepositoryOptions<Reservation> = {
             where,
+            order: {
+                startDate: 'DESC',
+            },
         };
         if (page && limit) {
             options.skip = (page - 1) * limit;
@@ -58,12 +67,18 @@ export class FindMyReservationListUsecase {
             return acc;
         }, {});
 
-        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
-            date,
-            reservations: (reservations as Reservation[]).map(
-                (reservation) => new ReservationWithRelationsResponseDto(reservation),
-            ),
-        }));
+        const groupedReservationsResponse = Object.entries(groupedReservations)
+            .map(([date, reservations]) => ({
+                date,
+                reservations: (reservations as Reservation[]).map(
+                    (reservation) => new ReservationWithRelationsResponseDto(reservation),
+                ),
+            }))
+            .sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateB.getTime() - dateA.getTime();
+            });
 
         return {
             items: groupedReservationsResponse,

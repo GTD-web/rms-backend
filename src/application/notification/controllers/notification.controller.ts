@@ -50,7 +50,7 @@ export class NotificationController {
         description: '웹 푸시 알림 전송 성공',
     })
     async send(@Body() sendNotificationDto: SendNotificationDto) {
-        await this.notificationService.createNotification(
+        await this.notificationService.sendReminderNotification(
             sendNotificationDto.notificationType,
             sendNotificationDto.notificationData,
             sendNotificationDto.notificationTarget,

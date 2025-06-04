@@ -6876,7 +6876,7 @@ let NotificationController = class NotificationController {
         await this.notificationService.sendDirectNotification(body.subscription, body.payload);
     }
     async send(sendNotificationDto) {
-        await this.notificationService.createNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
+        await this.notificationService.sendReminderNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
     }
     async findAllByEmployeeId(employeeId, query) {
         return await this.notificationService.findMyNotifications(employeeId, query);
@@ -7640,6 +7640,7 @@ const getSubscriptions_usecase_1 = __webpack_require__(/*! ../usecases/getSubscr
 const deleteScheduleJob_usecase_1 = __webpack_require__(/*! ../usecases/deleteScheduleJob.usecase */ "./src/application/notification/usecases/deleteScheduleJob.usecase.ts");
 const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
 const getSubscriptionInfo_usecase_1 = __webpack_require__(/*! ../usecases/getSubscriptionInfo.usecase */ "./src/application/notification/usecases/getSubscriptionInfo.usecase.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let NotificationService = class NotificationService {
     constructor(subscribeUsecase, sendMultiNotificationUsecase, getMyNotificationUsecase, markAsReadUsecase, createNotificationUsecase, saveNotificationUsecase, createScheduleJobUsecase, getSubscriptionsUsecase, deleteScheduleJobUsecase, notificationService, getSubscriptionInfoUsecase) {
         this.subscribeUsecase = subscribeUsecase;
@@ -7703,10 +7704,7 @@ let NotificationService = class NotificationService {
         }
         switch (notificationType) {
             case notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING:
-                this.createScheduleJobUsecase.execute(notification, totalSubscriptions);
                 break;
-            case notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED:
-                this.deleteScheduleJobUsecase.execute(createNotificationDatatDto);
             default:
                 this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
                     title: notification.title,
@@ -7714,6 +7712,44 @@ let NotificationService = class NotificationService {
                 });
                 break;
         }
+    }
+    async sendReminderNotification(notificationType, createNotificationDatatDto, notiTarget) {
+        const now = date_util_1.DateUtil.now().toDate();
+        const reservationDate = date_util_1.DateUtil.date(createNotificationDatatDto.reservationDate).toDate();
+        const diffInMilliseconds = reservationDate.getTime() - now.getTime();
+        const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+        const days = Math.floor(diffInMinutes / (24 * 60));
+        const hours = Math.floor((diffInMinutes % (24 * 60)) / 60);
+        const minutes = diffInMinutes % 60;
+        const parts = [];
+        if (days > 0) {
+            parts.push(`${days}일`);
+        }
+        if (hours > 0) {
+            parts.push(`${hours}시간`);
+        }
+        if (minutes > 0 || parts.length === 0) {
+            parts.push(`${minutes}분`);
+        }
+        const timeDifference = parts.join(' ');
+        const createNotificationDto = {
+            title: createNotificationDatatDto.reservationTitle + ` 예약시간이 ${timeDifference} 남았습니다.`,
+            body: createNotificationDatatDto.reservationDate,
+            notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
+            notificationData: createNotificationDatatDto,
+            createdAt: date_util_1.DateUtil.now().format('YYYY-MM-DD HH:mm'),
+            isSent: true,
+        };
+        const notification = await this.saveNotificationUsecase.execute(createNotificationDto, notiTarget);
+        const totalSubscriptions = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+        await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
+            title: notification.title,
+            body: notification.body,
+        });
     }
 };
 exports.NotificationService = NotificationService;
@@ -8656,9 +8692,9 @@ let UserReservationController = class UserReservationController {
     async create(user, createDto) {
         return this.reservationService.create(user, createDto);
     }
-    async findMyReservationList(user, resourceType, query) {
+    async findMyReservationList(user, resourceType, startDate, endDate, query) {
         const { page, limit } = query;
-        return this.reservationService.findMyReservationList(user.employeeId, page, limit, resourceType);
+        return this.reservationService.findMyReservationList(user.employeeId, page, limit, resourceType, startDate, endDate);
     }
     async findResourceReservationList(user, resourceId, query, month, isMine) {
         const { page, limit } = query;
@@ -8713,13 +8749,17 @@ __decorate([
         type: [reservation_response_dto_1.GroupedReservationResponseDto],
     }),
     (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'startDate', required: false, example: '2025-01 / 2025-01-01' }),
+    (0, swagger_1.ApiQuery)({ name: 'endDate', required: false, example: '2025-12 / 2025-12-31' }),
     (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
     (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)('resourceType')),
-    __param(2, (0, common_1.Query)()),
+    __param(2, (0, common_1.Query)('startDate')),
+    __param(3, (0, common_1.Query)('endDate')),
+    __param(4, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _e : Object, typeof (_f = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _f : Object, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _e : Object, typeof (_f = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _f : Object, String, String, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
     __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], UserReservationController.prototype, "findMyReservationList", null);
 __decorate([
@@ -9728,8 +9768,8 @@ let ReservationService = class ReservationService {
     async create(user, createDto) {
         return this.createReservationUsecase.execute(user, createDto);
     }
-    async findMyReservationList(employeeId, page, limit, resourceType) {
-        return this.findMyReservationListUsecase.execute(employeeId, page, limit, resourceType);
+    async findMyReservationList(employeeId, page, limit, resourceType, startDate, endDate) {
+        return this.findMyReservationListUsecase.execute(employeeId, page, limit, resourceType, startDate, endDate);
     }
     async findResourceReservationList(employeeId, resourceId, page, limit, month, isMine) {
         return this.findResourceReservationListUsecase.execute(employeeId, resourceId, page, limit, month, isMine);
@@ -10414,15 +10454,22 @@ let FindMyReservationListUsecase = class FindMyReservationListUsecase {
     constructor(reservationService) {
         this.reservationService = reservationService;
     }
-    async execute(employeeId, page, limit, resourceType, startDate) {
+    async execute(employeeId, page, limit, resourceType, startDate, endDate) {
         const where = { participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } };
         if (resourceType) {
             where.resource = {
                 type: resourceType,
             };
         }
+        if (startDate && endDate) {
+            where.startDate = (0, typeorm_1.MoreThanOrEqual)(date_util_1.DateUtil.date(startDate).getFirstDayOfMonth().toDate());
+            where.endDate = (0, typeorm_1.LessThanOrEqual)(date_util_1.DateUtil.date(endDate).getLastDayOfMonth().toDate());
+        }
         const options = {
             where,
+            order: {
+                startDate: 'DESC',
+            },
         };
         if (page && limit) {
             options.skip = (page - 1) * limit;
@@ -10449,10 +10496,16 @@ let FindMyReservationListUsecase = class FindMyReservationListUsecase {
             acc[date].push(reservation);
             return acc;
         }, {});
-        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+        const groupedReservationsResponse = Object.entries(groupedReservations)
+            .map(([date, reservations]) => ({
             date,
             reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
-        }));
+        }))
+            .sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateB.getTime() - dateA.getTime();
+        });
         return {
             items: groupedReservationsResponse,
             meta: {
@@ -12831,7 +12884,7 @@ let UserResourceController = class UserResourceController {
         return this.resourceService.findAvailableTime(query);
     }
     async checkAvailability(query) {
-        const isAvailable = await this.resourceService.checkAvailability(query.resourceId, query.startDate, query.endDate);
+        const isAvailable = await this.resourceService.checkAvailability(query.resourceId, query.startDate, query.endDate, query.reservationId);
         return {
             isAvailable,
         };
@@ -13133,6 +13186,12 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CheckAvailabilityQueryDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '예약 ID', required: false }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CheckAvailabilityQueryDto.prototype, "reservationId", void 0);
 class CheckAvailabilityResponseDto {
 }
 exports.CheckAvailabilityResponseDto = CheckAvailabilityResponseDto;
@@ -13994,8 +14053,8 @@ let ResourceService = class ResourceService {
     async findAvailableTime(query) {
         return this.findAvailableTimeUsecase.execute(query);
     }
-    async checkAvailability(resourceId, startDate, endDate) {
-        return this.checkAvailabilityUsecase.execute(resourceId, startDate, endDate);
+    async checkAvailability(resourceId, startDate, endDate, reservationId) {
+        return this.checkAvailabilityUsecase.execute(resourceId, startDate, endDate, reservationId);
     }
     async findResourceDetailForUser(employeeId, resourceId) {
         return this.findResourceDetailUsecase.executeForUser(employeeId, resourceId);
@@ -14414,13 +14473,14 @@ let CheckAvailabilityUsecase = class CheckAvailabilityUsecase {
     constructor(resourceService) {
         this.resourceService = resourceService;
     }
-    async execute(resourceId, startDate, endDate) {
+    async execute(resourceId, startDate, endDate, reservationId) {
         const startDateObj = date_util_1.DateUtil.date(startDate).toDate();
         const endDateObj = date_util_1.DateUtil.date(endDate).toDate();
         const resource = await this.resourceService.findOne({
             where: {
                 resourceId: resourceId,
                 reservations: {
+                    reservationId: reservationId ? (0, typeorm_1.Not)(reservationId) : undefined,
                     status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
                     startDate: (0, typeorm_1.LessThan)(endDateObj),
                     endDate: (0, typeorm_1.MoreThan)(startDateObj),
@@ -14428,6 +14488,7 @@ let CheckAvailabilityUsecase = class CheckAvailabilityUsecase {
             },
             relations: ['reservations'],
         });
+        console.log(resource);
         return !resource;
     }
 };
