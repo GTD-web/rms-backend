@@ -873,7 +873,7 @@ exports.File = File = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
+exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.TesterInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
 const employee_entity_1 = __webpack_require__(/*! ./employee.entity */ "./libs/entities/employee.entity.ts");
 Object.defineProperty(exports, "Employee", ({ enumerable: true, get: function () { return employee_entity_1.Employee; } }));
 const resource_entity_1 = __webpack_require__(/*! ./resource.entity */ "./libs/entities/resource.entity.ts");
@@ -886,6 +886,8 @@ const meeting_room_info_entity_1 = __webpack_require__(/*! ./meeting-room-info.e
 Object.defineProperty(exports, "MeetingRoomInfo", ({ enumerable: true, get: function () { return meeting_room_info_entity_1.MeetingRoomInfo; } }));
 const accommodation_info_entity_1 = __webpack_require__(/*! ./accommodation-info.entity */ "./libs/entities/accommodation-info.entity.ts");
 Object.defineProperty(exports, "AccommodationInfo", ({ enumerable: true, get: function () { return accommodation_info_entity_1.AccommodationInfo; } }));
+const tester_info_entity_1 = __webpack_require__(/*! ./tester-info.entity */ "./libs/entities/tester-info.entity.ts");
+Object.defineProperty(exports, "TesterInfo", ({ enumerable: true, get: function () { return tester_info_entity_1.TesterInfo; } }));
 const reservation_entity_1 = __webpack_require__(/*! ./reservation.entity */ "./libs/entities/reservation.entity.ts");
 Object.defineProperty(exports, "Reservation", ({ enumerable: true, get: function () { return reservation_entity_1.Reservation; } }));
 const reservation_participant_entity_1 = __webpack_require__(/*! ./reservation-participant.entity */ "./libs/entities/reservation-participant.entity.ts");
@@ -918,6 +920,7 @@ exports.Entities = [
     vehicle_info_entity_1.VehicleInfo,
     meeting_room_info_entity_1.MeetingRoomInfo,
     accommodation_info_entity_1.AccommodationInfo,
+    tester_info_entity_1.TesterInfo,
     reservation_entity_1.Reservation,
     reservation_vehicle_entity_1.ReservationVehicle,
     reservation_snapshot_entity_1.ReservationSnapshot,
@@ -940,6 +943,7 @@ exports.EntitiesMap = {
     VehicleInfo: vehicle_info_entity_1.VehicleInfo,
     MeetingRoomInfo: meeting_room_info_entity_1.MeetingRoomInfo,
     AccommodationInfo: accommodation_info_entity_1.AccommodationInfo,
+    TesterInfo: tester_info_entity_1.TesterInfo,
     Reservation: reservation_entity_1.Reservation,
     ReservationVehicle: reservation_vehicle_entity_1.ReservationVehicle,
     ReservationSnapshot: reservation_snapshot_entity_1.ReservationSnapshot,
@@ -1649,7 +1653,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Resource = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
@@ -1660,6 +1664,7 @@ const accommodation_info_entity_1 = __webpack_require__(/*! ./accommodation-info
 const reservation_entity_1 = __webpack_require__(/*! ./reservation.entity */ "./libs/entities/reservation.entity.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const resource_manager_entity_1 = __webpack_require__(/*! ./resource-manager.entity */ "./libs/entities/resource-manager.entity.ts");
+const tester_info_entity_1 = __webpack_require__(/*! ./tester-info.entity */ "./libs/entities/tester-info.entity.ts");
 let Resource = class Resource {
 };
 exports.Resource = Resource;
@@ -1739,6 +1744,10 @@ __decorate([
     __metadata("design:type", typeof (_f = typeof accommodation_info_entity_1.AccommodationInfo !== "undefined" && accommodation_info_entity_1.AccommodationInfo) === "function" ? _f : Object)
 ], Resource.prototype, "accommodationInfo", void 0);
 __decorate([
+    (0, typeorm_1.OneToOne)(() => tester_info_entity_1.TesterInfo, (testerInfo) => testerInfo.resource),
+    __metadata("design:type", typeof (_g = typeof tester_info_entity_1.TesterInfo !== "undefined" && tester_info_entity_1.TesterInfo) === "function" ? _g : Object)
+], Resource.prototype, "testerInfo", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => reservation_entity_1.Reservation, (reservation) => reservation.resource),
     __metadata("design:type", Array)
 ], Resource.prototype, "reservations", void 0);
@@ -1749,6 +1758,50 @@ __decorate([
 exports.Resource = Resource = __decorate([
     (0, typeorm_1.Entity)('resources')
 ], Resource);
+
+
+/***/ }),
+
+/***/ "./libs/entities/tester-info.entity.ts":
+/*!*********************************************!*\
+  !*** ./libs/entities/tester-info.entity.ts ***!
+  \*********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TesterInfo = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const resource_entity_1 = __webpack_require__(/*! ./resource.entity */ "./libs/entities/resource.entity.ts");
+let TesterInfo = class TesterInfo {
+};
+exports.TesterInfo = TesterInfo;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], TesterInfo.prototype, "testerInfoId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], TesterInfo.prototype, "resourceId", void 0);
+__decorate([
+    (0, typeorm_1.OneToOne)(() => resource_entity_1.Resource, (resource) => resource.testerInfo),
+    (0, typeorm_1.JoinColumn)({ name: 'resourceId' }),
+    __metadata("design:type", typeof (_a = typeof resource_entity_1.Resource !== "undefined" && resource_entity_1.Resource) === "function" ? _a : Object)
+], TesterInfo.prototype, "resource", void 0);
+exports.TesterInfo = TesterInfo = __decorate([
+    (0, typeorm_1.Entity)('tester_infos')
+], TesterInfo);
 
 
 /***/ }),
@@ -2059,7 +2112,6 @@ __decorate([
 ], EmployeeReservationStats.prototype, "employeeName", void 0);
 __decorate([
     (0, typeorm_1.ViewColumn)(),
-    (0, typeorm_1.ViewColumn)(),
     __metadata("design:type", Number)
 ], EmployeeReservationStats.prototype, "reservationCount", void 0);
 __decorate([
@@ -2111,7 +2163,7 @@ exports.EmployeeReservationStats = EmployeeReservationStats = __decorate([
     COUNT(DISTINCT CASE WHEN res.type = 'VEHICLE' THEN r."reservationId" END) AS "vehicleCount",
     COUNT(DISTINCT CASE WHEN res.type = 'MEETING_ROOM' THEN r."reservationId" END) AS "meetingRoomCount",
     COUNT(DISTINCT CASE WHEN res.type = 'ACCOMMODATION' THEN r."reservationId" END) AS "accommodationCount",
-    
+
     -- 취소 및 변경 빈도
     COUNT(DISTINCT CASE WHEN r.status = 'CANCELLED' THEN r."reservationId" END) AS "cancellationCount",
     
@@ -2534,6 +2586,7 @@ var ResourceType;
     ResourceType["MEETING_ROOM"] = "MEETING_ROOM";
     ResourceType["VEHICLE"] = "VEHICLE";
     ResourceType["ACCOMMODATION"] = "ACCOMMODATION";
+    ResourceType["TESTER"] = "TESTER";
 })(ResourceType || (exports.ResourceType = ResourceType = {}));
 
 
@@ -7868,6 +7921,9 @@ let CreateReminderNotificationUsecase = class CreateReminderNotificationUsecase 
             case resource_type_enum_1.ResourceType.ACCOMMODATION:
                 parts.push('입실 까지');
                 break;
+            case resource_type_enum_1.ResourceType.TESTER:
+                parts.push('테스트 시작까지');
+                break;
         }
         if (days > 0) {
             parts.push(`${days}일`);
@@ -13022,6 +13078,7 @@ const resource_group_module_1 = __webpack_require__(/*! @src/domain/resource-gro
 const resource_manager_module_1 = __webpack_require__(/*! @src/domain/resource-manager/resource-manager.module */ "./src/domain/resource-manager/resource-manager.module.ts");
 const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
 const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
+const tester_info_module_1 = __webpack_require__(/*! @src/domain/tester-info/tester-info.module */ "./src/domain/tester-info/tester-info.module.ts");
 const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
 const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
 const consumable_module_1 = __webpack_require__(/*! @src/domain/consumable/consumable.module */ "./src/domain/consumable/consumable.module.ts");
@@ -13049,6 +13106,7 @@ exports.ResourceCoreModule = ResourceCoreModule = __decorate([
                 entities_1.Maintenance,
                 entities_1.MeetingRoomInfo,
                 entities_1.AccommodationInfo,
+                entities_1.TesterInfo,
                 entities_1.File,
                 entities_1.Reservation,
             ]),
@@ -13060,6 +13118,7 @@ exports.ResourceCoreModule = ResourceCoreModule = __decorate([
             maintenance_module_1.DomainMaintenanceModule,
             meeting_room_info_module_1.DomainMeetingRoomInfoModule,
             accommodation_info_module_1.DomainAccommodationInfoModule,
+            tester_info_module_1.DomainTesterInfoModule,
             file_module_1.DomainFileModule,
             reservation_module_1.DomainReservationModule,
         ],
@@ -13248,6 +13307,7 @@ const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-
 const create_vehicle_info_dto_1 = __webpack_require__(/*! @src/application/resource/vehicle/dtos/create-vehicle-info.dto */ "./src/application/resource/vehicle/dtos/create-vehicle-info.dto.ts");
 const create_meeting_room_info_dto_1 = __webpack_require__(/*! @src/application/resource/meeting-room/dtos/create-meeting-room-info.dto */ "./src/application/resource/meeting-room/dtos/create-meeting-room-info.dto.ts");
 const create_accommodation_info_dto_1 = __webpack_require__(/*! @src/application/resource/accommodation/dtos/create-accommodation-info.dto */ "./src/application/resource/accommodation/dtos/create-accommodation-info.dto.ts");
+const create_tester_info_dto_1 = __webpack_require__(/*! @src/application/resource/tester/dtos/create-tester-info.dto */ "./src/application/resource/tester/dtos/create-tester-info.dto.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 class CreateResourceGroupDto {
 }
@@ -13387,6 +13447,7 @@ __decorate([
             { $ref: (0, swagger_1.getSchemaPath)(create_vehicle_info_dto_1.CreateVehicleInfoDto) },
             { $ref: (0, swagger_1.getSchemaPath)(create_meeting_room_info_dto_1.CreateMeetingRoomInfoDto) },
             { $ref: (0, swagger_1.getSchemaPath)(create_accommodation_info_dto_1.CreateAccommodationInfoDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(create_tester_info_dto_1.CreateTesterInfoDto) },
         ],
     }),
     __metadata("design:type", Object)
@@ -13555,6 +13616,7 @@ const create_resource_dto_1 = __webpack_require__(/*! ./create-resource.dto */ "
 const reservation_response_dto_1 = __webpack_require__(/*! @src/application/reservation/core/dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
 const employee_response_dto_1 = __webpack_require__(/*! @src/application/employee/dtos/employee-response.dto */ "./src/application/employee/dtos/employee-response.dto.ts");
 const file_response_dto_1 = __webpack_require__(/*! @src/application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
+const tester_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/tester/dtos/tester-info-response.dto */ "./src/application/resource/tester/dtos/tester-info-response.dto.ts");
 class CreateResourceResponseDto {
 }
 exports.CreateResourceResponseDto = CreateResourceResponseDto;
@@ -13643,6 +13705,9 @@ class ResourceResponseDto {
         else if (resource?.accommodationInfo) {
             this.typeInfo = resource.accommodationInfo;
         }
+        else if (resource?.testerInfo) {
+            this.typeInfo = resource.testerInfo;
+        }
     }
 }
 exports.ResourceResponseDto = ResourceResponseDto;
@@ -13709,6 +13774,7 @@ __decorate([
             { $ref: (0, swagger_1.getSchemaPath)(vehicle_response_dto_1.VehicleInfoResponseDto) },
             { $ref: (0, swagger_1.getSchemaPath)(meeting_room_info_response_dto_1.MeetingRoomInfoResponseDto) },
             { $ref: (0, swagger_1.getSchemaPath)(accommodation_info_response_dto_1.AccommodationInfoResponseDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(tester_info_response_dto_1.TesterInfoResponseDto) },
         ],
     }),
     __metadata("design:type", Object)
@@ -14536,7 +14602,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateResourceWithInfosUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -14550,14 +14616,16 @@ const meeting_room_info_service_1 = __webpack_require__(/*! @src/domain/meeting-
 const accommodation_info_service_1 = __webpack_require__(/*! @src/domain/accommodation-info/accommodation-info.service */ "./src/domain/accommodation-info/accommodation-info.service.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const tester_info_service_1 = __webpack_require__(/*! @src/domain/tester-info/tester-info.service */ "./src/domain/tester-info/tester-info.service.ts");
 let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
-    constructor(resourceService, resourceGroupService, resourceManagerService, vehicleInfoService, meetingRoomInfoService, accommodationInfoService, fileService, dataSource) {
+    constructor(resourceService, resourceGroupService, resourceManagerService, vehicleInfoService, meetingRoomInfoService, accommodationInfoService, testerInfoService, fileService, dataSource) {
         this.resourceService = resourceService;
         this.resourceGroupService = resourceGroupService;
         this.resourceManagerService = resourceManagerService;
         this.vehicleInfoService = vehicleInfoService;
         this.meetingRoomInfoService = meetingRoomInfoService;
         this.accommodationInfoService = accommodationInfoService;
+        this.testerInfoService = testerInfoService;
         this.fileService = fileService;
         this.dataSource = dataSource;
     }
@@ -14599,6 +14667,9 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
                 case resource_type_enum_1.ResourceType.ACCOMMODATION:
                     await this.accommodationInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
                     break;
+                case resource_type_enum_1.ResourceType.TESTER:
+                    await this.testerInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
+                    break;
             }
             await Promise.all([
                 ...managers.map((manager) => {
@@ -14611,14 +14682,15 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
             await queryRunner.commitTransaction();
             const resourceWithTypeInfo = await this.resourceService.findOne({
                 where: { resourceId: savedResource.resourceId },
-                relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo'],
+                relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo', 'testerInfo'],
             });
             return {
                 resourceId: resourceWithTypeInfo.resourceId,
                 type: resourceWithTypeInfo.type,
                 typeInfoId: resourceWithTypeInfo.vehicleInfo?.vehicleInfoId ||
                     resourceWithTypeInfo.meetingRoomInfo?.meetingRoomInfoId ||
-                    resourceWithTypeInfo.accommodationInfo?.accommodationInfoId,
+                    resourceWithTypeInfo.accommodationInfo?.accommodationInfoId ||
+                    resourceWithTypeInfo.testerInfo?.testerInfoId,
             };
         }
         catch (err) {
@@ -14634,7 +14706,7 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
 exports.CreateResourceWithInfosUsecase = CreateResourceWithInfosUsecase;
 exports.CreateResourceWithInfosUsecase = CreateResourceWithInfosUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _g : Object, typeof (_h = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _h : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof tester_info_service_1.DomainTesterInfoService !== "undefined" && tester_info_service_1.DomainTesterInfoService) === "function" ? _g : Object, typeof (_h = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _h : Object, typeof (_j = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _j : Object])
 ], CreateResourceWithInfosUsecase);
 
 
@@ -15159,6 +15231,9 @@ let FindResourcesUsecase = class FindResourcesUsecase {
         else if (type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
             relations = ['accommodationInfo'];
         }
+        else if (type === resource_type_enum_1.ResourceType.TESTER) {
+            relations = ['testerInfo'];
+        }
         const resources = await this.resourceService.findAll({
             where: {
                 type: type,
@@ -15557,6 +15632,72 @@ exports.UpdateMeetingRoomInfoDto = void 0;
 class UpdateMeetingRoomInfoDto {
 }
 exports.UpdateMeetingRoomInfoDto = UpdateMeetingRoomInfoDto;
+
+
+/***/ }),
+
+/***/ "./src/application/resource/tester/dtos/create-tester-info.dto.ts":
+/*!************************************************************************!*\
+  !*** ./src/application/resource/tester/dtos/create-tester-info.dto.ts ***!
+  \************************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateTesterInfoDto = void 0;
+class CreateTesterInfoDto {
+}
+exports.CreateTesterInfoDto = CreateTesterInfoDto;
+
+
+/***/ }),
+
+/***/ "./src/application/resource/tester/dtos/tester-info-response.dto.ts":
+/*!**************************************************************************!*\
+  !*** ./src/application/resource/tester/dtos/tester-info-response.dto.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TesterInfoResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class TesterInfoResponseDto {
+}
+exports.TesterInfoResponseDto = TesterInfoResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], TesterInfoResponseDto.prototype, "testerInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], TesterInfoResponseDto.prototype, "resourceId", void 0);
+
+
+/***/ }),
+
+/***/ "./src/application/resource/tester/dtos/update-tester-info.dto.ts":
+/*!************************************************************************!*\
+  !*** ./src/application/resource/tester/dtos/update-tester-info.dto.ts ***!
+  \************************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateTesterInfoDto = void 0;
+class UpdateTesterInfoDto {
+}
+exports.UpdateTesterInfoDto = UpdateTesterInfoDto;
 
 
 /***/ }),
@@ -21003,6 +21144,119 @@ exports.DomainResourceService = DomainResourceService = __decorate([
 
 /***/ }),
 
+/***/ "./src/domain/tester-info/tester-info.module.ts":
+/*!******************************************************!*\
+  !*** ./src/domain/tester-info/tester-info.module.ts ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainTesterInfoModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const tester_info_service_1 = __webpack_require__(/*! ./tester-info.service */ "./src/domain/tester-info/tester-info.service.ts");
+const tester_info_repository_1 = __webpack_require__(/*! ./tester-info.repository */ "./src/domain/tester-info/tester-info.repository.ts");
+const tester_info_entity_1 = __webpack_require__(/*! @libs/entities/tester-info.entity */ "./libs/entities/tester-info.entity.ts");
+let DomainTesterInfoModule = class DomainTesterInfoModule {
+};
+exports.DomainTesterInfoModule = DomainTesterInfoModule;
+exports.DomainTesterInfoModule = DomainTesterInfoModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([tester_info_entity_1.TesterInfo])],
+        providers: [tester_info_service_1.DomainTesterInfoService, tester_info_repository_1.DomainTesterInfoRepository],
+        exports: [tester_info_service_1.DomainTesterInfoService],
+    })
+], DomainTesterInfoModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/tester-info/tester-info.repository.ts":
+/*!**********************************************************!*\
+  !*** ./src/domain/tester-info/tester-info.repository.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainTesterInfoRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const tester_info_entity_1 = __webpack_require__(/*! @libs/entities/tester-info.entity */ "./libs/entities/tester-info.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainTesterInfoRepository = class DomainTesterInfoRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainTesterInfoRepository = DomainTesterInfoRepository;
+exports.DomainTesterInfoRepository = DomainTesterInfoRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(tester_info_entity_1.TesterInfo)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainTesterInfoRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/tester-info/tester-info.service.ts":
+/*!*******************************************************!*\
+  !*** ./src/domain/tester-info/tester-info.service.ts ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainTesterInfoService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const tester_info_repository_1 = __webpack_require__(/*! ./tester-info.repository */ "./src/domain/tester-info/tester-info.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainTesterInfoService = class DomainTesterInfoService extends base_service_1.BaseService {
+    constructor(testerInfoRepository) {
+        super(testerInfoRepository);
+        this.testerInfoRepository = testerInfoRepository;
+    }
+};
+exports.DomainTesterInfoService = DomainTesterInfoService;
+exports.DomainTesterInfoService = DomainTesterInfoService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof tester_info_repository_1.DomainTesterInfoRepository !== "undefined" && tester_info_repository_1.DomainTesterInfoRepository) === "function" ? _a : Object])
+], DomainTesterInfoService);
+
+
+/***/ }),
+
 /***/ "./src/domain/vehicle-info/vehicle-info.module.ts":
 /*!********************************************************!*\
   !*** ./src/domain/vehicle-info/vehicle-info.module.ts ***!
@@ -21142,8 +21396,8 @@ exports.DomainVehicleInfoService = DomainVehicleInfoService = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.CreateResourceResponseDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UpdateNotificationSettingsDto = exports.CheckPasswordDto = exports.ChangePasswordDto = exports.ChangeRoleDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.PushNotificationPayload = exports.PushNotificationDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = void 0;
+exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.TesterInfoResponseDto = exports.UpdateTesterInfoDto = exports.CreateTesterInfoDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.CreateResourceResponseDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UpdateNotificationSettingsDto = exports.CheckPasswordDto = exports.ChangePasswordDto = exports.ChangeRoleDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
+exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.PushNotificationPayload = exports.PushNotificationDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./application/auth/dto/login.dto */ "./src/application/auth/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./application/auth/dto/login-response.dto */ "./src/application/auth/dto/login-response.dto.ts");
@@ -21205,6 +21459,12 @@ var update_accommodation_info_dto_1 = __webpack_require__(/*! ./application/reso
 Object.defineProperty(exports, "UpdateAccommodationInfoDto", ({ enumerable: true, get: function () { return update_accommodation_info_dto_1.UpdateAccommodationInfoDto; } }));
 var accommodation_info_response_dto_1 = __webpack_require__(/*! ./application/resource/accommodation/dtos/accommodation-info-response.dto */ "./src/application/resource/accommodation/dtos/accommodation-info-response.dto.ts");
 Object.defineProperty(exports, "AccommodationInfoResponseDto", ({ enumerable: true, get: function () { return accommodation_info_response_dto_1.AccommodationInfoResponseDto; } }));
+var create_tester_info_dto_1 = __webpack_require__(/*! ./application/resource/tester/dtos/create-tester-info.dto */ "./src/application/resource/tester/dtos/create-tester-info.dto.ts");
+Object.defineProperty(exports, "CreateTesterInfoDto", ({ enumerable: true, get: function () { return create_tester_info_dto_1.CreateTesterInfoDto; } }));
+var update_tester_info_dto_1 = __webpack_require__(/*! ./application/resource/tester/dtos/update-tester-info.dto */ "./src/application/resource/tester/dtos/update-tester-info.dto.ts");
+Object.defineProperty(exports, "UpdateTesterInfoDto", ({ enumerable: true, get: function () { return update_tester_info_dto_1.UpdateTesterInfoDto; } }));
+var tester_info_response_dto_1 = __webpack_require__(/*! ./application/resource/tester/dtos/tester-info-response.dto */ "./src/application/resource/tester/dtos/tester-info-response.dto.ts");
+Object.defineProperty(exports, "TesterInfoResponseDto", ({ enumerable: true, get: function () { return tester_info_response_dto_1.TesterInfoResponseDto; } }));
 var create_employee_dto_1 = __webpack_require__(/*! ./application/employee/dtos/create-employee.dto */ "./src/application/employee/dtos/create-employee.dto.ts");
 Object.defineProperty(exports, "CreateEmployeeDto", ({ enumerable: true, get: function () { return create_employee_dto_1.CreateEmployeeDto; } }));
 var update_employee_dto_1 = __webpack_require__(/*! ./application/employee/dtos/update-employee.dto */ "./src/application/employee/dtos/update-employee.dto.ts");

@@ -5,6 +5,7 @@ import { Type } from 'class-transformer';
 import { CreateVehicleInfoDto } from '@src/application/resource/vehicle/dtos/create-vehicle-info.dto';
 import { CreateMeetingRoomInfoDto } from '@src/application/resource/meeting-room/dtos/create-meeting-room-info.dto';
 import { CreateAccommodationInfoDto } from '@src/application/resource/accommodation/dtos/create-accommodation-info.dto';
+import { CreateTesterInfoDto } from '@src/application/resource/tester/dtos/create-tester-info.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 export class CreateResourceGroupDto {
@@ -117,9 +118,10 @@ export class CreateResourceInfoDto {
             { $ref: getSchemaPath(CreateVehicleInfoDto) },
             { $ref: getSchemaPath(CreateMeetingRoomInfoDto) },
             { $ref: getSchemaPath(CreateAccommodationInfoDto) },
+            { $ref: getSchemaPath(CreateTesterInfoDto) },
         ],
     })
-    typeInfo: CreateVehicleInfoDto | CreateMeetingRoomInfoDto | CreateAccommodationInfoDto;
+    typeInfo: CreateVehicleInfoDto | CreateMeetingRoomInfoDto | CreateAccommodationInfoDto | CreateTesterInfoDto;
 
     @ApiProperty({ type: [CreateResourceManagerDto] })
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('관리자') })

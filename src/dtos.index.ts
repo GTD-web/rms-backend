@@ -64,6 +64,11 @@ export { CreateAccommodationInfoDto } from './application/resource/accommodation
 export { UpdateAccommodationInfoDto } from './application/resource/accommodation/dtos/update-accommodation-info.dto';
 export { AccommodationInfoResponseDto } from './application/resource/accommodation/dtos/accommodation-info-response.dto';
 
+// Tester
+export { CreateTesterInfoDto } from './application/resource/tester/dtos/create-tester-info.dto';
+export { UpdateTesterInfoDto } from './application/resource/tester/dtos/update-tester-info.dto';
+export { TesterInfoResponseDto } from './application/resource/tester/dtos/tester-info-response.dto';
+
 // Employee
 export { CreateEmployeeDto } from './application/employee/dtos/create-employee.dto';
 export { UpdateEmployeeDto } from './application/employee/dtos/update-employee.dto';
