@@ -1,16 +1,5 @@
-import {
-    Entity,
-    PrimaryColumn,
-    Column,
-    ManyToOne,
-    JoinColumn,
-    OneToMany,
-    UpdateDateColumn,
-    CreateDateColumn,
-} from 'typeorm';
-import { User } from './user.entity';
-import { ReservationParticipant } from './reservation-participant.entity';
-import { Resource } from './resource.entity';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+import { Employee } from './employee.entity';
 
 @Entity('reservation_snapshots')
 export class ReservationSnapshot {
@@ -20,7 +9,7 @@ export class ReservationSnapshot {
     snapshotId: string;
 
     @Column()
-    userId: string;
+    employeeId: string;
 
     @Column({ nullable: true })
     step: 'groups' | 'date-time' | 'resources' | 'info';
@@ -106,7 +95,7 @@ export class ReservationSnapshot {
     @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
 
-    @ManyToOne(() => User)
-    @JoinColumn({ name: 'userId' })
-    user?: User;
+    @ManyToOne(() => Employee)
+    @JoinColumn({ name: 'employeeId' })
+    employee?: Employee;
 }

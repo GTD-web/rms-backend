@@ -3,15 +3,15 @@ import { Resource } from './resource.entity';
 
 @Entity('accommodation_infos')
 export class AccommodationInfo {
-  @PrimaryColumn('uuid', {
-    generated: 'uuid',
-  })
-  accommodationInfoId: string;
+    @PrimaryColumn('uuid', {
+        generated: 'uuid',
+    })
+    accommodationInfoId: string;
 
-  @Column()
-  resourceId: string;
+    @Column()
+    resourceId: string;
 
-  @OneToOne(() => Resource, resource => resource.accommodationInfo)
-  @JoinColumn({ name: 'resourceId' })
-  resource: Resource;
-} 
+    @OneToOne(() => Resource, (resource) => resource.accommodationInfo)
+    @JoinColumn({ name: 'resourceId' })
+    resource: Resource;
+}

@@ -17,7 +17,7 @@ export default registerAs('database', () => {
 
 export const JWT_CONFIG = registerAs('jwt', () => {
     return {
-        secret: process.env.JWT_SECRET,
+        secret: process.env.GLOBAL_SECRET,
         expiresIn: process.env.JWT_EXPIRES_IN,
     };
 });

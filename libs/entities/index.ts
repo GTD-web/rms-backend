@@ -1,5 +1,4 @@
 import { Employee } from './employee.entity';
-import { User } from './user.entity';
 import { Resource } from './resource.entity';
 import { ResourceGroup } from './resource-group.entity';
 import { VehicleInfo } from './vehicle-info.entity';
@@ -7,7 +6,6 @@ import { MeetingRoomInfo } from './meeting-room-info.entity';
 import { AccommodationInfo } from './accommodation-info.entity';
 import { Reservation } from './reservation.entity';
 import { ReservationParticipant } from './reservation-participant.entity';
-import { Schedule } from './schedule.entity';
 import { ResourceManager } from './resource-manager.entity';
 import { Consumable } from './consumable.entity';
 import { Maintenance } from './maintenance.entity';
@@ -28,7 +26,6 @@ import { ConsumableItem } from './consumable-item.entity';
 
 export const Entities = [
     Employee,
-    User,
     Resource,
     ResourceGroup,
     VehicleInfo,
@@ -38,7 +35,6 @@ export const Entities = [
     ReservationVehicle,
     ReservationSnapshot,
     ReservationParticipant,
-    Schedule,
     ResourceManager,
     Consumable,
     Maintenance,
@@ -56,7 +52,6 @@ export const Entities = [
 
 export const EntitiesMap = {
     Employee,
-    User,
     Resource,
     ResourceGroup,
     VehicleInfo,
@@ -66,7 +61,6 @@ export const EntitiesMap = {
     ReservationVehicle,
     ReservationSnapshot,
     ReservationParticipant,
-    Schedule,
     ResourceManager,
     Consumable,
     Maintenance,
@@ -84,7 +78,6 @@ export const EntitiesMap = {
 
 export {
     Employee,
-    User,
     Resource,
     ResourceGroup,
     VehicleInfo,
@@ -94,7 +87,6 @@ export {
     ReservationVehicle,
     ReservationSnapshot,
     ReservationParticipant,
-    Schedule,
     ResourceManager,
     Consumable,
     Maintenance,
