@@ -35,6 +35,9 @@ export class CronSendUpcomingNotificationUsecase {
                 const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
                 totalSubscriptions.push(...subscriptions);
             }
+            if (totalSubscriptions.length === 0) {
+                continue;
+            }
             try {
                 await this.FCMAdapter.sendBulkNotification(totalSubscriptions, {
                     title: notification.title,
