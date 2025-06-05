@@ -13929,7 +13929,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: 'object' }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", typeof (_b = typeof create_resource_dto_1.ResourceLocationURL !== "undefined" && create_resource_dto_1.ResourceLocationURL) === "function" ? _b : Object)
-], UpdateResourceDto.prototype, "locationUrls", void 0);
+], UpdateResourceDto.prototype, "locationURLs", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
     (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),

@@ -52,7 +52,7 @@ export class UpdateResourceDto {
 
     @ApiProperty({ required: false, type: 'object' })
     @IsOptional()
-    locationUrls?: ResourceLocationURL;
+    locationURLs?: ResourceLocationURL;
 
     @ApiProperty({ required: false, type: [String] })
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') })
