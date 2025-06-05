@@ -12,7 +12,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { CreateResourceManagerDto, ResourceLocation } from './create-resource.dto';
+import { CreateResourceManagerDto, ResourceLocation, ResourceLocationURL } from './create-resource.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 export class UpdateResourceGroupDto {
@@ -49,6 +49,10 @@ export class UpdateResourceDto {
     @ApiProperty({ required: false, type: 'object' })
     @IsOptional()
     location?: ResourceLocation;
+
+    @ApiProperty({ required: false, type: 'object' })
+    @IsOptional()
+    locationUrls?: ResourceLocationURL;
 
     @ApiProperty({ required: false, type: [String] })
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') })

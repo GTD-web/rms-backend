@@ -13372,13 +13372,13 @@ __decorate([
     __metadata("design:type", String)
 ], ResourceLocationURL.prototype, "tmap", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('Navermap URL') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], ResourceLocationURL.prototype, "navermap", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('Kakaomap URL') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -13879,7 +13879,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateResourceGroupOrdersDto = exports.NewOrderResourceGroupDto = exports.UpdateResourceOrdersDto = exports.NewOrderResourceDto = exports.UpdateResourceInfoDto = exports.UpdateResourceDto = exports.UpdateResourceGroupDto = void 0;
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
@@ -13925,6 +13925,11 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", typeof (_a = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _a : Object)
 ], UpdateResourceDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: 'object' }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof create_resource_dto_1.ResourceLocationURL !== "undefined" && create_resource_dto_1.ResourceLocationURL) === "function" ? _b : Object)
+], UpdateResourceDto.prototype, "locationUrls", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
     (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
