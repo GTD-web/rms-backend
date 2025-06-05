@@ -54,12 +54,12 @@ export class ResourceLocationURL {
     @IsOptional()
     tmap?: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('Navermap URL') })
     @IsOptional()
     navermap?: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false })
     @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('Kakaomap URL') })
     @IsOptional()
     kakaomap?: string;
