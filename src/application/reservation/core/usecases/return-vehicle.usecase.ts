@@ -106,7 +106,7 @@ export class ReturnVehicleUsecase {
             );
 
             const notiTarget = [user.employeeId];
-            this.notificationService.createNotification(
+            await this.notificationService.createNotification(
                 NotificationType.RESOURCE_VEHICLE_RETURNED,
                 {
                     resourceId: reservation.resource.resourceId,

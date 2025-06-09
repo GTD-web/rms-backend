@@ -122,7 +122,7 @@ export class UpdateReservationUsecase {
                 try {
                     const notiTarget = [...newParticipants, ...participants.map((p) => p.employeeId)];
 
-                    this.notificationService.createNotification(
+                    await this.notificationService.createNotification(
                         NotificationType.RESERVATION_PARTICIPANT_CHANGED,
                         {
                             reservationId: updatedReservation.reservationId,
@@ -187,7 +187,7 @@ export class UpdateReservationUsecase {
                     );
 
                     for (const beforeMinutes of updatedReservation.notifyMinutesBeforeStart) {
-                        this.notificationService.createNotification(
+                        await this.notificationService.createNotification(
                             NotificationType.RESERVATION_DATE_UPCOMING,
                             {
                                 reservationId: updatedReservation.reservationId,
