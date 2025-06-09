@@ -7421,6 +7421,7 @@ const messaging_1 = __webpack_require__(/*! firebase-admin/messaging */ "firebas
 let FCMAdapter = class FCMAdapter {
     constructor(configService) {
         this.configService = configService;
+        this.isProduction = process.env.NODE_ENV === 'production';
         try {
             (0, app_1.initializeApp)({
                 credential: (0, app_1.cert)({
@@ -7490,7 +7491,7 @@ let FCMAdapter = class FCMAdapter {
                 .sendEachForMulticast({
                 tokens: tokens,
                 data: {
-                    title: payload.title,
+                    title: this.isProduction ? payload.title : '[개발]' + payload.title,
                     body: payload.body,
                 },
                 android: {
@@ -8538,6 +8539,7 @@ const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee
 let SubscribeUsecase = class SubscribeUsecase {
     constructor(employeeService) {
         this.employeeService = employeeService;
+        this.isProduction = process.env.NODE_ENV === 'production';
     }
     async execute(employeeId, subscription) {
         try {
@@ -8545,7 +8547,20 @@ let SubscribeUsecase = class SubscribeUsecase {
             if (!employee) {
                 throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.EMPLOYEE.NOT_FOUND);
             }
-            employee.subscriptions = [subscription];
+            if (!this.isProduction &&
+                employee.subscriptions &&
+                Array.isArray(employee.subscriptions) &&
+                employee.subscriptions.length > 0) {
+                if (employee.subscriptions.length < 2) {
+                    employee.subscriptions.push(subscription);
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                employee.subscriptions = [subscription];
+            }
             await this.employeeService.update(employee.employeeId, employee);
             return true;
         }
