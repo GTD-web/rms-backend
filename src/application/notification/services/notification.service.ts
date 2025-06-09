@@ -115,7 +115,7 @@ export class NotificationService {
             // case NotificationType.RESERVATION_TIME_CHANGED:
             //     this.deleteScheduleJobUsecase.execute(createNotificationDatatDto);
             default:
-                this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
+                await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
                     title: notification.title,
                     body: notification.body,
                 });

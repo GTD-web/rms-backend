@@ -7765,7 +7765,7 @@ let NotificationService = class NotificationService {
             case notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING:
                 break;
             default:
-                this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
+                await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
                     title: notification.title,
                     body: notification.body,
                 });
@@ -11241,7 +11241,7 @@ let ReturnVehicleUsecase = class ReturnVehicleUsecase {
                 indoorImages: returnDto.indoorImages,
             }, { queryRunner });
             const notiTarget = [user.employeeId];
-            this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED, {
+            await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED, {
                 resourceId: reservation.resource.resourceId,
                 resourceName: reservation.resource.name,
                 resourceType: reservation.resource.type,
@@ -11490,7 +11490,7 @@ let UpdateReservationUsecase = class UpdateReservationUsecase {
             if (updatedReservation.resource.notifyParticipantChange) {
                 try {
                     const notiTarget = [...newParticipants, ...participants.map((p) => p.employeeId)];
-                    this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED, {
+                    await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED, {
                         reservationId: updatedReservation.reservationId,
                         reservationTitle: updatedReservation.title,
                         reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
@@ -11531,7 +11531,7 @@ let UpdateReservationUsecase = class UpdateReservationUsecase {
                         resourceType: updatedReservation.resource.type,
                     }, notiTarget);
                     for (const beforeMinutes of updatedReservation.notifyMinutesBeforeStart) {
-                        this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+                        await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
                             reservationId: updatedReservation.reservationId,
                             reservationTitle: updatedReservation.title,
                             resourceId: updatedReservation.resource.resourceId,
