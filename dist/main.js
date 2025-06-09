@@ -6279,7 +6279,17 @@ let SyncEmployeeUsecase = class SyncEmployeeUsecase {
                     await this.employeeService.save(existingEmployee);
                 }
                 else {
-                    await this.employeeService.save(await this.employeeService.create(employee));
+                    console.log('create employee', employee);
+                    const employeeData = {
+                        employeeNumber: employee.employee_number,
+                        name: employee.name,
+                        email: employee.email,
+                        department: employee.department,
+                        position: employee.rank,
+                        mobile: employee.phone_number,
+                    };
+                    const newEmployee = await this.employeeService.create(employeeData);
+                    await this.employeeService.save(newEmployee);
                 }
             }
             catch (error) {
