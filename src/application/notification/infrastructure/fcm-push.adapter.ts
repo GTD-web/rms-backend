@@ -30,6 +30,8 @@ export class FCMAdapter {
         });
     }
 
+    isProduction = process.env.NODE_ENV === 'production';
+
     async sendNotification(
         subscription: PushSubscriptionDto,
         payload: PushNotificationPayload,
@@ -88,7 +90,7 @@ export class FCMAdapter {
                 .sendEachForMulticast({
                     tokens: tokens,
                     data: {
-                        title: payload.title,
+                        title: this.isProduction ? payload.title : '[개발]' + payload.title,
                         body: payload.body,
                     },
                     android: {
