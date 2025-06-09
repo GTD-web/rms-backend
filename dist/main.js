@@ -4963,19 +4963,19 @@ let EmployeeWebhookController = class EmployeeWebhookController {
     }
     async webhookCreate(body) {
         console.log('created employee', body);
-        await this.employeeService.syncEmployees(body.payload.employee_number);
+        await this.employeeService.syncEmployees(body.employee_number);
     }
     async webhookUpdate(body) {
         console.log('updated employee', body);
-        await this.employeeService.syncEmployees(body.payload.employee_number);
+        await this.employeeService.syncEmployees(body.employee_number);
     }
     async webhookPositionChanged(body) {
         console.log('position changed', body);
-        await this.employeeService.syncEmployees(body.payload.employee_number);
+        await this.employeeService.syncEmployees(body.employee_number);
     }
     async webhookDepartmentChanged(body) {
         console.log('department changed', body);
-        await this.employeeService.syncEmployees(body.payload.employee_number);
+        await this.employeeService.syncEmployees(body.employee_number);
     }
     async webhookDelete(body) {
         console.log('deleted employee', body);
@@ -4996,7 +4996,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _b : Object]),
     __metadata("design:returntype", Promise)
 ], EmployeeWebhookController.prototype, "webhookCreate", null);
 __decorate([
@@ -5006,7 +5006,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _c : Object]),
+    __metadata("design:paramtypes", [typeof (_c = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _c : Object]),
     __metadata("design:returntype", Promise)
 ], EmployeeWebhookController.prototype, "webhookUpdate", null);
 __decorate([
@@ -5016,7 +5016,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _d : Object]),
+    __metadata("design:paramtypes", [typeof (_d = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], EmployeeWebhookController.prototype, "webhookPositionChanged", null);
 __decorate([
@@ -5026,7 +5026,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _e : Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _e : Object]),
     __metadata("design:returntype", Promise)
 ], EmployeeWebhookController.prototype, "webhookDepartmentChanged", null);
 __decorate([
@@ -5036,7 +5036,7 @@ __decorate([
     (0, throttler_decorator_1.Throttle)(5, 60),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof mms_employee_response_dto_1.MMSWebhookRequestDto !== "undefined" && mms_employee_response_dto_1.MMSWebhookRequestDto) === "function" ? _f : Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], EmployeeWebhookController.prototype, "webhookDelete", null);
 exports.EmployeeWebhookController = EmployeeWebhookController = __decorate([
