@@ -6255,7 +6255,11 @@ let SyncEmployeeUsecase = class SyncEmployeeUsecase {
     }
     async execute(employees) {
         for (const employee of employees) {
-            const existingEmployee = await this.employeeService.findByEmployeeNumber(employee.employee_number);
+            const existingEmployee = await this.employeeService.findOne({
+                where: {
+                    employeeNumber: employee.employee_number,
+                },
+            });
             if (employee.status === '퇴사') {
                 if (existingEmployee) {
                     await this.employeeService.update(existingEmployee.employeeId, {
