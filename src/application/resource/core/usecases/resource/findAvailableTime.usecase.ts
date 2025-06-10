@@ -164,7 +164,7 @@ export class FindAvailableTimeUsecase {
         const confirmedReservations = existingReservations;
 
         if (isSameDay) {
-            const now = DateUtil.date('2025-06-10 08:32:02');
+            const now = DateUtil.now();
             const dateStr = startDate;
             const currentMinute = now.toDate().getMinutes();
             const roundedHour = now.format(
