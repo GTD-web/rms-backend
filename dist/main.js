@@ -17492,7 +17492,7 @@ let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
                 relations: ['vehicleInfo', 'vehicleInfo.resource'],
                 withDeleted: true,
             });
-            this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED, {
+            await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED, {
                 resourceId: consumable.vehicleInfo.resource.resourceId,
                 resourceType: consumable.vehicleInfo.resource.type,
                 consumableName: consumable.name,
