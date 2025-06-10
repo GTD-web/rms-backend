@@ -71,7 +71,7 @@ export class SaveMaintenanceUsecase {
                 relations: ['vehicleInfo', 'vehicleInfo.resource'],
                 withDeleted: true,
             });
-            this.notificationService.createNotification(
+            await this.notificationService.createNotification(
                 NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
                 {
                     resourceId: consumable.vehicleInfo.resource.resourceId,
