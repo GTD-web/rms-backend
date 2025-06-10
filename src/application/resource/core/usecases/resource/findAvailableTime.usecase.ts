@@ -164,11 +164,11 @@ export class FindAvailableTimeUsecase {
         const confirmedReservations = existingReservations;
 
         if (isSameDay) {
-            const now = DateUtil.now();
+            const now = DateUtil.date('2025-06-10 08:32:02');
             const dateStr = startDate;
             const currentMinute = now.toDate().getMinutes();
             const roundedHour = now.format(
-                `${now.format('HH') < '09' ? '09' : now.format('HH')}:${currentMinute < 30 ? '00' : '30'}:00`,
+                `${now.format('HH') < '09' ? '09' : now.format('HH')}:${now.format('HH') < '09' || currentMinute < 30 ? '00' : '30'}:00`,
             );
             const isToday = startDate === now.format('YYYY-MM-DD');
             const isAllDay = (am && pm) || (!am && !pm);
