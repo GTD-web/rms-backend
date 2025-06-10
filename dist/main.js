@@ -14958,7 +14958,7 @@ let FindAvailableTimeUsecase = class FindAvailableTimeUsecase {
         const existingReservations = resource.reservations || [];
         const confirmedReservations = existingReservations;
         if (isSameDay) {
-            const now = date_util_1.DateUtil.date('2025-06-10 08:32:02');
+            const now = date_util_1.DateUtil.now();
             const dateStr = startDate;
             const currentMinute = now.toDate().getMinutes();
             const roundedHour = now.format(`${now.format('HH') < '09' ? '09' : now.format('HH')}:${now.format('HH') < '09' || currentMinute < 30 ? '00' : '30'}:00`);
