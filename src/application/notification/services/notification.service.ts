@@ -118,6 +118,8 @@ export class NotificationService {
                 await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
                     title: notification.title,
                     body: notification.body,
+                    notificationType: notification.notificationType,
+                    notificationData: notification.notificationData,
                 });
                 break;
         }
@@ -130,6 +132,10 @@ export class NotificationService {
     ): Promise<void> {
         const createNotificationDto = await this.createReminderNotificationUsecase.execute(createNotificationDatatDto);
 
+        if (!createNotificationDto) {
+            return;
+        }
+
         const notification = await this.saveNotificationUsecase.execute(createNotificationDto, notiTarget);
 
         const totalSubscriptions: PushSubscriptionDto[] = [];
@@ -141,6 +147,8 @@ export class NotificationService {
         await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
             title: notification.title,
             body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
         });
     }
 }

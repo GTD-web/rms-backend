@@ -6,10 +6,17 @@ import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { DateUtil } from '@libs/utils/date.util';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { Raw } from 'typeorm';
+import { DomainEmployeeNotificationService } from '@src/domain/employee-notification/employee-notification.service';
+import { DomainNotificationService } from '@src/domain/notification/notification.service';
 
 @Injectable()
 export class FindReservationDetailUsecase {
-    constructor(private readonly reservationService: DomainReservationService) {}
+    constructor(
+        private readonly reservationService: DomainReservationService,
+        private readonly notificationService: DomainNotificationService,
+        private readonly employeeNotificationService: DomainEmployeeNotificationService,
+    ) {}
 
     async execute(user: Employee, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
         const reservation = await this.reservationService.findOne({
@@ -25,7 +32,7 @@ export class FindReservationDetailUsecase {
             ],
             withDeleted: true,
         });
-        console.log(reservation);
+
         if (!reservation) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
@@ -48,6 +55,31 @@ export class FindReservationDetailUsecase {
             [ReservationStatus.PENDING, ReservationStatus.CONFIRMED].includes(reservation.status) &&
             reservationResponseDto.isMine &&
             reservationResponseDto.endDate > DateUtil.now().format();
+
+        const notifications = await this.notificationService.findAll({
+            where: {
+                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`),
+                employees: {
+                    employeeId: user.employeeId,
+                    isRead: false,
+                },
+            },
+            relations: ['employees'],
+        });
+
+        if (notifications.length > 0) {
+            const employeeNotifications = notifications
+                .map((notification) => notification.employees.map((employee) => employee.employeeNotificationId).flat())
+                .flat();
+            console.log(employeeNotifications);
+            await Promise.all(
+                employeeNotifications.map((employeeNotificationId) =>
+                    this.employeeNotificationService.update(employeeNotificationId, {
+                        isRead: true,
+                    }),
+                ),
+            );
+        }
 
         return reservationResponseDto;
     }

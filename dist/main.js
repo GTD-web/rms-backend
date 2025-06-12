@@ -7378,11 +7378,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PushNotificationDto = exports.PushNotificationPayload = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const push_subscription_dto_1 = __webpack_require__(/*! ./push-subscription.dto */ "./src/application/notification/dtos/push-subscription.dto.ts");
+const notification_entity_1 = __webpack_require__(/*! @libs/entities/notification.entity */ "./libs/entities/notification.entity.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 class PushNotificationPayload {
 }
 exports.PushNotificationPayload = PushNotificationPayload;
@@ -7394,6 +7396,14 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], PushNotificationPayload.prototype, "body", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_a = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _a : Object)
+], PushNotificationPayload.prototype, "notificationType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_b = typeof notification_entity_1.NotificationData !== "undefined" && notification_entity_1.NotificationData) === "function" ? _b : Object)
+], PushNotificationPayload.prototype, "notificationData", void 0);
 class PushNotificationDto {
 }
 exports.PushNotificationDto = PushNotificationDto;
@@ -7403,7 +7413,7 @@ __decorate([
 ], PushNotificationDto.prototype, "payload", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: push_subscription_dto_1.PushSubscriptionDto }),
-    __metadata("design:type", typeof (_a = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_c = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _c : Object)
 ], PushNotificationDto.prototype, "subscription", void 0);
 
 
@@ -7501,12 +7511,15 @@ let FCMAdapter = class FCMAdapter {
         try {
             const tokens = subscriptions.map((subscription) => subscription.fcm.token);
             console.log('알림 전송 - tokens', tokens);
+            console.log('알림 전송 - payload', payload);
             const response = await (0, messaging_1.getMessaging)()
                 .sendEachForMulticast({
                 tokens: tokens,
                 data: {
                     title: this.isProduction ? payload.title : '[개발]' + payload.title,
                     body: payload.body,
+                    notificationData: JSON.stringify(payload.notificationData),
+                    notificationType: payload.notificationType,
                 },
                 android: {
                     priority: 'high',
@@ -7768,12 +7781,17 @@ let NotificationService = class NotificationService {
                 await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
                     title: notification.title,
                     body: notification.body,
+                    notificationType: notification.notificationType,
+                    notificationData: notification.notificationData,
                 });
                 break;
         }
     }
     async sendReminderNotification(notificationType, createNotificationDatatDto, notiTarget) {
         const createNotificationDto = await this.createReminderNotificationUsecase.execute(createNotificationDatatDto);
+        if (!createNotificationDto) {
+            return;
+        }
         const notification = await this.saveNotificationUsecase.execute(createNotificationDto, notiTarget);
         const totalSubscriptions = [];
         for (const employeeId of notiTarget) {
@@ -7783,6 +7801,8 @@ let NotificationService = class NotificationService {
         await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
             title: notification.title,
             body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
         });
     }
 };
@@ -7926,32 +7946,51 @@ let CreateReminderNotificationUsecase = class CreateReminderNotificationUsecase 
         const hours = Math.floor((diffInMinutes % (24 * 60)) / 60);
         const minutes = diffInMinutes % 60;
         const parts = [];
-        switch (createNotificationDatatDto.resourceType) {
-            case resource_type_enum_1.ResourceType.MEETING_ROOM:
-                parts.push('회의 시작까지');
-                break;
-            case resource_type_enum_1.ResourceType.VEHICLE:
-                parts.push('차량 이용 시작까지');
-                break;
-            case resource_type_enum_1.ResourceType.ACCOMMODATION:
-                parts.push('입실 까지');
-                break;
-            case resource_type_enum_1.ResourceType.EQUIPMENT:
-                parts.push('장비 이용 시작까지');
-                break;
+        if (diffInMilliseconds > 0) {
+            switch (createNotificationDatatDto.resourceType) {
+                case resource_type_enum_1.ResourceType.MEETING_ROOM:
+                    parts.push('회의 시작까지');
+                    break;
+                case resource_type_enum_1.ResourceType.VEHICLE:
+                    parts.push('차량 이용 시작까지');
+                    break;
+                case resource_type_enum_1.ResourceType.ACCOMMODATION:
+                    parts.push('입실 까지');
+                    break;
+                case resource_type_enum_1.ResourceType.EQUIPMENT:
+                    parts.push('장비 이용 시작까지');
+                    break;
+            }
+            if (days > 0) {
+                parts.push(`${days}일`);
+            }
+            if (hours > 0) {
+                parts.push(`${hours}시간`);
+            }
+            if (minutes > 0 || parts.length === 0) {
+                parts.push(`${minutes}분`);
+            }
+            parts.push('남았습니다.');
         }
-        if (days > 0) {
-            parts.push(`${days}일`);
-        }
-        if (hours > 0) {
-            parts.push(`${hours}시간`);
-        }
-        if (minutes > 0 || parts.length === 0) {
-            parts.push(`${minutes}분`);
+        else {
+            switch (createNotificationDatatDto.resourceType) {
+                case resource_type_enum_1.ResourceType.MEETING_ROOM:
+                    parts.push('회의 참여 알림');
+                    break;
+                case resource_type_enum_1.ResourceType.VEHICLE:
+                    parts.push('차량 탑승 알림');
+                    break;
+                case resource_type_enum_1.ResourceType.ACCOMMODATION:
+                    parts.push('입실 알림');
+                    break;
+                case resource_type_enum_1.ResourceType.EQUIPMENT:
+                    parts.push('장비 이용 알림');
+                    break;
+            }
         }
         const timeDifferencePhrase = parts.join(' ');
         return {
-            title: `[${createNotificationDatatDto.reservationTitle}]\n${timeDifferencePhrase} 남았습니다.`,
+            title: `[${createNotificationDatatDto.reservationTitle}]\n${timeDifferencePhrase}`,
             body: createNotificationDatatDto.reservationDate,
             notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
             notificationData: createNotificationDatatDto,
@@ -8011,6 +8050,8 @@ let CreateScheduleJobUsecase = class CreateScheduleJobUsecase {
                 await this.FCMAdapter.sendBulkNotification(subscriptions, {
                     title: notification.title,
                     body: notification.body,
+                    notificationType: notification.notificationType,
+                    notificationData: notification.notificationData,
                 });
             }
             catch (error) {
@@ -8088,6 +8129,8 @@ let CronSendUpcomingNotificationUsecase = class CronSendUpcomingNotificationUsec
                 await this.FCMAdapter.sendBulkNotification(totalSubscriptions, {
                     title: notification.title,
                     body: notification.body,
+                    notificationType: notification.notificationType,
+                    notificationData: notification.notificationData,
                 });
             }
             catch (error) {
@@ -9082,6 +9125,8 @@ const usecases_1 = __webpack_require__(/*! ./usecases */ "./src/application/rese
 const admin_reservation_service_1 = __webpack_require__(/*! ./services/admin-reservation.service */ "./src/application/reservation/core/services/admin-reservation.service.ts");
 const reservation_service_1 = __webpack_require__(/*! ./services/reservation.service */ "./src/application/reservation/core/services/reservation.service.ts");
 const cron_reservation_service_1 = __webpack_require__(/*! ./services/cron-reservation.service */ "./src/application/reservation/core/services/cron-reservation.service.ts");
+const notification_module_2 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
+const employee_notification_module_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.module */ "./src/domain/employee-notification/employee-notification.module.ts");
 let ReservationCoreModule = class ReservationCoreModule {
 };
 exports.ReservationCoreModule = ReservationCoreModule;
@@ -9104,6 +9149,8 @@ exports.ReservationCoreModule = ReservationCoreModule = __decorate([
             resource_module_1.DomainResourceModule,
             vehicle_info_module_1.DomainVehicleInfoModule,
             notification_module_1.NotificationModule,
+            employee_notification_module_1.DomainEmployeeNotificationModule,
+            notification_module_2.DomainNotificationModule,
             schedule_1.ScheduleModule.forRoot(),
         ],
         controllers: [admin_reservation_controller_1.AdminReservationController, reservation_controller_1.UserReservationController, cron_reservation_controller_1.CronReservationController],
@@ -9452,6 +9499,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Boolean)
 ], ReservationWithRelationsResponseDto.prototype, "modifiable", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "hasUnreadNotification", void 0);
 class CreateReservationResponseDto {
 }
 exports.CreateReservationResponseDto = CreateReservationResponseDto;
@@ -10261,7 +10312,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FindCalendarUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -10270,9 +10321,11 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
 let FindCalendarUsecase = class FindCalendarUsecase {
-    constructor(reservationService) {
+    constructor(reservationService, notificationService) {
         this.reservationService = reservationService;
+        this.notificationService = notificationService;
     }
     async execute(user, startDate, endDate, resourceType, isMine) {
         const startDateObj = date_util_1.DateUtil.date(startDate).toDate();
@@ -10314,14 +10367,28 @@ let FindCalendarUsecase = class FindCalendarUsecase {
             },
         });
         return {
-            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+            reservations: await Promise.all(reservations.map(async (reservation) => {
+                const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
+                const notification = await this.notificationService.findAll({
+                    where: {
+                        notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`),
+                        employees: {
+                            employeeId: user.employeeId,
+                            isRead: false,
+                        },
+                    },
+                    relations: ['employees'],
+                });
+                reservationResponseDto.hasUnreadNotification = notification.length > 0;
+                return reservationResponseDto;
+            })),
         };
     }
 };
 exports.FindCalendarUsecase = FindCalendarUsecase;
 exports.FindCalendarUsecase = FindCalendarUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _b : Object])
 ], FindCalendarUsecase);
 
 
@@ -10821,7 +10888,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FindReservationDetailUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -10831,9 +10898,14 @@ const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
 let FindReservationDetailUsecase = class FindReservationDetailUsecase {
-    constructor(reservationService) {
+    constructor(reservationService, notificationService, employeeNotificationService) {
         this.reservationService = reservationService;
+        this.notificationService = notificationService;
+        this.employeeNotificationService = employeeNotificationService;
     }
     async execute(user, reservationId) {
         const reservation = await this.reservationService.findOne({
@@ -10849,7 +10921,6 @@ let FindReservationDetailUsecase = class FindReservationDetailUsecase {
             ],
             withDeleted: true,
         });
-        console.log(reservation);
         if (!reservation) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
@@ -10865,13 +10936,32 @@ let FindReservationDetailUsecase = class FindReservationDetailUsecase {
             [reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED].includes(reservation.status) &&
                 reservationResponseDto.isMine &&
                 reservationResponseDto.endDate > date_util_1.DateUtil.now().format();
+        const notifications = await this.notificationService.findAll({
+            where: {
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`),
+                employees: {
+                    employeeId: user.employeeId,
+                    isRead: false,
+                },
+            },
+            relations: ['employees'],
+        });
+        if (notifications.length > 0) {
+            const employeeNotifications = notifications
+                .map((notification) => notification.employees.map((employee) => employee.employeeNotificationId).flat())
+                .flat();
+            console.log(employeeNotifications);
+            await Promise.all(employeeNotifications.map((employeeNotificationId) => this.employeeNotificationService.update(employeeNotificationId, {
+                isRead: true,
+            })));
+        }
         return reservationResponseDto;
     }
 };
 exports.FindReservationDetailUsecase = FindReservationDetailUsecase;
 exports.FindReservationDetailUsecase = FindReservationDetailUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _b : Object, typeof (_c = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _c : Object])
 ], FindReservationDetailUsecase);
 
 
@@ -20290,7 +20380,7 @@ exports.DomainNotificationModule = DomainNotificationModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([notification_entity_1.Notification])],
         providers: [notification_service_1.DomainNotificationService, notification_repository_1.DomainNotificationRepository],
-        exports: [notification_service_1.DomainNotificationService],
+        exports: [notification_service_1.DomainNotificationService, notification_repository_1.DomainNotificationRepository],
     })
 ], DomainNotificationModule);
 

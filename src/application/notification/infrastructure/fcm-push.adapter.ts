@@ -86,12 +86,15 @@ export class FCMAdapter {
         try {
             const tokens = subscriptions.map((subscription) => subscription.fcm.token);
             console.log('알림 전송 - tokens', tokens);
+            console.log('알림 전송 - payload', payload);
             const response = await getMessaging()
                 .sendEachForMulticast({
                     tokens: tokens,
                     data: {
                         title: this.isProduction ? payload.title : '[개발]' + payload.title,
                         body: payload.body,
+                        notificationData: JSON.stringify(payload.notificationData),
+                        notificationType: payload.notificationType,
                     },
                     android: {
                         priority: 'high',

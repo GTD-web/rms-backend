@@ -7,10 +7,14 @@ import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-typ
 import { ReservationWithResourceResponseDto } from '../dtos/reservation-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Employee } from '@libs/entities/employee.entity';
+import { DomainNotificationService } from '@src/domain/notification/notification.service';
 
 @Injectable()
 export class FindCalendarUsecase {
-    constructor(private readonly reservationService: DomainReservationService) {}
+    constructor(
+        private readonly reservationService: DomainReservationService,
+        private readonly notificationService: DomainNotificationService,
+    ) {}
 
     async execute(
         user: Employee,
@@ -66,7 +70,26 @@ export class FindCalendarUsecase {
         });
 
         return {
-            reservations: reservations.map((reservation) => new ReservationWithRelationsResponseDto(reservation)),
+            reservations: await Promise.all(
+                reservations.map(async (reservation) => {
+                    const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
+                    const notification = await this.notificationService.findAll({
+                        where: {
+                            notificationData: Raw(
+                                (alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`,
+                            ),
+                            employees: {
+                                employeeId: user.employeeId,
+                                isRead: false,
+                            },
+                        },
+                        relations: ['employees'],
+                    });
+
+                    reservationResponseDto.hasUnreadNotification = notification.length > 0;
+                    return reservationResponseDto;
+                }),
+            ),
         };
     }
 }
