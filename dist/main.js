@@ -10380,9 +10380,8 @@ let FindCalendarUsecase = class FindCalendarUsecase {
                     relations: ['employees'],
                 });
                 reservationResponseDto.hasUnreadNotification = notification.length > 0;
-                console.log(reservation);
-                console.log(notification[0]);
-                console.log(reservationResponseDto.hasUnreadNotification);
+                console.log(`${reservation.reservationId} / ${reservation.startDate} / ${reservation.title} : ${reservationResponseDto.hasUnreadNotification}`);
+                console.log(notification.map((n) => n.notificationId));
                 return reservationResponseDto;
             })),
         };
