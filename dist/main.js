@@ -10380,6 +10380,9 @@ let FindCalendarUsecase = class FindCalendarUsecase {
                     relations: ['employees'],
                 });
                 reservationResponseDto.hasUnreadNotification = notification.length > 0;
+                console.log(reservation);
+                console.log(notification[0]);
+                console.log(reservationResponseDto.hasUnreadNotification);
                 return reservationResponseDto;
             })),
         };
@@ -10946,14 +10949,16 @@ let FindReservationDetailUsecase = class FindReservationDetailUsecase {
             },
             relations: ['employees'],
         });
+        console.log(notifications);
         if (notifications.length > 0) {
             const employeeNotifications = notifications
                 .map((notification) => notification.employees.map((employee) => employee.employeeNotificationId).flat())
                 .flat();
             console.log(employeeNotifications);
-            await Promise.all(employeeNotifications.map((employeeNotificationId) => this.employeeNotificationService.update(employeeNotificationId, {
+            const updatedEmployeeNotifications = await Promise.all(employeeNotifications.map((employeeNotificationId) => this.employeeNotificationService.update(employeeNotificationId, {
                 isRead: true,
             })));
+            console.log(updatedEmployeeNotifications);
         }
         return reservationResponseDto;
     }

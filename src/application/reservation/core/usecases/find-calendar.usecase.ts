@@ -87,6 +87,9 @@ export class FindCalendarUsecase {
                     });
 
                     reservationResponseDto.hasUnreadNotification = notification.length > 0;
+                    console.log(reservation);
+                    console.log(notification[0]);
+                    console.log(reservationResponseDto.hasUnreadNotification);
                     return reservationResponseDto;
                 }),
             ),

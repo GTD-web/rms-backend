@@ -67,18 +67,21 @@ export class FindReservationDetailUsecase {
             relations: ['employees'],
         });
 
+        console.log(notifications);
+
         if (notifications.length > 0) {
             const employeeNotifications = notifications
                 .map((notification) => notification.employees.map((employee) => employee.employeeNotificationId).flat())
                 .flat();
             console.log(employeeNotifications);
-            await Promise.all(
+            const updatedEmployeeNotifications = await Promise.all(
                 employeeNotifications.map((employeeNotificationId) =>
                     this.employeeNotificationService.update(employeeNotificationId, {
                         isRead: true,
                     }),
                 ),
             );
+            console.log(updatedEmployeeNotifications);
         }
 
         return reservationResponseDto;
