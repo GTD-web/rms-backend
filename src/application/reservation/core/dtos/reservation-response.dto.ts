@@ -140,6 +140,9 @@ export class ReservationWithRelationsResponseDto extends ReservationResponseDto 
 
     @ApiProperty({ required: false })
     modifiable?: boolean;
+
+    @ApiProperty({ required: false })
+    hasUnreadNotification?: boolean;
 }
 
 export class CreateReservationResponseDto {

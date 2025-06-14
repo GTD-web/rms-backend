@@ -7,6 +7,6 @@ import { DomainNotificationRepository } from './notification.repository';
 @Module({
     imports: [TypeOrmModule.forFeature([Notification])],
     providers: [DomainNotificationService, DomainNotificationRepository],
-    exports: [DomainNotificationService],
+    exports: [DomainNotificationService, DomainNotificationRepository],
 })
 export class DomainNotificationModule {}

@@ -9,6 +9,7 @@ import {
     Resource,
     VehicleInfo,
     Notification,
+    EmployeeNotification,
 } from '@libs/entities';
 import { UserReservationController } from '@src/application/reservation/core/controllers/reservation.controller';
 import { AdminReservationController } from '@src/application/reservation/core/controllers/admin.reservation.controller';
@@ -48,6 +49,10 @@ import {
 import { AdminReservationService } from './services/admin-reservation.service';
 import { ReservationService } from './services/reservation.service';
 import { CronReservationService } from './services/cron-reservation.service';
+import { DomainNotificationService } from '@src/domain/notification/notification.service';
+import { DomainNotificationRepository } from '@src/domain/notification/notification.repository';
+import { DomainNotificationModule } from '@src/domain/notification/notification.module';
+import { DomainEmployeeNotificationModule } from '@src/domain/employee-notification/employee-notification.module';
 
 @Module({
     imports: [
@@ -67,6 +72,8 @@ import { CronReservationService } from './services/cron-reservation.service';
         DomainResourceModule,
         DomainVehicleInfoModule,
         NotificationModule,
+        DomainEmployeeNotificationModule,
+        DomainNotificationModule,
         ScheduleModule.forRoot(),
     ],
     controllers: [AdminReservationController, UserReservationController, CronReservationController],

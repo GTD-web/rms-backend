@@ -24,36 +24,57 @@ export class CreateReminderNotificationUsecase {
         const minutes = diffInMinutes % 60;
 
         const parts: string[] = [];
+        if (diffInMilliseconds > 0) {
+            switch (createNotificationDatatDto.resourceType) {
+                case ResourceType.MEETING_ROOM:
+                    parts.push('회의 시작까지');
+                    break;
+                case ResourceType.VEHICLE:
+                    parts.push('차량 이용 시작까지');
+                    break;
+                case ResourceType.ACCOMMODATION:
+                    parts.push('입실 까지');
+                    break;
+                case ResourceType.EQUIPMENT:
+                    parts.push('장비 이용 시작까지');
+                    break;
+            }
 
-        switch (createNotificationDatatDto.resourceType) {
-            case ResourceType.MEETING_ROOM:
-                parts.push('회의 시작까지');
-                break;
-            case ResourceType.VEHICLE:
-                parts.push('차량 이용 시작까지');
-                break;
-            case ResourceType.ACCOMMODATION:
-                parts.push('입실 까지');
-                break;
-            case ResourceType.EQUIPMENT:
-                parts.push('장비 이용 시작까지');
-                break;
-        }
+            if (days > 0) {
+                parts.push(`${days}일`);
+            }
+            if (hours > 0) {
+                parts.push(`${hours}시간`);
+            }
+            if (minutes > 0 || parts.length === 0) {
+                parts.push(`${minutes}분`);
+            }
 
-        if (days > 0) {
-            parts.push(`${days}일`);
-        }
-        if (hours > 0) {
-            parts.push(`${hours}시간`);
-        }
-        if (minutes > 0 || parts.length === 0) {
-            parts.push(`${minutes}분`);
+            parts.push('남았습니다.');
+        } else {
+            switch (createNotificationDatatDto.resourceType) {
+                case ResourceType.MEETING_ROOM:
+                    parts.push('회의 참여 알림');
+                    break;
+
+                case ResourceType.VEHICLE:
+                    parts.push('차량 탑승 알림');
+                    break;
+
+                case ResourceType.ACCOMMODATION:
+                    parts.push('입실 알림');
+                    break;
+
+                case ResourceType.EQUIPMENT:
+                    parts.push('장비 이용 알림');
+                    break;
+            }
         }
 
         const timeDifferencePhrase = parts.join(' ');
 
         return {
-            title: `[${createNotificationDatatDto.reservationTitle}]\n${timeDifferencePhrase} 남았습니다.`,
+            title: `[${createNotificationDatatDto.reservationTitle}]\n${timeDifferencePhrase}`,
             body: createNotificationDatatDto.reservationDate,
             notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
             notificationData: createNotificationDatatDto,
