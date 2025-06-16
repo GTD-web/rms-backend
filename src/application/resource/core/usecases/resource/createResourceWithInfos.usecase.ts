@@ -59,6 +59,8 @@ export class CreateResourceWithInfosUsecase {
             });
             const resourceOrder = resources.length;
 
+            if (!resource.images) resource.images = [];
+            resource.images = resource.images.map((image) => this.fileService.getFileUrl(image));
             const savedResource = await this.resourceService.save({ ...resource, order: resourceOrder } as Resource, {
                 queryRunner,
             });

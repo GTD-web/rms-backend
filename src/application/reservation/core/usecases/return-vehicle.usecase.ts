@@ -13,6 +13,8 @@ import { DateUtil } from '@libs/utils/date.util';
 import { NotificationService } from '@src/application/notification/services/notification.service';
 import { DomainResourceService } from '@src/domain/resource/resource.service';
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
+import { DomainFileService } from '@src/domain/file/file.service';
+
 @Injectable()
 export class ReturnVehicleUsecase {
     constructor(
@@ -21,6 +23,7 @@ export class ReturnVehicleUsecase {
         private readonly resourceService: DomainResourceService,
         private readonly vehicleInfoService: DomainVehicleInfoService,
         private readonly notificationService: NotificationService,
+        private readonly fileService: DomainFileService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -92,6 +95,23 @@ export class ReturnVehicleUsecase {
                 { location: returnDto.location },
                 { queryRunner },
             );
+
+            if (!returnDto.parkingLocationImages) returnDto.parkingLocationImages = [];
+            if (!returnDto.odometerImages) returnDto.odometerImages = [];
+            if (!returnDto.indoorImages) returnDto.indoorImages = [];
+            returnDto.parkingLocationImages = returnDto.parkingLocationImages.map((image) =>
+                this.fileService.getFileUrl(image),
+            );
+            returnDto.odometerImages = returnDto.odometerImages.map((image) => this.fileService.getFileUrl(image));
+            returnDto.indoorImages = returnDto.indoorImages.map((image) => this.fileService.getFileUrl(image));
+
+            const images = [...returnDto.parkingLocationImages, ...returnDto.odometerImages, ...returnDto.indoorImages];
+
+            if (images.length > 0) {
+                await this.fileService.updateTemporaryFiles(images, false, {
+                    queryRunner,
+                });
+            }
 
             await this.vehicleInfoService.update(
                 vehicleInfoId,

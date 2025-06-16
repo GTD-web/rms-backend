@@ -9347,6 +9347,7 @@ const reservation_service_1 = __webpack_require__(/*! ./services/reservation.ser
 const cron_reservation_service_1 = __webpack_require__(/*! ./services/cron-reservation.service */ "./src/application/reservation/core/services/cron-reservation.service.ts");
 const notification_module_2 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
 const employee_notification_module_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.module */ "./src/domain/employee-notification/employee-notification.module.ts");
+const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
 let ReservationCoreModule = class ReservationCoreModule {
 };
 exports.ReservationCoreModule = ReservationCoreModule;
@@ -9371,6 +9372,7 @@ exports.ReservationCoreModule = ReservationCoreModule = __decorate([
             notification_module_1.NotificationModule,
             employee_notification_module_1.DomainEmployeeNotificationModule,
             notification_module_2.DomainNotificationModule,
+            file_module_1.DomainFileModule,
             schedule_1.ScheduleModule.forRoot(),
         ],
         controllers: [admin_reservation_controller_1.AdminReservationController, reservation_controller_1.UserReservationController, cron_reservation_controller_1.CronReservationController],
@@ -11480,7 +11482,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReturnVehicleUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -11495,13 +11497,15 @@ const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/uti
 const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
 const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 let ReturnVehicleUsecase = class ReturnVehicleUsecase {
-    constructor(reservationService, reservationVehicleService, resourceService, vehicleInfoService, notificationService, dataSource) {
+    constructor(reservationService, reservationVehicleService, resourceService, vehicleInfoService, notificationService, fileService, dataSource) {
         this.reservationService = reservationService;
         this.reservationVehicleService = reservationVehicleService;
         this.resourceService = resourceService;
         this.vehicleInfoService = vehicleInfoService;
         this.notificationService = notificationService;
+        this.fileService = fileService;
         this.dataSource = dataSource;
     }
     async execute(user, reservationId, returnDto) {
@@ -11547,6 +11551,21 @@ let ReturnVehicleUsecase = class ReturnVehicleUsecase {
             }, { queryRunner });
             const vehicleInfoId = reservation.resource.vehicleInfo.vehicleInfoId;
             await this.resourceService.update(reservation.resource.resourceId, { location: returnDto.location }, { queryRunner });
+            if (!returnDto.parkingLocationImages)
+                returnDto.parkingLocationImages = [];
+            if (!returnDto.odometerImages)
+                returnDto.odometerImages = [];
+            if (!returnDto.indoorImages)
+                returnDto.indoorImages = [];
+            returnDto.parkingLocationImages = returnDto.parkingLocationImages.map((image) => this.fileService.getFileUrl(image));
+            returnDto.odometerImages = returnDto.odometerImages.map((image) => this.fileService.getFileUrl(image));
+            returnDto.indoorImages = returnDto.indoorImages.map((image) => this.fileService.getFileUrl(image));
+            const images = [...returnDto.parkingLocationImages, ...returnDto.odometerImages, ...returnDto.indoorImages];
+            if (images.length > 0) {
+                await this.fileService.updateTemporaryFiles(images, false, {
+                    queryRunner,
+                });
+            }
             await this.vehicleInfoService.update(vehicleInfoId, {
                 totalMileage: returnDto.totalMileage,
                 leftMileage: returnDto.leftMileage,
@@ -11576,7 +11595,7 @@ let ReturnVehicleUsecase = class ReturnVehicleUsecase {
 exports.ReturnVehicleUsecase = ReturnVehicleUsecase;
 exports.ReturnVehicleUsecase = ReturnVehicleUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _e : Object, typeof (_f = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
 ], ReturnVehicleUsecase);
 
 
@@ -15004,6 +15023,9 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
                 },
             });
             const resourceOrder = resources.length;
+            if (!resource.images)
+                resource.images = [];
+            resource.images = resource.images.map((image) => this.fileService.getFileUrl(image));
             const savedResource = await this.resourceService.save({ ...resource, order: resourceOrder }, {
                 queryRunner,
             });
@@ -15864,10 +15886,11 @@ let UpdateResourceUsecase = class UpdateResourceUsecase {
         await queryRunner.startTransaction();
         try {
             if (updateRequest.resource) {
+                if (!updateRequest.resource.images)
+                    updateRequest.resource.images = [];
+                updateRequest.resource.images = updateRequest.resource.images.map((image) => this.fileService.getFileUrl(image));
                 await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
-                if (updateRequest.resource.images && updateRequest.resource.images.length > 0) {
-                    await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
-                }
+                await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
             }
             if (updateRequest.managers) {
                 const newManagerIds = updateRequest.managers.map((m) => m.employeeId);
@@ -17780,10 +17803,11 @@ let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            if (!createMaintenanceDto.images)
+                createMaintenanceDto.images = [];
+            createMaintenanceDto.images = createMaintenanceDto.images.map((image) => this.fileService.getFileUrl(image));
             const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
-            if (createMaintenanceDto.images && createMaintenanceDto.images.length > 0) {
-                await this.fileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
-            }
+            await this.fileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
@@ -17881,10 +17905,11 @@ let UpdateMaintenanceUsecase = class UpdateMaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            if (!updateMaintenanceDto.images)
+                updateMaintenanceDto.images = [];
+            updateMaintenanceDto.images = updateMaintenanceDto.images.map((image) => this.fileService.getFileUrl(image));
             const maintenance = await this.maintenanceService.update(maintenanceId, updateMaintenanceDto);
-            if (updateMaintenanceDto.images && updateMaintenanceDto.images.length > 0) {
-                await this.fileService.updateTemporaryFiles(updateMaintenanceDto.images, false, { queryRunner });
-            }
+            await this.fileService.updateTemporaryFiles(updateMaintenanceDto.images, false, { queryRunner });
             if (updateMaintenanceDto.mileage) {
                 const savedMaintenance = await this.maintenanceService.findOne({
                     where: { maintenanceId: maintenance.maintenanceId },
@@ -18050,13 +18075,16 @@ let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
                 updateVehicleInfoDto.odometerImages = [];
             if (!updateVehicleInfoDto.indoorImages)
                 updateVehicleInfoDto.indoorImages = [];
+            updateVehicleInfoDto.parkingLocationImages = updateVehicleInfoDto.parkingLocationImages.map((image) => this.fileService.getFileUrl(image));
+            updateVehicleInfoDto.odometerImages = updateVehicleInfoDto.odometerImages.map((image) => this.fileService.getFileUrl(image));
+            updateVehicleInfoDto.indoorImages = updateVehicleInfoDto.indoorImages.map((image) => this.fileService.getFileUrl(image));
             const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, {
                 queryRunner,
             });
             const images = [
-                ...(updateVehicleInfoDto.parkingLocationImages || []),
-                ...(updateVehicleInfoDto.odometerImages || []),
-                ...(updateVehicleInfoDto.indoorImages || []),
+                ...updateVehicleInfoDto.parkingLocationImages,
+                ...updateVehicleInfoDto.odometerImages,
+                ...updateVehicleInfoDto.indoorImages,
             ];
             if (images.length > 0) {
                 await this.fileService.updateTemporaryFiles(images, false, {
@@ -20314,10 +20342,9 @@ let DomainFileService = class DomainFileService extends base_service_1.BaseServi
     async updateTemporaryFiles(filePaths, isTemporary, repositoryOptions) {
         await Promise.all(filePaths.map(async (filePath) => {
             const fileName = filePath.split('/').pop();
-            const fileUrl = this.getFileUrl(fileName);
             const file = await this.create({
                 fileName,
-                filePath: fileUrl,
+                filePath,
                 isTemporary,
             });
             await this.fileRepository.save(file, repositoryOptions);

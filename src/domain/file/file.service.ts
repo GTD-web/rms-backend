@@ -41,11 +41,10 @@ export class DomainFileService extends BaseService<File> {
         await Promise.all(
             filePaths.map(async (filePath) => {
                 const fileName = filePath.split('/').pop();
-                const fileUrl = this.getFileUrl(fileName);
 
                 const file = await this.create({
                     fileName,
-                    filePath: fileUrl,
+                    filePath,
                     isTemporary,
                 });
                 await this.fileRepository.save(file, repositoryOptions);
