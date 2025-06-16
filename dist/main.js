@@ -6562,10 +6562,6 @@ class CreateFileDataDto {
 }
 exports.CreateFileDataDto = CreateFileDataDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: '파일 이름' }),
-    __metadata("design:type", String)
-], CreateFileDataDto.prototype, "fileName", void 0);
-__decorate([
     (0, swagger_1.ApiProperty)({ description: '파일 경로' }),
     __metadata("design:type", String)
 ], CreateFileDataDto.prototype, "filePath", void 0);
@@ -6878,11 +6874,15 @@ let CreateFileDataUsecase = class CreateFileDataUsecase {
         this.retryCount = 3;
     }
     async execute(createFileDataDto) {
-        const fileExists = await this.s3Service.checkFileExists(createFileDataDto.fileName);
+        const fileName = createFileDataDto.filePath.split('/').pop();
+        const fileExists = await this.s3Service.checkFileExists(fileName);
         if (!fileExists) {
             throw new common_1.BadRequestException('File not found in S3');
         }
-        const file = await this.fileService.create(createFileDataDto);
+        const file = await this.fileService.create({
+            fileName,
+            filePath: createFileDataDto.filePath,
+        });
         return await this.fileService.save(file);
     }
 };

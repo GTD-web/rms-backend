@@ -14,7 +14,8 @@ export class CreateFileDataUsecase {
     retryCount = 3;
 
     async execute(createFileDataDto: CreateFileDataDto): Promise<File> {
-        const fileExists = await this.s3Service.checkFileExists(createFileDataDto.fileName);
+        const fileName = createFileDataDto.filePath.split('/').pop();
+        const fileExists = await this.s3Service.checkFileExists(fileName);
         // let retryCount = this.retryCount;
         // while (!fileExists && retryCount > 0) {
         //     console.log('file not found in S3, retrying...');
@@ -25,7 +26,10 @@ export class CreateFileDataUsecase {
         if (!fileExists) {
             throw new BadRequestException('File not found in S3');
         }
-        const file = await this.fileService.create(createFileDataDto);
+        const file = await this.fileService.create({
+            fileName,
+            filePath: createFileDataDto.filePath,
+        });
         return await this.fileService.save(file);
     }
 }
