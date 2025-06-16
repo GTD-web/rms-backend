@@ -6511,7 +6511,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "getPresignedUrl", null);
 __decorate([
-    (0, common_1.Post)('create-file-data'),
+    (0, common_1.Post)('data'),
     (0, swagger_1.ApiOperation)({ summary: '파일 데이터 생성' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 데이터 생성 성공' }),
     __param(0, (0, common_1.Body)()),

@@ -98,7 +98,7 @@ export class FileController {
         return this.fileService.getPresignedUrl(mime);
     }
 
-    @Post('create-file-data')
+    @Post('data')
     @ApiOperation({ summary: '파일 데이터 생성' })
     @ApiDataResponse({ status: 200, description: '파일 데이터 생성 성공' })
     async createFileData(@Body() createFileDataDto: CreateFileDataDto) {
