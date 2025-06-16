@@ -57,7 +57,8 @@ export class DomainFileService extends BaseService<File> {
         await Promise.all(files.map((file) => this.fileRepository.delete(file.fileId, repositoryOptions)));
     }
 
-    getFileUrl(fileKey: string): string {
+    getFileUrl(filePath: string): string {
+        const fileKey = filePath.split('/').pop();
         return `${this.configService.get<string>('S3_ENDPOINT').replace('s3', 'object/public')}/${this.configService.get<string>('S3_BUCKET_NAME')}/${fileKey}`;
     }
 }

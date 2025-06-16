@@ -104,7 +104,9 @@ export class ReturnVehicleUsecase {
             );
             returnDto.odometerImages = returnDto.odometerImages.map((image) => this.fileService.getFileUrl(image));
             returnDto.indoorImages = returnDto.indoorImages.map((image) => this.fileService.getFileUrl(image));
-
+            console.log(returnDto.parkingLocationImages);
+            console.log(returnDto.odometerImages);
+            console.log(returnDto.indoorImages);
             const images = [...returnDto.parkingLocationImages, ...returnDto.odometerImages, ...returnDto.indoorImages];
 
             if (images.length > 0) {

@@ -11560,6 +11560,9 @@ let ReturnVehicleUsecase = class ReturnVehicleUsecase {
             returnDto.parkingLocationImages = returnDto.parkingLocationImages.map((image) => this.fileService.getFileUrl(image));
             returnDto.odometerImages = returnDto.odometerImages.map((image) => this.fileService.getFileUrl(image));
             returnDto.indoorImages = returnDto.indoorImages.map((image) => this.fileService.getFileUrl(image));
+            console.log(returnDto.parkingLocationImages);
+            console.log(returnDto.odometerImages);
+            console.log(returnDto.indoorImages);
             const images = [...returnDto.parkingLocationImages, ...returnDto.odometerImages, ...returnDto.indoorImages];
             if (images.length > 0) {
                 await this.fileService.updateTemporaryFiles(images, false, {
@@ -20354,7 +20357,8 @@ let DomainFileService = class DomainFileService extends base_service_1.BaseServi
         const files = await this.fileRepository.findAll({ where: { filePath: (0, typeorm_1.In)(filePaths) } });
         await Promise.all(files.map((file) => this.fileRepository.delete(file.fileId, repositoryOptions)));
     }
-    getFileUrl(fileKey) {
+    getFileUrl(filePath) {
+        const fileKey = filePath.split('/').pop();
         return `${this.configService.get('S3_ENDPOINT').replace('s3', 'object/public')}/${this.configService.get('S3_BUCKET_NAME')}/${fileKey}`;
     }
 };
