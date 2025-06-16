@@ -20345,6 +20345,11 @@ let DomainFileService = class DomainFileService extends base_service_1.BaseServi
     async updateTemporaryFiles(filePaths, isTemporary, repositoryOptions) {
         await Promise.all(filePaths.map(async (filePath) => {
             const fileName = filePath.split('/').pop();
+            const fileExists = await this.fileRepository.findOne({ where: { filePath } });
+            if (fileExists) {
+                await this.fileRepository.update(fileExists.fileId, { isTemporary }, repositoryOptions);
+                return;
+            }
             const file = await this.create({
                 fileName,
                 filePath,
