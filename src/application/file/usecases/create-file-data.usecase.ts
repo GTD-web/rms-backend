@@ -28,7 +28,7 @@ export class CreateFileDataUsecase {
         }
         const file = await this.fileService.create({
             fileName,
-            filePath: createFileDataDto.filePath,
+            filePath: this.s3Service.getFileUrl(fileName),
         });
         return await this.fileService.save(file);
     }

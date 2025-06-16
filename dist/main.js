@@ -6881,7 +6881,7 @@ let CreateFileDataUsecase = class CreateFileDataUsecase {
         }
         const file = await this.fileService.create({
             fileName,
-            filePath: createFileDataDto.filePath,
+            filePath: this.s3Service.getFileUrl(fileName),
         });
         return await this.fileService.save(file);
     }
@@ -20282,17 +20282,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DomainFileService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
 const file_repository_1 = __webpack_require__(/*! ./file.repository */ "./src/domain/file/file.repository.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 let DomainFileService = class DomainFileService extends base_service_1.BaseService {
-    constructor(fileRepository) {
+    constructor(fileRepository, configService) {
         super(fileRepository);
         this.fileRepository = fileRepository;
+        this.configService = configService;
     }
     async findFileById(fileId) {
         const file = await this.fileRepository.findOne({ where: { fileId } });
@@ -20310,18 +20312,29 @@ let DomainFileService = class DomainFileService extends base_service_1.BaseServi
         return files;
     }
     async updateTemporaryFiles(filePaths, isTemporary, repositoryOptions) {
-        const files = await this.fileRepository.findAll({ where: { filePath: (0, typeorm_1.In)(filePaths) } });
-        await Promise.all(files.map((file) => this.fileRepository.update(file.fileId, { isTemporary }, repositoryOptions)));
+        await Promise.all(filePaths.map(async (filePath) => {
+            const fileName = filePath.split('/').pop();
+            const fileUrl = this.getFileUrl(fileName);
+            const file = await this.create({
+                fileName,
+                filePath: fileUrl,
+                isTemporary,
+            });
+            await this.fileRepository.save(file, repositoryOptions);
+        }));
     }
     async deleteFilesByFilePath(filePaths, repositoryOptions) {
         const files = await this.fileRepository.findAll({ where: { filePath: (0, typeorm_1.In)(filePaths) } });
         await Promise.all(files.map((file) => this.fileRepository.delete(file.fileId, repositoryOptions)));
     }
+    getFileUrl(fileKey) {
+        return `${this.configService.get('S3_ENDPOINT').replace('s3', 'object/public')}/${this.configService.get('S3_BUCKET_NAME')}/${fileKey}`;
+    }
 };
 exports.DomainFileService = DomainFileService;
 exports.DomainFileService = DomainFileService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_1.DomainFileRepository !== "undefined" && file_repository_1.DomainFileRepository) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_1.DomainFileRepository !== "undefined" && file_repository_1.DomainFileRepository) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
 ], DomainFileService);
 
 

@@ -4,10 +4,14 @@ import { BaseService } from '@libs/services/base.service';
 import { DomainFileRepository } from './file.repository';
 import { In } from 'typeorm';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DomainFileService extends BaseService<File> {
-    constructor(private readonly fileRepository: DomainFileRepository) {
+    constructor(
+        private readonly fileRepository: DomainFileRepository,
+        private readonly configService: ConfigService,
+    ) {
         super(fileRepository);
     }
 
@@ -34,14 +38,27 @@ export class DomainFileService extends BaseService<File> {
         isTemporary: boolean,
         repositoryOptions?: IRepositoryOptions<File>,
     ): Promise<void> {
-        const files = await this.fileRepository.findAll({ where: { filePath: In(filePaths) } });
         await Promise.all(
-            files.map((file) => this.fileRepository.update(file.fileId, { isTemporary }, repositoryOptions)),
+            filePaths.map(async (filePath) => {
+                const fileName = filePath.split('/').pop();
+                const fileUrl = this.getFileUrl(fileName);
+
+                const file = await this.create({
+                    fileName,
+                    filePath: fileUrl,
+                    isTemporary,
+                });
+                await this.fileRepository.save(file, repositoryOptions);
+            }),
         );
     }
 
     async deleteFilesByFilePath(filePaths: string[], repositoryOptions?: IRepositoryOptions<File>): Promise<void> {
         const files = await this.fileRepository.findAll({ where: { filePath: In(filePaths) } });
         await Promise.all(files.map((file) => this.fileRepository.delete(file.fileId, repositoryOptions)));
+    }
+
+    getFileUrl(fileKey: string): string {
+        return `${this.configService.get<string>('S3_ENDPOINT').replace('s3', 'object/public')}/${this.configService.get<string>('S3_BUCKET_NAME')}/${fileKey}`;
     }
 }
