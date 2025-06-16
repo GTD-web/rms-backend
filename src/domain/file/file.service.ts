@@ -42,6 +42,12 @@ export class DomainFileService extends BaseService<File> {
             filePaths.map(async (filePath) => {
                 const fileName = filePath.split('/').pop();
 
+                const fileExists = await this.fileRepository.findOne({ where: { filePath } });
+                if (fileExists) {
+                    await this.fileRepository.update(fileExists.fileId, { isTemporary }, repositoryOptions);
+                    return;
+                }
+
                 const file = await this.create({
                     fileName,
                     filePath,
