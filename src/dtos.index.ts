@@ -121,6 +121,7 @@ export { CheckAvailabilityResponseDto } from './application/resource/core/dtos/c
 
 // File Module DTOs
 export { FileResponseDto } from './application/file/dtos/file-response.dto';
+export { CreateFileDataDto } from './application/file/dtos/create-filedata.dto';
 
 // Notification Module DTOs
 export { CreateNotificationDto, SendNotificationDto } from './application/notification/dtos/create-notification.dto';

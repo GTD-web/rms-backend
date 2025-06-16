@@ -12,11 +12,13 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { FileService } from '@resource/application/file/file.service';
-import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { FileResponseDto } from '@resource/application/file/dtos/file-response.dto';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import { MimeType } from '@libs/enums/mime-type.enum';
+import { CreateFileDataDto } from '../dtos/create-filedata.dto';
 
 @ApiTags('0. 파일 - 공통 ')
 @Controller('v1/files')
@@ -86,6 +88,21 @@ export class FileController {
     @ApiDataResponse({ status: 200, description: '여러 파일 삭제 성공' })
     async deleteMultipleFiles(@Body('fileIds') fileIds: string[]) {
         await this.fileService.deleteMultipleFiles(fileIds);
+    }
+
+    @Get('presigned-url')
+    @ApiOperation({ summary: 'Presigned URL 생성' })
+    @ApiDataResponse({ status: 200, description: 'Presigned URL 생성 성공' })
+    @ApiQuery({ name: 'mime', enum: MimeType, example: MimeType.IMAGE_PNG, required: true })
+    async getPresignedUrl(@Query('mime') mime: MimeType) {
+        return this.fileService.getPresignedUrl(mime);
+    }
+
+    @Post('create-file-data')
+    @ApiOperation({ summary: '파일 데이터 생성' })
+    @ApiDataResponse({ status: 200, description: '파일 데이터 생성 성공' })
+    async createFileData(@Body() createFileDataDto: CreateFileDataDto) {
+        return this.fileService.createFileData(createFileDataDto);
     }
 
     @Delete(':fileId')

@@ -11,11 +11,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { File } from '@libs/entities/file.entity';
 import { CronFileController } from './controllers/cron.file.controller';
 import { FindTemporaryFileUsecase } from './usecases/find-temporary-file.usecase';
+import { CreateFileDataUsecase } from './usecases/create-file-data.usecase';
+import { GetPresignedUrlUsecase } from './usecases/get-presigned-url.usecase';
 
 @Module({
     imports: [DomainFileModule, TypeOrmModule.forFeature([File]), ConfigModule.forFeature(APP_CONFIG)],
     controllers: [FileController, CronFileController],
-    providers: [FileService, UploadFileUsecase, DeleteFileUsecase, S3Service, FindTemporaryFileUsecase],
+    providers: [
+        FileService,
+        UploadFileUsecase,
+        DeleteFileUsecase,
+        S3Service,
+        FindTemporaryFileUsecase,
+        CreateFileDataUsecase,
+        GetPresignedUrlUsecase,
+    ],
     exports: [FileService],
 })
 export class FileModule {}
