@@ -25,15 +25,24 @@ export class UpdateVehicleInfoUsecase {
             if (!updateVehicleInfoDto.parkingLocationImages) updateVehicleInfoDto.parkingLocationImages = [];
             if (!updateVehicleInfoDto.odometerImages) updateVehicleInfoDto.odometerImages = [];
             if (!updateVehicleInfoDto.indoorImages) updateVehicleInfoDto.indoorImages = [];
+            updateVehicleInfoDto.parkingLocationImages = updateVehicleInfoDto.parkingLocationImages.map((image) =>
+                this.fileService.getFileUrl(image),
+            );
+            updateVehicleInfoDto.odometerImages = updateVehicleInfoDto.odometerImages.map((image) =>
+                this.fileService.getFileUrl(image),
+            );
+            updateVehicleInfoDto.indoorImages = updateVehicleInfoDto.indoorImages.map((image) =>
+                this.fileService.getFileUrl(image),
+            );
 
             const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, {
                 queryRunner,
             });
 
             const images = [
-                ...(updateVehicleInfoDto.parkingLocationImages || []),
-                ...(updateVehicleInfoDto.odometerImages || []),
-                ...(updateVehicleInfoDto.indoorImages || []),
+                ...updateVehicleInfoDto.parkingLocationImages,
+                ...updateVehicleInfoDto.odometerImages,
+                ...updateVehicleInfoDto.indoorImages,
             ];
 
             if (images.length > 0) {

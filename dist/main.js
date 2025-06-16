@@ -2519,6 +2519,25 @@ ORDER BY
 
 /***/ }),
 
+/***/ "./libs/enums/mime-type.enum.ts":
+/*!**************************************!*\
+  !*** ./libs/enums/mime-type.enum.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MimeType = void 0;
+var MimeType;
+(function (MimeType) {
+    MimeType["IMAGE_JPEG"] = "image/jpeg";
+    MimeType["IMAGE_PNG"] = "image/png";
+    MimeType["IMAGE_WEBP"] = "image/webp";
+})(MimeType || (exports.MimeType = MimeType = {}));
+
+
+/***/ }),
+
 /***/ "./libs/enums/notification-type.enum.ts":
 /*!**********************************************!*\
   !*** ./libs/enums/notification-type.enum.ts ***!
@@ -6375,7 +6394,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -6386,6 +6405,8 @@ const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const file_response_dto_1 = __webpack_require__(/*! @resource/application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
 const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const mime_type_enum_1 = __webpack_require__(/*! @libs/enums/mime-type.enum */ "./libs/enums/mime-type.enum.ts");
+const create_filedata_dto_1 = __webpack_require__(/*! ../dtos/create-filedata.dto */ "./src/application/file/dtos/create-filedata.dto.ts");
 let FileController = class FileController {
     constructor(fileService) {
         this.fileService = fileService;
@@ -6398,6 +6419,12 @@ let FileController = class FileController {
     }
     async deleteMultipleFiles(fileIds) {
         await this.fileService.deleteMultipleFiles(fileIds);
+    }
+    async getPresignedUrl(mime) {
+        return this.fileService.getPresignedUrl(mime);
+    }
+    async createFileData(createFileDataDto) {
+        return this.fileService.createFileData(createFileDataDto);
     }
     async deleteFile(fileId) {
         await this.fileService.deleteFile(fileId);
@@ -6474,6 +6501,25 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "deleteMultipleFiles", null);
 __decorate([
+    (0, common_1.Get)('presigned-url'),
+    (0, swagger_1.ApiOperation)({ summary: 'Presigned URL 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: 'Presigned URL 생성 성공' }),
+    (0, swagger_1.ApiQuery)({ name: 'mime', enum: mime_type_enum_1.MimeType, example: mime_type_enum_1.MimeType.IMAGE_PNG, required: true }),
+    __param(0, (0, common_1.Query)('mime')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof mime_type_enum_1.MimeType !== "undefined" && mime_type_enum_1.MimeType) === "function" ? _d : Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "getPresignedUrl", null);
+__decorate([
+    (0, common_1.Post)('data'),
+    (0, swagger_1.ApiOperation)({ summary: '파일 데이터 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 데이터 생성 성공' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof create_filedata_dto_1.CreateFileDataDto !== "undefined" && create_filedata_dto_1.CreateFileDataDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "createFileData", null);
+__decorate([
     (0, common_1.Delete)(':fileId'),
     (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
     (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 삭제 성공' }),
@@ -6489,6 +6535,36 @@ exports.FileController = FileController = __decorate([
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _a : Object])
 ], FileController);
+
+
+/***/ }),
+
+/***/ "./src/application/file/dtos/create-filedata.dto.ts":
+/*!**********************************************************!*\
+  !*** ./src/application/file/dtos/create-filedata.dto.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateFileDataDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class CreateFileDataDto {
+}
+exports.CreateFileDataDto = CreateFileDataDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '파일 경로' }),
+    __metadata("design:type", String)
+], CreateFileDataDto.prototype, "filePath", void 0);
 
 
 /***/ }),
@@ -6559,6 +6635,8 @@ const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const file_entity_1 = __webpack_require__(/*! @libs/entities/file.entity */ "./libs/entities/file.entity.ts");
 const cron_file_controller_1 = __webpack_require__(/*! ./controllers/cron.file.controller */ "./src/application/file/controllers/cron.file.controller.ts");
 const find_temporary_file_usecase_1 = __webpack_require__(/*! ./usecases/find-temporary-file.usecase */ "./src/application/file/usecases/find-temporary-file.usecase.ts");
+const create_file_data_usecase_1 = __webpack_require__(/*! ./usecases/create-file-data.usecase */ "./src/application/file/usecases/create-file-data.usecase.ts");
+const get_presigned_url_usecase_1 = __webpack_require__(/*! ./usecases/get-presigned-url.usecase */ "./src/application/file/usecases/get-presigned-url.usecase.ts");
 let FileModule = class FileModule {
 };
 exports.FileModule = FileModule;
@@ -6566,7 +6644,15 @@ exports.FileModule = FileModule = __decorate([
     (0, common_1.Module)({
         imports: [file_module_1.DomainFileModule, typeorm_1.TypeOrmModule.forFeature([file_entity_1.File]), config_1.ConfigModule.forFeature(env_config_1.APP_CONFIG)],
         controllers: [file_controller_1.FileController, cron_file_controller_1.CronFileController],
-        providers: [file_service_1.FileService, upload_file_usecase_1.UploadFileUsecase, delete_file_usecase_1.DeleteFileUsecase, s3_service_1.S3Service, find_temporary_file_usecase_1.FindTemporaryFileUsecase],
+        providers: [
+            file_service_1.FileService,
+            upload_file_usecase_1.UploadFileUsecase,
+            delete_file_usecase_1.DeleteFileUsecase,
+            s3_service_1.S3Service,
+            find_temporary_file_usecase_1.FindTemporaryFileUsecase,
+            create_file_data_usecase_1.CreateFileDataUsecase,
+            get_presigned_url_usecase_1.GetPresignedUrlUsecase,
+        ],
         exports: [file_service_1.FileService],
     })
 ], FileModule);
@@ -6590,18 +6676,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const upload_file_usecase_1 = __webpack_require__(/*! ./usecases/upload-file.usecase */ "./src/application/file/usecases/upload-file.usecase.ts");
 const delete_file_usecase_1 = __webpack_require__(/*! ./usecases/delete-file.usecase */ "./src/application/file/usecases/delete-file.usecase.ts");
 const find_temporary_file_usecase_1 = __webpack_require__(/*! ./usecases/find-temporary-file.usecase */ "./src/application/file/usecases/find-temporary-file.usecase.ts");
+const get_presigned_url_usecase_1 = __webpack_require__(/*! ./usecases/get-presigned-url.usecase */ "./src/application/file/usecases/get-presigned-url.usecase.ts");
+const create_file_data_usecase_1 = __webpack_require__(/*! ./usecases/create-file-data.usecase */ "./src/application/file/usecases/create-file-data.usecase.ts");
 let FileService = class FileService {
-    constructor(uploadFileUsecase, deleteFileUsecase, findTemporaryFileUsecase) {
+    constructor(uploadFileUsecase, deleteFileUsecase, findTemporaryFileUsecase, getPresignedUrlUsecase, createFileDataUsecase) {
         this.uploadFileUsecase = uploadFileUsecase;
         this.deleteFileUsecase = deleteFileUsecase;
         this.findTemporaryFileUsecase = findTemporaryFileUsecase;
+        this.getPresignedUrlUsecase = getPresignedUrlUsecase;
+        this.createFileDataUsecase = createFileDataUsecase;
     }
     async deleteTemporaryFile() {
         const files = await this.findTemporaryFileUsecase.execute();
@@ -6622,11 +6712,20 @@ let FileService = class FileService {
         const deletePromises = fileIds.map((fileId) => this.deleteFileUsecase.execute(fileId));
         await Promise.all(deletePromises);
     }
+    async getPresignedUrl(mime) {
+        if (!mime) {
+            throw new common_1.BadRequestException('Mime type is required');
+        }
+        return this.getPresignedUrlUsecase.execute(mime);
+    }
+    async createFileData(createFileDataDto) {
+        return this.createFileDataUsecase.execute(createFileDataDto);
+    }
 };
 exports.FileService = FileService;
 exports.FileService = FileService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof upload_file_usecase_1.UploadFileUsecase !== "undefined" && upload_file_usecase_1.UploadFileUsecase) === "function" ? _a : Object, typeof (_b = typeof delete_file_usecase_1.DeleteFileUsecase !== "undefined" && delete_file_usecase_1.DeleteFileUsecase) === "function" ? _b : Object, typeof (_c = typeof find_temporary_file_usecase_1.FindTemporaryFileUsecase !== "undefined" && find_temporary_file_usecase_1.FindTemporaryFileUsecase) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof upload_file_usecase_1.UploadFileUsecase !== "undefined" && upload_file_usecase_1.UploadFileUsecase) === "function" ? _a : Object, typeof (_b = typeof delete_file_usecase_1.DeleteFileUsecase !== "undefined" && delete_file_usecase_1.DeleteFileUsecase) === "function" ? _b : Object, typeof (_c = typeof find_temporary_file_usecase_1.FindTemporaryFileUsecase !== "undefined" && find_temporary_file_usecase_1.FindTemporaryFileUsecase) === "function" ? _c : Object, typeof (_d = typeof get_presigned_url_usecase_1.GetPresignedUrlUsecase !== "undefined" && get_presigned_url_usecase_1.GetPresignedUrlUsecase) === "function" ? _d : Object, typeof (_e = typeof create_file_data_usecase_1.CreateFileDataUsecase !== "undefined" && create_file_data_usecase_1.CreateFileDataUsecase) === "function" ? _e : Object])
 ], FileService);
 
 
@@ -6654,7 +6753,9 @@ exports.S3Service = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const client_s3_1 = __webpack_require__(/*! @aws-sdk/client-s3 */ "@aws-sdk/client-s3");
+const s3_request_presigner_1 = __webpack_require__(/*! @aws-sdk/s3-request-presigner */ "@aws-sdk/s3-request-presigner");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const mime_type_enum_1 = __webpack_require__(/*! @libs/enums/mime-type.enum */ "./libs/enums/mime-type.enum.ts");
 let S3Service = class S3Service {
     constructor(configService) {
         this.configService = configService;
@@ -6703,12 +6804,93 @@ let S3Service = class S3Service {
     getFileUrl(fileKey) {
         return `${this.configService.get('S3_ENDPOINT').replace('s3', 'object/public')}/${this.bucketName}/${fileKey}`;
     }
+    async generatePresignedUrl(mime) {
+        const extMap = {
+            [mime_type_enum_1.MimeType.IMAGE_JPEG]: 'jpg',
+            [mime_type_enum_1.MimeType.IMAGE_PNG]: 'png',
+            [mime_type_enum_1.MimeType.IMAGE_WEBP]: 'webp',
+        };
+        const fileExtension = extMap[mime] || 'bin';
+        const fileKey = `${date_util_1.DateUtil.now().format('YYYYMMDDHHmmssSSS')}.${fileExtension}`;
+        const command = new client_s3_1.PutObjectCommand({
+            Bucket: this.bucketName,
+            Key: fileKey,
+            ContentType: mime,
+        });
+        const url = await (0, s3_request_presigner_1.getSignedUrl)(this.s3Client, command, { expiresIn: 60 * 2 });
+        return url;
+    }
+    async checkFileExists(fileKey) {
+        try {
+            const command = new client_s3_1.HeadObjectCommand({
+                Bucket: this.bucketName,
+                Key: fileKey,
+            });
+            const result = await this.s3Client.send(command);
+            console.log(result);
+            return result.ContentLength !== undefined && result.ContentLength > 0;
+        }
+        catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
 };
 exports.S3Service = S3Service;
 exports.S3Service = S3Service = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
 ], S3Service);
+
+
+/***/ }),
+
+/***/ "./src/application/file/usecases/create-file-data.usecase.ts":
+/*!*******************************************************************!*\
+  !*** ./src/application/file/usecases/create-file-data.usecase.ts ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateFileDataUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const s3_service_1 = __webpack_require__(/*! ../infrastructure/s3.service */ "./src/application/file/infrastructure/s3.service.ts");
+let CreateFileDataUsecase = class CreateFileDataUsecase {
+    constructor(fileService, s3Service) {
+        this.fileService = fileService;
+        this.s3Service = s3Service;
+        this.retryCount = 3;
+    }
+    async execute(createFileDataDto) {
+        const fileName = createFileDataDto.filePath.split('/').pop();
+        const fileExists = await this.s3Service.checkFileExists(fileName);
+        if (!fileExists) {
+            throw new common_1.BadRequestException('File not found in S3');
+        }
+        const file = await this.fileService.create({
+            fileName,
+            filePath: this.s3Service.getFileUrl(fileName),
+        });
+        return await this.fileService.save(file);
+    }
+};
+exports.CreateFileDataUsecase = CreateFileDataUsecase;
+exports.CreateFileDataUsecase = CreateFileDataUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object, typeof (_b = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _b : Object])
+], CreateFileDataUsecase);
 
 
 /***/ }),
@@ -6802,6 +6984,44 @@ exports.FindTemporaryFileUsecase = FindTemporaryFileUsecase = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object])
 ], FindTemporaryFileUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/file/usecases/get-presigned-url.usecase.ts":
+/*!********************************************************************!*\
+  !*** ./src/application/file/usecases/get-presigned-url.usecase.ts ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GetPresignedUrlUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const s3_service_1 = __webpack_require__(/*! ../infrastructure/s3.service */ "./src/application/file/infrastructure/s3.service.ts");
+let GetPresignedUrlUsecase = class GetPresignedUrlUsecase {
+    constructor(s3Service) {
+        this.s3Service = s3Service;
+    }
+    async execute(mime) {
+        return this.s3Service.generatePresignedUrl(mime);
+    }
+};
+exports.GetPresignedUrlUsecase = GetPresignedUrlUsecase;
+exports.GetPresignedUrlUsecase = GetPresignedUrlUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _a : Object])
+], GetPresignedUrlUsecase);
 
 
 /***/ }),
@@ -9127,6 +9347,7 @@ const reservation_service_1 = __webpack_require__(/*! ./services/reservation.ser
 const cron_reservation_service_1 = __webpack_require__(/*! ./services/cron-reservation.service */ "./src/application/reservation/core/services/cron-reservation.service.ts");
 const notification_module_2 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
 const employee_notification_module_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.module */ "./src/domain/employee-notification/employee-notification.module.ts");
+const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
 let ReservationCoreModule = class ReservationCoreModule {
 };
 exports.ReservationCoreModule = ReservationCoreModule;
@@ -9151,6 +9372,7 @@ exports.ReservationCoreModule = ReservationCoreModule = __decorate([
             notification_module_1.NotificationModule,
             employee_notification_module_1.DomainEmployeeNotificationModule,
             notification_module_2.DomainNotificationModule,
+            file_module_1.DomainFileModule,
             schedule_1.ScheduleModule.forRoot(),
         ],
         controllers: [admin_reservation_controller_1.AdminReservationController, reservation_controller_1.UserReservationController, cron_reservation_controller_1.CronReservationController],
@@ -11260,7 +11482,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReturnVehicleUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -11275,13 +11497,15 @@ const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/uti
 const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
 const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 let ReturnVehicleUsecase = class ReturnVehicleUsecase {
-    constructor(reservationService, reservationVehicleService, resourceService, vehicleInfoService, notificationService, dataSource) {
+    constructor(reservationService, reservationVehicleService, resourceService, vehicleInfoService, notificationService, fileService, dataSource) {
         this.reservationService = reservationService;
         this.reservationVehicleService = reservationVehicleService;
         this.resourceService = resourceService;
         this.vehicleInfoService = vehicleInfoService;
         this.notificationService = notificationService;
+        this.fileService = fileService;
         this.dataSource = dataSource;
     }
     async execute(user, reservationId, returnDto) {
@@ -11327,6 +11551,24 @@ let ReturnVehicleUsecase = class ReturnVehicleUsecase {
             }, { queryRunner });
             const vehicleInfoId = reservation.resource.vehicleInfo.vehicleInfoId;
             await this.resourceService.update(reservation.resource.resourceId, { location: returnDto.location }, { queryRunner });
+            if (!returnDto.parkingLocationImages)
+                returnDto.parkingLocationImages = [];
+            if (!returnDto.odometerImages)
+                returnDto.odometerImages = [];
+            if (!returnDto.indoorImages)
+                returnDto.indoorImages = [];
+            returnDto.parkingLocationImages = returnDto.parkingLocationImages.map((image) => this.fileService.getFileUrl(image));
+            returnDto.odometerImages = returnDto.odometerImages.map((image) => this.fileService.getFileUrl(image));
+            returnDto.indoorImages = returnDto.indoorImages.map((image) => this.fileService.getFileUrl(image));
+            console.log(returnDto.parkingLocationImages);
+            console.log(returnDto.odometerImages);
+            console.log(returnDto.indoorImages);
+            const images = [...returnDto.parkingLocationImages, ...returnDto.odometerImages, ...returnDto.indoorImages];
+            if (images.length > 0) {
+                await this.fileService.updateTemporaryFiles(images, false, {
+                    queryRunner,
+                });
+            }
             await this.vehicleInfoService.update(vehicleInfoId, {
                 totalMileage: returnDto.totalMileage,
                 leftMileage: returnDto.leftMileage,
@@ -11356,7 +11598,7 @@ let ReturnVehicleUsecase = class ReturnVehicleUsecase {
 exports.ReturnVehicleUsecase = ReturnVehicleUsecase;
 exports.ReturnVehicleUsecase = ReturnVehicleUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _e : Object, typeof (_f = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
 ], ReturnVehicleUsecase);
 
 
@@ -14784,6 +15026,9 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
                 },
             });
             const resourceOrder = resources.length;
+            if (!resource.images)
+                resource.images = [];
+            resource.images = resource.images.map((image) => this.fileService.getFileUrl(image));
             const savedResource = await this.resourceService.save({ ...resource, order: resourceOrder }, {
                 queryRunner,
             });
@@ -15644,10 +15889,11 @@ let UpdateResourceUsecase = class UpdateResourceUsecase {
         await queryRunner.startTransaction();
         try {
             if (updateRequest.resource) {
+                if (!updateRequest.resource.images)
+                    updateRequest.resource.images = [];
+                updateRequest.resource.images = updateRequest.resource.images.map((image) => this.fileService.getFileUrl(image));
                 await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
-                if (updateRequest.resource.images && updateRequest.resource.images.length > 0) {
-                    await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
-                }
+                await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
             }
             if (updateRequest.managers) {
                 const newManagerIds = updateRequest.managers.map((m) => m.employeeId);
@@ -17560,10 +17806,11 @@ let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            if (!createMaintenanceDto.images)
+                createMaintenanceDto.images = [];
+            createMaintenanceDto.images = createMaintenanceDto.images.map((image) => this.fileService.getFileUrl(image));
             const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
-            if (createMaintenanceDto.images && createMaintenanceDto.images.length > 0) {
-                await this.fileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
-            }
+            await this.fileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
@@ -17661,10 +17908,11 @@ let UpdateMaintenanceUsecase = class UpdateMaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            if (!updateMaintenanceDto.images)
+                updateMaintenanceDto.images = [];
+            updateMaintenanceDto.images = updateMaintenanceDto.images.map((image) => this.fileService.getFileUrl(image));
             const maintenance = await this.maintenanceService.update(maintenanceId, updateMaintenanceDto);
-            if (updateMaintenanceDto.images && updateMaintenanceDto.images.length > 0) {
-                await this.fileService.updateTemporaryFiles(updateMaintenanceDto.images, false, { queryRunner });
-            }
+            await this.fileService.updateTemporaryFiles(updateMaintenanceDto.images, false, { queryRunner });
             if (updateMaintenanceDto.mileage) {
                 const savedMaintenance = await this.maintenanceService.findOne({
                     where: { maintenanceId: maintenance.maintenanceId },
@@ -17830,13 +18078,16 @@ let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
                 updateVehicleInfoDto.odometerImages = [];
             if (!updateVehicleInfoDto.indoorImages)
                 updateVehicleInfoDto.indoorImages = [];
+            updateVehicleInfoDto.parkingLocationImages = updateVehicleInfoDto.parkingLocationImages.map((image) => this.fileService.getFileUrl(image));
+            updateVehicleInfoDto.odometerImages = updateVehicleInfoDto.odometerImages.map((image) => this.fileService.getFileUrl(image));
+            updateVehicleInfoDto.indoorImages = updateVehicleInfoDto.indoorImages.map((image) => this.fileService.getFileUrl(image));
             const vehicleInfo = await this.vehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, {
                 queryRunner,
             });
             const images = [
-                ...(updateVehicleInfoDto.parkingLocationImages || []),
-                ...(updateVehicleInfoDto.odometerImages || []),
-                ...(updateVehicleInfoDto.indoorImages || []),
+                ...updateVehicleInfoDto.parkingLocationImages,
+                ...updateVehicleInfoDto.odometerImages,
+                ...updateVehicleInfoDto.indoorImages,
             ];
             if (images.length > 0) {
                 await this.fileService.updateTemporaryFiles(images, false, {
@@ -20062,17 +20313,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DomainFileService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
 const file_repository_1 = __webpack_require__(/*! ./file.repository */ "./src/domain/file/file.repository.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 let DomainFileService = class DomainFileService extends base_service_1.BaseService {
-    constructor(fileRepository) {
+    constructor(fileRepository, configService) {
         super(fileRepository);
         this.fileRepository = fileRepository;
+        this.configService = configService;
     }
     async findFileById(fileId) {
         const file = await this.fileRepository.findOne({ where: { fileId } });
@@ -20090,18 +20343,29 @@ let DomainFileService = class DomainFileService extends base_service_1.BaseServi
         return files;
     }
     async updateTemporaryFiles(filePaths, isTemporary, repositoryOptions) {
-        const files = await this.fileRepository.findAll({ where: { filePath: (0, typeorm_1.In)(filePaths) } });
-        await Promise.all(files.map((file) => this.fileRepository.update(file.fileId, { isTemporary }, repositoryOptions)));
+        await Promise.all(filePaths.map(async (filePath) => {
+            const fileName = filePath.split('/').pop();
+            const file = await this.create({
+                fileName,
+                filePath,
+                isTemporary,
+            });
+            await this.fileRepository.save(file, repositoryOptions);
+        }));
     }
     async deleteFilesByFilePath(filePaths, repositoryOptions) {
         const files = await this.fileRepository.findAll({ where: { filePath: (0, typeorm_1.In)(filePaths) } });
         await Promise.all(files.map((file) => this.fileRepository.delete(file.fileId, repositoryOptions)));
     }
+    getFileUrl(filePath) {
+        const fileKey = filePath.split('/').pop();
+        return `${this.configService.get('S3_ENDPOINT').replace('s3', 'object/public')}/${this.configService.get('S3_BUCKET_NAME')}/${fileKey}`;
+    }
 };
 exports.DomainFileService = DomainFileService;
 exports.DomainFileService = DomainFileService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_1.DomainFileRepository !== "undefined" && file_repository_1.DomainFileRepository) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof file_repository_1.DomainFileRepository !== "undefined" && file_repository_1.DomainFileRepository) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
 ], DomainFileService);
 
 
@@ -21528,7 +21792,7 @@ exports.DomainVehicleInfoService = DomainVehicleInfoService = __decorate([
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.EquipmentInfoResponseDto = exports.UpdateEquipmentInfoDto = exports.CreateEquipmentInfoDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.CreateResourceResponseDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UpdateNotificationSettingsDto = exports.CheckPasswordDto = exports.ChangePasswordDto = exports.ChangeRoleDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.PushNotificationPayload = exports.PushNotificationDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = void 0;
+exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.PushNotificationPayload = exports.PushNotificationDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.CreateFileDataDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./application/auth/dto/login.dto */ "./src/application/auth/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./application/auth/dto/login-response.dto */ "./src/application/auth/dto/login-response.dto.ts");
@@ -21646,6 +21910,8 @@ var check_availability_dto_2 = __webpack_require__(/*! ./application/resource/co
 Object.defineProperty(exports, "CheckAvailabilityResponseDto", ({ enumerable: true, get: function () { return check_availability_dto_2.CheckAvailabilityResponseDto; } }));
 var file_response_dto_1 = __webpack_require__(/*! ./application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
 Object.defineProperty(exports, "FileResponseDto", ({ enumerable: true, get: function () { return file_response_dto_1.FileResponseDto; } }));
+var create_filedata_dto_1 = __webpack_require__(/*! ./application/file/dtos/create-filedata.dto */ "./src/application/file/dtos/create-filedata.dto.ts");
+Object.defineProperty(exports, "CreateFileDataDto", ({ enumerable: true, get: function () { return create_filedata_dto_1.CreateFileDataDto; } }));
 var create_notification_dto_1 = __webpack_require__(/*! ./application/notification/dtos/create-notification.dto */ "./src/application/notification/dtos/create-notification.dto.ts");
 Object.defineProperty(exports, "CreateNotificationDto", ({ enumerable: true, get: function () { return create_notification_dto_1.CreateNotificationDto; } }));
 Object.defineProperty(exports, "SendNotificationDto", ({ enumerable: true, get: function () { return create_notification_dto_1.SendNotificationDto; } }));
@@ -22036,6 +22302,16 @@ exports.SeedService = SeedService = __decorate([
 /***/ ((module) => {
 
 module.exports = require("@aws-sdk/client-s3");
+
+/***/ }),
+
+/***/ "@aws-sdk/s3-request-presigner":
+/*!************************************************!*\
+  !*** external "@aws-sdk/s3-request-presigner" ***!
+  \************************************************/
+/***/ ((module) => {
+
+module.exports = require("@aws-sdk/s3-request-presigner");
 
 /***/ }),
 

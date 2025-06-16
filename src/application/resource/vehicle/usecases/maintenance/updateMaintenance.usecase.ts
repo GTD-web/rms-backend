@@ -38,10 +38,12 @@ export class UpdateMaintenanceUsecase {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            if (!updateMaintenanceDto.images) updateMaintenanceDto.images = [];
+            updateMaintenanceDto.images = updateMaintenanceDto.images.map((image) =>
+                this.fileService.getFileUrl(image),
+            );
             const maintenance = await this.maintenanceService.update(maintenanceId, updateMaintenanceDto);
-            if (updateMaintenanceDto.images && updateMaintenanceDto.images.length > 0) {
-                await this.fileService.updateTemporaryFiles(updateMaintenanceDto.images, false, { queryRunner });
-            }
+            await this.fileService.updateTemporaryFiles(updateMaintenanceDto.images, false, { queryRunner });
             if (updateMaintenanceDto.mileage) {
                 const savedMaintenance = await this.maintenanceService.findOne({
                     where: { maintenanceId: maintenance.maintenanceId },

@@ -34,10 +34,12 @@ export class UpdateResourceUsecase {
 
         try {
             if (updateRequest.resource) {
+                if (!updateRequest.resource.images) updateRequest.resource.images = [];
+                updateRequest.resource.images = updateRequest.resource.images.map((image) =>
+                    this.fileService.getFileUrl(image),
+                );
                 await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
-                if (updateRequest.resource.images && updateRequest.resource.images.length > 0) {
-                    await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
-                }
+                await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
             }
 
             if (updateRequest.managers) {
