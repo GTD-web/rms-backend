@@ -146,14 +146,6 @@ export class UpdateReservationUsecase {
 
         // 상태가 CONFIRMED인 경우에만 새로운 Job 생성
         if (hasUpdateTime) {
-            if (
-                reservation.status === ReservationStatus.CONFIRMED &&
-                reservation.resource.type !== ResourceType.VEHICLE
-            ) {
-                // 기존 Job 삭제
-                this.deleteReservationClosingJob.execute(reservationId);
-                this.createReservationClosingJob.execute(reservation);
-            }
             updatedReservation = await this.reservationService.update(
                 reservationId,
                 {
@@ -168,6 +160,8 @@ export class UpdateReservationUsecase {
             );
             if (updatedReservation.resource.notifyReservationChange) {
                 try {
+                    await this.notificationService.deleteScheduleJob(updatedReservation.reservationId);
+
                     const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
 
                     await this.notificationService.createNotification(
