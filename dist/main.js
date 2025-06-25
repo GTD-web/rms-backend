@@ -8025,6 +8025,9 @@ let NotificationService = class NotificationService {
             notificationData: notification.notificationData,
         });
     }
+    async deleteScheduleJob(reservationId) {
+        await this.deleteScheduleJobUsecase.execute(reservationId);
+    }
 };
 exports.NotificationService = NotificationService;
 exports.NotificationService = NotificationService = __decorate([
@@ -8402,22 +8405,15 @@ let DeleteScheduleJobUsecase = class DeleteScheduleJobUsecase {
         this.notificationService = notificationService;
         this.employeeNotificationService = employeeNotificationService;
     }
-    async execute(createNotificationData) {
+    async execute(reservationId) {
         const notifications = await this.notificationService.findAll({
             where: {
                 notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
-                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${createNotificationData.reservationId}'`),
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
                 isSent: false,
             },
         });
         for (const notification of notifications) {
-            try {
-                const jobName = `upcoming-${notification.notificationId}}`;
-                this.schedulerRegistry.deleteCronJob(jobName);
-            }
-            catch (error) {
-                console.error(`Failed to delete cron job ${notification.notificationId}: ${error}`);
-            }
             await this.employeeNotificationService.deleteByNotificationId(notification.notificationId);
             await this.notificationService.delete(notification.notificationId);
         }
@@ -11842,11 +11838,6 @@ let UpdateReservationUsecase = class UpdateReservationUsecase {
             }
         }
         if (hasUpdateTime) {
-            if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED &&
-                reservation.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
-                this.deleteReservationClosingJob.execute(reservationId);
-                this.createReservationClosingJob.execute(reservation);
-            }
             updatedReservation = await this.reservationService.update(reservationId, {
                 startDate: updateDto.startDate ? date_util_1.DateUtil.date(updateDto.startDate).toDate() : undefined,
                 endDate: updateDto.endDate ? date_util_1.DateUtil.date(updateDto.endDate).toDate() : undefined,
@@ -11857,6 +11848,7 @@ let UpdateReservationUsecase = class UpdateReservationUsecase {
             });
             if (updatedReservation.resource.notifyReservationChange) {
                 try {
+                    await this.notificationService.deleteScheduleJob(updatedReservation.reservationId);
                     const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
                     await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED, {
                         reservationId: updatedReservation.reservationId,

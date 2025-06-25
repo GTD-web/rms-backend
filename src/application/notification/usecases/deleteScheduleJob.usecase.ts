@@ -15,23 +15,15 @@ export class DeleteScheduleJobUsecase {
         private readonly employeeNotificationService: DomainEmployeeNotificationService,
     ) {}
 
-    async execute(createNotificationData: CreateNotificationDataDto) {
+    async execute(reservationId: string) {
         const notifications = await this.notificationService.findAll({
             where: {
                 notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
-                notificationData: Raw(
-                    (alias) => `${alias} ->> 'reservationId' = '${createNotificationData.reservationId}'`,
-                ),
+                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
                 isSent: false,
             },
         });
         for (const notification of notifications) {
-            try {
-                const jobName = `upcoming-${notification.notificationId}}`;
-                this.schedulerRegistry.deleteCronJob(jobName);
-            } catch (error) {
-                console.error(`Failed to delete cron job ${notification.notificationId}: ${error}`);
-            }
             await this.employeeNotificationService.deleteByNotificationId(notification.notificationId);
             await this.notificationService.delete(notification.notificationId);
         }

@@ -151,4 +151,8 @@ export class NotificationService {
             notificationData: notification.notificationData,
         });
     }
+
+    async deleteScheduleJob(reservationId: string): Promise<void> {
+        await this.deleteScheduleJobUsecase.execute(reservationId);
+    }
 }
