@@ -29,7 +29,7 @@ export class SsoLoginUsecase {
                 },
             );
             const data: SsoResponseDto = response.data;
-            data.password = bcrypt.hashSync(password, 10);
+            data.password = await bcrypt.hash(password, 10);
 
             return data;
         } catch (error) {
