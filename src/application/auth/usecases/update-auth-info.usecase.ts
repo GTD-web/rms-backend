@@ -14,6 +14,21 @@ export class UpdateAuthInfoUsecase {
                 employeeNumber: ssoResponse.employeeNumber,
             },
         });
+
+        if (!employee) {
+            const newEmployee = await this.employeeService.create({
+                employeeNumber: ssoResponse.employeeNumber,
+                name: ssoResponse.name,
+                email: ssoResponse.email,
+                department: ssoResponse.department,
+                position: ssoResponse.position,
+                mobile: ssoResponse.phoneNumber,
+                accessToken: ssoResponse.accessToken,
+                expiredAt: DateUtil.format(ssoResponse.expiresAt, 'YYYY-MM-DD HH:mm:ss'),
+            });
+            return await this.employeeService.save(newEmployee);
+        }
+
         employee.password = ssoResponse.password;
         employee.mobile = ssoResponse.phoneNumber;
         employee.accessToken = ssoResponse.accessToken;
@@ -21,6 +36,6 @@ export class UpdateAuthInfoUsecase {
         employee.department = ssoResponse.department;
         employee.position = ssoResponse.position;
 
-        return await this.employeeService.update(employee.employeeId, employee);
+        return await this.employeeService.save(employee);
     }
 }
