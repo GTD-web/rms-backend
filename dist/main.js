@@ -4468,7 +4468,7 @@ let SsoLoginUsecase = class SsoLoginUsecase {
                 },
             });
             const data = response.data;
-            data.password = bcrypt.hashSync(password, 10);
+            data.password = await bcrypt.hash(password, 10);
             return data;
         }
         catch (error) {
