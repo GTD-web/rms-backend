@@ -2562,7 +2562,9 @@ var NotificationType;
     NotificationType["RESERVATION_TIME_CHANGED"] = "RESERVATION_TIME_CHANGED";
     NotificationType["RESERVATION_PARTICIPANT_CHANGED"] = "RESERVATION_PARTICIPANT_CHANGED";
     NotificationType["RESOURCE_CONSUMABLE_REPLACING"] = "RESOURCE_CONSUMABLE_REPLACING";
+    NotificationType["RESOURCE_CONSUMABLE_DELAYED_REPLACING"] = "RESOURCE_CONSUMABLE_DELAYED_REPLACING";
     NotificationType["RESOURCE_VEHICLE_RETURNED"] = "RESOURCE_VEHICLE_RETURNED";
+    NotificationType["RESOURCE_VEHICLE_DELAYED_RETURNED"] = "RESOURCE_VEHICLE_DELAYED_RETURNED";
     NotificationType["RESOURCE_MAINTENANCE_COMPLETED"] = "RESOURCE_MAINTENANCE_COMPLETED";
 })(NotificationType || (exports.NotificationType = NotificationType = {}));
 
@@ -8045,6 +8047,24 @@ let NotificationService = class NotificationService {
             notificationData: notification.notificationData,
         });
     }
+    async sendRequestNotification(notificationType, createNotificationDatatDto, notiTarget) {
+        const createNotificationDto = await this.createNotificationUsecase.execute(notificationType, createNotificationDatatDto);
+        if (!createNotificationDto) {
+            return;
+        }
+        const notification = await this.saveNotificationUsecase.execute(createNotificationDto, notiTarget);
+        const totalSubscriptions = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+        await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
+    }
     async deleteScheduleJob(reservationId) {
         await this.deleteScheduleJobUsecase.execute(reservationId);
     }
@@ -8127,9 +8147,17 @@ let CreateNotificationUsecase = class CreateNotificationUsecase {
                 createNotificationDto.title = `[교체 주기 알림] ${createNotificationDatatDto.consumableName}`;
                 createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
                 break;
+            case notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING:
+                createNotificationDto.title = `[교체 지연 알림] ${createNotificationDatatDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                break;
             case notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED:
                 createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
                 createNotificationDto.body = `${createNotificationDatatDto.resourceName}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED:
+                createNotificationDto.title = `[차량 반납 지연 알림] ${createNotificationDatatDto.resourceName}`;
+                createNotificationDto.body = `${createNotificationDatatDto.reservationDate}`;
                 break;
             case notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED:
                 createNotificationDto.title = `[정비 완료] ${createNotificationDatatDto.consumableName}`;
@@ -19242,7 +19270,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminTaskController.prototype, "getTasks", null);
 exports.AdminTaskController = AdminTaskController = __decorate([
-    (0, swagger_1.ApiTags)('3. 태스크 관리 '),
+    (0, swagger_1.ApiTags)('3. 태스크 관리 - 관리자'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     (0, common_1.Controller)('v1/admin/tasks'),
