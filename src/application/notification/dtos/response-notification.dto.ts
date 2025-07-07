@@ -65,8 +65,8 @@ export class ResponseNotificationDto {
     @ApiProperty({ enum: NotificationType })
     notificationType: NotificationType;
 
-    @ApiProperty()
-    isRead: boolean;
+    @ApiProperty({ required: false })
+    isRead?: boolean;
 }
 
 export class PushNotificationSendResult {

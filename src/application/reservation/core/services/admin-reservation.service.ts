@@ -11,6 +11,7 @@ import { FindCheckReservationListUsecase } from '../usecases/find-check-reservat
 import { FindReservationDetailUsecase } from '../usecases/find-reservation-detail.usecase';
 import { UpdateReservationStatusUsecase } from '../usecases/update-reservation-status.usecase';
 import { ReturnVehicleUsecase } from '../usecases/return-vehicle.usecase';
+import { FindDelayedVehicleNotificationsUsecase } from '../usecases/find-dealyed-vehicle-notifications.usecase';
 
 @Injectable()
 export class AdminReservationService {
@@ -20,6 +21,7 @@ export class AdminReservationService {
         private readonly findReservationDetailUsecase: FindReservationDetailUsecase,
         private readonly updateReservationStatusUsecase: UpdateReservationStatusUsecase,
         private readonly returnVehicleUsecase: ReturnVehicleUsecase,
+        private readonly findDelayedVehicleNotificationsUsecase: FindDelayedVehicleNotificationsUsecase,
     ) {}
 
     async findReservationList(
@@ -39,7 +41,9 @@ export class AdminReservationService {
     }
 
     async findOne(user: Employee, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
-        return this.findReservationDetailUsecase.execute(user, reservationId);
+        const reservation = await this.findReservationDetailUsecase.execute(user, reservationId);
+        const notifications = await this.findDelayedVehicleNotificationsUsecase.execute(reservationId);
+        return { ...reservation, notifications };
     }
 
     async updateStatus(reservationId: string, updateDto: UpdateReservationStatusDto): Promise<ReservationResponseDto> {
