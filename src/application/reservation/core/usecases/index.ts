@@ -12,6 +12,7 @@ export * from './find-reservation-detail.usecase';
 export * from './find-reservation-list.usecase';
 export * from './find-resource-reservation-list.usecase';
 export * from './handle-cron.usecase';
+export * from './handle-start-odometer.usecase';
 export * from './return-vehicle.usecase';
 export * from './update-reservation-status.usecase';
 export * from './update-reservation.usecase';

@@ -24,26 +24,7 @@ import { NotificationModule } from '@src/application/notification/notification.m
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Usecases
-import {
-    CheckReservationAccessUsecase,
-    CreateReservationClosingJobUsecase,
-    CreateReservationUsecase,
-    DeleteReservationClosingJobUsecase,
-    FindCheckReservationListUsecase,
-    FindConflictReservationUsecase,
-    FindMyAllSchedulesUsecase,
-    FindMyReservationListUsecase,
-    FindMyUpcomingReservationListUsecase,
-    FindMyUsingReservationListUsecase,
-    FindReservationDetailUsecase,
-    FindReservationListUsecase,
-    FindResourceReservationListUsecase,
-    HandleCronUsecase,
-    ReturnVehicleUsecase,
-    UpdateReservationStatusUsecase,
-    UpdateReservationUsecase,
-    FindCalendarUsecase,
-} from './usecases';
+import * as Usecases from './usecases';
 
 // Services
 import { AdminReservationService } from './services/admin-reservation.service';
@@ -86,24 +67,7 @@ import { DomainFileModule } from '@src/domain/file/file.module';
         CronReservationService,
 
         // Usecases
-        CheckReservationAccessUsecase,
-        CreateReservationClosingJobUsecase,
-        CreateReservationUsecase,
-        DeleteReservationClosingJobUsecase,
-        FindCheckReservationListUsecase,
-        FindConflictReservationUsecase,
-        FindMyAllSchedulesUsecase,
-        FindMyReservationListUsecase,
-        FindMyUpcomingReservationListUsecase,
-        FindMyUsingReservationListUsecase,
-        FindReservationDetailUsecase,
-        FindReservationListUsecase,
-        FindResourceReservationListUsecase,
-        HandleCronUsecase,
-        ReturnVehicleUsecase,
-        UpdateReservationStatusUsecase,
-        UpdateReservationUsecase,
-        FindCalendarUsecase,
+        ...Object.values(Usecases),
     ],
     exports: [
         // Services
@@ -112,24 +76,7 @@ import { DomainFileModule } from '@src/domain/file/file.module';
         CronReservationService,
 
         // Usecases
-        CheckReservationAccessUsecase,
-        CreateReservationClosingJobUsecase,
-        CreateReservationUsecase,
-        DeleteReservationClosingJobUsecase,
-        FindCheckReservationListUsecase,
-        FindConflictReservationUsecase,
-        FindMyAllSchedulesUsecase,
-        FindMyReservationListUsecase,
-        FindMyUpcomingReservationListUsecase,
-        FindMyUsingReservationListUsecase,
-        FindReservationDetailUsecase,
-        FindReservationListUsecase,
-        FindResourceReservationListUsecase,
-        HandleCronUsecase,
-        ReturnVehicleUsecase,
-        UpdateReservationStatusUsecase,
-        UpdateReservationUsecase,
-        FindCalendarUsecase,
+        ...Object.values(Usecases),
     ],
 })
 export class ReservationCoreModule {}
