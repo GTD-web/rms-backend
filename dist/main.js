@@ -7090,6 +7090,67 @@ exports.UploadFileUsecase = UploadFileUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/notification/controllers/admin.notification.controller.ts":
+/*!***********************************************************************************!*\
+  !*** ./src/application/notification/controllers/admin.notification.controller.ts ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdminNotificationController = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const create_notification_dto_1 = __webpack_require__(/*! ../dtos/create-notification.dto */ "./src/application/notification/dtos/create-notification.dto.ts");
+const notification_service_1 = __webpack_require__(/*! ../services/notification.service */ "./src/application/notification/services/notification.service.ts");
+let AdminNotificationController = class AdminNotificationController {
+    constructor(notificationService) {
+        this.notificationService = notificationService;
+    }
+    async send(sendNotificationDto) {
+        await this.notificationService.sendRequestNotification(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
+    }
+};
+exports.AdminNotificationController = AdminNotificationController;
+__decorate([
+    (0, common_1.Post)('send'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 알림 전송' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '웹 푸시 알림 전송 성공',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", Promise)
+], AdminNotificationController.prototype, "send", null);
+exports.AdminNotificationController = AdminNotificationController = __decorate([
+    (0, swagger_1.ApiTags)('5. 알림 - 관리자'),
+    (0, common_1.Controller)('v1/admin/notifications'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _a : Object])
+], AdminNotificationController);
+
+
+/***/ }),
+
 /***/ "./src/application/notification/controllers/cron.notification.controller.ts":
 /*!**********************************************************************************!*\
   !*** ./src/application/notification/controllers/cron.notification.controller.ts ***!
@@ -7857,6 +7918,7 @@ const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs
 const cron_notification_controller_1 = __webpack_require__(/*! ./controllers/cron.notification.controller */ "./src/application/notification/controllers/cron.notification.controller.ts");
 const cron_notification_service_1 = __webpack_require__(/*! ./services/cron-notification.service */ "./src/application/notification/services/cron-notification.service.ts");
 const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
+const admin_notification_controller_1 = __webpack_require__(/*! ./controllers/admin.notification.controller */ "./src/application/notification/controllers/admin.notification.controller.ts");
 let NotificationModule = class NotificationModule {
 };
 exports.NotificationModule = NotificationModule;
@@ -7888,7 +7950,7 @@ exports.NotificationModule = NotificationModule = __decorate([
             usecases_1.CronSendUpcomingNotificationUsecase,
             usecases_1.CreateReminderNotificationUsecase,
         ],
-        controllers: [notification_controller_1.NotificationController, cron_notification_controller_1.CronNotificationController],
+        controllers: [notification_controller_1.NotificationController, cron_notification_controller_1.CronNotificationController, admin_notification_controller_1.AdminNotificationController],
         exports: [notification_service_1.NotificationService],
     })
 ], NotificationModule);
