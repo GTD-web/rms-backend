@@ -9,7 +9,7 @@ import {
 } from '@resource/application/employee/dtos/mms-employee-response.dto';
 
 @ApiTags('5. 직원 ')
-@ApiBearerAuth()
+@Public()
 @Controller('v1/employees')
 export class EmployeeWebhookController {
     constructor(private readonly employeeService: EmployeeService) {}

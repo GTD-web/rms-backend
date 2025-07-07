@@ -258,7 +258,7 @@ const ApiDataResponse = (options) => {
                 },
                 {
                     properties: {
-                        data: options.isPaginated || Array.isArray(options.type)
+                        data: options.isPaginated
                             ? {
                                 type: 'object',
                                 properties: {
@@ -271,9 +271,14 @@ const ApiDataResponse = (options) => {
                                     },
                                 },
                             }
-                            : {
-                                $ref: (0, swagger_1.getSchemaPath)(options.type),
-                            },
+                            : Array.isArray(options.type)
+                                ? {
+                                    type: 'array',
+                                    items: { $ref: (0, swagger_1.getSchemaPath)(options.type[0]) },
+                                }
+                                : {
+                                    $ref: (0, swagger_1.getSchemaPath)(options.type),
+                                },
                     },
                 },
             ],
@@ -5075,7 +5080,7 @@ __decorate([
 ], EmployeeWebhookController.prototype, "webhookDelete", null);
 exports.EmployeeWebhookController = EmployeeWebhookController = __decorate([
     (0, swagger_1.ApiTags)('5. 직원 '),
-    (0, swagger_1.ApiBearerAuth)(),
+    (0, public_decorator_1.Public)(),
     (0, common_1.Controller)('v1/employees'),
     __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
 ], EmployeeWebhookController);
@@ -8886,7 +8891,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdminReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -8903,6 +8908,7 @@ const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-r
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
 const admin_reservation_service_1 = __webpack_require__(/*! ../services/admin-reservation.service */ "./src/application/reservation/core/services/admin-reservation.service.ts");
+const update_reservation_dto_1 = __webpack_require__(/*! ../dtos/update-reservation.dto */ "./src/application/reservation/core/dtos/update-reservation.dto.ts");
 let AdminReservationController = class AdminReservationController {
     constructor(adminReservationService) {
         this.adminReservationService = adminReservationService;
@@ -8918,6 +8924,9 @@ let AdminReservationController = class AdminReservationController {
     }
     async updateStatus(reservationId, updateDto) {
         return this.adminReservationService.updateStatus(reservationId, updateDto);
+    }
+    async returnVehicle(user, reservationId, returnDto) {
+        return this.adminReservationService.returnVehicle(user, reservationId, returnDto);
     }
 };
 exports.AdminReservationController = AdminReservationController;
@@ -8999,6 +9008,20 @@ __decorate([
     __metadata("design:paramtypes", [String, typeof (_h = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _h : Object]),
     __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], AdminReservationController.prototype, "updateStatus", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId/return-vehicle'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '차량 반납 성공',
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _k : Object, String, typeof (_l = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+], AdminReservationController.prototype, "returnVehicle", null);
 exports.AdminReservationController = AdminReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 - 관리자 '),
     (0, common_1.Controller)('v1/admin/reservations'),
@@ -10027,7 +10050,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdminReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -10035,12 +10058,14 @@ const find_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find
 const find_check_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-check-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-check-reservation-list.usecase.ts");
 const find_reservation_detail_usecase_1 = __webpack_require__(/*! ../usecases/find-reservation-detail.usecase */ "./src/application/reservation/core/usecases/find-reservation-detail.usecase.ts");
 const update_reservation_status_usecase_1 = __webpack_require__(/*! ../usecases/update-reservation-status.usecase */ "./src/application/reservation/core/usecases/update-reservation-status.usecase.ts");
+const return_vehicle_usecase_1 = __webpack_require__(/*! ../usecases/return-vehicle.usecase */ "./src/application/reservation/core/usecases/return-vehicle.usecase.ts");
 let AdminReservationService = class AdminReservationService {
-    constructor(findReservationListUsecase, findCheckReservationListUsecase, findReservationDetailUsecase, updateReservationStatusUsecase) {
+    constructor(findReservationListUsecase, findCheckReservationListUsecase, findReservationDetailUsecase, updateReservationStatusUsecase, returnVehicleUsecase) {
         this.findReservationListUsecase = findReservationListUsecase;
         this.findCheckReservationListUsecase = findCheckReservationListUsecase;
         this.findReservationDetailUsecase = findReservationDetailUsecase;
         this.updateReservationStatusUsecase = updateReservationStatusUsecase;
+        this.returnVehicleUsecase = returnVehicleUsecase;
     }
     async findReservationList(startDate, endDate, resourceType, resourceId, status) {
         return this.findReservationListUsecase.execute(startDate, endDate, resourceType, resourceId, status);
@@ -10054,11 +10079,14 @@ let AdminReservationService = class AdminReservationService {
     async updateStatus(reservationId, updateDto) {
         return this.updateReservationStatusUsecase.execute(reservationId, updateDto);
     }
+    async returnVehicle(user, reservationId, returnDto) {
+        return this.returnVehicleUsecase.execute(user, reservationId, returnDto);
+    }
 };
 exports.AdminReservationService = AdminReservationService;
 exports.AdminReservationService = AdminReservationService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof find_reservation_list_usecase_1.FindReservationListUsecase !== "undefined" && find_reservation_list_usecase_1.FindReservationListUsecase) === "function" ? _a : Object, typeof (_b = typeof find_check_reservation_list_usecase_1.FindCheckReservationListUsecase !== "undefined" && find_check_reservation_list_usecase_1.FindCheckReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _c : Object, typeof (_d = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _d : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof find_reservation_list_usecase_1.FindReservationListUsecase !== "undefined" && find_reservation_list_usecase_1.FindReservationListUsecase) === "function" ? _a : Object, typeof (_b = typeof find_check_reservation_list_usecase_1.FindCheckReservationListUsecase !== "undefined" && find_check_reservation_list_usecase_1.FindCheckReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _c : Object, typeof (_d = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _d : Object, typeof (_e = typeof return_vehicle_usecase_1.ReturnVehicleUsecase !== "undefined" && return_vehicle_usecase_1.ReturnVehicleUsecase) === "function" ? _e : Object])
 ], AdminReservationService);
 
 
@@ -11571,9 +11599,6 @@ let ReturnVehicleUsecase = class ReturnVehicleUsecase {
             returnDto.parkingLocationImages = returnDto.parkingLocationImages.map((image) => this.fileService.getFileUrl(image));
             returnDto.odometerImages = returnDto.odometerImages.map((image) => this.fileService.getFileUrl(image));
             returnDto.indoorImages = returnDto.indoorImages.map((image) => this.fileService.getFileUrl(image));
-            console.log(returnDto.parkingLocationImages);
-            console.log(returnDto.odometerImages);
-            console.log(returnDto.indoorImages);
             const images = [...returnDto.parkingLocationImages, ...returnDto.odometerImages, ...returnDto.indoorImages];
             if (images.length > 0) {
                 await this.fileService.updateTemporaryFiles(images, false, {
@@ -19158,10 +19183,79 @@ exports.StatisticsService = StatisticsService = __decorate([
 
 /***/ }),
 
-/***/ "./src/application/task/task.controller.ts":
-/*!*************************************************!*\
-  !*** ./src/application/task/task.controller.ts ***!
-  \*************************************************/
+/***/ "./src/application/task/controllers/admin.task.controller.ts":
+/*!*******************************************************************!*\
+  !*** ./src/application/task/controllers/admin.task.controller.ts ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdminTaskController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const task_response_dto_1 = __webpack_require__(/*! ../dtos/task-response.dto */ "./src/application/task/dtos/task-response.dto.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const admin_task_service_1 = __webpack_require__(/*! ../services/admin.task.service */ "./src/application/task/services/admin.task.service.ts");
+let AdminTaskController = class AdminTaskController {
+    constructor(adminTaskService) {
+        this.adminTaskService = adminTaskService;
+    }
+    async getTasks(type) {
+        return this.adminTaskService.getTasks(type);
+    }
+};
+exports.AdminTaskController = AdminTaskController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '태스크 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '태스크 목록 조회 성공',
+        type: [task_response_dto_1.TaskResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'type',
+        type: String,
+        required: false,
+        description: '태스크 타입',
+        enum: ['차량반납지연', '소모품교체'],
+    }),
+    __param(0, (0, common_1.Query)('type')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminTaskController.prototype, "getTasks", null);
+exports.AdminTaskController = AdminTaskController = __decorate([
+    (0, swagger_1.ApiTags)('3. 태스크 관리 '),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
+    (0, common_1.Controller)('v1/admin/tasks'),
+    __metadata("design:paramtypes", [typeof (_a = typeof admin_task_service_1.AdminTaskService !== "undefined" && admin_task_service_1.AdminTaskService) === "function" ? _a : Object])
+], AdminTaskController);
+
+
+/***/ }),
+
+/***/ "./src/application/task/controllers/task.controller.ts":
+/*!*************************************************************!*\
+  !*** ./src/application/task/controllers/task.controller.ts ***!
+  \*************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19181,7 +19275,7 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TaskController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const task_service_1 = __webpack_require__(/*! ./task.service */ "./src/application/task/task.service.ts");
+const task_service_1 = __webpack_require__(/*! ../services/task.service */ "./src/application/task/services/task.service.ts");
 const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -19261,10 +19355,10 @@ exports.TaskController = TaskController = __decorate([
 
 /***/ }),
 
-/***/ "./src/application/task/task.module.ts":
-/*!*********************************************!*\
-  !*** ./src/application/task/task.module.ts ***!
-  \*********************************************/
+/***/ "./src/application/task/dtos/task-response.dto.ts":
+/*!********************************************************!*\
+  !*** ./src/application/task/dtos/task-response.dto.ts ***!
+  \********************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19274,34 +19368,152 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TaskModule = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const task_controller_1 = __webpack_require__(/*! ./task.controller */ "./src/application/task/task.controller.ts");
-const task_service_1 = __webpack_require__(/*! ./task.service */ "./src/application/task/task.service.ts");
-const getTaskList_usecase_1 = __webpack_require__(/*! ./usecases/getTaskList.usecase */ "./src/application/task/usecases/getTaskList.usecase.ts");
-const getTaskStatus_usecase_1 = __webpack_require__(/*! ./usecases/getTaskStatus.usecase */ "./src/application/task/usecases/getTaskStatus.usecase.ts");
-const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
-const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
-let TaskModule = class TaskModule {
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-exports.TaskModule = TaskModule;
-exports.TaskModule = TaskModule = __decorate([
-    (0, common_1.Module)({
-        imports: [resource_module_1.DomainResourceModule, reservation_module_1.DomainReservationModule],
-        controllers: [task_controller_1.TaskController],
-        providers: [task_service_1.TaskService, getTaskList_usecase_1.GetTaskListUsecase, getTaskStatus_usecase_1.GetTaskStatusUsecase],
-        exports: [task_service_1.TaskService],
-    })
-], TaskModule);
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TaskResponseDto = exports.ManagerResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class ManagerResponseDto {
+}
+exports.ManagerResponseDto = ManagerResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+    }),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "employeeNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "position", void 0);
+class TaskResponseDto {
+}
+exports.TaskResponseDto = TaskResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '태스크 타입',
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '태스크 제목',
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '예약 ID',
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '자원 ID',
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '자원 이름',
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '시작 날짜',
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '종료 날짜',
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: ManagerResponseDto,
+        description: '관리자',
+    }),
+    __metadata("design:type", ManagerResponseDto)
+], TaskResponseDto.prototype, "manager", void 0);
 
 
 /***/ }),
 
-/***/ "./src/application/task/task.service.ts":
-/*!**********************************************!*\
-  !*** ./src/application/task/task.service.ts ***!
-  \**********************************************/
+/***/ "./src/application/task/services/admin.task.service.ts":
+/*!*************************************************************!*\
+  !*** ./src/application/task/services/admin.task.service.ts ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdminTaskService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const getDelayedReturnVehicles_usecase_1 = __webpack_require__(/*! ../usecases/getDelayedReturnVehicles.usecase */ "./src/application/task/usecases/getDelayedReturnVehicles.usecase.ts");
+const getNeedRaplaceConsumables_usecase_1 = __webpack_require__(/*! ../usecases/getNeedRaplaceConsumables.usecase */ "./src/application/task/usecases/getNeedRaplaceConsumables.usecase.ts");
+let AdminTaskService = class AdminTaskService {
+    constructor(getDelayedReturnVehicleUsecase, getNeedRaplaceConsumablesUsecase) {
+        this.getDelayedReturnVehicleUsecase = getDelayedReturnVehicleUsecase;
+        this.getNeedRaplaceConsumablesUsecase = getNeedRaplaceConsumablesUsecase;
+    }
+    async getTasks(type) {
+        if (type === '차량반납지연') {
+            return this.getDelayedReturnVehicleUsecase.execute();
+        }
+        else if (type === '소모품교체') {
+            return this.getNeedRaplaceConsumablesUsecase.execute();
+        }
+        else {
+            return [];
+        }
+    }
+};
+exports.AdminTaskService = AdminTaskService;
+exports.AdminTaskService = AdminTaskService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof getDelayedReturnVehicles_usecase_1.GetDelayedReturnVehicleUsecase !== "undefined" && getDelayedReturnVehicles_usecase_1.GetDelayedReturnVehicleUsecase) === "function" ? _a : Object, typeof (_b = typeof getNeedRaplaceConsumables_usecase_1.GetNeedRaplaceConsumablesUsecase !== "undefined" && getNeedRaplaceConsumables_usecase_1.GetNeedRaplaceConsumablesUsecase) === "function" ? _b : Object])
+], AdminTaskService);
+
+
+/***/ }),
+
+/***/ "./src/application/task/services/task.service.ts":
+/*!*******************************************************!*\
+  !*** ./src/application/task/services/task.service.ts ***!
+  \*******************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19318,8 +19530,8 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TaskService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const getTaskList_usecase_1 = __webpack_require__(/*! ./usecases/getTaskList.usecase */ "./src/application/task/usecases/getTaskList.usecase.ts");
-const getTaskStatus_usecase_1 = __webpack_require__(/*! ./usecases/getTaskStatus.usecase */ "./src/application/task/usecases/getTaskStatus.usecase.ts");
+const getTaskList_usecase_1 = __webpack_require__(/*! ../usecases/getTaskList.usecase */ "./src/application/task/usecases/getTaskList.usecase.ts");
+const getTaskStatus_usecase_1 = __webpack_require__(/*! ../usecases/getTaskStatus.usecase */ "./src/application/task/usecases/getTaskStatus.usecase.ts");
 let TaskService = class TaskService {
     constructor(getTaskListUsecase, getTaskStatusUsecase) {
         this.getTaskListUsecase = getTaskListUsecase;
@@ -19337,6 +19549,199 @@ exports.TaskService = TaskService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof getTaskList_usecase_1.GetTaskListUsecase !== "undefined" && getTaskList_usecase_1.GetTaskListUsecase) === "function" ? _a : Object, typeof (_b = typeof getTaskStatus_usecase_1.GetTaskStatusUsecase !== "undefined" && getTaskStatus_usecase_1.GetTaskStatusUsecase) === "function" ? _b : Object])
 ], TaskService);
+
+
+/***/ }),
+
+/***/ "./src/application/task/task.module.ts":
+/*!*********************************************!*\
+  !*** ./src/application/task/task.module.ts ***!
+  \*********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TaskModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const task_controller_1 = __webpack_require__(/*! ./controllers/task.controller */ "./src/application/task/controllers/task.controller.ts");
+const task_service_1 = __webpack_require__(/*! ./services/task.service */ "./src/application/task/services/task.service.ts");
+const getTaskList_usecase_1 = __webpack_require__(/*! ./usecases/getTaskList.usecase */ "./src/application/task/usecases/getTaskList.usecase.ts");
+const getTaskStatus_usecase_1 = __webpack_require__(/*! ./usecases/getTaskStatus.usecase */ "./src/application/task/usecases/getTaskStatus.usecase.ts");
+const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
+const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
+const getDelayedReturnVehicles_usecase_1 = __webpack_require__(/*! ./usecases/getDelayedReturnVehicles.usecase */ "./src/application/task/usecases/getDelayedReturnVehicles.usecase.ts");
+const getNeedRaplaceConsumables_usecase_1 = __webpack_require__(/*! ./usecases/getNeedRaplaceConsumables.usecase */ "./src/application/task/usecases/getNeedRaplaceConsumables.usecase.ts");
+const admin_task_controller_1 = __webpack_require__(/*! ./controllers/admin.task.controller */ "./src/application/task/controllers/admin.task.controller.ts");
+const admin_task_service_1 = __webpack_require__(/*! ./services/admin.task.service */ "./src/application/task/services/admin.task.service.ts");
+let TaskModule = class TaskModule {
+};
+exports.TaskModule = TaskModule;
+exports.TaskModule = TaskModule = __decorate([
+    (0, common_1.Module)({
+        imports: [resource_module_1.DomainResourceModule, reservation_module_1.DomainReservationModule],
+        controllers: [task_controller_1.TaskController, admin_task_controller_1.AdminTaskController],
+        providers: [
+            task_service_1.TaskService,
+            admin_task_service_1.AdminTaskService,
+            getTaskList_usecase_1.GetTaskListUsecase,
+            getTaskStatus_usecase_1.GetTaskStatusUsecase,
+            getDelayedReturnVehicles_usecase_1.GetDelayedReturnVehicleUsecase,
+            getNeedRaplaceConsumables_usecase_1.GetNeedRaplaceConsumablesUsecase,
+        ],
+        exports: [task_service_1.TaskService],
+    })
+], TaskModule);
+
+
+/***/ }),
+
+/***/ "./src/application/task/usecases/getDelayedReturnVehicles.usecase.ts":
+/*!***************************************************************************!*\
+  !*** ./src/application/task/usecases/getDelayedReturnVehicles.usecase.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GetDelayedReturnVehicleUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+let GetDelayedReturnVehicleUsecase = class GetDelayedReturnVehicleUsecase {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async execute() {
+        const delayedReturnVehicles = await this.reservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                endDate: (0, typeorm_1.LessThan)(date_util_1.DateUtil.now().toDate()),
+                reservationVehicles: {
+                    isReturned: false,
+                },
+            },
+            relations: ['participants', 'participants.employee', 'resource', 'reservationVehicles'],
+        });
+        return delayedReturnVehicles.map((reservation) => {
+            const manager = reservation.participants.find((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER);
+            return {
+                type: '차량반납지연',
+                title: `${reservation.resource.name} 반납 지연 중`,
+                reservationId: reservation.reservationId,
+                resourceId: reservation.resource.resourceId,
+                resourceName: reservation.resource.name,
+                startDate: reservation.startDate,
+                endDate: reservation.endDate,
+                manager: {
+                    employeeId: manager.employee.employeeId,
+                    name: manager.employee.name,
+                    employeeNumber: manager.employee.employeeNumber,
+                    department: manager.employee.department,
+                    position: manager.employee.position,
+                },
+            };
+        });
+    }
+};
+exports.GetDelayedReturnVehicleUsecase = GetDelayedReturnVehicleUsecase;
+exports.GetDelayedReturnVehicleUsecase = GetDelayedReturnVehicleUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object])
+], GetDelayedReturnVehicleUsecase);
+
+
+/***/ }),
+
+/***/ "./src/application/task/usecases/getNeedRaplaceConsumables.usecase.ts":
+/*!****************************************************************************!*\
+  !*** ./src/application/task/usecases/getNeedRaplaceConsumables.usecase.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GetNeedRaplaceConsumablesUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+let GetNeedRaplaceConsumablesUsecase = class GetNeedRaplaceConsumablesUsecase {
+    constructor(resourceService, reservationService) {
+        this.resourceService = resourceService;
+        this.reservationService = reservationService;
+    }
+    async execute() {
+        const resources = await this.resourceService.findAll({
+            relations: [
+                'resourceManagers',
+                'resourceManagers.employee',
+                'vehicleInfo',
+                'vehicleInfo.consumables',
+                'vehicleInfo.consumables.maintenances',
+            ],
+        });
+        const needReplaceConsumable = [];
+        for (const resource of resources) {
+            for (const consumable of resource.vehicleInfo?.consumables || []) {
+                const latestMaintenance = consumable.maintenances[consumable.maintenances.length - 1] || null;
+                if (latestMaintenance) {
+                    const maintanceRequired = resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
+                    if (maintanceRequired) {
+                        needReplaceConsumable.push({
+                            type: '소모품교체',
+                            title: `${consumable.name} 교체 필요`,
+                            reservationId: null,
+                            resourceId: resource.resourceId,
+                            resourceName: resource.name,
+                            startDate: null,
+                            endDate: null,
+                            manager: {
+                                employeeId: resource.resourceManagers[0].employee.employeeId,
+                                name: resource.resourceManagers[0].employee.name,
+                                employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
+                                department: resource.resourceManagers[0].employee.department,
+                                position: resource.resourceManagers[0].employee.position,
+                            },
+                        });
+                    }
+                }
+            }
+        }
+        return needReplaceConsumable;
+    }
+};
+exports.GetNeedRaplaceConsumablesUsecase = GetNeedRaplaceConsumablesUsecase;
+exports.GetNeedRaplaceConsumablesUsecase = GetNeedRaplaceConsumablesUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _b : Object])
+], GetNeedRaplaceConsumablesUsecase);
 
 
 /***/ }),
@@ -21804,7 +22209,8 @@ exports.DomainVehicleInfoService = DomainVehicleInfoService = __decorate([
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateReservationDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.EquipmentInfoResponseDto = exports.UpdateEquipmentInfoDto = exports.CreateEquipmentInfoDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = exports.CreateMeetingRoomInfoDto = exports.MaintenanceResponseDto = exports.ConsumableResponseDto = exports.VehicleInfoResponseDto = exports.UpdateMaintenanceDto = exports.UpdateConsumableDto = exports.UpdateVehicleInfoDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceManagerResponseDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.CreateResourceResponseDto = exports.NewOrderResourceGroupDto = exports.NewOrderResourceDto = exports.UpdateResourceOrdersDto = exports.UpdateResourceGroupOrdersDto = exports.UpdateResourceInfoDto = exports.UpdateResourceGroupDto = exports.UpdateResourceDto = exports.CreateResourceInfoDto = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.CreateResourceDto = exports.UpdateNotificationSettingsDto = exports.CheckPasswordDto = exports.ChangePasswordDto = exports.ChangeRoleDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.PushNotificationPayload = exports.PushNotificationDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.CreateFileDataDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = void 0;
+exports.TaskResponseDto = exports.StatisticsResponseDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.PushNotificationPayload = exports.PushNotificationDto = exports.NotificationDataDto = exports.ResponseNotificationDto = exports.PushSubscriptionDto = exports.SendNotificationDto = exports.CreateNotificationDto = exports.CreateFileDataDto = exports.FileResponseDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.ResourceAvailabilityDto = exports.ResourceQueryDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.ReservationSnapshotResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.ReminderTimeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationResponseDto = exports.CreateReservationResponseDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = void 0;
+exports.ManagerResponseDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./application/auth/dto/login.dto */ "./src/application/auth/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./application/auth/dto/login-response.dto */ "./src/application/auth/dto/login-response.dto.ts");
@@ -21950,6 +22356,9 @@ Object.defineProperty(exports, "ConsumableMaintenanceStatsFilterDto", ({ enumera
 Object.defineProperty(exports, "ConsumableMaintenanceStatsResponseDto", ({ enumerable: true, get: function () { return consumable_maintenance_stats_dto_1.ConsumableMaintenanceStatsResponseDto; } }));
 var base_dto_1 = __webpack_require__(/*! ./application/statistics/dtos/base.dto */ "./src/application/statistics/dtos/base.dto.ts");
 Object.defineProperty(exports, "StatisticsResponseDto", ({ enumerable: true, get: function () { return base_dto_1.StatisticsResponseDto; } }));
+var task_response_dto_1 = __webpack_require__(/*! ./application/task/dtos/task-response.dto */ "./src/application/task/dtos/task-response.dto.ts");
+Object.defineProperty(exports, "TaskResponseDto", ({ enumerable: true, get: function () { return task_response_dto_1.TaskResponseDto; } }));
+Object.defineProperty(exports, "ManagerResponseDto", ({ enumerable: true, get: function () { return task_response_dto_1.ManagerResponseDto; } }));
 
 
 /***/ }),
