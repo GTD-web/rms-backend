@@ -7,7 +7,7 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { AdminTaskService } from '../services/admin.task.service';
 
-@ApiTags('3. 태스크 관리 ')
+@ApiTags('3. 태스크 관리 - 관리자')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)
 @Controller('v1/admin/tasks')

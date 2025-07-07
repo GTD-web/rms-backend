@@ -152,6 +152,36 @@ export class NotificationService {
         });
     }
 
+    async sendRequestNotification(
+        notificationType: NotificationType,
+        createNotificationDatatDto: CreateNotificationDataDto,
+        notiTarget: string[],
+    ): Promise<void> {
+        const createNotificationDto = await this.createNotificationUsecase.execute(
+            notificationType,
+            createNotificationDatatDto,
+        );
+
+        if (!createNotificationDto) {
+            return;
+        }
+
+        const notification = await this.saveNotificationUsecase.execute(createNotificationDto, notiTarget);
+
+        const totalSubscriptions: PushSubscriptionDto[] = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.getSubscriptionsUsecase.execute(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+
+        await this.sendMultiNotificationUsecase.execute(totalSubscriptions, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
+    }
+
     async deleteScheduleJob(reservationId: string): Promise<void> {
         await this.deleteScheduleJobUsecase.execute(reservationId);
     }
