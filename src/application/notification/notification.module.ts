@@ -27,6 +27,7 @@ import { FIREBASE_CONFIG } from '@libs/configs/env.config';
 import { CronNotificationController } from './controllers/cron.notification.controller';
 import { CronNotificationService } from './services/cron-notification.service';
 import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
+import { AdminNotificationController } from './controllers/admin.notification.controller';
 
 @Module({
     imports: [
@@ -55,7 +56,7 @@ import { DomainReservationModule } from '@src/domain/reservation/reservation.mod
         CronSendUpcomingNotificationUsecase,
         CreateReminderNotificationUsecase,
     ],
-    controllers: [NotificationController, CronNotificationController],
+    controllers: [NotificationController, CronNotificationController, AdminNotificationController],
     exports: [NotificationService],
 })
 export class NotificationModule {}
