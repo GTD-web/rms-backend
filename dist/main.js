@@ -9153,6 +9153,9 @@ let CronReservationController = class CronReservationController {
     async closeReservation() {
         return this.cronReservationService.closeReservation();
     }
+    async handleStartOdometer() {
+        return this.cronReservationService.handleStartOdometer();
+    }
 };
 exports.CronReservationController = CronReservationController;
 __decorate([
@@ -9162,6 +9165,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CronReservationController.prototype, "closeReservation", null);
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/start-odometer'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronReservationController.prototype, "handleStartOdometer", null);
 exports.CronReservationController = CronReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 '),
     (0, public_decorator_1.Public)(),
@@ -9465,7 +9475,7 @@ const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.
 const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
 const notification_module_1 = __webpack_require__(/*! @src/application/notification/notification.module */ "./src/application/notification/notification.module.ts");
 const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
-const usecases_1 = __webpack_require__(/*! ./usecases */ "./src/application/reservation/core/usecases/index.ts");
+const Usecases = __webpack_require__(/*! ./usecases */ "./src/application/reservation/core/usecases/index.ts");
 const admin_reservation_service_1 = __webpack_require__(/*! ./services/admin-reservation.service */ "./src/application/reservation/core/services/admin-reservation.service.ts");
 const reservation_service_1 = __webpack_require__(/*! ./services/reservation.service */ "./src/application/reservation/core/services/reservation.service.ts");
 const cron_reservation_service_1 = __webpack_require__(/*! ./services/cron-reservation.service */ "./src/application/reservation/core/services/cron-reservation.service.ts");
@@ -9504,47 +9514,13 @@ exports.ReservationCoreModule = ReservationCoreModule = __decorate([
             admin_reservation_service_1.AdminReservationService,
             reservation_service_1.ReservationService,
             cron_reservation_service_1.CronReservationService,
-            usecases_1.CheckReservationAccessUsecase,
-            usecases_1.CreateReservationClosingJobUsecase,
-            usecases_1.CreateReservationUsecase,
-            usecases_1.DeleteReservationClosingJobUsecase,
-            usecases_1.FindCheckReservationListUsecase,
-            usecases_1.FindConflictReservationUsecase,
-            usecases_1.FindMyAllSchedulesUsecase,
-            usecases_1.FindMyReservationListUsecase,
-            usecases_1.FindMyUpcomingReservationListUsecase,
-            usecases_1.FindMyUsingReservationListUsecase,
-            usecases_1.FindReservationDetailUsecase,
-            usecases_1.FindReservationListUsecase,
-            usecases_1.FindResourceReservationListUsecase,
-            usecases_1.HandleCronUsecase,
-            usecases_1.ReturnVehicleUsecase,
-            usecases_1.UpdateReservationStatusUsecase,
-            usecases_1.UpdateReservationUsecase,
-            usecases_1.FindCalendarUsecase,
+            ...Object.values(Usecases),
         ],
         exports: [
             admin_reservation_service_1.AdminReservationService,
             reservation_service_1.ReservationService,
             cron_reservation_service_1.CronReservationService,
-            usecases_1.CheckReservationAccessUsecase,
-            usecases_1.CreateReservationClosingJobUsecase,
-            usecases_1.CreateReservationUsecase,
-            usecases_1.DeleteReservationClosingJobUsecase,
-            usecases_1.FindCheckReservationListUsecase,
-            usecases_1.FindConflictReservationUsecase,
-            usecases_1.FindMyAllSchedulesUsecase,
-            usecases_1.FindMyReservationListUsecase,
-            usecases_1.FindMyUpcomingReservationListUsecase,
-            usecases_1.FindMyUsingReservationListUsecase,
-            usecases_1.FindReservationDetailUsecase,
-            usecases_1.FindReservationListUsecase,
-            usecases_1.FindResourceReservationListUsecase,
-            usecases_1.HandleCronUsecase,
-            usecases_1.ReturnVehicleUsecase,
-            usecases_1.UpdateReservationStatusUsecase,
-            usecases_1.UpdateReservationUsecase,
-            usecases_1.FindCalendarUsecase,
+            ...Object.values(Usecases),
         ],
     })
 ], ReservationCoreModule);
@@ -10198,23 +10174,28 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CronReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const handle_cron_usecase_1 = __webpack_require__(/*! ../usecases/handle-cron.usecase */ "./src/application/reservation/core/usecases/handle-cron.usecase.ts");
+const handle_start_odometer_usecase_1 = __webpack_require__(/*! ../usecases/handle-start-odometer.usecase */ "./src/application/reservation/core/usecases/handle-start-odometer.usecase.ts");
 let CronReservationService = class CronReservationService {
-    constructor(handleCronUsecase) {
+    constructor(handleCronUsecase, handleStartOdometerUsecase) {
         this.handleCronUsecase = handleCronUsecase;
+        this.handleStartOdometerUsecase = handleStartOdometerUsecase;
     }
     async closeReservation() {
         return this.handleCronUsecase.execute();
+    }
+    async handleStartOdometer() {
+        return this.handleStartOdometerUsecase.execute();
     }
 };
 exports.CronReservationService = CronReservationService;
 exports.CronReservationService = CronReservationService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof handle_cron_usecase_1.HandleCronUsecase !== "undefined" && handle_cron_usecase_1.HandleCronUsecase) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof handle_cron_usecase_1.HandleCronUsecase !== "undefined" && handle_cron_usecase_1.HandleCronUsecase) === "function" ? _a : Object, typeof (_b = typeof handle_start_odometer_usecase_1.HandleStartOdometerUsecase !== "undefined" && handle_start_odometer_usecase_1.HandleStartOdometerUsecase) === "function" ? _b : Object])
 ], CronReservationService);
 
 
@@ -11551,6 +11532,67 @@ exports.HandleCronUsecase = HandleCronUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/reservation/core/usecases/handle-start-odometer.usecase.ts":
+/*!************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/handle-start-odometer.usecase.ts ***!
+  \************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HandleStartOdometerUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
+let HandleStartOdometerUsecase = class HandleStartOdometerUsecase {
+    constructor(reservationService, reservationVehicleService) {
+        this.reservationService = reservationService;
+        this.reservationVehicleService = reservationVehicleService;
+    }
+    async execute() {
+        const now = date_util_1.DateUtil.now().format();
+        const vehicleReservations = await this.reservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                resource: {
+                    type: resource_type_enum_1.ResourceType.VEHICLE,
+                },
+                startDate: (0, typeorm_1.Between)(date_util_1.DateUtil.date(now).addMinutes(-2).toDate(), date_util_1.DateUtil.date(now).addMinutes(2).toDate()),
+            },
+            relations: ['reservationVehicles', 'resource', 'resource.vehicleInfo'],
+        });
+        for (const reservation of vehicleReservations) {
+            const reservationVehicle = reservation.reservationVehicles[0];
+            const vehicleInfo = reservation.resource.vehicleInfo;
+            await this.reservationVehicleService.update(reservationVehicle.reservationVehicleId, {
+                startOdometer: vehicleInfo.totalMileage,
+            });
+        }
+    }
+};
+exports.HandleStartOdometerUsecase = HandleStartOdometerUsecase;
+exports.HandleStartOdometerUsecase = HandleStartOdometerUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _b : Object])
+], HandleStartOdometerUsecase);
+
+
+/***/ }),
+
 /***/ "./src/application/reservation/core/usecases/index.ts":
 /*!************************************************************!*\
   !*** ./src/application/reservation/core/usecases/index.ts ***!
@@ -11587,6 +11629,7 @@ __exportStar(__webpack_require__(/*! ./find-reservation-detail.usecase */ "./src
 __exportStar(__webpack_require__(/*! ./find-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-reservation-list.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./find-resource-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-resource-reservation-list.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./handle-cron.usecase */ "./src/application/reservation/core/usecases/handle-cron.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./handle-start-odometer.usecase */ "./src/application/reservation/core/usecases/handle-start-odometer.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./return-vehicle.usecase */ "./src/application/reservation/core/usecases/return-vehicle.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./update-reservation-status.usecase */ "./src/application/reservation/core/usecases/update-reservation-status.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./update-reservation.usecase */ "./src/application/reservation/core/usecases/update-reservation.usecase.ts"), exports);

@@ -14,4 +14,10 @@ export class CronReservationController {
     async closeReservation() {
         return this.cronReservationService.closeReservation();
     }
+
+    @ApiExcludeEndpoint()
+    @Get('cron-job/start-odometer')
+    async handleStartOdometer() {
+        return this.cronReservationService.handleStartOdometer();
+    }
 }
