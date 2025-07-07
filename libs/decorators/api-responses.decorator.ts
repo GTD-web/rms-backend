@@ -39,23 +39,27 @@ export const ApiDataResponse = (options: {
                   },
                   {
                       properties: {
-                          data:
-                              options.isPaginated || Array.isArray(options.type)
-                                  ? {
-                                        type: 'object',
-                                        properties: {
-                                            items: {
-                                                type: 'array',
-                                                items: { $ref: getSchemaPath(options.type[0]) },
-                                            },
-                                            meta: {
-                                                $ref: getSchemaPath(PaginationMetaDto),
-                                            },
+                          data: options.isPaginated
+                              ? {
+                                    type: 'object',
+                                    properties: {
+                                        items: {
+                                            type: 'array',
+                                            items: { $ref: getSchemaPath(options.type[0]) },
                                         },
-                                    }
-                                  : {
-                                        $ref: getSchemaPath(options.type),
+                                        meta: {
+                                            $ref: getSchemaPath(PaginationMetaDto),
+                                        },
                                     },
+                                }
+                              : Array.isArray(options.type)
+                                ? {
+                                      type: 'array',
+                                      items: { $ref: getSchemaPath(options.type[0]) },
+                                  }
+                                : {
+                                      $ref: getSchemaPath(options.type),
+                                  },
                       },
                   },
               ],

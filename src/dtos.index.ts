@@ -152,3 +152,5 @@ export {
 } from './application/statistics/dtos/consumable-maintenance-stats.dto';
 
 export { StatisticsResponseDto } from './application/statistics/dtos/base.dto';
+
+export { TaskResponseDto, ManagerResponseDto } from './application/task/dtos/task-response.dto';

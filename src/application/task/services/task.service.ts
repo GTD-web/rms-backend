@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { GetTaskListUsecase } from './usecases/getTaskList.usecase';
-import { GetTaskStatusUsecase } from './usecases/getTaskStatus.usecase';
+import { GetTaskListUsecase } from '../usecases/getTaskList.usecase';
+import { GetTaskStatusUsecase } from '../usecases/getTaskStatus.usecase';
 import { Employee } from '@libs/entities';
 @Injectable()
 export class TaskService {

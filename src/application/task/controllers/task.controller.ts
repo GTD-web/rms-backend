@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { TaskService } from './task.service';
+import { TaskService } from '../services/task.service';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';

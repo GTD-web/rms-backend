@@ -13,6 +13,7 @@ import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { AdminReservationService } from '../services/admin-reservation.service';
+import { ReturnVehicleDto } from '../dtos/update-reservation.dto';
 
 @ApiTags('2. 예약 - 관리자 ')
 @Controller('v1/admin/reservations')
@@ -98,5 +99,19 @@ export class AdminReservationController {
         @Body() updateDto: UpdateReservationStatusDto,
     ): Promise<ReservationResponseDto> {
         return this.adminReservationService.updateStatus(reservationId, updateDto);
+    }
+
+    @Patch(':reservationId/return-vehicle')
+    @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })
+    @ApiDataResponse({
+        status: 200,
+        description: '차량 반납 성공',
+    })
+    async returnVehicle(
+        @User() user: Employee,
+        @Param('reservationId') reservationId: string,
+        @Body() returnDto: ReturnVehicleDto,
+    ): Promise<boolean> {
+        return this.adminReservationService.returnVehicle(user, reservationId, returnDto);
     }
 }
