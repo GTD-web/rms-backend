@@ -7643,7 +7643,7 @@ __decorate([
     __metadata("design:type", typeof (_b = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _b : Object)
 ], ResponseNotificationDto.prototype, "notificationType", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
+    (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Boolean)
 ], ResponseNotificationDto.prototype, "isRead", void 0);
 class PushNotificationSendResult {
@@ -9810,6 +9810,10 @@ __decorate([
     __metadata("design:type", Array)
 ], ReservationWithRelationsResponseDto.prototype, "reservationVehicles", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: [dtos_index_1.ResponseNotificationDto], required: false }),
+    __metadata("design:type", Array)
+], ReservationWithRelationsResponseDto.prototype, "notifications", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Boolean)
 ], ReservationWithRelationsResponseDto.prototype, "isMine", void 0);
@@ -10116,7 +10120,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdminReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -10125,13 +10129,15 @@ const find_check_reservation_list_usecase_1 = __webpack_require__(/*! ../usecase
 const find_reservation_detail_usecase_1 = __webpack_require__(/*! ../usecases/find-reservation-detail.usecase */ "./src/application/reservation/core/usecases/find-reservation-detail.usecase.ts");
 const update_reservation_status_usecase_1 = __webpack_require__(/*! ../usecases/update-reservation-status.usecase */ "./src/application/reservation/core/usecases/update-reservation-status.usecase.ts");
 const return_vehicle_usecase_1 = __webpack_require__(/*! ../usecases/return-vehicle.usecase */ "./src/application/reservation/core/usecases/return-vehicle.usecase.ts");
+const find_dealyed_vehicle_notifications_usecase_1 = __webpack_require__(/*! ../usecases/find-dealyed-vehicle-notifications.usecase */ "./src/application/reservation/core/usecases/find-dealyed-vehicle-notifications.usecase.ts");
 let AdminReservationService = class AdminReservationService {
-    constructor(findReservationListUsecase, findCheckReservationListUsecase, findReservationDetailUsecase, updateReservationStatusUsecase, returnVehicleUsecase) {
+    constructor(findReservationListUsecase, findCheckReservationListUsecase, findReservationDetailUsecase, updateReservationStatusUsecase, returnVehicleUsecase, findDelayedVehicleNotificationsUsecase) {
         this.findReservationListUsecase = findReservationListUsecase;
         this.findCheckReservationListUsecase = findCheckReservationListUsecase;
         this.findReservationDetailUsecase = findReservationDetailUsecase;
         this.updateReservationStatusUsecase = updateReservationStatusUsecase;
         this.returnVehicleUsecase = returnVehicleUsecase;
+        this.findDelayedVehicleNotificationsUsecase = findDelayedVehicleNotificationsUsecase;
     }
     async findReservationList(startDate, endDate, resourceType, resourceId, status) {
         return this.findReservationListUsecase.execute(startDate, endDate, resourceType, resourceId, status);
@@ -10140,7 +10146,9 @@ let AdminReservationService = class AdminReservationService {
         return this.findCheckReservationListUsecase.execute(query);
     }
     async findOne(user, reservationId) {
-        return this.findReservationDetailUsecase.execute(user, reservationId);
+        const reservation = await this.findReservationDetailUsecase.execute(user, reservationId);
+        const notifications = await this.findDelayedVehicleNotificationsUsecase.execute(reservationId);
+        return { ...reservation, notifications };
     }
     async updateStatus(reservationId, updateDto) {
         return this.updateReservationStatusUsecase.execute(reservationId, updateDto);
@@ -10152,7 +10160,7 @@ let AdminReservationService = class AdminReservationService {
 exports.AdminReservationService = AdminReservationService;
 exports.AdminReservationService = AdminReservationService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof find_reservation_list_usecase_1.FindReservationListUsecase !== "undefined" && find_reservation_list_usecase_1.FindReservationListUsecase) === "function" ? _a : Object, typeof (_b = typeof find_check_reservation_list_usecase_1.FindCheckReservationListUsecase !== "undefined" && find_check_reservation_list_usecase_1.FindCheckReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _c : Object, typeof (_d = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _d : Object, typeof (_e = typeof return_vehicle_usecase_1.ReturnVehicleUsecase !== "undefined" && return_vehicle_usecase_1.ReturnVehicleUsecase) === "function" ? _e : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof find_reservation_list_usecase_1.FindReservationListUsecase !== "undefined" && find_reservation_list_usecase_1.FindReservationListUsecase) === "function" ? _a : Object, typeof (_b = typeof find_check_reservation_list_usecase_1.FindCheckReservationListUsecase !== "undefined" && find_check_reservation_list_usecase_1.FindCheckReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _c : Object, typeof (_d = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _d : Object, typeof (_e = typeof return_vehicle_usecase_1.ReturnVehicleUsecase !== "undefined" && return_vehicle_usecase_1.ReturnVehicleUsecase) === "function" ? _e : Object, typeof (_f = typeof find_dealyed_vehicle_notifications_usecase_1.FindDelayedVehicleNotificationsUsecase !== "undefined" && find_dealyed_vehicle_notifications_usecase_1.FindDelayedVehicleNotificationsUsecase) === "function" ? _f : Object])
 ], AdminReservationService);
 
 
@@ -10841,6 +10849,52 @@ exports.FindConflictReservationUsecase = FindConflictReservationUsecase = __deco
 
 /***/ }),
 
+/***/ "./src/application/reservation/core/usecases/find-dealyed-vehicle-notifications.usecase.ts":
+/*!*************************************************************************************************!*\
+  !*** ./src/application/reservation/core/usecases/find-dealyed-vehicle-notifications.usecase.ts ***!
+  \*************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindDelayedVehicleNotificationsUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+let FindDelayedVehicleNotificationsUsecase = class FindDelayedVehicleNotificationsUsecase {
+    constructor(notificationService) {
+        this.notificationService = notificationService;
+    }
+    async execute(reservationId) {
+        const notifications = await this.notificationService.findAll({
+            where: {
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                notificationType: notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED,
+            },
+        });
+        return notifications;
+    }
+};
+exports.FindDelayedVehicleNotificationsUsecase = FindDelayedVehicleNotificationsUsecase;
+exports.FindDelayedVehicleNotificationsUsecase = FindDelayedVehicleNotificationsUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _a : Object])
+], FindDelayedVehicleNotificationsUsecase);
+
+
+/***/ }),
+
 /***/ "./src/application/reservation/core/usecases/find-my-all-schedules.usecase.ts":
 /*!************************************************************************************!*\
   !*** ./src/application/reservation/core/usecases/find-my-all-schedules.usecase.ts ***!
@@ -11280,16 +11334,13 @@ let FindReservationDetailUsecase = class FindReservationDetailUsecase {
             },
             relations: ['employees'],
         });
-        console.log(notifications);
         if (notifications.length > 0) {
             const employeeNotifications = notifications
                 .map((notification) => notification.employees.map((employee) => employee.employeeNotificationId).flat())
                 .flat();
-            console.log(employeeNotifications);
             const updatedEmployeeNotifications = await Promise.all(employeeNotifications.map((employeeNotificationId) => this.employeeNotificationService.update(employeeNotificationId, {
                 isRead: true,
             })));
-            console.log(updatedEmployeeNotifications);
         }
         return reservationResponseDto;
     }
@@ -11634,6 +11685,7 @@ __exportStar(__webpack_require__(/*! ./return-vehicle.usecase */ "./src/applicat
 __exportStar(__webpack_require__(/*! ./update-reservation-status.usecase */ "./src/application/reservation/core/usecases/update-reservation-status.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./update-reservation.usecase */ "./src/application/reservation/core/usecases/update-reservation.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./find-calendar.usecase */ "./src/application/reservation/core/usecases/find-calendar.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./find-dealyed-vehicle-notifications.usecase */ "./src/application/reservation/core/usecases/find-dealyed-vehicle-notifications.usecase.ts"), exports);
 
 
 /***/ }),
