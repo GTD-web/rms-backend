@@ -7,3 +7,4 @@ export * from './reorderResources.usecase';
 export * from './deleteResource.usecase';
 export * from './findResourcesByTypeAndDateWithReservations.usecase';
 export * from './findAvailableTime.usecase';
+export * from './findResourcesByGroup.usecase';

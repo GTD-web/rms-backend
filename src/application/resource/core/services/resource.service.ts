@@ -27,11 +27,13 @@ import {
     CheckAvailabilityUsecase,
     FindAvailableTimeUsecase,
     FindResourcesByTypeAndDateWithReservationsUsecase,
+    FindResourcesByGroupUsecase,
 } from '@src/application/resource/core/usecases/resource';
 @Injectable()
 export class ResourceService {
     constructor(
         private readonly findResourcesUsecase: FindResourcesUsecase,
+        private readonly findResourcesByGroupUsecase: FindResourcesByGroupUsecase,
         private readonly findResourceDetailUsecase: FindResourceDetailUsecase,
         private readonly reorderResourcesUsecase: ReorderResourcesUsecase,
         private readonly updateResourceUsecase: UpdateResourceUsecase,
@@ -48,6 +50,10 @@ export class ResourceService {
 
     async findResources(type: ResourceType): Promise<ResourceResponseDto[]> {
         return this.findResourcesUsecase.execute(type);
+    }
+
+    async findResourcesByResourceGroupId(resourceGroupId: string): Promise<ResourceResponseDto[]> {
+        return this.findResourcesByGroupUsecase.execute(resourceGroupId);
     }
 
     async findResourceDetailForAdmin(resourceId: string): Promise<ResourceResponseDto> {
