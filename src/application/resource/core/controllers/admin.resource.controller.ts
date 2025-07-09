@@ -56,6 +56,19 @@ export class AdminResourceController {
         return this.resourceService.findResourceDetailForAdmin(resourceId);
     }
 
+    @Get('resource-group/:resourceGroupId')
+    @ApiOperation({ summary: '자원 그룹 상세 조회 #관리자/자원관리/자원리스트' })
+    @ApiDataResponse({
+        status: 200,
+        description: '자원 그룹을 성공적으로 조회했습니다.',
+        type: [ResourceResponseDto],
+    })
+    async findResourcesByResourceGroupId(
+        @Param('resourceGroupId') resourceGroupId: string,
+    ): Promise<ResourceResponseDto[]> {
+        return this.resourceService.findResourcesByResourceGroupId(resourceGroupId);
+    }
+
     @Patch('order')
     @ApiOperation({ summary: '자원 순서 변경' })
     @ApiDataResponse({

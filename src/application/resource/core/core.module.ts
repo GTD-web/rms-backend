@@ -32,26 +32,8 @@ import { AdminResourceGroupController } from './controllers/admin.resource-group
 import { ResourceService } from './services/resource.service';
 import { ResourceGroupService } from './services/resource-group.service';
 
-import {
-    FindResourcesUsecase,
-    FindResourceDetailUsecase,
-    CheckAvailabilityUsecase,
-    CreateResourceWithInfosUsecase,
-    UpdateResourceUsecase,
-    ReorderResourcesUsecase,
-    DeleteResourceUsecase,
-    FindAvailableTimeUsecase,
-    FindResourcesByTypeAndDateWithReservationsUsecase,
-} from './usecases/resource';
-
-import {
-    FindParentResourceGroupsUsecase,
-    FindResourceGroupsWithResourceDataUsecase,
-    CreateResourceGroupUsecase,
-    UpdateResourceGroupUsecase,
-    ReorderResourceGroupsUsecase,
-    DeleteResourceGroupUsecase,
-} from './usecases/resource-group';
+import * as ResourceUsecase from './usecases/resource';
+import * as ResourceGroupUsecase from './usecases/resource-group';
 
 @Module({
     imports: [
@@ -89,21 +71,8 @@ import {
     providers: [
         ResourceService,
         ResourceGroupService,
-        FindResourcesUsecase,
-        FindResourceDetailUsecase,
-        CheckAvailabilityUsecase,
-        CreateResourceWithInfosUsecase,
-        UpdateResourceUsecase,
-        ReorderResourcesUsecase,
-        DeleteResourceUsecase,
-        FindAvailableTimeUsecase,
-        FindResourcesByTypeAndDateWithReservationsUsecase,
-        FindParentResourceGroupsUsecase,
-        FindResourceGroupsWithResourceDataUsecase,
-        CreateResourceGroupUsecase,
-        UpdateResourceGroupUsecase,
-        ReorderResourceGroupsUsecase,
-        DeleteResourceGroupUsecase,
+        ...Object.values(ResourceUsecase),
+        ...Object.values(ResourceGroupUsecase),
     ],
 })
 export class ResourceCoreModule {}

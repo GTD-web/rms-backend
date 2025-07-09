@@ -13277,7 +13277,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdminResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -13302,6 +13302,9 @@ let AdminResourceController = class AdminResourceController {
     }
     async findOne(resourceId) {
         return this.resourceService.findResourceDetailForAdmin(resourceId);
+    }
+    async findResourcesByResourceGroupId(resourceGroupId) {
+        return this.resourceService.findResourcesByResourceGroupId(resourceGroupId);
     }
     async reorder(updateResourceOrdersDto) {
         return this.resourceService.reorderResources(updateResourceOrdersDto);
@@ -13358,6 +13361,19 @@ __decorate([
     __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], AdminResourceController.prototype, "findOne", null);
 __decorate([
+    (0, common_1.Get)('resource-group/:resourceGroupId'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 상세 조회 #관리자/자원관리/자원리스트' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 그룹을 성공적으로 조회했습니다.',
+        type: [resource_response_dto_1.ResourceResponseDto],
+    }),
+    __param(0, (0, common_1.Param)('resourceGroupId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], AdminResourceController.prototype, "findResourcesByResourceGroupId", null);
+__decorate([
     (0, common_1.Patch)('order'),
     (0, swagger_1.ApiOperation)({ summary: '자원 순서 변경' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -13366,8 +13382,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+    __metadata("design:paramtypes", [typeof (_h = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], AdminResourceController.prototype, "reorder", null);
 __decorate([
     (0, common_1.Patch)(':resourceId'),
@@ -13380,8 +13396,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_j = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _j : Object]),
-    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+    __metadata("design:paramtypes", [String, typeof (_k = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], AdminResourceController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':resourceId/availability'),
@@ -13394,8 +13410,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_l = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _l : Object]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+    __metadata("design:paramtypes", [String, typeof (_m = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], AdminResourceController.prototype, "updateAvailability", null);
 __decorate([
     (0, common_1.Delete)(':resourceId'),
@@ -13407,7 +13423,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], AdminResourceController.prototype, "remove", null);
 exports.AdminResourceController = AdminResourceController = __decorate([
     (0, swagger_1.ApiTags)('3. 자원 - 관리자 '),
@@ -13674,8 +13690,8 @@ const admin_resource_controller_1 = __webpack_require__(/*! ./controllers/admin.
 const admin_resource_group_controller_1 = __webpack_require__(/*! ./controllers/admin.resource-group.controller */ "./src/application/resource/core/controllers/admin.resource-group.controller.ts");
 const resource_service_1 = __webpack_require__(/*! ./services/resource.service */ "./src/application/resource/core/services/resource.service.ts");
 const resource_group_service_1 = __webpack_require__(/*! ./services/resource-group.service */ "./src/application/resource/core/services/resource-group.service.ts");
-const resource_1 = __webpack_require__(/*! ./usecases/resource */ "./src/application/resource/core/usecases/resource/index.ts");
-const resource_group_1 = __webpack_require__(/*! ./usecases/resource-group */ "./src/application/resource/core/usecases/resource-group/index.ts");
+const ResourceUsecase = __webpack_require__(/*! ./usecases/resource */ "./src/application/resource/core/usecases/resource/index.ts");
+const ResourceGroupUsecase = __webpack_require__(/*! ./usecases/resource-group */ "./src/application/resource/core/usecases/resource-group/index.ts");
 let ResourceCoreModule = class ResourceCoreModule {
 };
 exports.ResourceCoreModule = ResourceCoreModule;
@@ -13716,21 +13732,8 @@ exports.ResourceCoreModule = ResourceCoreModule = __decorate([
         providers: [
             resource_service_1.ResourceService,
             resource_group_service_1.ResourceGroupService,
-            resource_1.FindResourcesUsecase,
-            resource_1.FindResourceDetailUsecase,
-            resource_1.CheckAvailabilityUsecase,
-            resource_1.CreateResourceWithInfosUsecase,
-            resource_1.UpdateResourceUsecase,
-            resource_1.ReorderResourcesUsecase,
-            resource_1.DeleteResourceUsecase,
-            resource_1.FindAvailableTimeUsecase,
-            resource_1.FindResourcesByTypeAndDateWithReservationsUsecase,
-            resource_group_1.FindParentResourceGroupsUsecase,
-            resource_group_1.FindResourceGroupsWithResourceDataUsecase,
-            resource_group_1.CreateResourceGroupUsecase,
-            resource_group_1.UpdateResourceGroupUsecase,
-            resource_group_1.ReorderResourceGroupsUsecase,
-            resource_group_1.DeleteResourceGroupUsecase,
+            ...Object.values(ResourceUsecase),
+            ...Object.values(ResourceGroupUsecase),
         ],
     })
 ], ResourceCoreModule);
@@ -14687,14 +14690,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const resource_1 = __webpack_require__(/*! @src/application/resource/core/usecases/resource */ "./src/application/resource/core/usecases/resource/index.ts");
 let ResourceService = class ResourceService {
-    constructor(findResourcesUsecase, findResourceDetailUsecase, reorderResourcesUsecase, updateResourceUsecase, deleteResourceUsecase, findAvailableTimeUsecase, findResourcesByTypeAndDateWithReservationsUsecase, checkAvailabilityUsecase, createResourceWithInfosUsecase) {
+    constructor(findResourcesUsecase, findResourcesByGroupUsecase, findResourceDetailUsecase, reorderResourcesUsecase, updateResourceUsecase, deleteResourceUsecase, findAvailableTimeUsecase, findResourcesByTypeAndDateWithReservationsUsecase, checkAvailabilityUsecase, createResourceWithInfosUsecase) {
         this.findResourcesUsecase = findResourcesUsecase;
+        this.findResourcesByGroupUsecase = findResourcesByGroupUsecase;
         this.findResourceDetailUsecase = findResourceDetailUsecase;
         this.reorderResourcesUsecase = reorderResourcesUsecase;
         this.updateResourceUsecase = updateResourceUsecase;
@@ -14709,6 +14713,9 @@ let ResourceService = class ResourceService {
     }
     async findResources(type) {
         return this.findResourcesUsecase.execute(type);
+    }
+    async findResourcesByResourceGroupId(resourceGroupId) {
+        return this.findResourcesByGroupUsecase.execute(resourceGroupId);
     }
     async findResourceDetailForAdmin(resourceId) {
         return this.findResourceDetailUsecase.executeForAdmin(resourceId);
@@ -14738,7 +14745,7 @@ let ResourceService = class ResourceService {
 exports.ResourceService = ResourceService;
 exports.ResourceService = ResourceService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_1.FindResourcesUsecase !== "undefined" && resource_1.FindResourcesUsecase) === "function" ? _a : Object, typeof (_b = typeof resource_1.FindResourceDetailUsecase !== "undefined" && resource_1.FindResourceDetailUsecase) === "function" ? _b : Object, typeof (_c = typeof resource_1.ReorderResourcesUsecase !== "undefined" && resource_1.ReorderResourcesUsecase) === "function" ? _c : Object, typeof (_d = typeof resource_1.UpdateResourceUsecase !== "undefined" && resource_1.UpdateResourceUsecase) === "function" ? _d : Object, typeof (_e = typeof resource_1.DeleteResourceUsecase !== "undefined" && resource_1.DeleteResourceUsecase) === "function" ? _e : Object, typeof (_f = typeof resource_1.FindAvailableTimeUsecase !== "undefined" && resource_1.FindAvailableTimeUsecase) === "function" ? _f : Object, typeof (_g = typeof resource_1.FindResourcesByTypeAndDateWithReservationsUsecase !== "undefined" && resource_1.FindResourcesByTypeAndDateWithReservationsUsecase) === "function" ? _g : Object, typeof (_h = typeof resource_1.CheckAvailabilityUsecase !== "undefined" && resource_1.CheckAvailabilityUsecase) === "function" ? _h : Object, typeof (_j = typeof resource_1.CreateResourceWithInfosUsecase !== "undefined" && resource_1.CreateResourceWithInfosUsecase) === "function" ? _j : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_1.FindResourcesUsecase !== "undefined" && resource_1.FindResourcesUsecase) === "function" ? _a : Object, typeof (_b = typeof resource_1.FindResourcesByGroupUsecase !== "undefined" && resource_1.FindResourcesByGroupUsecase) === "function" ? _b : Object, typeof (_c = typeof resource_1.FindResourceDetailUsecase !== "undefined" && resource_1.FindResourceDetailUsecase) === "function" ? _c : Object, typeof (_d = typeof resource_1.ReorderResourcesUsecase !== "undefined" && resource_1.ReorderResourcesUsecase) === "function" ? _d : Object, typeof (_e = typeof resource_1.UpdateResourceUsecase !== "undefined" && resource_1.UpdateResourceUsecase) === "function" ? _e : Object, typeof (_f = typeof resource_1.DeleteResourceUsecase !== "undefined" && resource_1.DeleteResourceUsecase) === "function" ? _f : Object, typeof (_g = typeof resource_1.FindAvailableTimeUsecase !== "undefined" && resource_1.FindAvailableTimeUsecase) === "function" ? _g : Object, typeof (_h = typeof resource_1.FindResourcesByTypeAndDateWithReservationsUsecase !== "undefined" && resource_1.FindResourcesByTypeAndDateWithReservationsUsecase) === "function" ? _h : Object, typeof (_j = typeof resource_1.CheckAvailabilityUsecase !== "undefined" && resource_1.CheckAvailabilityUsecase) === "function" ? _j : Object, typeof (_k = typeof resource_1.CreateResourceWithInfosUsecase !== "undefined" && resource_1.CreateResourceWithInfosUsecase) === "function" ? _k : Object])
 ], ResourceService);
 
 
@@ -15845,6 +15852,59 @@ exports.FindResourcesUsecase = FindResourcesUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/resource/core/usecases/resource/findResourcesByGroup.usecase.ts":
+/*!*****************************************************************************************!*\
+  !*** ./src/application/resource/core/usecases/resource/findResourcesByGroup.usecase.ts ***!
+  \*****************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindResourcesByGroupUsecase = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_response_dto_1 = __webpack_require__(/*! ../../dtos/resource-response.dto */ "./src/application/resource/core/dtos/resource-response.dto.ts");
+const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+let FindResourcesByGroupUsecase = class FindResourcesByGroupUsecase {
+    constructor(resourceService) {
+        this.resourceService = resourceService;
+    }
+    async execute(resourceGroupId) {
+        const resources = await this.resourceService.findAll({
+            where: {
+                resourceGroupId: resourceGroupId,
+            },
+            relations: [
+                'vehicleInfo',
+                'vehicleInfo.consumables',
+                'meetingRoomInfo',
+                'accommodationInfo',
+                'equipmentInfo',
+                'resourceManagers',
+                'resourceManagers.employee',
+            ],
+        });
+        return resources.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
+    }
+};
+exports.FindResourcesByGroupUsecase = FindResourcesByGroupUsecase;
+exports.FindResourcesByGroupUsecase = FindResourcesByGroupUsecase = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object])
+], FindResourcesByGroupUsecase);
+
+
+/***/ }),
+
 /***/ "./src/application/resource/core/usecases/resource/findResourcesByTypeAndDateWithReservations.usecase.ts":
 /*!***************************************************************************************************************!*\
   !*** ./src/application/resource/core/usecases/resource/findResourcesByTypeAndDateWithReservations.usecase.ts ***!
@@ -15998,6 +16058,7 @@ __exportStar(__webpack_require__(/*! ./reorderResources.usecase */ "./src/applic
 __exportStar(__webpack_require__(/*! ./deleteResource.usecase */ "./src/application/resource/core/usecases/resource/deleteResource.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./findResourcesByTypeAndDateWithReservations.usecase */ "./src/application/resource/core/usecases/resource/findResourcesByTypeAndDateWithReservations.usecase.ts"), exports);
 __exportStar(__webpack_require__(/*! ./findAvailableTime.usecase */ "./src/application/resource/core/usecases/resource/findAvailableTime.usecase.ts"), exports);
+__exportStar(__webpack_require__(/*! ./findResourcesByGroup.usecase */ "./src/application/resource/core/usecases/resource/findResourcesByGroup.usecase.ts"), exports);
 
 
 /***/ }),
@@ -16106,11 +16167,11 @@ let UpdateResourceUsecase = class UpdateResourceUsecase {
         await queryRunner.startTransaction();
         try {
             if (updateRequest.resource) {
-                if (!updateRequest.resource.images)
-                    updateRequest.resource.images = [];
-                updateRequest.resource.images = updateRequest.resource.images.map((image) => this.fileService.getFileUrl(image));
+                if (updateRequest.resource.images && updateRequest.resource.images.length > 0) {
+                    updateRequest.resource.images = updateRequest.resource.images.map((image) => this.fileService.getFileUrl(image));
+                    await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
+                }
                 await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
-                await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
             }
             if (updateRequest.managers) {
                 const newManagerIds = updateRequest.managers.map((m) => m.employeeId);
