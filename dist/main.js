@@ -8981,7 +8981,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdminReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -9008,6 +9008,9 @@ let AdminReservationController = class AdminReservationController {
     }
     async findCheckReservationList(query) {
         return this.adminReservationService.findCheckReservationList(query);
+    }
+    async findCalendar(user, startDate, endDate, resourceType) {
+        return this.adminReservationService.findCalendar(user, startDate, endDate, resourceType);
     }
     async findOne(user, reservationId) {
         return this.adminReservationService.findOne(user, reservationId);
@@ -9073,6 +9076,24 @@ __decorate([
     __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], AdminReservationController.prototype, "findCheckReservationList", null);
 __decorate([
+    (0, common_1.Get)('calendar'),
+    (0, swagger_1.ApiOperation)({ summary: '캘린더 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '캘린더 조회 성공',
+        type: dtos_index_1.CalendarResponseDto,
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'startDate', example: '2025-01-01' }),
+    (0, swagger_1.ApiQuery)({ name: 'endDate', example: '2025-12-31' }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('startDate')),
+    __param(2, (0, common_1.Query)('endDate')),
+    __param(3, (0, common_1.Query)('resourceType')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _f : Object, String, String, typeof (_g = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], AdminReservationController.prototype, "findCalendar", null);
+__decorate([
     (0, common_1.Get)(':reservationId'),
     (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
@@ -9082,8 +9103,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _f : Object, String]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _j : Object, String]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], AdminReservationController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/status'),
@@ -9095,8 +9116,8 @@ __decorate([
     __param(0, (0, common_1.Param)('reservationId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_h = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:paramtypes", [String, typeof (_l = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], AdminReservationController.prototype, "updateStatus", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/return-vehicle'),
@@ -9109,8 +9130,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _k : Object, String, typeof (_l = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _l : Object]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+    __metadata("design:paramtypes", [typeof (_o = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _o : Object, String, typeof (_p = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _p : Object]),
+    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
 ], AdminReservationController.prototype, "returnVehicle", null);
 exports.AdminReservationController = AdminReservationController = __decorate([
     (0, swagger_1.ApiTags)('2. 예약 - 관리자 '),
@@ -9824,6 +9845,10 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "isDelayed", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
 ], ReservationWithRelationsResponseDto.prototype, "modifiable", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
@@ -10120,24 +10145,30 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdminReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const find_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-reservation-list.usecase.ts");
 const find_check_reservation_list_usecase_1 = __webpack_require__(/*! ../usecases/find-check-reservation-list.usecase */ "./src/application/reservation/core/usecases/find-check-reservation-list.usecase.ts");
 const find_reservation_detail_usecase_1 = __webpack_require__(/*! ../usecases/find-reservation-detail.usecase */ "./src/application/reservation/core/usecases/find-reservation-detail.usecase.ts");
 const update_reservation_status_usecase_1 = __webpack_require__(/*! ../usecases/update-reservation-status.usecase */ "./src/application/reservation/core/usecases/update-reservation-status.usecase.ts");
 const return_vehicle_usecase_1 = __webpack_require__(/*! ../usecases/return-vehicle.usecase */ "./src/application/reservation/core/usecases/return-vehicle.usecase.ts");
 const find_dealyed_vehicle_notifications_usecase_1 = __webpack_require__(/*! ../usecases/find-dealyed-vehicle-notifications.usecase */ "./src/application/reservation/core/usecases/find-dealyed-vehicle-notifications.usecase.ts");
+const find_calendar_usecase_1 = __webpack_require__(/*! ../usecases/find-calendar.usecase */ "./src/application/reservation/core/usecases/find-calendar.usecase.ts");
+const reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let AdminReservationService = class AdminReservationService {
-    constructor(findReservationListUsecase, findCheckReservationListUsecase, findReservationDetailUsecase, updateReservationStatusUsecase, returnVehicleUsecase, findDelayedVehicleNotificationsUsecase) {
+    constructor(findReservationListUsecase, findCheckReservationListUsecase, findReservationDetailUsecase, updateReservationStatusUsecase, returnVehicleUsecase, findDelayedVehicleNotificationsUsecase, findCalendarUsecase, reservationVehicleService) {
         this.findReservationListUsecase = findReservationListUsecase;
         this.findCheckReservationListUsecase = findCheckReservationListUsecase;
         this.findReservationDetailUsecase = findReservationDetailUsecase;
         this.updateReservationStatusUsecase = updateReservationStatusUsecase;
         this.returnVehicleUsecase = returnVehicleUsecase;
         this.findDelayedVehicleNotificationsUsecase = findDelayedVehicleNotificationsUsecase;
+        this.findCalendarUsecase = findCalendarUsecase;
+        this.reservationVehicleService = reservationVehicleService;
     }
     async findReservationList(startDate, endDate, resourceType, resourceId, status) {
         return this.findReservationListUsecase.execute(startDate, endDate, resourceType, resourceId, status);
@@ -10150,6 +10181,25 @@ let AdminReservationService = class AdminReservationService {
         const notifications = await this.findDelayedVehicleNotificationsUsecase.execute(reservationId);
         return { ...reservation, notifications };
     }
+    async findCalendar(user, startDate, endDate, resourceType) {
+        const reservations = await this.findCalendarUsecase.execute(user, startDate, endDate, resourceType, false);
+        for (const reservation of reservations.reservations) {
+            const type = reservation.resource.type;
+            if (type === resource_type_enum_1.ResourceType.VEHICLE) {
+                const reservationVehicle = await this.reservationVehicleService.findOne({
+                    where: { reservationId: reservation.reservationId },
+                    relations: ['vehicleInfo'],
+                });
+                if (reservation.endDate < date_util_1.DateUtil.now().format() && !reservationVehicle.isReturned) {
+                    reservation.isDelayed = true;
+                }
+                else {
+                    reservation.isDelayed = false;
+                }
+            }
+        }
+        return reservations;
+    }
     async updateStatus(reservationId, updateDto) {
         return this.updateReservationStatusUsecase.execute(reservationId, updateDto);
     }
@@ -10160,7 +10210,7 @@ let AdminReservationService = class AdminReservationService {
 exports.AdminReservationService = AdminReservationService;
 exports.AdminReservationService = AdminReservationService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof find_reservation_list_usecase_1.FindReservationListUsecase !== "undefined" && find_reservation_list_usecase_1.FindReservationListUsecase) === "function" ? _a : Object, typeof (_b = typeof find_check_reservation_list_usecase_1.FindCheckReservationListUsecase !== "undefined" && find_check_reservation_list_usecase_1.FindCheckReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _c : Object, typeof (_d = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _d : Object, typeof (_e = typeof return_vehicle_usecase_1.ReturnVehicleUsecase !== "undefined" && return_vehicle_usecase_1.ReturnVehicleUsecase) === "function" ? _e : Object, typeof (_f = typeof find_dealyed_vehicle_notifications_usecase_1.FindDelayedVehicleNotificationsUsecase !== "undefined" && find_dealyed_vehicle_notifications_usecase_1.FindDelayedVehicleNotificationsUsecase) === "function" ? _f : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof find_reservation_list_usecase_1.FindReservationListUsecase !== "undefined" && find_reservation_list_usecase_1.FindReservationListUsecase) === "function" ? _a : Object, typeof (_b = typeof find_check_reservation_list_usecase_1.FindCheckReservationListUsecase !== "undefined" && find_check_reservation_list_usecase_1.FindCheckReservationListUsecase) === "function" ? _b : Object, typeof (_c = typeof find_reservation_detail_usecase_1.FindReservationDetailUsecase !== "undefined" && find_reservation_detail_usecase_1.FindReservationDetailUsecase) === "function" ? _c : Object, typeof (_d = typeof update_reservation_status_usecase_1.UpdateReservationStatusUsecase !== "undefined" && update_reservation_status_usecase_1.UpdateReservationStatusUsecase) === "function" ? _d : Object, typeof (_e = typeof return_vehicle_usecase_1.ReturnVehicleUsecase !== "undefined" && return_vehicle_usecase_1.ReturnVehicleUsecase) === "function" ? _e : Object, typeof (_f = typeof find_dealyed_vehicle_notifications_usecase_1.FindDelayedVehicleNotificationsUsecase !== "undefined" && find_dealyed_vehicle_notifications_usecase_1.FindDelayedVehicleNotificationsUsecase) === "function" ? _f : Object, typeof (_g = typeof find_calendar_usecase_1.FindCalendarUsecase !== "undefined" && find_calendar_usecase_1.FindCalendarUsecase) === "function" ? _g : Object, typeof (_h = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _h : Object])
 ], AdminReservationService);
 
 
@@ -10720,8 +10770,6 @@ let FindCalendarUsecase = class FindCalendarUsecase {
                     relations: ['employees'],
                 });
                 reservationResponseDto.hasUnreadNotification = notification.length > 0;
-                console.log(`${reservation.reservationId} / ${reservation.startDate} / ${reservation.title} : ${reservationResponseDto.hasUnreadNotification}`);
-                console.log(notification.map((n) => n.notificationId));
                 return reservationResponseDto;
             })),
         };
