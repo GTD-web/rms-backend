@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger'
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
-import { ReservationResponseDto, UpdateReservationStatusDto } from '@resource/dtos.index';
+import { CalendarResponseDto, ReservationResponseDto, UpdateReservationStatusDto } from '@resource/dtos.index';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
@@ -73,6 +73,24 @@ export class AdminReservationController {
         @Query() query: PaginationQueryDto,
     ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
         return this.adminReservationService.findCheckReservationList(query);
+    }
+
+    @Get('calendar')
+    @ApiOperation({ summary: '캘린더 조회' })
+    @ApiDataResponse({
+        description: '캘린더 조회 성공',
+        type: CalendarResponseDto,
+    })
+    @ApiQuery({ name: 'startDate', example: '2025-01-01' })
+    @ApiQuery({ name: 'endDate', example: '2025-12-31' })
+    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    async findCalendar(
+        @User() user: Employee,
+        @Query('startDate') startDate: string,
+        @Query('endDate') endDate: string,
+        @Query('resourceType') resourceType?: ResourceType,
+    ): Promise<CalendarResponseDto> {
+        return this.adminReservationService.findCalendar(user, startDate, endDate, resourceType);
     }
 
     @Get(':reservationId')

@@ -147,6 +147,9 @@ export class ReservationWithRelationsResponseDto extends ReservationResponseDto 
     returnable?: boolean;
 
     @ApiProperty({ required: false })
+    isDelayed?: boolean;
+
+    @ApiProperty({ required: false })
     modifiable?: boolean;
 
     @ApiProperty({ required: false })
