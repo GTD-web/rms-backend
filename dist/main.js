@@ -19873,12 +19873,13 @@ const getDelayedReturnVehicles_usecase_1 = __webpack_require__(/*! ./usecases/ge
 const getNeedRaplaceConsumables_usecase_1 = __webpack_require__(/*! ./usecases/getNeedRaplaceConsumables.usecase */ "./src/application/task/usecases/getNeedRaplaceConsumables.usecase.ts");
 const admin_task_controller_1 = __webpack_require__(/*! ./controllers/admin.task.controller */ "./src/application/task/controllers/admin.task.controller.ts");
 const admin_task_service_1 = __webpack_require__(/*! ./services/admin.task.service */ "./src/application/task/services/admin.task.service.ts");
+const notification_module_1 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
 let TaskModule = class TaskModule {
 };
 exports.TaskModule = TaskModule;
 exports.TaskModule = TaskModule = __decorate([
     (0, common_1.Module)({
-        imports: [resource_module_1.DomainResourceModule, reservation_module_1.DomainReservationModule],
+        imports: [resource_module_1.DomainResourceModule, reservation_module_1.DomainReservationModule, notification_module_1.DomainNotificationModule],
         controllers: [task_controller_1.TaskController, admin_task_controller_1.AdminTaskController],
         providers: [
             task_service_1.TaskService,
@@ -19980,16 +19981,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GetNeedRaplaceConsumablesUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
 const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 let GetNeedRaplaceConsumablesUsecase = class GetNeedRaplaceConsumablesUsecase {
-    constructor(resourceService, reservationService) {
+    constructor(resourceService, reservationService, notificationService) {
         this.resourceService = resourceService;
         this.reservationService = reservationService;
+        this.notificationService = notificationService;
     }
     async execute() {
         const resources = await this.resourceService.findAll({
@@ -20008,6 +20014,13 @@ let GetNeedRaplaceConsumablesUsecase = class GetNeedRaplaceConsumablesUsecase {
                 if (latestMaintenance) {
                     const maintanceRequired = resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
                     if (maintanceRequired) {
+                        const notifications = await this.notificationService.findAll({
+                            where: {
+                                notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING,
+                                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'resourceId' = '${resource.resourceId}' AND ${alias} ->> 'consumableName' = '${consumable.name}'`),
+                                createdAt: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(latestMaintenance.date).format('YYYY-MM-DD HH:mm')),
+                            },
+                        });
                         needReplaceConsumable.push({
                             type: '소모품교체',
                             title: `${consumable.name} 교체 필요`,
@@ -20023,6 +20036,7 @@ let GetNeedRaplaceConsumablesUsecase = class GetNeedRaplaceConsumablesUsecase {
                                 department: resource.resourceManagers[0].employee.department,
                                 position: resource.resourceManagers[0].employee.position,
                             },
+                            notifications: notifications,
                         });
                     }
                 }
@@ -20034,7 +20048,7 @@ let GetNeedRaplaceConsumablesUsecase = class GetNeedRaplaceConsumablesUsecase {
 exports.GetNeedRaplaceConsumablesUsecase = GetNeedRaplaceConsumablesUsecase;
 exports.GetNeedRaplaceConsumablesUsecase = GetNeedRaplaceConsumablesUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object])
 ], GetNeedRaplaceConsumablesUsecase);
 
 

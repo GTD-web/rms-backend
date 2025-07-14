@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { DateUtil } from '@libs/utils/date.util';
-import { LessThan } from 'typeorm';
+import { LessThan, MoreThan, Raw } from 'typeorm';
 import { Role } from '@libs/enums/role-type.enum';
 import { Employee } from '@libs/entities';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
 import { DomainResourceService } from '@src/domain/resource/resource.service';
+import { DomainNotificationService } from '@src/domain/notification/notification.service';
+import { NotificationType } from '@libs/enums/notification-type.enum';
 
 @Injectable()
 export class GetNeedRaplaceConsumablesUsecase {
     constructor(
         private readonly resourceService: DomainResourceService,
         private readonly reservationService: DomainReservationService,
+        private readonly notificationService: DomainNotificationService,
     ) {}
 
     async execute() {
@@ -32,6 +35,17 @@ export class GetNeedRaplaceConsumablesUsecase {
                     const maintanceRequired =
                         resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
                     if (maintanceRequired) {
+                        const notifications = await this.notificationService.findAll({
+                            where: {
+                                notificationType: NotificationType.RESOURCE_CONSUMABLE_REPLACING,
+                                notificationData: Raw(
+                                    (alias) =>
+                                        `${alias} ->> 'resourceId' = '${resource.resourceId}' AND ${alias} ->> 'consumableName' = '${consumable.name}'`,
+                                ),
+                                createdAt: MoreThan(DateUtil.date(latestMaintenance.date).format('YYYY-MM-DD HH:mm')),
+                            },
+                        });
+
                         needReplaceConsumable.push({
                             type: '소모품교체',
                             title: `${consumable.name} 교체 필요`,
@@ -47,6 +61,7 @@ export class GetNeedRaplaceConsumablesUsecase {
                                 department: resource.resourceManagers[0].employee.department,
                                 position: resource.resourceManagers[0].employee.position,
                             },
+                            notifications: notifications,
                         });
                     }
                 }
