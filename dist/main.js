@@ -20016,7 +20016,7 @@ let GetNeedRaplaceConsumablesUsecase = class GetNeedRaplaceConsumablesUsecase {
                     if (maintanceRequired) {
                         const notifications = await this.notificationService.findAll({
                             where: {
-                                notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING,
+                                notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
                                 notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'resourceId' = '${resource.resourceId}' AND ${alias} ->> 'consumableName' = '${consumable.name}'`),
                                 createdAt: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(latestMaintenance.date).format('YYYY-MM-DD HH:mm')),
                             },

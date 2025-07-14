@@ -37,7 +37,7 @@ export class GetNeedRaplaceConsumablesUsecase {
                     if (maintanceRequired) {
                         const notifications = await this.notificationService.findAll({
                             where: {
-                                notificationType: NotificationType.RESOURCE_CONSUMABLE_REPLACING,
+                                notificationType: NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
                                 notificationData: Raw(
                                     (alias) =>
                                         `${alias} ->> 'resourceId' = '${resource.resourceId}' AND ${alias} ->> 'consumableName' = '${consumable.name}'`,
