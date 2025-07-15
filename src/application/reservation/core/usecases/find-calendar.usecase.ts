@@ -33,14 +33,12 @@ export class FindCalendarUsecase {
               (${alias} <= :startDateObj AND "Reservation"."endDate" >= :endDateObj))`,
             { startDateObj, endDateObj },
         );
-
         const where = {
             startDate: dateCondition,
             status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
             ...(resourceType ? { resource: { type: resourceType } } : {}),
             ...(isMine ? { participants: { employeeId: user.employeeId, type: ParticipantsType.RESERVER } } : {}),
         };
-
         const reservations = await this.reservationService.findAll({
             where: where,
             relations: ['resource', 'participants', 'participants.employee'],
@@ -67,8 +65,8 @@ export class FindCalendarUsecase {
                     },
                 },
             },
+            withDeleted: true,
         });
-
         return {
             reservations: await Promise.all(
                 reservations.map(async (reservation) => {

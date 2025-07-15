@@ -10755,6 +10755,7 @@ let FindCalendarUsecase = class FindCalendarUsecase {
                     },
                 },
             },
+            withDeleted: true,
         });
         return {
             reservations: await Promise.all(reservations.map(async (reservation) => {
