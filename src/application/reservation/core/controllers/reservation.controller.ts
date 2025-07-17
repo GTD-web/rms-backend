@@ -19,6 +19,7 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { UpdateReservationDto, ReturnVehicleDto } from '../dtos/update-reservation.dto';
 import { ReservationService } from '../services/reservation.service';
 import { ReservationResponseDto } from '../dtos/reservation-response.dto';
+import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
 
 @ApiTags('2. 예약 ')
 @Controller('v1/reservations')
@@ -155,14 +156,17 @@ export class UserReservationController {
     @ApiQuery({ name: 'endDate', example: '2025-12-31' })
     @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
     @ApiQuery({ name: 'isMine', type: Boolean, required: false, example: true })
+    @ApiQuery({ name: 'isMySchedules', type: Boolean, required: false, example: true })
     async findCalendar(
         @User() user: Employee,
         @Query('startDate') startDate: string,
         @Query('endDate') endDate: string,
         @Query('resourceType') resourceType?: ResourceType,
         @Query('isMine') isMine?: boolean,
+        @Query('isMySchedules') isMySchedules?: boolean,
     ): Promise<CalendarResponseDto> {
-        return this.reservationService.findCalendar(user, startDate, endDate, resourceType, isMine);
+        const query = { startDate, endDate, resourceType, isMine, isMySchedules };
+        return this.reservationService.findCalendar(user, query);
     }
 
     @Get(':reservationId')

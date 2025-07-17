@@ -8,6 +8,7 @@ import { ReservationWithResourceResponseDto } from '../dtos/reservation-response
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Employee } from '@libs/entities/employee.entity';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
+import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
 
 @Injectable()
 export class FindCalendarUsecase {
@@ -16,13 +17,8 @@ export class FindCalendarUsecase {
         private readonly notificationService: DomainNotificationService,
     ) {}
 
-    async execute(
-        user: Employee,
-        startDate: string,
-        endDate: string,
-        resourceType?: ResourceType,
-        isMine?: boolean,
-    ): Promise<CalendarResponseDto> {
+    async execute(user: Employee, query: ReservationQueryDto): Promise<CalendarResponseDto> {
+        const { startDate, endDate, resourceType, isMine, isMySchedules } = query;
         const startDateObj = DateUtil.date(startDate).toDate();
         const endDateObj = DateUtil.date(endDate).toDate();
 
@@ -33,11 +29,19 @@ export class FindCalendarUsecase {
               (${alias} <= :startDateObj AND "Reservation"."endDate" >= :endDateObj))`,
             { startDateObj, endDateObj },
         );
+        let participantCondition = {};
+        if (!!isMine && !isMySchedules) {
+            participantCondition = { participants: { employeeId: user.employeeId, type: ParticipantsType.RESERVER } };
+        } else if (!isMine && !isMySchedules) {
+            participantCondition = {};
+        } else {
+            participantCondition = { participants: { employeeId: user.employeeId } };
+        }
         const where = {
             startDate: dateCondition,
             status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
             ...(resourceType ? { resource: { type: resourceType } } : {}),
-            ...(isMine ? { participants: { employeeId: user.employeeId, type: ParticipantsType.RESERVER } } : {}),
+            ...participantCondition,
         };
         const reservations = await this.reservationService.findAll({
             where: where,

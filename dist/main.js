@@ -9010,7 +9010,9 @@ let AdminReservationController = class AdminReservationController {
         return this.adminReservationService.findCheckReservationList(query);
     }
     async findCalendar(user, startDate, endDate, resourceType) {
-        return this.adminReservationService.findCalendar(user, startDate, endDate, resourceType);
+        const query = { startDate, endDate, resourceType };
+        console.log(query);
+        return this.adminReservationService.findCalendar(user, query);
     }
     async findOne(user, reservationId) {
         return this.adminReservationService.findOne(user, reservationId);
@@ -9263,8 +9265,9 @@ let UserReservationController = class UserReservationController {
     async findMyUpcomingSchedules(user, resourceType, query) {
         return this.reservationService.findMyAllSchedules(user.employeeId, query, resourceType);
     }
-    async findCalendar(user, startDate, endDate, resourceType, isMine) {
-        return this.reservationService.findCalendar(user, startDate, endDate, resourceType, isMine);
+    async findCalendar(user, startDate, endDate, resourceType, isMine, isMySchedules) {
+        const query = { startDate, endDate, resourceType, isMine, isMySchedules };
+        return this.reservationService.findCalendar(user, query);
     }
     async findOne(user, reservationId) {
         return this.reservationService.findReservationDetail(user, reservationId);
@@ -9393,13 +9396,15 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'endDate', example: '2025-12-31' }),
     (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
     (0, swagger_1.ApiQuery)({ name: 'isMine', type: Boolean, required: false, example: true }),
+    (0, swagger_1.ApiQuery)({ name: 'isMySchedules', type: Boolean, required: false, example: true }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)('startDate')),
     __param(2, (0, common_1.Query)('endDate')),
     __param(3, (0, common_1.Query)('resourceType')),
     __param(4, (0, common_1.Query)('isMine')),
+    __param(5, (0, common_1.Query)('isMySchedules')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_x = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _x : Object, String, String, typeof (_y = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _y : Object, Boolean]),
+    __metadata("design:paramtypes", [typeof (_x = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _x : Object, String, String, typeof (_y = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _y : Object, Boolean, Boolean]),
     __metadata("design:returntype", typeof (_z = typeof Promise !== "undefined" && Promise) === "function" ? _z : Object)
 ], UserReservationController.prototype, "findCalendar", null);
 __decorate([
@@ -10181,8 +10186,8 @@ let AdminReservationService = class AdminReservationService {
         const notifications = await this.findDelayedVehicleNotificationsUsecase.execute(reservationId);
         return { ...reservation, notifications };
     }
-    async findCalendar(user, startDate, endDate, resourceType) {
-        const reservations = await this.findCalendarUsecase.execute(user, startDate, endDate, resourceType, false);
+    async findCalendar(user, query) {
+        const reservations = await this.findCalendarUsecase.execute(user, query);
         for (const reservation of reservations.reservations) {
             const type = reservation.resource.type;
             if (type === resource_type_enum_1.ResourceType.VEHICLE) {
@@ -10331,8 +10336,8 @@ let ReservationService = class ReservationService {
     async findMyAllSchedules(employeeId, query, resourceType) {
         return this.findMyAllSchedulesUsecase.execute(employeeId, query, resourceType);
     }
-    async findCalendar(user, startDate, endDate, resourceType, isMine) {
-        return this.findCalendarUsecase.execute(user, startDate, endDate, resourceType, isMine);
+    async findCalendar(user, query) {
+        return this.findCalendarUsecase.execute(user, query);
     }
     async findReservationDetail(user, reservationId) {
         return this.findReservationDetailUsecase.execute(user, reservationId);
@@ -10717,17 +10722,28 @@ let FindCalendarUsecase = class FindCalendarUsecase {
         this.reservationService = reservationService;
         this.notificationService = notificationService;
     }
-    async execute(user, startDate, endDate, resourceType, isMine) {
+    async execute(user, query) {
+        const { startDate, endDate, resourceType, isMine, isMySchedules } = query;
         const startDateObj = date_util_1.DateUtil.date(startDate).toDate();
         const endDateObj = date_util_1.DateUtil.date(endDate).toDate();
         const dateCondition = (0, typeorm_1.Raw)((alias) => `(${alias} BETWEEN :startDateObj AND :endDateObj OR
               "Reservation"."endDate" BETWEEN :startDateObj AND :endDateObj OR
               (${alias} <= :startDateObj AND "Reservation"."endDate" >= :endDateObj))`, { startDateObj, endDateObj });
+        let participantCondition = {};
+        if (!!isMine && !isMySchedules) {
+            participantCondition = { participants: { employeeId: user.employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } };
+        }
+        else if (!isMine && !isMySchedules) {
+            participantCondition = {};
+        }
+        else {
+            participantCondition = { participants: { employeeId: user.employeeId } };
+        }
         const where = {
             startDate: dateCondition,
             status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
             ...(resourceType ? { resource: { type: resourceType } } : {}),
-            ...(isMine ? { participants: { employeeId: user.employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } } : {}),
+            ...participantCondition,
         };
         const reservations = await this.reservationService.findAll({
             where: where,

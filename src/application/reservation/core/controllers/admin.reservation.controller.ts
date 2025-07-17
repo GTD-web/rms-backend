@@ -14,6 +14,7 @@ import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { AdminReservationService } from '../services/admin-reservation.service';
 import { ReturnVehicleDto } from '../dtos/update-reservation.dto';
+import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
 
 @ApiTags('2. 예약 - 관리자 ')
 @Controller('v1/admin/reservations')
@@ -90,7 +91,9 @@ export class AdminReservationController {
         @Query('endDate') endDate: string,
         @Query('resourceType') resourceType?: ResourceType,
     ): Promise<CalendarResponseDto> {
-        return this.adminReservationService.findCalendar(user, startDate, endDate, resourceType);
+        const query = { startDate, endDate, resourceType };
+        console.log(query);
+        return this.adminReservationService.findCalendar(user, query);
     }
 
     @Get(':reservationId')

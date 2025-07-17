@@ -15,6 +15,7 @@ import { FindDelayedVehicleNotificationsUsecase } from '../usecases/find-dealyed
 import { FindCalendarUsecase } from '../usecases/find-calendar.usecase';
 import { DomainReservationVehicleService } from '@src/domain/reservation-vehicle/reservation-vehicle.service';
 import { DateUtil } from '@libs/utils/date.util';
+import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
 
 @Injectable()
 export class AdminReservationService {
@@ -51,13 +52,8 @@ export class AdminReservationService {
         return { ...reservation, notifications };
     }
 
-    async findCalendar(
-        user: Employee,
-        startDate: string,
-        endDate: string,
-        resourceType?: ResourceType,
-    ): Promise<CalendarResponseDto> {
-        const reservations = await this.findCalendarUsecase.execute(user, startDate, endDate, resourceType, false);
+    async findCalendar(user: Employee, query: ReservationQueryDto): Promise<CalendarResponseDto> {
+        const reservations = await this.findCalendarUsecase.execute(user, query);
         for (const reservation of reservations.reservations) {
             const type = reservation.resource.type;
             if (type === ResourceType.VEHICLE) {

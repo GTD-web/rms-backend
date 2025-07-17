@@ -30,6 +30,7 @@ import { MoreThan } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
 import { CreateReservationClosingJobUsecase } from '../usecases/create-reservation-closing-job.usecase';
+import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
 @Injectable()
 export class ReservationService {
     constructor(
@@ -123,14 +124,8 @@ export class ReservationService {
         return this.findMyAllSchedulesUsecase.execute(employeeId, query, resourceType);
     }
 
-    async findCalendar(
-        user: Employee,
-        startDate: string,
-        endDate: string,
-        resourceType?: ResourceType,
-        isMine?: boolean,
-    ): Promise<CalendarResponseDto> {
-        return this.findCalendarUsecase.execute(user, startDate, endDate, resourceType, isMine);
+    async findCalendar(user: Employee, query: ReservationQueryDto): Promise<CalendarResponseDto> {
+        return this.findCalendarUsecase.execute(user, query);
     }
 
     async findReservationDetail(user: Employee, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
