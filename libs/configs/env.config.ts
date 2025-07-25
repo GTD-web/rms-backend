@@ -12,6 +12,7 @@ export default registerAs('database', () => {
         username: process.env.POSTGRES_USER || 'admin',
         password: process.env.POSTGRES_PASSWORD || 'tech7admin!',
         database: process.env.POSTGRES_DB || 'resource-server',
+        schema: process.env.POSTGRES_SCHEMA || 'public',
     };
 });
 
