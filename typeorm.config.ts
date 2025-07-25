@@ -12,6 +12,7 @@ export default new DataSource({
     username: process.env.POSTGRES_USER || 'postgres',
     password: process.env.POSTGRES_PASSWORD || 'postgres',
     database: process.env.POSTGRES_DB || 'resource_management',
+    schema: process.env.POSTGRES_SCHEMA || 'public',
     entities: [join(__dirname, 'libs/entities/*.entity.ts')],
     migrations: [join(__dirname, 'libs/migrations/*.ts')],
     synchronize: false,
