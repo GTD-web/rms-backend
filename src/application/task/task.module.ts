@@ -9,9 +9,10 @@ import { GetDelayedReturnVehicleUsecase } from './usecases/getDelayedReturnVehic
 import { GetNeedRaplaceConsumablesUsecase } from './usecases/getNeedRaplaceConsumables.usecase';
 import { AdminTaskController } from './controllers/admin.task.controller';
 import { AdminTaskService } from './services/admin.task.service';
+import { DomainNotificationModule } from '@src/domain/notification/notification.module';
 
 @Module({
-    imports: [DomainResourceModule, DomainReservationModule],
+    imports: [DomainResourceModule, DomainReservationModule, DomainNotificationModule],
     controllers: [TaskController, AdminTaskController],
     providers: [
         TaskService,
