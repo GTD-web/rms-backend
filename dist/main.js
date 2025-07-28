@@ -10770,7 +10770,6 @@ exports.FindCalendarUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
@@ -10780,6 +10779,7 @@ let FindCalendarUsecase = class FindCalendarUsecase {
         this.notificationService = notificationService;
     }
     async execute(user, query) {
+        console.time('FindCalendarUsecase');
         const { startDate, endDate, resourceType, isMine, isMySchedules } = query;
         const startDateObj = date_util_1.DateUtil.date(startDate).toDate();
         const endDateObj = date_util_1.DateUtil.date(endDate).toDate();
@@ -10802,54 +10802,94 @@ let FindCalendarUsecase = class FindCalendarUsecase {
             ...(resourceType ? { resource: { type: resourceType } } : {}),
             ...participantCondition,
         };
-        const reservations = await this.reservationService.findAll({
-            where: where,
-            relations: ['resource', 'participants', 'participants.employee'],
-            order: {
-                startDate: 'ASC',
-            },
-            select: {
-                reservationId: true,
-                startDate: true,
-                endDate: true,
-                title: true,
-                status: true,
-                resource: {
-                    resourceId: true,
-                    name: true,
-                    type: true,
+        console.time('parallel-queries');
+        const [reservations, notis] = await Promise.all([
+            this.reservationService.findAll({
+                where: where,
+                relations: ['resource', 'participants', 'participants.employee'],
+                order: {
+                    startDate: 'ASC',
                 },
-                participants: {
-                    employeeId: true,
-                    type: true,
-                    employee: {
-                        employeeId: true,
+                select: {
+                    reservationId: true,
+                    startDate: true,
+                    endDate: true,
+                    title: true,
+                    status: true,
+                    resource: {
+                        resourceId: true,
                         name: true,
+                        type: true,
+                    },
+                    participants: {
+                        employeeId: true,
+                        type: true,
+                        employee: {
+                            employeeId: true,
+                            name: true,
+                        },
                     },
                 },
-            },
-            withDeleted: true,
-        });
-        const notis = await this.notificationService.findAll({
-            where: {
-                employees: {
-                    employeeId: user.employeeId,
-                    isRead: false,
+                withDeleted: true,
+            }),
+            this.notificationService.findAll({
+                where: {
+                    employees: {
+                        employeeId: user.employeeId,
+                        isRead: false,
+                    },
                 },
-            },
-            relations: ['employees'],
-        });
+                relations: ['employees'],
+            }),
+        ]);
+        console.timeEnd('parallel-queries');
+        console.time('map');
         const map = new Map();
         notis.forEach((noti) => {
             if (!map.has(noti.notificationData.reservationId)) {
                 map.set(noti.notificationData.reservationId, true);
             }
         });
+        console.timeEnd('map');
+        console.time('map2');
+        const formatDate = (date) => {
+            if (!date)
+                return undefined;
+            const dateObj = typeof date === 'string' ? new Date(date) : date;
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const hour = String(dateObj.getHours()).padStart(2, '0');
+            const minute = String(dateObj.getMinutes()).padStart(2, '0');
+            const second = String(dateObj.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+        };
         const reservationsWithNotifications = reservations.map((reservation) => {
-            const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
-            reservationResponseDto.hasUnreadNotification = map.has(reservation.reservationId);
-            return reservationResponseDto;
+            const participants = reservation.participants || [];
+            const reservers = [];
+            const participantsOnly = [];
+            for (const participant of participants) {
+                if (participant.type === reservation_type_enum_1.ParticipantsType.RESERVER) {
+                    reservers.push(participant);
+                }
+                else if (participant.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT) {
+                    participantsOnly.push(participant);
+                }
+            }
+            return {
+                reservationId: reservation.reservationId,
+                title: reservation.title,
+                startDate: formatDate(reservation.startDate),
+                endDate: formatDate(reservation.endDate),
+                status: reservation.status,
+                resource: reservation.resource,
+                reservers,
+                participants: participantsOnly,
+                hasUnreadNotification: map.has(reservation.reservationId),
+            };
         });
+        console.timeEnd('map2');
+        console.timeEnd('FindCalendarUsecase');
         return {
             reservations: reservationsWithNotifications,
         };
