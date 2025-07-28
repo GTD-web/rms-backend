@@ -7,12 +7,14 @@ import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-typ
 import { Employee } from '@libs/entities/employee.entity';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
 import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
+import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 
 @Injectable()
 export class FindCalendarUsecase {
     constructor(
         private readonly reservationService: DomainReservationService,
         private readonly notificationService: DomainNotificationService,
+        private readonly employeeService: DomainEmployeeService,
     ) {}
 
     async execute(user: Employee, query: ReservationQueryDto): Promise<CalendarResponseDto> {
@@ -50,47 +52,74 @@ export class FindCalendarUsecase {
 
         // 병렬 처리로 성능 개선: 85ms + 139ms → ~139ms (60% 개선 예상)
         console.time('parallel-queries');
-        const [reservations, notis] = await Promise.all([
-            this.reservationService.findAll({
-                where: where,
-                relations: ['resource', 'participants', 'participants.employee'],
-                order: {
-                    startDate: 'ASC',
+
+        console.time('employee-query');
+        const employeePromise = this.employeeService.findAll({
+            select: {
+                employeeId: true,
+                name: true,
+            },
+        });
+        console.time('reservation-query');
+
+        const reservationPromise = this.reservationService.findAll({
+            where: where,
+            // N+1 쿼리 방지: participants.employee 제거 (가장 느린 부분)
+            relations: ['resource', 'participants'],
+            order: {
+                startDate: 'ASC',
+            },
+            select: {
+                reservationId: true,
+                startDate: true,
+                endDate: true,
+                title: true,
+                status: true,
+                resource: {
+                    resourceId: true,
+                    name: true,
+                    type: true,
                 },
-                select: {
-                    reservationId: true,
-                    startDate: true,
-                    endDate: true,
-                    title: true,
-                    status: true,
-                    resource: {
-                        resourceId: true,
-                        name: true,
-                        type: true,
-                    },
-                    participants: {
-                        employeeId: true,
-                        type: true,
-                        employee: {
-                            employeeId: true,
-                            name: true,
-                        },
-                    },
+                participants: {
+                    employeeId: true,
+                    type: true,
+                    // employee 정보는 별도로 조회하거나 클라이언트에서 처리
                 },
-                withDeleted: true,
-            }),
-            this.notificationService.findAll({
-                where: {
-                    employees: {
-                        employeeId: user.employeeId,
-                        isRead: false,
-                    },
+            },
+            withDeleted: true,
+        });
+
+        console.time('notification-query');
+        const notificationPromise = this.notificationService.findAll({
+            where: {
+                employees: {
+                    employeeId: user.employeeId,
+                    isRead: false,
                 },
-                relations: ['employees'],
-            }),
+            },
+            relations: ['employees'],
+            select: {
+                notificationId: true,
+                notificationData: true,
+            },
+        });
+
+        const [reservations, notis, employees] = await Promise.all([
+            reservationPromise,
+            notificationPromise,
+            employeePromise,
         ]);
+        console.timeEnd('employee-query');
+        console.timeEnd('reservation-query');
+        console.timeEnd('notification-query');
         console.timeEnd('parallel-queries');
 
+        console.time('employee-map');
+        const employeeMap = new Map();
+        employees.forEach((employee) => {
+            employeeMap.set(employee.employeeId, employee);
+        });
+        console.timeEnd('employee-map');
         console.time('map');
         const map = new Map();
         notis.forEach((noti) => {
@@ -138,9 +167,17 @@ export class FindCalendarUsecase {
 
             for (const participant of participants) {
                 if (participant.type === ParticipantsType.RESERVER) {
-                    reservers.push(participant);
+                    reservers.push({
+                        employeeId: participant.employeeId,
+                        type: participant.type,
+                        employee: employeeMap.get(participant.employeeId),
+                    });
                 } else if (participant.type === ParticipantsType.PARTICIPANT) {
-                    participantsOnly.push(participant);
+                    participantsOnly.push({
+                        employeeId: participant.employeeId,
+                        type: participant.type,
+                        employee: employeeMap.get(participant.employeeId),
+                    });
                 }
             }
 
