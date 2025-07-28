@@ -10852,17 +10852,26 @@ let FindCalendarUsecase = class FindCalendarUsecase {
         });
         console.timeEnd('map');
         console.time('map2');
+        const formatter = new Intl.DateTimeFormat('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'Asia/Seoul',
+            hour12: false,
+        });
         const formatDate = (date) => {
             if (!date)
                 return undefined;
             const dateObj = typeof date === 'string' ? new Date(date) : date;
-            const year = dateObj.getFullYear();
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            const hour = String(dateObj.getHours()).padStart(2, '0');
-            const minute = String(dateObj.getMinutes()).padStart(2, '0');
-            const second = String(dateObj.getSeconds()).padStart(2, '0');
-            return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+            const parts = formatter.formatToParts(dateObj);
+            const partsObj = {};
+            for (const part of parts) {
+                partsObj[part.type] = part.value;
+            }
+            return `${partsObj.year}-${partsObj.month}-${partsObj.day} ${partsObj.hour}:${partsObj.minute}:${partsObj.second}`;
         };
         const reservationsWithNotifications = reservations.map((reservation) => {
             const participants = reservation.participants || [];

@@ -102,20 +102,32 @@ export class FindCalendarUsecase {
 
         console.time('map2');
 
-        // 간단하고 빠른 날짜 포맷팅
+        // 타임존 적용한 효율적인 날짜 포맷팅
+        const formatter = new Intl.DateTimeFormat('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'Asia/Seoul',
+            hour12: false,
+        });
+
         const formatDate = (date: Date | string) => {
             if (!date) return undefined;
             const dateObj = typeof date === 'string' ? new Date(date) : date;
 
-            // 직접 포맷팅이 더 빠를 수 있음
-            const year = dateObj.getFullYear();
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            const hour = String(dateObj.getHours()).padStart(2, '0');
-            const minute = String(dateObj.getMinutes()).padStart(2, '0');
-            const second = String(dateObj.getSeconds()).padStart(2, '0');
+            // 한 번의 formatToParts 호출로 모든 부분 가져오기
+            const parts = formatter.formatToParts(dateObj);
 
-            return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+            // parts를 객체로 변환하여 빠른 접근
+            const partsObj: Record<string, string> = {};
+            for (const part of parts) {
+                partsObj[part.type] = part.value;
+            }
+
+            return `${partsObj.year}-${partsObj.month}-${partsObj.day} ${partsObj.hour}:${partsObj.minute}:${partsObj.second}`;
         };
 
         const reservationsWithNotifications = reservations.map((reservation) => {
