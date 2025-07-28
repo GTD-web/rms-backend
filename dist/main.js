@@ -10764,7 +10764,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FindCalendarUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -10773,10 +10773,12 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 let FindCalendarUsecase = class FindCalendarUsecase {
-    constructor(reservationService, notificationService) {
+    constructor(reservationService, notificationService, employeeService) {
         this.reservationService = reservationService;
         this.notificationService = notificationService;
+        this.employeeService = employeeService;
     }
     async execute(user, query) {
         console.time('FindCalendarUsecase');
@@ -10803,46 +10805,67 @@ let FindCalendarUsecase = class FindCalendarUsecase {
             ...participantCondition,
         };
         console.time('parallel-queries');
-        const [reservations, notis] = await Promise.all([
-            this.reservationService.findAll({
-                where: where,
-                relations: ['resource', 'participants', 'participants.employee'],
-                order: {
-                    startDate: 'ASC',
+        console.time('employee-query');
+        const employeePromise = this.employeeService.findAll({
+            select: {
+                employeeId: true,
+                name: true,
+            },
+        });
+        console.time('reservation-query');
+        const reservationPromise = this.reservationService.findAll({
+            where: where,
+            relations: ['resource', 'participants'],
+            order: {
+                startDate: 'ASC',
+            },
+            select: {
+                reservationId: true,
+                startDate: true,
+                endDate: true,
+                title: true,
+                status: true,
+                resource: {
+                    resourceId: true,
+                    name: true,
+                    type: true,
                 },
-                select: {
-                    reservationId: true,
-                    startDate: true,
-                    endDate: true,
-                    title: true,
-                    status: true,
-                    resource: {
-                        resourceId: true,
-                        name: true,
-                        type: true,
-                    },
-                    participants: {
-                        employeeId: true,
-                        type: true,
-                        employee: {
-                            employeeId: true,
-                            name: true,
-                        },
-                    },
+                participants: {
+                    employeeId: true,
+                    type: true,
                 },
-                withDeleted: true,
-            }),
-            this.notificationService.findAll({
-                where: {
-                    employees: {
-                        employeeId: user.employeeId,
-                        isRead: false,
-                    },
+            },
+            withDeleted: true,
+        });
+        console.time('notification-query');
+        const notificationPromise = this.notificationService.findAll({
+            where: {
+                employees: {
+                    employeeId: user.employeeId,
+                    isRead: false,
                 },
-                relations: ['employees'],
-            }),
+            },
+            relations: ['employees'],
+            select: {
+                notificationId: true,
+                notificationData: true,
+            },
+        });
+        const [reservations, notis, employees] = await Promise.all([
+            reservationPromise,
+            notificationPromise,
+            employeePromise,
         ]);
+        console.timeEnd('employee-query');
+        console.timeEnd('reservation-query');
+        console.timeEnd('notification-query');
         console.timeEnd('parallel-queries');
+        console.time('employee-map');
+        const employeeMap = new Map();
+        employees.forEach((employee) => {
+            employeeMap.set(employee.employeeId, employee);
+        });
+        console.timeEnd('employee-map');
         console.time('map');
         const map = new Map();
         notis.forEach((noti) => {
@@ -10879,10 +10902,18 @@ let FindCalendarUsecase = class FindCalendarUsecase {
             const participantsOnly = [];
             for (const participant of participants) {
                 if (participant.type === reservation_type_enum_1.ParticipantsType.RESERVER) {
-                    reservers.push(participant);
+                    reservers.push({
+                        employeeId: participant.employeeId,
+                        type: participant.type,
+                        employee: employeeMap.get(participant.employeeId),
+                    });
                 }
                 else if (participant.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT) {
-                    participantsOnly.push(participant);
+                    participantsOnly.push({
+                        employeeId: participant.employeeId,
+                        type: participant.type,
+                        employee: employeeMap.get(participant.employeeId),
+                    });
                 }
             }
             return {
@@ -10907,7 +10938,7 @@ let FindCalendarUsecase = class FindCalendarUsecase {
 exports.FindCalendarUsecase = FindCalendarUsecase;
 exports.FindCalendarUsecase = FindCalendarUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _b : Object, typeof (_c = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _c : Object])
 ], FindCalendarUsecase);
 
 
