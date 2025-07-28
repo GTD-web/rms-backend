@@ -10830,22 +10830,28 @@ let FindCalendarUsecase = class FindCalendarUsecase {
             },
             withDeleted: true,
         });
+        const notis = await this.notificationService.findAll({
+            where: {
+                employees: {
+                    employeeId: user.employeeId,
+                    isRead: false,
+                },
+            },
+            relations: ['employees'],
+        });
+        const map = new Map();
+        notis.forEach((noti) => {
+            if (!map.has(noti.notificationData.reservationId)) {
+                map.set(noti.notificationData.reservationId, true);
+            }
+        });
+        const reservationsWithNotifications = reservations.map((reservation) => {
+            const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
+            reservationResponseDto.hasUnreadNotification = map.has(reservation.reservationId);
+            return reservationResponseDto;
+        });
         return {
-            reservations: await Promise.all(reservations.map(async (reservation) => {
-                const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
-                const notification = await this.notificationService.findAll({
-                    where: {
-                        notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`),
-                        employees: {
-                            employeeId: user.employeeId,
-                            isRead: false,
-                        },
-                    },
-                    relations: ['employees'],
-                });
-                reservationResponseDto.hasUnreadNotification = notification.length > 0;
-                return reservationResponseDto;
-            })),
+            reservations: reservationsWithNotifications,
         };
     }
 };

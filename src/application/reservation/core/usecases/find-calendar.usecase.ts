@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
-import { Between, In, Raw } from 'typeorm';
+import { In, Raw } from 'typeorm';
 import { CalendarResponseDto, ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { DateUtil } from '@libs/utils/date.util';
 import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-type.enum';
-import { ReservationWithResourceResponseDto } from '../dtos/reservation-response.dto';
-import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Employee } from '@libs/entities/employee.entity';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
 import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
@@ -21,7 +19,6 @@ export class FindCalendarUsecase {
         const { startDate, endDate, resourceType, isMine, isMySchedules } = query;
         const startDateObj = DateUtil.date(startDate).toDate();
         const endDateObj = DateUtil.date(endDate).toDate();
-
         const dateCondition = Raw(
             (alias) =>
                 `(${alias} BETWEEN :startDateObj AND :endDateObj OR
@@ -43,6 +40,7 @@ export class FindCalendarUsecase {
             ...(resourceType ? { resource: { type: resourceType } } : {}),
             ...participantCondition,
         };
+
         const reservations = await this.reservationService.findAll({
             where: where,
             relations: ['resource', 'participants', 'participants.employee'],
@@ -71,27 +69,30 @@ export class FindCalendarUsecase {
             },
             withDeleted: true,
         });
-        return {
-            reservations: await Promise.all(
-                reservations.map(async (reservation) => {
-                    const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
-                    const notification = await this.notificationService.findAll({
-                        where: {
-                            notificationData: Raw(
-                                (alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`,
-                            ),
-                            employees: {
-                                employeeId: user.employeeId,
-                                isRead: false,
-                            },
-                        },
-                        relations: ['employees'],
-                    });
 
-                    reservationResponseDto.hasUnreadNotification = notification.length > 0;
-                    return reservationResponseDto;
-                }),
-            ),
+        const notis = await this.notificationService.findAll({
+            where: {
+                employees: {
+                    employeeId: user.employeeId,
+                    isRead: false,
+                },
+            },
+            relations: ['employees'],
+        });
+        const map = new Map();
+        notis.forEach((noti) => {
+            if (!map.has(noti.notificationData.reservationId)) {
+                map.set(noti.notificationData.reservationId, true);
+            }
+        });
+        const reservationsWithNotifications = reservations.map((reservation) => {
+            const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
+            reservationResponseDto.hasUnreadNotification = map.has(reservation.reservationId);
+            return reservationResponseDto;
+        });
+
+        return {
+            reservations: reservationsWithNotifications,
         };
     }
 }

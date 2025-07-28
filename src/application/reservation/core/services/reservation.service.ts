@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Employee } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
@@ -7,7 +7,7 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
 import { CalendarResponseDto, CreateReservationResponseDto } from '../dtos/reservation-response.dto';
 import { ReservationResponseDto } from '../dtos/reservation-response.dto';
-import { UpdateReservationDto, ReturnVehicleDto } from '../dtos/update-reservation.dto';
+import { UpdateReservationDto, ReturnVehicleDto, UpdateReservationTimeDto } from '../dtos/update-reservation.dto';
 import { ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { GroupedReservationResponseDto } from '../dtos/reservation-response.dto';
 import { GroupedReservationWithResourceResponseDto } from '../dtos/reservation-response.dto';
@@ -25,12 +25,12 @@ import { UpdateReservationStatusUsecase } from '../usecases/update-reservation-s
 import { ReturnVehicleUsecase } from '../usecases/return-vehicle.usecase';
 import { CheckReservationAccessUsecase } from '../usecases/check-reservation-access.usecase';
 import { FindCalendarUsecase } from '../usecases/find-calendar.usecase';
-import { In, LessThanOrEqual, Not } from 'typeorm';
-import { MoreThan } from 'typeorm';
-import { DateUtil } from '@libs/utils/date.util';
-import { DomainReservationService } from '@src/domain/reservation/reservation.service';
-import { CreateReservationClosingJobUsecase } from '../usecases/create-reservation-closing-job.usecase';
 import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
+import { ReservationManagementService } from '@src/context/reservation-management/services/reservation-management.service';
+import { ReservationConflictService } from '@src/context/reservation-management/services/reservation-conflict.service';
+import { ReservationValidationService } from '@src/context/reservation-management/services/reservation-validation.service';
+import { DateUtil } from '@libs/utils/date.util';
+
 @Injectable()
 export class ReservationService {
     constructor(
@@ -46,8 +46,9 @@ export class ReservationService {
         private readonly returnVehicleUsecase: ReturnVehicleUsecase,
         private readonly checkReservationAccessUsecase: CheckReservationAccessUsecase,
         private readonly findCalendarUsecase: FindCalendarUsecase,
-        private readonly reservationService: DomainReservationService,
-        private readonly createReservationClosingJob: CreateReservationClosingJobUsecase,
+        private readonly reservationConflictService: ReservationConflictService,
+        private readonly reservationValidationService: ReservationValidationService,
+        private readonly reservationManagementService: ReservationManagementService,
     ) {}
 
     async onModuleInit() {
@@ -146,5 +147,41 @@ export class ReservationService {
 
     async checkReservationAccess(reservationId: string, employeeId: string): Promise<void> {
         await this.checkReservationAccessUsecase.execute(reservationId, employeeId);
+    }
+
+    async checkAvailablityToExtendReservation(employeeId: string, reservationId: string): Promise<boolean> {
+        await this.reservationValidationService.validateReserverId(employeeId, reservationId);
+
+        const reservation = await this.reservationValidationService.validateReservationId(reservationId);
+        console.log('reservation', reservation);
+        const isAvailable = await this.reservationValidationService.validateReservationTiming(
+            DateUtil.date(reservation.endDate).addMinutes(-15).toDate(),
+            reservation.endDate,
+        );
+        console.log('isAvailable', isAvailable);
+        if (!isAvailable) {
+            return false;
+        }
+        const isConflict = await this.reservationConflictService.isReservationTimeConflict(
+            reservation.resourceId,
+            DateUtil.date(reservation.endDate).toDate(),
+            DateUtil.date(reservation.endDate).addMinutes(30).toDate(),
+            reservationId,
+        );
+        console.log('isConflict', isConflict);
+        return !isConflict;
+    }
+
+    async extendReservation(
+        employeeId: string,
+        reservationId: string,
+        extendDto: UpdateReservationTimeDto,
+    ): Promise<ReservationResponseDto> {
+        await this.reservationValidationService.validateReserverId(employeeId, reservationId);
+        const updatedReservation = await this.reservationManagementService.updateReservationTime(
+            reservationId,
+            extendDto,
+        );
+        return new ReservationResponseDto(updatedReservation);
     }
 }

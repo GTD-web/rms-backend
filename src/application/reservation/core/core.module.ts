@@ -35,6 +35,7 @@ import { DomainNotificationRepository } from '@src/domain/notification/notificat
 import { DomainNotificationModule } from '@src/domain/notification/notification.module';
 import { DomainEmployeeNotificationModule } from '@src/domain/employee-notification/employee-notification.module';
 import { DomainFileModule } from '@src/domain/file/file.module';
+import { ReservationManagementContextModule } from '@src/context/reservation-management/reservation-management.context.module';
 
 @Module({
     imports: [
@@ -58,6 +59,7 @@ import { DomainFileModule } from '@src/domain/file/file.module';
         DomainNotificationModule,
         DomainFileModule,
         ScheduleModule.forRoot(),
+        ReservationManagementContextModule,
     ],
     controllers: [AdminReservationController, UserReservationController, CronReservationController],
     providers: [

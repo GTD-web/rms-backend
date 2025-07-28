@@ -16,7 +16,7 @@ import {
 } from '../dtos/reservation-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
-import { UpdateReservationDto, ReturnVehicleDto } from '../dtos/update-reservation.dto';
+import { UpdateReservationDto, ReturnVehicleDto, UpdateReservationTimeDto } from '../dtos/update-reservation.dto';
 import { ReservationService } from '../services/reservation.service';
 import { ReservationResponseDto } from '../dtos/reservation-response.dto';
 import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
@@ -223,5 +223,28 @@ export class UserReservationController {
         @Body() returnDto: ReturnVehicleDto,
     ): Promise<boolean> {
         return this.reservationService.returnVehicle(user, reservationId, returnDto);
+    }
+
+    @Get(':reservationId/check/extendable')
+    @ApiOperation({ summary: '예약 시간 연장 가능 여부 조회' })
+    @ApiDataResponse({
+        description: '예약 시간 연장 가능 여부 조회 성공',
+    })
+    async checkExtendable(@User() user: Employee, @Param('reservationId') reservationId: string): Promise<boolean> {
+        return this.reservationService.checkAvailablityToExtendReservation(user.employeeId, reservationId);
+    }
+
+    @Patch(':reservationId/extend')
+    @ApiOperation({ summary: '예약 시간 연장' })
+    @ApiDataResponse({
+        description: '예약 시간 연장 성공',
+        type: ReservationResponseDto,
+    })
+    async extendReservation(
+        @User() user: Employee,
+        @Param('reservationId') reservationId: string,
+        @Body() extendDto: UpdateReservationTimeDto,
+    ): Promise<ReservationResponseDto> {
+        return this.reservationService.extendReservation(user.employeeId, reservationId, extendDto);
     }
 }
