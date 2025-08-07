@@ -45,7 +45,17 @@ export class GetTaskListUsecase {
                     'vehicleInfo.consumables',
                     'vehicleInfo.consumables.maintenances',
                 ],
+                order: {
+                    vehicleInfo: {
+                        consumables: {
+                            maintenances: {
+                                date: 'DESC',
+                            },
+                        },
+                    },
+                },
             });
+
             for (const resource of resources) {
                 for (const consumable of resource.vehicleInfo?.consumables || []) {
                     const latestMaintenance = consumable.maintenances[0] || null;

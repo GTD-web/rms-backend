@@ -20274,6 +20274,15 @@ let GetTaskListUsecase = class GetTaskListUsecase {
                     'vehicleInfo.consumables',
                     'vehicleInfo.consumables.maintenances',
                 ],
+                order: {
+                    vehicleInfo: {
+                        consumables: {
+                            maintenances: {
+                                date: 'DESC',
+                            },
+                        },
+                    },
+                },
             });
             for (const resource of resources) {
                 for (const consumable of resource.vehicleInfo?.consumables || []) {
