@@ -20277,7 +20277,7 @@ let GetTaskListUsecase = class GetTaskListUsecase {
             });
             for (const resource of resources) {
                 for (const consumable of resource.vehicleInfo?.consumables || []) {
-                    const latestMaintenance = consumable.maintenances[consumable.maintenances.length - 1] || null;
+                    const latestMaintenance = consumable.maintenances[0] || null;
                     if (latestMaintenance) {
                         const maintanceRequired = resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) >
                             consumable.replaceCycle;
