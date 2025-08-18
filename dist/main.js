@@ -21498,8 +21498,6 @@ const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.
 const reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.module */ "./src/domain/reservation-vehicle/reservation-vehicle.module.ts");
 const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
 const resource_vehicle_info_service_1 = __webpack_require__(/*! ./services/resource-vehicle-info.service */ "./src/context/resource-management/services/resource-vehicle-info.service.ts");
-const file_reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/file-reservation-vehicle/file-reservation-vehicle.module */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.module.ts");
-const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
 let ResourceManagementContextModule = class ResourceManagementContextModule {
 };
 exports.ResourceManagementContextModule = ResourceManagementContextModule;
@@ -21510,8 +21508,6 @@ exports.ResourceManagementContextModule = ResourceManagementContextModule = __de
             resource_module_1.DomainResourceModule,
             reservation_vehicle_module_1.DomainReservationVehicleModule,
             vehicle_info_module_1.DomainVehicleInfoModule,
-            file_reservation_vehicle_module_1.DomainFileReservationVehicleModule,
-            file_module_1.DomainFileModule,
         ],
         controllers: [],
         providers: [
