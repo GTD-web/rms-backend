@@ -33,6 +33,9 @@ import {
     FindAllMaintenancesByVehicleInfoIdUsecase,
 } from './usecases/maintenance';
 import { DomainFileModule } from '@src/domain/file/file.module';
+import { ResourceManagementContextModule } from '@src/context/resource-management/resource-management.context.module';
+import { FileContextModule } from '@src/context/file/file.context.module';
+import { AdminReservationVehicleController } from './controllers/admin.reservation-vehicle.controller';
 @Module({
     imports: [
         TypeOrmModule.forFeature([VehicleInfo, Consumable, Maintenance, Employee, Notification, File]),
@@ -42,6 +45,8 @@ import { DomainFileModule } from '@src/domain/file/file.module';
         DomainEmployeeModule,
         NotificationModule,
         DomainFileModule,
+        ResourceManagementContextModule,
+        FileContextModule,
     ],
     controllers: [
         AdminVehicleInfoController,
@@ -49,6 +54,7 @@ import { DomainFileModule } from '@src/domain/file/file.module';
         AdminMaintenanceController,
         UserConsumableController,
         UserMaintenanceController,
+        AdminReservationVehicleController,
     ],
     providers: [
         VehicleInfoService,

@@ -12,11 +12,7 @@ export class DomainReservationVehicleService extends BaseService<ReservationVehi
     async findByReservationVehicleId(reservationVehicleId: string): Promise<ReservationVehicle> {
         const reservationVehicle = await this.reservationVehicleRepository.findOne({
             where: { reservationVehicleId },
-            relations: ['reservation', 'vehicleInfo'],
         });
-        if (!reservationVehicle) {
-            throw new NotFoundException('예약 차량을 찾을 수 없습니다.');
-        }
         return reservationVehicle;
     }
 

@@ -6,6 +6,11 @@ import { VehicleInfoResponseDto } from '../dtos/vehicle-response.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { VehicleInfoService } from '@src/application/resource/vehicle/services/vehicle-info.service';
+import { ReservationVehicleResponseDto } from '@src/application/reservation/core/dtos/reservation-response.dto';
+import {
+    ReturnVehicleDetailResponseDto,
+    ReturnVehicleResponseDto,
+} from '@src/application/reservation/core/dtos/return-vehicle-response.dto';
 
 @ApiTags('4. 차량 정보 - 관리자 ')
 @Controller('v1/admin/vehicle-info')
@@ -37,5 +42,17 @@ export class AdminVehicleInfoController {
         @Body() updateVehicleInfoDto: UpdateVehicleInfoDto,
     ): Promise<VehicleInfoResponseDto> {
         return this.vehicleInfoService.updateVehicleInfo(vehicleInfoId, updateVehicleInfoDto);
+    }
+
+    // 차량 반납 리스트
+    @Get(':vehicleInfoId/return-list')
+    @ApiOperation({ summary: '차량 반납 리스트 조회' })
+    @ApiDataResponse({
+        status: 200,
+        description: '차량 반납 리스트를 성공적으로 조회했습니다.',
+        type: [ReturnVehicleResponseDto],
+    })
+    async findReturnList(@Param('vehicleInfoId') vehicleInfoId: string): Promise<ReturnVehicleResponseDto[]> {
+        return this.vehicleInfoService.findReturnList(vehicleInfoId);
     }
 }

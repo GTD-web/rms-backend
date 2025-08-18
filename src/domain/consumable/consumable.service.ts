@@ -37,8 +37,4 @@ export class DomainConsumableService extends BaseService<Consumable> {
     async bulkCreate(consumables: Consumable[], repositoryOptions?: IRepositoryOptions<Consumable>) {
         return this.consumableRepository.bulkCreate(consumables, repositoryOptions);
     }
-
-    async count(repositoryOptions?: IRepositoryOptions<Consumable>) {
-        return this.consumableRepository.count(repositoryOptions);
-    }
 }

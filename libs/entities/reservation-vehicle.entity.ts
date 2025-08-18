@@ -40,4 +40,10 @@ export class ReservationVehicle {
     @ManyToOne(() => VehicleInfo)
     @JoinColumn({ name: 'vehicleInfoId' })
     vehicleInfo: VehicleInfo;
+
+    @Column({ type: 'jsonb', nullable: true })
+    location: any;
+
+    @Column({ nullable: true })
+    returnedBy: string;
 }

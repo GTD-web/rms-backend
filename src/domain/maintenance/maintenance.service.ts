@@ -10,8 +10,4 @@ export class DomainMaintenanceService extends BaseService<Maintenance> {
     constructor(private readonly maintenanceRepository: DomainMaintenanceRepository) {
         super(maintenanceRepository);
     }
-
-    async count(options: IRepositoryOptions<Maintenance>): Promise<number> {
-        return await this.maintenanceRepository.count(options);
-    }
 }

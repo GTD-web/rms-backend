@@ -31,4 +31,8 @@ export abstract class BaseService<T extends ObjectLiteral> implements IService<T
     async delete(entityId: string, options?: IRepositoryOptions<T>): Promise<void> {
         return this.repository.delete(entityId, options);
     }
+
+    async count(options?: IRepositoryOptions<T>): Promise<number> {
+        return this.repository.count(options);
+    }
 }

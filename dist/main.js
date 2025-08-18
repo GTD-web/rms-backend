@@ -580,6 +580,10 @@ __decorate([
     __metadata("design:type", String)
 ], AccommodationInfo.prototype, "resourceId", void 0);
 __decorate([
+    (0, typeorm_1.Column)('jsonb', { nullable: true }),
+    __metadata("design:type", Object)
+], AccommodationInfo.prototype, "locationURLs", void 0);
+__decorate([
     (0, typeorm_1.OneToOne)(() => resource_entity_1.Resource, (resource) => resource.accommodationInfo),
     (0, typeorm_1.JoinColumn)({ name: 'resourceId' }),
     __metadata("design:type", typeof (_a = typeof resource_entity_1.Resource !== "undefined" && resource_entity_1.Resource) === "function" ? _a : Object)
@@ -865,6 +869,230 @@ exports.EquipmentInfo = EquipmentInfo = __decorate([
 
 /***/ }),
 
+/***/ "./libs/entities/file-maintenance.entity.ts":
+/*!**************************************************!*\
+  !*** ./libs/entities/file-maintenance.entity.ts ***!
+  \**************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileMaintenance = void 0;
+const file_entity_1 = __webpack_require__(/*! ./file.entity */ "./libs/entities/file.entity.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const maintenance_entity_1 = __webpack_require__(/*! ./maintenance.entity */ "./libs/entities/maintenance.entity.ts");
+let FileMaintenance = class FileMaintenance {
+};
+exports.FileMaintenance = FileMaintenance;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], FileMaintenance.prototype, "fileMaintenanceId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileMaintenance.prototype, "maintenanceId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileMaintenance.prototype, "fileId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => maintenance_entity_1.Maintenance),
+    (0, typeorm_1.JoinColumn)({ name: 'maintenanceId' }),
+    __metadata("design:type", typeof (_a = typeof maintenance_entity_1.Maintenance !== "undefined" && maintenance_entity_1.Maintenance) === "function" ? _a : Object)
+], FileMaintenance.prototype, "maintenance", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => file_entity_1.File),
+    (0, typeorm_1.JoinColumn)({ name: 'fileId' }),
+    __metadata("design:type", typeof (_b = typeof file_entity_1.File !== "undefined" && file_entity_1.File) === "function" ? _b : Object)
+], FileMaintenance.prototype, "file", void 0);
+exports.FileMaintenance = FileMaintenance = __decorate([
+    (0, typeorm_1.Entity)('file_maintenances')
+], FileMaintenance);
+
+
+/***/ }),
+
+/***/ "./libs/entities/file-reservation-vehicle.entity.ts":
+/*!**********************************************************!*\
+  !*** ./libs/entities/file-reservation-vehicle.entity.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileReservationVehicle = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const file_entity_1 = __webpack_require__(/*! ./file.entity */ "./libs/entities/file.entity.ts");
+const reservation_vehicle_entity_1 = __webpack_require__(/*! ./reservation-vehicle.entity */ "./libs/entities/reservation-vehicle.entity.ts");
+let FileReservationVehicle = class FileReservationVehicle {
+};
+exports.FileReservationVehicle = FileReservationVehicle;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], FileReservationVehicle.prototype, "fileReservationVehicleId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileReservationVehicle.prototype, "reservationVehicleId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileReservationVehicle.prototype, "fileId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileReservationVehicle.prototype, "type", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => reservation_vehicle_entity_1.ReservationVehicle),
+    (0, typeorm_1.JoinColumn)({ name: 'reservationVehicleId' }),
+    __metadata("design:type", typeof (_a = typeof reservation_vehicle_entity_1.ReservationVehicle !== "undefined" && reservation_vehicle_entity_1.ReservationVehicle) === "function" ? _a : Object)
+], FileReservationVehicle.prototype, "reservationVehicle", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => file_entity_1.File),
+    (0, typeorm_1.JoinColumn)({ name: 'fileId' }),
+    __metadata("design:type", typeof (_b = typeof file_entity_1.File !== "undefined" && file_entity_1.File) === "function" ? _b : Object)
+], FileReservationVehicle.prototype, "file", void 0);
+exports.FileReservationVehicle = FileReservationVehicle = __decorate([
+    (0, typeorm_1.Entity)('file_reservation_vehicles')
+], FileReservationVehicle);
+
+
+/***/ }),
+
+/***/ "./libs/entities/file-resource.entity.ts":
+/*!***********************************************!*\
+  !*** ./libs/entities/file-resource.entity.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileResource = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const resource_entity_1 = __webpack_require__(/*! ./resource.entity */ "./libs/entities/resource.entity.ts");
+const file_entity_1 = __webpack_require__(/*! ./file.entity */ "./libs/entities/file.entity.ts");
+let FileResource = class FileResource {
+};
+exports.FileResource = FileResource;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], FileResource.prototype, "fileResourceId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileResource.prototype, "resourceId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileResource.prototype, "fileId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => resource_entity_1.Resource),
+    (0, typeorm_1.JoinColumn)({ name: 'resourceId' }),
+    __metadata("design:type", typeof (_a = typeof resource_entity_1.Resource !== "undefined" && resource_entity_1.Resource) === "function" ? _a : Object)
+], FileResource.prototype, "resource", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => file_entity_1.File),
+    (0, typeorm_1.JoinColumn)({ name: 'fileId' }),
+    __metadata("design:type", typeof (_b = typeof file_entity_1.File !== "undefined" && file_entity_1.File) === "function" ? _b : Object)
+], FileResource.prototype, "file", void 0);
+exports.FileResource = FileResource = __decorate([
+    (0, typeorm_1.Entity)('file_resources')
+], FileResource);
+
+
+/***/ }),
+
+/***/ "./libs/entities/file-vehicle-info.entity.ts":
+/*!***************************************************!*\
+  !*** ./libs/entities/file-vehicle-info.entity.ts ***!
+  \***************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileVehicleInfo = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const vehicle_info_entity_1 = __webpack_require__(/*! ./vehicle-info.entity */ "./libs/entities/vehicle-info.entity.ts");
+const file_entity_1 = __webpack_require__(/*! ./file.entity */ "./libs/entities/file.entity.ts");
+let FileVehicleInfo = class FileVehicleInfo {
+};
+exports.FileVehicleInfo = FileVehicleInfo;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], FileVehicleInfo.prototype, "fileVehicleInfoId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileVehicleInfo.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileVehicleInfo.prototype, "fileId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], FileVehicleInfo.prototype, "type", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => vehicle_info_entity_1.VehicleInfo),
+    (0, typeorm_1.JoinColumn)({ name: 'vehicleInfoId' }),
+    __metadata("design:type", typeof (_a = typeof vehicle_info_entity_1.VehicleInfo !== "undefined" && vehicle_info_entity_1.VehicleInfo) === "function" ? _a : Object)
+], FileVehicleInfo.prototype, "vehicleInfo", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => file_entity_1.File),
+    (0, typeorm_1.JoinColumn)({ name: 'fileId' }),
+    __metadata("design:type", typeof (_b = typeof file_entity_1.File !== "undefined" && file_entity_1.File) === "function" ? _b : Object)
+], FileVehicleInfo.prototype, "file", void 0);
+exports.FileVehicleInfo = FileVehicleInfo = __decorate([
+    (0, typeorm_1.Entity)('file_vehicle_infos')
+], FileVehicleInfo);
+
+
+/***/ }),
+
 /***/ "./libs/entities/file.entity.ts":
 /*!**************************************!*\
   !*** ./libs/entities/file.entity.ts ***!
@@ -923,7 +1151,7 @@ exports.File = File = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
+exports.ScheduleRelation = exports.ScheduleParticipant = exports.Schedule = exports.FileVehicleInfo = exports.FileResource = exports.FileReservationVehicle = exports.FileMaintenance = exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
 const employee_entity_1 = __webpack_require__(/*! ./employee.entity */ "./libs/entities/employee.entity.ts");
 Object.defineProperty(exports, "Employee", ({ enumerable: true, get: function () { return employee_entity_1.Employee; } }));
 const resource_entity_1 = __webpack_require__(/*! ./resource.entity */ "./libs/entities/resource.entity.ts");
@@ -963,6 +1191,20 @@ const reservation_snapshot_entity_1 = __webpack_require__(/*! ./reservation-snap
 Object.defineProperty(exports, "ReservationSnapshot", ({ enumerable: true, get: function () { return reservation_snapshot_entity_1.ReservationSnapshot; } }));
 const reservation_vehicle_entity_1 = __webpack_require__(/*! ./reservation-vehicle.entity */ "./libs/entities/reservation-vehicle.entity.ts");
 Object.defineProperty(exports, "ReservationVehicle", ({ enumerable: true, get: function () { return reservation_vehicle_entity_1.ReservationVehicle; } }));
+const file_maintenance_entity_1 = __webpack_require__(/*! ./file-maintenance.entity */ "./libs/entities/file-maintenance.entity.ts");
+Object.defineProperty(exports, "FileMaintenance", ({ enumerable: true, get: function () { return file_maintenance_entity_1.FileMaintenance; } }));
+const file_reservation_vehicle_entity_1 = __webpack_require__(/*! ./file-reservation-vehicle.entity */ "./libs/entities/file-reservation-vehicle.entity.ts");
+Object.defineProperty(exports, "FileReservationVehicle", ({ enumerable: true, get: function () { return file_reservation_vehicle_entity_1.FileReservationVehicle; } }));
+const file_resource_entity_1 = __webpack_require__(/*! ./file-resource.entity */ "./libs/entities/file-resource.entity.ts");
+Object.defineProperty(exports, "FileResource", ({ enumerable: true, get: function () { return file_resource_entity_1.FileResource; } }));
+const file_vehicle_info_entity_1 = __webpack_require__(/*! ./file-vehicle-info.entity */ "./libs/entities/file-vehicle-info.entity.ts");
+Object.defineProperty(exports, "FileVehicleInfo", ({ enumerable: true, get: function () { return file_vehicle_info_entity_1.FileVehicleInfo; } }));
+const schedule_participant_entity_1 = __webpack_require__(/*! ./schedule-participant.entity */ "./libs/entities/schedule-participant.entity.ts");
+Object.defineProperty(exports, "ScheduleParticipant", ({ enumerable: true, get: function () { return schedule_participant_entity_1.ScheduleParticipant; } }));
+const schedule_entity_1 = __webpack_require__(/*! ./schedule.entity */ "./libs/entities/schedule.entity.ts");
+Object.defineProperty(exports, "Schedule", ({ enumerable: true, get: function () { return schedule_entity_1.Schedule; } }));
+const schedule_relations_entity_1 = __webpack_require__(/*! ./schedule-relations.entity */ "./libs/entities/schedule-relations.entity.ts");
+Object.defineProperty(exports, "ScheduleRelation", ({ enumerable: true, get: function () { return schedule_relations_entity_1.ScheduleRelation; } }));
 exports.Entities = [
     employee_entity_1.Employee,
     resource_entity_1.Resource,
@@ -985,6 +1227,13 @@ exports.Entities = [
     view_1.ResourceUsageStats,
     view_1.VehicleMaintenanceHistory,
     view_1.ConsumableMaintenanceStats,
+    file_maintenance_entity_1.FileMaintenance,
+    file_reservation_vehicle_entity_1.FileReservationVehicle,
+    file_resource_entity_1.FileResource,
+    file_vehicle_info_entity_1.FileVehicleInfo,
+    schedule_entity_1.Schedule,
+    schedule_relations_entity_1.ScheduleRelation,
+    schedule_participant_entity_1.ScheduleParticipant,
 ];
 exports.EntitiesMap = {
     Employee: employee_entity_1.Employee,
@@ -1008,6 +1257,13 @@ exports.EntitiesMap = {
     ResourceUsageStats: view_1.ResourceUsageStats,
     VehicleMaintenanceHistory: view_1.VehicleMaintenanceHistory,
     ConsumableMaintenanceStats: view_1.ConsumableMaintenanceStats,
+    FileMaintenance: file_maintenance_entity_1.FileMaintenance,
+    FileReservationVehicle: file_reservation_vehicle_entity_1.FileReservationVehicle,
+    FileResource: file_resource_entity_1.FileResource,
+    FileVehicleInfo: file_vehicle_info_entity_1.FileVehicleInfo,
+    Schedule: schedule_entity_1.Schedule,
+    ScheduleParticipant: schedule_participant_entity_1.ScheduleParticipant,
+    ScheduleRelation: schedule_relations_entity_1.ScheduleRelation,
 };
 
 
@@ -1454,6 +1710,14 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'vehicleInfoId' }),
     __metadata("design:type", typeof (_c = typeof vehicle_info_entity_1.VehicleInfo !== "undefined" && vehicle_info_entity_1.VehicleInfo) === "function" ? _c : Object)
 ], ReservationVehicle.prototype, "vehicleInfo", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    __metadata("design:type", Object)
+], ReservationVehicle.prototype, "location", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], ReservationVehicle.prototype, "returnedBy", void 0);
 exports.ReservationVehicle = ReservationVehicle = __decorate([
     (0, typeorm_1.Entity)('reservation_vehicles')
 ], ReservationVehicle);
@@ -1808,6 +2072,178 @@ __decorate([
 exports.Resource = Resource = __decorate([
     (0, typeorm_1.Entity)('resources')
 ], Resource);
+
+
+/***/ }),
+
+/***/ "./libs/entities/schedule-participant.entity.ts":
+/*!******************************************************!*\
+  !*** ./libs/entities/schedule-participant.entity.ts ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleParticipant = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const schedule_entity_1 = __webpack_require__(/*! ./schedule.entity */ "./libs/entities/schedule.entity.ts");
+let ScheduleParticipant = class ScheduleParticipant {
+};
+exports.ScheduleParticipant = ScheduleParticipant;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], ScheduleParticipant.prototype, "participantId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], ScheduleParticipant.prototype, "scheduleId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], ScheduleParticipant.prototype, "employeeId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: reservation_type_enum_1.ParticipantsType,
+    }),
+    __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ParticipantsType !== "undefined" && reservation_type_enum_1.ParticipantsType) === "function" ? _a : Object)
+], ScheduleParticipant.prototype, "type", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => schedule_entity_1.Schedule),
+    (0, typeorm_1.JoinColumn)({ name: 'scheduleId' }),
+    __metadata("design:type", typeof (_b = typeof schedule_entity_1.Schedule !== "undefined" && schedule_entity_1.Schedule) === "function" ? _b : Object)
+], ScheduleParticipant.prototype, "schedule", void 0);
+exports.ScheduleParticipant = ScheduleParticipant = __decorate([
+    (0, typeorm_1.Entity)('schedule_participants')
+], ScheduleParticipant);
+
+
+/***/ }),
+
+/***/ "./libs/entities/schedule-relations.entity.ts":
+/*!****************************************************!*\
+  !*** ./libs/entities/schedule-relations.entity.ts ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleRelation = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let ScheduleRelation = class ScheduleRelation {
+};
+exports.ScheduleRelation = ScheduleRelation;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], ScheduleRelation.prototype, "scheduleRelationId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], ScheduleRelation.prototype, "scheduleId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], ScheduleRelation.prototype, "reservationId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], ScheduleRelation.prototype, "projectId", void 0);
+exports.ScheduleRelation = ScheduleRelation = __decorate([
+    (0, typeorm_1.Entity)('schedule_relations')
+], ScheduleRelation);
+
+
+/***/ }),
+
+/***/ "./libs/entities/schedule.entity.ts":
+/*!******************************************!*\
+  !*** ./libs/entities/schedule.entity.ts ***!
+  \******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Schedule = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const schedule_participant_entity_1 = __webpack_require__(/*! ./schedule-participant.entity */ "./libs/entities/schedule-participant.entity.ts");
+let Schedule = class Schedule {
+};
+exports.Schedule = Schedule;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], Schedule.prototype, "scheduleId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Schedule.prototype, "title", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Schedule.prototype, "description", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp with time zone' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], Schedule.prototype, "startDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp with time zone' }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], Schedule.prototype, "endDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Schedule.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, typeorm_1.Column)('jsonb', { nullable: true }),
+    __metadata("design:type", Array)
+], Schedule.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp with time zone' }),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], Schedule.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp with time zone' }),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], Schedule.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => schedule_participant_entity_1.ScheduleParticipant, (participant) => participant.schedule),
+    __metadata("design:type", Array)
+], Schedule.prototype, "participants", void 0);
+exports.Schedule = Schedule = __decorate([
+    (0, typeorm_1.Entity)('schedules')
+], Schedule);
 
 
 /***/ }),
@@ -2967,6 +3403,20 @@ let BaseRepository = class BaseRepository {
             : this.repository;
         await repository.delete(entityId);
     }
+    async count(repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
+            : this.repository;
+        return repository.count({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+            select: repositoryOptions?.select,
+            order: repositoryOptions?.order,
+            skip: repositoryOptions?.skip,
+            take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
+        });
+    }
 };
 exports.BaseRepository = BaseRepository;
 exports.BaseRepository = BaseRepository = __decorate([
@@ -3019,6 +3469,9 @@ let BaseService = class BaseService {
     }
     async delete(entityId, options) {
         return this.repository.delete(entityId, options);
+    }
+    async count(options) {
+        return this.repository.count(options);
     }
 };
 exports.BaseService = BaseService;
@@ -9947,6 +10400,78 @@ __decorate([
 
 /***/ }),
 
+/***/ "./src/application/reservation/core/dtos/return-vehicle-response.dto.ts":
+/*!******************************************************************************!*\
+  !*** ./src/application/reservation/core/dtos/return-vehicle-response.dto.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReturnVehicleDetailResponseDto = exports.ReturnVehicleResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class Location {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], Location.prototype, "address", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], Location.prototype, "detailAddress", void 0);
+class ReturnVehicleResponseDto {
+}
+exports.ReturnVehicleResponseDto = ReturnVehicleResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReturnVehicleResponseDto.prototype, "reservationVehicleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], ReturnVehicleResponseDto.prototype, "returnedAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => Location }),
+    __metadata("design:type", Location)
+], ReturnVehicleResponseDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReturnVehicleResponseDto.prototype, "returnedBy", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReturnVehicleResponseDto.prototype, "endOdometer", void 0);
+class ReturnVehicleDetailResponseDto extends ReturnVehicleResponseDto {
+}
+exports.ReturnVehicleDetailResponseDto = ReturnVehicleDetailResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], ReturnVehicleDetailResponseDto.prototype, "parkingLocationImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], ReturnVehicleDetailResponseDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], ReturnVehicleDetailResponseDto.prototype, "indoorImages", void 0);
+
+
+/***/ }),
+
 /***/ "./src/application/reservation/core/dtos/update-reservation.dto.ts":
 /*!*************************************************************************!*\
   !*** ./src/application/reservation/core/dtos/update-reservation.dto.ts ***!
@@ -16836,6 +17361,68 @@ exports.AdminMaintenanceController = AdminMaintenanceController = __decorate([
 
 /***/ }),
 
+/***/ "./src/application/resource/vehicle/controllers/admin.reservation-vehicle.controller.ts":
+/*!**********************************************************************************************!*\
+  !*** ./src/application/resource/vehicle/controllers/admin.reservation-vehicle.controller.ts ***!
+  \**********************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdminReservationVehicleController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const vehicle_info_service_1 = __webpack_require__(/*! @src/application/resource/vehicle/services/vehicle-info.service */ "./src/application/resource/vehicle/services/vehicle-info.service.ts");
+const return_vehicle_response_dto_1 = __webpack_require__(/*! @src/application/reservation/core/dtos/return-vehicle-response.dto */ "./src/application/reservation/core/dtos/return-vehicle-response.dto.ts");
+let AdminReservationVehicleController = class AdminReservationVehicleController {
+    constructor(vehicleInfoService) {
+        this.vehicleInfoService = vehicleInfoService;
+    }
+    async findReturnDetail(reservationVehicleId) {
+        return this.vehicleInfoService.findReturnDetail(reservationVehicleId);
+    }
+};
+exports.AdminReservationVehicleController = AdminReservationVehicleController;
+__decorate([
+    (0, common_1.Get)(':reservationVehicleId'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 반납 상세 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '차량 반납 상세를 성공적으로 조회했습니다.',
+        type: return_vehicle_response_dto_1.ReturnVehicleDetailResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('reservationVehicleId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], AdminReservationVehicleController.prototype, "findReturnDetail", null);
+exports.AdminReservationVehicleController = AdminReservationVehicleController = __decorate([
+    (0, swagger_1.ApiTags)('4. 차량 예약 정보 - 관리자 '),
+    (0, common_1.Controller)('v1/admin/reservation-vehicle'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _a : Object])
+], AdminReservationVehicleController);
+
+
+/***/ }),
+
 /***/ "./src/application/resource/vehicle/controllers/admin.vehicle-info.controller.ts":
 /*!***************************************************************************************!*\
   !*** ./src/application/resource/vehicle/controllers/admin.vehicle-info.controller.ts ***!
@@ -16855,7 +17442,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdminVehicleInfoController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -16866,6 +17453,7 @@ const vehicle_response_dto_1 = __webpack_require__(/*! ../dtos/vehicle-response.
 const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/application/resource/vehicle/services/vehicle-info.service */ "./src/application/resource/vehicle/services/vehicle-info.service.ts");
+const return_vehicle_response_dto_1 = __webpack_require__(/*! @src/application/reservation/core/dtos/return-vehicle-response.dto */ "./src/application/reservation/core/dtos/return-vehicle-response.dto.ts");
 let AdminVehicleInfoController = class AdminVehicleInfoController {
     constructor(vehicleInfoService) {
         this.vehicleInfoService = vehicleInfoService;
@@ -16875,6 +17463,9 @@ let AdminVehicleInfoController = class AdminVehicleInfoController {
     }
     async update(vehicleInfoId, updateVehicleInfoDto) {
         return this.vehicleInfoService.updateVehicleInfo(vehicleInfoId, updateVehicleInfoDto);
+    }
+    async findReturnList(vehicleInfoId) {
+        return this.vehicleInfoService.findReturnList(vehicleInfoId);
     }
 };
 exports.AdminVehicleInfoController = AdminVehicleInfoController;
@@ -16905,6 +17496,19 @@ __decorate([
     __metadata("design:paramtypes", [String, typeof (_c = typeof update_vehicle_info_dto_1.UpdateVehicleInfoDto !== "undefined" && update_vehicle_info_dto_1.UpdateVehicleInfoDto) === "function" ? _c : Object]),
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], AdminVehicleInfoController.prototype, "update", null);
+__decorate([
+    (0, common_1.Get)(':vehicleInfoId/return-list'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 반납 리스트 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '차량 반납 리스트를 성공적으로 조회했습니다.',
+        type: [return_vehicle_response_dto_1.ReturnVehicleResponseDto],
+    }),
+    __param(0, (0, common_1.Param)('vehicleInfoId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], AdminVehicleInfoController.prototype, "findReturnList", null);
 exports.AdminVehicleInfoController = AdminVehicleInfoController = __decorate([
     (0, swagger_1.ApiTags)('4. 차량 정보 - 관리자 '),
     (0, common_1.Controller)('v1/admin/vehicle-info'),
@@ -17651,16 +18255,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VehicleInfoService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const findVehicleInfo_usecase_1 = __webpack_require__(/*! ../usecases/vehicle-info/findVehicleInfo.usecase */ "./src/application/resource/vehicle/usecases/vehicle-info/findVehicleInfo.usecase.ts");
 const updateVehicleInfo_usecase_1 = __webpack_require__(/*! ../usecases/vehicle-info/updateVehicleInfo.usecase */ "./src/application/resource/vehicle/usecases/vehicle-info/updateVehicleInfo.usecase.ts");
+const resource_vehicle_info_service_1 = __webpack_require__(/*! @src/context/resource-management/services/resource-vehicle-info.service */ "./src/context/resource-management/services/resource-vehicle-info.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/context/file/services/file.service */ "./src/context/file/services/file.service.ts");
 let VehicleInfoService = class VehicleInfoService {
-    constructor(findVehicleInfoUsecase, updateVehicleInfoUsecase) {
+    constructor(findVehicleInfoUsecase, updateVehicleInfoUsecase, resourceVehicleInfoService, fileService) {
         this.findVehicleInfoUsecase = findVehicleInfoUsecase;
         this.updateVehicleInfoUsecase = updateVehicleInfoUsecase;
+        this.resourceVehicleInfoService = resourceVehicleInfoService;
+        this.fileService = fileService;
     }
     async findVehicleInfo(vehicleInfoId) {
         return this.findVehicleInfoUsecase.execute(vehicleInfoId);
@@ -17668,11 +18276,37 @@ let VehicleInfoService = class VehicleInfoService {
     async updateVehicleInfo(vehicleInfoId, updateVehicleInfoDto) {
         return this.updateVehicleInfoUsecase.execute(vehicleInfoId, updateVehicleInfoDto);
     }
+    async findReturnList(vehicleInfoId) {
+        const returnList = await this.resourceVehicleInfoService.반납_리스트를_조회한다(vehicleInfoId);
+        return returnList.map((returnVehicle) => {
+            return {
+                reservationVehicleId: returnVehicle.reservationVehicleId,
+                returnedAt: returnVehicle.returnedAt,
+                returnedBy: returnVehicle.returnedBy,
+                endOdometer: returnVehicle.endOdometer,
+                location: returnVehicle.location,
+            };
+        });
+    }
+    async findReturnDetail(reservationVehicleId) {
+        const returnDetail = await this.resourceVehicleInfoService.반납_상세정보를_조회한다(reservationVehicleId);
+        const reservationVehicleFile = await this.fileService.차량예약_파일을_조회한다(reservationVehicleId);
+        return {
+            reservationVehicleId: returnDetail.reservationVehicleId,
+            returnedAt: returnDetail.returnedAt,
+            returnedBy: returnDetail.returnedBy,
+            endOdometer: returnDetail.endOdometer,
+            location: returnDetail.location,
+            parkingLocationImages: reservationVehicleFile.parkingLocationImages.map((image) => image.filePath),
+            odometerImages: reservationVehicleFile.odometerImages.map((image) => image.filePath),
+            indoorImages: reservationVehicleFile.indoorImages.map((image) => image.filePath),
+        };
+    }
 };
 exports.VehicleInfoService = VehicleInfoService;
 exports.VehicleInfoService = VehicleInfoService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof findVehicleInfo_usecase_1.FindVehicleInfoUsecase !== "undefined" && findVehicleInfo_usecase_1.FindVehicleInfoUsecase) === "function" ? _a : Object, typeof (_b = typeof updateVehicleInfo_usecase_1.UpdateVehicleInfoUsecase !== "undefined" && updateVehicleInfo_usecase_1.UpdateVehicleInfoUsecase) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof findVehicleInfo_usecase_1.FindVehicleInfoUsecase !== "undefined" && findVehicleInfo_usecase_1.FindVehicleInfoUsecase) === "function" ? _a : Object, typeof (_b = typeof updateVehicleInfo_usecase_1.UpdateVehicleInfoUsecase !== "undefined" && updateVehicleInfo_usecase_1.UpdateVehicleInfoUsecase) === "function" ? _b : Object, typeof (_c = typeof resource_vehicle_info_service_1.ResourceVehicleInfoService !== "undefined" && resource_vehicle_info_service_1.ResourceVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _d : Object])
 ], VehicleInfoService);
 
 
@@ -18671,6 +19305,9 @@ const vehicle_info_1 = __webpack_require__(/*! ./usecases/vehicle-info */ "./src
 const consumable_1 = __webpack_require__(/*! ./usecases/consumable */ "./src/application/resource/vehicle/usecases/consumable/index.ts");
 const maintenance_1 = __webpack_require__(/*! ./usecases/maintenance */ "./src/application/resource/vehicle/usecases/maintenance/index.ts");
 const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
+const resource_management_context_module_1 = __webpack_require__(/*! @src/context/resource-management/resource-management.context.module */ "./src/context/resource-management/resource-management.context.module.ts");
+const file_context_module_1 = __webpack_require__(/*! @src/context/file/file.context.module */ "./src/context/file/file.context.module.ts");
+const admin_reservation_vehicle_controller_1 = __webpack_require__(/*! ./controllers/admin.reservation-vehicle.controller */ "./src/application/resource/vehicle/controllers/admin.reservation-vehicle.controller.ts");
 let VehicleResourceModule = class VehicleResourceModule {
 };
 exports.VehicleResourceModule = VehicleResourceModule;
@@ -18684,6 +19321,8 @@ exports.VehicleResourceModule = VehicleResourceModule = __decorate([
             employee_module_1.DomainEmployeeModule,
             notification_module_1.NotificationModule,
             file_module_1.DomainFileModule,
+            resource_management_context_module_1.ResourceManagementContextModule,
+            file_context_module_1.FileContextModule,
         ],
         controllers: [
             admin_vehicle_info_controller_1.AdminVehicleInfoController,
@@ -18691,6 +19330,7 @@ exports.VehicleResourceModule = VehicleResourceModule = __decorate([
             admin_maintenance_controller_1.AdminMaintenanceController,
             consumable_controller_1.UserConsumableController,
             maintenance_controller_1.UserMaintenanceController,
+            admin_reservation_vehicle_controller_1.AdminReservationVehicleController,
         ],
         providers: [
             vehicle_info_service_1.VehicleInfoService,
@@ -20447,6 +21087,126 @@ exports.GetTaskStatusUsecase = GetTaskStatusUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/context/file/file.context.module.ts":
+/*!*************************************************!*\
+  !*** ./src/context/file/file.context.module.ts ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileContextModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
+const file_maintenance_module_1 = __webpack_require__(/*! @src/domain/file-maintenance/file-maintenance.module */ "./src/domain/file-maintenance/file-maintenance.module.ts");
+const file_reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/file-reservation-vehicle/file-reservation-vehicle.module */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.module.ts");
+const file_resource_module_1 = __webpack_require__(/*! @src/domain/file-resource/file-resource.module */ "./src/domain/file-resource/file-resource.module.ts");
+const file_vehicle_info_module_1 = __webpack_require__(/*! @src/domain/file-vehicle-info/file-vehicle-info.module */ "./src/domain/file-vehicle-info/file-vehicle-info.module.ts");
+const file_service_1 = __webpack_require__(/*! ./services/file.service */ "./src/context/file/services/file.service.ts");
+let FileContextModule = class FileContextModule {
+};
+exports.FileContextModule = FileContextModule;
+exports.FileContextModule = FileContextModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([entities_1.File, entities_1.FileMaintenance, entities_1.FileReservationVehicle, entities_1.FileResource, entities_1.FileVehicleInfo]),
+            file_module_1.DomainFileModule,
+            file_maintenance_module_1.DomainFileMaintenanceModule,
+            file_reservation_vehicle_module_1.DomainFileReservationVehicleModule,
+            file_resource_module_1.DomainFileResourceModule,
+            file_vehicle_info_module_1.DomainFileVehicleInfoModule,
+        ],
+        controllers: [],
+        providers: [
+            file_service_1.FileService,
+        ],
+        exports: [
+            file_service_1.FileService,
+        ],
+    })
+], FileContextModule);
+
+
+/***/ }),
+
+/***/ "./src/context/file/services/file.service.ts":
+/*!***************************************************!*\
+  !*** ./src/context/file/services/file.service.ts ***!
+  \***************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const file_reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/file-reservation-vehicle/file-reservation-vehicle.service */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let FileService = class FileService {
+    constructor(domainFileService, domainFileReservationVehicleService) {
+        this.domainFileService = domainFileService;
+        this.domainFileReservationVehicleService = domainFileReservationVehicleService;
+    }
+    async 차량예약_파일을_조회한다(reservationVehicleId) {
+        const fileReservationVehicles = await this.domainFileReservationVehicleService.findAll({
+            where: { reservationVehicleId },
+        });
+        const result = {
+            parkingLocationImages: [],
+            odometerImages: [],
+            indoorImages: [],
+        };
+        for (const fileReservationVehicle of fileReservationVehicles) {
+            if (fileReservationVehicle.type === 'PARKING_LOCATION') {
+                result.parkingLocationImages.push(fileReservationVehicle.fileId);
+            }
+            else if (fileReservationVehicle.type === 'ODOMETER') {
+                result.odometerImages.push(fileReservationVehicle.fileId);
+            }
+            else if (fileReservationVehicle.type === 'INDOOR') {
+                result.indoorImages.push(fileReservationVehicle.fileId);
+            }
+        }
+        return {
+            parkingLocationImages: await this.domainFileService.findAll({
+                where: { fileId: (0, typeorm_1.In)(result.parkingLocationImages) },
+            }),
+            odometerImages: await this.domainFileService.findAll({
+                where: { fileId: (0, typeorm_1.In)(result.odometerImages) },
+            }),
+            indoorImages: await this.domainFileService.findAll({
+                where: { fileId: (0, typeorm_1.In)(result.indoorImages) },
+            }),
+        };
+    }
+};
+exports.FileService = FileService;
+exports.FileService = FileService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object, typeof (_b = typeof file_reservation_vehicle_service_1.DomainFileReservationVehicleService !== "undefined" && file_reservation_vehicle_service_1.DomainFileReservationVehicleService) === "function" ? _b : Object])
+], FileService);
+
+
+/***/ }),
+
 /***/ "./src/context/reservation-management/reservation-management.context.module.ts":
 /*!*************************************************************************************!*\
   !*** ./src/context/reservation-management/reservation-management.context.module.ts ***!
@@ -20716,6 +21476,104 @@ exports.ReservationValidationService = ReservationValidationService = __decorate
 
 /***/ }),
 
+/***/ "./src/context/resource-management/resource-management.context.module.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/context/resource-management/resource-management.context.module.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceManagementContextModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
+const reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.module */ "./src/domain/reservation-vehicle/reservation-vehicle.module.ts");
+const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
+const resource_vehicle_info_service_1 = __webpack_require__(/*! ./services/resource-vehicle-info.service */ "./src/context/resource-management/services/resource-vehicle-info.service.ts");
+const file_reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/file-reservation-vehicle/file-reservation-vehicle.module */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.module.ts");
+const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
+let ResourceManagementContextModule = class ResourceManagementContextModule {
+};
+exports.ResourceManagementContextModule = ResourceManagementContextModule;
+exports.ResourceManagementContextModule = ResourceManagementContextModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([entities_1.Resource, entities_1.VehicleInfo, entities_1.ReservationVehicle]),
+            resource_module_1.DomainResourceModule,
+            reservation_vehicle_module_1.DomainReservationVehicleModule,
+            vehicle_info_module_1.DomainVehicleInfoModule,
+            file_reservation_vehicle_module_1.DomainFileReservationVehicleModule,
+            file_module_1.DomainFileModule,
+        ],
+        controllers: [],
+        providers: [
+            resource_vehicle_info_service_1.ResourceVehicleInfoService,
+        ],
+        exports: [
+            resource_vehicle_info_service_1.ResourceVehicleInfoService,
+        ],
+    })
+], ResourceManagementContextModule);
+
+
+/***/ }),
+
+/***/ "./src/context/resource-management/services/resource-vehicle-info.service.ts":
+/*!***********************************************************************************!*\
+  !*** ./src/context/resource-management/services/resource-vehicle-info.service.ts ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceVehicleInfoService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
+let ResourceVehicleInfoService = class ResourceVehicleInfoService {
+    constructor(domainReservationVehicleService) {
+        this.domainReservationVehicleService = domainReservationVehicleService;
+    }
+    async 반납_리스트를_조회한다(vehicleInfoId) {
+        const reservationVehicles = await this.domainReservationVehicleService.findAll({
+            where: { isReturned: true, vehicleInfoId },
+            order: {
+                returnedAt: 'DESC',
+            },
+        });
+        return reservationVehicles;
+    }
+    async 반납_상세정보를_조회한다(reservationVehicleId) {
+        const reservationVehicle = await this.domainReservationVehicleService.findByReservationVehicleId(reservationVehicleId);
+        return reservationVehicle;
+    }
+};
+exports.ResourceVehicleInfoService = ResourceVehicleInfoService;
+exports.ResourceVehicleInfoService = ResourceVehicleInfoService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _a : Object])
+], ResourceVehicleInfoService);
+
+
+/***/ }),
+
 /***/ "./src/domain/accommodation-info/accommodation-info.module.ts":
 /*!********************************************************************!*\
   !*** ./src/domain/accommodation-info/accommodation-info.module.ts ***!
@@ -20913,9 +21771,6 @@ let DomainConsumableRepository = class DomainConsumableRepository extends base_r
     constructor(repository) {
         super(repository);
     }
-    async count(repositoryOptions) {
-        return this.repository.count(repositoryOptions);
-    }
     async bulkCreate(consumables, repositoryOptions) {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
@@ -20983,9 +21838,6 @@ let DomainConsumableService = class DomainConsumableService extends base_service
     }
     async bulkCreate(consumables, repositoryOptions) {
         return this.consumableRepository.bulkCreate(consumables, repositoryOptions);
-    }
-    async count(repositoryOptions) {
-        return this.consumableRepository.count(repositoryOptions);
     }
 };
 exports.DomainConsumableService = DomainConsumableService;
@@ -21379,6 +22231,542 @@ exports.DomainEquipmentInfoService = DomainEquipmentInfoService = __decorate([
 
 /***/ }),
 
+/***/ "./src/domain/file-maintenance/file-maintenance.module.ts":
+/*!****************************************************************!*\
+  !*** ./src/domain/file-maintenance/file-maintenance.module.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileMaintenanceModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const file_maintenance_service_1 = __webpack_require__(/*! ./file-maintenance.service */ "./src/domain/file-maintenance/file-maintenance.service.ts");
+const file_maintenance_repository_1 = __webpack_require__(/*! ./file-maintenance.repository */ "./src/domain/file-maintenance/file-maintenance.repository.ts");
+const file_maintenance_entity_1 = __webpack_require__(/*! @libs/entities/file-maintenance.entity */ "./libs/entities/file-maintenance.entity.ts");
+let DomainFileMaintenanceModule = class DomainFileMaintenanceModule {
+};
+exports.DomainFileMaintenanceModule = DomainFileMaintenanceModule;
+exports.DomainFileMaintenanceModule = DomainFileMaintenanceModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([file_maintenance_entity_1.FileMaintenance])],
+        providers: [file_maintenance_service_1.DomainFileMaintenanceService, file_maintenance_repository_1.DomainFileMaintenanceRepository],
+        exports: [file_maintenance_service_1.DomainFileMaintenanceService],
+    })
+], DomainFileMaintenanceModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-maintenance/file-maintenance.repository.ts":
+/*!********************************************************************!*\
+  !*** ./src/domain/file-maintenance/file-maintenance.repository.ts ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileMaintenanceRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const file_maintenance_entity_1 = __webpack_require__(/*! @libs/entities/file-maintenance.entity */ "./libs/entities/file-maintenance.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainFileMaintenanceRepository = class DomainFileMaintenanceRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainFileMaintenanceRepository = DomainFileMaintenanceRepository;
+exports.DomainFileMaintenanceRepository = DomainFileMaintenanceRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(file_maintenance_entity_1.FileMaintenance)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainFileMaintenanceRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-maintenance/file-maintenance.service.ts":
+/*!*****************************************************************!*\
+  !*** ./src/domain/file-maintenance/file-maintenance.service.ts ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileMaintenanceService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_maintenance_repository_1 = __webpack_require__(/*! ./file-maintenance.repository */ "./src/domain/file-maintenance/file-maintenance.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainFileMaintenanceService = class DomainFileMaintenanceService extends base_service_1.BaseService {
+    constructor(fileMaintenanceRepository) {
+        super(fileMaintenanceRepository);
+        this.fileMaintenanceRepository = fileMaintenanceRepository;
+    }
+    async findByFileMaintenanceId(fileMaintenanceId) {
+        const fileMaintenance = await this.fileMaintenanceRepository.findOne({
+            where: { fileMaintenanceId },
+        });
+        return fileMaintenance;
+    }
+    async findByMaintenanceId(maintenanceId) {
+        return this.fileMaintenanceRepository.findAll({
+            where: { maintenanceId },
+            relations: ['maintenance', 'file'],
+        });
+    }
+    async findByFileId(fileId) {
+        return this.fileMaintenanceRepository.findAll({
+            where: { fileId },
+            relations: ['maintenance', 'file'],
+        });
+    }
+};
+exports.DomainFileMaintenanceService = DomainFileMaintenanceService;
+exports.DomainFileMaintenanceService = DomainFileMaintenanceService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_maintenance_repository_1.DomainFileMaintenanceRepository !== "undefined" && file_maintenance_repository_1.DomainFileMaintenanceRepository) === "function" ? _a : Object])
+], DomainFileMaintenanceService);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.module.ts":
+/*!********************************************************************************!*\
+  !*** ./src/domain/file-reservation-vehicle/file-reservation-vehicle.module.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileReservationVehicleModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const file_reservation_vehicle_service_1 = __webpack_require__(/*! ./file-reservation-vehicle.service */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.service.ts");
+const file_reservation_vehicle_repository_1 = __webpack_require__(/*! ./file-reservation-vehicle.repository */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.repository.ts");
+const file_reservation_vehicle_entity_1 = __webpack_require__(/*! @libs/entities/file-reservation-vehicle.entity */ "./libs/entities/file-reservation-vehicle.entity.ts");
+let DomainFileReservationVehicleModule = class DomainFileReservationVehicleModule {
+};
+exports.DomainFileReservationVehicleModule = DomainFileReservationVehicleModule;
+exports.DomainFileReservationVehicleModule = DomainFileReservationVehicleModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([file_reservation_vehicle_entity_1.FileReservationVehicle])],
+        providers: [file_reservation_vehicle_service_1.DomainFileReservationVehicleService, file_reservation_vehicle_repository_1.DomainFileReservationVehicleRepository],
+        exports: [file_reservation_vehicle_service_1.DomainFileReservationVehicleService],
+    })
+], DomainFileReservationVehicleModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.repository.ts":
+/*!************************************************************************************!*\
+  !*** ./src/domain/file-reservation-vehicle/file-reservation-vehicle.repository.ts ***!
+  \************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileReservationVehicleRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const file_reservation_vehicle_entity_1 = __webpack_require__(/*! @libs/entities/file-reservation-vehicle.entity */ "./libs/entities/file-reservation-vehicle.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainFileReservationVehicleRepository = class DomainFileReservationVehicleRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainFileReservationVehicleRepository = DomainFileReservationVehicleRepository;
+exports.DomainFileReservationVehicleRepository = DomainFileReservationVehicleRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(file_reservation_vehicle_entity_1.FileReservationVehicle)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainFileReservationVehicleRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.service.ts":
+/*!*********************************************************************************!*\
+  !*** ./src/domain/file-reservation-vehicle/file-reservation-vehicle.service.ts ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileReservationVehicleService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_reservation_vehicle_repository_1 = __webpack_require__(/*! ./file-reservation-vehicle.repository */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainFileReservationVehicleService = class DomainFileReservationVehicleService extends base_service_1.BaseService {
+    constructor(fileReservationVehicleRepository) {
+        super(fileReservationVehicleRepository);
+        this.fileReservationVehicleRepository = fileReservationVehicleRepository;
+    }
+    async findByFileReservationVehicleId(fileReservationVehicleId) {
+        const fileReservationVehicle = await this.fileReservationVehicleRepository.findOne({
+            where: { fileReservationVehicleId },
+        });
+        return fileReservationVehicle;
+    }
+    async findByReservationVehicleId(reservationVehicleId) {
+        return this.fileReservationVehicleRepository.findAll({
+            where: { reservationVehicleId },
+            relations: ['reservationVehicle', 'file'],
+        });
+    }
+    async findByFileId(fileId) {
+        return this.fileReservationVehicleRepository.findAll({
+            where: { fileId },
+            relations: ['reservationVehicle', 'file'],
+        });
+    }
+    async findByType(type) {
+        return this.fileReservationVehicleRepository.findAll({
+            where: { type },
+            relations: ['reservationVehicle', 'file'],
+        });
+    }
+};
+exports.DomainFileReservationVehicleService = DomainFileReservationVehicleService;
+exports.DomainFileReservationVehicleService = DomainFileReservationVehicleService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_reservation_vehicle_repository_1.DomainFileReservationVehicleRepository !== "undefined" && file_reservation_vehicle_repository_1.DomainFileReservationVehicleRepository) === "function" ? _a : Object])
+], DomainFileReservationVehicleService);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-resource/file-resource.module.ts":
+/*!**********************************************************!*\
+  !*** ./src/domain/file-resource/file-resource.module.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileResourceModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const file_resource_service_1 = __webpack_require__(/*! ./file-resource.service */ "./src/domain/file-resource/file-resource.service.ts");
+const file_resource_repository_1 = __webpack_require__(/*! ./file-resource.repository */ "./src/domain/file-resource/file-resource.repository.ts");
+const file_resource_entity_1 = __webpack_require__(/*! @libs/entities/file-resource.entity */ "./libs/entities/file-resource.entity.ts");
+let DomainFileResourceModule = class DomainFileResourceModule {
+};
+exports.DomainFileResourceModule = DomainFileResourceModule;
+exports.DomainFileResourceModule = DomainFileResourceModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([file_resource_entity_1.FileResource])],
+        providers: [file_resource_service_1.DomainFileResourceService, file_resource_repository_1.DomainFileResourceRepository],
+        exports: [file_resource_service_1.DomainFileResourceService],
+    })
+], DomainFileResourceModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-resource/file-resource.repository.ts":
+/*!**************************************************************!*\
+  !*** ./src/domain/file-resource/file-resource.repository.ts ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileResourceRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const file_resource_entity_1 = __webpack_require__(/*! @libs/entities/file-resource.entity */ "./libs/entities/file-resource.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainFileResourceRepository = class DomainFileResourceRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainFileResourceRepository = DomainFileResourceRepository;
+exports.DomainFileResourceRepository = DomainFileResourceRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(file_resource_entity_1.FileResource)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainFileResourceRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-resource/file-resource.service.ts":
+/*!***********************************************************!*\
+  !*** ./src/domain/file-resource/file-resource.service.ts ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileResourceService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_resource_repository_1 = __webpack_require__(/*! ./file-resource.repository */ "./src/domain/file-resource/file-resource.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainFileResourceService = class DomainFileResourceService extends base_service_1.BaseService {
+    constructor(fileResourceRepository) {
+        super(fileResourceRepository);
+        this.fileResourceRepository = fileResourceRepository;
+    }
+    async findByFileResourceId(fileResourceId) {
+        const fileResource = await this.fileResourceRepository.findOne({
+            where: { fileResourceId },
+        });
+        return fileResource;
+    }
+    async findByResourceId(resourceId) {
+        return this.fileResourceRepository.findAll({
+            where: { resourceId },
+            relations: ['resource', 'file'],
+        });
+    }
+    async findByFileId(fileId) {
+        return this.fileResourceRepository.findAll({
+            where: { fileId },
+            relations: ['resource', 'file'],
+        });
+    }
+};
+exports.DomainFileResourceService = DomainFileResourceService;
+exports.DomainFileResourceService = DomainFileResourceService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_resource_repository_1.DomainFileResourceRepository !== "undefined" && file_resource_repository_1.DomainFileResourceRepository) === "function" ? _a : Object])
+], DomainFileResourceService);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-vehicle-info/file-vehicle-info.module.ts":
+/*!******************************************************************!*\
+  !*** ./src/domain/file-vehicle-info/file-vehicle-info.module.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileVehicleInfoModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const file_vehicle_info_service_1 = __webpack_require__(/*! ./file-vehicle-info.service */ "./src/domain/file-vehicle-info/file-vehicle-info.service.ts");
+const file_vehicle_info_repository_1 = __webpack_require__(/*! ./file-vehicle-info.repository */ "./src/domain/file-vehicle-info/file-vehicle-info.repository.ts");
+const file_vehicle_info_entity_1 = __webpack_require__(/*! @libs/entities/file-vehicle-info.entity */ "./libs/entities/file-vehicle-info.entity.ts");
+let DomainFileVehicleInfoModule = class DomainFileVehicleInfoModule {
+};
+exports.DomainFileVehicleInfoModule = DomainFileVehicleInfoModule;
+exports.DomainFileVehicleInfoModule = DomainFileVehicleInfoModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([file_vehicle_info_entity_1.FileVehicleInfo])],
+        providers: [file_vehicle_info_service_1.DomainFileVehicleInfoService, file_vehicle_info_repository_1.DomainFileVehicleInfoRepository],
+        exports: [file_vehicle_info_service_1.DomainFileVehicleInfoService],
+    })
+], DomainFileVehicleInfoModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-vehicle-info/file-vehicle-info.repository.ts":
+/*!**********************************************************************!*\
+  !*** ./src/domain/file-vehicle-info/file-vehicle-info.repository.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileVehicleInfoRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const file_vehicle_info_entity_1 = __webpack_require__(/*! @libs/entities/file-vehicle-info.entity */ "./libs/entities/file-vehicle-info.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainFileVehicleInfoRepository = class DomainFileVehicleInfoRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainFileVehicleInfoRepository = DomainFileVehicleInfoRepository;
+exports.DomainFileVehicleInfoRepository = DomainFileVehicleInfoRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(file_vehicle_info_entity_1.FileVehicleInfo)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainFileVehicleInfoRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/file-vehicle-info/file-vehicle-info.service.ts":
+/*!*******************************************************************!*\
+  !*** ./src/domain/file-vehicle-info/file-vehicle-info.service.ts ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainFileVehicleInfoService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_vehicle_info_repository_1 = __webpack_require__(/*! ./file-vehicle-info.repository */ "./src/domain/file-vehicle-info/file-vehicle-info.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainFileVehicleInfoService = class DomainFileVehicleInfoService extends base_service_1.BaseService {
+    constructor(fileVehicleInfoRepository) {
+        super(fileVehicleInfoRepository);
+        this.fileVehicleInfoRepository = fileVehicleInfoRepository;
+    }
+    async findByFileVehicleInfoId(fileVehicleInfoId) {
+        const fileVehicleInfo = await this.fileVehicleInfoRepository.findOne({
+            where: { fileVehicleInfoId },
+        });
+        return fileVehicleInfo;
+    }
+    async findByVehicleInfoId(vehicleInfoId) {
+        return this.fileVehicleInfoRepository.findAll({
+            where: { vehicleInfoId },
+            relations: ['vehicleInfo', 'file'],
+        });
+    }
+    async findByFileId(fileId) {
+        return this.fileVehicleInfoRepository.findAll({
+            where: { fileId },
+            relations: ['vehicleInfo', 'file'],
+        });
+    }
+    async findByType(type) {
+        return this.fileVehicleInfoRepository.findAll({
+            where: { type },
+            relations: ['vehicleInfo', 'file'],
+        });
+    }
+};
+exports.DomainFileVehicleInfoService = DomainFileVehicleInfoService;
+exports.DomainFileVehicleInfoService = DomainFileVehicleInfoService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_vehicle_info_repository_1.DomainFileVehicleInfoRepository !== "undefined" && file_vehicle_info_repository_1.DomainFileVehicleInfoRepository) === "function" ? _a : Object])
+], DomainFileVehicleInfoService);
+
+
+/***/ }),
+
 /***/ "./src/domain/file/file.module.ts":
 /*!****************************************!*\
   !*** ./src/domain/file/file.module.ts ***!
@@ -21639,9 +23027,6 @@ let DomainMaintenanceService = class DomainMaintenanceService extends base_servi
     constructor(maintenanceRepository) {
         super(maintenanceRepository);
         this.maintenanceRepository = maintenanceRepository;
-    }
-    async count(options) {
-        return await this.maintenanceRepository.count(options);
     }
 };
 exports.DomainMaintenanceService = DomainMaintenanceService;
@@ -22274,11 +23659,7 @@ let DomainReservationVehicleService = class DomainReservationVehicleService exte
     async findByReservationVehicleId(reservationVehicleId) {
         const reservationVehicle = await this.reservationVehicleRepository.findOne({
             where: { reservationVehicleId },
-            relations: ['reservation', 'vehicleInfo'],
         });
-        if (!reservationVehicle) {
-            throw new common_1.NotFoundException('예약 차량을 찾을 수 없습니다.');
-        }
         return reservationVehicle;
     }
     async findByReservationId(reservationId) {
@@ -22374,18 +23755,6 @@ let DomainReservationRepository = class DomainReservationRepository extends base
     constructor(repository) {
         super(repository);
     }
-    async count(repositoryOptions) {
-        const repository = repositoryOptions?.queryRunner
-            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
-            : this.repository;
-        return await repository.count({
-            where: repositoryOptions?.where,
-            relations: repositoryOptions?.relations,
-            select: repositoryOptions?.select,
-            order: repositoryOptions?.order,
-            withDeleted: repositoryOptions?.withDeleted,
-        });
-    }
 };
 exports.DomainReservationRepository = DomainReservationRepository;
 exports.DomainReservationRepository = DomainReservationRepository = __decorate([
@@ -22423,9 +23792,6 @@ let DomainReservationService = class DomainReservationService extends base_servi
     constructor(reservationRepository) {
         super(reservationRepository);
         this.reservationRepository = reservationRepository;
-    }
-    async count(repositoryOptions) {
-        return await this.reservationRepository.count(repositoryOptions);
     }
 };
 exports.DomainReservationService = DomainReservationService;

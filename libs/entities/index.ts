@@ -21,9 +21,13 @@ import {
 } from './view';
 import { ReservationSnapshot } from './reservation-snapshot.entity';
 import { ReservationVehicle } from './reservation-vehicle.entity';
-import { InsuranceCompany } from './insurance-company.entity';
-import { VehicleInsurance } from './vehicle-insurance.entity';
-import { ConsumableItem } from './consumable-item.entity';
+import { FileMaintenance } from './file-maintenance.entity';
+import { FileReservationVehicle } from './file-reservation-vehicle.entity';
+import { FileResource } from './file-resource.entity';
+import { FileVehicleInfo } from './file-vehicle-info.entity';
+import { ScheduleParticipant } from './schedule-participant.entity';
+import { Schedule } from './schedule.entity';
+import { ScheduleRelation } from './schedule-relations.entity';
 
 export const Entities = [
     Employee,
@@ -47,9 +51,13 @@ export const Entities = [
     ResourceUsageStats,
     VehicleMaintenanceHistory,
     ConsumableMaintenanceStats,
-    // InsuranceCompany,
-    // VehicleInsurance,
-    // ConsumableItem,
+    FileMaintenance,
+    FileReservationVehicle,
+    FileResource,
+    FileVehicleInfo,
+    Schedule,
+    ScheduleRelation,
+    ScheduleParticipant,
 ];
 
 export const EntitiesMap = {
@@ -74,9 +82,13 @@ export const EntitiesMap = {
     ResourceUsageStats,
     VehicleMaintenanceHistory,
     ConsumableMaintenanceStats,
-    // InsuranceCompany,
-    // VehicleInsurance,
-    // ConsumableItem,
+    FileMaintenance,
+    FileReservationVehicle,
+    FileResource,
+    FileVehicleInfo,
+    Schedule,
+    ScheduleParticipant,
+    ScheduleRelation,
 };
 
 export {
@@ -101,7 +113,11 @@ export {
     ResourceUsageStats,
     VehicleMaintenanceHistory,
     ConsumableMaintenanceStats,
-    // InsuranceCompany,
-    // VehicleInsurance,
-    // ConsumableItem,
+    FileMaintenance,
+    FileReservationVehicle,
+    FileResource,
+    FileVehicleInfo,
+    Schedule,
+    ScheduleParticipant,
+    ScheduleRelation,
 };

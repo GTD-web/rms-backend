@@ -9,8 +9,4 @@ export class DomainReservationService extends BaseService<Reservation> {
     constructor(private readonly reservationRepository: DomainReservationRepository) {
         super(reservationRepository);
     }
-
-    async count(repositoryOptions: IRepositoryOptions<Reservation>): Promise<number> {
-        return await this.reservationRepository.count(repositoryOptions);
-    }
 }
