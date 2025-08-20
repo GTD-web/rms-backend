@@ -3122,53 +3122,6 @@ exports.JwtAuthGuard = JwtAuthGuard = __decorate([
 
 /***/ }),
 
-/***/ "./libs/guards/role.guard.ts":
-/*!***********************************!*\
-  !*** ./libs/guards/role.guard.ts ***!
-  \***********************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RolesGuard = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-let RolesGuard = class RolesGuard {
-    constructor(reflector) {
-        this.reflector = reflector;
-    }
-    canActivate(context) {
-        const requiredRoles = this.reflector.getAllAndOverride(role_decorator_1.ROLES_KEY, [
-            context.getHandler(),
-            context.getClass(),
-        ]);
-        if (!requiredRoles) {
-            return true;
-        }
-        const { user } = context.switchToHttp().getRequest();
-        return requiredRoles.some((role) => user.roles?.includes(role));
-    }
-};
-exports.RolesGuard = RolesGuard;
-exports.RolesGuard = RolesGuard = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object])
-], RolesGuard);
-
-
-/***/ }),
-
 /***/ "./libs/interceptors/error.interceptor.ts":
 /*!************************************************!*\
   !*** ./libs/interceptors/error.interceptor.ts ***!
@@ -3392,9 +3345,6 @@ let BaseRepository = class BaseRepository {
             order: repositoryOptions?.order,
             withDeleted: repositoryOptions?.withDeleted,
         });
-        if (!updated) {
-            throw new common_1.NotFoundException(`${this.repository.metadata.name} Entity with id ${entityId} not found`);
-        }
         return updated;
     }
     async delete(entityId, repositoryOptions) {
@@ -3499,7 +3449,7 @@ function setupSwagger(app, dtos) {
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Resource Management API')
         .setDescription('Resource Management API Description')
-        .setVersion('1.0')
+        .setVersion('2.0')
         .addBearerAuth()
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config, {
@@ -3530,383 +3480,6 @@ function setupSwagger(app, dtos) {
         },
     });
 }
-
-
-/***/ }),
-
-/***/ "./libs/utils/api-doc.service.ts":
-/*!***************************************!*\
-  !*** ./libs/utils/api-doc.service.ts ***!
-  \***************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var ApiDocService_1;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ApiDocService = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const fs = __webpack_require__(/*! fs */ "fs");
-const axios_1 = __webpack_require__(/*! axios */ "axios");
-const path_1 = __webpack_require__(/*! path */ "path");
-let ApiDocService = ApiDocService_1 = class ApiDocService {
-    constructor() {
-        this.logger = new common_1.Logger(ApiDocService_1.name);
-        this.MAX_RETRIES = 3;
-        this.RETRY_DELAY = 2000;
-        if (process.env.NODE_ENV === 'local') {
-        }
-    }
-    async getApiJson(retries = this.MAX_RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, this.RETRY_DELAY));
-        try {
-            const response = await axios_1.default.get('http://localhost:3060/api-docs-json');
-            this.data = response.data;
-        }
-        catch (error) {
-            if (retries > 0) {
-                this.getApiJson(retries - 1);
-            }
-        }
-    }
-    getControllers() {
-        const v1Paths = Object.entries(this.data.paths).filter(([path]) => path.startsWith('/api/v1/'));
-        return v1Paths
-            .map(([path, routes]) => {
-            const pathParts = path.split('/');
-            const isAdmin = pathParts[3] === 'admin';
-            const controllerIndex = isAdmin ? 4 : 3;
-            const controller = pathParts[controllerIndex] || 'undefined';
-            const controllerName = isAdmin ? `admin-${controller}` : controller;
-            const apis = Object.entries(routes).map(([method, metadata]) => {
-                return {
-                    method,
-                    path,
-                    metadata,
-                    isAdmin,
-                };
-            });
-            return {
-                controller: controllerName,
-                apis,
-            };
-        })
-            .reduce((acc, curr) => {
-            if (acc[curr.controller]) {
-                acc[curr.controller].push(...curr.apis);
-            }
-            else {
-                acc[curr.controller] = [...curr.apis];
-            }
-            return acc;
-        }, {});
-    }
-    getSchemaType(schema) {
-        if (schema.type === 'array') {
-            const itemType = schema.items ? this.getSchemaType(schema.items) : 'any';
-            return `${itemType}[]`;
-        }
-        return schema.type || 'object';
-    }
-    renderSchemaJson(schema, indentLevel = 1) {
-        if (!schema)
-            return 'null';
-        const indent = '  '.repeat(indentLevel);
-        const commentIndent = '  '.repeat(Math.max(0, indentLevel - 1));
-        let content = '';
-        if (schema.type === 'object' && schema.properties) {
-            content += '{\n';
-            const properties = Object.entries(schema.properties);
-            properties.forEach(([key, prop], index) => {
-                if (!prop) {
-                    prop = {};
-                }
-                const isLast = index === properties.length - 1;
-                const required = (schema.required || []).includes(key);
-                const comment = [];
-                if (prop.description)
-                    comment.push(prop.description);
-                if (required && prop.type !== 'except')
-                    comment.push('✅ Required');
-                if (!required && prop.type !== 'except')
-                    comment.push('❌ Optional');
-                if (prop.type === 'object' && prop.properties) {
-                    content += `${indent}"${key}": ${this.renderSchemaJson(prop, indentLevel + 1)}${isLast ? '' : ','}`;
-                }
-                else if (prop.type === 'array' && prop.items) {
-                    content += `${indent}"${key}": [`;
-                    if (prop.items.type === 'object' && prop.items.properties) {
-                        content += '\n';
-                        content += `${indent}  ${this.renderSchemaJson(prop.items, indentLevel + 2).trim()}`;
-                        content += `\n${indent}]${isLast ? '' : ','}`;
-                    }
-                    else {
-                        const example = this.getExampleValue(prop.items);
-                        content += `${example}]${isLast ? '' : ','}`;
-                    }
-                }
-                else {
-                    const example = this.getExampleValue(prop);
-                    content += `${indent}"${key}": ${example}${isLast ? '' : ','}`;
-                }
-                if (comment.length > 0) {
-                    content += ` // ${comment.join(', ')}`;
-                }
-                content += '\n';
-            });
-            content += `${commentIndent}}`;
-        }
-        else if (schema.type === 'array' && schema.items) {
-            content = `[${this.getExampleValue(schema.items)}]`;
-        }
-        else {
-            content = this.getExampleValue(schema);
-        }
-        return content;
-    }
-    getExampleValue(prop) {
-        if (!prop)
-            return 'null';
-        if (prop.example !== undefined) {
-            return typeof prop.example === 'string' ? `"${prop.example}"` : prop.example;
-        }
-        switch (prop.type) {
-            case 'string':
-                return prop.enum ? `"${prop.enum[0]}"` : '""';
-            case 'number':
-                return '0';
-            case 'integer':
-                return '0';
-            case 'boolean':
-                return 'false';
-            case 'array':
-                return '[]';
-            default:
-                return 'null';
-        }
-    }
-    resolveSchema(schema, schemas, visited = new Set()) {
-        if (!schema)
-            return { type: 'object', properties: {} };
-        if (schema.$ref) {
-            const refPath = schema.$ref.split('/');
-            const schemaName = refPath[refPath.length - 1];
-            if (visited.has(schemaName)) {
-                return { type: 'object', description: `Reference to ${schemaName}` };
-            }
-            visited.add(schemaName);
-            if (!schemas[schemaName]) {
-                this.logger.warn(`Schema reference not found: ${schemaName}`);
-                return { type: 'object', properties: {} };
-            }
-            return this.resolveSchema(schemas[schemaName], schemas, visited);
-        }
-        if (schema.allOf) {
-            const resolvedSchemas = schema.allOf
-                .filter((s) => s)
-                .map((s) => this.resolveSchema(s, schemas, visited));
-            if (resolvedSchemas.length === 0) {
-                return { type: 'object', properties: {} };
-            }
-            return resolvedSchemas.reduce((acc, curr) => {
-                return {
-                    ...acc,
-                    ...curr,
-                    properties: {
-                        ...(acc.properties || {}),
-                        ...(curr.properties || {}),
-                    },
-                    required: [...(acc.required || []), ...(curr.required || [])],
-                };
-            }, {});
-        }
-        if (schema.properties) {
-            const resolvedProperties = {};
-            Object.entries(schema.properties).forEach(([key, value]) => {
-                if (value !== null && value !== undefined) {
-                    resolvedProperties[key] = this.resolveSchema(value, schemas, new Set(visited));
-                }
-                else {
-                    resolvedProperties[key] = { type: 'object', properties: {} };
-                }
-            });
-            return { ...schema, properties: resolvedProperties };
-        }
-        if (schema.items) {
-            return {
-                ...schema,
-                items: this.resolveSchema(schema.items, schemas, visited),
-            };
-        }
-        return schema;
-    }
-    async generateApiDocs() {
-        try {
-            await this.getApiJson();
-            if (!this.data || !this.data.paths) {
-                this.logger.error('API 문서 데이터를 불러오는데 실패했습니다.');
-                return;
-            }
-            const controllers = this.getControllers();
-            if (Object.keys(controllers).length === 0) {
-                this.logger.warn('API v1 경로를 찾을 수 없습니다.');
-                return;
-            }
-            const schemas = this.data.components?.schemas || {};
-            Object.keys(controllers).forEach((controller, index) => {
-                try {
-                    const isAdmin = controller.startsWith('admin-');
-                    const controllerName = isAdmin ? controller.substring(6) : controller;
-                    const apiType = isAdmin ? '[관리자 API]' : '[사용자 API]';
-                    let markdownContent = `# ${apiType} ${controllerName[0].toUpperCase() + controllerName.slice(1)}\n\n`;
-                    const domain = controllers[controller];
-                    for (const api of domain) {
-                        try {
-                            const method = api.method.toUpperCase();
-                            const path = api.path;
-                            const metadata = api.metadata;
-                            markdownContent += `### ${metadata.summary || path}\n\n`;
-                            if (metadata.description) {
-                                markdownContent += `${metadata.description}\n\n`;
-                            }
-                            markdownContent += `- **Method:** \`${method}\`\n`;
-                            markdownContent += `- **Endpoint:** \`${path}\`\n\n`;
-                            if (metadata.parameters && metadata.parameters.length > 0) {
-                                const pathParams = metadata.parameters.filter((p) => p.in === 'path');
-                                const queryParams = metadata.parameters.filter((p) => p.in === 'query');
-                                if (pathParams.length > 0) {
-                                    markdownContent += `#### 🔵 Path Parameters\n\n`;
-                                    markdownContent += '```json\n';
-                                    markdownContent += '{\n';
-                                    pathParams.forEach((param, index) => {
-                                        try {
-                                            const resolvedSchema = this.resolveSchema(param.schema, schemas);
-                                            const isLast = index === pathParams.length - 1;
-                                            const example = this.getExampleValue(resolvedSchema);
-                                            const required = param.required ? '✅ Required' : '❌ Optional';
-                                            markdownContent += `  "${param.name}": ${example} // ${required} ${param.description || ''}\n`;
-                                            markdownContent += `${isLast ? '' : ','}\n`;
-                                        }
-                                        catch (err) {
-                                            this.logger.error(`Path parameter 처리 중 오류: ${err.message}`);
-                                            markdownContent += `  "${param.name}": null // Error processing parameter\n`;
-                                            markdownContent += `${index === pathParams.length - 1 ? '' : ','}\n`;
-                                        }
-                                    });
-                                    markdownContent += '}\n';
-                                    markdownContent += '```\n\n';
-                                }
-                                if (queryParams.length > 0) {
-                                    markdownContent += `#### 🟣 Query Parameters\n\n`;
-                                    markdownContent += '```json\n';
-                                    markdownContent += '{\n';
-                                    queryParams.forEach((param, index) => {
-                                        try {
-                                            const resolvedSchema = this.resolveSchema(param.schema, schemas);
-                                            const isLast = index === queryParams.length - 1;
-                                            const example = this.getExampleValue(resolvedSchema);
-                                            const required = param.required ? '✅ Required' : '❌ Optional';
-                                            markdownContent += `  "${param.name}": ${example} // ${required} ${param.description || ''}\n`;
-                                            markdownContent += `${isLast ? '' : ','}\n`;
-                                        }
-                                        catch (err) {
-                                            this.logger.error(`Query parameter 처리 중 오류: ${err.message}`);
-                                            markdownContent += `  "${param.name}": null // Error processing parameter\n`;
-                                            markdownContent += `${index === queryParams.length - 1 ? '' : ','}\n`;
-                                        }
-                                    });
-                                    markdownContent += '}\n';
-                                    markdownContent += '```\n\n';
-                                }
-                            }
-                            if (metadata.requestBody) {
-                                markdownContent += `#### 🟠 Request Body\n\n`;
-                                const content = metadata.requestBody.content;
-                                if (content) {
-                                    Object.keys(content).forEach((contentType) => {
-                                        try {
-                                            markdownContent += `**Content Type:** \`${contentType}\`\n\n`;
-                                            const resolvedSchema = this.resolveSchema(content[contentType].schema, schemas);
-                                            markdownContent += '```json\n';
-                                            markdownContent += this.renderSchemaJson(resolvedSchema);
-                                            markdownContent += '\n```\n\n';
-                                        }
-                                        catch (err) {
-                                            this.logger.error(`Request body 처리 중 오류: ${err.message}`);
-                                            markdownContent +=
-                                                '```json\n{ "error": "Error processing request body" }\n```\n\n';
-                                        }
-                                    });
-                                }
-                            }
-                            markdownContent += `#### Responses\n\n`;
-                            if (metadata.responses) {
-                                Object.entries(metadata.responses).forEach(([code, response]) => {
-                                    try {
-                                        const titleEmoji = code.startsWith('2') ? '🟢' : '🔴';
-                                        markdownContent += `##### ${titleEmoji} ${code} - ${response.description || 'No description'}\n\n`;
-                                        if (response.content) {
-                                            Object.keys(response.content).forEach((contentType) => {
-                                                try {
-                                                    markdownContent += `**Content Type:** \`${contentType}\`\n\n`;
-                                                    const resolvedSchema = this.resolveSchema(response.content[contentType].schema, schemas);
-                                                    markdownContent += '```json\n';
-                                                    markdownContent += this.renderSchemaJson(resolvedSchema);
-                                                    markdownContent += '\n```\n\n';
-                                                }
-                                                catch (err) {
-                                                    this.logger.error(`Response content 처리 중 오류: ${err.message}`);
-                                                    markdownContent +=
-                                                        '```json\n{ "error": "Error processing response" }\n```\n\n';
-                                                }
-                                            });
-                                        }
-                                    }
-                                    catch (err) {
-                                        this.logger.error(`Response 처리 중 오류: ${err.message}`);
-                                        markdownContent += `##### Status ${code} - Error processing response\n\n`;
-                                    }
-                                });
-                            }
-                            markdownContent += `---\n\n`;
-                        }
-                        catch (err) {
-                            this.logger.error(`API 엔드포인트 처리 중 오류: ${err.message}`);
-                            markdownContent += `### Error processing endpoint: ${api.path}\n\n---\n\n`;
-                        }
-                    }
-                    const filePrefix = isAdmin ? 'admin_' : '';
-                    const docsPath = (0, path_1.join)('C:/Users/USER/Desktop/projects/RMS-documents/docs/개발/03_api', `${index + 1 < 10 ? '0' : ''}${index + 1}_${filePrefix}${controllerName}.md`);
-                    this.saveMarkdown(docsPath, markdownContent);
-                }
-                catch (err) {
-                    this.logger.error(`컨트롤러 문서화 중 오류 발생: ${controller}, ${err.message}`);
-                }
-            });
-            this.logger.log('API 문서 생성이 완료되었습니다.');
-        }
-        catch (err) {
-            this.logger.error(`API 문서 생성 중 예상치 못한 오류 발생: ${err.message}`);
-        }
-    }
-    saveMarkdown(filePath, content) {
-        fs.writeFileSync(filePath, content);
-        this.logger.log(`API 문서가 생성되었습니다: ${filePath}`);
-    }
-};
-exports.ApiDocService = ApiDocService;
-exports.ApiDocService = ApiDocService = ApiDocService_1 = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
-], ApiDocService);
 
 
 /***/ }),
@@ -4049,169 +3622,6 @@ exports.DateUtil = DateUtil;
 
 /***/ }),
 
-/***/ "./libs/utils/db-doc.service.ts":
-/*!**************************************!*\
-  !*** ./libs/utils/db-doc.service.ts ***!
-  \**************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DbDocService = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const fs = __webpack_require__(/*! fs */ "fs");
-const path = __webpack_require__(/*! path */ "path");
-let DbDocService = class DbDocService {
-    constructor() {
-        if (process.env.NODE_ENV === 'local') {
-            const storage = (0, typeorm_1.getMetadataArgsStorage)();
-            this.metadata = storage.tables.map((table) => ({
-                name: table.name,
-                columns: storage.columns.filter((col) => col.target === table.target),
-                relations: storage.relations.filter((rel) => rel.target === table.target),
-            }));
-        }
-    }
-    async generateDbDocumentation() {
-        const doc = this.generateMarkdown();
-        const outputPath = path.join('C:/Users/USER/Desktop/projects/RMS-documents/docs/개발/02_database-design.md');
-        const outputDir = path.dirname(outputPath);
-        await fs.promises.mkdir(outputDir, { recursive: true });
-        await fs.promises.writeFile(outputPath, doc, 'utf8');
-    }
-    generateMarkdown() {
-        let markdown = '# 데이터베이스 설계 문서\n\n';
-        markdown += "import { MermaidDiagram } from '@site/src/components/MermaidDiagram';\n\n";
-        markdown += this.generateErdSection();
-        markdown += this.generateEntityDetailsSection();
-        markdown += this.generateRelationsSection();
-        return markdown;
-    }
-    generateErdSection() {
-        let section = '## ERD (Entity Relationship Diagram)\n\n';
-        section += '<MermaidDiagram\n';
-        section += 'title="database-erd"\n';
-        section += 'chart={`\n';
-        section += 'erDiagram\n';
-        this.metadata.forEach((metadata) => {
-            const entityName = metadata.name.replace(/[^a-zA-Z0-9]/g, '').replace(/s$/, '');
-            section += `    ${entityName} {\n`;
-            metadata.columns.forEach((column) => {
-                let type = 'unknown';
-                if (column.options?.type) {
-                    if (typeof column.options.type === 'string') {
-                        type = column.options.type;
-                    }
-                    else if (typeof column.options.type === 'function') {
-                        switch (column.options.type.name) {
-                            case 'String':
-                                type = 'string';
-                                break;
-                            case 'Number':
-                                type = 'number';
-                                break;
-                            case 'Boolean':
-                                type = 'boolean';
-                                break;
-                            case 'Date':
-                                type = 'date';
-                                break;
-                            default:
-                                type = column.options.type.name.toLowerCase();
-                        }
-                    }
-                }
-                const isPrimary = column.options?.primary ? 'PK' : '';
-                section += `        ${type} ${column.propertyName} ${isPrimary}\n`;
-            });
-            section += '    }\n';
-        });
-        this.metadata.forEach((metadata) => {
-            const sourceEntity = metadata.name.replace(/[^a-zA-Z0-9]/g, '').replace(/s$/, '');
-            metadata.relations.forEach((relation) => {
-                const targetEntity = relation.type.toString().split('.').pop();
-                if (targetEntity) {
-                    const sanitizedTarget = targetEntity
-                        .toLowerCase()
-                        .replace(/[^a-zA-Z0-9]/g, '')
-                        .replace(/s$/, '');
-                    let cardinality = '||--o{';
-                    if (relation.relationType === 'one-to-one') {
-                        cardinality = '||--||';
-                    }
-                    else if (relation.relationType === 'many-to-one') {
-                        cardinality = '}|--||';
-                    }
-                    const relationDesc = relation.relationType === 'many-to-one' ? 'belongs_to' : 'has';
-                    section += `    ${sourceEntity} ${cardinality} ${sanitizedTarget} : ${relationDesc}\n`;
-                }
-            });
-        });
-        section += '`}\n';
-        section += '/>\n\n';
-        return section;
-    }
-    generateEntityDetailsSection() {
-        let section = '## 엔티티 상세 정보\n\n';
-        this.metadata.forEach((metadata) => {
-            section += `### ${metadata.name}\n\n`;
-            section += '| 컬럼명 | 타입 | 제약조건 | 설명 |\n';
-            section += '|--------|------|-----------|------|\n';
-            metadata.columns.forEach((column) => {
-                const constraints = [];
-                if (column.options.primary)
-                    constraints.push('PK');
-                if (!column.options.nullable)
-                    constraints.push('NOT NULL');
-                if (column.options.unique)
-                    constraints.push('UNIQUE');
-                let type = column.options.type;
-                if (typeof type === 'function') {
-                    type = type.name;
-                }
-                section += `| ${column.propertyName} | ${type} | ${constraints.join(', ')} | ${column.options?.comment || ''} |\n`;
-            });
-            section += '\n';
-        });
-        return section;
-    }
-    generateRelationsSection() {
-        let section = '## 관계 정보\n\n';
-        this.metadata.forEach((metadata) => {
-            if (metadata.relations.length > 0) {
-                section += `### ${metadata.name} 관계\n\n`;
-                section += '| 관계 타입 | 대상 엔티티 | 설명 |\n';
-                section += '|------------|-------------|------|\n';
-                metadata.relations.forEach((relation) => {
-                    const targetEntity = relation.type.toString();
-                    const relationType = relation.relationType;
-                    section += `| ${relationType} | ${targetEntity} | ${relation.options?.comment || ''} |\n`;
-                });
-                section += '\n';
-            }
-        });
-        return section;
-    }
-};
-exports.DbDocService = DbDocService;
-exports.DbDocService = DbDocService = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
-], DbDocService);
-
-
-/***/ }),
-
 /***/ "./src/app.module.ts":
 /*!***************************!*\
   !*** ./src/app.module.ts ***!
@@ -4236,9 +3646,6 @@ const typeorm_config_1 = __webpack_require__(/*! @libs/configs/typeorm.config */
 const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
 const jwt_config_1 = __webpack_require__(/*! @libs/configs/jwt.config */ "./libs/configs/jwt.config.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const api_doc_service_1 = __webpack_require__(/*! @libs/utils/api-doc.service */ "./libs/utils/api-doc.service.ts");
-const db_doc_service_1 = __webpack_require__(/*! @libs/utils/db-doc.service */ "./libs/utils/db-doc.service.ts");
-const seed_module_1 = __webpack_require__(/*! ./modules/seed/seed.module */ "./src/modules/seed/seed.module.ts");
 const auth_module_1 = __webpack_require__(/*! ./application/auth/auth.module */ "./src/application/auth/auth.module.ts");
 const employee_module_1 = __webpack_require__(/*! ./application/employee/employee.module */ "./src/application/employee/employee.module.ts");
 const file_module_1 = __webpack_require__(/*! ./application/file/file.module */ "./src/application/file/file.module.ts");
@@ -4249,6 +3656,10 @@ const core_module_2 = __webpack_require__(/*! ./application/reservation/core/cor
 const vehicle_module_1 = __webpack_require__(/*! ./application/resource/vehicle/vehicle.module */ "./src/application/resource/vehicle/vehicle.module.ts");
 const task_module_1 = __webpack_require__(/*! ./application/task/task.module */ "./src/application/task/task.module.ts");
 const statistics_module_1 = __webpack_require__(/*! ./application/statistics/statistics.module */ "./src/application/statistics/statistics.module.ts");
+const file_context_module_1 = __webpack_require__(/*! ./context/file/file.context.module */ "./src/context/file/file.context.module.ts");
+const notification_context_module_1 = __webpack_require__(/*! ./context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
+const resource_management_module_1 = __webpack_require__(/*! ./business/resource-management/resource-management.module */ "./src/business/resource-management/resource-management.module.ts");
+const reservation_management_module_1 = __webpack_require__(/*! ./business/reservation-management/reservation-management.module */ "./src/business/reservation-management/reservation-management.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -4270,7 +3681,6 @@ exports.AppModule = AppModule = __decorate([
                 useFactory: typeorm_config_1.typeOrmConfig,
             }),
             typeorm_1.TypeOrmModule.forFeature(entities_1.Entities),
-            seed_module_1.SeedModule,
             auth_module_1.AuthModule,
             employee_module_1.EmployeeModule,
             file_module_1.FileModule,
@@ -4281,8 +3691,12 @@ exports.AppModule = AppModule = __decorate([
             vehicle_module_1.VehicleResourceModule,
             task_module_1.TaskModule,
             statistics_module_1.StatisticsModule,
+            file_context_module_1.FileContextModule,
+            notification_context_module_1.NotificationContextModule,
+            resource_management_module_1.ResourceManagementModule,
+            reservation_management_module_1.ReservationManagementModule,
         ],
-        providers: [api_doc_service_1.ApiDocService, db_doc_service_1.DbDocService],
+        providers: [],
     })
 ], AppModule);
 
@@ -9994,7 +9408,7 @@ const cron_reservation_service_1 = __webpack_require__(/*! ./services/cron-reser
 const notification_module_2 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
 const employee_notification_module_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.module */ "./src/domain/employee-notification/employee-notification.module.ts");
 const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
-const reservation_management_context_module_1 = __webpack_require__(/*! @src/context/reservation-management/reservation-management.context.module */ "./src/context/reservation-management/reservation-management.context.module.ts");
+const reservation_context_module_1 = __webpack_require__(/*! @src/context/reservation/reservation.context.module */ "./src/context/reservation/reservation.context.module.ts");
 let ReservationCoreModule = class ReservationCoreModule {
 };
 exports.ReservationCoreModule = ReservationCoreModule;
@@ -10021,7 +9435,7 @@ exports.ReservationCoreModule = ReservationCoreModule = __decorate([
             notification_module_2.DomainNotificationModule,
             file_module_1.DomainFileModule,
             schedule_1.ScheduleModule.forRoot(),
-            reservation_management_context_module_1.ReservationManagementContextModule,
+            reservation_context_module_1.ReservationContextModule,
         ],
         controllers: [admin_reservation_controller_1.AdminReservationController, reservation_controller_1.UserReservationController, cron_reservation_controller_1.CronReservationController],
         providers: [
@@ -10858,9 +10272,9 @@ const update_reservation_status_usecase_1 = __webpack_require__(/*! ../usecases/
 const return_vehicle_usecase_1 = __webpack_require__(/*! ../usecases/return-vehicle.usecase */ "./src/application/reservation/core/usecases/return-vehicle.usecase.ts");
 const check_reservation_access_usecase_1 = __webpack_require__(/*! ../usecases/check-reservation-access.usecase */ "./src/application/reservation/core/usecases/check-reservation-access.usecase.ts");
 const find_calendar_usecase_1 = __webpack_require__(/*! ../usecases/find-calendar.usecase */ "./src/application/reservation/core/usecases/find-calendar.usecase.ts");
-const reservation_management_service_1 = __webpack_require__(/*! @src/context/reservation-management/services/reservation-management.service */ "./src/context/reservation-management/services/reservation-management.service.ts");
-const reservation_conflict_service_1 = __webpack_require__(/*! @src/context/reservation-management/services/reservation-conflict.service */ "./src/context/reservation-management/services/reservation-conflict.service.ts");
-const reservation_validation_service_1 = __webpack_require__(/*! @src/context/reservation-management/services/reservation-validation.service */ "./src/context/reservation-management/services/reservation-validation.service.ts");
+const reservation_management_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation-management.service */ "./src/context/reservation/services/reservation-management.service.ts");
+const reservation_conflict_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation-conflict.service */ "./src/context/reservation/services/reservation-conflict.service.ts");
+const reservation_validation_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation-validation.service */ "./src/context/reservation/services/reservation-validation.service.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ReservationService = class ReservationService {
     constructor(createReservationUsecase, findMyReservationListUsecase, findResourceReservationListUsecase, findMyUsingReservationListUsecase, findMyUpcomingReservationListUsecase, findMyAllSchedulesUsecase, findReservationDetailUsecase, updateReservationUsecase, updateReservationStatusUsecase, returnVehicleUsecase, checkReservationAccessUsecase, findCalendarUsecase, reservationConflictService, reservationValidationService, reservationManagementService) {
@@ -18261,14 +17675,14 @@ exports.VehicleInfoService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const findVehicleInfo_usecase_1 = __webpack_require__(/*! ../usecases/vehicle-info/findVehicleInfo.usecase */ "./src/application/resource/vehicle/usecases/vehicle-info/findVehicleInfo.usecase.ts");
 const updateVehicleInfo_usecase_1 = __webpack_require__(/*! ../usecases/vehicle-info/updateVehicleInfo.usecase */ "./src/application/resource/vehicle/usecases/vehicle-info/updateVehicleInfo.usecase.ts");
-const resource_vehicle_info_service_1 = __webpack_require__(/*! @src/context/resource-management/services/resource-vehicle-info.service */ "./src/context/resource-management/services/resource-vehicle-info.service.ts");
-const file_service_1 = __webpack_require__(/*! @src/context/file/services/file.service */ "./src/context/file/services/file.service.ts");
+const vehicle_info_context_service_1 = __webpack_require__(/*! @src/context/resource/services/vehicle-info.context.service */ "./src/context/resource/services/vehicle-info.context.service.ts");
+const file_context_service_1 = __webpack_require__(/*! @src/context/file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
 let VehicleInfoService = class VehicleInfoService {
-    constructor(findVehicleInfoUsecase, updateVehicleInfoUsecase, resourceVehicleInfoService, fileService) {
+    constructor(findVehicleInfoUsecase, updateVehicleInfoUsecase, vehicleInfoContextService, fileContextService) {
         this.findVehicleInfoUsecase = findVehicleInfoUsecase;
         this.updateVehicleInfoUsecase = updateVehicleInfoUsecase;
-        this.resourceVehicleInfoService = resourceVehicleInfoService;
-        this.fileService = fileService;
+        this.vehicleInfoContextService = vehicleInfoContextService;
+        this.fileContextService = fileContextService;
     }
     async findVehicleInfo(vehicleInfoId) {
         return this.findVehicleInfoUsecase.execute(vehicleInfoId);
@@ -18277,7 +17691,7 @@ let VehicleInfoService = class VehicleInfoService {
         return this.updateVehicleInfoUsecase.execute(vehicleInfoId, updateVehicleInfoDto);
     }
     async findReturnList(vehicleInfoId) {
-        const returnList = await this.resourceVehicleInfoService.반납_리스트를_조회한다(vehicleInfoId);
+        const returnList = await this.vehicleInfoContextService.반납_리스트를_조회한다(vehicleInfoId);
         return returnList.map((returnVehicle) => {
             return {
                 reservationVehicleId: returnVehicle.reservationVehicleId,
@@ -18289,8 +17703,8 @@ let VehicleInfoService = class VehicleInfoService {
         });
     }
     async findReturnDetail(reservationVehicleId) {
-        const returnDetail = await this.resourceVehicleInfoService.반납_상세정보를_조회한다(reservationVehicleId);
-        const reservationVehicleFile = await this.fileService.차량예약_파일을_조회한다(reservationVehicleId);
+        const returnDetail = await this.vehicleInfoContextService.반납_상세정보를_조회한다(reservationVehicleId);
+        const reservationVehicleFile = await this.fileContextService.차량예약_파일을_조회한다(reservationVehicleId);
         return {
             reservationVehicleId: returnDetail.reservationVehicleId,
             returnedAt: returnDetail.returnedAt,
@@ -18306,7 +17720,7 @@ let VehicleInfoService = class VehicleInfoService {
 exports.VehicleInfoService = VehicleInfoService;
 exports.VehicleInfoService = VehicleInfoService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof findVehicleInfo_usecase_1.FindVehicleInfoUsecase !== "undefined" && findVehicleInfo_usecase_1.FindVehicleInfoUsecase) === "function" ? _a : Object, typeof (_b = typeof updateVehicleInfo_usecase_1.UpdateVehicleInfoUsecase !== "undefined" && updateVehicleInfo_usecase_1.UpdateVehicleInfoUsecase) === "function" ? _b : Object, typeof (_c = typeof resource_vehicle_info_service_1.ResourceVehicleInfoService !== "undefined" && resource_vehicle_info_service_1.ResourceVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _d : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof findVehicleInfo_usecase_1.FindVehicleInfoUsecase !== "undefined" && findVehicleInfo_usecase_1.FindVehicleInfoUsecase) === "function" ? _a : Object, typeof (_b = typeof updateVehicleInfo_usecase_1.UpdateVehicleInfoUsecase !== "undefined" && updateVehicleInfo_usecase_1.UpdateVehicleInfoUsecase) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _c : Object, typeof (_d = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _d : Object])
 ], VehicleInfoService);
 
 
@@ -19305,7 +18719,7 @@ const vehicle_info_1 = __webpack_require__(/*! ./usecases/vehicle-info */ "./src
 const consumable_1 = __webpack_require__(/*! ./usecases/consumable */ "./src/application/resource/vehicle/usecases/consumable/index.ts");
 const maintenance_1 = __webpack_require__(/*! ./usecases/maintenance */ "./src/application/resource/vehicle/usecases/maintenance/index.ts");
 const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
-const resource_management_context_module_1 = __webpack_require__(/*! @src/context/resource-management/resource-management.context.module */ "./src/context/resource-management/resource-management.context.module.ts");
+const resource_context_module_1 = __webpack_require__(/*! @src/context/resource/resource.context.module */ "./src/context/resource/resource.context.module.ts");
 const file_context_module_1 = __webpack_require__(/*! @src/context/file/file.context.module */ "./src/context/file/file.context.module.ts");
 const admin_reservation_vehicle_controller_1 = __webpack_require__(/*! ./controllers/admin.reservation-vehicle.controller */ "./src/application/resource/vehicle/controllers/admin.reservation-vehicle.controller.ts");
 let VehicleResourceModule = class VehicleResourceModule {
@@ -19321,7 +18735,7 @@ exports.VehicleResourceModule = VehicleResourceModule = __decorate([
             employee_module_1.DomainEmployeeModule,
             notification_module_1.NotificationModule,
             file_module_1.DomainFileModule,
-            resource_management_context_module_1.ResourceManagementContextModule,
+            resource_context_module_1.ResourceContextModule,
             file_context_module_1.FileContextModule,
         ],
         controllers: [
@@ -20365,7 +19779,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TaskController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -20381,9 +19795,6 @@ let TaskController = class TaskController {
     }
     async getTasks(user) {
         return this.taskService.getTasks(user);
-    }
-    async getTaskStatus(user) {
-        return this.taskService.getTaskStatus(user);
     }
 };
 exports.TaskController = TaskController;
@@ -20420,24 +19831,6 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object]),
     __metadata("design:returntype", Promise)
 ], TaskController.prototype, "getTasks", null);
-__decorate([
-    (0, common_1.Get)('status'),
-    (0, swagger_1.ApiOperation)({ summary: '태스크 상태 조회' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: '태스크 상태 조회 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                title: { type: 'string' },
-            },
-        },
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
-], TaskController.prototype, "getTaskStatus", null);
 exports.TaskController = TaskController = __decorate([
     (0, swagger_1.ApiTags)('3. 태스크 관리 '),
     (0, swagger_1.ApiBearerAuth)(),
@@ -21087,6 +20480,3732 @@ exports.GetTaskStatusUsecase = GetTaskStatusUsecase = __decorate([
 
 /***/ }),
 
+/***/ "./src/business/reservation-management/controllers/cron.reservation.controller.ts":
+/*!****************************************************************************************!*\
+  !*** ./src/business/reservation-management/controllers/cron.reservation.controller.ts ***!
+  \****************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronReservationController = void 0;
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const cron_reservation_service_1 = __webpack_require__(/*! ../services/cron-reservation.service */ "./src/business/reservation-management/services/cron-reservation.service.ts");
+let CronReservationController = class CronReservationController {
+    constructor(cronReservationService) {
+        this.cronReservationService = cronReservationService;
+    }
+    async closeReservation() {
+        return this.cronReservationService.closeReservation();
+    }
+    async handleStartOdometer() {
+        return this.cronReservationService.handleStartOdometer();
+    }
+};
+exports.CronReservationController = CronReservationController;
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/close'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronReservationController.prototype, "closeReservation", null);
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/start-odometer'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronReservationController.prototype, "handleStartOdometer", null);
+exports.CronReservationController = CronReservationController = __decorate([
+    (0, swagger_1.ApiTags)('v2 예약 '),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Controller)('v2/reservations'),
+    __metadata("design:paramtypes", [typeof (_a = typeof cron_reservation_service_1.CronReservationService !== "undefined" && cron_reservation_service_1.CronReservationService) === "function" ? _a : Object])
+], CronReservationController);
+
+
+/***/ }),
+
+/***/ "./src/business/reservation-management/controllers/reservation.controller.ts":
+/*!***********************************************************************************!*\
+  !*** ./src/business/reservation-management/controllers/reservation.controller.ts ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const create_reservation_dto_1 = __webpack_require__(/*! ../dtos/create-reservation.dto */ "./src/business/reservation-management/dtos/create-reservation.dto.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/business/reservation-management/dtos/reservation-response.dto.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
+const update_reservation_dto_1 = __webpack_require__(/*! ../dtos/update-reservation.dto */ "./src/business/reservation-management/dtos/update-reservation.dto.ts");
+const reservation_service_1 = __webpack_require__(/*! ../services/reservation.service */ "./src/business/reservation-management/services/reservation.service.ts");
+const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./src/dtos.index.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+let ReservationController = class ReservationController {
+    constructor(reservationService) {
+        this.reservationService = reservationService;
+    }
+    async create(user, createDto) {
+        return this.reservationService.create(user, createDto);
+    }
+    async findReservationList(startDate, endDate, resourceType, resourceId, status) {
+        return this.reservationService.findReservationList(startDate, endDate, resourceType, resourceId, status);
+    }
+    async findCheckReservationList(query) {
+        return this.reservationService.findCheckReservationList(query);
+    }
+    async findMyReservationList(user, resourceType, startDate, endDate, query) {
+        const { page, limit } = query;
+        return this.reservationService.findMyReservationList(user.employeeId, page, limit, resourceType, startDate, endDate);
+    }
+    async findResourceReservationList(user, resourceId, query, month, isMine) {
+        const { page, limit } = query;
+        return this.reservationService.findResourceReservationList(user.employeeId, resourceId, page, limit, month, isMine);
+    }
+    async findMyUsingReservationList(user) {
+        return this.reservationService.findMyUsingReservationList(user.employeeId);
+    }
+    async findMyUpcomingReservationList(user, resourceType, query) {
+        return this.reservationService.findMyUpcomingReservationList(user.employeeId, query, resourceType);
+    }
+    async findMyUpcomingSchedules(user, resourceType, query) {
+        return this.reservationService.findMyUpcomingSchedules(user.employeeId, query, resourceType);
+    }
+    async findCalendar(user, startDate, endDate, resourceType, isMine, isMySchedules) {
+        const query = { startDate, endDate, resourceType, isMine, isMySchedules };
+        return this.reservationService.findCalendar(user, query);
+    }
+    async findOne(user, reservationId) {
+        return this.reservationService.findOne(user, reservationId);
+    }
+    async updateReservation(user, reservationId, updateDto) {
+        return this.reservationService.updateReservation(user, reservationId, updateDto);
+    }
+    async updateStatus(reservationId, updateDto) {
+        return this.reservationService.updateStatus(reservationId, updateDto);
+    }
+    async updateStatusCancel(user, reservationId) {
+        return this.reservationService.updateStatusCancel(user, reservationId);
+    }
+    async returnVehicle(user, reservationId, returnDto) {
+        return this.reservationService.returnVehicle(user, reservationId, returnDto);
+    }
+};
+exports.ReservationController = ReservationController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '예약 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 생성 성공',
+        type: reservation_response_dto_1.CreateReservationResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object, typeof (_c = typeof create_reservation_dto_1.CreateReservationDto !== "undefined" && create_reservation_dto_1.CreateReservationDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], ReservationController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(''),
+    (0, swagger_1.ApiOperation)({
+        summary: '예약 리스트 조회 #관리자/예약관리',
+    }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 리스트 조회 성공',
+        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'startDate',
+        type: String,
+        required: false,
+        example: date_util_1.DateUtil.now().addDays(-20).format('YYYY-MM-DD'),
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'endDate',
+        type: String,
+        required: false,
+        example: date_util_1.DateUtil.now().addDays(30).format('YYYY-MM-DD'),
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceId', type: String, required: false, example: '78117aaf-a203-43a3-bb38-51ec91ca935a' }),
+    (0, swagger_1.ApiQuery)({
+        name: 'status',
+        enum: reservation_type_enum_1.ReservationStatus,
+        description: `Available values : ${Object.values(reservation_type_enum_1.ReservationStatus).join(', ')}`,
+        isArray: true,
+        required: false,
+        example: [reservation_type_enum_1.ReservationStatus.CONFIRMED],
+    }),
+    __param(0, (0, common_1.Query)('startDate')),
+    __param(1, (0, common_1.Query)('endDate')),
+    __param(2, (0, common_1.Query)('resourceType')),
+    __param(3, (0, common_1.Query)('resourceId')),
+    __param(4, (0, common_1.Query)('status', new common_1.ParseArrayPipe({ optional: true, separator: ',' }))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, typeof (_e = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _e : Object, String, Array]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], ReservationController.prototype, "findReservationList", null);
+__decorate([
+    (0, common_1.Get)('check'),
+    (0, swagger_1.ApiOperation)({ summary: '확인이 필요한 예약들' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '확인이 필요한 예약들 조회 성공',
+        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], ReservationController.prototype, "findCheckReservationList", null);
+__decorate([
+    (0, common_1.Get)('me'),
+    (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회, 자원 타입별 ' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '내 예약 리스트 조회',
+        type: [reservation_response_dto_1.GroupedReservationResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'startDate', required: false, example: '2025-01 / 2025-01-01' }),
+    (0, swagger_1.ApiQuery)({ name: 'endDate', required: false, example: '2025-12 / 2025-12-31' }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('resourceType')),
+    __param(2, (0, common_1.Query)('startDate')),
+    __param(3, (0, common_1.Query)('endDate')),
+    __param(4, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _j : Object, typeof (_k = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _k : Object, String, String, typeof (_l = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+], ReservationController.prototype, "findMyReservationList", null);
+__decorate([
+    (0, common_1.Get)('resource/:resourceId'),
+    (0, swagger_1.ApiOperation)({ summary: '자원별 예약 리스트 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '자원별 예약 리스트 조회',
+        type: reservation_response_dto_1.GroupedReservationWithResourceResponseDto,
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    (0, swagger_1.ApiQuery)({ name: 'month', type: String, example: '2025-04' }),
+    (0, swagger_1.ApiQuery)({ name: 'isMine', type: Boolean, required: false, example: true }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('resourceId')),
+    __param(2, (0, common_1.Query)()),
+    __param(3, (0, common_1.Query)('month')),
+    __param(4, (0, common_1.Query)('isMine')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_o = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _o : Object, String, typeof (_p = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _p : Object, String, Boolean]),
+    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
+], ReservationController.prototype, "findResourceReservationList", null);
+__decorate([
+    (0, common_1.Get)('my-using'),
+    (0, swagger_1.ApiOperation)({ summary: '내 이용중인 예약 리스트 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '내 이용중인 예약 리스트 조회',
+        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_r = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _r : Object]),
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
+], ReservationController.prototype, "findMyUsingReservationList", null);
+__decorate([
+    (0, common_1.Get)('my-upcoming'),
+    (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '내 예약 리스트 조회',
+        type: [reservation_response_dto_1.GroupedReservationResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('resourceType')),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_t = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _t : Object, typeof (_u = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _u : Object, typeof (_v = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _v : Object]),
+    __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
+], ReservationController.prototype, "findMyUpcomingReservationList", null);
+__decorate([
+    (0, common_1.Get)('my-upcoming-schedules'),
+    (0, swagger_1.ApiOperation)({ summary: '내 일정 리스트 조회 (예약자/참석자 모두 포함)' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '내 일정 리스트 조회 (예약자/참석자 모두 포함)',
+        type: [reservation_response_dto_1.GroupedReservationResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('resourceType')),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_x = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _x : Object, typeof (_y = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _y : Object, typeof (_z = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _z : Object]),
+    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
+], ReservationController.prototype, "findMyUpcomingSchedules", null);
+__decorate([
+    (0, common_1.Get)('calendar'),
+    (0, swagger_1.ApiOperation)({ summary: '캘린더 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '캘린더 조회 성공',
+        type: reservation_response_dto_1.CalendarResponseDto,
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'startDate', example: '2025-01-01' }),
+    (0, swagger_1.ApiQuery)({ name: 'endDate', example: '2025-12-31' }),
+    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
+    (0, swagger_1.ApiQuery)({ name: 'isMine', type: Boolean, required: false, example: true }),
+    (0, swagger_1.ApiQuery)({ name: 'isMySchedules', type: Boolean, required: false, example: true }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('startDate')),
+    __param(2, (0, common_1.Query)('endDate')),
+    __param(3, (0, common_1.Query)('resourceType')),
+    __param(4, (0, common_1.Query)('isMine')),
+    __param(5, (0, common_1.Query)('isMySchedules')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_1 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _1 : Object, String, String, typeof (_2 = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _2 : Object, Boolean, Boolean]),
+    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
+], ReservationController.prototype, "findCalendar", null);
+__decorate([
+    (0, common_1.Get)(':reservationId'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 상세 조회 성공',
+        type: reservation_response_dto_1.ReservationWithRelationsResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_4 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _4 : Object, String]),
+    __metadata("design:returntype", typeof (_5 = typeof Promise !== "undefined" && Promise) === "function" ? _5 : Object)
+], ReservationController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 수정' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 수정 성공',
+        type: reservation_response_dto_1.ReservationResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_6 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _6 : Object, String, typeof (_7 = typeof update_reservation_dto_1.UpdateReservationDto !== "undefined" && update_reservation_dto_1.UpdateReservationDto) === "function" ? _7 : Object]),
+    __metadata("design:returntype", typeof (_8 = typeof Promise !== "undefined" && Promise) === "function" ? _8 : Object)
+], ReservationController.prototype, "updateReservation", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId/status'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 상태 수정 성공',
+        type: reservation_response_dto_1.ReservationResponseDto,
+    }),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
+    __param(0, (0, common_1.Param)('reservationId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_9 = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _9 : Object]),
+    __metadata("design:returntype", typeof (_10 = typeof Promise !== "undefined" && Promise) === "function" ? _10 : Object)
+], ReservationController.prototype, "updateStatus", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId/status/cancel'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 취소 #사용자/예약상세페이지' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '예약 상태 수정 성공',
+        type: reservation_response_dto_1.ReservationResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_11 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _11 : Object, String]),
+    __metadata("design:returntype", typeof (_12 = typeof Promise !== "undefined" && Promise) === "function" ? _12 : Object)
+], ReservationController.prototype, "updateStatusCancel", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId/return-vehicle'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '차량 반납 성공',
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_13 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _13 : Object, String, typeof (_14 = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _14 : Object]),
+    __metadata("design:returntype", typeof (_15 = typeof Promise !== "undefined" && Promise) === "function" ? _15 : Object)
+], ReservationController.prototype, "returnVehicle", null);
+exports.ReservationController = ReservationController = __decorate([
+    (0, swagger_1.ApiTags)('v2 예약 '),
+    (0, common_1.Controller)('v2/reservations'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _a : Object])
+], ReservationController);
+
+
+/***/ }),
+
+/***/ "./src/business/reservation-management/dtos/create-reservation.dto.ts":
+/*!****************************************************************************!*\
+  !*** ./src/business/reservation-management/dtos/create-reservation.dto.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateReservationDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+class CreateReservationDto {
+}
+exports.CreateReservationDto = CreateReservationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('자원 타입', Object.values(resource_type_enum_1.ResourceType)) }),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], CreateReservationDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('설명') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('시작 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 종료 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('종료 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
+    __metadata("design:type", Boolean)
+], CreateReservationDto.prototype, "isAllDay", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('시작 전 알림 여부') }),
+    __metadata("design:type", Boolean)
+], CreateReservationDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, enum: reservation_type_enum_1.ReservationStatus }),
+    __metadata("design:type", typeof (_b = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _b : Object)
+], CreateReservationDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [Number], example: [10, 20] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('알림 시간') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateReservationDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [String] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
+    __metadata("design:type", Array)
+], CreateReservationDto.prototype, "participantIds", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/reservation-management/dtos/reservation-response.dto.ts":
+/*!******************************************************************************!*\
+  !*** ./src/business/reservation-management/dtos/reservation-response.dto.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.CreateReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationVehicleResponseDto = exports.ReservationParticipantResponseDto = exports.ReservationResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const reservation_type_enum_2 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./src/dtos.index.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+class ReservationResponseDto {
+    constructor(reservation) {
+        this.reservationId = reservation?.reservationId;
+        this.resourceId = reservation?.resourceId;
+        this.title = reservation?.title;
+        this.description = reservation?.description;
+        this.rejectReason = reservation?.rejectReason;
+        this.startDate = date_util_1.DateUtil.format(reservation?.startDate);
+        this.endDate = date_util_1.DateUtil.format(reservation?.endDate);
+        this.status = reservation?.status;
+        this.isAllDay = reservation?.isAllDay;
+        this.notifyBeforeStart = reservation?.notifyBeforeStart;
+        this.notifyMinutesBeforeStart = reservation?.notifyMinutesBeforeStart;
+    }
+}
+exports.ReservationResponseDto = ReservationResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ReservationResponseDto.prototype, "rejectReason", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: reservation_type_enum_1.ReservationStatus, required: false }),
+    __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _a : Object)
+], ReservationResponseDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationResponseDto.prototype, "isAllDay", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationResponseDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [Number] }),
+    __metadata("design:type", Array)
+], ReservationResponseDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationResponseDto.prototype, "isMine", void 0);
+class ReservationParticipantResponseDto {
+}
+exports.ReservationParticipantResponseDto = ReservationParticipantResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationParticipantResponseDto.prototype, "participantId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationParticipantResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationParticipantResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => dtos_index_1.EmployeeResponseDto, required: false }),
+    __metadata("design:type", typeof (_b = typeof dtos_index_1.EmployeeResponseDto !== "undefined" && dtos_index_1.EmployeeResponseDto) === "function" ? _b : Object)
+], ReservationParticipantResponseDto.prototype, "employee", void 0);
+class ReservationVehicleResponseDto {
+}
+exports.ReservationVehicleResponseDto = ReservationVehicleResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationVehicleResponseDto.prototype, "reservationVehicleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReservationVehicleResponseDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReservationVehicleResponseDto.prototype, "startOdometer", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReservationVehicleResponseDto.prototype, "endOdometer", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReservationVehicleResponseDto.prototype, "startFuelLevel", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReservationVehicleResponseDto.prototype, "endFuelLevel", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], ReservationVehicleResponseDto.prototype, "isReturned", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], ReservationVehicleResponseDto.prototype, "returnedAt", void 0);
+class ReservationWithResourceResponseDto extends ReservationResponseDto {
+    constructor(reservation) {
+        super(reservation);
+        this.resource = reservation?.resource;
+    }
+}
+exports.ReservationWithResourceResponseDto = ReservationWithResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => dtos_index_1.ResourceResponseDto, required: false }),
+    __metadata("design:type", typeof (_d = typeof dtos_index_1.ResourceResponseDto !== "undefined" && dtos_index_1.ResourceResponseDto) === "function" ? _d : Object)
+], ReservationWithResourceResponseDto.prototype, "resource", void 0);
+class ReservationWithRelationsResponseDto extends ReservationResponseDto {
+    constructor(reservation) {
+        super(reservation);
+        this.resource = reservation?.resource;
+        this.reservers = reservation?.participants?.filter((participant) => participant.type === reservation_type_enum_2.ParticipantsType.RESERVER);
+        this.participants = reservation?.participants?.filter((participant) => participant.type === reservation_type_enum_2.ParticipantsType.PARTICIPANT);
+        this.reservationVehicles = reservation?.reservationVehicles;
+    }
+}
+exports.ReservationWithRelationsResponseDto = ReservationWithRelationsResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => dtos_index_1.ResourceResponseDto, required: false }),
+    __metadata("design:type", typeof (_e = typeof dtos_index_1.ResourceResponseDto !== "undefined" && dtos_index_1.ResourceResponseDto) === "function" ? _e : Object)
+], ReservationWithRelationsResponseDto.prototype, "resource", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [ReservationParticipantResponseDto], required: false }),
+    __metadata("design:type", Array)
+], ReservationWithRelationsResponseDto.prototype, "reservers", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [ReservationParticipantResponseDto], required: false }),
+    __metadata("design:type", Array)
+], ReservationWithRelationsResponseDto.prototype, "participants", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [ReservationVehicleResponseDto], required: false }),
+    __metadata("design:type", Array)
+], ReservationWithRelationsResponseDto.prototype, "reservationVehicles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [dtos_index_1.ResponseNotificationDto], required: false }),
+    __metadata("design:type", Array)
+], ReservationWithRelationsResponseDto.prototype, "notifications", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "isMine", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "returnable", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "isDelayed", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "modifiable", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ReservationWithRelationsResponseDto.prototype, "hasUnreadNotification", void 0);
+class CreateReservationResponseDto {
+}
+exports.CreateReservationResponseDto = CreateReservationResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '123e4567-e89b-12d3-a456-426614174000' }),
+    __metadata("design:type", String)
+], CreateReservationResponseDto.prototype, "reservationId", void 0);
+class GroupedReservationResponseDto {
+}
+exports.GroupedReservationResponseDto = GroupedReservationResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '날짜 (YYYY-MM-DD 형식)' }),
+    __metadata("design:type", String)
+], GroupedReservationResponseDto.prototype, "date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 날짜의 예약 목록',
+        type: [ReservationWithRelationsResponseDto],
+    }),
+    __metadata("design:type", Array)
+], GroupedReservationResponseDto.prototype, "reservations", void 0);
+class GroupedReservationWithResourceResponseDto {
+}
+exports.GroupedReservationWithResourceResponseDto = GroupedReservationWithResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 정보',
+        type: () => dtos_index_1.ResourceResponseDto,
+    }),
+    __metadata("design:type", typeof (_f = typeof dtos_index_1.ResourceResponseDto !== "undefined" && dtos_index_1.ResourceResponseDto) === "function" ? _f : Object)
+], GroupedReservationWithResourceResponseDto.prototype, "resource", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 목록',
+        required: false,
+        type: [GroupedReservationResponseDto],
+    }),
+    __metadata("design:type", Array)
+], GroupedReservationWithResourceResponseDto.prototype, "groupedReservations", void 0);
+class CalendarResponseDto {
+}
+exports.CalendarResponseDto = CalendarResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 캘린더',
+        type: [ReservationWithRelationsResponseDto],
+    }),
+    __metadata("design:type", Array)
+], CalendarResponseDto.prototype, "reservations", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/reservation-management/dtos/update-reservation.dto.ts":
+/*!****************************************************************************!*\
+  !*** ./src/business/reservation-management/dtos/update-reservation.dto.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReturnVehicleDto = exports.UpdateReservationDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const resource_entity_1 = __webpack_require__(/*! @libs/entities/resource.entity */ "./libs/entities/resource.entity.ts");
+class UpdateReservationTitleDto {
+}
+exports.UpdateReservationTitleDto = UpdateReservationTitleDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateReservationTitleDto.prototype, "title", void 0);
+class UpdateReservationTimeDto {
+    constructor(reservation) {
+        this.startDate = date_util_1.DateUtil.format(reservation?.startDate);
+        this.endDate = date_util_1.DateUtil.format(reservation?.endDate);
+        this.isAllDay = reservation?.isAllDay;
+    }
+    getPropertiesAndTypes() {
+        return Object.getOwnPropertyNames(this).map((property) => ({
+            property,
+            type: Reflect.getMetadata('design:type', this, property),
+        }));
+    }
+}
+exports.UpdateReservationTimeDto = UpdateReservationTimeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('시작 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    __metadata("design:type", String)
+], UpdateReservationTimeDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 종료 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('종료 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    __metadata("design:type", String)
+], UpdateReservationTimeDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateReservationTimeDto.prototype, "isAllDay", void 0);
+class UpdateReservationStatusDto {
+}
+exports.UpdateReservationStatusDto = UpdateReservationStatusDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: reservation_type_enum_1.ReservationStatus }),
+    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('예약 상태', Object.values(reservation_type_enum_1.ReservationStatus)),
+    }),
+    __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _a : Object)
+], UpdateReservationStatusDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('거절 사유') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('거절 사유', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateReservationStatusDto.prototype, "rejectReason", void 0);
+class UpdateReservationParticipantsDto {
+}
+exports.UpdateReservationParticipantsDto = UpdateReservationParticipantsDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [String] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
+    __metadata("design:type", Array)
+], UpdateReservationParticipantsDto.prototype, "participantIds", void 0);
+class UpdateReservationCcReceipientDto {
+}
+exports.UpdateReservationCcReceipientDto = UpdateReservationCcReceipientDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [String] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('수신참조자 ID') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('수신참조자 ID', '문자열') }),
+    __metadata("design:type", Array)
+], UpdateReservationCcReceipientDto.prototype, "ccReceipientIds", void 0);
+class UpdateReservationDto {
+}
+exports.UpdateReservationDto = UpdateReservationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateReservationDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateReservationDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 시작 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+        required: false,
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('시작 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateReservationDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2025-01-01 00:00:00',
+        description: '예약 종료 시간 (YYYY-MM-DD HH:mm:ss 형식)',
+        required: false,
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('종료 시간', 'YYYY-MM-DD HH:mm:ss'),
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateReservationDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false, required: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('종일 여부') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateReservationDto.prototype, "isAllDay", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false, required: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('시작 전 알림 여부') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateReservationDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [Number], example: [10, 20] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('알림 시간') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateReservationDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [String], required: false }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('참가자 ID') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('참가자 ID', '문자열') }),
+    __metadata("design:type", Array)
+], UpdateReservationDto.prototype, "participantIds", void 0);
+class ReturnVehicleDto {
+}
+exports.ReturnVehicleDto = ReturnVehicleDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_b = typeof resource_entity_1.ResourceLocation !== "undefined" && resource_entity_1.ResourceLocation) === "function" ? _b : Object)
+], ReturnVehicleDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    __metadata("design:type", Number)
+], ReturnVehicleDto.prototype, "leftMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    __metadata("design:type", Number)
+], ReturnVehicleDto.prototype, "totalMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주차 위치 이미지', '문자열') }),
+    __metadata("design:type", Array)
+], ReturnVehicleDto.prototype, "parkingLocationImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지', '문자열') }),
+    __metadata("design:type", Array)
+], ReturnVehicleDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('차량 실내 이미지') }),
+    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('차량 실내 이미지', '문자열') }),
+    __metadata("design:type", Array)
+], ReturnVehicleDto.prototype, "indoorImages", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/reservation-management/reservation-management.module.ts":
+/*!******************************************************************************!*\
+  !*** ./src/business/reservation-management/reservation-management.module.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationManagementModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_controller_1 = __webpack_require__(/*! ./controllers/reservation.controller */ "./src/business/reservation-management/controllers/reservation.controller.ts");
+const cron_reservation_controller_1 = __webpack_require__(/*! ./controllers/cron.reservation.controller */ "./src/business/reservation-management/controllers/cron.reservation.controller.ts");
+const reservation_context_module_1 = __webpack_require__(/*! @src/context/reservation/reservation.context.module */ "./src/context/reservation/reservation.context.module.ts");
+const reservation_service_1 = __webpack_require__(/*! ./services/reservation.service */ "./src/business/reservation-management/services/reservation.service.ts");
+const cron_reservation_service_1 = __webpack_require__(/*! ./services/cron-reservation.service */ "./src/business/reservation-management/services/cron-reservation.service.ts");
+let ReservationManagementModule = class ReservationManagementModule {
+};
+exports.ReservationManagementModule = ReservationManagementModule;
+exports.ReservationManagementModule = ReservationManagementModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            reservation_context_module_1.ReservationContextModule,
+        ],
+        controllers: [reservation_controller_1.ReservationController, cron_reservation_controller_1.CronReservationController],
+        providers: [reservation_service_1.ReservationService, cron_reservation_service_1.CronReservationService],
+        exports: [],
+    })
+], ReservationManagementModule);
+
+
+/***/ }),
+
+/***/ "./src/business/reservation-management/services/cron-reservation.service.ts":
+/*!**********************************************************************************!*\
+  !*** ./src/business/reservation-management/services/cron-reservation.service.ts ***!
+  \**********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronReservationService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
+let CronReservationService = class CronReservationService {
+    constructor(reservationContextService) {
+        this.reservationContextService = reservationContextService;
+    }
+    async closeReservation() {
+        return this.reservationContextService.크론_작업을_처리한다();
+    }
+    async handleStartOdometer() {
+        return this.reservationContextService.시작주행거리를_처리한다();
+    }
+};
+exports.CronReservationService = CronReservationService;
+exports.CronReservationService = CronReservationService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _a : Object])
+], CronReservationService);
+
+
+/***/ }),
+
+/***/ "./src/business/reservation-management/services/reservation.service.ts":
+/*!*****************************************************************************!*\
+  !*** ./src/business/reservation-management/services/reservation.service.ts ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
+let ReservationService = class ReservationService {
+    constructor(reservationContextService) {
+        this.reservationContextService = reservationContextService;
+    }
+    async create(user, createDto) {
+        return this.reservationContextService.예약을_생성한다(user, createDto);
+    }
+    async findReservationList(startDate, endDate, resourceType, resourceId, status) {
+        return this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status);
+    }
+    async findCheckReservationList(query) {
+        return this.reservationContextService.확인필요_예약목록을_조회한다(query);
+    }
+    async findMyReservationList(employeeId, page, limit, resourceType, startDate, endDate) {
+        return this.reservationContextService.내_예약목록을_조회한다(employeeId, page, limit, resourceType, startDate, endDate);
+    }
+    async findResourceReservationList(employeeId, resourceId, page, limit, month, isMine) {
+        return this.reservationContextService.자원별_예약목록을_조회한다(employeeId, resourceId, page, limit, month, isMine);
+    }
+    async findMyUsingReservationList(employeeId) {
+        return this.reservationContextService.내_이용중인_예약목록을_조회한다(employeeId);
+    }
+    async findMyUpcomingReservationList(employeeId, query, resourceType) {
+        return this.reservationContextService.내_다가오는_예약목록을_조회한다(employeeId, query, resourceType);
+    }
+    async findMyUpcomingSchedules(employeeId, query, resourceType) {
+        return this.reservationContextService.내_모든_일정을_조회한다(employeeId, query, resourceType);
+    }
+    async findCalendar(user, query) {
+        return this.reservationContextService.캘린더를_조회한다(user, query);
+    }
+    async findOne(user, reservationId) {
+        return this.reservationContextService.예약_상세를_조회한다(user, reservationId);
+    }
+    async updateReservation(user, reservationId, updateDto) {
+        await this.reservationContextService.예약_접근권한을_확인한다(reservationId, user.employeeId);
+        return this.reservationContextService.예약을_수정한다(reservationId, updateDto);
+    }
+    async updateStatus(reservationId, updateDto) {
+        return this.reservationContextService.예약상태를_변경한다(reservationId, updateDto);
+    }
+    async updateStatusCancel(user, reservationId) {
+        await this.reservationContextService.예약_접근권한을_확인한다(reservationId, user.employeeId);
+        return this.reservationContextService.예약을_취소한다(reservationId);
+    }
+    async returnVehicle(user, reservationId, returnDto) {
+        return this.reservationContextService.차량을_반납한다(user, reservationId, returnDto);
+    }
+    async checkExtendable(employeeId, reservationId) {
+        return this.reservationContextService.예약_연장가능여부를_확인한다(employeeId, reservationId);
+    }
+    async extendReservation(employeeId, reservationId, extendDto) {
+        return this.reservationContextService.예약을_연장한다(employeeId, reservationId, extendDto);
+    }
+};
+exports.ReservationService = ReservationService;
+exports.ReservationService = ReservationService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _a : Object])
+], ReservationService);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/controllers/resource/resource-group.controller.ts":
+/*!********************************************************************************************!*\
+  !*** ./src/business/resource-management/controllers/resource/resource-group.controller.ts ***!
+  \********************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceGroupController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const create_resource_dto_1 = __webpack_require__(/*! ../../dtos/resource/create-resource.dto */ "./src/business/resource-management/dtos/resource/create-resource.dto.ts");
+const resource_response_dto_1 = __webpack_require__(/*! ../../dtos/resource/resource-response.dto */ "./src/business/resource-management/dtos/resource/resource-response.dto.ts");
+const update_resource_dto_1 = __webpack_require__(/*! ../../dtos/resource/update-resource.dto */ "./src/business/resource-management/dtos/resource/update-resource.dto.ts");
+const resource_group_service_1 = __webpack_require__(/*! ../../services/resource-group.service */ "./src/business/resource-management/services/resource-group.service.ts");
+let ResourceGroupController = class ResourceGroupController {
+    constructor(resourceGroupService) {
+        this.resourceGroupService = resourceGroupService;
+    }
+    async findParentResourceGroups() {
+        return this.resourceGroupService.findParentResourceGroups();
+    }
+    async findAll(type) {
+        return this.resourceGroupService.findResourceGroupsWithResourceData(type);
+    }
+    async create(createResourceGroupDto) {
+        return this.resourceGroupService.createResourceGroup(createResourceGroupDto);
+    }
+    async updateOrder(updateResourceGroupOrdersDto) {
+        return this.resourceGroupService.reorderResourceGroups(updateResourceGroupOrdersDto);
+    }
+    async update(resourceGroupId, updateResourceGroupDto) {
+        return this.resourceGroupService.updateResourceGroup(resourceGroupId, updateResourceGroupDto);
+    }
+    async remove(resourceGroupId) {
+        return this.resourceGroupService.deleteResourceGroup(resourceGroupId);
+    }
+};
+exports.ResourceGroupController = ResourceGroupController;
+__decorate([
+    (0, common_1.Get)('parents'),
+    (0, swagger_1.ApiOperation)({ summary: '상위그룹 목록 조회 #사용자/자원구분/모달' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '상위 자원 그룹 목록을 조회했습니다.',
+        type: [resource_response_dto_1.ResourceGroupResponseDto],
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], ResourceGroupController.prototype, "findParentResourceGroups", null);
+__decorate([
+    (0, common_1.Get)('resources'),
+    (0, swagger_1.ApiOperation)({ summary: '상위그룹-하위그룹-자원 목록 조회 #사용자/자원선택/모달 #관리자/자원관리/자원목록' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '자원 그룹들과 각 그룹에 속한 자원 목록을 조회했습니다.',
+        type: [resource_response_dto_1.ResourceGroupWithResourcesResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'type', enum: resource_type_enum_1.ResourceType, required: false }),
+    __param(0, (0, common_1.Query)('type')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], ResourceGroupController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 201,
+        description: '자원 그룹이 생성되었습니다.',
+        type: resource_response_dto_1.ResourceGroupResponseDto,
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof create_resource_dto_1.CreateResourceGroupDto !== "undefined" && create_resource_dto_1.CreateResourceGroupDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], ResourceGroupController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)('order'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 순서 변경' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 그룹 순서가 성공적으로 변경되었습니다.',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_g = typeof update_resource_dto_1.UpdateResourceGroupOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceGroupOrdersDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", Promise)
+], ResourceGroupController.prototype, "updateOrder", null);
+__decorate([
+    (0, common_1.Patch)(':resourceGroupId'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 수정' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '자원 그룹이 수정되었습니다.',
+        type: resource_response_dto_1.ResourceGroupResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('resourceGroupId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof update_resource_dto_1.UpdateResourceGroupDto !== "undefined" && update_resource_dto_1.UpdateResourceGroupDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], ResourceGroupController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':resourceGroupId'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 삭제' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '자원 그룹이 삭제되었습니다.',
+    }),
+    __param(0, (0, common_1.Param)('resourceGroupId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+], ResourceGroupController.prototype, "remove", null);
+exports.ResourceGroupController = ResourceGroupController = __decorate([
+    (0, swagger_1.ApiTags)('v2 자원 그룹'),
+    (0, common_1.Controller)('v2/resource-groups'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_group_service_1.ResourceGroupService !== "undefined" && resource_group_service_1.ResourceGroupService) === "function" ? _a : Object])
+], ResourceGroupController);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/controllers/resource/resource.controller.ts":
+/*!**************************************************************************************!*\
+  !*** ./src/business/resource-management/controllers/resource/resource.controller.ts ***!
+  \**************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const resource_response_dto_1 = __webpack_require__(/*! ../../dtos/resource/resource-response.dto */ "./src/business/resource-management/dtos/resource/resource-response.dto.ts");
+const create_resource_dto_1 = __webpack_require__(/*! ../../dtos/resource/create-resource.dto */ "./src/business/resource-management/dtos/resource/create-resource.dto.ts");
+const update_resource_dto_1 = __webpack_require__(/*! ../../dtos/resource/update-resource.dto */ "./src/business/resource-management/dtos/resource/update-resource.dto.ts");
+const resource_service_1 = __webpack_require__(/*! ../../services/resource.service */ "./src/business/resource-management/services/resource.service.ts");
+let ResourceController = class ResourceController {
+    constructor(resourceService) {
+        this.resourceService = resourceService;
+    }
+    async createWithInfos(createResourceInfo) {
+        return this.resourceService.createResourceWithInfos(createResourceInfo);
+    }
+    async findAll(type) {
+        return this.resourceService.findResources(type);
+    }
+    async findOne(resourceId) {
+        return this.resourceService.findResourceDetailForAdmin(resourceId);
+    }
+    async findResourcesByResourceGroupId(resourceGroupId) {
+        return this.resourceService.findResourcesByResourceGroupId(resourceGroupId);
+    }
+    async reorder(updateResourceOrdersDto) {
+        return this.resourceService.reorderResources(updateResourceOrdersDto);
+    }
+    async update(resourceId, updateResourceInfoDto) {
+        return this.resourceService.updateResource(resourceId, updateResourceInfoDto);
+    }
+    async updateAvailability(resourceId, updateResourceInfoDto) {
+        return this.resourceService.updateResource(resourceId, updateResourceInfoDto);
+    }
+    async remove(resourceId) {
+        return this.resourceService.deleteResource(resourceId);
+    }
+};
+exports.ResourceController = ResourceController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '자원 생성 #관리자/자원관리/생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 201,
+        description: '자원이 성공적으로 생성되었습니다.',
+        type: resource_response_dto_1.CreateResourceResponseDto,
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof create_resource_dto_1.CreateResourceInfoDto !== "undefined" && create_resource_dto_1.CreateResourceInfoDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], ResourceController.prototype, "createWithInfos", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '자원 목록 조회 #관리자/자원관리/자원리스트' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 목록을 성공적으로 조회했습니다.',
+        type: [resource_response_dto_1.ResourceResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'type', enum: resource_type_enum_1.ResourceType }),
+    __param(0, (0, common_1.Query)('type')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], ResourceController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':resourceId'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 상세 조회 #관리자/자원관리/상세' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원을 성공적으로 조회했습니다.',
+        type: resource_response_dto_1.ResourceResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('resourceId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], ResourceController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Get)('resource-group/:resourceGroupId'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 그룹 상세 조회 #관리자/자원관리/자원리스트' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 그룹을 성공적으로 조회했습니다.',
+        type: [resource_response_dto_1.ResourceResponseDto],
+    }),
+    __param(0, (0, common_1.Param)('resourceGroupId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], ResourceController.prototype, "findResourcesByResourceGroupId", null);
+__decorate([
+    (0, common_1.Patch)('order'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 순서 변경' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 순서가 성공적으로 변경되었습니다.',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_h = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], ResourceController.prototype, "reorder", null);
+__decorate([
+    (0, common_1.Patch)(':resourceId'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 수정' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원이 성공적으로 수정되었습니다.',
+        type: resource_response_dto_1.ResourceResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('resourceId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_k = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+], ResourceController.prototype, "update", null);
+__decorate([
+    (0, common_1.Patch)(':resourceId/availability'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 예약 가능 상태 수정' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원이 성공적으로 수정되었습니다.',
+        type: resource_response_dto_1.ResourceResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('resourceId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_m = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+], ResourceController.prototype, "updateAvailability", null);
+__decorate([
+    (0, common_1.Delete)(':resourceId'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 삭제' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원이 성공적으로 삭제되었습니다.',
+    }),
+    __param(0, (0, common_1.Param)('resourceId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
+], ResourceController.prototype, "remove", null);
+exports.ResourceController = ResourceController = __decorate([
+    (0, swagger_1.ApiTags)('v2 자원'),
+    (0, common_1.Controller)('v2/resources'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.ResourceService !== "undefined" && resource_service_1.ResourceService) === "function" ? _a : Object])
+], ResourceController);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/controllers/vehicle/consumable.controller.ts":
+/*!***************************************************************************************!*\
+  !*** ./src/business/resource-management/controllers/vehicle/consumable.controller.ts ***!
+  \***************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConsumableController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const create_vehicle_info_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/create-vehicle-info.dto */ "./src/business/resource-management/dtos/vehicle/create-vehicle-info.dto.ts");
+const update_vehicle_info_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/update-vehicle-info.dto */ "./src/business/resource-management/dtos/vehicle/update-vehicle-info.dto.ts");
+const vehicle_response_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/vehicle-response.dto */ "./src/business/resource-management/dtos/vehicle/vehicle-response.dto.ts");
+const consumable_service_1 = __webpack_require__(/*! ../../services/consumable.service */ "./src/business/resource-management/services/consumable.service.ts");
+let ConsumableController = class ConsumableController {
+    constructor(consumableService) {
+        this.consumableService = consumableService;
+    }
+    async create(createConsumableDto) {
+        return this.consumableService.save(createConsumableDto);
+    }
+    async findAll(vehicleInfoId) {
+        return this.consumableService.findAll(vehicleInfoId);
+    }
+    async findOne(consumableId) {
+        return this.consumableService.findOne(consumableId);
+    }
+    async update(consumableId, updateConsumableDto) {
+        return this.consumableService.update(consumableId, updateConsumableDto);
+    }
+    async remove(consumableId) {
+        await this.consumableService.delete(consumableId);
+    }
+};
+exports.ConsumableController = ConsumableController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '소모품 등록' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 201,
+        description: '소모품이 성공적으로 등록되었습니다.',
+        type: vehicle_response_dto_1.ConsumableResponseDto,
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof create_vehicle_info_dto_1.CreateConsumableDto !== "undefined" && create_vehicle_info_dto_1.CreateConsumableDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], ConsumableController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)('vehicle/:vehicleInfoId'),
+    (0, swagger_1.ApiOperation)({ summary: '소모품 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '소모품 목록을 성공적으로 조회했습니다.',
+        type: [vehicle_response_dto_1.ConsumableResponseDto],
+    }),
+    __param(0, (0, common_1.Param)('vehicleInfoId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], ConsumableController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':consumableId'),
+    (0, swagger_1.ApiOperation)({ summary: '소모품 상세 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '소모품을 성공적으로 조회했습니다.',
+        type: vehicle_response_dto_1.ConsumableResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('consumableId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], ConsumableController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':consumableId'),
+    (0, swagger_1.ApiOperation)({ summary: '소모품 수정' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '소모품이 성공적으로 수정되었습니다.',
+        type: vehicle_response_dto_1.ConsumableResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('consumableId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_f = typeof update_vehicle_info_dto_1.UpdateConsumableDto !== "undefined" && update_vehicle_info_dto_1.UpdateConsumableDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], ConsumableController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':consumableId'),
+    (0, swagger_1.ApiOperation)({ summary: '소모품 삭제' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '소모품이 성공적으로 삭제되었습니다.',
+    }),
+    __param(0, (0, common_1.Param)('consumableId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], ConsumableController.prototype, "remove", null);
+exports.ConsumableController = ConsumableController = __decorate([
+    (0, swagger_1.ApiTags)('v2 차량 소모품'),
+    (0, common_1.Controller)('v2/consumables'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof consumable_service_1.ConsumableService !== "undefined" && consumable_service_1.ConsumableService) === "function" ? _a : Object])
+], ConsumableController);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/controllers/vehicle/maintenance.controller.ts":
+/*!****************************************************************************************!*\
+  !*** ./src/business/resource-management/controllers/vehicle/maintenance.controller.ts ***!
+  \****************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MaintenanceController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const create_vehicle_info_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/create-vehicle-info.dto */ "./src/business/resource-management/dtos/vehicle/create-vehicle-info.dto.ts");
+const update_vehicle_info_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/update-vehicle-info.dto */ "./src/business/resource-management/dtos/vehicle/update-vehicle-info.dto.ts");
+const vehicle_response_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/vehicle-response.dto */ "./src/business/resource-management/dtos/vehicle/vehicle-response.dto.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
+const maintenance_service_1 = __webpack_require__(/*! ../../services/maintenance.service */ "./src/business/resource-management/services/maintenance.service.ts");
+let MaintenanceController = class MaintenanceController {
+    constructor(maintenanceService) {
+        this.maintenanceService = maintenanceService;
+    }
+    async create(createMaintenanceDto) {
+        return this.maintenanceService.save(createMaintenanceDto);
+    }
+    async findAll(vehicleInfoId, query) {
+        const { page, limit } = query;
+        return this.maintenanceService.findAllByVehicleInfoId(vehicleInfoId, page, limit);
+    }
+    async findOne(maintenanceId) {
+        return this.maintenanceService.findOne(maintenanceId);
+    }
+    async update(maintenanceId, updateMaintenanceDto) {
+        return this.maintenanceService.update(maintenanceId, updateMaintenanceDto);
+    }
+    async remove(maintenanceId) {
+        return this.maintenanceService.delete(maintenanceId);
+    }
+};
+exports.MaintenanceController = MaintenanceController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '정비 이력 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 201,
+        description: '정비 이력이 생성되었습니다.',
+        type: vehicle_response_dto_1.MaintenanceResponseDto,
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof create_vehicle_info_dto_1.CreateMaintenanceDto !== "undefined" && create_vehicle_info_dto_1.CreateMaintenanceDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], MaintenanceController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)('vehicle/:vehicleInfoId'),
+    (0, swagger_1.ApiOperation)({ summary: '정비 이력 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '정비 이력 목록을 조회했습니다.',
+        type: [vehicle_response_dto_1.MaintenanceResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
+    __param(0, (0, common_1.Param)('vehicleInfoId')),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_d = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], MaintenanceController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':maintenanceId'),
+    (0, swagger_1.ApiOperation)({ summary: '정비 상세 이력 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '정비 상세 이력을 조회했습니다.',
+        type: vehicle_response_dto_1.MaintenanceResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('maintenanceId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], MaintenanceController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':maintenanceId'),
+    (0, swagger_1.ApiOperation)({ summary: '정비 이력 수정' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '정비 이력이 수정되었습니다.',
+        type: vehicle_response_dto_1.MaintenanceResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('maintenanceId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_g = typeof update_vehicle_info_dto_1.UpdateMaintenanceDto !== "undefined" && update_vehicle_info_dto_1.UpdateMaintenanceDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], MaintenanceController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':maintenanceId'),
+    (0, swagger_1.ApiOperation)({ summary: '정비 이력 삭제' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        description: '정비 이력이 삭제되었습니다.',
+    }),
+    __param(0, (0, common_1.Param)('maintenanceId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], MaintenanceController.prototype, "remove", null);
+exports.MaintenanceController = MaintenanceController = __decorate([
+    (0, swagger_1.ApiTags)('v2 차량 정비 이력'),
+    (0, common_1.Controller)('v2/maintenances'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.MaintenanceService !== "undefined" && maintenance_service_1.MaintenanceService) === "function" ? _a : Object])
+], MaintenanceController);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/controllers/vehicle/reservation-vehicle.controller.ts":
+/*!************************************************************************************************!*\
+  !*** ./src/business/resource-management/controllers/vehicle/reservation-vehicle.controller.ts ***!
+  \************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationVehicleController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const vehicle_info_service_1 = __webpack_require__(/*! ../../services/vehicle-info.service */ "./src/business/resource-management/services/vehicle-info.service.ts");
+const return_vehicle_response_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/return-vehicle-response.dto */ "./src/business/resource-management/dtos/vehicle/return-vehicle-response.dto.ts");
+let ReservationVehicleController = class ReservationVehicleController {
+    constructor(vehicleInfoService) {
+        this.vehicleInfoService = vehicleInfoService;
+    }
+    async findReturnDetail(reservationVehicleId) {
+        return this.vehicleInfoService.findReturnDetail(reservationVehicleId);
+    }
+};
+exports.ReservationVehicleController = ReservationVehicleController;
+__decorate([
+    (0, common_1.Get)(':reservationVehicleId'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 반납 상세 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '차량 반납 상세를 성공적으로 조회했습니다.',
+        type: return_vehicle_response_dto_1.ReturnVehicleDetailResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('reservationVehicleId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], ReservationVehicleController.prototype, "findReturnDetail", null);
+exports.ReservationVehicleController = ReservationVehicleController = __decorate([
+    (0, swagger_1.ApiTags)('v2 차량 예약 정보'),
+    (0, common_1.Controller)('v2/reservation-vehicle'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _a : Object])
+], ReservationVehicleController);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/controllers/vehicle/vehicle-info.controller.ts":
+/*!*****************************************************************************************!*\
+  !*** ./src/business/resource-management/controllers/vehicle/vehicle-info.controller.ts ***!
+  \*****************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VehicleInfoController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const update_vehicle_info_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/update-vehicle-info.dto */ "./src/business/resource-management/dtos/vehicle/update-vehicle-info.dto.ts");
+const vehicle_response_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/vehicle-response.dto */ "./src/business/resource-management/dtos/vehicle/vehicle-response.dto.ts");
+const return_vehicle_response_dto_1 = __webpack_require__(/*! ../../dtos/vehicle/return-vehicle-response.dto */ "./src/business/resource-management/dtos/vehicle/return-vehicle-response.dto.ts");
+const vehicle_info_service_1 = __webpack_require__(/*! ../../services/vehicle-info.service */ "./src/business/resource-management/services/vehicle-info.service.ts");
+let VehicleInfoController = class VehicleInfoController {
+    constructor(vehicleInfoService) {
+        this.vehicleInfoService = vehicleInfoService;
+    }
+    async findVehicleInfo(vehicleInfoId) {
+        return this.vehicleInfoService.findVehicleInfo(vehicleInfoId);
+    }
+    async update(vehicleInfoId, updateVehicleInfoDto) {
+        return this.vehicleInfoService.updateVehicleInfo(vehicleInfoId, updateVehicleInfoDto);
+    }
+    async findReturnList(vehicleInfoId) {
+        return this.vehicleInfoService.findReturnList(vehicleInfoId);
+    }
+};
+exports.VehicleInfoController = VehicleInfoController;
+__decorate([
+    (0, common_1.Get)(':vehicleInfoId'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 정보 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '차량 정보를 성공적으로 조회했습니다.',
+        type: vehicle_response_dto_1.VehicleInfoResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('vehicleInfoId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], VehicleInfoController.prototype, "findVehicleInfo", null);
+__decorate([
+    (0, common_1.Patch)(':vehicleInfoId'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 정보 수정' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '차량 정보가 성공적으로 수정되었습니다.',
+        type: vehicle_response_dto_1.VehicleInfoResponseDto,
+    }),
+    __param(0, (0, common_1.Param)('vehicleInfoId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_c = typeof update_vehicle_info_dto_1.UpdateVehicleInfoDto !== "undefined" && update_vehicle_info_dto_1.UpdateVehicleInfoDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], VehicleInfoController.prototype, "update", null);
+__decorate([
+    (0, common_1.Get)(':vehicleInfoId/return-list'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 반납 리스트 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '차량 반납 리스트를 성공적으로 조회했습니다.',
+        type: [return_vehicle_response_dto_1.ReturnVehicleResponseDto],
+    }),
+    __param(0, (0, common_1.Param)('vehicleInfoId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], VehicleInfoController.prototype, "findReturnList", null);
+exports.VehicleInfoController = VehicleInfoController = __decorate([
+    (0, swagger_1.ApiTags)('v2 차량 정보'),
+    (0, common_1.Controller)('v2/vehicle-info'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.VehicleInfoService !== "undefined" && vehicle_info_service_1.VehicleInfoService) === "function" ? _a : Object])
+], VehicleInfoController);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/dtos/resource/create-resource.dto.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/business/resource-management/dtos/resource/create-resource.dto.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateResourceInfoDto = exports.CreateResourceDto = exports.ResourceLocationURL = exports.ResourceLocation = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = void 0;
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const create_vehicle_info_dto_1 = __webpack_require__(/*! ../vehicle/create-vehicle-info.dto */ "./src/business/resource-management/dtos/vehicle/create-vehicle-info.dto.ts");
+const create_meeting_room_info_dto_1 = __webpack_require__(/*! @src/application/resource/meeting-room/dtos/create-meeting-room-info.dto */ "./src/application/resource/meeting-room/dtos/create-meeting-room-info.dto.ts");
+const create_accommodation_info_dto_1 = __webpack_require__(/*! @src/application/resource/accommodation/dtos/create-accommodation-info.dto */ "./src/application/resource/accommodation/dtos/create-accommodation-info.dto.ts");
+const create_equipment_info_dto_1 = __webpack_require__(/*! @src/application/resource/equipment/dtos/create-equipment-info.dto */ "./src/application/resource/equipment/dtos/create-equipment-info.dto.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+class CreateResourceGroupDto {
+}
+exports.CreateResourceGroupDto = CreateResourceGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('상위 자원 그룹 ID') }),
+    __metadata("design:type", String)
+], CreateResourceGroupDto.prototype, "parentResourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('자원 타입', Object.values(resource_type_enum_1.ResourceType)) }),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], CreateResourceGroupDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
+    __metadata("design:type", String)
+], CreateResourceGroupDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('설명') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) }),
+    __metadata("design:type", String)
+], CreateResourceGroupDto.prototype, "description", void 0);
+class CreateResourceManagerDto {
+}
+exports.CreateResourceManagerDto = CreateResourceManagerDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직원 ID' }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('직원 ID') }),
+    __metadata("design:type", String)
+], CreateResourceManagerDto.prototype, "employeeId", void 0);
+class ResourceLocation {
+}
+exports.ResourceLocation = ResourceLocation;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('주소') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('주소', 0, 100) }),
+    __metadata("design:type", String)
+], ResourceLocation.prototype, "address", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('상세 주소') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('상세 주소', 0, 100) }),
+    __metadata("design:type", String)
+], ResourceLocation.prototype, "detailAddress", void 0);
+class ResourceLocationURL {
+}
+exports.ResourceLocationURL = ResourceLocationURL;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('Tmap URL') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ResourceLocationURL.prototype, "tmap", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('Navermap URL') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ResourceLocationURL.prototype, "navermap", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('Kakaomap URL') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ResourceLocationURL.prototype, "kakaomap", void 0);
+class CreateResourceDto {
+}
+exports.CreateResourceDto = CreateResourceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 그룹 ID') }),
+    __metadata("design:type", String)
+], CreateResourceDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('이름', 0, 100) }),
+    __metadata("design:type", String)
+], CreateResourceDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('설명') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) }),
+    __metadata("design:type", String)
+], CreateResourceDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ResourceLocation }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", ResourceLocation)
+], CreateResourceDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ResourceLocationURL }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", ResourceLocationURL)
+], CreateResourceDto.prototype, "locationURLs", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [String] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateResourceDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('참가자 변경 알림 여부') }),
+    __metadata("design:type", Boolean)
+], CreateResourceDto.prototype, "notifyParticipantChange", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('예약 변경 알림 여부') }),
+    __metadata("design:type", Boolean)
+], CreateResourceDto.prototype, "notifyReservationChange", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ENUM('자원 타입', Object.values(resource_type_enum_1.ResourceType)) }),
+    __metadata("design:type", typeof (_b = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _b : Object)
+], CreateResourceDto.prototype, "type", void 0);
+class CreateResourceInfoDto {
+}
+exports.CreateResourceInfoDto = CreateResourceInfoDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: CreateResourceDto }),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => CreateResourceDto),
+    __metadata("design:type", CreateResourceDto)
+], CreateResourceInfoDto.prototype, "resource", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        oneOf: [
+            { $ref: (0, swagger_1.getSchemaPath)(create_vehicle_info_dto_1.CreateVehicleInfoDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(create_meeting_room_info_dto_1.CreateMeetingRoomInfoDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(create_accommodation_info_dto_1.CreateAccommodationInfoDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(create_equipment_info_dto_1.CreateEquipmentInfoDto) },
+        ],
+    }),
+    __metadata("design:type", Object)
+], CreateResourceInfoDto.prototype, "typeInfo", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [CreateResourceManagerDto] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('관리자') }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => CreateResourceManagerDto),
+    __metadata("design:type", Array)
+], CreateResourceInfoDto.prototype, "managers", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/dtos/resource/resource-response.dto.ts":
+/*!*********************************************************************************!*\
+  !*** ./src/business/resource-management/dtos/resource/resource-response.dto.ts ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f, _g, _h;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = exports.CreateResourceResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const vehicle_response_dto_1 = __webpack_require__(/*! ../vehicle/vehicle-response.dto */ "./src/business/resource-management/dtos/vehicle/vehicle-response.dto.ts");
+const meeting_room_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/meeting-room/dtos/meeting-room-info-response.dto */ "./src/application/resource/meeting-room/dtos/meeting-room-info-response.dto.ts");
+const accommodation_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/accommodation/dtos/accommodation-info-response.dto */ "./src/application/resource/accommodation/dtos/accommodation-info-response.dto.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const create_resource_dto_1 = __webpack_require__(/*! ./create-resource.dto */ "./src/business/resource-management/dtos/resource/create-resource.dto.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! @src/application/reservation/core/dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const employee_response_dto_1 = __webpack_require__(/*! @src/application/employee/dtos/employee-response.dto */ "./src/application/employee/dtos/employee-response.dto.ts");
+const file_response_dto_1 = __webpack_require__(/*! @src/application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
+const equipment_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/equipment/dtos/equipment-info-response.dto */ "./src/application/resource/equipment/dtos/equipment-info-response.dto.ts");
+class CreateResourceResponseDto {
+}
+exports.CreateResourceResponseDto = CreateResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateResourceResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], CreateResourceResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateResourceResponseDto.prototype, "typeInfoId", void 0);
+class ResourceManagerResponseDto {
+}
+exports.ResourceManagerResponseDto = ResourceManagerResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceManagerResponseDto.prototype, "resourceManagerId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceManagerResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceManagerResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_b = typeof employee_response_dto_1.EmployeeResponseDto !== "undefined" && employee_response_dto_1.EmployeeResponseDto) === "function" ? _b : Object)
+], ResourceManagerResponseDto.prototype, "employee", void 0);
+class ResourceGroupResponseDto {
+}
+exports.ResourceGroupResponseDto = ResourceGroupResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceGroupResponseDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceGroupResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ResourceGroupResponseDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    __metadata("design:type", typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object)
+], ResourceGroupResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ResourceGroupResponseDto.prototype, "order", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ResourceGroupResponseDto.prototype, "parentResourceGroupId", void 0);
+class ResourceResponseDto {
+    constructor(resource) {
+        this.resourceId = resource?.resourceId;
+        this.resourceGroupId = resource?.resourceGroupId;
+        this.name = resource?.name;
+        this.description = resource?.description;
+        this.location = resource?.location;
+        this.locationURLs = resource?.locationURLs;
+        this.images = resource?.images;
+        this.type = resource?.type;
+        this.isAvailable = resource?.isAvailable;
+        this.unavailableReason = resource?.unavailableReason;
+        this.notifyParticipantChange = resource?.notifyParticipantChange;
+        this.notifyReservationChange = resource?.notifyReservationChange;
+        this.order = resource?.order;
+        this.managers = resource?.resourceManagers;
+        this.resourceGroup = resource?.resourceGroup;
+        this.imageFiles = resource?.images ? resource['imageFiles'] : [];
+        if (resource?.vehicleInfo) {
+            this.typeInfo = resource.vehicleInfo;
+        }
+        else if (resource?.meetingRoomInfo) {
+            this.typeInfo = resource.meetingRoomInfo;
+        }
+        else if (resource?.accommodationInfo) {
+            this.typeInfo = resource.accommodationInfo;
+        }
+        else if (resource?.equipmentInfo) {
+            this.typeInfo = resource.equipmentInfo;
+        }
+    }
+}
+exports.ResourceResponseDto = ResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ResourceResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ResourceResponseDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ResourceResponseDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: create_resource_dto_1.ResourceLocation }),
+    __metadata("design:type", typeof (_d = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _d : Object)
+], ResourceResponseDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: create_resource_dto_1.ResourceLocationURL }),
+    __metadata("design:type", typeof (_e = typeof create_resource_dto_1.ResourceLocationURL !== "undefined" && create_resource_dto_1.ResourceLocationURL) === "function" ? _e : Object)
+], ResourceResponseDto.prototype, "locationURLs", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
+    __metadata("design:type", Array)
+], ResourceResponseDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [file_response_dto_1.FileResponseDto] }),
+    __metadata("design:type", Array)
+], ResourceResponseDto.prototype, "imageFiles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    __metadata("design:type", typeof (_f = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _f : Object)
+], ResourceResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], ResourceResponseDto.prototype, "isAvailable", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ResourceResponseDto.prototype, "unavailableReason", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], ResourceResponseDto.prototype, "notifyParticipantChange", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], ResourceResponseDto.prototype, "notifyReservationChange", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ResourceResponseDto.prototype, "order", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        required: false,
+        oneOf: [
+            { $ref: (0, swagger_1.getSchemaPath)(vehicle_response_dto_1.VehicleInfoResponseDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(meeting_room_info_response_dto_1.MeetingRoomInfoResponseDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(accommodation_info_response_dto_1.AccommodationInfoResponseDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(equipment_info_response_dto_1.EquipmentInfoResponseDto) },
+        ],
+    }),
+    __metadata("design:type", Object)
+], ResourceResponseDto.prototype, "typeInfo", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [ResourceManagerResponseDto] }),
+    __metadata("design:type", Array)
+], ResourceResponseDto.prototype, "managers", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", ResourceGroupResponseDto)
+], ResourceResponseDto.prototype, "resourceGroup", void 0);
+class ResourceSelectResponseDto {
+}
+exports.ResourceSelectResponseDto = ResourceSelectResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceSelectResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceSelectResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
+    __metadata("design:type", Array)
+], ResourceSelectResponseDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], ResourceSelectResponseDto.prototype, "isAvailable", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ResourceSelectResponseDto.prototype, "unavailableReason", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResourceSelectResponseDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ResourceSelectResponseDto.prototype, "order", void 0);
+class ResourceWithReservationsResponseDto extends ResourceResponseDto {
+    constructor(resource) {
+        super(resource);
+        this.reservations = resource?.reservations.map((reservation) => new reservation_response_dto_1.ReservationResponseDto(reservation));
+    }
+}
+exports.ResourceWithReservationsResponseDto = ResourceWithReservationsResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [reservation_response_dto_1.ReservationResponseDto] }),
+    __metadata("design:type", Array)
+], ResourceWithReservationsResponseDto.prototype, "reservations", void 0);
+class ChildResourceGroupResponseDto extends ResourceGroupResponseDto {
+}
+exports.ChildResourceGroupResponseDto = ChildResourceGroupResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => ResourceSelectResponseDto, required: false }),
+    __metadata("design:type", Array)
+], ChildResourceGroupResponseDto.prototype, "resources", void 0);
+class ResourceGroupWithResourcesResponseDto extends ResourceGroupResponseDto {
+}
+exports.ResourceGroupWithResourcesResponseDto = ResourceGroupWithResourcesResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [ChildResourceGroupResponseDto],
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ResourceGroupWithResourcesResponseDto.prototype, "children", void 0);
+class ResourceGroupWithResourcesAndReservationsResponseDto extends ResourceGroupResponseDto {
+}
+exports.ResourceGroupWithResourcesAndReservationsResponseDto = ResourceGroupWithResourcesAndReservationsResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [ResourceWithReservationsResponseDto],
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ResourceGroupWithResourcesAndReservationsResponseDto.prototype, "resources", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/dtos/resource/update-resource.dto.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/business/resource-management/dtos/resource/update-resource.dto.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateResourceGroupOrdersDto = exports.NewOrderResourceGroupDto = exports.UpdateResourceOrdersDto = exports.NewOrderResourceDto = exports.UpdateResourceInfoDto = exports.UpdateResourceDto = exports.UpdateResourceGroupDto = void 0;
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const create_resource_dto_1 = __webpack_require__(/*! ./create-resource.dto */ "./src/business/resource-management/dtos/resource/create-resource.dto.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+class UpdateResourceGroupDto {
+}
+exports.UpdateResourceGroupDto = UpdateResourceGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('제목') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('제목', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateResourceGroupDto.prototype, "title", void 0);
+class UpdateResourceDto {
+}
+exports.UpdateResourceDto = UpdateResourceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 그룹 ID') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateResourceDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('이름') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('이름', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateResourceDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('설명') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('설명', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateResourceDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: 'object' }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof create_resource_dto_1.ResourceLocation !== "undefined" && create_resource_dto_1.ResourceLocation) === "function" ? _a : Object)
+], UpdateResourceDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: 'object' }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof create_resource_dto_1.ResourceLocationURL !== "undefined" && create_resource_dto_1.ResourceLocationURL) === "function" ? _b : Object)
+], UpdateResourceDto.prototype, "locationURLs", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateResourceDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('사용 가능 여부') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateResourceDto.prototype, "isAvailable", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('사용 불가 사유') }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('사용 불가 사유', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateResourceDto.prototype, "unavailableReason", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('참가자 변경 알림 여부') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateResourceDto.prototype, "notifyParticipantChange", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('예약 변경 알림 여부') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateResourceDto.prototype, "notifyReservationChange", void 0);
+class UpdateResourceInfoDto {
+}
+exports.UpdateResourceInfoDto = UpdateResourceInfoDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: UpdateResourceDto }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => UpdateResourceDto),
+    __metadata("design:type", UpdateResourceDto)
+], UpdateResourceInfoDto.prototype, "resource", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [create_resource_dto_1.CreateResourceManagerDto] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('관리자') }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => create_resource_dto_1.CreateResourceManagerDto),
+    __metadata("design:type", Array)
+], UpdateResourceInfoDto.prototype, "managers", void 0);
+class NewOrderResourceDto {
+}
+exports.NewOrderResourceDto = NewOrderResourceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 ID') }),
+    __metadata("design:type", String)
+], NewOrderResourceDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsNumber)({}, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_NUMBER('순서') }),
+    __metadata("design:type", Number)
+], NewOrderResourceDto.prototype, "newOrder", void 0);
+class UpdateResourceOrdersDto {
+}
+exports.UpdateResourceOrdersDto = UpdateResourceOrdersDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [NewOrderResourceDto] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('순서 목록') }),
+    __metadata("design:type", Array)
+], UpdateResourceOrdersDto.prototype, "orders", void 0);
+class NewOrderResourceGroupDto {
+}
+exports.NewOrderResourceGroupDto = NewOrderResourceGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('자원 그룹 ID') }),
+    __metadata("design:type", String)
+], NewOrderResourceGroupDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsNumber)({}, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_NUMBER('순서') }),
+    __metadata("design:type", Number)
+], NewOrderResourceGroupDto.prototype, "newOrder", void 0);
+class UpdateResourceGroupOrdersDto {
+}
+exports.UpdateResourceGroupOrdersDto = UpdateResourceGroupOrdersDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [NewOrderResourceGroupDto] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('순서 목록') }),
+    __metadata("design:type", Array)
+], UpdateResourceGroupOrdersDto.prototype, "orders", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/dtos/vehicle/create-vehicle-info.dto.ts":
+/*!**********************************************************************************!*\
+  !*** ./src/business/resource-management/dtos/vehicle/create-vehicle-info.dto.ts ***!
+  \**********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+class CreateVehicleInfoDto {
+}
+exports.CreateVehicleInfoDto = CreateVehicleInfoDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: true }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('차량 번호') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('차량 번호', 0, 100) }),
+    __metadata("design:type", String)
+], CreateVehicleInfoDto.prototype, "vehicleNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    __metadata("design:type", Number)
+], CreateVehicleInfoDto.prototype, "leftMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    __metadata("design:type", Number)
+], CreateVehicleInfoDto.prototype, "totalMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('보험 이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험 이름', 0, 100) }),
+    __metadata("design:type", String)
+], CreateVehicleInfoDto.prototype, "insuranceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('보험사 전화 번호') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험사 전화 번호', 0, 100) }),
+    __metadata("design:type", String)
+], CreateVehicleInfoDto.prototype, "insuranceNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '주차위치 이미지 배열' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차위치 이미지') }),
+    __metadata("design:type", Array)
+], CreateVehicleInfoDto.prototype, "parkingLocationImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '계기판 이미지 배열' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('계기판 이미지') }),
+    __metadata("design:type", Array)
+], CreateVehicleInfoDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '실내 이미지 배열' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') }),
+    __metadata("design:type", Array)
+], CreateVehicleInfoDto.prototype, "indoorImages", void 0);
+class CreateConsumableDto {
+}
+exports.CreateConsumableDto = CreateConsumableDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('소모품 이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('소모품 이름', 0, 100) }),
+    __metadata("design:type", String)
+], CreateConsumableDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('소모품 교체 주기') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') }),
+    __metadata("design:type", Number)
+], CreateConsumableDto.prototype, "replaceCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ default: true, description: '소모품 교체 알림 주기' }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('소모품 교체 알림 주기') }),
+    __metadata("design:type", Boolean)
+], CreateConsumableDto.prototype, "notifyReplacementCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '차량 ID',
+        example: 'vehicle-123',
+    }),
+    __metadata("design:type", String)
+], CreateConsumableDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '초기 주행거리',
+        example: 0,
+    }),
+    __metadata("design:type", Number)
+], CreateConsumableDto.prototype, "initMileage", void 0);
+class CreateMaintenanceDto {
+}
+exports.CreateMaintenanceDto = CreateMaintenanceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('날짜', 'YYYY-MM-DD'),
+    }),
+    __metadata("design:type", String)
+], CreateMaintenanceDto.prototype, "date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') }),
+    __metadata("design:type", Number)
+], CreateMaintenanceDto.prototype, "mileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('비용') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') }),
+    __metadata("design:type", Number)
+], CreateMaintenanceDto.prototype, "cost", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '이미지 배열' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
+    __metadata("design:type", Array)
+], CreateMaintenanceDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '소모품 ID',
+        example: 'consumable-123',
+    }),
+    __metadata("design:type", String)
+], CreateMaintenanceDto.prototype, "consumableId", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/dtos/vehicle/return-vehicle-response.dto.ts":
+/*!**************************************************************************************!*\
+  !*** ./src/business/resource-management/dtos/vehicle/return-vehicle-response.dto.ts ***!
+  \**************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReturnVehicleDetailResponseDto = exports.ReturnVehicleResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class Location {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], Location.prototype, "address", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], Location.prototype, "detailAddress", void 0);
+class ReturnVehicleResponseDto {
+}
+exports.ReturnVehicleResponseDto = ReturnVehicleResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReturnVehicleResponseDto.prototype, "reservationVehicleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], ReturnVehicleResponseDto.prototype, "returnedAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => Location }),
+    __metadata("design:type", Location)
+], ReturnVehicleResponseDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReturnVehicleResponseDto.prototype, "returnedBy", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ReturnVehicleResponseDto.prototype, "endOdometer", void 0);
+class ReturnVehicleDetailResponseDto extends ReturnVehicleResponseDto {
+}
+exports.ReturnVehicleDetailResponseDto = ReturnVehicleDetailResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], ReturnVehicleDetailResponseDto.prototype, "parkingLocationImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], ReturnVehicleDetailResponseDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], ReturnVehicleDetailResponseDto.prototype, "indoorImages", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/dtos/vehicle/update-vehicle-info.dto.ts":
+/*!**********************************************************************************!*\
+  !*** ./src/business/resource-management/dtos/vehicle/update-vehicle-info.dto.ts ***!
+  \**********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateVehicleInfoDto = exports.UpdateConsumableDto = exports.UpdateMaintenanceDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+class UpdateMaintenanceDto {
+}
+exports.UpdateMaintenanceDto = UpdateMaintenanceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_DATE_FORMAT('날짜', 'YYYY-MM-DD'),
+    }),
+    __metadata("design:type", String)
+], UpdateMaintenanceDto.prototype, "date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('주행거리') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateMaintenanceDto.prototype, "mileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('비용') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') }),
+    __metadata("design:type", Number)
+], UpdateMaintenanceDto.prototype, "cost", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
+    __metadata("design:type", Array)
+], UpdateMaintenanceDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '소모품 ID',
+        example: 'consumable-123',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateMaintenanceDto.prototype, "consumableId", void 0);
+class UpdateConsumableDto {
+}
+exports.UpdateConsumableDto = UpdateConsumableDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('소모품 이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('소모품 이름', 0, 100) }),
+    __metadata("design:type", String)
+], UpdateConsumableDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('소모품 교체 주기') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('소모품 교체 주기') }),
+    __metadata("design:type", Number)
+], UpdateConsumableDto.prototype, "replaceCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ default: true, description: '소모품 교체 알림 주기' }),
+    (0, class_validator_1.IsBoolean)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_BOOLEAN('소모품 교체 알림 주기') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateConsumableDto.prototype, "notifyReplacementCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '차량 ID',
+        example: 'vehicle-123',
+    }),
+    __metadata("design:type", String)
+], UpdateConsumableDto.prototype, "vehicleInfoId", void 0);
+class UpdateVehicleInfoDto {
+}
+exports.UpdateVehicleInfoDto = UpdateVehicleInfoDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('차량 번호') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('차량 번호', 0, 100) }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateVehicleInfoDto.prototype, "vehicleNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('보험 이름') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험 이름', 0, 100) }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateVehicleInfoDto.prototype, "insuranceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('보험 번호') }),
+    (0, class_validator_1.Length)(0, 100, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험 번호', 0, 100) }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateVehicleInfoDto.prototype, "insuranceNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('총 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('총 주행거리') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateVehicleInfoDto.prototype, "totalMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') }),
+    (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    (0, class_validator_1.Max)(999999999, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateVehicleInfoDto.prototype, "leftMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateVehicleInfoDto.prototype, "parkingLocationImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateVehicleInfoDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateVehicleInfoDto.prototype, "indoorImages", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/dtos/vehicle/vehicle-response.dto.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/business/resource-management/dtos/vehicle/vehicle-response.dto.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VehicleInfoResponseDto = exports.ConsumableResponseDto = exports.MaintenanceResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const file_response_dto_1 = __webpack_require__(/*! @src/application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
+class MaintenanceResponseDto {
+}
+exports.MaintenanceResponseDto = MaintenanceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], MaintenanceResponseDto.prototype, "maintenanceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], MaintenanceResponseDto.prototype, "consumableId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], MaintenanceResponseDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], MaintenanceResponseDto.prototype, "consumableName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], MaintenanceResponseDto.prototype, "date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], MaintenanceResponseDto.prototype, "mileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], MaintenanceResponseDto.prototype, "cost", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], MaintenanceResponseDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Number)
+], MaintenanceResponseDto.prototype, "mileageFromLastMaintenance", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], MaintenanceResponseDto.prototype, "maintanceRequired", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Number)
+], MaintenanceResponseDto.prototype, "previousMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], MaintenanceResponseDto.prototype, "isLatest", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], MaintenanceResponseDto.prototype, "previousDate", void 0);
+class ConsumableResponseDto {
+}
+exports.ConsumableResponseDto = ConsumableResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ConsumableResponseDto.prototype, "consumableId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ConsumableResponseDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
+    __metadata("design:type", String)
+], ConsumableResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 교체 주기' }),
+    __metadata("design:type", Number)
+], ConsumableResponseDto.prototype, "replaceCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 교체 알림 주기' }),
+    __metadata("design:type", Boolean)
+], ConsumableResponseDto.prototype, "notifyReplacementCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [MaintenanceResponseDto], required: false }),
+    __metadata("design:type", Array)
+], ConsumableResponseDto.prototype, "maintenances", void 0);
+class VehicleInfoResponseDto {
+}
+exports.VehicleInfoResponseDto = VehicleInfoResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], VehicleInfoResponseDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], VehicleInfoResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], VehicleInfoResponseDto.prototype, "insuranceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], VehicleInfoResponseDto.prototype, "insuranceNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], VehicleInfoResponseDto.prototype, "totalMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], VehicleInfoResponseDto.prototype, "leftMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "parkingLocationImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "odometerImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "indoorImages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [file_response_dto_1.FileResponseDto], required: false }),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "parkingLocationFiles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [file_response_dto_1.FileResponseDto], required: false }),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "odometerFiles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [file_response_dto_1.FileResponseDto], required: false }),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "indoorFiles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: [ConsumableResponseDto], required: false }),
+    __metadata("design:type", Array)
+], VehicleInfoResponseDto.prototype, "consumables", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/resource-management.module.ts":
+/*!************************************************************************!*\
+  !*** ./src/business/resource-management/resource-management.module.ts ***!
+  \************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceManagementModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_context_module_1 = __webpack_require__(/*! @src/context/resource/resource.context.module */ "./src/context/resource/resource.context.module.ts");
+const file_context_module_1 = __webpack_require__(/*! @src/context/file/file.context.module */ "./src/context/file/file.context.module.ts");
+const notification_context_module_1 = __webpack_require__(/*! @src/context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
+const resource_controller_1 = __webpack_require__(/*! ./controllers/resource/resource.controller */ "./src/business/resource-management/controllers/resource/resource.controller.ts");
+const resource_group_controller_1 = __webpack_require__(/*! ./controllers/resource/resource-group.controller */ "./src/business/resource-management/controllers/resource/resource-group.controller.ts");
+const vehicle_info_controller_1 = __webpack_require__(/*! ./controllers/vehicle/vehicle-info.controller */ "./src/business/resource-management/controllers/vehicle/vehicle-info.controller.ts");
+const consumable_controller_1 = __webpack_require__(/*! ./controllers/vehicle/consumable.controller */ "./src/business/resource-management/controllers/vehicle/consumable.controller.ts");
+const maintenance_controller_1 = __webpack_require__(/*! ./controllers/vehicle/maintenance.controller */ "./src/business/resource-management/controllers/vehicle/maintenance.controller.ts");
+const reservation_vehicle_controller_1 = __webpack_require__(/*! ./controllers/vehicle/reservation-vehicle.controller */ "./src/business/resource-management/controllers/vehicle/reservation-vehicle.controller.ts");
+const resource_service_1 = __webpack_require__(/*! ./services/resource.service */ "./src/business/resource-management/services/resource.service.ts");
+const resource_group_service_1 = __webpack_require__(/*! ./services/resource-group.service */ "./src/business/resource-management/services/resource-group.service.ts");
+const vehicle_info_service_1 = __webpack_require__(/*! ./services/vehicle-info.service */ "./src/business/resource-management/services/vehicle-info.service.ts");
+const consumable_service_1 = __webpack_require__(/*! ./services/consumable.service */ "./src/business/resource-management/services/consumable.service.ts");
+const maintenance_service_1 = __webpack_require__(/*! ./services/maintenance.service */ "./src/business/resource-management/services/maintenance.service.ts");
+let ResourceManagementModule = class ResourceManagementModule {
+};
+exports.ResourceManagementModule = ResourceManagementModule;
+exports.ResourceManagementModule = ResourceManagementModule = __decorate([
+    (0, common_1.Module)({
+        imports: [resource_context_module_1.ResourceContextModule, file_context_module_1.FileContextModule, notification_context_module_1.NotificationContextModule],
+        controllers: [
+            resource_controller_1.ResourceController,
+            resource_group_controller_1.ResourceGroupController,
+            vehicle_info_controller_1.VehicleInfoController,
+            consumable_controller_1.ConsumableController,
+            maintenance_controller_1.MaintenanceController,
+            reservation_vehicle_controller_1.ReservationVehicleController,
+        ],
+        providers: [resource_service_1.ResourceService, resource_group_service_1.ResourceGroupService, vehicle_info_service_1.VehicleInfoService, consumable_service_1.ConsumableService, maintenance_service_1.MaintenanceService],
+        exports: [resource_service_1.ResourceService, resource_group_service_1.ResourceGroupService, vehicle_info_service_1.VehicleInfoService, consumable_service_1.ConsumableService, maintenance_service_1.MaintenanceService],
+    })
+], ResourceManagementModule);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/services/consumable.service.ts":
+/*!*************************************************************************!*\
+  !*** ./src/business/resource-management/services/consumable.service.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConsumableService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const consumable_context_service_1 = __webpack_require__(/*! @src/context/resource/services/consumable.context.service */ "./src/context/resource/services/consumable.context.service.ts");
+let ConsumableService = class ConsumableService {
+    constructor(consumableContextService) {
+        this.consumableContextService = consumableContextService;
+    }
+    async save(createConsumableDto) {
+        return this.consumableContextService.소모품을_저장한다(createConsumableDto);
+    }
+    async findAll(vehicleInfoId) {
+        return this.consumableContextService.차량별_소모품목록을_조회한다(vehicleInfoId);
+    }
+    async findOne(consumableId) {
+        return this.consumableContextService.소모품을_조회한다(consumableId);
+    }
+    async update(consumableId, updateConsumableDto) {
+        return this.consumableContextService.소모품을_수정한다(consumableId, updateConsumableDto);
+    }
+    async delete(consumableId) {
+        return this.consumableContextService.소모품을_삭제한다(consumableId);
+    }
+};
+exports.ConsumableService = ConsumableService;
+exports.ConsumableService = ConsumableService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof consumable_context_service_1.ConsumableContextService !== "undefined" && consumable_context_service_1.ConsumableContextService) === "function" ? _a : Object])
+], ConsumableService);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/services/maintenance.service.ts":
+/*!**************************************************************************!*\
+  !*** ./src/business/resource-management/services/maintenance.service.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MaintenanceService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const maintenance_context_service_1 = __webpack_require__(/*! @src/context/resource/services/maintenance.context.service */ "./src/context/resource/services/maintenance.context.service.ts");
+const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+let MaintenanceService = class MaintenanceService {
+    constructor(maintenanceContextService, notificationContextService) {
+        this.maintenanceContextService = maintenanceContextService;
+        this.notificationContextService = notificationContextService;
+    }
+    async save(createMaintenanceDto) {
+        const maintenance = await this.maintenanceContextService.정비이력을_저장한다(createMaintenanceDto);
+        await this.notificationContextService.시스템_관리자들에게_알림을_발송한다();
+        return maintenance;
+    }
+    async findAllByVehicleInfoId(vehicleInfoId, page, limit) {
+        return this.maintenanceContextService.차량별_정비이력을_조회한다(vehicleInfoId, page, limit);
+    }
+    async findOne(maintenanceId) {
+        return this.maintenanceContextService.정비이력을_조회한다(maintenanceId);
+    }
+    async update(maintenanceId, updateMaintenanceDto) {
+        return this.maintenanceContextService.정비이력을_수정한다(maintenanceId, updateMaintenanceDto);
+    }
+    async delete(maintenanceId) {
+        return this.maintenanceContextService.정비이력을_삭제한다(maintenanceId);
+    }
+};
+exports.MaintenanceService = MaintenanceService;
+exports.MaintenanceService = MaintenanceService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_context_service_1.MaintenanceContextService !== "undefined" && maintenance_context_service_1.MaintenanceContextService) === "function" ? _a : Object, typeof (_b = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _b : Object])
+], MaintenanceService);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/services/resource-group.service.ts":
+/*!*****************************************************************************!*\
+  !*** ./src/business/resource-management/services/resource-group.service.ts ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceGroupService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_group_context_service_1 = __webpack_require__(/*! @src/context/resource/services/resource-group.context.service */ "./src/context/resource/services/resource-group.context.service.ts");
+let ResourceGroupService = class ResourceGroupService {
+    constructor(resourceGroupContextService) {
+        this.resourceGroupContextService = resourceGroupContextService;
+    }
+    async findParentResourceGroups() {
+        return this.resourceGroupContextService.상위_자원그룹을_조회한다();
+    }
+    async findResourceGroupsWithResourceData(type) {
+        return this.resourceGroupContextService.자원데이터포함_그룹목록을_조회한다(type);
+    }
+    async createResourceGroup(createResourceGroupDto) {
+        return this.resourceGroupContextService.자원그룹을_생성한다(createResourceGroupDto);
+    }
+    async reorderResourceGroups(updateResourceGroupOrdersDto) {
+        return this.resourceGroupContextService.자원그룹_순서를_변경한다(updateResourceGroupOrdersDto);
+    }
+    async updateResourceGroup(resourceGroupId, updateResourceGroupDto) {
+        return this.resourceGroupContextService.자원그룹을_수정한다(resourceGroupId, updateResourceGroupDto);
+    }
+    async deleteResourceGroup(resourceGroupId) {
+        return this.resourceGroupContextService.자원그룹을_삭제한다(resourceGroupId);
+    }
+    async findParentResourceGroupsForUser() {
+        return this.resourceGroupContextService.상위_자원그룹을_조회한다();
+    }
+    async findResourceGroupsWithResourceDataForUser(type) {
+        return this.resourceGroupContextService.자원데이터포함_그룹목록을_조회한다(type);
+    }
+};
+exports.ResourceGroupService = ResourceGroupService;
+exports.ResourceGroupService = ResourceGroupService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_group_context_service_1.ResourceGroupContextService !== "undefined" && resource_group_context_service_1.ResourceGroupContextService) === "function" ? _a : Object])
+], ResourceGroupService);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/services/resource.service.ts":
+/*!***********************************************************************!*\
+  !*** ./src/business/resource-management/services/resource.service.ts ***!
+  \***********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_context_service_1 = __webpack_require__(/*! @src/context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
+let ResourceService = class ResourceService {
+    constructor(resourceContextService) {
+        this.resourceContextService = resourceContextService;
+    }
+    async createResourceWithInfos(createResourceInfo) {
+        return this.resourceContextService.자원과_상세정보를_생성한다(createResourceInfo);
+    }
+    async findResources(type) {
+        return this.resourceContextService.자원_목록을_조회한다(type);
+    }
+    async findResourcesByResourceGroupId(resourceGroupId) {
+        return this.resourceContextService.그룹별_자원_목록을_조회한다(resourceGroupId);
+    }
+    async findResourceDetailForAdmin(resourceId) {
+        return this.resourceContextService.자원_상세정보를_조회한다(resourceId);
+    }
+    async reorderResources(updateResourceOrdersDto) {
+        return this.resourceContextService.자원_순서를_변경한다(updateResourceOrdersDto);
+    }
+    async updateResource(resourceId, updateResourceInfoDto) {
+        return this.resourceContextService.자원을_수정한다(resourceId, updateResourceInfoDto);
+    }
+    async deleteResource(resourceId) {
+        return this.resourceContextService.자원을_삭제한다(resourceId);
+    }
+    async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate, isMine) {
+        return [];
+    }
+    async findAvailableTime(query) {
+        return [];
+    }
+    async checkAvailability(resourceId, startDate, endDate, reservationId) {
+        return true;
+    }
+    async findResourceDetailForUser(employeeId, resourceId) {
+        return this.resourceContextService.자원_상세정보를_조회한다(resourceId);
+    }
+};
+exports.ResourceService = ResourceService;
+exports.ResourceService = ResourceService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object])
+], ResourceService);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/services/vehicle-info.service.ts":
+/*!***************************************************************************!*\
+  !*** ./src/business/resource-management/services/vehicle-info.service.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VehicleInfoService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const vehicle_info_context_service_1 = __webpack_require__(/*! @src/context/resource/services/vehicle-info.context.service */ "./src/context/resource/services/vehicle-info.context.service.ts");
+const file_context_service_1 = __webpack_require__(/*! @src/context/file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
+let VehicleInfoService = class VehicleInfoService {
+    constructor(vehicleInfoContextService, fileContextService) {
+        this.vehicleInfoContextService = vehicleInfoContextService;
+        this.fileContextService = fileContextService;
+    }
+    async findVehicleInfo(vehicleInfoId) {
+        return this.vehicleInfoContextService.차량정보를_조회한다(vehicleInfoId);
+    }
+    async updateVehicleInfo(vehicleInfoId, updateVehicleInfoDto) {
+        return this.vehicleInfoContextService.차량정보를_수정한다(vehicleInfoId, updateVehicleInfoDto);
+    }
+    async findReturnList(vehicleInfoId) {
+        const returnList = await this.vehicleInfoContextService.반납_리스트를_조회한다(vehicleInfoId);
+        return returnList.map((returnVehicle) => {
+            return {
+                reservationVehicleId: returnVehicle.reservationVehicleId,
+                returnedAt: returnVehicle.returnedAt,
+                returnedBy: returnVehicle.returnedBy,
+                endOdometer: returnVehicle.endOdometer,
+                location: returnVehicle.location,
+            };
+        });
+    }
+    async findReturnDetail(reservationVehicleId) {
+        const returnDetail = await this.vehicleInfoContextService.반납_상세정보를_조회한다(reservationVehicleId);
+        const reservationVehicleFile = await this.fileContextService.차량예약_파일을_조회한다(reservationVehicleId);
+        return {
+            reservationVehicleId: returnDetail.reservationVehicleId,
+            returnedAt: returnDetail.returnedAt,
+            returnedBy: returnDetail.returnedBy,
+            endOdometer: returnDetail.endOdometer,
+            location: returnDetail.location,
+            parkingLocationImages: reservationVehicleFile.parkingLocationImages.map((image) => image.filePath),
+            odometerImages: reservationVehicleFile.odometerImages.map((image) => image.filePath),
+            indoorImages: reservationVehicleFile.indoorImages.map((image) => image.filePath),
+        };
+    }
+};
+exports.VehicleInfoService = VehicleInfoService;
+exports.VehicleInfoService = VehicleInfoService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _a : Object, typeof (_b = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _b : Object])
+], VehicleInfoService);
+
+
+/***/ }),
+
+/***/ "./src/context/file/adapter/s3.service.ts":
+/*!************************************************!*\
+  !*** ./src/context/file/adapter/s3.service.ts ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.S3Service = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const client_s3_1 = __webpack_require__(/*! @aws-sdk/client-s3 */ "@aws-sdk/client-s3");
+const s3_request_presigner_1 = __webpack_require__(/*! @aws-sdk/s3-request-presigner */ "@aws-sdk/s3-request-presigner");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const mime_type_enum_1 = __webpack_require__(/*! @libs/enums/mime-type.enum */ "./libs/enums/mime-type.enum.ts");
+let S3Service = class S3Service {
+    constructor(configService) {
+        this.configService = configService;
+        this.bucketName = this.configService.get('S3_BUCKET_NAME');
+        this.s3Client = new client_s3_1.S3Client({
+            region: this.configService.get('S3_REGION'),
+            endpoint: this.configService.get('S3_ENDPOINT'),
+            credentials: {
+                accessKeyId: this.configService.get('S3_ACCESS_KEY'),
+                secretAccessKey: this.configService.get('S3_SECRET_KEY'),
+            },
+            forcePathStyle: true,
+        });
+    }
+    async uploadFile(file) {
+        const fileExtension = file.originalname.split('.').pop();
+        const fileName = `${date_util_1.DateUtil.now().format('YYYYMMDDHHmmssSSS')}.${fileExtension}`;
+        try {
+            await this.s3Client.send(new client_s3_1.PutObjectCommand({
+                Bucket: this.bucketName,
+                Key: fileName,
+                Body: file.buffer,
+                ContentType: file.mimetype,
+            }));
+            const newFile = {
+                fileName: fileName,
+                filePath: this.getFileUrl(fileName),
+            };
+            return newFile;
+        }
+        catch (error) {
+            throw new Error(`Failed to upload file to S3: ${error.message}`);
+        }
+    }
+    async deleteFile(file) {
+        try {
+            await this.s3Client.send(new client_s3_1.DeleteObjectCommand({
+                Bucket: this.bucketName,
+                Key: file.fileName,
+            }));
+        }
+        catch (error) {
+            throw new Error(`Failed to delete file from S3: ${error.message}`);
+        }
+    }
+    getFileUrl(fileKey) {
+        return `${this.configService.get('S3_ENDPOINT').replace('s3', 'object/public')}/${this.bucketName}/${fileKey}`;
+    }
+    async generatePresignedUrl(mime) {
+        const extMap = {
+            [mime_type_enum_1.MimeType.IMAGE_JPEG]: 'jpg',
+            [mime_type_enum_1.MimeType.IMAGE_PNG]: 'png',
+            [mime_type_enum_1.MimeType.IMAGE_WEBP]: 'webp',
+        };
+        const fileExtension = extMap[mime] || 'bin';
+        const fileKey = `${date_util_1.DateUtil.now().format('YYYYMMDDHHmmssSSS')}.${fileExtension}`;
+        const command = new client_s3_1.PutObjectCommand({
+            Bucket: this.bucketName,
+            Key: fileKey,
+            ContentType: mime,
+        });
+        const url = await (0, s3_request_presigner_1.getSignedUrl)(this.s3Client, command, { expiresIn: 60 * 2 });
+        return url;
+    }
+    async checkFileExists(fileKey) {
+        try {
+            const command = new client_s3_1.HeadObjectCommand({
+                Bucket: this.bucketName,
+                Key: fileKey,
+            });
+            const result = await this.s3Client.send(command);
+            console.log(result);
+            return result.ContentLength !== undefined && result.ContentLength > 0;
+        }
+        catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
+};
+exports.S3Service = S3Service;
+exports.S3Service = S3Service = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
+], S3Service);
+
+
+/***/ }),
+
+/***/ "./src/context/file/controllers/cron.file.controller.ts":
+/*!**************************************************************!*\
+  !*** ./src/context/file/controllers/cron.file.controller.ts ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronFileController = void 0;
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const file_context_service_1 = __webpack_require__(/*! ../services/file.context.service */ "./src/context/file/services/file.context.service.ts");
+let CronFileController = class CronFileController {
+    constructor(fileContextService) {
+        this.fileContextService = fileContextService;
+    }
+    async deleteTemporaryFile() {
+        return this.fileContextService.임시_파일들을_삭제한다();
+    }
+};
+exports.CronFileController = CronFileController;
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/delete-temporary-file'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronFileController.prototype, "deleteTemporaryFile", null);
+exports.CronFileController = CronFileController = __decorate([
+    (0, swagger_1.ApiTags)('v2 파일 '),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Controller)('v2/files'),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _a : Object])
+], CronFileController);
+
+
+/***/ }),
+
+/***/ "./src/context/file/controllers/file.controller.ts":
+/*!*********************************************************!*\
+  !*** ./src/context/file/controllers/file.controller.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
+const file_context_service_1 = __webpack_require__(/*! ../services/file.context.service */ "./src/context/file/services/file.context.service.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const file_response_dto_1 = __webpack_require__(/*! @resource/application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const mime_type_enum_1 = __webpack_require__(/*! @libs/enums/mime-type.enum */ "./libs/enums/mime-type.enum.ts");
+const create_filedata_dto_1 = __webpack_require__(/*! ../dtos/create-filedata.dto */ "./src/context/file/dtos/create-filedata.dto.ts");
+let FileController = class FileController {
+    constructor(fileContextService) {
+        this.fileContextService = fileContextService;
+    }
+    async uploadFile(file) {
+        return this.fileContextService.파일을_업로드한다(file);
+    }
+    async uploadMultipleFiles(files) {
+        return this.fileContextService.다중_파일을_업로드한다(files);
+    }
+    async deleteMultipleFiles(fileIds) {
+        await this.fileContextService.다중_파일을_삭제한다(fileIds);
+    }
+    async getPresignedUrl(mime) {
+        return this.fileContextService.프리사인드_URL을_생성한다(mime);
+    }
+    async createFileData(createFileDataDto) {
+        return this.fileContextService.파일_데이터를_생성한다(createFileDataDto);
+    }
+    async deleteFile(fileId) {
+        await this.fileContextService.파일을_삭제한다(fileId);
+    }
+};
+exports.FileController = FileController;
+__decorate([
+    (0, common_1.Post)('upload'),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiOperation)({ summary: '파일 업로드' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 업로드 성공', type: file_response_dto_1.FileResponseDto }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof Express !== "undefined" && (_b = Express.Multer) !== void 0 && _b.File) === "function" ? _c : Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "uploadFile", null);
+__decorate([
+    (0, common_1.Post)('upload/multiple'),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                files: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary',
+                    },
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiOperation)({ summary: '여러 파일 업로드' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '여러 파일 업로드 성공', type: [file_response_dto_1.FileResponseDto] }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files', 10)),
+    __param(0, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "uploadMultipleFiles", null);
+__decorate([
+    (0, common_1.Delete)('multiple'),
+    (0, swagger_1.ApiOperation)({ summary: '여러 파일 삭제' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                fileIds: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                    },
+                },
+            },
+        },
+    }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '여러 파일 삭제 성공' }),
+    __param(0, (0, common_1.Body)('fileIds')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "deleteMultipleFiles", null);
+__decorate([
+    (0, common_1.Get)('presigned-url'),
+    (0, swagger_1.ApiOperation)({ summary: 'Presigned URL 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: 'Presigned URL 생성 성공' }),
+    (0, swagger_1.ApiQuery)({ name: 'mime', enum: mime_type_enum_1.MimeType, example: mime_type_enum_1.MimeType.IMAGE_PNG, required: true }),
+    __param(0, (0, common_1.Query)('mime')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof mime_type_enum_1.MimeType !== "undefined" && mime_type_enum_1.MimeType) === "function" ? _d : Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "getPresignedUrl", null);
+__decorate([
+    (0, common_1.Post)('data'),
+    (0, swagger_1.ApiOperation)({ summary: '파일 데이터 생성' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 데이터 생성 성공' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof create_filedata_dto_1.CreateFileDataDto !== "undefined" && create_filedata_dto_1.CreateFileDataDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "createFileData", null);
+__decorate([
+    (0, common_1.Delete)(':fileId'),
+    (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '파일 삭제 성공' }),
+    __param(0, (0, common_1.Param)('fileId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "deleteFile", null);
+exports.FileController = FileController = __decorate([
+    (0, swagger_1.ApiTags)('v2 파일 '),
+    (0, common_1.Controller)('v2/files'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _a : Object])
+], FileController);
+
+
+/***/ }),
+
+/***/ "./src/context/file/dtos/create-filedata.dto.ts":
+/*!******************************************************!*\
+  !*** ./src/context/file/dtos/create-filedata.dto.ts ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateFileDataDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class CreateFileDataDto {
+}
+exports.CreateFileDataDto = CreateFileDataDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '파일 경로' }),
+    __metadata("design:type", String)
+], CreateFileDataDto.prototype, "filePath", void 0);
+
+
+/***/ }),
+
 /***/ "./src/context/file/file.context.module.ts":
 /*!*************************************************!*\
   !*** ./src/context/file/file.context.module.ts ***!
@@ -21110,7 +24229,10 @@ const file_maintenance_module_1 = __webpack_require__(/*! @src/domain/file-maint
 const file_reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/file-reservation-vehicle/file-reservation-vehicle.module */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.module.ts");
 const file_resource_module_1 = __webpack_require__(/*! @src/domain/file-resource/file-resource.module */ "./src/domain/file-resource/file-resource.module.ts");
 const file_vehicle_info_module_1 = __webpack_require__(/*! @src/domain/file-vehicle-info/file-vehicle-info.module */ "./src/domain/file-vehicle-info/file-vehicle-info.module.ts");
-const file_service_1 = __webpack_require__(/*! ./services/file.service */ "./src/context/file/services/file.service.ts");
+const file_context_service_1 = __webpack_require__(/*! ./services/file.context.service */ "./src/context/file/services/file.context.service.ts");
+const s3_service_1 = __webpack_require__(/*! ./adapter/s3.service */ "./src/context/file/adapter/s3.service.ts");
+const file_controller_1 = __webpack_require__(/*! ./controllers/file.controller */ "./src/context/file/controllers/file.controller.ts");
+const cron_file_controller_1 = __webpack_require__(/*! ./controllers/cron.file.controller */ "./src/context/file/controllers/cron.file.controller.ts");
 let FileContextModule = class FileContextModule {
 };
 exports.FileContextModule = FileContextModule;
@@ -21124,12 +24246,13 @@ exports.FileContextModule = FileContextModule = __decorate([
             file_resource_module_1.DomainFileResourceModule,
             file_vehicle_info_module_1.DomainFileVehicleInfoModule,
         ],
-        controllers: [],
+        controllers: [file_controller_1.FileController, cron_file_controller_1.CronFileController],
         providers: [
-            file_service_1.FileService,
+            file_context_service_1.FileContextService,
+            s3_service_1.S3Service,
         ],
         exports: [
-            file_service_1.FileService,
+            file_context_service_1.FileContextService,
         ],
     })
 ], FileContextModule);
@@ -21137,10 +24260,10 @@ exports.FileContextModule = FileContextModule = __decorate([
 
 /***/ }),
 
-/***/ "./src/context/file/services/file.service.ts":
-/*!***************************************************!*\
-  !*** ./src/context/file/services/file.service.ts ***!
-  \***************************************************/
+/***/ "./src/context/file/services/file.context.service.ts":
+/*!***********************************************************!*\
+  !*** ./src/context/file/services/file.context.service.ts ***!
+  \***********************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21153,17 +24276,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FileService = void 0;
+exports.FileContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 const file_reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/file-reservation-vehicle/file-reservation-vehicle.service */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-let FileService = class FileService {
-    constructor(domainFileService, domainFileReservationVehicleService) {
+const s3_service_1 = __webpack_require__(/*! ../adapter/s3.service */ "./src/context/file/adapter/s3.service.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+let FileContextService = class FileContextService {
+    constructor(domainFileService, domainFileReservationVehicleService, s3Service) {
         this.domainFileService = domainFileService;
         this.domainFileReservationVehicleService = domainFileReservationVehicleService;
+        this.s3Service = s3Service;
     }
     async 차량예약_파일을_조회한다(reservationVehicleId) {
         const fileReservationVehicles = await this.domainFileReservationVehicleService.findAll({
@@ -21197,20 +24324,870 @@ let FileService = class FileService {
             }),
         };
     }
+    async 파일을_업로드한다(file) {
+        const newFile = await this.s3Service.uploadFile(file);
+        const savedFile = await this.domainFileService.save(newFile);
+        return savedFile;
+    }
+    async 다중_파일을_업로드한다(files) {
+        const uploadPromises = files.map((file) => this.파일을_업로드한다(file));
+        return await Promise.all(uploadPromises);
+    }
+    async 파일을_삭제한다(fileId) {
+        let file;
+        if (fileId) {
+            file = await this.domainFileService.findFileById(fileId);
+            if (!file)
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.NOT_FOUND);
+        }
+        else {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.FILE.ID_OR_PATH_REQUIRED);
+        }
+        await this.s3Service.deleteFile(file);
+        await this.domainFileService.delete(file.fileId);
+    }
+    async 다중_파일을_삭제한다(fileIds) {
+        const deletePromises = fileIds.map((fileId) => this.파일을_삭제한다(fileId));
+        await Promise.all(deletePromises);
+    }
+    async 임시_파일들을_삭제한다() {
+        const files = await this.임시_파일들을_조회한다();
+        const deletePromises = files.map((file) => this.파일을_삭제한다(file.fileId));
+        await Promise.all(deletePromises);
+    }
+    async 임시_파일들을_조회한다() {
+        return await this.domainFileService.findAll({
+            where: { isTemporary: true, createdAt: (0, typeorm_1.LessThan)(date_util_1.DateUtil.now().addDays(-1).toDate()) },
+        });
+    }
+    async 프리사인드_URL을_생성한다(mime) {
+        if (!mime) {
+            throw new common_1.BadRequestException('Mime type is required');
+        }
+        return this.s3Service.generatePresignedUrl(mime);
+    }
+    async 파일_데이터를_생성한다(createFileDataDto) {
+        const fileName = createFileDataDto.filePath.split('/').pop();
+        const fileExists = await this.s3Service.checkFileExists(fileName);
+        if (!fileExists) {
+            throw new common_1.BadRequestException('File not found in S3');
+        }
+        const file = await this.domainFileService.create({
+            fileName,
+            filePath: this.s3Service.getFileUrl(fileName),
+        });
+        return await this.domainFileService.save(file);
+    }
 };
-exports.FileService = FileService;
-exports.FileService = FileService = __decorate([
+exports.FileContextService = FileContextService;
+exports.FileContextService = FileContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object, typeof (_b = typeof file_reservation_vehicle_service_1.DomainFileReservationVehicleService !== "undefined" && file_reservation_vehicle_service_1.DomainFileReservationVehicleService) === "function" ? _b : Object])
-], FileService);
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object, typeof (_b = typeof file_reservation_vehicle_service_1.DomainFileReservationVehicleService !== "undefined" && file_reservation_vehicle_service_1.DomainFileReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _c : Object])
+], FileContextService);
 
 
 /***/ }),
 
-/***/ "./src/context/reservation-management/reservation-management.context.module.ts":
-/*!*************************************************************************************!*\
-  !*** ./src/context/reservation-management/reservation-management.context.module.ts ***!
-  \*************************************************************************************/
+/***/ "./src/context/notification/adapter/fcm-push.adapter.ts":
+/*!**************************************************************!*\
+  !*** ./src/context/notification/adapter/fcm-push.adapter.ts ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FCMAdapter = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const app_1 = __webpack_require__(/*! firebase-admin/app */ "firebase-admin/app");
+const messaging_1 = __webpack_require__(/*! firebase-admin/messaging */ "firebase-admin/messaging");
+let FCMAdapter = class FCMAdapter {
+    constructor(configService) {
+        this.configService = configService;
+        this.isProduction = process.env.NODE_ENV === 'production';
+        try {
+            if ((0, app_1.getApps)().length === 0) {
+                (0, app_1.initializeApp)({
+                    credential: (0, app_1.cert)({
+                        clientEmail: this.configService.get('firebase.clientEmail'),
+                        privateKey: this.configService.get('firebase.privateKey').replace(/\\n/g, '\n'),
+                        projectId: this.configService.get('firebase.projectId'),
+                    }),
+                });
+                console.log('✅ Firebase Admin initialized successfully');
+            }
+            else {
+                console.log('⚡ Firebase Admin already initialized, skipping');
+            }
+        }
+        catch (error) {
+            console.error('Firebase initialization error:', error);
+            throw error;
+        }
+        process.on('unhandledRejection', (reason, promise) => {
+            console.error('🧨 Unhandled Rejection:', reason);
+        });
+    }
+    async sendNotification(subscription, payload) {
+        try {
+            if (!subscription || !subscription.fcm || !subscription.fcm.token) {
+                throw new common_1.BadRequestException('FCM token is missing');
+            }
+            const message = {
+                token: subscription.fcm.token,
+                notification: {
+                    title: payload.title,
+                    body: payload.body,
+                },
+                data: {
+                    title: payload.title,
+                    body: payload.body,
+                },
+            };
+            const response = await (0, messaging_1.getMessaging)()
+                .send(message)
+                .then((response) => {
+                console.log('FCM send successful. Message ID:', response);
+                return { success: true, message: response, error: null };
+            })
+                .catch((error) => {
+                console.error('FCM send error:', {
+                    code: error.code,
+                    message: error.message,
+                    details: error.details,
+                    stack: error.stack,
+                });
+                return { success: false, message: 'failed', error: error.message };
+            });
+            return response;
+        }
+        catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
+            return { success: false, message: 'failed', error: error.message };
+        }
+    }
+    async sendBulkNotification(subscriptions, payload) {
+        try {
+            const tokens = subscriptions.map((subscription) => subscription.fcm.token);
+            console.log('알림 전송 - tokens', tokens);
+            console.log('알림 전송 - payload', payload);
+            const response = await (0, messaging_1.getMessaging)()
+                .sendEachForMulticast({
+                tokens: tokens,
+                data: {
+                    title: this.isProduction ? payload.title : '[개발]' + payload.title,
+                    body: payload.body,
+                    notificationData: JSON.stringify(payload.notificationData),
+                    notificationType: payload.notificationType,
+                },
+                android: {
+                    priority: 'high',
+                },
+            })
+                .then((response) => {
+                console.log('FCM send successful.', response);
+                return response;
+            });
+            return response;
+        }
+        catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
+            return { responses: [], successCount: -1, failureCount: -1 };
+        }
+    }
+    async sendTestNotification(subscription, payload) {
+        try {
+            const message = {
+                token: subscription.fcm.token,
+                ...payload,
+            };
+            const response = await (0, messaging_1.getMessaging)()
+                .send(message)
+                .then((response) => {
+                console.log('FCM send successful. Message ID:', response);
+                return { success: true, message: response, error: null };
+            })
+                .catch((error) => {
+                console.error('FCM send error:', {
+                    code: error.code,
+                    message: error.message,
+                    details: error.details,
+                    stack: error.stack,
+                });
+                return { success: false, message: 'failed', error: error.message };
+            });
+            return response;
+        }
+        catch (error) {
+            console.error('FCM send error:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                stack: error.stack,
+            });
+            return { success: false, message: 'failed', error: error.message };
+        }
+    }
+};
+exports.FCMAdapter = FCMAdapter;
+exports.FCMAdapter = FCMAdapter = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
+], FCMAdapter);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/controllers/admin.notification.controller.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/context/notification/controllers/admin.notification.controller.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdminNotificationController = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const create_notification_dto_1 = __webpack_require__(/*! ../dtos/create-notification.dto */ "./src/context/notification/dtos/create-notification.dto.ts");
+const notification_context_service_1 = __webpack_require__(/*! ../services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+let AdminNotificationController = class AdminNotificationController {
+    constructor(notificationContextService) {
+        this.notificationContextService = notificationContextService;
+    }
+    async send(sendNotificationDto) {
+        await this.notificationContextService.요청_알림을_전송한다(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
+    }
+};
+exports.AdminNotificationController = AdminNotificationController;
+__decorate([
+    (0, common_1.Post)('send'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 알림 전송' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '웹 푸시 알림 전송 성공',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", Promise)
+], AdminNotificationController.prototype, "send", null);
+exports.AdminNotificationController = AdminNotificationController = __decorate([
+    (0, swagger_1.ApiTags)('v2 알림 '),
+    (0, common_1.Controller)('v2/notifications'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _a : Object])
+], AdminNotificationController);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/controllers/cron.notification.controller.ts":
+/*!******************************************************************************!*\
+  !*** ./src/context/notification/controllers/cron.notification.controller.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronNotificationController = void 0;
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const cron_notification_context_service_1 = __webpack_require__(/*! ../services/cron-notification.context.service */ "./src/context/notification/services/cron-notification.context.service.ts");
+let CronNotificationController = class CronNotificationController {
+    constructor(cronNotificationContextService) {
+        this.cronNotificationContextService = cronNotificationContextService;
+    }
+    async sendUpcomingNotification() {
+        return this.cronNotificationContextService.다가오는_알림을_전송한다();
+    }
+};
+exports.CronNotificationController = CronNotificationController;
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/send-upcoming-notification'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronNotificationController.prototype, "sendUpcomingNotification", null);
+exports.CronNotificationController = CronNotificationController = __decorate([
+    (0, swagger_1.ApiTags)('v2 알림 '),
+    (0, common_1.Controller)('v2/notifications'),
+    (0, public_decorator_1.Public)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof cron_notification_context_service_1.CronNotificationContextService !== "undefined" && cron_notification_context_service_1.CronNotificationContextService) === "function" ? _a : Object])
+], CronNotificationController);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/controllers/notification.controller.ts":
+/*!*************************************************************************!*\
+  !*** ./src/context/notification/controllers/notification.controller.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationController = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const push_subscription_dto_1 = __webpack_require__(/*! ../dtos/push-subscription.dto */ "./src/context/notification/dtos/push-subscription.dto.ts");
+const response_notification_dto_1 = __webpack_require__(/*! ../dtos/response-notification.dto */ "./src/context/notification/dtos/response-notification.dto.ts");
+const create_notification_dto_1 = __webpack_require__(/*! ../dtos/create-notification.dto */ "./src/context/notification/dtos/create-notification.dto.ts");
+const send_notification_dto_1 = __webpack_require__(/*! ../dtos/send-notification.dto */ "./src/context/notification/dtos/send-notification.dto.ts");
+const notification_context_service_1 = __webpack_require__(/*! ../services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+let NotificationController = class NotificationController {
+    constructor(notificationContextService) {
+        this.notificationContextService = notificationContextService;
+    }
+    async subscribe(user, subscription) {
+        await this.notificationContextService.푸시_알림을_구독한다(user.employeeId, subscription);
+    }
+    async sendSuccess(body) {
+        await this.notificationContextService.직접_알림을_전송한다(body.subscription, body.payload);
+    }
+    async send(sendNotificationDto) {
+        await this.notificationContextService.리마인더_알림을_전송한다(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
+    }
+    async findAllByEmployeeId(employeeId, query) {
+        return await this.notificationContextService.내_알림_목록을_조회한다(employeeId, query);
+    }
+    async markAsRead(user, notificationId) {
+        await this.notificationContextService.알림을_읽음_처리한다(user.employeeId, notificationId);
+    }
+    async findSubscription(token, employeeId) {
+        return await this.notificationContextService.구독_정보를_조회한다(token, employeeId);
+    }
+};
+exports.NotificationController = NotificationController;
+__decorate([
+    (0, common_1.Post)('subscribe'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '웹 푸시 구독 성공',
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object, typeof (_c = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], NotificationController.prototype, "subscribe", null);
+__decorate([
+    (0, common_1.Post)('subscribe/success'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독 성공' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '웹 푸시 구독 성공',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof send_notification_dto_1.PushNotificationDto !== "undefined" && send_notification_dto_1.PushNotificationDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "sendSuccess", null);
+__decorate([
+    (0, common_1.Post)('send/reminder'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 알림 전송' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '웹 푸시 알림 전송 성공',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "send", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '알람 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '알람 목록 조회 성공',
+        type: [response_notification_dto_1.ResponseNotificationDto],
+        isPaginated: true,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'page',
+        type: Number,
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'limit',
+        type: Number,
+        required: false,
+    }),
+    __param(0, (0, user_decorator_1.User)('employeeId')),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_g = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], NotificationController.prototype, "findAllByEmployeeId", null);
+__decorate([
+    (0, common_1.Patch)(':notificationId/read'),
+    (0, swagger_1.ApiOperation)({ summary: '알람 읽음 처리' }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('notificationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_j = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _j : Object, String]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "markAsRead", null);
+__decorate([
+    (0, common_1.Get)('subscription'),
+    (0, swagger_1.ApiOperation)({ summary: '구독 정보 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '구독 정보 조회 성공',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'token',
+        type: String,
+        required: false,
+        description: '구독 토큰',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'employeeId',
+        type: String,
+        required: false,
+        description: '직원 ID',
+    }),
+    __param(0, (0, common_1.Query)('token')),
+    __param(1, (0, common_1.Query)('employeeId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "findSubscription", null);
+exports.NotificationController = NotificationController = __decorate([
+    (0, swagger_1.ApiTags)('v2 알림 '),
+    (0, common_1.Controller)('v2/notifications'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _a : Object])
+], NotificationController);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/dtos/create-notification.dto.ts":
+/*!******************************************************************!*\
+  !*** ./src/context/notification/dtos/create-notification.dto.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SendNotificationDto = exports.CreateEmployeeNotificationDto = exports.CreateNotificationDto = exports.CreateNotificationDataDto = void 0;
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class CreateNotificationDataDto {
+}
+exports.CreateNotificationDataDto = CreateNotificationDataDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '예약 ID, 예약 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '예약 제목, 예약 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "reservationTitle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '예약 날짜, 예약 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "reservationDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '예약 시작 전 분 수, 예약 시간 알림 시 필수' }),
+    __metadata("design:type", Number)
+], CreateNotificationDataDto.prototype, "beforeMinutes", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '자원 ID, 자원 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: true, description: '자원 이름' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, required: true, description: '자원 타입' }),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], CreateNotificationDataDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '소모품 이름, 소모품 알림 시 필수' }),
+    __metadata("design:type", String)
+], CreateNotificationDataDto.prototype, "consumableName", void 0);
+class CreateNotificationDto {
+}
+exports.CreateNotificationDto = CreateNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateNotificationDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateNotificationDto.prototype, "body", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", CreateNotificationDataDto)
+], CreateNotificationDto.prototype, "notificationData", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateNotificationDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], CreateNotificationDto.prototype, "isSent", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: notification_type_enum_1.NotificationType }),
+    __metadata("design:type", typeof (_b = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _b : Object)
+], CreateNotificationDto.prototype, "notificationType", void 0);
+class CreateEmployeeNotificationDto {
+}
+exports.CreateEmployeeNotificationDto = CreateEmployeeNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateEmployeeNotificationDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateEmployeeNotificationDto.prototype, "notificationId", void 0);
+class SendNotificationDto {
+}
+exports.SendNotificationDto = SendNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: notification_type_enum_1.NotificationType }),
+    __metadata("design:type", typeof (_c = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _c : Object)
+], SendNotificationDto.prototype, "notificationType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", CreateNotificationDataDto)
+], SendNotificationDto.prototype, "notificationData", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: ['1256124-ef14-4124-9124-124124124124'],
+        description: '알림 수신자 목록 (employeeId)',
+    }),
+    __metadata("design:type", Array)
+], SendNotificationDto.prototype, "notificationTarget", void 0);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/dtos/push-subscription.dto.ts":
+/*!****************************************************************!*\
+  !*** ./src/context/notification/dtos/push-subscription.dto.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PushSubscriptionDto = exports.WebPushDto = exports.FCMDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class FCMDto {
+}
+exports.FCMDto = FCMDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], FCMDto.prototype, "token", void 0);
+class WebPushDto {
+}
+exports.WebPushDto = WebPushDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], WebPushDto.prototype, "endpoint", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'object',
+        properties: {
+            auth: { type: 'string' },
+            p256dh: { type: 'string' },
+        },
+    }),
+    __metadata("design:type", Object)
+], WebPushDto.prototype, "keys", void 0);
+class PushSubscriptionDto {
+}
+exports.PushSubscriptionDto = PushSubscriptionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: FCMDto, required: false }),
+    __metadata("design:type", FCMDto)
+], PushSubscriptionDto.prototype, "fcm", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: WebPushDto, required: false }),
+    __metadata("design:type", WebPushDto)
+], PushSubscriptionDto.prototype, "webPush", void 0);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/dtos/response-notification.dto.ts":
+/*!********************************************************************!*\
+  !*** ./src/context/notification/dtos/response-notification.dto.ts ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PushNotificationSendResult = exports.ResponseNotificationDto = exports.NotificationDataDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class NotificationDataDto {
+}
+exports.NotificationDataDto = NotificationDataDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, required: false }),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], NotificationDataDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "consumableName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "reservationTitle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], NotificationDataDto.prototype, "reservationDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], NotificationDataDto.prototype, "beforeMinutes", void 0);
+class ResponseNotificationDto {
+}
+exports.ResponseNotificationDto = ResponseNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResponseNotificationDto.prototype, "notificationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResponseNotificationDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResponseNotificationDto.prototype, "body", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: NotificationDataDto }),
+    __metadata("design:type", NotificationDataDto)
+], ResponseNotificationDto.prototype, "notificationData", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ResponseNotificationDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: notification_type_enum_1.NotificationType }),
+    __metadata("design:type", typeof (_b = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _b : Object)
+], ResponseNotificationDto.prototype, "notificationType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", Boolean)
+], ResponseNotificationDto.prototype, "isRead", void 0);
+class PushNotificationSendResult {
+}
+exports.PushNotificationSendResult = PushNotificationSendResult;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], PushNotificationSendResult.prototype, "success", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Object)
+], PushNotificationSendResult.prototype, "message", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], PushNotificationSendResult.prototype, "error", void 0);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/dtos/send-notification.dto.ts":
+/*!****************************************************************!*\
+  !*** ./src/context/notification/dtos/send-notification.dto.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PushNotificationDto = exports.PushNotificationPayload = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const push_subscription_dto_1 = __webpack_require__(/*! ./push-subscription.dto */ "./src/context/notification/dtos/push-subscription.dto.ts");
+const notification_entity_1 = __webpack_require__(/*! @libs/entities/notification.entity */ "./libs/entities/notification.entity.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+class PushNotificationPayload {
+}
+exports.PushNotificationPayload = PushNotificationPayload;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], PushNotificationPayload.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], PushNotificationPayload.prototype, "body", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_a = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _a : Object)
+], PushNotificationPayload.prototype, "notificationType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", typeof (_b = typeof notification_entity_1.NotificationData !== "undefined" && notification_entity_1.NotificationData) === "function" ? _b : Object)
+], PushNotificationPayload.prototype, "notificationData", void 0);
+class PushNotificationDto {
+}
+exports.PushNotificationDto = PushNotificationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: PushNotificationPayload }),
+    __metadata("design:type", PushNotificationPayload)
+], PushNotificationDto.prototype, "payload", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: push_subscription_dto_1.PushSubscriptionDto }),
+    __metadata("design:type", typeof (_c = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _c : Object)
+], PushNotificationDto.prototype, "subscription", void 0);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/notification.context.module.ts":
+/*!*****************************************************************!*\
+  !*** ./src/context/notification/notification.context.module.ts ***!
+  \*****************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21221,7 +25198,550 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReservationManagementContextModule = void 0;
+exports.NotificationContextModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const notification_module_1 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
+const employee_notification_module_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.module */ "./src/domain/employee-notification/employee-notification.module.ts");
+const notification_context_service_1 = __webpack_require__(/*! ./services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+const notification_controller_1 = __webpack_require__(/*! ./controllers/notification.controller */ "./src/context/notification/controllers/notification.controller.ts");
+const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
+const cron_notification_controller_1 = __webpack_require__(/*! ./controllers/cron.notification.controller */ "./src/context/notification/controllers/cron.notification.controller.ts");
+const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
+const admin_notification_controller_1 = __webpack_require__(/*! ./controllers/admin.notification.controller */ "./src/context/notification/controllers/admin.notification.controller.ts");
+const fcm_push_adapter_1 = __webpack_require__(/*! ./adapter/fcm-push.adapter */ "./src/context/notification/adapter/fcm-push.adapter.ts");
+const cron_notification_context_service_1 = __webpack_require__(/*! ./services/cron-notification.context.service */ "./src/context/notification/services/cron-notification.context.service.ts");
+let NotificationContextModule = class NotificationContextModule {
+};
+exports.NotificationContextModule = NotificationContextModule;
+exports.NotificationContextModule = NotificationContextModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([entities_1.Employee, entities_1.Notification, entities_1.EmployeeNotification, entities_1.Reservation]),
+            config_1.ConfigModule.forFeature(env_config_1.FIREBASE_CONFIG),
+            schedule_1.ScheduleModule.forRoot(),
+            employee_module_1.DomainEmployeeModule,
+            employee_notification_module_1.DomainEmployeeNotificationModule,
+            notification_module_1.DomainNotificationModule,
+            reservation_module_1.DomainReservationModule,
+        ],
+        controllers: [notification_controller_1.NotificationController, cron_notification_controller_1.CronNotificationController, admin_notification_controller_1.AdminNotificationController],
+        providers: [notification_context_service_1.NotificationContextService, cron_notification_context_service_1.CronNotificationContextService, fcm_push_adapter_1.FCMAdapter],
+        exports: [notification_context_service_1.NotificationContextService],
+    })
+], NotificationContextModule);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/services/cron-notification.context.service.ts":
+/*!********************************************************************************!*\
+  !*** ./src/context/notification/services/cron-notification.context.service.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronNotificationContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const fcm_push_adapter_1 = __webpack_require__(/*! ../adapter/fcm-push.adapter */ "./src/context/notification/adapter/fcm-push.adapter.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+let CronNotificationContextService = class CronNotificationContextService {
+    constructor(domainNotificationService, fcmAdapter, domainEmployeeService) {
+        this.domainNotificationService = domainNotificationService;
+        this.fcmAdapter = fcmAdapter;
+        this.domainEmployeeService = domainEmployeeService;
+    }
+    async 다가오는_알림을_전송한다() {
+        const now = date_util_1.DateUtil.now().format('YYYY-MM-DD HH:mm');
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                isSent: false,
+                createdAt: (0, typeorm_1.LessThanOrEqual)(now),
+            },
+            relations: ['employees'],
+        });
+        for (const notification of notifications) {
+            const notiTarget = notification.employees.map((employee) => employee.employeeId);
+            const totalSubscriptions = [];
+            for (const employeeId of notiTarget) {
+                const subscriptions = await this.구독_목록을_조회한다(employeeId);
+                totalSubscriptions.push(...subscriptions);
+            }
+            if (totalSubscriptions.length === 0) {
+                continue;
+            }
+            try {
+                await this.fcmAdapter.sendBulkNotification(totalSubscriptions, {
+                    title: notification.title,
+                    body: notification.body,
+                    notificationType: notification.notificationType,
+                    notificationData: notification.notificationData,
+                });
+            }
+            catch (error) {
+                console.error(`Failed to send notification: ${error}`);
+            }
+            finally {
+                await this.domainNotificationService.update(notification.notificationId, { isSent: true });
+            }
+        }
+    }
+    async 구독_목록을_조회한다(employeeId) {
+        const employee = await this.domainEmployeeService.findOne({
+            where: { employeeId },
+            select: { subscriptions: true, isPushNotificationEnabled: true },
+        });
+        if (!employee ||
+            !employee.subscriptions ||
+            employee.subscriptions.length === 0 ||
+            !employee.isPushNotificationEnabled) {
+            return [];
+        }
+        return employee.subscriptions;
+    }
+};
+exports.CronNotificationContextService = CronNotificationContextService;
+exports.CronNotificationContextService = CronNotificationContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _a : Object, typeof (_b = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _b : Object, typeof (_c = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _c : Object])
+], CronNotificationContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/services/notification.context.service.ts":
+/*!***************************************************************************!*\
+  !*** ./src/context/notification/services/notification.context.service.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const fcm_push_adapter_1 = __webpack_require__(/*! ../adapter/fcm-push.adapter */ "./src/context/notification/adapter/fcm-push.adapter.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let NotificationContextService = class NotificationContextService {
+    constructor(domainNotificationService, domainEmployeeService, domainEmployeeNotificationService, domainReservationService, fcmAdapter) {
+        this.domainNotificationService = domainNotificationService;
+        this.domainEmployeeService = domainEmployeeService;
+        this.domainEmployeeNotificationService = domainEmployeeNotificationService;
+        this.domainReservationService = domainReservationService;
+        this.fcmAdapter = fcmAdapter;
+        this.isProduction = process.env.NODE_ENV === 'production';
+    }
+    async 푸시_알림을_구독한다(employeeId, subscription) {
+        try {
+            const employee = await this.domainEmployeeService.findByEmployeeId(employeeId);
+            if (!employee) {
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.EMPLOYEE.NOT_FOUND);
+            }
+            if (!this.isProduction &&
+                employee.subscriptions &&
+                Array.isArray(employee.subscriptions) &&
+                employee.subscriptions.length > 0) {
+                if (employee.subscriptions.length < 2) {
+                    employee.subscriptions.push(subscription);
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                employee.subscriptions = [subscription];
+            }
+            await this.domainEmployeeService.update(employee.employeeId, employee);
+            return true;
+        }
+        catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async 직접_알림을_전송한다(subscription, payload) {
+        await this.fcmAdapter.sendBulkNotification([subscription], payload);
+    }
+    async 다중_알림을_전송한다(subscriptions, payload) {
+        return await this.fcmAdapter.sendBulkNotification(subscriptions, payload);
+    }
+    async 내_알림_목록을_조회한다(employeeId, query) {
+        const options = {
+            where: {
+                employees: { employeeId },
+                isSent: true,
+            },
+        };
+        const total = await this.domainNotificationService.count({
+            where: options.where,
+        });
+        if (query) {
+            options.skip = query.getOffset();
+            options.take = query.limit;
+        }
+        const notifications = await this.domainNotificationService.findAll({
+            ...options,
+            relations: ['employees'],
+            order: {
+                createdAt: 'DESC',
+            },
+        });
+        return {
+            items: notifications.map((notification) => {
+                return {
+                    notificationId: notification.notificationId,
+                    title: notification.title,
+                    body: notification.body,
+                    notificationData: notification.notificationData,
+                    notificationType: notification.notificationType,
+                    createdAt: notification.createdAt,
+                    isRead: notification.employees.find((employee) => employee.employeeId === employeeId).isRead,
+                };
+            }),
+            meta: {
+                total,
+                page: query.page,
+                limit: query.limit,
+                hasNext: query.page * query.limit < total,
+            },
+        };
+    }
+    async 알림을_읽음_처리한다(employeeId, notificationId) {
+        const employeeNotification = await this.domainEmployeeNotificationService.findOne({
+            where: {
+                employeeId,
+                notificationId,
+            },
+        });
+        if (!employeeNotification) {
+            throw new common_1.BadRequestException('There is no data');
+        }
+        await this.domainEmployeeNotificationService.update(employeeNotification.employeeNotificationId, {
+            isRead: true,
+        });
+    }
+    async 구독_정보를_조회한다(token, employeeId) {
+        if (!token && !employeeId) {
+            return null;
+        }
+        if (employeeId) {
+            return await this.직원별_구독정보를_조회한다(employeeId);
+        }
+        return await this.토큰별_구독정보를_조회한다(token);
+    }
+    async 시스템_관리자들에게_알림을_발송한다() {
+    }
+    async 토큰별_구독정보를_조회한다(token) {
+        const employee = await this.domainEmployeeService.findOne({
+            where: {
+                subscriptions: (0, typeorm_1.Raw)((alias) => `
+                EXISTS (
+                  SELECT 1 FROM jsonb_array_elements(${alias}) AS elem
+                  WHERE elem -> 'fcm' ->> 'token' = '${token}'
+                )
+              `),
+            },
+        });
+        return {
+            employeeId: employee.employeeId,
+            employeeName: employee.name,
+            subscriptions: employee.subscriptions,
+        };
+    }
+    async 직원별_구독정보를_조회한다(employeeId) {
+        const employee = await this.domainEmployeeService.findOne({
+            where: { employeeId },
+        });
+        return {
+            employeeId: employee.employeeId,
+            employeeName: employee.name,
+            subscriptions: employee.subscriptions,
+        };
+    }
+    async 구독_목록을_조회한다(employeeId) {
+        const employee = await this.domainEmployeeService.findOne({
+            where: { employeeId },
+            select: { subscriptions: true, isPushNotificationEnabled: true },
+        });
+        if (!employee ||
+            !employee.subscriptions ||
+            employee.subscriptions.length === 0 ||
+            !employee.isPushNotificationEnabled) {
+            return [];
+        }
+        return employee.subscriptions;
+    }
+    async 알림_내용을_생성한다(notificationType, createNotificationDataDto) {
+        const createNotificationDto = {
+            title: '',
+            body: '',
+            notificationType: notificationType,
+            notificationData: createNotificationDataDto,
+            createdAt: date_util_1.DateUtil.now().format('YYYY-MM-DD HH:mm'),
+            isSent: true,
+        };
+        switch (notificationType) {
+            case notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING:
+                createNotificationDto.title = `예약 시간이 ${createNotificationDataDto.beforeMinutes}분 남았습니다.`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                createNotificationDto.createdAt = date_util_1.DateUtil.parse(createNotificationDataDto.reservationDate)
+                    .addMinutes(-createNotificationDataDto.beforeMinutes)
+                    .format('YYYY-MM-DD HH:mm');
+                createNotificationDto.isSent = false;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING:
+                createNotificationDto.title = `[숙소 확정 대기중] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED:
+                createNotificationDto.title = `[예약 확정] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED:
+                createNotificationDto.title = `[예약 취소] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED:
+                createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED:
+                createNotificationDto.title = `[예약 시간 변경] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED:
+                createNotificationDto.title = `[참가자 변경] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING:
+                createNotificationDto.title = `[교체 주기 알림] ${createNotificationDataDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING:
+                createNotificationDto.title = `[교체 지연 알림] ${createNotificationDataDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED:
+                createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED:
+                createNotificationDto.title = `[차량 반납 지연 알림] ${createNotificationDataDto.resourceName}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED:
+                createNotificationDto.title = `[정비 완료] ${createNotificationDataDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                break;
+        }
+        return createNotificationDto;
+    }
+    async 알림을_저장한다(createNotificationDto, notiTarget, repositoryOptions) {
+        const notification = await this.domainNotificationService.save(createNotificationDto, repositoryOptions);
+        for (const employeeId of notiTarget) {
+            await this.domainEmployeeNotificationService.save({
+                employeeId: employeeId,
+                notificationId: notification.notificationId,
+            }, repositoryOptions);
+        }
+        return notification;
+    }
+    async 리마인더_알림_내용을_생성한다(createNotificationDataDto) {
+        const now = date_util_1.DateUtil.now().toDate();
+        const reservation = await this.domainReservationService.findOne({
+            where: {
+                reservationId: createNotificationDataDto.reservationId,
+            },
+        });
+        const diffInMilliseconds = reservation.startDate.getTime() - now.getTime();
+        const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+        const days = Math.floor(diffInMinutes / (24 * 60));
+        const hours = Math.floor((diffInMinutes % (24 * 60)) / 60);
+        const minutes = diffInMinutes % 60;
+        const parts = [];
+        if (diffInMilliseconds > 0) {
+            switch (createNotificationDataDto.resourceType) {
+                case resource_type_enum_1.ResourceType.MEETING_ROOM:
+                    parts.push('회의 시작까지');
+                    break;
+                case resource_type_enum_1.ResourceType.VEHICLE:
+                    parts.push('차량 이용 시작까지');
+                    break;
+                case resource_type_enum_1.ResourceType.ACCOMMODATION:
+                    parts.push('입실 까지');
+                    break;
+                case resource_type_enum_1.ResourceType.EQUIPMENT:
+                    parts.push('장비 이용 시작까지');
+                    break;
+            }
+            if (days > 0) {
+                parts.push(`${days}일`);
+            }
+            if (hours > 0) {
+                parts.push(`${hours}시간`);
+            }
+            if (minutes > 0 || parts.length === 0) {
+                parts.push(`${minutes}분`);
+            }
+            parts.push('남았습니다.');
+        }
+        else {
+            switch (createNotificationDataDto.resourceType) {
+                case resource_type_enum_1.ResourceType.MEETING_ROOM:
+                    parts.push('회의 참여 알림');
+                    break;
+                case resource_type_enum_1.ResourceType.VEHICLE:
+                    parts.push('차량 탑승 알림');
+                    break;
+                case resource_type_enum_1.ResourceType.ACCOMMODATION:
+                    parts.push('입실 알림');
+                    break;
+                case resource_type_enum_1.ResourceType.EQUIPMENT:
+                    parts.push('장비 이용 알림');
+                    break;
+            }
+        }
+        const timeDifferencePhrase = parts.join(' ');
+        return {
+            title: `[${createNotificationDataDto.reservationTitle}]\n${timeDifferencePhrase}`,
+            body: createNotificationDataDto.reservationDate,
+            notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
+            notificationData: createNotificationDataDto,
+            createdAt: date_util_1.DateUtil.now().format('YYYY-MM-DD HH:mm'),
+            isSent: true,
+        };
+    }
+    async 알림을_생성한다(notificationType, createNotificationDataDto, notiTarget, repositoryOptions) {
+        notiTarget = Array.from(new Set(notiTarget));
+        const notificationDto = await this.알림_내용을_생성한다(notificationType, createNotificationDataDto);
+        const notification = await this.알림을_저장한다(notificationDto, notiTarget, repositoryOptions);
+        const totalSubscriptions = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.구독_목록을_조회한다(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+        switch (notificationType) {
+            case notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING:
+                break;
+            default:
+                await this.다중_알림을_전송한다(totalSubscriptions, {
+                    title: notification.title,
+                    body: notification.body,
+                    notificationType: notification.notificationType,
+                    notificationData: notification.notificationData,
+                });
+                break;
+        }
+    }
+    async 리마인더_알림을_전송한다(notificationType, createNotificationDataDto, notiTarget) {
+        const createNotificationDto = await this.리마인더_알림_내용을_생성한다(createNotificationDataDto);
+        if (!createNotificationDto) {
+            return;
+        }
+        const notification = await this.알림을_저장한다(createNotificationDto, notiTarget);
+        const totalSubscriptions = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.구독_목록을_조회한다(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+        await this.다중_알림을_전송한다(totalSubscriptions, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
+    }
+    async 요청_알림을_전송한다(notificationType, createNotificationDataDto, notiTarget) {
+        const createNotificationDto = await this.알림_내용을_생성한다(notificationType, createNotificationDataDto);
+        if (!createNotificationDto) {
+            return;
+        }
+        const notification = await this.알림을_저장한다(createNotificationDto, notiTarget);
+        const totalSubscriptions = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.구독_목록을_조회한다(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+        await this.다중_알림을_전송한다(totalSubscriptions, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
+    }
+    async 스케줄_작업을_삭제한다(reservationId) {
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                isSent: false,
+            },
+        });
+        for (const notification of notifications) {
+            await this.domainEmployeeNotificationService.deleteByNotificationId(notification.notificationId);
+            await this.domainNotificationService.delete(notification.notificationId);
+        }
+    }
+};
+exports.NotificationContextService = NotificationContextService;
+exports.NotificationContextService = NotificationContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _a : Object, typeof (_b = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _b : Object, typeof (_c = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _c : Object, typeof (_d = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _d : Object, typeof (_e = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _e : Object])
+], NotificationContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/reservation/reservation.context.module.ts":
+/*!***************************************************************!*\
+  !*** ./src/context/reservation/reservation.context.module.ts ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationContextModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
@@ -21229,42 +25749,59 @@ const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/res
 const reservation_participant_module_1 = __webpack_require__(/*! @src/domain/reservation-participant/reservation-participant.module */ "./src/domain/reservation-participant/reservation-participant.module.ts");
 const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
 const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
-const reservation_management_service_1 = __webpack_require__(/*! ./services/reservation-management.service */ "./src/context/reservation-management/services/reservation-management.service.ts");
-const reservation_validation_service_1 = __webpack_require__(/*! ./services/reservation-validation.service */ "./src/context/reservation-management/services/reservation-validation.service.ts");
-const reservation_conflict_service_1 = __webpack_require__(/*! ./services/reservation-conflict.service */ "./src/context/reservation-management/services/reservation-conflict.service.ts");
-let ReservationManagementContextModule = class ReservationManagementContextModule {
+const notification_module_1 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
+const employee_notification_module_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.module */ "./src/domain/employee-notification/employee-notification.module.ts");
+const reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.module */ "./src/domain/reservation-vehicle/reservation-vehicle.module.ts");
+const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
+const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
+const notification_module_2 = __webpack_require__(/*! @src/application/notification/notification.module */ "./src/application/notification/notification.module.ts");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const reservation_context_service_1 = __webpack_require__(/*! ./services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
+const reservation_management_service_1 = __webpack_require__(/*! ./services/reservation-management.service */ "./src/context/reservation/services/reservation-management.service.ts");
+const reservation_validation_service_1 = __webpack_require__(/*! ./services/reservation-validation.service */ "./src/context/reservation/services/reservation-validation.service.ts");
+const reservation_conflict_service_1 = __webpack_require__(/*! ./services/reservation-conflict.service */ "./src/context/reservation/services/reservation-conflict.service.ts");
+let ReservationContextModule = class ReservationContextModule {
 };
-exports.ReservationManagementContextModule = ReservationManagementContextModule;
-exports.ReservationManagementContextModule = ReservationManagementContextModule = __decorate([
+exports.ReservationContextModule = ReservationContextModule;
+exports.ReservationContextModule = ReservationContextModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([entities_1.Reservation, entities_1.ReservationParticipant, entities_1.Employee, entities_1.Resource]),
+            typeorm_1.TypeOrmModule.forFeature([entities_1.Reservation, entities_1.ReservationParticipant, entities_1.Employee, entities_1.Resource, entities_1.ReservationVehicle]),
             reservation_module_1.DomainReservationModule,
             reservation_participant_module_1.DomainReservationParticipantModule,
             employee_module_1.DomainEmployeeModule,
             resource_module_1.DomainResourceModule,
+            notification_module_1.DomainNotificationModule,
+            employee_notification_module_1.DomainEmployeeNotificationModule,
+            reservation_vehicle_module_1.DomainReservationVehicleModule,
+            vehicle_info_module_1.DomainVehicleInfoModule,
+            file_module_1.DomainFileModule,
+            notification_module_2.NotificationModule,
+            schedule_1.ScheduleModule.forRoot(),
         ],
         controllers: [],
         providers: [
+            reservation_context_service_1.ReservationContextService,
             reservation_management_service_1.ReservationManagementService,
             reservation_validation_service_1.ReservationValidationService,
             reservation_conflict_service_1.ReservationConflictService,
         ],
         exports: [
+            reservation_context_service_1.ReservationContextService,
             reservation_management_service_1.ReservationManagementService,
             reservation_validation_service_1.ReservationValidationService,
             reservation_conflict_service_1.ReservationConflictService,
         ],
     })
-], ReservationManagementContextModule);
+], ReservationContextModule);
 
 
 /***/ }),
 
-/***/ "./src/context/reservation-management/services/reservation-conflict.service.ts":
-/*!*************************************************************************************!*\
-  !*** ./src/context/reservation-management/services/reservation-conflict.service.ts ***!
-  \*************************************************************************************/
+/***/ "./src/context/reservation/services/reservation-conflict.service.ts":
+/*!**************************************************************************!*\
+  !*** ./src/context/reservation/services/reservation-conflict.service.ts ***!
+  \**************************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21320,10 +25857,10 @@ exports.ReservationConflictService = ReservationConflictService = __decorate([
 
 /***/ }),
 
-/***/ "./src/context/reservation-management/services/reservation-management.service.ts":
-/*!***************************************************************************************!*\
-  !*** ./src/context/reservation-management/services/reservation-management.service.ts ***!
-  \***************************************************************************************/
+/***/ "./src/context/reservation/services/reservation-management.service.ts":
+/*!****************************************************************************!*\
+  !*** ./src/context/reservation/services/reservation-management.service.ts ***!
+  \****************************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21341,8 +25878,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationManagementService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
-const reservation_conflict_service_1 = __webpack_require__(/*! ./reservation-conflict.service */ "./src/context/reservation-management/services/reservation-conflict.service.ts");
-const reservation_validation_service_1 = __webpack_require__(/*! ./reservation-validation.service */ "./src/context/reservation-management/services/reservation-validation.service.ts");
+const reservation_conflict_service_1 = __webpack_require__(/*! ./reservation-conflict.service */ "./src/context/reservation/services/reservation-conflict.service.ts");
+const reservation_validation_service_1 = __webpack_require__(/*! ./reservation-validation.service */ "./src/context/reservation/services/reservation-validation.service.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ReservationManagementService = class ReservationManagementService {
     constructor(domainReservationService, reservationConflictService, reservationValidationService) {
@@ -21374,10 +25911,10 @@ exports.ReservationManagementService = ReservationManagementService = __decorate
 
 /***/ }),
 
-/***/ "./src/context/reservation-management/services/reservation-validation.service.ts":
-/*!***************************************************************************************!*\
-  !*** ./src/context/reservation-management/services/reservation-validation.service.ts ***!
-  \***************************************************************************************/
+/***/ "./src/context/reservation/services/reservation-validation.service.ts":
+/*!****************************************************************************!*\
+  !*** ./src/context/reservation/services/reservation-validation.service.ts ***!
+  \****************************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21476,56 +26013,10 @@ exports.ReservationValidationService = ReservationValidationService = __decorate
 
 /***/ }),
 
-/***/ "./src/context/resource-management/resource-management.context.module.ts":
-/*!*******************************************************************************!*\
-  !*** ./src/context/resource-management/resource-management.context.module.ts ***!
-  \*******************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ResourceManagementContextModule = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
-const reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.module */ "./src/domain/reservation-vehicle/reservation-vehicle.module.ts");
-const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
-const resource_vehicle_info_service_1 = __webpack_require__(/*! ./services/resource-vehicle-info.service */ "./src/context/resource-management/services/resource-vehicle-info.service.ts");
-let ResourceManagementContextModule = class ResourceManagementContextModule {
-};
-exports.ResourceManagementContextModule = ResourceManagementContextModule;
-exports.ResourceManagementContextModule = ResourceManagementContextModule = __decorate([
-    (0, common_1.Module)({
-        imports: [
-            typeorm_1.TypeOrmModule.forFeature([entities_1.Resource, entities_1.VehicleInfo, entities_1.ReservationVehicle]),
-            resource_module_1.DomainResourceModule,
-            reservation_vehicle_module_1.DomainReservationVehicleModule,
-            vehicle_info_module_1.DomainVehicleInfoModule,
-        ],
-        controllers: [],
-        providers: [
-            resource_vehicle_info_service_1.ResourceVehicleInfoService,
-        ],
-        exports: [
-            resource_vehicle_info_service_1.ResourceVehicleInfoService,
-        ],
-    })
-], ResourceManagementContextModule);
-
-
-/***/ }),
-
-/***/ "./src/context/resource-management/services/resource-vehicle-info.service.ts":
-/*!***********************************************************************************!*\
-  !*** ./src/context/resource-management/services/resource-vehicle-info.service.ts ***!
-  \***********************************************************************************/
+/***/ "./src/context/reservation/services/reservation.context.service.ts":
+/*!*************************************************************************!*\
+  !*** ./src/context/reservation/services/reservation.context.service.ts ***!
+  \*************************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21538,14 +26029,2051 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ResourceVehicleInfoService = void 0;
+exports.ReservationContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
+const reservation_participant_service_1 = __webpack_require__(/*! @src/domain/reservation-participant/reservation-participant.service */ "./src/domain/reservation-participant/reservation-participant.service.ts");
 const reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
-let ResourceVehicleInfoService = class ResourceVehicleInfoService {
-    constructor(domainReservationVehicleService) {
+const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const notification_service_2 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! @src/application/reservation/core/dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+const dtos_index_1 = __webpack_require__(/*! @resource/dtos.index */ "./src/dtos.index.ts");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const cron_1 = __webpack_require__(/*! cron */ "cron");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const reservation_response_dto_2 = __webpack_require__(/*! @src/application/reservation/core/dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
+let ReservationContextService = class ReservationContextService {
+    constructor(domainReservationService, domainResourceService, domainNotificationService, domainEmployeeService, domainEmployeeNotificationService, domainReservationParticipantService, domainReservationVehicleService, domainVehicleInfoService, domainFileService, notificationService, schedulerRegistry, dataSource) {
+        this.domainReservationService = domainReservationService;
+        this.domainResourceService = domainResourceService;
+        this.domainNotificationService = domainNotificationService;
+        this.domainEmployeeService = domainEmployeeService;
+        this.domainEmployeeNotificationService = domainEmployeeNotificationService;
+        this.domainReservationParticipantService = domainReservationParticipantService;
         this.domainReservationVehicleService = domainReservationVehicleService;
+        this.domainVehicleInfoService = domainVehicleInfoService;
+        this.domainFileService = domainFileService;
+        this.notificationService = notificationService;
+        this.schedulerRegistry = schedulerRegistry;
+        this.dataSource = dataSource;
+    }
+    async 캘린더를_조회한다(user, query) {
+        console.time('FindCalendarUsecase');
+        const { startDate, endDate, resourceType, isMine, isMySchedules } = query;
+        const startDateObj = date_util_1.DateUtil.date(startDate).toDate();
+        const endDateObj = date_util_1.DateUtil.date(endDate).toDate();
+        const dateCondition = (0, typeorm_2.Raw)((alias) => `(${alias} BETWEEN :startDateObj AND :endDateObj OR
+              "Reservation"."endDate" BETWEEN :startDateObj AND :endDateObj OR
+              (${alias} <= :startDateObj AND "Reservation"."endDate" >= :endDateObj))`, { startDateObj, endDateObj });
+        let participantCondition = {};
+        if (!!isMine && !isMySchedules) {
+            participantCondition = { participants: { employeeId: user.employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } };
+        }
+        else if (!isMine && !isMySchedules) {
+            participantCondition = {};
+        }
+        else {
+            participantCondition = { participants: { employeeId: user.employeeId } };
+        }
+        const where = {
+            startDate: dateCondition,
+            status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+            ...(resourceType ? { resource: { type: resourceType } } : {}),
+            ...participantCondition,
+        };
+        console.time('parallel-queries');
+        console.time('employee-query');
+        const employeePromise = this.domainEmployeeService.findAll({
+            select: {
+                employeeId: true,
+                name: true,
+            },
+        });
+        console.time('reservation-query');
+        const reservationPromise = this.domainReservationService.findAll({
+            where: where,
+            relations: ['resource', 'participants'],
+            order: {
+                startDate: 'ASC',
+            },
+            select: {
+                reservationId: true,
+                startDate: true,
+                endDate: true,
+                title: true,
+                status: true,
+                resource: {
+                    resourceId: true,
+                    name: true,
+                    type: true,
+                },
+                participants: {
+                    employeeId: true,
+                    type: true,
+                },
+            },
+            withDeleted: true,
+        });
+        console.time('notification-query');
+        const notificationPromise = this.domainNotificationService.findAll({
+            where: {
+                employees: {
+                    employeeId: user.employeeId,
+                    isRead: false,
+                },
+            },
+            relations: ['employees'],
+            select: {
+                notificationId: true,
+                notificationData: true,
+            },
+        });
+        const [reservations, notis, employees] = await Promise.all([
+            reservationPromise,
+            notificationPromise,
+            employeePromise,
+        ]);
+        console.timeEnd('employee-query');
+        console.timeEnd('reservation-query');
+        console.timeEnd('notification-query');
+        console.timeEnd('parallel-queries');
+        console.time('employee-map');
+        const employeeMap = new Map();
+        employees.forEach((employee) => {
+            employeeMap.set(employee.employeeId, employee);
+        });
+        console.timeEnd('employee-map');
+        console.time('map');
+        const map = new Map();
+        notis.forEach((noti) => {
+            if (!map.has(noti.notificationData.reservationId)) {
+                map.set(noti.notificationData.reservationId, true);
+            }
+        });
+        console.timeEnd('map');
+        console.time('map2');
+        const formatter = new Intl.DateTimeFormat('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'Asia/Seoul',
+            hour12: false,
+        });
+        const formatDate = (date) => {
+            if (!date)
+                return undefined;
+            const dateObj = typeof date === 'string' ? new Date(date) : date;
+            const parts = formatter.formatToParts(dateObj);
+            const partsObj = {};
+            for (const part of parts) {
+                partsObj[part.type] = part.value;
+            }
+            return `${partsObj.year}-${partsObj.month}-${partsObj.day} ${partsObj.hour}:${partsObj.minute}:${partsObj.second}`;
+        };
+        const reservationsWithNotifications = reservations.map((reservation) => {
+            const participants = reservation.participants || [];
+            const reservers = [];
+            const participantsOnly = [];
+            for (const participant of participants) {
+                if (participant.type === reservation_type_enum_1.ParticipantsType.RESERVER) {
+                    reservers.push({
+                        employeeId: participant.employeeId,
+                        type: participant.type,
+                        employee: employeeMap.get(participant.employeeId),
+                    });
+                }
+                else if (participant.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT) {
+                    participantsOnly.push({
+                        employeeId: participant.employeeId,
+                        type: participant.type,
+                        employee: employeeMap.get(participant.employeeId),
+                    });
+                }
+            }
+            return {
+                reservationId: reservation.reservationId,
+                title: reservation.title,
+                startDate: formatDate(reservation.startDate),
+                endDate: formatDate(reservation.endDate),
+                status: reservation.status,
+                resource: reservation.resource,
+                reservers,
+                participants: participantsOnly,
+                hasUnreadNotification: map.has(reservation.reservationId),
+            };
+        });
+        console.timeEnd('map2');
+        console.timeEnd('FindCalendarUsecase');
+        return {
+            reservations: reservationsWithNotifications,
+        };
+    }
+    async 확인필요_예약목록을_조회한다(query) {
+        const { page, limit } = query;
+        const where = [
+            {
+                status: reservation_type_enum_1.ReservationStatus.PENDING,
+                resource: {
+                    type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                },
+            },
+        ];
+        const options = {
+            where,
+            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
+            withDeleted: true,
+        };
+        const reservations = await this.domainReservationService.findAll(options);
+        const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation));
+        return {
+            items: reservationResponseDtos,
+            meta: {
+                total: reservations.length,
+                page: 1,
+                limit: reservations.length,
+                hasNext: false,
+            },
+        };
+    }
+    async 충돌_예약을_조회한다(resourceId, startDate, endDate, reservationId) {
+        return await this.domainReservationService.findAll({
+            where: {
+                resourceId,
+                ...(reservationId && { reservationId: (0, typeorm_2.Not)(reservationId) }),
+                startDate: (0, typeorm_2.LessThan)(endDate),
+                endDate: (0, typeorm_2.MoreThan)(startDate),
+                status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+            },
+        });
+    }
+    async 지연_차량_알림을_조회한다(reservationId) {
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationData: (0, typeorm_2.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                notificationType: notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED,
+            },
+        });
+        return notifications;
+    }
+    async 내_모든_일정을_조회한다(employeeId, query, resourceType) {
+        const { page, limit } = query;
+        const today = date_util_1.DateUtil.date(date_util_1.DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
+        const where = {
+            participants: { employeeId },
+            status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+            endDate: (0, typeorm_2.MoreThanOrEqual)(today),
+        };
+        if (resourceType) {
+            where.resource = {
+                type: resourceType,
+            };
+        }
+        const options = {
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+        };
+        const reservations = await this.domainReservationService.findAll(options);
+        const count = reservations.length;
+        const reservationWithParticipants = await this.domainReservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_2.In)(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['resource', 'participants', 'participants.employee'],
+            order: {
+                startDate: 'ASC',
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+            withDeleted: true,
+        });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }));
+        return {
+            items: groupedReservationsResponse,
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+    async 내_예약목록을_조회한다(employeeId, page, limit, resourceType, startDate, endDate) {
+        const where = { participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } };
+        if (resourceType) {
+            where.resource = {
+                type: resourceType,
+            };
+        }
+        if (startDate && endDate) {
+            where.startDate = (0, typeorm_2.MoreThanOrEqual)(date_util_1.DateUtil.date(startDate).getFirstDayOfMonth().toDate());
+            where.endDate = (0, typeorm_2.LessThanOrEqual)(date_util_1.DateUtil.date(endDate).getLastDayOfMonth().toDate());
+        }
+        const options = {
+            where,
+            order: {
+                startDate: 'DESC',
+            },
+        };
+        if (page && limit) {
+            options.skip = (page - 1) * limit;
+            options.take = limit;
+        }
+        const reservations = await this.domainReservationService.findAll(options);
+        const reservationWithParticipants = await this.domainReservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_2.In)(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['resource', 'participants', 'participants.employee', 'reservationVehicles'],
+            withDeleted: true,
+        });
+        const count = await this.domainReservationService.count({
+            where: {
+                reservationId: (0, typeorm_2.In)(reservations.map((r) => r.reservationId)),
+            },
+        });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations)
+            .map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }))
+            .sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateB.getTime() - dateA.getTime();
+        });
+        return {
+            items: groupedReservationsResponse,
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+    async 내_다가오는_예약목록을_조회한다(employeeId, query, resourceType) {
+        const { page, limit } = query;
+        const today = date_util_1.DateUtil.date(date_util_1.DateUtil.now().format('YYYY-MM-DD 00:00:00')).toDate();
+        const where = {
+            participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
+            endDate: (0, typeorm_2.MoreThanOrEqual)(today),
+        };
+        if (resourceType) {
+            where.resource = {
+                type: resourceType,
+            };
+        }
+        const options = {
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+        };
+        const reservations = await this.domainReservationService.findAll(options);
+        const count = reservations.length;
+        const reservationWithParticipants = await this.domainReservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_2.In)(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['resource', 'participants', 'participants.employee'],
+            order: {
+                startDate: 'ASC',
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+            withDeleted: true,
+        });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }));
+        return {
+            items: groupedReservationsResponse,
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+    async 내_이용중인_예약목록을_조회한다(employeeId) {
+        const where = [
+            {
+                participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
+                resource: { type: resource_type_enum_1.ResourceType.VEHICLE },
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                startDate: (0, typeorm_2.LessThanOrEqual)(date_util_1.DateUtil.date(date_util_1.DateUtil.now().format()).toDate()),
+                endDate: (0, typeorm_2.MoreThanOrEqual)(date_util_1.DateUtil.date(date_util_1.DateUtil.now().format()).toDate()),
+            },
+            {
+                participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
+                status: reservation_type_enum_1.ReservationStatus.CLOSED,
+                reservationVehicles: {
+                    isReturned: false,
+                },
+            },
+        ];
+        const reservations = await this.domainReservationService.findAll({
+            where,
+            relations: ['resource', 'reservationVehicles', 'participants'],
+            order: {
+                startDate: 'ASC',
+            },
+            withDeleted: true,
+        });
+        reservations.sort((a, b) => {
+            if (a.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                return -1;
+            }
+            return 1;
+        });
+        return {
+            items: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+            meta: {
+                total: reservations.length,
+                page: 1,
+                limit: reservations.length,
+                hasNext: false,
+            },
+        };
+    }
+    async 자원별_예약목록을_조회한다(employeeId, resourceId, page, limit, month, isMine) {
+        const monthStart = `${month}-01 00:00:00`;
+        const lastDay = date_util_1.DateUtil.date(month).getLastDayOfMonth().getDate();
+        const monthEnd = `${month}-${lastDay} 23:59:59`;
+        const monthStartDate = date_util_1.DateUtil.date(monthStart).toDate();
+        const monthEndDate = date_util_1.DateUtil.date(monthEnd).toDate();
+        const dateCondition = (0, typeorm_2.Raw)((alias) => `(${alias} BETWEEN :monthStartDate AND :monthEndDate OR
+              "Reservation"."endDate" BETWEEN :monthStartDate AND :monthEndDate OR
+              (${alias} <= :monthStartDate AND "Reservation"."endDate" >= :monthEndDate))`, { monthStartDate, monthEndDate });
+        const where = {
+            startDate: dateCondition,
+            resourceId: resourceId,
+        };
+        const resource = await this.domainResourceService.findOne({
+            where: { resourceId: resourceId },
+        });
+        if (!resource) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
+        }
+        if (isMine) {
+            where.participants = { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER };
+        }
+        const options = {
+            where,
+        };
+        if (page && limit) {
+            options.skip = (page - 1) * limit;
+            options.take = limit;
+        }
+        const reservations = await this.domainReservationService.findAll(options);
+        const count = await this.domainReservationService.count({ where });
+        const reservationWithParticipants = await this.domainReservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_2.In)(reservations.map((r) => r.reservationId)),
+            },
+            relations: ['participants', 'participants.employee'],
+            withDeleted: true,
+        });
+        const groupedReservations = reservationWithParticipants.reduce((acc, reservation) => {
+            const date = date_util_1.DateUtil.format(reservation.startDate, 'YYYY-MM-DD');
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(reservation);
+            return acc;
+        }, {});
+        const groupedReservationsResponse = Object.entries(groupedReservations).map(([date, reservations]) => ({
+            date,
+            reservations: reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation)),
+        }));
+        return {
+            resource: new dtos_index_1.ResourceResponseDto(resource),
+            groupedReservations: groupedReservationsResponse,
+        };
+    }
+    async 예약_상세를_조회한다(user, reservationId) {
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId },
+            relations: [
+                'resource',
+                'resource.vehicleInfo',
+                'resource.meetingRoomInfo',
+                'resource.accommodationInfo',
+                'participants',
+                'participants.employee',
+                'reservationVehicles',
+            ],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        const reservationResponseDto = new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation);
+        reservationResponseDto.isMine = reservationResponseDto.reservers.some((reserver) => reserver.employeeId === user.employeeId);
+        reservationResponseDto.returnable =
+            reservationResponseDto.resource.type === resource_type_enum_1.ResourceType.VEHICLE
+                ? reservationResponseDto.isMine &&
+                    reservationResponseDto.reservationVehicles.some((reservationVehicle) => !reservationVehicle.isReturned) &&
+                    reservationResponseDto.startDate <= date_util_1.DateUtil.now().format()
+                : null;
+        reservationResponseDto.modifiable =
+            [reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED].includes(reservation.status) &&
+                reservationResponseDto.isMine &&
+                reservationResponseDto.endDate > date_util_1.DateUtil.now().format();
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationData: (0, typeorm_2.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`),
+                employees: {
+                    employeeId: user.employeeId,
+                    isRead: false,
+                },
+            },
+            relations: ['employees'],
+        });
+        if (notifications.length > 0) {
+            const employeeNotifications = notifications
+                .map((notification) => notification.employees.map((employee) => employee.employeeNotificationId).flat())
+                .flat();
+            const updatedEmployeeNotifications = await Promise.all(employeeNotifications.map((employeeNotificationId) => this.domainEmployeeNotificationService.update(employeeNotificationId, {
+                isRead: true,
+            })));
+        }
+        return reservationResponseDto;
+    }
+    async 예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status) {
+        if (startDate && endDate && startDate > endDate) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
+        }
+        if (status && status.filter((s) => reservation_type_enum_1.ReservationStatus[s]).length === 0) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
+        }
+        const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+        let where = {};
+        if (status && status.length > 0) {
+            where.status = (0, typeorm_2.In)(status);
+        }
+        if (resourceType) {
+            where.resource = {
+                type: resourceType,
+            };
+        }
+        if (resourceId) {
+            where.resource = {
+                resourceId,
+            };
+        }
+        if (startDate && endDate) {
+            where = {
+                ...where,
+                startDate: (0, typeorm_2.LessThan)(date_util_1.DateUtil.date(regex.test(endDate) ? endDate : endDate + ' 23:59:59').toDate()),
+                endDate: (0, typeorm_2.MoreThan)(date_util_1.DateUtil.date(regex.test(startDate) ? startDate : startDate + ' 00:00:00').toDate()),
+            };
+        }
+        const reservations = await this.domainReservationService.findAll({
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+            withDeleted: true,
+        });
+        const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation));
+        return reservationResponseDtos;
+    }
+    async 예약_접근권한을_확인한다(reservationId, employeeId) {
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId, participants: { employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER } },
+            relations: ['participants'],
+        });
+        if (!reservation) {
+            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.COMMON.UNAUTHORIZED);
+        }
+        return true;
+    }
+    async 예약을_생성한다(user, createDto) {
+        const conflicts = await this.충돌_예약을_조회한다(createDto.resourceId, date_util_1.DateUtil.date(createDto.startDate).toDate(), date_util_1.DateUtil.date(createDto.endDate).toDate());
+        if (conflicts.length > 0) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
+        }
+        if (createDto.startDate > createDto.endDate) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
+        }
+        const resource = await this.domainResourceService.findOne({
+            where: { resourceId: createDto.resourceId },
+            relations: ['vehicleInfo'],
+        });
+        if (!resource.isAvailable) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.RESOURCE_UNAVAILABLE);
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            createDto.status =
+                createDto.resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION
+                    ? reservation_type_enum_1.ReservationStatus.PENDING
+                    : reservation_type_enum_1.ReservationStatus.CONFIRMED;
+            const reservation = await this.domainReservationService.create(createDto);
+            reservation.startDate = date_util_1.DateUtil.date(createDto.startDate).toDate();
+            reservation.endDate = date_util_1.DateUtil.date(createDto.endDate).toDate();
+            const savedReservation = await this.domainReservationService.save(reservation, {
+                queryRunner,
+            });
+            if (createDto.resourceType === resource_type_enum_1.ResourceType.VEHICLE) {
+                const reservationVehicle = new entities_1.ReservationVehicle();
+                reservationVehicle.reservationId = savedReservation.reservationId;
+                reservationVehicle.vehicleInfoId = resource.vehicleInfo.vehicleInfoId;
+                reservationVehicle.startOdometer = resource.vehicleInfo.totalMileage;
+                reservationVehicle.isReturned = false;
+                reservationVehicle.returnedAt = null;
+                await this.domainReservationVehicleService.save(reservationVehicle, {
+                    queryRunner,
+                });
+            }
+            await Promise.all([
+                this.domainReservationParticipantService.save({
+                    reservationId: savedReservation.reservationId,
+                    employeeId: user.employeeId,
+                    type: reservation_type_enum_1.ParticipantsType.RESERVER,
+                }, { queryRunner }),
+                ...createDto.participantIds.map((employeeId) => this.domainReservationParticipantService.save({
+                    reservationId: savedReservation.reservationId,
+                    employeeId,
+                    type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
+                }, { queryRunner })),
+            ]);
+            await queryRunner.commitTransaction();
+            if (resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
+                await this.예약_종료작업을_생성한다(savedReservation);
+            }
+            try {
+                const reservationWithResource = await this.domainReservationService.findOne({
+                    where: { reservationId: savedReservation.reservationId },
+                    relations: ['resource'],
+                    withDeleted: true,
+                });
+                if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                    const notiTarget = [...createDto.participantIds, user.employeeId];
+                    await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, {
+                        reservationId: reservationWithResource.reservationId,
+                        reservationTitle: reservationWithResource.title,
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(reservationWithResource.startDate), date_util_1.DateUtil.format(reservationWithResource.endDate)),
+                        resourceId: reservationWithResource.resource.resourceId,
+                        resourceName: reservationWithResource.resource.name,
+                        resourceType: reservationWithResource.resource.type,
+                    }, notiTarget);
+                    for (const beforeMinutes of reservationWithResource.notifyMinutesBeforeStart) {
+                        await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+                            reservationId: reservationWithResource.reservationId,
+                            reservationTitle: reservationWithResource.title,
+                            resourceId: reservationWithResource.resource.resourceId,
+                            resourceName: reservationWithResource.resource.name,
+                            resourceType: reservationWithResource.resource.type,
+                            reservationDate: date_util_1.DateUtil.format(reservationWithResource.startDate),
+                            beforeMinutes: beforeMinutes,
+                        }, notiTarget);
+                    }
+                }
+                else if (reservationWithResource.status === reservation_type_enum_1.ReservationStatus.PENDING &&
+                    reservationWithResource.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+                    const systemAdmins = await this.domainEmployeeService.findAll({
+                        where: {
+                            roles: (0, typeorm_2.Raw)(() => `'${role_type_enum_1.Role.SYSTEM_ADMIN}' = ANY("roles")`),
+                        },
+                    });
+                    await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING, {
+                        reservationId: reservationWithResource.reservationId,
+                        reservationTitle: reservationWithResource.title,
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(reservationWithResource.startDate), date_util_1.DateUtil.format(reservationWithResource.endDate)),
+                        resourceId: reservationWithResource.resource.resourceId,
+                        resourceName: reservationWithResource.resource.name,
+                        resourceType: reservationWithResource.resource.type,
+                    }, systemAdmins.map((user) => user.employeeId));
+                }
+            }
+            catch (error) {
+                console.log(error);
+                console.log('Notification creation failed');
+            }
+            return {
+                reservationId: savedReservation.reservationId,
+            };
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+    async 예약을_수정한다(reservationId, updateDto) {
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId, status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED]) },
+            relations: ['resource', 'participants'],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+        }
+        let hasUpdateTime = false;
+        let hasUpdateParticipants = false;
+        if (updateDto.participantIds) {
+            hasUpdateParticipants =
+                updateDto.participantIds.length !==
+                    reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT).length ||
+                    updateDto.participantIds.some((id) => !reservation.participants.some((p) => p.employeeId === id));
+        }
+        if (updateDto.resourceId && updateDto.startDate && updateDto.endDate) {
+            hasUpdateTime = true;
+            const conflicts = await this.충돌_예약을_조회한다(updateDto.resourceId, date_util_1.DateUtil.date(updateDto.startDate).toDate(), date_util_1.DateUtil.date(updateDto.endDate).toDate(), reservationId);
+            if (conflicts.length > 0) {
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.TIME_CONFLICT);
+            }
+            if (reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED &&
+                reservation.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_ACCOMMODATION_TIME);
+            }
+        }
+        const participantIds = updateDto.participantIds;
+        delete updateDto.participantIds;
+        let updatedReservation = await this.domainReservationService.findOne({
+            where: { reservationId },
+            relations: ['participants', 'resource'],
+            withDeleted: true,
+        });
+        const hasUpdateTings = updateDto.title || updateDto.isAllDay || updateDto.notifyBeforeStart || updateDto.notifyMinutesBeforeStart;
+        if (hasUpdateTings) {
+            updatedReservation = await this.domainReservationService.update(reservationId, {
+                title: updateDto?.title || undefined,
+                isAllDay: updateDto?.isAllDay || undefined,
+                notifyBeforeStart: updateDto?.notifyBeforeStart || undefined,
+                notifyMinutesBeforeStart: updateDto?.notifyMinutesBeforeStart || undefined,
+            }, {
+                where: { reservationId },
+                relations: ['participants', 'resource'],
+                withDeleted: true,
+            });
+        }
+        if (hasUpdateParticipants) {
+            const participants = reservation.participants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
+            const newParticipants = participantIds.filter((id) => !participants.some((p) => p.employeeId === id));
+            const deletedParticipants = participants.filter((p) => !participantIds.includes(p.employeeId));
+            await Promise.all(deletedParticipants.map((participant) => this.domainReservationParticipantService.delete(participant.participantId)));
+            await Promise.all(newParticipants.map((employeeId) => this.domainReservationParticipantService.save({
+                reservationId,
+                employeeId,
+                type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
+            })));
+            if (updatedReservation.resource.notifyParticipantChange) {
+                try {
+                    const notiTarget = [...newParticipants, ...participants.map((p) => p.employeeId)];
+                    await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED, {
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
+                    }, notiTarget);
+                }
+                catch (error) {
+                    console.log(error);
+                    console.log('Notification creation failed in updateParticipants');
+                }
+            }
+        }
+        if (hasUpdateTime) {
+            updatedReservation = await this.domainReservationService.update(reservationId, {
+                startDate: updateDto.startDate ? date_util_1.DateUtil.date(updateDto.startDate).toDate() : undefined,
+                endDate: updateDto.endDate ? date_util_1.DateUtil.date(updateDto.endDate).toDate() : undefined,
+            }, {
+                where: { reservationId },
+                relations: ['participants', 'resource'],
+                withDeleted: true,
+            });
+            if (updatedReservation.resource.notifyReservationChange) {
+                try {
+                    await this.notificationService.deleteScheduleJob(updatedReservation.reservationId);
+                    const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+                    await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED, {
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
+                        reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
+                    }, notiTarget);
+                    for (const beforeMinutes of updatedReservation.notifyMinutesBeforeStart) {
+                        await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+                            reservationId: updatedReservation.reservationId,
+                            reservationTitle: updatedReservation.title,
+                            resourceId: updatedReservation.resource.resourceId,
+                            resourceName: updatedReservation.resource.name,
+                            resourceType: updatedReservation.resource.type,
+                            reservationDate: date_util_1.DateUtil.format(updatedReservation.startDate),
+                            beforeMinutes: beforeMinutes,
+                        }, notiTarget);
+                    }
+                }
+                catch (error) {
+                    console.log(error);
+                    console.log('Notification creation failed in updateTime');
+                }
+            }
+        }
+        return new reservation_response_dto_2.ReservationResponseDto(updatedReservation);
+    }
+    async 예약상태를_변경한다(reservationId, updateDto) {
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId },
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        if (reservation.status === reservation_type_enum_1.ReservationStatus.CLOSED) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+        }
+        const updatedReservation = await this.domainReservationService.update(reservationId, updateDto, {
+            relations: ['resource', 'resource.resourceManagers', 'participants', 'participants.employee'],
+            withDeleted: true,
+        });
+        if (updateDto.status === reservation_type_enum_1.ReservationStatus.CANCELLED || updateDto.status === reservation_type_enum_1.ReservationStatus.REJECTED) {
+            this.예약_종료작업을_삭제한다(reservationId);
+        }
+        if (updateDto.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+            this.예약_종료작업을_생성한다(updatedReservation);
+        }
+        const notiTarget = [
+            ...updatedReservation.resource.resourceManagers.map((manager) => manager.employeeId),
+            ...updatedReservation.participants.map((reserver) => reserver.employeeId),
+        ];
+        if (updatedReservation.resource.notifyReservationChange && updateDto.status !== reservation_type_enum_1.ReservationStatus.CLOSED) {
+            try {
+                let notificationType;
+                switch (updateDto.status) {
+                    case reservation_type_enum_1.ReservationStatus.CONFIRMED:
+                        notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED;
+                        break;
+                    case reservation_type_enum_1.ReservationStatus.CANCELLED:
+                        notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED;
+                        break;
+                    case reservation_type_enum_1.ReservationStatus.REJECTED:
+                        notificationType = notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED;
+                        break;
+                }
+                await this.notificationService.createNotification(notificationType, {
+                    reservationId: updatedReservation.reservationId,
+                    reservationTitle: updatedReservation.title,
+                    reservationDate: date_util_1.DateUtil.toAlarmRangeString(date_util_1.DateUtil.format(updatedReservation.startDate), date_util_1.DateUtil.format(updatedReservation.endDate)),
+                    resourceId: updatedReservation.resource.resourceId,
+                    resourceName: updatedReservation.resource.name,
+                    resourceType: updatedReservation.resource.type,
+                }, notiTarget);
+                if (updateDto.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+                    for (const beforeMinutes of updatedReservation.notifyMinutesBeforeStart) {
+                        await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, {
+                            reservationId: updatedReservation.reservationId,
+                            reservationTitle: updatedReservation.title,
+                            resourceId: updatedReservation.resource.resourceId,
+                            resourceName: updatedReservation.resource.name,
+                            resourceType: updatedReservation.resource.type,
+                            reservationDate: date_util_1.DateUtil.format(updatedReservation.startDate),
+                            beforeMinutes: beforeMinutes,
+                        }, notiTarget);
+                    }
+                }
+            }
+            catch (error) {
+                console.log(error);
+                console.log('Notification creation failed in updateStatus');
+            }
+        }
+        return new reservation_response_dto_2.ReservationResponseDto(updatedReservation);
+    }
+    async 예약을_취소한다(reservationId) {
+        return this.예약상태를_변경한다(reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELLED });
+    }
+    async 차량을_반납한다(user, reservationId, returnDto) {
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId },
+            relations: ['resource', 'resource.vehicleInfo', 'resource.resourceManagers'],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        if (reservation.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_RESOURCE_TYPE);
+        }
+        if (reservation.status !== reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_RETURN_STATUS(reservation.status));
+        }
+        if (reservation.resource.vehicleInfo.totalMileage > returnDto.totalMileage) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_MILEAGE);
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const reservationVehicles = await this.domainReservationVehicleService.findAll({
+                where: { reservationId },
+                relations: ['reservation', 'vehicleInfo'],
+            });
+            if (!reservationVehicles || reservationVehicles.length === 0) {
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_NOT_FOUND);
+            }
+            const reservationVehicle = reservationVehicles[0];
+            if (reservationVehicle.isReturned) {
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_ALREADY_RETURNED);
+            }
+            await this.domainReservationService.update(reservationId, {
+                status: reservation_type_enum_1.ReservationStatus.CLOSED,
+            }, { queryRunner });
+            await this.domainReservationVehicleService.update(reservationVehicle.reservationVehicleId, {
+                endOdometer: returnDto.totalMileage,
+                isReturned: true,
+                returnedAt: date_util_1.DateUtil.now().toDate(),
+            }, { queryRunner });
+            const vehicleInfoId = reservation.resource.vehicleInfo.vehicleInfoId;
+            await this.domainResourceService.update(reservation.resource.resourceId, { location: returnDto.location }, { queryRunner });
+            if (!returnDto.parkingLocationImages)
+                returnDto.parkingLocationImages = [];
+            if (!returnDto.odometerImages)
+                returnDto.odometerImages = [];
+            if (!returnDto.indoorImages)
+                returnDto.indoorImages = [];
+            returnDto.parkingLocationImages = returnDto.parkingLocationImages.map((image) => this.domainFileService.getFileUrl(image));
+            returnDto.odometerImages = returnDto.odometerImages.map((image) => this.domainFileService.getFileUrl(image));
+            returnDto.indoorImages = returnDto.indoorImages.map((image) => this.domainFileService.getFileUrl(image));
+            const images = [...returnDto.parkingLocationImages, ...returnDto.odometerImages, ...returnDto.indoorImages];
+            if (images.length > 0) {
+                await this.domainFileService.updateTemporaryFiles(images, false, {
+                    queryRunner,
+                });
+            }
+            await this.domainVehicleInfoService.update(vehicleInfoId, {
+                totalMileage: returnDto.totalMileage,
+                leftMileage: returnDto.leftMileage,
+                parkingLocationImages: returnDto.parkingLocationImages,
+                odometerImages: returnDto.odometerImages,
+                indoorImages: returnDto.indoorImages,
+            }, { queryRunner });
+            const notiTarget = [user.employeeId];
+            await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED, {
+                resourceId: reservation.resource.resourceId,
+                resourceName: reservation.resource.name,
+                resourceType: reservation.resource.type,
+            }, notiTarget);
+            await queryRunner.commitTransaction();
+            return true;
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            console.error('Error in returnVehicle:', error);
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+    async 예약_연장가능여부를_확인한다(employeeId, reservationId) {
+        throw new Error('Method not implemented yet - need to migrate from existing usecase');
+    }
+    async 예약을_연장한다(employeeId, reservationId, extendDto) {
+        throw new Error('Method not implemented yet - need to migrate from existing usecase');
+    }
+    async 크론_작업을_처리한다() {
+        const now = date_util_1.DateUtil.now().format();
+        const notClosedReservations = await this.domainReservationService.findAll({
+            where: {
+                status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING]),
+                resource: {
+                    type: (0, typeorm_2.Not)(resource_type_enum_1.ResourceType.VEHICLE),
+                },
+                endDate: (0, typeorm_2.LessThanOrEqual)(date_util_1.DateUtil.date(now).toDate()),
+            },
+        });
+        for (const reservation of notClosedReservations) {
+            await this.domainReservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+        }
+    }
+    async 시작주행거리를_처리한다() {
+        const now = date_util_1.DateUtil.now().format();
+        const vehicleReservations = await this.domainReservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                resource: {
+                    type: resource_type_enum_1.ResourceType.VEHICLE,
+                },
+                startDate: (0, typeorm_2.Between)(date_util_1.DateUtil.date(now).addMinutes(-2).toDate(), date_util_1.DateUtil.date(now).addMinutes(2).toDate()),
+            },
+            relations: ['reservationVehicles', 'resource', 'resource.vehicleInfo'],
+        });
+        for (const reservation of vehicleReservations) {
+            const reservationVehicle = reservation.reservationVehicles[0];
+            const vehicleInfo = reservation.resource.vehicleInfo;
+            await this.domainReservationVehicleService.update(reservationVehicle.reservationVehicleId, {
+                startOdometer: vehicleInfo.totalMileage,
+            });
+        }
+    }
+    async 예약_종료작업을_생성한다(reservation) {
+        const jobName = `closing-${reservation.reservationId}`;
+        console.log('createReservationClosingJob', jobName);
+        const executeTime = date_util_1.DateUtil.date(reservation.endDate).toDate();
+        if (executeTime.getTime() <= Date.now()) {
+            console.log(`ExecuteTime time ${executeTime} is in the past, skipping cron job creation`);
+            await this.domainReservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+            return;
+        }
+        this.예약_종료작업을_삭제한다(reservation.reservationId);
+        const job = new cron_1.CronJob(executeTime, async () => {
+            await this.domainReservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED });
+        });
+        this.schedulerRegistry.addCronJob(jobName, job);
+        job.start();
+    }
+    예약_종료작업을_삭제한다(reservationId) {
+        const jobName = `closing-${reservationId}`;
+        try {
+            if (this.schedulerRegistry.doesExist('cron', jobName)) {
+                this.schedulerRegistry.deleteCronJob(jobName);
+                console.log(`Job ${jobName} deleted successfully`);
+            }
+        }
+        catch (error) {
+            console.log(`Failed to delete job ${jobName}: ${error.message}`);
+        }
+    }
+};
+exports.ReservationContextService = ReservationContextService;
+exports.ReservationContextService = ReservationContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _e : Object, typeof (_f = typeof reservation_participant_service_1.DomainReservationParticipantService !== "undefined" && reservation_participant_service_1.DomainReservationParticipantService) === "function" ? _f : Object, typeof (_g = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _g : Object, typeof (_h = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _h : Object, typeof (_j = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _j : Object, typeof (_k = typeof notification_service_2.NotificationService !== "undefined" && notification_service_2.NotificationService) === "function" ? _k : Object, typeof (_l = typeof schedule_1.SchedulerRegistry !== "undefined" && schedule_1.SchedulerRegistry) === "function" ? _l : Object, typeof (_m = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _m : Object])
+], ReservationContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/resource/resource.context.module.ts":
+/*!*********************************************************!*\
+  !*** ./src/context/resource/resource.context.module.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceContextModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
+const resource_group_module_1 = __webpack_require__(/*! @src/domain/resource-group/resource-group.module */ "./src/domain/resource-group/resource-group.module.ts");
+const resource_manager_module_1 = __webpack_require__(/*! @src/domain/resource-manager/resource-manager.module */ "./src/domain/resource-manager/resource-manager.module.ts");
+const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
+const meeting_room_info_module_1 = __webpack_require__(/*! @src/domain/meeting-room-info/meeting-room-info.module */ "./src/domain/meeting-room-info/meeting-room-info.module.ts");
+const accommodation_info_module_1 = __webpack_require__(/*! @src/domain/accommodation-info/accommodation-info.module */ "./src/domain/accommodation-info/accommodation-info.module.ts");
+const equipment_info_module_1 = __webpack_require__(/*! @src/domain/equipment-info/equipment-info.module */ "./src/domain/equipment-info/equipment-info.module.ts");
+const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
+const consumable_module_1 = __webpack_require__(/*! @src/domain/consumable/consumable.module */ "./src/domain/consumable/consumable.module.ts");
+const maintenance_module_1 = __webpack_require__(/*! @src/domain/maintenance/maintenance.module */ "./src/domain/maintenance/maintenance.module.ts");
+const reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.module */ "./src/domain/reservation-vehicle/reservation-vehicle.module.ts");
+const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+const notification_module_1 = __webpack_require__(/*! @src/application/notification/notification.module */ "./src/application/notification/notification.module.ts");
+const resource_context_service_1 = __webpack_require__(/*! ./services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
+const resource_group_context_service_1 = __webpack_require__(/*! ./services/resource-group.context.service */ "./src/context/resource/services/resource-group.context.service.ts");
+const vehicle_info_context_service_1 = __webpack_require__(/*! ./services/vehicle-info.context.service */ "./src/context/resource/services/vehicle-info.context.service.ts");
+const consumable_context_service_1 = __webpack_require__(/*! ./services/consumable.context.service */ "./src/context/resource/services/consumable.context.service.ts");
+const maintenance_context_service_1 = __webpack_require__(/*! ./services/maintenance.context.service */ "./src/context/resource/services/maintenance.context.service.ts");
+let ResourceContextModule = class ResourceContextModule {
+};
+exports.ResourceContextModule = ResourceContextModule;
+exports.ResourceContextModule = ResourceContextModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            resource_module_1.DomainResourceModule,
+            resource_group_module_1.DomainResourceGroupModule,
+            resource_manager_module_1.DomainResourceManagerModule,
+            vehicle_info_module_1.DomainVehicleInfoModule,
+            meeting_room_info_module_1.DomainMeetingRoomInfoModule,
+            accommodation_info_module_1.DomainAccommodationInfoModule,
+            equipment_info_module_1.DomainEquipmentInfoModule,
+            file_module_1.DomainFileModule,
+            consumable_module_1.DomainConsumableModule,
+            maintenance_module_1.DomainMaintenanceModule,
+            reservation_vehicle_module_1.DomainReservationVehicleModule,
+            employee_module_1.DomainEmployeeModule,
+            notification_module_1.NotificationModule,
+        ],
+        providers: [
+            resource_context_service_1.ResourceContextService,
+            resource_group_context_service_1.ResourceGroupContextService,
+            vehicle_info_context_service_1.VehicleInfoContextService,
+            consumable_context_service_1.ConsumableContextService,
+            maintenance_context_service_1.MaintenanceContextService,
+        ],
+        exports: [
+            resource_context_service_1.ResourceContextService,
+            resource_group_context_service_1.ResourceGroupContextService,
+            vehicle_info_context_service_1.VehicleInfoContextService,
+            consumable_context_service_1.ConsumableContextService,
+            maintenance_context_service_1.MaintenanceContextService,
+        ],
+    })
+], ResourceContextModule);
+
+
+/***/ }),
+
+/***/ "./src/context/resource/services/consumable.context.service.ts":
+/*!*********************************************************************!*\
+  !*** ./src/context/resource/services/consumable.context.service.ts ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConsumableContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
+const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
+let ConsumableContextService = class ConsumableContextService {
+    constructor(domainConsumableService, domainVehicleInfoService) {
+        this.domainConsumableService = domainConsumableService;
+        this.domainVehicleInfoService = domainVehicleInfoService;
+    }
+    async 소모품을_저장한다(createConsumableDto) {
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: {
+                vehicleInfoId: createConsumableDto.vehicleInfoId,
+            },
+            relations: ['consumables'],
+        });
+        if (!vehicleInfo) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        }
+        createConsumableDto.initMileage = vehicleInfo.totalMileage;
+        if (vehicleInfo.consumables.length > 0) {
+            const hasSameName = vehicleInfo.consumables.some((consumable) => consumable.name === createConsumableDto.name);
+            if (hasSameName) {
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.ALREADY_EXISTS);
+            }
+        }
+        const savedConsumable = await this.domainConsumableService.save(createConsumableDto);
+        return {
+            consumableId: savedConsumable.consumableId,
+            vehicleInfoId: savedConsumable.vehicleInfoId,
+            name: savedConsumable.name,
+            replaceCycle: savedConsumable.replaceCycle,
+            notifyReplacementCycle: savedConsumable.notifyReplacementCycle,
+        };
+    }
+    async 차량별_소모품목록을_조회한다(vehicleInfoId) {
+        const consumables = await this.domainConsumableService.findAll({
+            where: { vehicleInfoId },
+            relations: ['maintenances'],
+            order: { name: 'ASC' },
+        });
+        return consumables.map((consumable) => ({
+            consumableId: consumable.consumableId,
+            vehicleInfoId: consumable.vehicleInfoId,
+            name: consumable.name,
+            replaceCycle: consumable.replaceCycle,
+            notifyReplacementCycle: consumable.notifyReplacementCycle,
+            maintenances: consumable.maintenances,
+        }));
+    }
+    async 소모품을_조회한다(consumableId) {
+        const consumable = await this.domainConsumableService.findOne({
+            where: { consumableId },
+            relations: ['maintenances'],
+        });
+        if (!consumable) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.NOT_FOUND);
+        }
+        return {
+            consumableId: consumable.consumableId,
+            vehicleInfoId: consumable.vehicleInfoId,
+            name: consumable.name,
+            replaceCycle: consumable.replaceCycle,
+            notifyReplacementCycle: consumable.notifyReplacementCycle,
+            maintenances: consumable.maintenances,
+        };
+    }
+    async 소모품을_수정한다(consumableId, updateConsumableDto) {
+        const existingConsumable = await this.domainConsumableService.findOne({
+            where: { consumableId },
+        });
+        if (!existingConsumable) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.NOT_FOUND);
+        }
+        const vehicleConsumables = await this.domainConsumableService.findAll({
+            where: { vehicleInfoId: updateConsumableDto.vehicleInfoId },
+        });
+        const hasSameName = vehicleConsumables.some((consumable) => consumable.name === updateConsumableDto.name && consumable.consumableId !== consumableId);
+        if (hasSameName) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.ALREADY_EXISTS);
+        }
+        await this.domainConsumableService.update(consumableId, updateConsumableDto);
+        const updatedConsumable = await this.domainConsumableService.findOne({
+            where: { consumableId },
+            relations: ['maintenances'],
+        });
+        return {
+            consumableId: updatedConsumable.consumableId,
+            vehicleInfoId: updatedConsumable.vehicleInfoId,
+            name: updatedConsumable.name,
+            replaceCycle: updatedConsumable.replaceCycle,
+            notifyReplacementCycle: updatedConsumable.notifyReplacementCycle,
+            maintenances: updatedConsumable.maintenances,
+        };
+    }
+    async 소모품을_삭제한다(consumableId) {
+        const consumable = await this.domainConsumableService.findOne({
+            where: { consumableId },
+            relations: ['maintenances'],
+        });
+        if (!consumable) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.NOT_FOUND);
+        }
+        if (consumable.maintenances && consumable.maintenances.length > 0) {
+            throw new common_1.BadRequestException('정비 이력이 있는 소모품은 삭제할 수 없습니다.');
+        }
+        await this.domainConsumableService.delete(consumableId);
+    }
+};
+exports.ConsumableContextService = ConsumableContextService;
+exports.ConsumableContextService = ConsumableContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _a : Object, typeof (_b = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _b : Object])
+], ConsumableContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/resource/services/maintenance.context.service.ts":
+/*!**********************************************************************!*\
+  !*** ./src/context/resource/services/maintenance.context.service.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f, _g;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MaintenanceContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const maintenance_service_1 = __webpack_require__(/*! @src/domain/maintenance/maintenance.service */ "./src/domain/maintenance/maintenance.service.ts");
+const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
+const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
+let MaintenanceContextService = class MaintenanceContextService {
+    constructor(domainMaintenanceService, domainConsumableService, domainVehicleInfoService, domainEmployeeService, domainFileService, notificationService, dataSource) {
+        this.domainMaintenanceService = domainMaintenanceService;
+        this.domainConsumableService = domainConsumableService;
+        this.domainVehicleInfoService = domainVehicleInfoService;
+        this.domainEmployeeService = domainEmployeeService;
+        this.domainFileService = domainFileService;
+        this.notificationService = notificationService;
+        this.dataSource = dataSource;
+    }
+    async 정비이력을_저장한다(createMaintenanceDto) {
+        const existingMaintenance = await this.domainMaintenanceService.findOne({
+            where: {
+                consumableId: createMaintenanceDto.consumableId,
+                date: (0, typeorm_1.MoreThanOrEqual)(createMaintenanceDto.date),
+            },
+        });
+        if (existingMaintenance) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.INVALID_DATE);
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            if (!createMaintenanceDto.images)
+                createMaintenanceDto.images = [];
+            createMaintenanceDto.images = createMaintenanceDto.images.map((image) => this.domainFileService.getFileUrl(image));
+            const maintenance = await this.domainMaintenanceService.save(createMaintenanceDto, { queryRunner });
+            await this.domainFileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
+            if (createMaintenanceDto.mileage) {
+                const consumable = await this.domainConsumableService.findOne({
+                    where: { consumableId: maintenance.consumableId },
+                    relations: ['vehicleInfo'],
+                });
+                if (consumable.vehicleInfo.totalMileage < createMaintenanceDto.mileage) {
+                    await this.domainVehicleInfoService.update(consumable.vehicleInfo.vehicleInfoId, {
+                        totalMileage: createMaintenanceDto.mileage,
+                    }, { queryRunner });
+                }
+            }
+            await queryRunner.commitTransaction();
+            const systemAdmins = await this.domainEmployeeService.findAll({
+                where: {
+                    roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.SYSTEM_ADMIN}' = ANY("roles")`),
+                },
+            });
+            const consumable = await this.domainConsumableService.findOne({
+                where: { consumableId: maintenance.consumableId },
+                relations: ['vehicleInfo', 'vehicleInfo.resource'],
+                withDeleted: true,
+            });
+            await this.notificationService.createNotification(notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED, {
+                resourceId: consumable.vehicleInfo.resource.resourceId,
+                resourceType: consumable.vehicleInfo.resource.type,
+                consumableName: consumable.name,
+                resourceName: consumable.vehicleInfo.resource.name,
+            }, systemAdmins.map((admin) => admin.employeeId));
+            return {
+                maintenanceId: maintenance.maintenanceId,
+                consumableId: maintenance.consumableId,
+                date: maintenance.date,
+                mileage: maintenance.mileage,
+                cost: maintenance.cost,
+                images: maintenance.images,
+            };
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+    async 모든_정비이력을_조회한다(user) {
+        const maintenances = await this.domainMaintenanceService.findAll({
+            relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
+            order: { date: 'DESC' },
+        });
+        return maintenances.map((maintenance) => ({
+            maintenanceId: maintenance.maintenanceId,
+            consumableId: maintenance.consumableId,
+            resourceName: maintenance.consumable?.vehicleInfo?.resource?.name,
+            consumableName: maintenance.consumable?.name,
+            date: maintenance.date,
+            mileage: maintenance.mileage,
+            cost: maintenance.cost,
+            images: maintenance.images,
+        }));
+    }
+    async 차량별_정비이력을_조회한다(vehicleInfoId, page = 1, limit = 10) {
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { vehicleInfoId },
+            relations: ['resource', 'consumables', 'consumables.maintenances'],
+            withDeleted: true,
+        });
+        const options = {
+            where: {
+                maintenanceId: (0, typeorm_1.In)(vehicleInfo.consumables.flatMap((consumable) => consumable.maintenances.map((maintenance) => maintenance.maintenanceId))),
+            },
+            withDeleted: true,
+        };
+        const count = await this.domainMaintenanceService.count(options);
+        if (page && limit) {
+            options.skip = (page - 1) * limit;
+            options.take = limit;
+        }
+        options.relations = ['consumable'];
+        options.order = { createdAt: 'DESC' };
+        const maintenances = await this.domainMaintenanceService.findAll(options);
+        return {
+            items: maintenances.map((maintenance, index, array) => ({
+                maintenanceId: maintenance.maintenanceId,
+                consumableId: maintenance.consumableId,
+                date: maintenance.date,
+                mileage: maintenance.mileage,
+                cost: maintenance.cost,
+                images: maintenance.images,
+                consumableName: maintenance.consumable.name,
+                resourceName: vehicleInfo.resource.name,
+                previousMileage: index !== array.length - 1 ? array[index + 1].mileage : 0,
+                isLatest: index === 0,
+            })),
+            meta: {
+                total: count,
+                page,
+                limit,
+                hasNext: page * limit < count,
+            },
+        };
+    }
+    async 정비이력을_조회한다(maintenanceId) {
+        const maintenance = await this.domainMaintenanceService.findOne({
+            where: { maintenanceId },
+            relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
+        });
+        if (!maintenance) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.NOT_FOUND);
+        }
+        return {
+            maintenanceId: maintenance.maintenanceId,
+            consumableId: maintenance.consumableId,
+            resourceName: maintenance.consumable?.vehicleInfo?.resource?.name,
+            consumableName: maintenance.consumable?.name,
+            date: maintenance.date,
+            mileage: maintenance.mileage,
+            cost: maintenance.cost,
+            images: maintenance.images,
+        };
+    }
+    async 정비이력을_수정한다(maintenanceId, updateMaintenanceDto) {
+        const existingMaintenance = await this.domainMaintenanceService.findOne({
+            where: { maintenanceId },
+        });
+        if (!existingMaintenance) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.NOT_FOUND);
+        }
+        if (updateMaintenanceDto.date && updateMaintenanceDto.date !== existingMaintenance.date) {
+            const conflictingMaintenance = await this.domainMaintenanceService.findOne({
+                where: {
+                    consumableId: existingMaintenance.consumableId,
+                    date: (0, typeorm_1.MoreThanOrEqual)(updateMaintenanceDto.date),
+                    maintenanceId: (0, typeorm_1.Not)(maintenanceId),
+                },
+            });
+            if (conflictingMaintenance) {
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.INVALID_DATE);
+            }
+        }
+        await this.domainMaintenanceService.update(maintenanceId, updateMaintenanceDto);
+        const updatedMaintenance = await this.domainMaintenanceService.findOne({
+            where: { maintenanceId },
+            relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
+        });
+        return {
+            maintenanceId: updatedMaintenance.maintenanceId,
+            consumableId: updatedMaintenance.consumableId,
+            resourceName: updatedMaintenance.consumable?.vehicleInfo?.resource?.name,
+            consumableName: updatedMaintenance.consumable?.name,
+            date: updatedMaintenance.date,
+            mileage: updatedMaintenance.mileage,
+            cost: updatedMaintenance.cost,
+            images: updatedMaintenance.images,
+        };
+    }
+    async 정비이력을_삭제한다(maintenanceId) {
+        const maintenance = await this.domainMaintenanceService.findOne({
+            where: { maintenanceId },
+        });
+        if (!maintenance) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.NOT_FOUND);
+        }
+        await this.domainMaintenanceService.delete(maintenanceId);
+    }
+};
+exports.MaintenanceContextService = MaintenanceContextService;
+exports.MaintenanceContextService = MaintenanceContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _e : Object, typeof (_f = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
+], MaintenanceContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/resource/services/resource-group.context.service.ts":
+/*!*************************************************************************!*\
+  !*** ./src/context/resource/services/resource-group.context.service.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceGroupContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const resource_group_service_1 = __webpack_require__(/*! @src/domain/resource-group/resource-group.service */ "./src/domain/resource-group/resource-group.service.ts");
+const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+let ResourceGroupContextService = class ResourceGroupContextService {
+    constructor(domainResourceGroupService, domainResourceService, dataSource) {
+        this.domainResourceGroupService = domainResourceGroupService;
+        this.domainResourceService = domainResourceService;
+        this.dataSource = dataSource;
+    }
+    async 상위_자원그룹을_조회한다() {
+        const resourceGroups = await this.domainResourceGroupService.findAll({
+            where: {
+                parentResourceGroupId: (0, typeorm_1.IsNull)(),
+            },
+            order: {
+                order: 'ASC',
+            },
+        });
+        return resourceGroups;
+    }
+    async 자원데이터포함_그룹목록을_조회한다(type) {
+        const whereCondition = {
+            parentResourceGroupId: (0, typeorm_1.IsNull)(),
+        };
+        if (type) {
+            whereCondition.type = type;
+        }
+        const parentGroups = await this.domainResourceGroupService.findAll({
+            where: whereCondition,
+            order: { order: 'ASC' },
+        });
+        const result = [];
+        for (const parentGroup of parentGroups) {
+            const childGroups = await this.domainResourceGroupService.findAll({
+                where: { parentResourceGroupId: parentGroup.resourceGroupId },
+                order: { order: 'ASC' },
+            });
+            const childGroupsWithResources = await Promise.all(childGroups.map(async (childGroup) => {
+                const resources = await this.domainResourceService.findAll({
+                    where: { resourceGroupId: childGroup.resourceGroupId },
+                    order: { order: 'ASC' },
+                });
+                const resourceSelectDtos = resources.map((resource) => ({
+                    resourceId: resource.resourceId,
+                    name: resource.name,
+                    images: resource.images,
+                    isAvailable: resource.isAvailable,
+                    unavailableReason: resource.unavailableReason,
+                    resourceGroupId: resource.resourceGroupId,
+                    order: resource.order,
+                }));
+                return {
+                    ...childGroup,
+                    resources: resourceSelectDtos,
+                };
+            }));
+            result.push({
+                ...parentGroup,
+                children: childGroupsWithResources,
+            });
+        }
+        return result;
+    }
+    async 자원그룹을_생성한다(createResourceGroupDto) {
+        const groups = await this.domainResourceGroupService.findAll({
+            where: { parentResourceGroupId: createResourceGroupDto.parentResourceGroupId },
+        });
+        const order = groups.length;
+        const savedGroup = await this.domainResourceGroupService.save({
+            ...createResourceGroupDto,
+            order,
+        });
+        return savedGroup;
+    }
+    async 자원그룹을_수정한다(resourceGroupId, updateResourceGroupDto) {
+        const existingGroup = await this.domainResourceGroupService.findOne({
+            where: { resourceGroupId },
+        });
+        if (!existingGroup) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE_GROUP.NOT_FOUND);
+        }
+        await this.domainResourceGroupService.update(resourceGroupId, updateResourceGroupDto);
+        const updatedGroup = await this.domainResourceGroupService.findOne({
+            where: { resourceGroupId },
+        });
+        return updatedGroup;
+    }
+    async 자원그룹_순서를_변경한다(updateResourceGroupOrdersDto) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            await Promise.all(updateResourceGroupOrdersDto.orders.map((order) => this.domainResourceGroupService.update(order.resourceGroupId, { order: order.newOrder }, { queryRunner })));
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+    async 자원그룹을_삭제한다(resourceGroupId) {
+        const group = await this.domainResourceGroupService.findOne({
+            where: { resourceGroupId },
+        });
+        if (!group) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE_GROUP.NOT_FOUND);
+        }
+        const childGroups = await this.domainResourceGroupService.findAll({
+            where: { parentResourceGroupId: resourceGroupId },
+        });
+        if (childGroups.length > 0) {
+            throw new Error('하위 그룹이 있는 그룹은 삭제할 수 없습니다.');
+        }
+        const resources = await this.domainResourceService.findAll({
+            where: { resourceGroupId },
+        });
+        if (resources.length > 0) {
+            throw new Error('자원이 있는 그룹은 삭제할 수 없습니다.');
+        }
+        await this.domainResourceGroupService.delete(resourceGroupId);
+    }
+};
+exports.ResourceGroupContextService = ResourceGroupContextService;
+exports.ResourceGroupContextService = ResourceGroupContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _a : Object, typeof (_b = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object])
+], ResourceGroupContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/resource/services/resource.context.service.ts":
+/*!*******************************************************************!*\
+  !*** ./src/context/resource/services/resource.context.service.ts ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+const resource_group_service_1 = __webpack_require__(/*! @src/domain/resource-group/resource-group.service */ "./src/domain/resource-group/resource-group.service.ts");
+const resource_manager_service_1 = __webpack_require__(/*! @src/domain/resource-manager/resource-manager.service */ "./src/domain/resource-manager/resource-manager.service.ts");
+const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
+const meeting_room_info_service_1 = __webpack_require__(/*! @src/domain/meeting-room-info/meeting-room-info.service */ "./src/domain/meeting-room-info/meeting-room-info.service.ts");
+const accommodation_info_service_1 = __webpack_require__(/*! @src/domain/accommodation-info/accommodation-info.service */ "./src/domain/accommodation-info/accommodation-info.service.ts");
+const equipment_info_service_1 = __webpack_require__(/*! @src/domain/equipment-info/equipment-info.service */ "./src/domain/equipment-info/equipment-info.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const resource_response_dto_1 = __webpack_require__(/*! @src/business/resource-management/dtos/resource/resource-response.dto */ "./src/business/resource-management/dtos/resource/resource-response.dto.ts");
+let ResourceContextService = class ResourceContextService {
+    constructor(domainResourceService, domainResourceGroupService, domainResourceManagerService, domainVehicleInfoService, domainMeetingRoomInfoService, domainAccommodationInfoService, domainEquipmentInfoService, domainFileService, dataSource) {
+        this.domainResourceService = domainResourceService;
+        this.domainResourceGroupService = domainResourceGroupService;
+        this.domainResourceManagerService = domainResourceManagerService;
+        this.domainVehicleInfoService = domainVehicleInfoService;
+        this.domainMeetingRoomInfoService = domainMeetingRoomInfoService;
+        this.domainAccommodationInfoService = domainAccommodationInfoService;
+        this.domainEquipmentInfoService = domainEquipmentInfoService;
+        this.domainFileService = domainFileService;
+        this.dataSource = dataSource;
+    }
+    async 자원_목록을_조회한다(type) {
+        let relations = [];
+        if (type === resource_type_enum_1.ResourceType.VEHICLE) {
+            relations = ['vehicleInfo', 'vehicleInfo.consumables'];
+        }
+        else if (type === resource_type_enum_1.ResourceType.MEETING_ROOM) {
+            relations = ['meetingRoomInfo'];
+        }
+        else if (type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+            relations = ['accommodationInfo'];
+        }
+        else if (type === resource_type_enum_1.ResourceType.EQUIPMENT) {
+            relations = ['equipmentInfo'];
+        }
+        const resources = await this.domainResourceService.findAll({
+            where: { type: type },
+            relations: relations,
+        });
+        return resources.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
+    }
+    async 자원과_상세정보를_생성한다(createResourceInfo) {
+        const { resource, typeInfo, managers } = createResourceInfo;
+        if (!resource.resourceGroupId) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.GROUP_ID_REQUIRED);
+        }
+        if (!managers || managers.length === 0) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.MANAGERS_REQUIRED);
+        }
+        const group = await this.domainResourceGroupService.findOne({
+            where: { resourceGroupId: resource.resourceGroupId },
+        });
+        if (!group) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE_GROUP.NOT_FOUND);
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const resources = await this.domainResourceService.findAll({
+                where: { resourceGroupId: group.resourceGroupId },
+            });
+            const resourceOrder = resources.length;
+            if (!resource.images)
+                resource.images = [];
+            resource.images = resource.images.map((image) => this.domainFileService.getFileUrl(image));
+            const savedResource = await this.domainResourceService.save({ ...resource, order: resourceOrder }, { queryRunner });
+            await this.domainFileService.updateTemporaryFiles(resource.images, false, { queryRunner });
+            switch (group.type) {
+                case resource_type_enum_1.ResourceType.VEHICLE:
+                    await this.domainVehicleInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
+                    break;
+                case resource_type_enum_1.ResourceType.MEETING_ROOM:
+                    await this.domainMeetingRoomInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
+                    break;
+                case resource_type_enum_1.ResourceType.ACCOMMODATION:
+                    await this.domainAccommodationInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
+                    break;
+                case resource_type_enum_1.ResourceType.EQUIPMENT:
+                    await this.domainEquipmentInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
+                    break;
+            }
+            await Promise.all([
+                ...managers.map((manager) => {
+                    return this.domainResourceManagerService.save({
+                        resourceId: savedResource.resourceId,
+                        employeeId: manager.employeeId,
+                    }, { queryRunner });
+                }),
+            ]);
+            await queryRunner.commitTransaction();
+            const resourceWithTypeInfo = await this.domainResourceService.findOne({
+                where: { resourceId: savedResource.resourceId },
+                relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo', 'equipmentInfo'],
+            });
+            return {
+                resourceId: resourceWithTypeInfo.resourceId,
+                type: resourceWithTypeInfo.type,
+                typeInfoId: resourceWithTypeInfo.vehicleInfo?.vehicleInfoId ||
+                    resourceWithTypeInfo.meetingRoomInfo?.meetingRoomInfoId ||
+                    resourceWithTypeInfo.accommodationInfo?.accommodationInfoId ||
+                    resourceWithTypeInfo.equipmentInfo?.equipmentInfoId,
+            };
+        }
+        catch (err) {
+            console.error(err);
+            await queryRunner.rollbackTransaction();
+            throw new common_1.InternalServerErrorException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_CREATE);
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+    async 자원_상세정보를_조회한다(resourceId) {
+        const resource = await this.domainResourceService.findOne({
+            where: { resourceId },
+            relations: [
+                'vehicleInfo',
+                'meetingRoomInfo',
+                'accommodationInfo',
+                'equipmentInfo',
+                'resourceManagers',
+                'resourceManagers.employee',
+                'resourceGroup',
+            ],
+        });
+        if (!resource) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
+        }
+        return new resource_response_dto_1.ResourceResponseDto(resource);
+    }
+    async 그룹별_자원_목록을_조회한다(resourceGroupId) {
+        const resources = await this.domainResourceService.findAll({
+            where: { resourceGroupId },
+            relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo', 'equipmentInfo'],
+            order: { order: 'ASC' },
+        });
+        return resources.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
+    }
+    async 자원을_수정한다(resourceId, updateResourceInfoDto) {
+        const resource = await this.domainResourceService.findOne({
+            where: {
+                resourceId: resourceId,
+            },
+            relations: ['resourceGroup'],
+        });
+        if (!resource) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            if (updateResourceInfoDto.resource) {
+                if (updateResourceInfoDto.resource.images && updateResourceInfoDto.resource.images.length > 0) {
+                    updateResourceInfoDto.resource.images = updateResourceInfoDto.resource.images.map((image) => this.domainFileService.getFileUrl(image));
+                    await this.domainFileService.updateTemporaryFiles(updateResourceInfoDto.resource.images, false, {
+                        queryRunner,
+                    });
+                }
+                await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
+            }
+            if (updateResourceInfoDto.managers) {
+                const newManagerIds = updateResourceInfoDto.managers.map((m) => m.employeeId);
+                const currentManagers = await this.domainResourceManagerService.findAll({
+                    where: {
+                        resourceId: resourceId,
+                    },
+                });
+                const currentManagerIds = currentManagers.map((m) => m.employeeId);
+                const managersToRemove = currentManagers.filter((manager) => !newManagerIds.includes(manager.employeeId));
+                await Promise.all(managersToRemove.map((manager) => this.domainResourceManagerService.delete(manager.resourceManagerId, { queryRunner })));
+                const managersToAdd = newManagerIds.filter((employeeId) => !currentManagerIds.includes(employeeId));
+                await Promise.all(managersToAdd.map((employeeId) => this.domainResourceManagerService.save({ resourceId, employeeId }, { queryRunner })));
+            }
+            await queryRunner.commitTransaction();
+            return this.자원_상세정보를_조회한다(resourceId);
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw new common_1.InternalServerErrorException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_UPDATE);
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+    async 자원_순서를_변경한다(updateResourceOrdersDto) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            await Promise.all(updateResourceOrdersDto.orders.map((order) => this.domainResourceService.update(order.resourceId, { order: order.newOrder }, { queryRunner })));
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+    async 자원을_삭제한다(resourceId) {
+        const resource = await this.domainResourceService.findOne({
+            where: { resourceId },
+        });
+        if (!resource) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
+        }
+        await this.domainResourceService.delete(resourceId);
+    }
+};
+exports.ResourceContextService = ResourceContextService;
+exports.ResourceContextService = ResourceContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _g : Object, typeof (_h = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _h : Object, typeof (_j = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _j : Object])
+], ResourceContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/resource/services/vehicle-info.context.service.ts":
+/*!***********************************************************************!*\
+  !*** ./src/context/resource/services/vehicle-info.context.service.ts ***!
+  \***********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VehicleInfoContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
+const reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
+const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
+const consumable_entity_1 = __webpack_require__(/*! @libs/entities/consumable.entity */ "./libs/entities/consumable.entity.ts");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+let VehicleInfoContextService = class VehicleInfoContextService {
+    constructor(domainVehicleInfoService, domainReservationVehicleService, domainFileService, domainConsumableService, domainEmployeeService, dataSource) {
+        this.domainVehicleInfoService = domainVehicleInfoService;
+        this.domainReservationVehicleService = domainReservationVehicleService;
+        this.domainFileService = domainFileService;
+        this.domainConsumableService = domainConsumableService;
+        this.domainEmployeeService = domainEmployeeService;
+        this.dataSource = dataSource;
+    }
+    async 차량정보를_조회한다(vehicleInfoId) {
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { vehicleInfoId },
+        });
+        if (!vehicleInfo) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        }
+        return {
+            vehicleInfoId: vehicleInfo.vehicleInfoId,
+            resourceId: vehicleInfo.resourceId,
+            totalMileage: Number(vehicleInfo.totalMileage),
+            leftMileage: Number(vehicleInfo.leftMileage),
+            insuranceName: vehicleInfo.insuranceName,
+            insuranceNumber: vehicleInfo.insuranceNumber,
+            parkingLocationImages: vehicleInfo.parkingLocationImages,
+            odometerImages: vehicleInfo.odometerImages,
+            indoorImages: vehicleInfo.indoorImages,
+        };
+    }
+    async 차량정보를_수정한다(vehicleInfoId, updateVehicleInfoDto) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            if (!updateVehicleInfoDto.parkingLocationImages)
+                updateVehicleInfoDto.parkingLocationImages = [];
+            if (!updateVehicleInfoDto.odometerImages)
+                updateVehicleInfoDto.odometerImages = [];
+            if (!updateVehicleInfoDto.indoorImages)
+                updateVehicleInfoDto.indoorImages = [];
+            updateVehicleInfoDto.parkingLocationImages = updateVehicleInfoDto.parkingLocationImages.map((image) => this.domainFileService.getFileUrl(image));
+            updateVehicleInfoDto.odometerImages = updateVehicleInfoDto.odometerImages.map((image) => this.domainFileService.getFileUrl(image));
+            updateVehicleInfoDto.indoorImages = updateVehicleInfoDto.indoorImages.map((image) => this.domainFileService.getFileUrl(image));
+            const vehicleInfo = await this.domainVehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, {
+                queryRunner,
+            });
+            const images = [
+                ...updateVehicleInfoDto.parkingLocationImages,
+                ...updateVehicleInfoDto.odometerImages,
+                ...updateVehicleInfoDto.indoorImages,
+            ];
+            if (images.length > 0) {
+                await this.domainFileService.updateTemporaryFiles(images, false, {
+                    queryRunner,
+                });
+            }
+            const hasConsumables = await this.domainConsumableService.count({
+                where: {
+                    vehicleInfoId: vehicleInfoId,
+                },
+            });
+            if (hasConsumables === 0) {
+                const sourceConsumables = await queryRunner.manager
+                    .createQueryBuilder(consumable_entity_1.Consumable, 'consumable')
+                    .select('DISTINCT ON (consumable.name) consumable.name, consumable.notifyReplacementCycle, consumable.replaceCycle')
+                    .where('consumable.vehicleInfoId != :vehicleInfoId', { vehicleInfoId })
+                    .orderBy('consumable.name', 'ASC')
+                    .getRawMany();
+                const newConsumables = sourceConsumables.map((consumable) => {
+                    const newConsumable = new consumable_entity_1.Consumable();
+                    newConsumable.vehicleInfoId = vehicleInfoId;
+                    newConsumable.name = consumable.name;
+                    newConsumable.notifyReplacementCycle = consumable.notifyReplacementCycle;
+                    newConsumable.replaceCycle = consumable.replaceCycle;
+                    newConsumable.initMileage = updateVehicleInfoDto.totalMileage || 0;
+                    return newConsumable;
+                });
+                await this.domainConsumableService.bulkCreate(newConsumables, {
+                    queryRunner,
+                });
+            }
+            await queryRunner.commitTransaction();
+            return {
+                vehicleInfoId: vehicleInfo.vehicleInfoId,
+                resourceId: vehicleInfo.resourceId,
+                totalMileage: Number(vehicleInfo.totalMileage),
+                leftMileage: Number(vehicleInfo.leftMileage),
+                insuranceName: vehicleInfo.insuranceName,
+                insuranceNumber: vehicleInfo.insuranceNumber,
+                parkingLocationImages: vehicleInfo.parkingLocationImages,
+                odometerImages: vehicleInfo.odometerImages,
+                indoorImages: vehicleInfo.indoorImages,
+            };
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async 반납_리스트를_조회한다(vehicleInfoId) {
         const reservationVehicles = await this.domainReservationVehicleService.findAll({
@@ -21554,18 +28082,29 @@ let ResourceVehicleInfoService = class ResourceVehicleInfoService {
                 returnedAt: 'DESC',
             },
         });
+        const employees = await this.domainEmployeeService.findAll({
+            where: { employeeId: (0, typeorm_1.In)(reservationVehicles.map((reservationVehicle) => reservationVehicle.returnedBy)) },
+        });
+        const employeeMap = new Map(employees.map((employee) => [employee.employeeId, employee]));
+        reservationVehicles.forEach((reservationVehicle) => {
+            reservationVehicle.returnedBy = employeeMap.get(reservationVehicle.returnedBy)?.name;
+        });
         return reservationVehicles;
     }
     async 반납_상세정보를_조회한다(reservationVehicleId) {
         const reservationVehicle = await this.domainReservationVehicleService.findByReservationVehicleId(reservationVehicleId);
+        const employee = await this.domainEmployeeService.findOne({
+            where: { employeeId: reservationVehicle.returnedBy },
+        });
+        reservationVehicle.returnedBy = employee.name;
         return reservationVehicle;
     }
 };
-exports.ResourceVehicleInfoService = ResourceVehicleInfoService;
-exports.ResourceVehicleInfoService = ResourceVehicleInfoService = __decorate([
+exports.VehicleInfoContextService = VehicleInfoContextService;
+exports.VehicleInfoContextService = VehicleInfoContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _a : Object])
-], ResourceVehicleInfoService);
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _c : Object, typeof (_d = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _d : Object, typeof (_e = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object])
+], VehicleInfoContextService);
 
 
 /***/ }),
@@ -21811,25 +28350,15 @@ let DomainConsumableService = class DomainConsumableService extends base_service
         super(consumableRepository);
         this.consumableRepository = consumableRepository;
     }
-    async findByConsumableId(consumableId) {
+    async findOneByConsumableId(consumableId) {
         const consumable = await this.consumableRepository.findOne({
             where: { consumableId },
         });
-        if (!consumable) {
-            throw new common_1.NotFoundException('소모품을 찾을 수 없습니다.');
-        }
         return consumable;
     }
-    async findByVehicleInfoId(vehicleInfoId) {
+    async findAllByVehicleInfoId(vehicleInfoId) {
         return this.consumableRepository.findAll({
             where: { vehicleInfoId },
-            relations: ['vehicleInfo', 'maintenances'],
-        });
-    }
-    async findNeedReplacement() {
-        return this.consumableRepository.findAll({
-            where: { notifyReplacementCycle: true },
-            relations: ['vehicleInfo'],
         });
     }
     async bulkCreate(consumables, repositoryOptions) {
@@ -24471,359 +31000,6 @@ Object.defineProperty(exports, "ManagerResponseDto", ({ enumerable: true, get: f
 
 /***/ }),
 
-/***/ "./src/modules/seed/seed.data.ts":
-/*!***************************************!*\
-  !*** ./src/modules/seed/seed.data.ts ***!
-  \***************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.seedData = void 0;
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
-exports.seedData = [
-    {
-        title: '법인차량 ',
-        type: resource_type_enum_1.ResourceType.VEHICLE,
-        resources: [
-            {
-                name: '싼타페(25어5677)',
-                location: {
-                    address: 'B3',
-                    detailAddress: 'A01',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.VEHICLE,
-                order: 0,
-            },
-            {
-                name: '셀토스(126서1152)',
-                location: {
-                    address: 'B3',
-                    detailAddress: 'B01',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.VEHICLE,
-                order: 1,
-            },
-            {
-                name: '카니발(116너 5351)',
-                location: {
-                    address: 'B3',
-                    detailAddress: 'C01',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.VEHICLE,
-                order: 2,
-            },
-            {
-                name: '카니발(161라 4762)',
-                location: {
-                    address: 'B3',
-                    detailAddress: 'D01',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.VEHICLE,
-                order: 3,
-            },
-        ],
-    },
-    {
-        title: '대전숙소',
-        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-        resources: [
-            {
-                name: '럭셔리모텔1',
-                location: {
-                    address: '대전광역시 유성구',
-                    detailAddress: '온천서로 30-10',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-                order: 0,
-            },
-            {
-                name: '럭셔리모텔2',
-                location: {
-                    address: '대전광역시 유성구',
-                    detailAddress: '온천서로 30-10',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-                order: 1,
-            },
-            {
-                name: '럭셔리모텔3',
-                location: {
-                    address: '대전광역시 유성구',
-                    detailAddress: '온천서로 30-10',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-                order: 2,
-            },
-            {
-                name: '럭셔리모텔4',
-                location: {
-                    address: '대전광역시 유성구',
-                    detailAddress: '온천서로 30-10',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-                order: 3,
-            },
-            {
-                name: '럭셔리모텔5',
-                location: {
-                    address: '대전광역시 유성구',
-                    detailAddress: '온천서로 30-10',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-                order: 4,
-            },
-            {
-                name: '럭셔리모텔6',
-                location: {
-                    address: '대전광역시 유성구',
-                    detailAddress: '온천서로 30-10',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-                order: 5,
-            },
-        ],
-    },
-    {
-        title: '11층 회의실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-        resources: [
-            {
-                name: '11층 대회의실',
-                location: {
-                    address: '11층',
-                    detailAddress: '',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-                order: 0,
-            },
-            {
-                name: '11층 중회의실',
-                location: {
-                    address: '11층',
-                    detailAddress: '',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-                order: 1,
-            },
-            {
-                name: '11층 소회의실',
-                location: {
-                    address: '11층',
-                    detailAddress: '',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-                order: 2,
-            },
-            {
-                name: '대표이사실',
-                location: {
-                    address: '11층',
-                    detailAddress: '',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-                order: 3,
-            },
-        ],
-    },
-    {
-        title: '5층 회의실',
-        type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-        resources: [
-            {
-                name: '5층 회의실',
-                location: {
-                    address: '5층',
-                    detailAddress: '',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-                order: 0,
-            },
-            {
-                name: '5층 중회의실',
-                location: {
-                    address: '5층',
-                    detailAddress: '',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-                order: 1,
-            },
-            {
-                name: '5층 소회의실',
-                location: {
-                    address: '5층',
-                    detailAddress: '',
-                },
-                images: [],
-                type: resource_type_enum_1.ResourceType.MEETING_ROOM,
-                order: 2,
-            },
-        ],
-    },
-];
-
-
-/***/ }),
-
-/***/ "./src/modules/seed/seed.module.ts":
-/*!*****************************************!*\
-  !*** ./src/modules/seed/seed.module.ts ***!
-  \*****************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SeedModule = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
-const seed_service_1 = __webpack_require__(/*! ./seed.service */ "./src/modules/seed/seed.service.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const entities_2 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-let SeedModule = class SeedModule {
-};
-exports.SeedModule = SeedModule;
-exports.SeedModule = SeedModule = __decorate([
-    (0, common_1.Module)({
-        imports: [
-            typeorm_1.TypeOrmModule.forFeature([
-                entities_1.ResourceGroup,
-                entities_2.Resource,
-                entities_1.ResourceManager,
-                entities_1.VehicleInfo,
-                entities_1.AccommodationInfo,
-                entities_1.MeetingRoomInfo,
-            ]),
-        ],
-        providers: [seed_service_1.SeedService],
-        exports: [seed_service_1.SeedService],
-    })
-], SeedModule);
-
-
-/***/ }),
-
-/***/ "./src/modules/seed/seed.service.ts":
-/*!******************************************!*\
-  !*** ./src/modules/seed/seed.service.ts ***!
-  \******************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SeedService = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
-const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const entities_2 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const seed_data_1 = __webpack_require__(/*! ./seed.data */ "./src/modules/seed/seed.data.ts");
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
-let SeedService = class SeedService {
-    constructor(resourceGroupRepository, resourceRepository, resourceManagerRepository, vehicleInfoRepository, accommodationInfoRepository, meetingRoomInfoRepository) {
-        this.resourceGroupRepository = resourceGroupRepository;
-        this.resourceRepository = resourceRepository;
-        this.resourceManagerRepository = resourceManagerRepository;
-        this.vehicleInfoRepository = vehicleInfoRepository;
-        this.accommodationInfoRepository = accommodationInfoRepository;
-        this.meetingRoomInfoRepository = meetingRoomInfoRepository;
-    }
-    async onModuleInit() {
-    }
-    async seed(employeeId) {
-        const defaultResourceGroup = await this.resourceGroupRepository.find();
-        const categories = defaultResourceGroup.filter((group) => group.parentResourceGroupId === null);
-        const groups = defaultResourceGroup.filter((group) => group.parentResourceGroupId !== null);
-        if (groups.length === 0) {
-            for (const group of seed_data_1.seedData) {
-                const parentGroup = categories.find((c) => c.type === group.type);
-                const savedGroup = await this.resourceGroupRepository.save({
-                    title: group.title,
-                    type: group.type,
-                    parentResourceGroupId: parentGroup.resourceGroupId,
-                });
-                for (const resource of group.resources) {
-                    const savedResource = await this.resourceRepository.save({
-                        name: resource.name,
-                        location: resource.location,
-                        images: resource.images,
-                        type: resource.type,
-                        order: resource.order,
-                        resourceGroupId: savedGroup.resourceGroupId,
-                    });
-                    if (resource.type === resource_type_enum_1.ResourceType.VEHICLE) {
-                        await this.vehicleInfoRepository.save({
-                            resourceId: savedResource.resourceId,
-                        });
-                    }
-                    else if (resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
-                        await this.accommodationInfoRepository.save({
-                            resourceId: savedResource.resourceId,
-                        });
-                    }
-                    else if (resource.type === resource_type_enum_1.ResourceType.MEETING_ROOM) {
-                        await this.meetingRoomInfoRepository.save({
-                            resourceId: savedResource.resourceId,
-                        });
-                    }
-                    await this.resourceManagerRepository.save({
-                        resourceId: savedResource.resourceId,
-                        employeeId: employeeId,
-                    });
-                }
-            }
-        }
-    }
-};
-exports.SeedService = SeedService;
-exports.SeedService = SeedService = __decorate([
-    (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(entities_1.ResourceGroup)),
-    __param(1, (0, typeorm_1.InjectRepository)(entities_2.Resource)),
-    __param(2, (0, typeorm_1.InjectRepository)(entities_1.ResourceManager)),
-    __param(3, (0, typeorm_1.InjectRepository)(entities_1.VehicleInfo)),
-    __param(4, (0, typeorm_1.InjectRepository)(entities_1.AccommodationInfo)),
-    __param(5, (0, typeorm_1.InjectRepository)(entities_1.MeetingRoomInfo)),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _c : Object, typeof (_d = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _d : Object, typeof (_e = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _e : Object, typeof (_f = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _f : Object])
-], SeedService);
-
-
-/***/ }),
-
 /***/ "@aws-sdk/client-s3":
 /*!*************************************!*\
   !*** external "@aws-sdk/client-s3" ***!
@@ -25114,16 +31290,6 @@ module.exports = require("typeorm");
 
 /***/ }),
 
-/***/ "fs":
-/*!*********************!*\
-  !*** external "fs" ***!
-  \*********************/
-/***/ ((module) => {
-
-module.exports = require("fs");
-
-/***/ }),
-
 /***/ "path":
 /*!***********************!*\
   !*** external "path" ***!
@@ -25180,7 +31346,6 @@ const error_interceptor_1 = __webpack_require__(/*! @libs/interceptors/error.int
 const jwt_auth_guard_1 = __webpack_require__(/*! @libs/guards/jwt-auth.guard */ "./libs/guards/jwt-auth.guard.ts");
 const core_2 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const path_1 = __webpack_require__(/*! path */ "path");
-const role_guard_1 = __webpack_require__(/*! @libs/guards/role.guard */ "./libs/guards/role.guard.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const request_interceptor_1 = __webpack_require__(/*! @libs/interceptors/request.interceptor */ "./libs/interceptors/request.interceptor.ts");
 async function bootstrap() {
@@ -25209,7 +31374,7 @@ async function bootstrap() {
         credentials: true,
     });
     app.setGlobalPrefix('api');
-    app.useGlobalGuards(new jwt_auth_guard_1.JwtAuthGuard(app.get(core_2.Reflector)), new role_guard_1.RolesGuard(app.get(core_2.Reflector)));
+    app.useGlobalGuards(new jwt_auth_guard_1.JwtAuthGuard(app.get(core_2.Reflector)));
     app.useGlobalInterceptors(new request_interceptor_1.RequestInterceptor(), new response_interceptor_1.ResponseInterceptor(), new error_interceptor_1.ErrorInterceptor());
     app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
     const uploadPath = (0, path_1.join)(process.cwd(), 'public');

@@ -33,7 +33,7 @@ import {
     FindAllMaintenancesByVehicleInfoIdUsecase,
 } from './usecases/maintenance';
 import { DomainFileModule } from '@src/domain/file/file.module';
-import { ResourceManagementContextModule } from '@src/context/resource-management/resource-management.context.module';
+import { ResourceContextModule } from '@src/context/resource/resource.context.module';
 import { FileContextModule } from '@src/context/file/file.context.module';
 import { AdminReservationVehicleController } from './controllers/admin.reservation-vehicle.controller';
 @Module({
@@ -45,7 +45,7 @@ import { AdminReservationVehicleController } from './controllers/admin.reservati
         DomainEmployeeModule,
         NotificationModule,
         DomainFileModule,
-        ResourceManagementContextModule,
+        ResourceContextModule,
         FileContextModule,
     ],
     controllers: [

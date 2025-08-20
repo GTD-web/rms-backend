@@ -26,9 +26,9 @@ import { ReturnVehicleUsecase } from '../usecases/return-vehicle.usecase';
 import { CheckReservationAccessUsecase } from '../usecases/check-reservation-access.usecase';
 import { FindCalendarUsecase } from '../usecases/find-calendar.usecase';
 import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
-import { ReservationManagementService } from '@src/context/reservation-management/services/reservation-management.service';
-import { ReservationConflictService } from '@src/context/reservation-management/services/reservation-conflict.service';
-import { ReservationValidationService } from '@src/context/reservation-management/services/reservation-validation.service';
+import { ReservationManagementService } from '@src/context/reservation/services/reservation-management.service';
+import { ReservationConflictService } from '@src/context/reservation/services/reservation-conflict.service';
+import { ReservationValidationService } from '@src/context/reservation/services/reservation-validation.service';
 import { DateUtil } from '@libs/utils/date.util';
 
 @Injectable()

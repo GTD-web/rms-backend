@@ -1,0 +1,490 @@
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Employee, Notification } from '@libs/entities';
+import { PushNotificationPayload } from '@src/application/notification/dtos/send-notification.dto';
+import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
+import {
+    ResponseNotificationDto,
+    NotificationDataDto,
+} from '@src/application/notification/dtos/response-notification.dto';
+import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { NotificationType } from '@libs/enums/notification-type.enum';
+import { CreateNotificationDataDto, CreateNotificationDto } from '../dtos/create-notification.dto';
+import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
+import { DomainNotificationService } from '@src/domain/notification/notification.service';
+import { DomainEmployeeService } from '@src/domain/employee/employee.service';
+import { DomainEmployeeNotificationService } from '@src/domain/employee-notification/employee-notification.service';
+import { DomainReservationService } from '@src/domain/reservation/reservation.service';
+import { FCMAdapter } from '../adapter/fcm-push.adapter';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron/dist';
+import { DateUtil } from '@libs/utils/date.util';
+import { ERROR_MESSAGE } from '@libs/constants/error-message';
+import { ResourceType } from '@libs/enums/resource-type.enum';
+import { LessThanOrEqual, Raw } from 'typeorm';
+
+@Injectable()
+export class NotificationContextService {
+    constructor(
+        private readonly domainNotificationService: DomainNotificationService,
+        private readonly domainEmployeeService: DomainEmployeeService,
+        private readonly domainEmployeeNotificationService: DomainEmployeeNotificationService,
+        private readonly domainReservationService: DomainReservationService,
+        private readonly fcmAdapter: FCMAdapter,
+    ) {}
+
+    isProduction = process.env.NODE_ENV === 'production';
+
+    // 구독 관련 메서드들
+    async 푸시_알림을_구독한다(employeeId: string, subscription: PushSubscriptionDto): Promise<boolean> {
+        try {
+            const employee = await this.domainEmployeeService.findByEmployeeId(employeeId);
+            if (!employee) {
+                throw new NotFoundException(ERROR_MESSAGE.BUSINESS.EMPLOYEE.NOT_FOUND);
+            }
+
+            if (
+                !this.isProduction &&
+                employee.subscriptions &&
+                Array.isArray(employee.subscriptions) &&
+                employee.subscriptions.length > 0
+            ) {
+                if (employee.subscriptions.length < 2) {
+                    employee.subscriptions.push(subscription);
+                } else {
+                    return false;
+                }
+            } else {
+                employee.subscriptions = [subscription];
+            }
+            await this.domainEmployeeService.update(employee.employeeId, employee);
+
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async 직접_알림을_전송한다(subscription: PushSubscriptionDto, payload: PushNotificationPayload): Promise<void> {
+        await this.fcmAdapter.sendBulkNotification([subscription], payload);
+    }
+
+    async 다중_알림을_전송한다(subscriptions: PushSubscriptionDto[], payload: PushNotificationPayload): Promise<any> {
+        return await this.fcmAdapter.sendBulkNotification(subscriptions, payload);
+    }
+
+    // 알림 조회 관련 메서드들
+    async 내_알림_목록을_조회한다(
+        employeeId: string,
+        query?: PaginationQueryDto,
+    ): Promise<PaginationData<ResponseNotificationDto>> {
+        const options: IRepositoryOptions<Notification> = {
+            where: {
+                employees: { employeeId },
+                isSent: true,
+            },
+        };
+        const total = await this.domainNotificationService.count({
+            where: options.where,
+        });
+
+        if (query) {
+            options.skip = query.getOffset();
+            options.take = query.limit;
+        }
+        const notifications = await this.domainNotificationService.findAll({
+            ...options,
+            relations: ['employees'],
+            order: {
+                createdAt: 'DESC',
+            },
+        });
+
+        return {
+            items: notifications.map((notification) => {
+                return {
+                    notificationId: notification.notificationId,
+                    title: notification.title,
+                    body: notification.body,
+                    notificationData: notification.notificationData as NotificationDataDto,
+                    notificationType: notification.notificationType,
+                    createdAt: notification.createdAt,
+                    isRead: notification.employees.find((employee) => employee.employeeId === employeeId).isRead,
+                };
+            }),
+            meta: {
+                total,
+                page: query.page,
+                limit: query.limit,
+                hasNext: query.page * query.limit < total,
+            },
+        };
+    }
+
+    async 알림을_읽음_처리한다(employeeId: string, notificationId: string): Promise<void> {
+        const employeeNotification = await this.domainEmployeeNotificationService.findOne({
+            where: {
+                employeeId,
+                notificationId,
+            },
+        });
+        if (!employeeNotification) {
+            throw new BadRequestException('There is no data');
+        }
+        await this.domainEmployeeNotificationService.update(employeeNotification.employeeNotificationId, {
+            isRead: true,
+        });
+    }
+
+    // 구독 정보 조회 관련 메서드들
+    async 구독_정보를_조회한다(token?: string, employeeId?: string) {
+        if (!token && !employeeId) {
+            return null;
+        }
+
+        if (employeeId) {
+            return await this.직원별_구독정보를_조회한다(employeeId);
+        }
+
+        return await this.토큰별_구독정보를_조회한다(token);
+    }
+
+    async 시스템_관리자들에게_알림을_발송한다() // notificationType: NotificationType,
+    // createNotificationDataDto: CreateNotificationDataDto,
+    {
+        // // 시스템 관리자들에게 알림 발송
+        // const systemAdmins = await this.domainEmployeeService.findAll({
+        //     where: {
+        //         roles: Raw(() => `'${Role.SYSTEM_ADMIN}' = ANY("roles")`),
+        //     },
+        // });
+        // const consumable = await this.domainConsumableService.findOne({
+        //     where: { consumableId: maintenance.consumableId },
+        //     relations: ['vehicleInfo', 'vehicleInfo.resource'],
+        //     withDeleted: true,
+        // });
+        // await this.notificationService.createNotification(
+        //     NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
+        //     {
+        //         resourceId: consumable.vehicleInfo.resource.resourceId,
+        //         resourceType: consumable.vehicleInfo.resource.type,
+        //         consumableName: consumable.name,
+        //         resourceName: consumable.vehicleInfo.resource.name,
+        //     },
+        //     systemAdmins.map((admin) => admin.employeeId),
+        // );
+    }
+
+    async 토큰별_구독정보를_조회한다(token: string) {
+        const employee = await this.domainEmployeeService.findOne({
+            where: {
+                subscriptions: Raw(
+                    (alias) => `
+                EXISTS (
+                  SELECT 1 FROM jsonb_array_elements(${alias}) AS elem
+                  WHERE elem -> 'fcm' ->> 'token' = '${token}'
+                )
+              `,
+                ),
+            },
+        });
+
+        return {
+            employeeId: employee.employeeId,
+            employeeName: employee.name,
+            subscriptions: employee.subscriptions,
+        };
+    }
+
+    async 직원별_구독정보를_조회한다(employeeId: string) {
+        const employee = await this.domainEmployeeService.findOne({
+            where: { employeeId },
+        });
+        return {
+            employeeId: employee.employeeId,
+            employeeName: employee.name,
+            subscriptions: employee.subscriptions,
+        };
+    }
+
+    async 구독_목록을_조회한다(employeeId: string): Promise<PushSubscriptionDto[]> {
+        const employee = await this.domainEmployeeService.findOne({
+            where: { employeeId },
+            select: { subscriptions: true, isPushNotificationEnabled: true },
+        });
+
+        if (
+            !employee ||
+            !employee.subscriptions ||
+            employee.subscriptions.length === 0 ||
+            !employee.isPushNotificationEnabled
+        ) {
+            return [];
+        }
+        return employee.subscriptions;
+    }
+
+    // 알림 생성 관련 메서드들
+    async 알림_내용을_생성한다(
+        notificationType: NotificationType,
+        createNotificationDataDto: CreateNotificationDataDto,
+    ): Promise<CreateNotificationDto> {
+        const createNotificationDto: CreateNotificationDto = {
+            title: '',
+            body: '',
+            notificationType: notificationType,
+            notificationData: createNotificationDataDto,
+            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
+            isSent: true,
+        };
+
+        switch (notificationType) {
+            case NotificationType.RESERVATION_DATE_UPCOMING:
+                createNotificationDto.title = `예약 시간이 ${createNotificationDataDto.beforeMinutes}분 남았습니다.`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                createNotificationDto.createdAt = DateUtil.parse(createNotificationDataDto.reservationDate)
+                    .addMinutes(-createNotificationDataDto.beforeMinutes)
+                    .format('YYYY-MM-DD HH:mm');
+                createNotificationDto.isSent = false;
+                break;
+            case NotificationType.RESERVATION_STATUS_PENDING:
+                createNotificationDto.title = `[숙소 확정 대기중] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case NotificationType.RESERVATION_STATUS_CONFIRMED:
+                createNotificationDto.title = `[예약 확정] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case NotificationType.RESERVATION_STATUS_CANCELLED:
+                createNotificationDto.title = `[예약 취소] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case NotificationType.RESERVATION_STATUS_REJECTED:
+                createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case NotificationType.RESERVATION_TIME_CHANGED:
+                createNotificationDto.title = `[예약 시간 변경] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case NotificationType.RESERVATION_PARTICIPANT_CHANGED:
+                createNotificationDto.title = `[참가자 변경] ${createNotificationDataDto.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case NotificationType.RESOURCE_CONSUMABLE_REPLACING:
+                createNotificationDto.title = `[교체 주기 알림] ${createNotificationDataDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                break;
+            case NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING:
+                createNotificationDto.title = `[교체 지연 알림] ${createNotificationDataDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                break;
+            case NotificationType.RESOURCE_VEHICLE_RETURNED:
+                createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                break;
+            case NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED:
+                createNotificationDto.title = `[차량 반납 지연 알림] ${createNotificationDataDto.resourceName}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                break;
+            case NotificationType.RESOURCE_MAINTENANCE_COMPLETED:
+                createNotificationDto.title = `[정비 완료] ${createNotificationDataDto.consumableName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                break;
+        }
+
+        return createNotificationDto;
+    }
+
+    async 알림을_저장한다(
+        createNotificationDto: CreateNotificationDto,
+        notiTarget: string[],
+        repositoryOptions?: IRepositoryOptions<Notification>,
+    ) {
+        const notification = await this.domainNotificationService.save(createNotificationDto, repositoryOptions);
+        // employee 와 연결 필요
+        for (const employeeId of notiTarget) {
+            await this.domainEmployeeNotificationService.save(
+                {
+                    employeeId: employeeId,
+                    notificationId: notification.notificationId,
+                },
+                repositoryOptions,
+            );
+        }
+        return notification;
+    }
+
+    async 리마인더_알림_내용을_생성한다(
+        createNotificationDataDto: CreateNotificationDataDto,
+    ): Promise<CreateNotificationDto> {
+        const now = DateUtil.now().toDate();
+        const reservation = await this.domainReservationService.findOne({
+            where: {
+                reservationId: createNotificationDataDto.reservationId,
+            },
+        });
+        const diffInMilliseconds = reservation.startDate.getTime() - now.getTime();
+        const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+
+        const days = Math.floor(diffInMinutes / (24 * 60));
+        const hours = Math.floor((diffInMinutes % (24 * 60)) / 60);
+        const minutes = diffInMinutes % 60;
+
+        const parts: string[] = [];
+        if (diffInMilliseconds > 0) {
+            switch (createNotificationDataDto.resourceType) {
+                case ResourceType.MEETING_ROOM:
+                    parts.push('회의 시작까지');
+                    break;
+                case ResourceType.VEHICLE:
+                    parts.push('차량 이용 시작까지');
+                    break;
+                case ResourceType.ACCOMMODATION:
+                    parts.push('입실 까지');
+                    break;
+                case ResourceType.EQUIPMENT:
+                    parts.push('장비 이용 시작까지');
+                    break;
+            }
+
+            if (days > 0) {
+                parts.push(`${days}일`);
+            }
+            if (hours > 0) {
+                parts.push(`${hours}시간`);
+            }
+            if (minutes > 0 || parts.length === 0) {
+                parts.push(`${minutes}분`);
+            }
+
+            parts.push('남았습니다.');
+        } else {
+            switch (createNotificationDataDto.resourceType) {
+                case ResourceType.MEETING_ROOM:
+                    parts.push('회의 참여 알림');
+                    break;
+                case ResourceType.VEHICLE:
+                    parts.push('차량 탑승 알림');
+                    break;
+                case ResourceType.ACCOMMODATION:
+                    parts.push('입실 알림');
+                    break;
+                case ResourceType.EQUIPMENT:
+                    parts.push('장비 이용 알림');
+                    break;
+            }
+        }
+
+        const timeDifferencePhrase = parts.join(' ');
+
+        return {
+            title: `[${createNotificationDataDto.reservationTitle}]\n${timeDifferencePhrase}`,
+            body: createNotificationDataDto.reservationDate,
+            notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
+            notificationData: createNotificationDataDto,
+            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
+            isSent: true,
+        };
+    }
+
+    async 알림을_생성한다(
+        notificationType: NotificationType,
+        createNotificationDataDto: CreateNotificationDataDto,
+        notiTarget: string[],
+        repositoryOptions?: IRepositoryOptions<Notification>,
+    ): Promise<void> {
+        notiTarget = Array.from(new Set(notiTarget));
+        const notificationDto = await this.알림_내용을_생성한다(notificationType, createNotificationDataDto);
+        const notification = await this.알림을_저장한다(notificationDto, notiTarget, repositoryOptions);
+
+        const totalSubscriptions: PushSubscriptionDto[] = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.구독_목록을_조회한다(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+
+        switch (notificationType) {
+            case NotificationType.RESERVATION_DATE_UPCOMING:
+                // this.스케줄_작업을_생성한다(notification, totalSubscriptions);
+                break;
+            default:
+                await this.다중_알림을_전송한다(totalSubscriptions, {
+                    title: notification.title,
+                    body: notification.body,
+                    notificationType: notification.notificationType,
+                    notificationData: notification.notificationData,
+                });
+                break;
+        }
+    }
+
+    async 리마인더_알림을_전송한다(
+        notificationType: NotificationType,
+        createNotificationDataDto: CreateNotificationDataDto,
+        notiTarget: string[],
+    ): Promise<void> {
+        const createNotificationDto = await this.리마인더_알림_내용을_생성한다(createNotificationDataDto);
+
+        if (!createNotificationDto) {
+            return;
+        }
+
+        const notification = await this.알림을_저장한다(createNotificationDto, notiTarget);
+
+        const totalSubscriptions: PushSubscriptionDto[] = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.구독_목록을_조회한다(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+
+        await this.다중_알림을_전송한다(totalSubscriptions, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
+    }
+
+    async 요청_알림을_전송한다(
+        notificationType: NotificationType,
+        createNotificationDataDto: CreateNotificationDataDto,
+        notiTarget: string[],
+    ): Promise<void> {
+        const createNotificationDto = await this.알림_내용을_생성한다(notificationType, createNotificationDataDto);
+
+        if (!createNotificationDto) {
+            return;
+        }
+
+        const notification = await this.알림을_저장한다(createNotificationDto, notiTarget);
+
+        const totalSubscriptions: PushSubscriptionDto[] = [];
+        for (const employeeId of notiTarget) {
+            const subscriptions = await this.구독_목록을_조회한다(employeeId);
+            totalSubscriptions.push(...subscriptions);
+        }
+
+        await this.다중_알림을_전송한다(totalSubscriptions, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
+    }
+
+    async 스케줄_작업을_삭제한다(reservationId: string) {
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
+                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                isSent: false,
+            },
+        });
+        for (const notification of notifications) {
+            await this.domainEmployeeNotificationService.deleteByNotificationId(notification.notificationId);
+            await this.domainNotificationService.delete(notification.notificationId);
+        }
+    }
+}

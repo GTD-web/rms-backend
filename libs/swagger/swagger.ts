@@ -7,7 +7,7 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
     const config = new DocumentBuilder()
         .setTitle('Resource Management API')
         .setDescription('Resource Management API Description')
-        .setVersion('1.0')
+        .setVersion('2.0')
         .addBearerAuth()
         .build();
 

@@ -61,9 +61,6 @@ export abstract class BaseRepository<T extends ObjectLiteral> implements IReposi
             order: repositoryOptions?.order,
             withDeleted: repositoryOptions?.withDeleted,
         });
-        if (!updated) {
-            throw new NotFoundException(`${this.repository.metadata.name} Entity with id ${entityId} not found`);
-        }
         return updated;
     }
 

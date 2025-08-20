@@ -8,7 +8,10 @@ import { DomainFileMaintenanceModule } from '@src/domain/file-maintenance/file-m
 import { DomainFileReservationVehicleModule } from '@src/domain/file-reservation-vehicle/file-reservation-vehicle.module';
 import { DomainFileResourceModule } from '@src/domain/file-resource/file-resource.module';
 import { DomainFileVehicleInfoModule } from '@src/domain/file-vehicle-info/file-vehicle-info.module';
-import { FileService } from './services/file.service';
+import { FileContextService } from './services/file.context.service';
+import { S3Service } from './adapter/s3.service';
+import { FileController } from './controllers/file.controller';
+import { CronFileController } from './controllers/cron.file.controller';
 
 // Context Services
 
@@ -36,14 +39,15 @@ import { FileService } from './services/file.service';
         DomainFileResourceModule,
         DomainFileVehicleInfoModule,
     ],
-    controllers: [],
+    controllers: [FileController, CronFileController],
     providers: [
         // Context Services
-        FileService,
+        FileContextService,
+        S3Service,
     ],
     exports: [
         // Context Services
-        FileService,
+        FileContextService,
     ],
 })
 export class FileContextModule {}

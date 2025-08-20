@@ -3,20 +3,20 @@ import { UpdateVehicleInfoDto } from '../dtos/update-vehicle-info.dto';
 import { VehicleInfoResponseDto } from '../dtos/vehicle-response.dto';
 import { FindVehicleInfoUsecase } from '../usecases/vehicle-info/findVehicleInfo.usecase';
 import { UpdateVehicleInfoUsecase } from '../usecases/vehicle-info/updateVehicleInfo.usecase';
-import { ResourceVehicleInfoService } from '@src/context/resource-management/services/resource-vehicle-info.service';
+import { VehicleInfoContextService } from '@src/context/resource/services/vehicle-info.context.service';
 import {
     ReturnVehicleDetailResponseDto,
     ReturnVehicleResponseDto,
 } from '@src/application/reservation/core/dtos/return-vehicle-response.dto';
-import { FileService } from '@src/context/file/services/file.service';
+import { FileContextService } from '@src/context/file/services/file.context.service';
 
 @Injectable()
 export class VehicleInfoService {
     constructor(
         private readonly findVehicleInfoUsecase: FindVehicleInfoUsecase,
         private readonly updateVehicleInfoUsecase: UpdateVehicleInfoUsecase,
-        private readonly resourceVehicleInfoService: ResourceVehicleInfoService,
-        private readonly fileService: FileService,
+        private readonly vehicleInfoContextService: VehicleInfoContextService,
+        private readonly fileContextService: FileContextService,
     ) {}
 
     async findVehicleInfo(vehicleInfoId: string): Promise<VehicleInfoResponseDto> {
@@ -31,7 +31,7 @@ export class VehicleInfoService {
     }
 
     async findReturnList(vehicleInfoId: string): Promise<ReturnVehicleResponseDto[]> {
-        const returnList = await this.resourceVehicleInfoService.반납_리스트를_조회한다(vehicleInfoId);
+        const returnList = await this.vehicleInfoContextService.반납_리스트를_조회한다(vehicleInfoId);
         return returnList.map((returnVehicle) => {
             return {
                 reservationVehicleId: returnVehicle.reservationVehicleId,
@@ -44,8 +44,8 @@ export class VehicleInfoService {
     }
 
     async findReturnDetail(reservationVehicleId: string): Promise<ReturnVehicleDetailResponseDto> {
-        const returnDetail = await this.resourceVehicleInfoService.반납_상세정보를_조회한다(reservationVehicleId);
-        const reservationVehicleFile = await this.fileService.차량예약_파일을_조회한다(reservationVehicleId);
+        const returnDetail = await this.vehicleInfoContextService.반납_상세정보를_조회한다(reservationVehicleId);
+        const reservationVehicleFile = await this.fileContextService.차량예약_파일을_조회한다(reservationVehicleId);
         return {
             reservationVehicleId: returnDetail.reservationVehicleId,
             returnedAt: returnDetail.returnedAt,

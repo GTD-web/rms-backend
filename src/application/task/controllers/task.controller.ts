@@ -44,19 +44,19 @@ export class TaskController {
         return this.taskService.getTasks(user);
     }
 
-    @Get('status')
-    @ApiOperation({ summary: '태스크 상태 조회' })
-    @ApiResponse({
-        status: 200,
-        description: '태스크 상태 조회 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                title: { type: 'string' },
-            },
-        },
-    })
-    async getTaskStatus(@User() user: Employee) {
-        return this.taskService.getTaskStatus(user);
-    }
+    // @Get('status')
+    // @ApiOperation({ summary: '태스크 상태 조회' })
+    // @ApiResponse({
+    //     status: 200,
+    //     description: '태스크 상태 조회 성공',
+    //     schema: {
+    //         type: 'object',
+    //         properties: {
+    //             title: { type: 'string' },
+    //         },
+    //     },
+    // })
+    // async getTaskStatus(@User() user: Employee) {
+    //     return this.taskService.getTaskStatus(user);
+    // }
 }

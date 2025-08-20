@@ -1,14 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Reservation, ReservationParticipant, Employee, Resource } from '@libs/entities';
+import { Reservation, ReservationParticipant, Employee, Resource, ReservationVehicle } from '@libs/entities';
 
 // Domain Modules
 import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
 import { DomainReservationParticipantModule } from '@src/domain/reservation-participant/reservation-participant.module';
 import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
 import { DomainResourceModule } from '@src/domain/resource/resource.module';
+import { DomainNotificationModule } from '@src/domain/notification/notification.module';
+import { DomainEmployeeNotificationModule } from '@src/domain/employee-notification/employee-notification.module';
+import { DomainReservationVehicleModule } from '@src/domain/reservation-vehicle/reservation-vehicle.module';
+import { DomainVehicleInfoModule } from '@src/domain/vehicle-info/vehicle-info.module';
+import { DomainFileModule } from '@src/domain/file/file.module';
+import { NotificationModule } from '@src/application/notification/notification.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 // Context Services
+import { ReservationContextService } from './services/reservation.context.service';
 import { ReservationManagementService } from './services/reservation-management.service';
 import { ReservationValidationService } from './services/reservation-validation.service';
 import { ReservationConflictService } from './services/reservation-conflict.service';
@@ -28,25 +36,34 @@ import { ReservationConflictService } from './services/reservation-conflict.serv
  */
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Reservation, ReservationParticipant, Employee, Resource]),
+        TypeOrmModule.forFeature([Reservation, ReservationParticipant, Employee, Resource, ReservationVehicle]),
         // Domain Layer Modules
         DomainReservationModule,
         DomainReservationParticipantModule,
         DomainEmployeeModule,
         DomainResourceModule,
+        DomainNotificationModule,
+        DomainEmployeeNotificationModule,
+        DomainReservationVehicleModule,
+        DomainVehicleInfoModule,
+        DomainFileModule,
+        NotificationModule,
+        ScheduleModule.forRoot(),
     ],
     controllers: [],
     providers: [
         // Context Services
+        ReservationContextService,
         ReservationManagementService,
         ReservationValidationService,
         ReservationConflictService,
     ],
     exports: [
         // Context Services
+        ReservationContextService,
         ReservationManagementService,
         ReservationValidationService,
         ReservationConflictService,
     ],
 })
-export class ReservationManagementContextModule {}
+export class ReservationContextModule {}

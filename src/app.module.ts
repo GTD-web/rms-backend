@@ -13,9 +13,9 @@ import { jwtConfig } from '@libs/configs/jwt.config';
 import { Entities } from '@libs/entities';
 
 // 프로젝트 내부 모듈
-import { ApiDocService } from '@libs/utils/api-doc.service';
-import { DbDocService } from '@libs/utils/db-doc.service';
-import { SeedModule } from './modules/seed/seed.module';
+// import { ApiDocService } from '@libs/utils/api-doc.service';
+// import { DbDocService } from '@libs/utils/db-doc.service';
+// import { SeedModule } from './modules/seed/seed.module';
 
 import { AuthModule as AuthApplicationModule } from './application/auth/auth.module';
 import { EmployeeModule as EmployeeApplicationModule } from './application/employee/employee.module';
@@ -27,6 +27,10 @@ import { ReservationCoreModule } from './application/reservation/core/core.modul
 import { VehicleResourceModule } from './application/resource/vehicle/vehicle.module';
 import { TaskModule } from './application/task/task.module';
 import { StatisticsModule } from './application/statistics/statistics.module';
+import { FileContextModule } from './context/file/file.context.module';
+import { NotificationContextModule } from './context/notification/notification.context.module';
+import { ResourceManagementModule } from './business/resource-management/resource-management.module';
+import { ReservationManagementModule } from './business/reservation-management/reservation-management.module';
 
 @Module({
     imports: [
@@ -46,8 +50,9 @@ import { StatisticsModule } from './application/statistics/statistics.module';
         }),
         TypeOrmModule.forFeature(Entities),
 
-        SeedModule,
+        // SeedModule,
 
+        /** 어플리케이션 */
         AuthApplicationModule,
         EmployeeApplicationModule,
         FileApplicationModule,
@@ -58,7 +63,15 @@ import { StatisticsModule } from './application/statistics/statistics.module';
         VehicleResourceModule,
         TaskModule,
         StatisticsModule,
+
+        /** 비즈니스 */
+        FileContextModule,
+        NotificationContextModule,
+        ResourceManagementModule,
+        ReservationManagementModule,
     ],
-    providers: [ApiDocService, DbDocService],
+    providers: [
+        // ApiDocService, DbDocService
+    ],
 })
 export class AppModule {}
