@@ -25614,7 +25614,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationController = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -25624,6 +25624,7 @@ const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const paginate_query_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-query.dto */ "./libs/dtos/paginate-query.dto.ts");
 const paginate_response_dto_1 = __webpack_require__(/*! @libs/dtos/paginate-response.dto */ "./libs/dtos/paginate-response.dto.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const push_subscription_dto_1 = __webpack_require__(/*! ../dtos/push-subscription.dto */ "./src/context/notification/dtos/push-subscription.dto.ts");
 const response_notification_dto_1 = __webpack_require__(/*! ../dtos/response-notification.dto */ "./src/context/notification/dtos/response-notification.dto.ts");
 const create_notification_dto_1 = __webpack_require__(/*! ../dtos/create-notification.dto */ "./src/context/notification/dtos/create-notification.dto.ts");
@@ -25645,11 +25646,14 @@ let NotificationController = class NotificationController {
     async send(sendNotificationDto) {
         await this.notificationContextService.리마인더_알림을_전송한다(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
     }
-    async findAllByEmployeeId(employeeId, query) {
-        return await this.notificationContextService.내_알림_목록을_조회한다(employeeId, query);
+    async findAllByEmployeeId(employeeId, query, resourceType) {
+        return await this.notificationContextService.내_알림_목록을_조회한다(employeeId, query, resourceType);
     }
     async markAsRead(user, notificationId) {
         await this.notificationContextService.알림을_읽음_처리한다(user.employeeId, notificationId);
+    }
+    async markAllAsRead(employeeId) {
+        await this.notificationContextService.모든_알림을_읽음_처리한다(employeeId);
     }
     async findSubscription(token, employeeId) {
         return await this.notificationContextService.구독_정보를_조회한다(token, employeeId);
@@ -25712,21 +25716,44 @@ __decorate([
         type: Number,
         required: false,
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'resourceType',
+        enum: resource_type_enum_1.ResourceType,
+        required: false,
+        description: '자원 타입별 필터링 (차량, 회의실, 숙박시설, 장비)',
+    }),
     __param(0, (0, user_decorator_1.User)('employeeId')),
     __param(1, (0, common_1.Query)()),
+    __param(2, (0, common_1.Query)('resourceType')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_h = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:paramtypes", [String, typeof (_h = typeof paginate_query_dto_1.PaginationQueryDto !== "undefined" && paginate_query_dto_1.PaginationQueryDto) === "function" ? _h : Object, typeof (_j = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _j : Object]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], NotificationController.prototype, "findAllByEmployeeId", null);
 __decorate([
     (0, common_1.Patch)(':notificationId/read'),
     (0, swagger_1.ApiOperation)({ summary: '알람 읽음 처리' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '알람 읽음 처리 성공',
+    }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('notificationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _k : Object, String]),
+    __metadata("design:paramtypes", [typeof (_l = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _l : Object, String]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAsRead", null);
+__decorate([
+    (0, common_1.Patch)('mark-all-read'),
+    (0, swagger_1.ApiOperation)({ summary: '모든 알람 읽음 처리' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '모든 알람 읽음 처리 성공',
+    }),
+    __param(0, (0, user_decorator_1.User)('employeeId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "markAllAsRead", null);
 __decorate([
     (0, common_1.Get)('subscription'),
     (0, swagger_1.ApiOperation)({ summary: '구독 정보 조회' }),
@@ -26256,6 +26283,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var NotificationContextService_1;
 var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationContextService = void 0;
@@ -26270,7 +26298,7 @@ const adapters_1 = __webpack_require__(/*! @src/domain/employee/adapters */ "./s
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-let NotificationContextService = class NotificationContextService {
+let NotificationContextService = NotificationContextService_1 = class NotificationContextService {
     constructor(domainNotificationService, domainEmployeeService, domainEmployeeNotificationService, domainReservationService, fcmAdapter, employeeMicroserviceAdapter) {
         this.domainNotificationService = domainNotificationService;
         this.domainEmployeeService = domainEmployeeService;
@@ -26278,6 +26306,7 @@ let NotificationContextService = class NotificationContextService {
         this.domainReservationService = domainReservationService;
         this.fcmAdapter = fcmAdapter;
         this.employeeMicroserviceAdapter = employeeMicroserviceAdapter;
+        this.logger = new common_1.Logger(NotificationContextService_1.name);
         this.isProduction = process.env.NODE_ENV === 'production';
     }
     async 푸시_알림을_구독한다(authorization, employeeId, subscription) {
@@ -26305,12 +26334,18 @@ let NotificationContextService = class NotificationContextService {
     async 다중_알림을_전송한다(subscriptions, payload) {
         return await this.fcmAdapter.sendBulkNotification(subscriptions, payload);
     }
-    async 내_알림_목록을_조회한다(employeeId, query) {
+    async 내_알림_목록을_조회한다(employeeId, query, resourceType) {
+        const whereCondition = {
+            employees: { employeeId },
+            isSent: true,
+        };
+        if (resourceType) {
+            whereCondition.notificationData = (0, typeorm_1.Raw)((alias) => `${alias} ->> 'resourceType' = :resourceType`, {
+                resourceType,
+            });
+        }
         const options = {
-            where: {
-                employees: { employeeId },
-                isSent: true,
-            },
+            where: whereCondition,
         };
         const total = await this.domainNotificationService.count({
             where: options.where,
@@ -26359,6 +26394,31 @@ let NotificationContextService = class NotificationContextService {
         await this.domainEmployeeNotificationService.update(employeeNotification.employeeNotificationId, {
             isRead: true,
         });
+    }
+    async 모든_알림을_읽음_처리한다(employeeId) {
+        try {
+            this.logger.log(`모든 알림 읽음 처리 요청: ${employeeId}`);
+            const employeeNotifications = await this.domainEmployeeNotificationService.findAll({
+                where: {
+                    employeeId,
+                    isRead: false,
+                },
+            });
+            if (employeeNotifications.length > 0) {
+                const updatePromises = employeeNotifications.map((notification) => this.domainEmployeeNotificationService.update(notification.employeeNotificationId, {
+                    isRead: true,
+                }));
+                await Promise.all(updatePromises);
+                this.logger.log(`모든 알림 읽음 처리 완료: ${employeeId} - ${employeeNotifications.length}개 처리`);
+            }
+            else {
+                this.logger.log(`읽지 않은 알림이 없습니다: ${employeeId}`);
+            }
+        }
+        catch (error) {
+            this.logger.error(`모든 알림 읽음 처리 실패: ${error.message}`, error.stack);
+            throw new common_1.BadRequestException('모든 알림 읽음 처리 중 오류가 발생했습니다.');
+        }
     }
     async 구독_정보를_조회한다(token, employeeId) {
         if (!token && !employeeId) {
@@ -26624,7 +26684,7 @@ let NotificationContextService = class NotificationContextService {
     }
 };
 exports.NotificationContextService = NotificationContextService;
-exports.NotificationContextService = NotificationContextService = __decorate([
+exports.NotificationContextService = NotificationContextService = NotificationContextService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _a : Object, typeof (_b = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _b : Object, typeof (_c = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _c : Object, typeof (_d = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _d : Object, typeof (_e = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _e : Object, typeof (_f = typeof adapters_1.EmployeeMicroserviceAdapter !== "undefined" && adapters_1.EmployeeMicroserviceAdapter) === "function" ? _f : Object])
 ], NotificationContextService);

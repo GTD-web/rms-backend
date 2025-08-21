@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Notification } from '@libs/entities';
 import { PushNotificationPayload } from '../dtos/send-notification.dto';
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
@@ -20,6 +20,8 @@ import { Raw } from 'typeorm';
 
 @Injectable()
 export class NotificationContextService {
+    private readonly logger = new Logger(NotificationContextService.name);
+
     constructor(
         private readonly domainNotificationService: DomainNotificationService,
         private readonly domainEmployeeService: DomainEmployeeService,
@@ -76,12 +78,22 @@ export class NotificationContextService {
     async 내_알림_목록을_조회한다(
         employeeId: string,
         query?: PaginationQueryDto,
+        resourceType?: ResourceType,
     ): Promise<PaginationData<ResponseNotificationDto>> {
+        const whereCondition: any = {
+            employees: { employeeId },
+            isSent: true,
+        };
+
+        // ResourceType 필터링 추가 (JSON 컬럼 접근)
+        if (resourceType) {
+            whereCondition.notificationData = Raw((alias) => `${alias} ->> 'resourceType' = :resourceType`, {
+                resourceType,
+            });
+        }
+
         const options: IRepositoryOptions<Notification> = {
-            where: {
-                employees: { employeeId },
-                isSent: true,
-            },
+            where: whereCondition,
         };
         const total = await this.domainNotificationService.count({
             where: options.where,
@@ -98,7 +110,6 @@ export class NotificationContextService {
                 createdAt: 'DESC',
             },
         });
-
         return {
             items: notifications.map((notification) => {
                 return {
@@ -133,6 +144,40 @@ export class NotificationContextService {
         await this.domainEmployeeNotificationService.update(employeeNotification.employeeNotificationId, {
             isRead: true,
         });
+    }
+
+    /**
+     * 모든 알림을 읽음 처리한다
+     */
+    async 모든_알림을_읽음_처리한다(employeeId: string): Promise<void> {
+        try {
+            this.logger.log(`모든 알림 읽음 처리 요청: ${employeeId}`);
+
+            // 해당 직원의 모든 읽지 않은 알림을 조회
+            const employeeNotifications = await this.domainEmployeeNotificationService.findAll({
+                where: {
+                    employeeId,
+                    isRead: false,
+                },
+            });
+
+            if (employeeNotifications.length > 0) {
+                // 모든 읽지 않은 알림을 읽음 처리
+                const updatePromises = employeeNotifications.map((notification) =>
+                    this.domainEmployeeNotificationService.update(notification.employeeNotificationId, {
+                        isRead: true,
+                    }),
+                );
+
+                await Promise.all(updatePromises);
+                this.logger.log(`모든 알림 읽음 처리 완료: ${employeeId} - ${employeeNotifications.length}개 처리`);
+            } else {
+                this.logger.log(`읽지 않은 알림이 없습니다: ${employeeId}`);
+            }
+        } catch (error) {
+            this.logger.error(`모든 알림 읽음 처리 실패: ${error.message}`, error.stack);
+            throw new BadRequestException('모든 알림 읽음 처리 중 오류가 발생했습니다.');
+        }
     }
 
     // 구독 정보 조회 관련 메서드들

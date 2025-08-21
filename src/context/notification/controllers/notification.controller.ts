@@ -7,6 +7,7 @@ import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
+import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
 
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
@@ -80,17 +81,38 @@ export class NotificationController {
         type: Number,
         required: false,
     })
+    @ApiQuery({
+        name: 'resourceType',
+        enum: ResourceType,
+        required: false,
+        description: '자원 타입별 필터링 (차량, 회의실, 숙박시설, 장비)',
+    })
     async findAllByEmployeeId(
         @User('employeeId') employeeId: string,
         @Query() query: PaginationQueryDto,
+        @Query('resourceType') resourceType?: ResourceType,
     ): Promise<PaginationData<ResponseNotificationDto>> {
-        return await this.notificationContextService.내_알림_목록을_조회한다(employeeId, query);
+        return await this.notificationContextService.내_알림_목록을_조회한다(employeeId, query, resourceType);
     }
 
     @Patch(':notificationId/read')
     @ApiOperation({ summary: '알람 읽음 처리' })
+    @ApiOkResponse({
+        status: 200,
+        description: '알람 읽음 처리 성공',
+    })
     async markAsRead(@User() user: Employee, @Param('notificationId') notificationId: string) {
         await this.notificationContextService.알림을_읽음_처리한다(user.employeeId, notificationId);
+    }
+
+    @Patch('mark-all-read')
+    @ApiOperation({ summary: '모든 알람 읽음 처리' })
+    @ApiOkResponse({
+        status: 200,
+        description: '모든 알람 읽음 처리 성공',
+    })
+    async markAllAsRead(@User('employeeId') employeeId: string) {
+        await this.notificationContextService.모든_알림을_읽음_처리한다(employeeId);
     }
 
     @Get('subscription')
