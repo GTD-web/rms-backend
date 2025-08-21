@@ -3699,6 +3699,7 @@ const file_context_module_1 = __webpack_require__(/*! ./context/file/file.contex
 const notification_context_module_1 = __webpack_require__(/*! ./context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
 const resource_management_module_1 = __webpack_require__(/*! ./business/resource-management/resource-management.module */ "./src/business/resource-management/resource-management.module.ts");
 const reservation_management_module_1 = __webpack_require__(/*! ./business/reservation-management/reservation-management.module */ "./src/business/reservation-management/reservation-management.module.ts");
+const schedule_management_module_1 = __webpack_require__(/*! ./business/schedule-management/schedule-management.module */ "./src/business/schedule-management/schedule-management.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -3725,6 +3726,7 @@ exports.AppModule = AppModule = __decorate([
             notification_context_module_1.NotificationContextModule,
             resource_management_module_1.ResourceManagementModule,
             reservation_management_module_1.ReservationManagementModule,
+            schedule_management_module_1.ScheduleManagementModule,
         ],
         providers: [],
     })
@@ -24780,6 +24782,335 @@ exports.VehicleInfoService = VehicleInfoService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _a : Object, typeof (_b = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _b : Object])
 ], VehicleInfoService);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/controllers/schedule.controllers.ts":
+/*!******************************************************************************!*\
+  !*** ./src/business/schedule-management/controllers/schedule.controllers.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const schedule_management_service_1 = __webpack_require__(/*! ../schedule-management.service */ "./src/business/schedule-management/schedule-management.service.ts");
+const employee_entity_1 = __webpack_require__(/*! @libs/entities/employee.entity */ "./libs/entities/employee.entity.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const schedule_calendar_query_dto_1 = __webpack_require__(/*! ../dtos/schedule-calendar-query.dto */ "./src/business/schedule-management/dtos/schedule-calendar-query.dto.ts");
+const schedule_calendar_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-calendar-response.dto */ "./src/business/schedule-management/dtos/schedule-calendar-response.dto.ts");
+let ScheduleController = class ScheduleController {
+    constructor(scheduleManagementService) {
+        this.scheduleManagementService = scheduleManagementService;
+    }
+    async findCalendar(user, query) {
+        return this.scheduleManagementService.findCalendar(user, query);
+    }
+};
+exports.ScheduleController = ScheduleController;
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: '일정 캘린더 조회',
+        description: '월별 일정 캘린더를 조회합니다. 카테고리 필터 및 내 일정만 조회 옵션을 지원합니다.',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '일정 캘린더 조회 성공',
+        type: schedule_calendar_response_dto_1.ScheduleCalendarResponseDto,
+    }),
+    (0, common_1.Get)('calendar'),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _b : Object, typeof (_c = typeof schedule_calendar_query_dto_1.ScheduleCalendarQueryDto !== "undefined" && schedule_calendar_query_dto_1.ScheduleCalendarQueryDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], ScheduleController.prototype, "findCalendar", null);
+exports.ScheduleController = ScheduleController = __decorate([
+    (0, swagger_1.ApiTags)('v2 일정'),
+    (0, common_1.Controller)('v2/schedule'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_management_service_1.ScheduleManagementService !== "undefined" && schedule_management_service_1.ScheduleManagementService) === "function" ? _a : Object])
+], ScheduleController);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/schedule-calendar-query.dto.ts":
+/*!******************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-calendar-query.dto.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleCalendarQueryDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+class ScheduleCalendarQueryDto {
+}
+exports.ScheduleCalendarQueryDto = ScheduleCalendarQueryDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '조회할 날짜 (YYYY-MM 형식)',
+        example: '2024-01',
+        required: true,
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ScheduleCalendarQueryDto.prototype, "date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '카테고리 필터 (전체, 일정, 프로젝트, 자원)',
+        example: '전체',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ScheduleCalendarQueryDto.prototype, "category", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '내 일정만 조회 여부',
+        example: false,
+        required: false,
+        type: Boolean,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === 'true')
+            return true;
+        if (value === 'false')
+            return false;
+        return Boolean(value);
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], ScheduleCalendarQueryDto.prototype, "mySchedule", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/schedule-calendar-response.dto.ts":
+/*!*********************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-calendar-response.dto.ts ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleCalendarResponseDto = exports.ScheduleCalendarItemDto = exports.ProjectDto = exports.ReservationDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class ReservationDto {
+}
+exports.ReservationDto = ReservationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 예약 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ReservationDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 이름',
+        example: '자원 1',
+    }),
+    __metadata("design:type", String)
+], ReservationDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 타입',
+        example: '자원 1',
+    }),
+    __metadata("design:type", String)
+], ReservationDto.prototype, "resourceType", void 0);
+class ProjectDto {
+}
+exports.ProjectDto = ProjectDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ProjectDto.prototype, "projectId", void 0);
+class ScheduleCalendarItemDto {
+}
+exports.ScheduleCalendarItemDto = ScheduleCalendarItemDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ScheduleCalendarItemDto.prototype, "scheduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 제목',
+        example: '프로젝트 회의',
+    }),
+    __metadata("design:type", String)
+], ScheduleCalendarItemDto.prototype, "scheduleTitle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '시작 날짜 및 시간',
+        example: '2024-01-15T09:00:00Z',
+    }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], ScheduleCalendarItemDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '종료 날짜 및 시간',
+        example: '2024-01-15T10:00:00Z',
+    }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], ScheduleCalendarItemDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약자 정보',
+        example: '홍길동',
+    }),
+    __metadata("design:type", String)
+], ScheduleCalendarItemDto.prototype, "reserverName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 정보',
+        example: '프로젝트 1',
+        required: false,
+    }),
+    __metadata("design:type", ProjectDto)
+], ScheduleCalendarItemDto.prototype, "project", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 예약 정보',
+        example: '자원 예약 1',
+        required: false,
+    }),
+    __metadata("design:type", ReservationDto)
+], ScheduleCalendarItemDto.prototype, "reservation", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '안읽은 알림 여부',
+        example: true,
+        required: false,
+    }),
+    __metadata("design:type", Boolean)
+], ScheduleCalendarItemDto.prototype, "hasUnreadNotification", void 0);
+class ScheduleCalendarResponseDto {
+}
+exports.ScheduleCalendarResponseDto = ScheduleCalendarResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 목록',
+        type: [ScheduleCalendarItemDto],
+    }),
+    __metadata("design:type", Array)
+], ScheduleCalendarResponseDto.prototype, "schedules", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/schedule-management.module.ts":
+/*!************************************************************************!*\
+  !*** ./src/business/schedule-management/schedule-management.module.ts ***!
+  \************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleManagementModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_controllers_1 = __webpack_require__(/*! ./controllers/schedule.controllers */ "./src/business/schedule-management/controllers/schedule.controllers.ts");
+const schedule_management_service_1 = __webpack_require__(/*! ./schedule-management.service */ "./src/business/schedule-management/schedule-management.service.ts");
+let ScheduleManagementModule = class ScheduleManagementModule {
+};
+exports.ScheduleManagementModule = ScheduleManagementModule;
+exports.ScheduleManagementModule = ScheduleManagementModule = __decorate([
+    (0, common_1.Module)({
+        imports: [],
+        controllers: [schedule_controllers_1.ScheduleController],
+        providers: [schedule_management_service_1.ScheduleManagementService],
+        exports: [],
+    })
+], ScheduleManagementModule);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/schedule-management.service.ts":
+/*!*************************************************************************!*\
+  !*** ./src/business/schedule-management/schedule-management.service.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleManagementService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+let ScheduleManagementService = class ScheduleManagementService {
+    constructor() { }
+    async findCalendar(user, query) {
+        const responseData = {
+            schedules: [],
+        };
+        return responseData;
+    }
+};
+exports.ScheduleManagementService = ScheduleManagementService;
+exports.ScheduleManagementService = ScheduleManagementService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], ScheduleManagementService);
 
 
 /***/ }),

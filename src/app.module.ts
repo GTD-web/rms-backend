@@ -22,6 +22,7 @@ import { FileContextModule } from './context/file/file.context.module';
 import { NotificationContextModule } from './context/notification/notification.context.module';
 import { ResourceManagementModule } from './business/resource-management/resource-management.module';
 import { ReservationManagementModule } from './business/reservation-management/reservation-management.module';
+import { ScheduleManagementModule } from './business/schedule-management/schedule-management.module';
 
 @Module({
     imports: [
@@ -51,6 +52,7 @@ import { ReservationManagementModule } from './business/reservation-management/r
         NotificationContextModule,
         ResourceManagementModule,
         ReservationManagementModule,
+        ScheduleManagementModule,
     ],
     providers: [
         // ApiDocService, DbDocService
