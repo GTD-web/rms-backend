@@ -17,16 +17,7 @@ import { Entities } from '@libs/entities';
 // import { DbDocService } from '@libs/utils/db-doc.service';
 // import { SeedModule } from './modules/seed/seed.module';
 
-import { AuthModule as AuthApplicationModule } from './application/auth/auth.module';
-import { EmployeeModule as EmployeeApplicationModule } from './application/employee/employee.module';
-import { FileModule as FileApplicationModule } from './application/file/file.module';
-import { NotificationModule as NotificationApplicationModule } from './application/notification/notification.module';
-import { ResourceCoreModule } from './application/resource/core/core.module';
-import { ReservationSnapshotModule } from './application/reservation/snapshot/snapshot.module';
-import { ReservationCoreModule } from './application/reservation/core/core.module';
-import { VehicleResourceModule } from './application/resource/vehicle/vehicle.module';
-import { TaskModule } from './application/task/task.module';
-import { StatisticsModule } from './application/statistics/statistics.module';
+import { LegacyApplicationModule } from './legacy-application.module';
 import { FileContextModule } from './context/file/file.context.module';
 import { NotificationContextModule } from './context/notification/notification.context.module';
 import { ResourceManagementModule } from './business/resource-management/resource-management.module';
@@ -52,17 +43,8 @@ import { ReservationManagementModule } from './business/reservation-management/r
 
         // SeedModule,
 
-        /** 어플리케이션 */
-        AuthApplicationModule,
-        EmployeeApplicationModule,
-        FileApplicationModule,
-        NotificationApplicationModule,
-        ResourceCoreModule,
-        ReservationSnapshotModule,
-        ReservationCoreModule,
-        VehicleResourceModule,
-        TaskModule,
-        StatisticsModule,
+        /** 레거시 어플리케이션 (인터셉터 적용) */
+        LegacyApplicationModule,
 
         /** 비즈니스 */
         FileContextModule,

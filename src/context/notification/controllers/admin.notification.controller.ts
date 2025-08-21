@@ -1,4 +1,4 @@
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Controller, Get, Post, Patch, Param, Body, Query } from '@nestjs/common';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
@@ -7,7 +7,6 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
-import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
 import { ResponseNotificationDto } from '../dtos/response-notification.dto';
@@ -24,7 +23,7 @@ export class AdminNotificationController {
 
     @Post('send')
     @ApiOperation({ summary: '웹 푸시 알림 전송' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '웹 푸시 알림 전송 성공',
     })

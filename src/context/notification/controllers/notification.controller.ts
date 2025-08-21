@@ -1,5 +1,6 @@
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Post, Patch, Param, Body, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiTags, ApiOkResponse } from '@nestjs/swagger';
+import { Controller, Get, Post, Patch, Param, Body, Query, Req, Type } from '@nestjs/common';
+import { Request } from 'express';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
@@ -7,7 +8,6 @@ import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
-import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
 import { ResponseNotificationDto } from '../dtos/response-notification.dto';
@@ -24,17 +24,25 @@ export class NotificationController {
 
     @Post('subscribe')
     @ApiOperation({ summary: '웹 푸시 구독' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '웹 푸시 구독 성공',
+        type: ResponseNotificationDto,
     })
-    async subscribe(@User() user: Employee, @Body() subscription: PushSubscriptionDto): Promise<void> {
-        await this.notificationContextService.푸시_알림을_구독한다(user.employeeId, subscription);
+    async subscribe(
+        @Req() request: Request,
+        @User() user: Employee,
+        @Body() subscription: PushSubscriptionDto,
+    ): Promise<void> {
+        const authorization = Array.isArray(request.headers.authorization)
+            ? request.headers.authorization[0]
+            : request.headers.authorization || '';
+        await this.notificationContextService.푸시_알림을_구독한다(authorization, user.employeeId, subscription);
     }
 
     @Post('subscribe/success')
     @ApiOperation({ summary: '웹 푸시 구독 성공' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '웹 푸시 구독 성공',
     })
@@ -44,7 +52,7 @@ export class NotificationController {
 
     @Post('send/reminder')
     @ApiOperation({ summary: '웹 푸시 알림 전송' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '웹 푸시 알림 전송 성공',
     })
@@ -58,11 +66,9 @@ export class NotificationController {
 
     @Get()
     @ApiOperation({ summary: '알람 목록 조회' })
-    @ApiDataResponse({
-        status: 200,
+    @ApiOkResponse({
         description: '알람 목록 조회 성공',
-        type: [ResponseNotificationDto],
-        isPaginated: true,
+        type: PaginationData<ResponseNotificationDto>,
     })
     @ApiQuery({
         name: 'page',
@@ -89,7 +95,7 @@ export class NotificationController {
 
     @Get('subscription')
     @ApiOperation({ summary: '구독 정보 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '구독 정보 조회 성공',
     })

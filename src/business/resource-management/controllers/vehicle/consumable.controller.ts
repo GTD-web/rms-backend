@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Delete, Body, Param, Patch } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { CreateConsumableDto } from '../../dtos/vehicle/create-vehicle-info.dto';
 import { UpdateConsumableDto } from '../../dtos/vehicle/update-vehicle-info.dto';
 import { ConsumableResponseDto } from '../../dtos/vehicle/vehicle-response.dto';
@@ -15,7 +14,7 @@ export class ConsumableController {
 
     @Post()
     @ApiOperation({ summary: '소모품 등록' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 201,
         description: '소모품이 성공적으로 등록되었습니다.',
         type: ConsumableResponseDto,
@@ -26,7 +25,7 @@ export class ConsumableController {
 
     @Get('vehicle/:vehicleInfoId')
     @ApiOperation({ summary: '소모품 목록 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '소모품 목록을 성공적으로 조회했습니다.',
         type: [ConsumableResponseDto],
@@ -37,7 +36,7 @@ export class ConsumableController {
 
     @Get(':consumableId')
     @ApiOperation({ summary: '소모품 상세 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '소모품을 성공적으로 조회했습니다.',
         type: ConsumableResponseDto,
@@ -48,7 +47,7 @@ export class ConsumableController {
 
     @Patch(':consumableId')
     @ApiOperation({ summary: '소모품 수정' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '소모품이 성공적으로 수정되었습니다.',
         type: ConsumableResponseDto,
@@ -63,7 +62,7 @@ export class ConsumableController {
 
     @Delete(':consumableId')
     @ApiOperation({ summary: '소모품 삭제' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '소모품이 성공적으로 삭제되었습니다.',
     })

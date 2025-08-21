@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Body, Patch, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { UserResponseDto } from '@resource/application/employee/dtos/user-response.dto';
@@ -6,11 +6,14 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { ChangeRoleDto } from '@resource/application/employee/dtos/change-role.dto';
 import { EmployeeService } from '../employee.service';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 
 @ApiTags('5. 유저 - 관리자 ')
 @ApiBearerAuth()
 @Controller('v1/admin/users')
 @Roles(Role.SYSTEM_ADMIN)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class AdminUserController {
     constructor(private readonly employeeService: EmployeeService) {}
 

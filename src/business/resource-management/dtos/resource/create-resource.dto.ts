@@ -3,9 +3,9 @@ import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { CreateVehicleInfoDto } from '../vehicle/create-vehicle-info.dto';
-import { CreateMeetingRoomInfoDto } from '@src/application/resource/meeting-room/dtos/create-meeting-room-info.dto';
-import { CreateAccommodationInfoDto } from '@src/application/resource/accommodation/dtos/create-accommodation-info.dto';
-import { CreateEquipmentInfoDto } from '@src/application/resource/equipment/dtos/create-equipment-info.dto';
+import { CreateMeetingRoomInfoDto } from '../meeting-room/dtos/create-meeting-room-info.dto';
+import { CreateAccommodationInfoDto } from '../accommodation/dtos/create-accommodation-info.dto';
+import { CreateEquipmentInfoDto } from '../equipment/dtos/create-equipment-info.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 
 export class CreateResourceGroupDto {

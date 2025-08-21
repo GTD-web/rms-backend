@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { CreateResourceResponseDto, ResourceResponseDto } from '../../dtos/resource/resource-response.dto';
@@ -16,7 +15,7 @@ export class ResourceController {
 
     @Post()
     @ApiOperation({ summary: '자원 생성 #관리자/자원관리/생성' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 201,
         description: '자원이 성공적으로 생성되었습니다.',
         type: CreateResourceResponseDto,
@@ -27,7 +26,7 @@ export class ResourceController {
 
     @Get()
     @ApiOperation({ summary: '자원 목록 조회 #관리자/자원관리/자원리스트' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '자원 목록을 성공적으로 조회했습니다.',
         type: [ResourceResponseDto],
@@ -39,7 +38,7 @@ export class ResourceController {
 
     @Get(':resourceId')
     @ApiOperation({ summary: '자원 상세 조회 #관리자/자원관리/상세' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '자원을 성공적으로 조회했습니다.',
         type: ResourceResponseDto,
@@ -50,7 +49,7 @@ export class ResourceController {
 
     @Get('resource-group/:resourceGroupId')
     @ApiOperation({ summary: '자원 그룹 상세 조회 #관리자/자원관리/자원리스트' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '자원 그룹을 성공적으로 조회했습니다.',
         type: [ResourceResponseDto],
@@ -63,7 +62,7 @@ export class ResourceController {
 
     @Patch('order')
     @ApiOperation({ summary: '자원 순서 변경' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '자원 순서가 성공적으로 변경되었습니다.',
     })
@@ -73,7 +72,7 @@ export class ResourceController {
 
     @Patch(':resourceId')
     @ApiOperation({ summary: '자원 수정' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '자원이 성공적으로 수정되었습니다.',
         type: ResourceResponseDto,
@@ -87,7 +86,7 @@ export class ResourceController {
 
     @Patch(':resourceId/availability')
     @ApiOperation({ summary: '자원 예약 가능 상태 수정' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '자원이 성공적으로 수정되었습니다.',
         type: ResourceResponseDto,
@@ -101,7 +100,7 @@ export class ResourceController {
 
     @Delete(':resourceId')
     @ApiOperation({ summary: '자원 삭제' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '자원이 성공적으로 삭제되었습니다.',
     })

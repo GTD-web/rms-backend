@@ -1,11 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Employee, Notification } from '@libs/entities';
-import { PushNotificationPayload } from '@src/application/notification/dtos/send-notification.dto';
-import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
-import {
-    ResponseNotificationDto,
-    NotificationDataDto,
-} from '@src/application/notification/dtos/response-notification.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Notification } from '@libs/entities';
+import { PushNotificationPayload } from '../dtos/send-notification.dto';
+import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
+import { ResponseNotificationDto, NotificationDataDto } from '../dtos/response-notification.dto';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
 import { NotificationType } from '@libs/enums/notification-type.enum';
@@ -16,12 +13,10 @@ import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { DomainEmployeeNotificationService } from '@src/domain/employee-notification/employee-notification.service';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
 import { FCMAdapter } from '../adapter/fcm-push.adapter';
-import { SchedulerRegistry } from '@nestjs/schedule';
-import { CronJob } from 'cron/dist';
+import { EmployeeMicroserviceAdapter } from '@src/domain/employee/adapters';
 import { DateUtil } from '@libs/utils/date.util';
-import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { LessThanOrEqual, Raw } from 'typeorm';
+import { Raw } from 'typeorm';
 
 @Injectable()
 export class NotificationContextService {
@@ -31,37 +26,40 @@ export class NotificationContextService {
         private readonly domainEmployeeNotificationService: DomainEmployeeNotificationService,
         private readonly domainReservationService: DomainReservationService,
         private readonly fcmAdapter: FCMAdapter,
+        private readonly employeeMicroserviceAdapter: EmployeeMicroserviceAdapter,
     ) {}
 
     isProduction = process.env.NODE_ENV === 'production';
 
     // 구독 관련 메서드들
-    async 푸시_알림을_구독한다(employeeId: string, subscription: PushSubscriptionDto): Promise<boolean> {
+    async 푸시_알림을_구독한다(
+        authorization: string,
+        employeeId: string,
+        subscription: PushSubscriptionDto,
+    ): Promise<boolean> {
         try {
-            const employee = await this.domainEmployeeService.findByEmployeeId(employeeId);
-            if (!employee) {
-                throw new NotFoundException(ERROR_MESSAGE.BUSINESS.EMPLOYEE.NOT_FOUND);
+            // SSO 서버로 FCM 토큰 구독 요청
+            const fcmSubscribeDto = {
+                fcmToken: subscription.fcm?.token,
+            };
+
+            if (!fcmSubscribeDto.fcmToken) {
+                throw new BadRequestException('FCM 토큰이 필요합니다.');
             }
 
-            if (
-                !this.isProduction &&
-                employee.subscriptions &&
-                Array.isArray(employee.subscriptions) &&
-                employee.subscriptions.length > 0
-            ) {
-                if (employee.subscriptions.length < 2) {
-                    employee.subscriptions.push(subscription);
-                } else {
-                    return false;
-                }
-            } else {
-                employee.subscriptions = [subscription];
-            }
-            await this.domainEmployeeService.update(employee.employeeId, employee);
+            const response = await this.employeeMicroserviceAdapter.subscribeFcm(
+                authorization,
+                employeeId,
+                fcmSubscribeDto,
+            );
 
-            return true;
+            if (response.success) {
+                return true;
+            }
+
+            return false;
         } catch (error) {
-            console.log(error);
+            console.log('SSO 서버 구독 실패:', error);
             return false;
         }
     }
@@ -150,9 +148,8 @@ export class NotificationContextService {
         return await this.토큰별_구독정보를_조회한다(token);
     }
 
-    async 시스템_관리자들에게_알림을_발송한다() // notificationType: NotificationType,
-    // createNotificationDataDto: CreateNotificationDataDto,
-    {
+    async 시스템_관리자들에게_알림을_발송한다() {
+        // createNotificationDataDto: CreateNotificationDataDto, // notificationType: NotificationType,
         // // 시스템 관리자들에게 알림 발송
         // const systemAdmins = await this.domainEmployeeService.findAll({
         //     where: {

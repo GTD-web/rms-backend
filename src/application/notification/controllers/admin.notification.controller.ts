@@ -1,5 +1,5 @@
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Post, Patch, Param, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, UseInterceptors } from '@nestjs/common';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
@@ -8,6 +8,8 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
 import { ResponseNotificationDto } from '../dtos/response-notification.dto';
@@ -20,6 +22,7 @@ import { NotificationService } from '../services/notification.service';
 @Controller('v1/admin/notifications')
 @Roles(Role.SYSTEM_ADMIN)
 @ApiBearerAuth()
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class AdminNotificationController {
     constructor(private readonly notificationService: NotificationService) {}
 

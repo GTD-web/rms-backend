@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { CreateMaintenanceDto } from '../dtos/create-vehicle-info.dto';
@@ -7,12 +7,15 @@ import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 import { MaintenanceService } from '@src/application/resource/vehicle/services/maintenance.service';
 
 @ApiTags('4. 차량 정비 이력 ')
 @Controller('v1/maintenances')
 @ApiBearerAuth()
 @Roles(Role.RESOURCE_ADMIN)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class UserMaintenanceController {
     constructor(private readonly maintenanceService: MaintenanceService) {}
 

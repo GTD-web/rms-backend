@@ -8,6 +8,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>
     intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
         return next.handle().pipe(
             map((data): ApiResponse<T> => {
+                console.log('data', data);
                 return {
                     success: true,
                     data: data as T,

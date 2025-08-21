@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseInterceptors } from '@nestjs/common';
 import { EmployeeService } from '../employee.service';
 import { ApiBearerAuth, ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Public } from '@libs/decorators/public.decorator';
@@ -7,10 +7,13 @@ import {
     MMSEmployeeResponseDto,
     MMSWebhookRequestDto,
 } from '@resource/application/employee/dtos/mms-employee-response.dto';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 
 @ApiTags('5. 직원 ')
 @Public()
 @Controller('v1/employees')
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class EmployeeWebhookController {
     constructor(private readonly employeeService: EmployeeService) {}
 

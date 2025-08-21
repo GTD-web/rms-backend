@@ -1,15 +1,18 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
 import { TaskService } from '../services/task.service';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 
 @ApiTags('3. 태스크 관리 ')
 @ApiBearerAuth()
 @Roles(Role.USER)
 @Controller('v1/tasks')
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class TaskController {
     constructor(private readonly taskService: TaskService) {}
 

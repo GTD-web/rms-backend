@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { ResourceLocationURL } from '../../../../business/resource-management/dtos/resource/create-resource.dto';
 
 export class CreateAccommodationInfoDto {
-  // resourceId는 CreateResourceRequestDto를 통해 전달되므로 제거
-  // 필요한 숙소 관련 필드들 추가
-} 
+    @ApiProperty({ type: ResourceLocationURL })
+    @IsOptional()
+    locationURLs?: ResourceLocationURL;
+}

@@ -3,8 +3,7 @@ import { AppModule } from '@resource/app.module';
 import { setupSwagger } from '@libs/swagger/swagger';
 import { ENV } from '@libs/configs/env.config';
 import * as dtos from '@resource/dtos.index';
-import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
-import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
+import * as businessDtos from './business.dto.index';
 import { JwtAuthGuard } from '@libs/guards/jwt-auth.guard';
 import { Reflector } from '@nestjs/core';
 import { join } from 'path';
@@ -37,9 +36,9 @@ async function bootstrap() {
         credentials: true,
     });
     app.setGlobalPrefix('api');
-    app.useGlobalGuards(new JwtAuthGuard(app.get(Reflector)));
+    app.useGlobalGuards(new JwtAuthGuard(app.get(Reflector)), new RolesGuard(app.get(Reflector)));
     // 전역 인터셉터 등록
-    app.useGlobalInterceptors(new RequestInterceptor(), new ResponseInterceptor(), new ErrorInterceptor());
+    app.useGlobalInterceptors(new RequestInterceptor());
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
     const uploadPath = join(process.cwd(), 'public');
@@ -49,7 +48,7 @@ async function bootstrap() {
         fallthrough: false,
     });
 
-    setupSwagger(app, Object.values(dtos));
+    setupSwagger(app, [...Object.values(dtos), ...Object.values(businessDtos)]);
     await app.listen(ENV.APP_PORT || 3000);
 }
 bootstrap();

@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Param, Patch, Query, ParseArrayPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { CreateReservationDto } from '../dtos/create-reservation.dto';
-import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
@@ -33,7 +33,7 @@ export class ReservationController {
 
     @Post()
     @ApiOperation({ summary: '예약 생성' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '예약 생성 성공',
         type: CreateReservationResponseDto,
     })
@@ -50,7 +50,7 @@ export class ReservationController {
     @ApiOperation({
         summary: '예약 리스트 조회 #관리자/예약관리',
     })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '예약 리스트 조회 성공',
         type: [ReservationWithRelationsResponseDto],
     })
@@ -89,7 +89,7 @@ export class ReservationController {
 
     @Get('check')
     @ApiOperation({ summary: '확인이 필요한 예약들' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '확인이 필요한 예약들 조회 성공',
         type: [ReservationWithRelationsResponseDto],
     })
@@ -104,7 +104,7 @@ export class ReservationController {
     // 내 모든 예약
     @Get('me')
     @ApiOperation({ summary: '내 예약 리스트 조회, 자원 타입별 ' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '내 예약 리스트 조회',
         type: [GroupedReservationResponseDto],
     })
@@ -134,7 +134,7 @@ export class ReservationController {
     // 햄버거 메뉴 -> 자원목록 -> 자원상세 -> 내예약으로 들어간 후 나오는 리스트
     @Get('resource/:resourceId')
     @ApiOperation({ summary: '자원별 예약 리스트 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '자원별 예약 리스트 조회',
         type: GroupedReservationWithResourceResponseDto,
     })
@@ -162,7 +162,7 @@ export class ReservationController {
 
     @Get('my-using')
     @ApiOperation({ summary: '내 이용중인 예약 리스트 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '내 이용중인 예약 리스트 조회',
         type: [ReservationWithRelationsResponseDto],
     })
@@ -174,7 +174,7 @@ export class ReservationController {
 
     @Get('my-upcoming')
     @ApiOperation({ summary: '내 예약 리스트 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '내 예약 리스트 조회',
         type: [GroupedReservationResponseDto],
     })
@@ -191,7 +191,7 @@ export class ReservationController {
 
     @Get('my-upcoming-schedules')
     @ApiOperation({ summary: '내 일정 리스트 조회 (예약자/참석자 모두 포함)' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '내 일정 리스트 조회 (예약자/참석자 모두 포함)',
         type: [GroupedReservationResponseDto],
     })
@@ -208,7 +208,7 @@ export class ReservationController {
 
     @Get('calendar')
     @ApiOperation({ summary: '캘린더 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '캘린더 조회 성공',
         type: CalendarResponseDto,
     })
@@ -231,7 +231,7 @@ export class ReservationController {
 
     @Get(':reservationId')
     @ApiOperation({ summary: '예약 상세 조회 #사용자/예약상세페이지' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '예약 상세 조회 성공',
         type: ReservationWithRelationsResponseDto,
     })
@@ -244,7 +244,7 @@ export class ReservationController {
 
     @Patch(':reservationId')
     @ApiOperation({ summary: '예약 수정' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '예약 수정 성공',
         type: ReservationResponseDto,
     })
@@ -258,7 +258,7 @@ export class ReservationController {
 
     @Patch(':reservationId/status')
     @ApiOperation({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '예약 상태 수정 성공',
         type: ReservationResponseDto,
     })
@@ -272,7 +272,7 @@ export class ReservationController {
 
     @Patch(':reservationId/status/cancel')
     @ApiOperation({ summary: '예약 취소 #사용자/예약상세페이지' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '예약 상태 수정 성공',
         type: ReservationResponseDto,
     })
@@ -285,7 +285,7 @@ export class ReservationController {
 
     @Patch(':reservationId/return-vehicle')
     @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '차량 반납 성공',
     })
@@ -297,26 +297,26 @@ export class ReservationController {
         return this.reservationService.returnVehicle(user, reservationId, returnDto);
     }
 
-    // @Get(':reservationId/check/extendable')
-    // @ApiOperation({ summary: '예약 시간 연장 가능 여부 조회' })
-    // @ApiDataResponse({
-    //     description: '예약 시간 연장 가능 여부 조회 성공',
-    // })
-    // async checkExtendable(@User() user: Employee, @Param('reservationId') reservationId: string): Promise<boolean> {
-    //     return this.reservationService.checkExtendable(user.employeeId, reservationId);
-    // }
+    @Get(':reservationId/check/extendable')
+    @ApiOperation({ summary: '예약 시간 연장 가능 여부 조회' })
+    @ApiOkResponse({
+        description: '예약 시간 연장 가능 여부 조회 성공',
+    })
+    async checkExtendable(@User() user: Employee, @Param('reservationId') reservationId: string): Promise<boolean> {
+        return this.reservationService.checkExtendable(user.employeeId, reservationId);
+    }
 
-    // @Patch(':reservationId/extend')
-    // @ApiOperation({ summary: '예약 시간 연장' })
-    // @ApiDataResponse({
-    //     description: '예약 시간 연장 성공',
-    //     type: ReservationResponseDto,
-    // })
-    // async extendReservation(
-    //     @User() user: Employee,
-    //     @Param('reservationId') reservationId: string,
-    //     @Body() extendDto: UpdateReservationTimeDto,
-    // ): Promise<ReservationResponseDto> {
-    //     return this.reservationService.extendReservation(user.employeeId, reservationId, extendDto);
-    // }
+    @Patch(':reservationId/extend')
+    @ApiOperation({ summary: '예약 시간 연장' })
+    @ApiOkResponse({
+        description: '예약 시간 연장 성공',
+        type: ReservationResponseDto,
+    })
+    async extendReservation(
+        @User() user: Employee,
+        @Param('reservationId') reservationId: string,
+        @Body() extendDto: UpdateReservationTimeDto,
+    ): Promise<ReservationResponseDto> {
+        return this.reservationService.extendReservation(user.employeeId, reservationId, extendDto);
+    }
 }

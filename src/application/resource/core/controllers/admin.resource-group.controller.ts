@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Patch, Query, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 
 import { CreateResourceGroupDto } from '@src/application/resource/core/dtos/create-resource.dto';
@@ -21,6 +23,7 @@ import { ResourceGroupService } from '@src/application/resource/core/services/re
 @Controller('v1/admin/resource-groups')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class AdminResourceGroupController {
     constructor(private readonly resourceGroupService: ResourceGroupService) {}
 

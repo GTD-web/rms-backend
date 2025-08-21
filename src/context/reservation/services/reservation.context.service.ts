@@ -47,6 +47,7 @@ import {
     UpdateReservationDto,
     ReturnVehicleDto,
     UpdateReservationStatusDto,
+    UpdateReservationTimeDto,
 } from '@src/application/reservation/core/dtos/update-reservation.dto';
 
 @Injectable()
@@ -1295,6 +1296,8 @@ export class ReservationContextService {
                     endOdometer: returnDto.totalMileage,
                     isReturned: true,
                     returnedAt: DateUtil.now().toDate(),
+                    location: returnDto.location,
+                    returnedBy: user.employeeId,
                 },
                 { queryRunner },
             );
@@ -1362,14 +1365,105 @@ export class ReservationContextService {
 
     // ==================== 예약 연장 가능 여부 확인 ====================
     async 예약_연장가능여부를_확인한다(employeeId: string, reservationId: string): Promise<boolean> {
-        // TODO: 구현 필요 - 기존 유즈케이스에서 로직 이식
-        throw new Error('Method not implemented yet - need to migrate from existing usecase');
+        // 1. 예약자 검증 - 해당 예약의 예약자가 맞는지 확인
+        await this.예약_접근권한을_확인한다(reservationId, employeeId);
+
+        // 2. 예약 정보 조회 및 검증
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId },
+            relations: ['resource'],
+            withDeleted: true,
+        });
+
+        if (!reservation) {
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+
+        // 3. 예약 타이밍 검증 (예약 종료 15분 전부터 연장 가능)
+        const currentTime = DateUtil.now().toDate();
+        const extendableStartTime = DateUtil.date(reservation.endDate).addMinutes(-15).toDate();
+
+        console.log('reservation', reservation);
+        console.log('currentTime', currentTime);
+        console.log('extendableStartTime', extendableStartTime);
+
+        // 현재 시간이 연장 가능 시간 범위에 있는지 확인
+        if (currentTime < extendableStartTime || currentTime > reservation.endDate) {
+            console.log('isAvailable', false);
+            return false;
+        }
+
+        // 4. 연장 시간(30분)에 다른 예약과 충돌하는지 확인
+        const extendedEndTime = DateUtil.date(reservation.endDate).addMinutes(30).toDate();
+        const conflictReservations = await this.충돌_예약을_조회한다(
+            reservation.resourceId,
+            reservation.endDate,
+            extendedEndTime,
+            reservationId,
+        );
+
+        const isConflict = conflictReservations.length > 0;
+        console.log('isConflict', isConflict);
+
+        return !isConflict;
     }
 
     // ==================== 예약 연장 ====================
-    async 예약을_연장한다(employeeId: string, reservationId: string, extendDto: any): Promise<ReservationResponseDto> {
-        // TODO: 구현 필요 - 기존 유즈케이스에서 로직 이식
-        throw new Error('Method not implemented yet - need to migrate from existing usecase');
+    async 예약을_연장한다(
+        employeeId: string,
+        reservationId: string,
+        extendDto: UpdateReservationTimeDto,
+    ): Promise<ReservationResponseDto> {
+        // 1. 예약자 검증 - 해당 예약의 예약자가 맞는지 확인
+        await this.예약_접근권한을_확인한다(reservationId, employeeId);
+
+        // 2. 예약 시간 업데이트 (기존 예약 수정 로직 활용)
+        const updatedReservation = await this.domainReservationService.update(
+            reservationId,
+            {
+                endDate: DateUtil.date(extendDto.endDate).toDate(),
+            },
+            {
+                relations: ['resource', 'participants', 'participants.employee'],
+                withDeleted: true,
+            },
+        );
+
+        // 3. 예약 종료 작업 재생성 (연장된 시간에 맞춰)
+        if (updatedReservation.resource.type !== ResourceType.VEHICLE) {
+            // 기존 종료 작업 삭제
+            this.예약_종료작업을_삭제한다(reservationId);
+            // 새로운 종료 작업 생성
+            await this.예약_종료작업을_생성한다(updatedReservation);
+        }
+
+        // 4. 알림 처리 (예약 시간 변경 알림)
+        if (updatedReservation.resource.notifyReservationChange) {
+            try {
+                const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
+
+                await this.notificationService.createNotification(
+                    NotificationType.RESERVATION_TIME_CHANGED,
+                    {
+                        reservationId: updatedReservation.reservationId,
+                        reservationTitle: updatedReservation.title,
+                        reservationDate: DateUtil.toAlarmRangeString(
+                            DateUtil.format(updatedReservation.startDate),
+                            DateUtil.format(updatedReservation.endDate),
+                        ),
+                        resourceId: updatedReservation.resource.resourceId,
+                        resourceName: updatedReservation.resource.name,
+                        resourceType: updatedReservation.resource.type,
+                    },
+                    notiTarget,
+                );
+            } catch (error) {
+                console.log(error);
+                console.log('Notification creation failed in extendReservation');
+            }
+        }
+
+        return new ReservationResponseDto(updatedReservation);
     }
 
     // ==================== 크론 작업 처리 ====================

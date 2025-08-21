@@ -4,9 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getMessaging, BatchResponse } from 'firebase-admin/messaging';
 
-import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
-import { PushNotificationPayload } from '@src/application/notification/dtos/send-notification.dto';
-import { PushNotificationSendResult } from '@src/application/notification/dtos/response-notification.dto';
+import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
+import { PushNotificationPayload } from '../dtos/send-notification.dto';
+import { PushNotificationSendResult } from '../dtos/response-notification.dto';
 
 @Injectable()
 export class FCMAdapter {

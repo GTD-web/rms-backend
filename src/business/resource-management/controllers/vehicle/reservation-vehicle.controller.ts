@@ -1,6 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { VehicleInfoService } from '../../services/vehicle-info.service';
 import { ReturnVehicleDetailResponseDto } from '../../dtos/vehicle/return-vehicle-response.dto';
 
@@ -13,7 +12,7 @@ export class ReservationVehicleController {
     // 차량 반납 상세 조회
     @Get(':reservationVehicleId')
     @ApiOperation({ summary: '차량 반납 상세 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 200,
         description: '차량 반납 상세를 성공적으로 조회했습니다.',
         type: ReturnVehicleDetailResponseDto,

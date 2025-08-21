@@ -74,6 +74,12 @@ export class UpdateConsumableDto {
 }
 
 export class UpdateVehicleInfoDto {
+    @ApiProperty({
+        description: '차량 ID',
+        example: 'vehicle-123',
+    })
+    vehicleInfoId: string;
+
     @ApiProperty({ required: false })
     @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('차량 번호') })
     @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('차량 번호', 0, 100) })

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Query, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
@@ -7,6 +7,8 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 import {
     ReservationWithRelationsResponseDto,
     GroupedReservationResponseDto,
@@ -25,6 +27,7 @@ import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
 @Controller('v1/reservations')
 @ApiBearerAuth()
 @Roles(Role.USER)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class UserReservationController {
     constructor(private readonly reservationService: ReservationService) {}
 

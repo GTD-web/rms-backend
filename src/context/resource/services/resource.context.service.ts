@@ -29,6 +29,10 @@ import {
     CheckAvailabilityResponseDto,
 } from '@src/business/resource-management/dtos/resource/check-availability.dto';
 import { ResourceAvailabilityDto } from '@src/business/resource-management/dtos/resource/available-time-response.dto';
+import { UpdateVehicleInfoDto } from '@src/business/resource-management/dtos/vehicle/update-vehicle-info.dto';
+import { UpdateMeetingRoomInfoDto } from '@src/business/resource-management/dtos/meeting-room/dtos/update-meeting-room-info.dto';
+import { UpdateAccommodationInfoDto } from '@src/business/resource-management/dtos/accommodation/dtos/update-accommodation-info.dto';
+import { UpdateEquipmentInfoDto } from '@src/business/resource-management/dtos/equipment/dtos/update-equipment-info.dto';
 
 @Injectable()
 export class ResourceContextService {
@@ -231,6 +235,42 @@ export class ResourceContextService {
                 await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
             }
 
+            if (updateResourceInfoDto.typeInfo) {
+                switch (resource.type) {
+                    case ResourceType.VEHICLE:
+                        const vehicleInfo = updateResourceInfoDto.typeInfo as UpdateVehicleInfoDto;
+                        await this.domainVehicleInfoService.update(vehicleInfo.vehicleInfoId, vehicleInfo, {
+                            queryRunner,
+                        });
+                        break;
+                    case ResourceType.MEETING_ROOM:
+                        const meetingRoomInfo = updateResourceInfoDto.typeInfo as UpdateMeetingRoomInfoDto;
+                        await this.domainMeetingRoomInfoService.update(
+                            meetingRoomInfo.meetingRoomInfoId,
+                            meetingRoomInfo,
+                            {
+                                queryRunner,
+                            },
+                        );
+                        break;
+                    case ResourceType.ACCOMMODATION:
+                        const accommodationInfo = updateResourceInfoDto.typeInfo as UpdateAccommodationInfoDto;
+                        await this.domainAccommodationInfoService.update(
+                            accommodationInfo.accommodationInfoId,
+                            accommodationInfo,
+                            {
+                                queryRunner,
+                            },
+                        );
+                        break;
+                    case ResourceType.EQUIPMENT:
+                        const equipmentInfo = updateResourceInfoDto.typeInfo as UpdateEquipmentInfoDto;
+                        await this.domainEquipmentInfoService.update(equipmentInfo.equipmentInfoId, equipmentInfo, {
+                            queryRunner,
+                        });
+                        break;
+                }
+            }
             if (updateResourceInfoDto.managers) {
                 const newManagerIds = updateResourceInfoDto.managers.map((m) => m.employeeId);
                 const currentManagers = await this.domainResourceManagerService.findAll({

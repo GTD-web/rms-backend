@@ -1,14 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { EmployeeService } from '../employee.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { EmplyeesByDepartmentResponseDto } from '@resource/application/employee/dtos/employees-by-department-response.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
 
 @ApiTags('5. 직원 ')
 @ApiBearerAuth()
 @Controller('v1/employees')
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class UserEmployeeController {
     constructor(private readonly employeeService: EmployeeService) {}
 

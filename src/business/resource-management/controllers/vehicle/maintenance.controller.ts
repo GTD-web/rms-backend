@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 import { CreateMaintenanceDto } from '../../dtos/vehicle/create-vehicle-info.dto';
 import { UpdateMaintenanceDto } from '../../dtos/vehicle/update-vehicle-info.dto';
 import { MaintenanceResponseDto } from '../../dtos/vehicle/vehicle-response.dto';
@@ -19,7 +18,7 @@ export class MaintenanceController {
 
     @Post()
     @ApiOperation({ summary: '정비 이력 생성' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         status: 201,
         description: '정비 이력이 생성되었습니다.',
         type: MaintenanceResponseDto,
@@ -30,7 +29,7 @@ export class MaintenanceController {
 
     @Get('vehicle/:vehicleInfoId')
     @ApiOperation({ summary: '정비 이력 목록 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '정비 이력 목록을 조회했습니다.',
         type: [MaintenanceResponseDto],
     })
@@ -46,7 +45,7 @@ export class MaintenanceController {
 
     @Get(':maintenanceId')
     @ApiOperation({ summary: '정비 상세 이력 조회' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '정비 상세 이력을 조회했습니다.',
         type: MaintenanceResponseDto,
     })
@@ -56,7 +55,7 @@ export class MaintenanceController {
 
     @Patch(':maintenanceId')
     @ApiOperation({ summary: '정비 이력 수정' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '정비 이력이 수정되었습니다.',
         type: MaintenanceResponseDto,
     })
@@ -69,7 +68,7 @@ export class MaintenanceController {
 
     @Delete(':maintenanceId')
     @ApiOperation({ summary: '정비 이력 삭제' })
-    @ApiDataResponse({
+    @ApiOkResponse({
         description: '정비 이력이 삭제되었습니다.',
     })
     async remove(@Param('maintenanceId') maintenanceId: string): Promise<void> {

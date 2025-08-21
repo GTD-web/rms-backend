@@ -12,11 +12,19 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { FileContextService } from '../services/file.context.service';
-import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+    ApiTags,
+    ApiBearerAuth,
+    ApiConsumes,
+    ApiBody,
+    ApiOperation,
+    ApiResponse,
+    ApiQuery,
+    ApiOkResponse,
+} from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { FileResponseDto } from '@resource/application/file/dtos/file-response.dto';
-import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { MimeType } from '@libs/enums/mime-type.enum';
 import { CreateFileDataDto } from '../dtos/create-filedata.dto';
 
@@ -40,7 +48,7 @@ export class FileController {
         },
     })
     @ApiOperation({ summary: '파일 업로드' })
-    @ApiDataResponse({ status: 200, description: '파일 업로드 성공', type: FileResponseDto })
+    @ApiOkResponse({ status: 200, description: '파일 업로드 성공', type: FileResponseDto })
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(@UploadedFile() file: Express.Multer.File) {
         return this.fileContextService.파일을_업로드한다(file);
@@ -63,7 +71,7 @@ export class FileController {
         },
     })
     @ApiOperation({ summary: '여러 파일 업로드' })
-    @ApiDataResponse({ status: 200, description: '여러 파일 업로드 성공', type: [FileResponseDto] })
+    @ApiOkResponse({ status: 200, description: '여러 파일 업로드 성공', type: [FileResponseDto] })
     @UseInterceptors(FilesInterceptor('files', 10)) // 최대 10개 파일 업로드 가능
     async uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
         return this.fileContextService.다중_파일을_업로드한다(files);
@@ -84,14 +92,14 @@ export class FileController {
             },
         },
     })
-    @ApiDataResponse({ status: 200, description: '여러 파일 삭제 성공' })
+    @ApiOkResponse({ status: 200, description: '여러 파일 삭제 성공' })
     async deleteMultipleFiles(@Body('fileIds') fileIds: string[]) {
         await this.fileContextService.다중_파일을_삭제한다(fileIds);
     }
 
     @Get('presigned-url')
     @ApiOperation({ summary: 'Presigned URL 생성' })
-    @ApiDataResponse({ status: 200, description: 'Presigned URL 생성 성공' })
+    @ApiOkResponse({ status: 200, description: 'Presigned URL 생성 성공' })
     @ApiQuery({ name: 'mime', enum: MimeType, example: MimeType.IMAGE_PNG, required: true })
     async getPresignedUrl(@Query('mime') mime: MimeType) {
         return this.fileContextService.프리사인드_URL을_생성한다(mime);
@@ -99,14 +107,14 @@ export class FileController {
 
     @Post('data')
     @ApiOperation({ summary: '파일 데이터 생성' })
-    @ApiDataResponse({ status: 200, description: '파일 데이터 생성 성공' })
+    @ApiOkResponse({ status: 200, description: '파일 데이터 생성 성공' })
     async createFileData(@Body() createFileDataDto: CreateFileDataDto) {
         return this.fileContextService.파일_데이터를_생성한다(createFileDataDto);
     }
 
     @Delete(':fileId')
     @ApiOperation({ summary: '파일 삭제' })
-    @ApiDataResponse({ status: 200, description: '파일 삭제 성공' })
+    @ApiOkResponse({ status: 200, description: '파일 삭제 성공' })
     async deleteFile(@Param('fileId') fileId: string) {
         await this.fileContextService.파일을_삭제한다(fileId);
     }
