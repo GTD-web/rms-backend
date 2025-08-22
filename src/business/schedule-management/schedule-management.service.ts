@@ -36,16 +36,16 @@ export class ScheduleManagementService {
         let scheduleRelations = await this.scheduleContextService.일정관계정보를_조회한다(scheduleIds);
         if (category) {
             switch (category) {
+                case ScheduleCategoryType.SCHEDULE:
+                    scheduleRelations = scheduleRelations.filter(
+                        (scheduleRelation) => !scheduleRelation.projectId && !scheduleRelation.reservationId,
+                    );
+                    break;
                 case ScheduleCategoryType.PROJECT:
                     scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.projectId);
                     break;
                 case ScheduleCategoryType.RESOURCE:
                     scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.reservationId);
-                    break;
-                default:
-                    scheduleRelations = scheduleRelations.filter(
-                        (scheduleRelation) => !scheduleRelation.projectId && !scheduleRelation.reservationId,
-                    );
                     break;
             }
         }

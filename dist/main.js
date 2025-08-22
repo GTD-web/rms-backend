@@ -25783,14 +25783,14 @@ let ScheduleManagementService = class ScheduleManagementService {
         let scheduleRelations = await this.scheduleContextService.일정관계정보를_조회한다(scheduleIds);
         if (category) {
             switch (category) {
+                case my_schedule_query_dto_1.ScheduleCategoryType.SCHEDULE:
+                    scheduleRelations = scheduleRelations.filter((scheduleRelation) => !scheduleRelation.projectId && !scheduleRelation.reservationId);
+                    break;
                 case my_schedule_query_dto_1.ScheduleCategoryType.PROJECT:
                     scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.projectId);
                     break;
                 case my_schedule_query_dto_1.ScheduleCategoryType.RESOURCE:
                     scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.reservationId);
-                    break;
-                default:
-                    scheduleRelations = scheduleRelations.filter((scheduleRelation) => !scheduleRelation.projectId && !scheduleRelation.reservationId);
                     break;
             }
         }
