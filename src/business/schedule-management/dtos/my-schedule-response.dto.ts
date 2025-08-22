@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ParticipantsType } from '@libs/enums/reservation-type.enum';
+import { StatisticsItemDto } from './my-schedule-statistics-response.dto';
 
 export class MyScheduleResourceDto {
     @ApiProperty({
@@ -91,7 +92,55 @@ export class MyScheduleItemDto {
 
 export class MyScheduleResponseDto {
     @ApiProperty({
-        description: '일정 목록',
+        description: '통계 정보 (검색/페이지네이션과 무관한 전체 통계)',
+        type: [StatisticsItemDto],
+    })
+    statistics: StatisticsItemDto[];
+
+    @ApiProperty({
+        description: '전체 일정 개수 (필터링 후, 검색 전)',
+        example: 45,
+    })
+    totalCount: number;
+
+    @ApiProperty({
+        description: '검색 결과 개수',
+        example: 25,
+    })
+    filteredCount: number;
+
+    @ApiProperty({
+        description: '현재 페이지',
+        example: 1,
+    })
+    currentPage: number;
+
+    @ApiProperty({
+        description: '페이지당 항목 수',
+        example: 20,
+    })
+    pageSize: number;
+
+    @ApiProperty({
+        description: '총 페이지 수',
+        example: 3,
+    })
+    totalPages: number;
+
+    @ApiProperty({
+        description: '다음 페이지 존재 여부',
+        example: true,
+    })
+    hasNext: boolean;
+
+    @ApiProperty({
+        description: '이전 페이지 존재 여부',
+        example: false,
+    })
+    hasPrevious: boolean;
+
+    @ApiProperty({
+        description: '일정 목록 (페이지네이션 적용됨)',
         type: [MyScheduleItemDto],
     })
     schedules: MyScheduleItemDto[];

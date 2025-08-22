@@ -38,6 +38,12 @@ export class ResourceScheduleItemDto {
         example: '홍길동',
     })
     reserverName: string;
+
+    @ApiProperty({
+        description: '내 일정 여부',
+        example: true,
+    })
+    isMine: boolean;
 }
 
 export class ResourceInfoDto {

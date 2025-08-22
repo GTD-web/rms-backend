@@ -1,13 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsEnum } from 'class-validator';
 import { ParticipantsType } from '@libs/enums/reservation-type.enum';
-
-export enum ScheduleCategoryType {
-    ALL = '전체',
-    SCHEDULE = '일정',
-    PROJECT = '프로젝트',
-    RESOURCE = '자원',
-}
+import { ScheduleCategoryType } from './my-schedule-query.dto';
 
 export class MyScheduleStatisticsQueryDto {
     @ApiProperty({

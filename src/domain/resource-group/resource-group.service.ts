@@ -4,6 +4,7 @@ import { BaseService } from '@libs/services/base.service';
 import { ResourceGroup } from '@libs/entities/resource-group.entity';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { IsNull, Not } from 'typeorm';
 
 @Injectable()
 export class DomainResourceGroupService extends BaseService<ResourceGroup> {

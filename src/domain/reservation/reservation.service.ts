@@ -17,4 +17,11 @@ export class DomainReservationService extends BaseService<Reservation> {
             relations: ['resource'],
         });
     }
+
+    async findByResourceIds(resourceIds: string[]): Promise<Reservation[]> {
+        return this.reservationRepository.findAll({
+            where: { resourceId: In(resourceIds) },
+            relations: ['resource'],
+        });
+    }
 }

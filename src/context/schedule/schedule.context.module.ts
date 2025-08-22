@@ -5,6 +5,8 @@ import { DomainScheduleRelationModule } from '@src/domain/schedule-relation/sche
 import { ScheduleContextService } from './schedule.context.service';
 import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
 import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
+import { DomainResourceModule } from '@src/domain/resource/resource.module';
+import { DomainResourceGroupModule } from '@src/domain/resource-group/resource-group.module';
 
 @Module({
     imports: [
@@ -13,6 +15,8 @@ import { DomainReservationModule } from '@src/domain/reservation/reservation.mod
         DomainScheduleRelationModule,
         DomainEmployeeModule,
         DomainReservationModule,
+        DomainResourceModule,
+        DomainResourceGroupModule,
     ],
     providers: [ScheduleContextService],
     exports: [ScheduleContextService],

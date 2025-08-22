@@ -7,8 +7,6 @@ import { ScheduleCalendarQueryDto } from '../dtos/schedule-calendar-query.dto';
 import { ScheduleCalendarResponseDto } from '../dtos/schedule-calendar-response.dto';
 import { MyScheduleQueryDto } from '../dtos/my-schedule-query.dto';
 import { MyScheduleResponseDto } from '../dtos/my-schedule-response.dto';
-import { MyScheduleStatisticsQueryDto } from '../dtos/my-schedule-statistics-query.dto';
-import { MyScheduleStatisticsResponseDto } from '../dtos/my-schedule-statistics-response.dto';
 import { ResourceScheduleQueryDto } from '../dtos/resource-schedule-query.dto';
 import { ResourceScheduleResponseDto } from '../dtos/resource-schedule-response.dto';
 
@@ -42,38 +40,18 @@ export class ScheduleController {
     }
 
     /**
-     * 내 일정 통계 조회
-     * 내 일정의 검색을 제외한 필터 조건이 적용된 일정 통계를 조회한다.
-     * 필터 - 역할 기준 ( 예약자, 참석자 ) / 카테고리 ( 전체, 일정, 프로젝트, 자원 별 )
-     *
-     */
-
-    @ApiOperation({
-        summary: '내 일정 통계 조회',
-        description: '내 일정의 검색을 제외한 필터 조건이 적용된 일정 통계를 조회한다.',
-    })
-    @ApiOkResponse({
-        description: '내 일정 통계 조회 성공',
-        type: MyScheduleStatisticsResponseDto,
-    })
-    @Get('my/statistics')
-    async findMyScheduleStatistics(
-        @User() user: Employee,
-        @Query() query: MyScheduleStatisticsQueryDto,
-    ): Promise<MyScheduleStatisticsResponseDto> {
-        return this.scheduleManagementService.findMyScheduleStatistics(user, query);
-    }
-
-    /**
-     * 내 일정 조회
+     * 내 일정 조회 (통계 + 목록)
      * 조회 조건
      * 1. 현재시간을 기준으로 오늘 날짜 이후의 일정만 조회한다.
      * 2. 필터 - 역할 기준 ( 예약자, 참석자 ) / 카테고리 ( 전체, 일정, 프로젝트, 자원 별 )
      * 3. 제목과 자원명으로 검색할 수 있다.
+     * 4. 통계는 검색 및 페이지네이션과 무관하게 필터 조건만 적용하여 계산한다.
+     * 5. 일정 목록은 검색 및 페이지네이션이 적용된다.
      */
     @ApiOperation({
-        summary: '내 일정 조회',
-        description: '로그인한 사용자의 일정을 조회합니다. 역할, 카테고리 필터링과 키워드 검색을 지원합니다.',
+        summary: '내 일정 조회 (통계 + 목록)',
+        description:
+            '로그인한 사용자의 일정 통계와 목록을 함께 조회합니다. 통계는 검색에 영향받지 않으며, 목록은 검색과 페이지네이션이 적용됩니다.',
     })
     @ApiOkResponse({
         description: '내 일정 조회 성공',

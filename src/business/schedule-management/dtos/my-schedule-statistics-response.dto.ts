@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ParticipantsType } from '@libs/enums/reservation-type.enum';
-import { ScheduleCategoryType } from './my-schedule-statistics-query.dto';
 
 export class StatisticsItemDto {
     @ApiProperty({

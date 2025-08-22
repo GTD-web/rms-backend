@@ -24834,7 +24834,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -24846,8 +24846,6 @@ const schedule_calendar_query_dto_1 = __webpack_require__(/*! ../dtos/schedule-c
 const schedule_calendar_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-calendar-response.dto */ "./src/business/schedule-management/dtos/schedule-calendar-response.dto.ts");
 const my_schedule_query_dto_1 = __webpack_require__(/*! ../dtos/my-schedule-query.dto */ "./src/business/schedule-management/dtos/my-schedule-query.dto.ts");
 const my_schedule_response_dto_1 = __webpack_require__(/*! ../dtos/my-schedule-response.dto */ "./src/business/schedule-management/dtos/my-schedule-response.dto.ts");
-const my_schedule_statistics_query_dto_1 = __webpack_require__(/*! ../dtos/my-schedule-statistics-query.dto */ "./src/business/schedule-management/dtos/my-schedule-statistics-query.dto.ts");
-const my_schedule_statistics_response_dto_1 = __webpack_require__(/*! ../dtos/my-schedule-statistics-response.dto */ "./src/business/schedule-management/dtos/my-schedule-statistics-response.dto.ts");
 const resource_schedule_query_dto_1 = __webpack_require__(/*! ../dtos/resource-schedule-query.dto */ "./src/business/schedule-management/dtos/resource-schedule-query.dto.ts");
 const resource_schedule_response_dto_1 = __webpack_require__(/*! ../dtos/resource-schedule-response.dto */ "./src/business/schedule-management/dtos/resource-schedule-response.dto.ts");
 let ScheduleController = class ScheduleController {
@@ -24856,9 +24854,6 @@ let ScheduleController = class ScheduleController {
     }
     async findCalendar(user, query) {
         return this.scheduleManagementService.findCalendar(user, query);
-    }
-    async findMyScheduleStatistics(user, query) {
-        return this.scheduleManagementService.findMyScheduleStatistics(user, query);
     }
     async findMySchedules(user, query) {
         return this.scheduleManagementService.findMySchedules(user, query);
@@ -24886,24 +24881,8 @@ __decorate([
 ], ScheduleController.prototype, "findCalendar", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: '내 일정 통계 조회',
-        description: '내 일정의 검색을 제외한 필터 조건이 적용된 일정 통계를 조회한다.',
-    }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '내 일정 통계 조회 성공',
-        type: my_schedule_statistics_response_dto_1.MyScheduleStatisticsResponseDto,
-    }),
-    (0, common_1.Get)('my/statistics'),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _e : Object, typeof (_f = typeof my_schedule_statistics_query_dto_1.MyScheduleStatisticsQueryDto !== "undefined" && my_schedule_statistics_query_dto_1.MyScheduleStatisticsQueryDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
-], ScheduleController.prototype, "findMyScheduleStatistics", null);
-__decorate([
-    (0, swagger_1.ApiOperation)({
-        summary: '내 일정 조회',
-        description: '로그인한 사용자의 일정을 조회합니다. 역할, 카테고리 필터링과 키워드 검색을 지원합니다.',
+        summary: '내 일정 조회 (통계 + 목록)',
+        description: '로그인한 사용자의 일정 통계와 목록을 함께 조회합니다. 통계는 검색에 영향받지 않으며, 목록은 검색과 페이지네이션이 적용됩니다.',
     }),
     (0, swagger_1.ApiOkResponse)({
         description: '내 일정 조회 성공',
@@ -24913,8 +24892,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _h : Object, typeof (_j = typeof my_schedule_query_dto_1.MyScheduleQueryDto !== "undefined" && my_schedule_query_dto_1.MyScheduleQueryDto) === "function" ? _j : Object]),
-    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+    __metadata("design:paramtypes", [typeof (_e = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _e : Object, typeof (_f = typeof my_schedule_query_dto_1.MyScheduleQueryDto !== "undefined" && my_schedule_query_dto_1.MyScheduleQueryDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], ScheduleController.prototype, "findMySchedules", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -24929,8 +24908,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_l = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _l : Object, typeof (_m = typeof resource_schedule_query_dto_1.ResourceScheduleQueryDto !== "undefined" && resource_schedule_query_dto_1.ResourceScheduleQueryDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [typeof (_h = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _h : Object, typeof (_j = typeof resource_schedule_query_dto_1.ResourceScheduleQueryDto !== "undefined" && resource_schedule_query_dto_1.ResourceScheduleQueryDto) === "function" ? _j : Object]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], ScheduleController.prototype, "findResourceSchedules", null);
 exports.ScheduleController = ScheduleController = __decorate([
     (0, swagger_1.ApiTags)('v2 일정'),
@@ -25058,6 +25037,7 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MyScheduleResponseDto = exports.MyScheduleItemDto = exports.MyScheduleProjectDto = exports.MyScheduleResourceDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const my_schedule_statistics_response_dto_1 = __webpack_require__(/*! ./my-schedule-statistics-response.dto */ "./src/business/schedule-management/dtos/my-schedule-statistics-response.dto.ts");
 class MyScheduleResourceDto {
 }
 exports.MyScheduleResourceDto = MyScheduleResourceDto;
@@ -25167,69 +25147,67 @@ class MyScheduleResponseDto {
 exports.MyScheduleResponseDto = MyScheduleResponseDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: '일정 목록',
+        description: '통계 정보 (검색/페이지네이션과 무관한 전체 통계)',
+        type: [my_schedule_statistics_response_dto_1.StatisticsItemDto],
+    }),
+    __metadata("design:type", Array)
+], MyScheduleResponseDto.prototype, "statistics", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '전체 일정 개수 (필터링 후, 검색 전)',
+        example: 45,
+    }),
+    __metadata("design:type", Number)
+], MyScheduleResponseDto.prototype, "totalCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '검색 결과 개수',
+        example: 25,
+    }),
+    __metadata("design:type", Number)
+], MyScheduleResponseDto.prototype, "filteredCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '현재 페이지',
+        example: 1,
+    }),
+    __metadata("design:type", Number)
+], MyScheduleResponseDto.prototype, "currentPage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '페이지당 항목 수',
+        example: 20,
+    }),
+    __metadata("design:type", Number)
+], MyScheduleResponseDto.prototype, "pageSize", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '총 페이지 수',
+        example: 3,
+    }),
+    __metadata("design:type", Number)
+], MyScheduleResponseDto.prototype, "totalPages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '다음 페이지 존재 여부',
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], MyScheduleResponseDto.prototype, "hasNext", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '이전 페이지 존재 여부',
+        example: false,
+    }),
+    __metadata("design:type", Boolean)
+], MyScheduleResponseDto.prototype, "hasPrevious", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 목록 (페이지네이션 적용됨)',
         type: [MyScheduleItemDto],
     }),
     __metadata("design:type", Array)
 ], MyScheduleResponseDto.prototype, "schedules", void 0);
-
-
-/***/ }),
-
-/***/ "./src/business/schedule-management/dtos/my-schedule-statistics-query.dto.ts":
-/*!***********************************************************************************!*\
-  !*** ./src/business/schedule-management/dtos/my-schedule-statistics-query.dto.ts ***!
-  \***********************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MyScheduleStatisticsQueryDto = exports.ScheduleCategoryType = void 0;
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
-const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
-var ScheduleCategoryType;
-(function (ScheduleCategoryType) {
-    ScheduleCategoryType["ALL"] = "\uC804\uCCB4";
-    ScheduleCategoryType["SCHEDULE"] = "\uC77C\uC815";
-    ScheduleCategoryType["PROJECT"] = "\uD504\uB85C\uC81D\uD2B8";
-    ScheduleCategoryType["RESOURCE"] = "\uC790\uC6D0";
-})(ScheduleCategoryType || (exports.ScheduleCategoryType = ScheduleCategoryType = {}));
-class MyScheduleStatisticsQueryDto {
-}
-exports.MyScheduleStatisticsQueryDto = MyScheduleStatisticsQueryDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '역할 기준 필터 (예약자, 참석자)',
-        enum: reservation_type_enum_1.ParticipantsType,
-        required: false,
-        example: reservation_type_enum_1.ParticipantsType.RESERVER,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ParticipantsType),
-    __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ParticipantsType !== "undefined" && reservation_type_enum_1.ParticipantsType) === "function" ? _a : Object)
-], MyScheduleStatisticsQueryDto.prototype, "role", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '카테고리 필터 (전체, 일정, 프로젝트, 자원)',
-        enum: ScheduleCategoryType,
-        required: false,
-        example: ScheduleCategoryType.ALL,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(ScheduleCategoryType),
-    __metadata("design:type", String)
-], MyScheduleStatisticsQueryDto.prototype, "category", void 0);
 
 
 /***/ }),
@@ -25425,6 +25403,13 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], ResourceScheduleItemDto.prototype, "reserverName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '내 일정 여부',
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], ResourceScheduleItemDto.prototype, "isMine", void 0);
 class ResourceInfoDto {
 }
 exports.ResourceInfoDto = ResourceInfoDto;
@@ -25764,9 +25749,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleManagementService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const my_schedule_query_dto_1 = __webpack_require__(/*! ./dtos/my-schedule-query.dto */ "./src/business/schedule-management/dtos/my-schedule-query.dto.ts");
-const my_schedule_statistics_query_dto_1 = __webpack_require__(/*! ./dtos/my-schedule-statistics-query.dto */ "./src/business/schedule-management/dtos/my-schedule-statistics-query.dto.ts");
-const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const schedule_context_service_1 = __webpack_require__(/*! ../../context/schedule/schedule.context.service */ "./src/context/schedule/schedule.context.service.ts");
 let ScheduleManagementService = class ScheduleManagementService {
     constructor(scheduleContextService) {
@@ -25828,128 +25812,60 @@ let ScheduleManagementService = class ScheduleManagementService {
         };
         return responseData;
     }
-    async findMySchedules(user, query) {
-        const page = query.page || 1;
-        const limit = query.limit || 20;
-        const totalCount = 0;
-        const totalPages = Math.ceil(totalCount / limit);
-        const responseData = {
-            schedules: [],
-        };
-        return responseData;
-    }
-    async findMyScheduleStatistics(user, query) {
-        const totalSchedules = 24;
+    async generateCategoryStatistics(schedules, scheduleRelations, category) {
+        const { scheduleTypeStats, projectStats, resourceStats } = this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelations);
         const statistics = [];
-        await this.generateDynamicStatistics(query, statistics, totalSchedules);
-        const responseData = {
-            label: '통계',
-            totalCount: totalSchedules,
-            statistics,
-        };
-        return responseData;
-    }
-    async generateDynamicStatistics(query, statistics, totalCount) {
-        if (!query.role) {
-            const roleStats = await this.generateRoleStatistics(query, totalCount);
-            if (roleStats)
-                statistics.push(roleStats);
+        if (!category || category === my_schedule_query_dto_1.ScheduleCategoryType.ALL) {
+            statistics.push({
+                label: '일정',
+                count: Array.from(scheduleTypeStats.values()).reduce((sum, arr) => sum + arr.length, 0),
+            });
+            statistics.push({
+                label: '프로젝트',
+                count: projectStats.length,
+            });
+            statistics.push({
+                label: '자원',
+                count: Array.from(resourceStats.values()).reduce((sum, arr) => sum + arr.length, 0),
+            });
         }
-        if (!query.category || query.category === my_schedule_statistics_query_dto_1.ScheduleCategoryType.ALL) {
-            const categoryStats = await this.generateCategoryStatistics(query, totalCount);
-            if (categoryStats)
-                statistics.push(categoryStats);
+        else if (category === my_schedule_query_dto_1.ScheduleCategoryType.SCHEDULE) {
+            Object.values(schedule_type_enum_1.ScheduleType).forEach((scheduleType) => {
+                const scheduleList = scheduleTypeStats.get(scheduleType) || [];
+                statistics.push({
+                    label: this.getScheduleTypeLabel(scheduleType),
+                    count: scheduleList.length,
+                });
+            });
         }
-        const timeStats = await this.generateTimeStatistics(query, totalCount);
-        if (timeStats)
-            statistics.push(timeStats);
+        else if (category === my_schedule_query_dto_1.ScheduleCategoryType.PROJECT) {
+            statistics.push({
+                label: '프로젝트',
+                count: projectStats.length,
+            });
+        }
+        else if (category === my_schedule_query_dto_1.ScheduleCategoryType.RESOURCE) {
+            Object.values(resource_type_enum_1.ResourceType).forEach((resourceType) => {
+                const scheduleList = resourceStats.get(resourceType) || [];
+                statistics.push({
+                    label: this.getResourceTypeLabel(resourceType),
+                    count: scheduleList.length,
+                });
+            });
+        }
+        return statistics;
     }
-    async generateRoleStatistics(query, totalCount) {
-        const mockData = [
-            { type: reservation_type_enum_1.ParticipantsType.RESERVER, count: 15 },
-            { type: reservation_type_enum_1.ParticipantsType.PARTICIPANT, count: 8 },
-            { type: reservation_type_enum_1.ParticipantsType.CC_RECEIPIENT, count: 1 },
-        ];
-        const details = mockData.map((item) => ({
-            key: item.type,
-            label: this.getParticipantTypeLabel(item.type),
-            count: item.count,
-            percentage: totalCount > 0 ? Math.round((item.count / totalCount) * 100 * 10) / 10 : 0,
-        }));
-        return {
-            label: '역할별',
-            count: totalCount,
-        };
-    }
-    async generateCategoryStatistics(query, totalCount) {
-        const mockData = [
-            { type: my_schedule_statistics_query_dto_1.ScheduleCategoryType.SCHEDULE, count: 10 },
-            { type: my_schedule_statistics_query_dto_1.ScheduleCategoryType.PROJECT, count: 8 },
-            { type: my_schedule_statistics_query_dto_1.ScheduleCategoryType.RESOURCE, count: 6 },
-        ];
-        const details = mockData.map((item) => ({
-            key: item.type,
-            label: this.getCategoryTypeLabel(item.type),
-            count: item.count,
-            percentage: totalCount > 0 ? Math.round((item.count / totalCount) * 100 * 10) / 10 : 0,
-        }));
-        return {
-            label: '카테고리별',
-            count: totalCount,
-        };
-    }
-    async generateTimeStatistics(query, totalCount) {
-        const mockData = [
-            { timeRange: '오전 (09:00-12:00)', count: 12 },
-            { timeRange: '오후 (13:00-18:00)', count: 10 },
-            { timeRange: '저녁 (18:00-21:00)', count: 2 },
-        ];
-        const details = mockData.map((item) => ({
-            key: item.timeRange,
-            label: item.timeRange,
-            count: item.count,
-            percentage: totalCount > 0 ? Math.round((item.count / totalCount) * 100 * 10) / 10 : 0,
-        }));
-        return {
-            label: '시간대별',
-            count: totalCount,
-        };
-    }
-    getParticipantTypeLabel(type) {
+    getScheduleTypeLabel(type) {
         switch (type) {
-            case reservation_type_enum_1.ParticipantsType.RESERVER:
-                return '예약자';
-            case reservation_type_enum_1.ParticipantsType.PARTICIPANT:
-                return '참석자';
-            case reservation_type_enum_1.ParticipantsType.CC_RECEIPIENT:
-                return '수신참조자';
+            case schedule_type_enum_1.ScheduleType.COMPANY:
+                return '회사전체일정';
+            case schedule_type_enum_1.ScheduleType.DEPARTMENT:
+                return '부서일정';
+            case schedule_type_enum_1.ScheduleType.PERSONAL:
+                return '개인일정';
             default:
                 return type;
         }
-    }
-    getCategoryTypeLabel(type) {
-        switch (type) {
-            case my_schedule_statistics_query_dto_1.ScheduleCategoryType.SCHEDULE:
-                return '일정';
-            case my_schedule_statistics_query_dto_1.ScheduleCategoryType.PROJECT:
-                return '프로젝트';
-            case my_schedule_statistics_query_dto_1.ScheduleCategoryType.RESOURCE:
-                return '자원';
-            case my_schedule_statistics_query_dto_1.ScheduleCategoryType.ALL:
-                return '전체';
-            default:
-                return type;
-        }
-    }
-    async findResourceSchedules(user, query) {
-        const isMonthlySearch = query.resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION;
-        const queryDate = isMonthlySearch ? query.month || '' : query.date || '';
-        const queryType = isMonthlySearch ? 'monthly' : 'daily';
-        const responseData = {
-            type: query.resourceType,
-            resourceGroups: [],
-        };
-        return responseData;
     }
     getResourceTypeLabel(type) {
         switch (type) {
@@ -25964,6 +25880,130 @@ let ScheduleManagementService = class ScheduleManagementService {
             default:
                 return type;
         }
+    }
+    async findMySchedules(user, query) {
+        const page = query.page || 1;
+        const limit = query.limit || 20;
+        let schedules = await this.scheduleContextService.직원의_다가올_일정을_조회한다(user.employeeId);
+        schedules = await this.scheduleContextService.일정들을_역할별로_필터링한다(schedules, user.employeeId, query.role);
+        if (query.category && query.category !== my_schedule_query_dto_1.ScheduleCategoryType.ALL) {
+            const scheduleRelations = await this.scheduleContextService.일정관계정보를_조회한다(schedules.map((schedule) => schedule.scheduleId));
+            schedules = this.filterByCategory(schedules, scheduleRelations, query.category);
+        }
+        const scheduleRelationsForStats = await this.scheduleContextService.일정관계정보를_조회한다(schedules.map((schedule) => schedule.scheduleId));
+        const statistics = await this.generateCategoryStatistics(schedules, scheduleRelationsForStats, query.category);
+        const totalCount = schedules.length;
+        const searchedSchedules = this.scheduleContextService.일정들을_키워드로_필터링한다(schedules, query.keyword);
+        const filteredCount = searchedSchedules.length;
+        const { paginatedSchedules, totalPages, hasNext, hasPrevious } = this.scheduleContextService.일정들을_페이지네이션_적용한다(searchedSchedules, page, limit);
+        const scheduleItems = await this.convertToMyScheduleItems(paginatedSchedules, scheduleRelationsForStats);
+        const responseData = {
+            statistics,
+            totalCount,
+            filteredCount,
+            currentPage: page,
+            pageSize: limit,
+            totalPages,
+            hasNext,
+            hasPrevious,
+            schedules: scheduleItems,
+        };
+        return responseData;
+    }
+    filterByCategory(schedules, scheduleRelations, category) {
+        const { scheduleTypeStats, projectStats, resourceStats } = this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelations);
+        switch (category) {
+            case my_schedule_query_dto_1.ScheduleCategoryType.SCHEDULE:
+                return Array.from(scheduleTypeStats.values()).flat();
+            case my_schedule_query_dto_1.ScheduleCategoryType.PROJECT:
+                return projectStats;
+            case my_schedule_query_dto_1.ScheduleCategoryType.RESOURCE:
+                return Array.from(resourceStats.values()).flat();
+            default:
+                return schedules;
+        }
+    }
+    async convertToMyScheduleItems(schedules, scheduleRelations) {
+        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(schedules.map((s) => s.scheduleId));
+        const projectMap = await this.scheduleContextService.일정들의_프로젝트정보를_조회한다(scheduleRelations);
+        const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelations);
+        return schedules.map((schedule) => {
+            const reserver = reserverMap.get(schedule.scheduleId);
+            const project = projectMap.get(schedule.scheduleId);
+            const reservation = reservationMap.get(schedule.scheduleId);
+            return {
+                scheduleId: schedule.scheduleId,
+                title: schedule.title,
+                description: schedule.description,
+                startDate: schedule.startDate,
+                endDate: schedule.endDate,
+                scheduleType: this.getScheduleTypeLabel(schedule.scheduleType),
+                project: project
+                    ? {
+                        projectId: project.projectId,
+                        projectName: `프로젝트_${project.projectId.slice(-4)}`,
+                    }
+                    : undefined,
+                resource: reservation
+                    ? {
+                        resourceId: reservation.reservationId,
+                        resourceName: `자원_${reservation.reservationId.slice(-4)}`,
+                        resourceType: 'MEETING_ROOM',
+                    }
+                    : undefined,
+            };
+        });
+    }
+    async findResourceSchedules(user, query) {
+        const { resourceType, date, month } = query;
+        const schedules = await this.scheduleContextService.자원유형별_일정을_조회한다(resourceType, date, month);
+        const resourceScheduleMap = await this.scheduleContextService.자원별_일정정보를_맵핑한다(schedules);
+        const { resourceGroups, resourceMap } = await this.scheduleContextService.자원그룹별_자원정보를_조회한다(resourceType);
+        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(schedules.map((s) => s.scheduleId));
+        const resourceGroupDtos = await this.buildResourceGroupDtos(resourceGroups, resourceMap, resourceScheduleMap, reserverMap, user.employeeId);
+        const responseData = {
+            type: resourceType,
+            resourceGroups: resourceGroupDtos,
+        };
+        return responseData;
+    }
+    async buildResourceGroupDtos(resourceGroups, resourceMap, resourceScheduleMap, reserverMap, currentEmployeeId) {
+        const resourceGroupDtos = [];
+        for (const group of resourceGroups) {
+            const resources = [];
+            const groupResources = resourceMap.get(group.resourceGroupId) || [];
+            for (const resource of groupResources) {
+                const resourceSchedules = resourceScheduleMap.get(resource.resourceId) || [];
+                const scheduleItems = resourceSchedules.map((schedule) => {
+                    const reserver = reserverMap.get(schedule.scheduleId);
+                    const reserverName = reserver ? reserver.employee.name || '알 수 없음' : '알 수 없음';
+                    const isMine = reserver ? reserver.employee.employeeId === currentEmployeeId : false;
+                    return {
+                        scheduleId: schedule.scheduleId,
+                        title: schedule.title,
+                        description: schedule.description,
+                        startDate: schedule.startDate,
+                        endDate: schedule.endDate,
+                        reserverName,
+                        isMine,
+                    };
+                });
+                resources.push({
+                    resourceId: resource.resourceId,
+                    resourceName: resource.name,
+                    resourceDescription: resource.description,
+                    schedules: scheduleItems,
+                });
+            }
+            resourceGroupDtos.push({
+                resourceGroupId: group.resourceGroupId,
+                resourceGroupName: group.title,
+                resourceGroupDescription: group.description,
+                order: group.order,
+                resources,
+            });
+        }
+        return resourceGroupDtos.sort((a, b) => a.order - b.order);
     }
 };
 exports.ScheduleManagementService = ScheduleManagementService;
@@ -30367,6 +30407,8 @@ const schedule_relation_module_1 = __webpack_require__(/*! @src/domain/schedule-
 const schedule_context_service_1 = __webpack_require__(/*! ./schedule.context.service */ "./src/context/schedule/schedule.context.service.ts");
 const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
 const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
+const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
+const resource_group_module_1 = __webpack_require__(/*! @src/domain/resource-group/resource-group.module */ "./src/domain/resource-group/resource-group.module.ts");
 let ScheduleContextModule = class ScheduleContextModule {
 };
 exports.ScheduleContextModule = ScheduleContextModule;
@@ -30378,6 +30420,8 @@ exports.ScheduleContextModule = ScheduleContextModule = __decorate([
             schedule_relation_module_1.DomainScheduleRelationModule,
             employee_module_1.DomainEmployeeModule,
             reservation_module_1.DomainReservationModule,
+            resource_module_1.DomainResourceModule,
+            resource_group_module_1.DomainResourceGroupModule,
         ],
         providers: [schedule_context_service_1.ScheduleContextService],
         exports: [schedule_context_service_1.ScheduleContextService],
@@ -30404,7 +30448,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var ScheduleContextService_1;
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -30413,13 +30457,18 @@ const schedule_participant_service_1 = __webpack_require__(/*! @src/domain/sched
 const schedule_relation_service_1 = __webpack_require__(/*! @src/domain/schedule-relation/schedule-relation.service */ "./src/domain/schedule-relation/schedule-relation.service.ts");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource.service */ "./src/domain/resource/resource.service.ts");
+const resource_group_service_1 = __webpack_require__(/*! @src/domain/resource-group/resource-group.service */ "./src/domain/resource-group/resource-group.service.ts");
 let ScheduleContextService = ScheduleContextService_1 = class ScheduleContextService {
-    constructor(domainScheduleService, domainScheduleParticipantService, domainScheduleRelationService, domainEmployeeService, domainReservationService) {
+    constructor(domainScheduleService, domainScheduleParticipantService, domainScheduleRelationService, domainEmployeeService, domainReservationService, domainResourceService, domainResourceGroupService) {
         this.domainScheduleService = domainScheduleService;
         this.domainScheduleParticipantService = domainScheduleParticipantService;
         this.domainScheduleRelationService = domainScheduleRelationService;
         this.domainEmployeeService = domainEmployeeService;
         this.domainReservationService = domainReservationService;
+        this.domainResourceService = domainResourceService;
+        this.domainResourceGroupService = domainResourceGroupService;
         this.logger = new common_1.Logger(ScheduleContextService_1.name);
     }
     async 일정들을_조회한다(scheduleIds) {
@@ -30433,13 +30482,15 @@ let ScheduleContextService = ScheduleContextService_1 = class ScheduleContextSer
             endDateOfMonth.setMonth(endDateOfMonth.getMonth() + 1);
             endDateOfMonth.setDate(0);
             endDateOfMonth.setHours(23, 59, 59);
-            console.log(startDateOfMonth, endDateOfMonth);
             return await this.domainScheduleService.findByDateRange(startDateOfMonth, endDateOfMonth);
         }
         catch (error) {
             this.logger.error(`월별 일정 조회 실패: ${error.message}`, error.stack);
             throw new common_1.BadRequestException('월별 일정 조회 중 오류가 발생했습니다.');
         }
+    }
+    async 직원의_다가올_일정을_조회한다(employeeId) {
+        return await this.domainScheduleService.findByEmployeeIdFromNow(employeeId);
     }
     async 일정관계정보를_조회한다(scheduleIds) {
         return await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
@@ -30490,11 +30541,212 @@ let ScheduleContextService = ScheduleContextService_1 = class ScheduleContextSer
         });
         return scheduleReservationMap;
     }
+    async 일정들을_역할별로_필터링한다(schedules, employeeId, role) {
+        if (!role) {
+            return schedules;
+        }
+        const scheduleIds = schedules.map((schedule) => schedule.scheduleId);
+        const participants = await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(employeeId, scheduleIds);
+        const filteredParticipants = participants.filter((participant) => participant.type === role);
+        const filteredScheduleIds = new Set(filteredParticipants.map((p) => p.scheduleId));
+        return schedules.filter((schedule) => filteredScheduleIds.has(schedule.scheduleId));
+    }
+    async 일정들의_자원정보를_조회한다(scheduleRelations) {
+        const validRelations = scheduleRelations.filter((relation) => relation.reservationId);
+        const reservationIds = validRelations.map((relation) => relation.reservationId);
+        const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
+        const scheduleResourceMap = new Map();
+        validRelations.forEach((relation) => {
+            const reservation = reservations.find((r) => r.reservationId === relation.reservationId);
+            if (reservation) {
+                const resourceInfo = {
+                    resourceName: `자원_${reservation.reservationId.slice(-4)}`,
+                    resourceType: resource_type_enum_1.ResourceType.MEETING_ROOM,
+                };
+                if (!scheduleResourceMap.has(relation.scheduleId)) {
+                    scheduleResourceMap.set(relation.scheduleId, []);
+                }
+                scheduleResourceMap.get(relation.scheduleId).push(resourceInfo);
+            }
+        });
+        return scheduleResourceMap;
+    }
+    일정들을_카테고리별로_분류한다(schedules, scheduleRelations) {
+        const scheduleTypeStats = new Map();
+        const projectStats = [];
+        const resourceStats = new Map();
+        const relationMap = new Map();
+        scheduleRelations.forEach((relation) => {
+            if (!relationMap.has(relation.scheduleId)) {
+                relationMap.set(relation.scheduleId, []);
+            }
+            relationMap.get(relation.scheduleId).push(relation);
+        });
+        schedules.forEach((schedule) => {
+            const relations = relationMap.get(schedule.scheduleId) || [];
+            if (!scheduleTypeStats.has(schedule.scheduleType)) {
+                scheduleTypeStats.set(schedule.scheduleType, []);
+            }
+            scheduleTypeStats.get(schedule.scheduleType).push(schedule);
+            if (relations.some((r) => r.projectId)) {
+                projectStats.push(schedule);
+            }
+            if (relations.some((r) => r.reservationId)) {
+                const resourceType = resource_type_enum_1.ResourceType.MEETING_ROOM;
+                if (!resourceStats.has(resourceType)) {
+                    resourceStats.set(resourceType, []);
+                }
+                resourceStats.get(resourceType).push(schedule);
+            }
+        });
+        return { scheduleTypeStats, projectStats, resourceStats };
+    }
+    일정들을_키워드로_필터링한다(schedules, keyword) {
+        if (!keyword || keyword.trim() === '') {
+            return schedules;
+        }
+        const searchKeyword = keyword.trim().toLowerCase();
+        return schedules.filter((schedule) => {
+            const titleMatch = schedule.title.toLowerCase().includes(searchKeyword);
+            const descriptionMatch = schedule.description?.toLowerCase().includes(searchKeyword) || false;
+            return titleMatch || descriptionMatch;
+        });
+    }
+    일정들을_페이지네이션_적용한다(schedules, page = 1, limit = 20) {
+        const totalPages = Math.ceil(schedules.length / limit);
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedSchedules = schedules.slice(startIndex, endIndex);
+        return {
+            paginatedSchedules,
+            totalPages,
+            hasNext: page < totalPages,
+            hasPrevious: page > 1,
+        };
+    }
+    async 자원유형별_일정을_조회한다(resourceType, date, month) {
+        try {
+            const resources = await this.domainResourceService.findAll({
+                where: { type: resourceType },
+            });
+            if (resources.length === 0) {
+                return [];
+            }
+            const resourceIds = resources.map((r) => r.resourceId);
+            const reservations = await this.domainReservationService.findByResourceIds(resourceIds);
+            if (reservations.length === 0) {
+                return [];
+            }
+            const reservationIds = reservations.map((r) => r.reservationId);
+            const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds(reservationIds);
+            if (scheduleRelations.length === 0) {
+                return [];
+            }
+            const scheduleIds = scheduleRelations.map((sr) => sr.scheduleId);
+            const schedules = await this.domainScheduleService.findByScheduleIds(scheduleIds);
+            return this.filterSchedulesByDate(schedules, resourceType, date, month);
+        }
+        catch (error) {
+            this.logger.error(`자원유형별 일정 조회 실패: ${error.message}`, error.stack);
+            return [];
+        }
+    }
+    filterSchedulesByDate(schedules, resourceType, date, month) {
+        if (resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION && month) {
+            const startOfMonth = new Date(`${month}-01T00:00:00Z`);
+            const endOfMonth = new Date(startOfMonth);
+            endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+            endOfMonth.setDate(0);
+            endOfMonth.setHours(23, 59, 59, 999);
+            return schedules.filter((schedule) => {
+                const scheduleStart = new Date(schedule.startDate);
+                const scheduleEnd = new Date(schedule.endDate);
+                return scheduleStart <= endOfMonth && scheduleEnd >= startOfMonth;
+            });
+        }
+        else if (date) {
+            const targetDate = new Date(`${date}T00:00:00Z`);
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            return schedules.filter((schedule) => {
+                const scheduleStart = new Date(schedule.startDate);
+                const scheduleEnd = new Date(schedule.endDate);
+                return scheduleStart < nextDay && scheduleEnd >= targetDate;
+            });
+        }
+        return schedules;
+    }
+    async 자원그룹별_자원정보를_조회한다(resourceType) {
+        const allResourceGroups = await this.domainResourceGroupService.findByType(resourceType);
+        const resourceGroups = allResourceGroups.filter((group) => group.parentResourceGroupId);
+        const resourceMap = new Map();
+        for (const group of resourceGroups) {
+            if (group.resources && group.resources.length > 0) {
+                resourceMap.set(group.resourceGroupId, group.resources);
+            }
+            else {
+                const resources = await this.domainResourceService.findAll({
+                    where: { resourceGroupId: group.resourceGroupId },
+                });
+                resourceMap.set(group.resourceGroupId, resources);
+            }
+        }
+        return { resourceGroups, resourceMap };
+    }
+    getResourceTypeKoreanName(resourceType) {
+        switch (resourceType) {
+            case resource_type_enum_1.ResourceType.MEETING_ROOM:
+                return '회의실';
+            case resource_type_enum_1.ResourceType.VEHICLE:
+                return '차량';
+            case resource_type_enum_1.ResourceType.ACCOMMODATION:
+                return '숙소';
+            case resource_type_enum_1.ResourceType.EQUIPMENT:
+                return '장비';
+            default:
+                return '자원';
+        }
+    }
+    async 자원별_일정정보를_맵핑한다(schedules) {
+        if (schedules.length === 0) {
+            return new Map();
+        }
+        const scheduleIds = schedules.map((s) => s.scheduleId);
+        const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
+        if (scheduleRelations.length === 0) {
+            return new Map();
+        }
+        const reservationIds = scheduleRelations.filter((r) => r.reservationId).map((r) => r.reservationId);
+        if (reservationIds.length === 0) {
+            return new Map();
+        }
+        const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
+        const reservationToResourceMap = new Map();
+        reservations.forEach((reservation) => {
+            if (reservation.resourceId) {
+                reservationToResourceMap.set(reservation.reservationId, reservation.resourceId);
+            }
+        });
+        const resourceScheduleMap = new Map();
+        schedules.forEach((schedule) => {
+            const relation = scheduleRelations.find((r) => r.scheduleId === schedule.scheduleId);
+            if (relation && relation.reservationId) {
+                const resourceId = reservationToResourceMap.get(relation.reservationId);
+                if (resourceId) {
+                    if (!resourceScheduleMap.has(resourceId)) {
+                        resourceScheduleMap.set(resourceId, []);
+                    }
+                    resourceScheduleMap.get(resourceId).push(schedule);
+                }
+            }
+        });
+        return resourceScheduleMap;
+    }
 };
 exports.ScheduleContextService = ScheduleContextService;
 exports.ScheduleContextService = ScheduleContextService = ScheduleContextService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _a : Object, typeof (_b = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _b : Object, typeof (_c = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _e : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _a : Object, typeof (_b = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _b : Object, typeof (_c = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _e : Object, typeof (_f = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _f : Object, typeof (_g = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _g : Object])
 ], ScheduleContextService);
 
 
@@ -33026,6 +33278,12 @@ let DomainReservationService = class DomainReservationService extends base_servi
             relations: ['resource'],
         });
     }
+    async findByResourceIds(resourceIds) {
+        return this.reservationRepository.findAll({
+            where: { resourceId: (0, typeorm_1.In)(resourceIds) },
+            relations: ['resource'],
+        });
+    }
 };
 exports.DomainReservationService = DomainReservationService;
 exports.DomainReservationService = DomainReservationService = __decorate([
@@ -33648,6 +33906,11 @@ let DomainScheduleRelationService = class DomainScheduleRelationService extends 
             where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
         });
     }
+    async findByReservationIds(reservationIds) {
+        return this.scheduleRelationRepository.findAll({
+            where: { reservationId: (0, typeorm_1.In)(reservationIds) },
+        });
+    }
 };
 exports.DomainScheduleRelationService = DomainScheduleRelationService;
 exports.DomainScheduleRelationService = DomainScheduleRelationService = __decorate([
@@ -33768,6 +34031,16 @@ let DomainScheduleService = class DomainScheduleService extends base_service_1.B
                 startDate: (0, typeorm_1.LessThanOrEqual)(endDate),
                 endDate: (0, typeorm_1.MoreThanOrEqual)(startDate),
             },
+        });
+    }
+    async findByEmployeeIdFromNow(employeeId) {
+        const now = new Date();
+        now.setDate(now.getDate() - 30);
+        now.setHours(now.getHours() + 9);
+        const stringDate = now.toISOString().split('T')[0];
+        const date = new Date(stringDate);
+        return this.scheduleRepository.findAll({
+            where: { participants: { employeeId }, endDate: (0, typeorm_1.MoreThanOrEqual)(date) },
         });
     }
     async findByScheduleIds(scheduleIds) {
