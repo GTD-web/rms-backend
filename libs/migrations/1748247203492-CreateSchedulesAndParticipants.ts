@@ -15,6 +15,17 @@ export class CreateSchedulesAndParticipants1748247203492 implements MigrationInt
             $$;
         `);
 
+        // enum type for schedule_relations.scheduleType
+        await queryRunner.query(`
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'schedule_type_enum') THEN
+                    CREATE TYPE "public"."schedule_type_enum" AS ENUM ('COMPANY', 'DEPARTMENT', 'PERSONAL');
+                END IF;
+            END
+            $$;
+        `);
+
         // schedules table
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS "schedules" (
@@ -25,6 +36,7 @@ export class CreateSchedulesAndParticipants1748247203492 implements MigrationInt
                 "endDate" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "notifyBeforeStart" boolean NOT NULL DEFAULT false,
                 "notifyMinutesBeforeStart" jsonb,
+                "scheduleType" "public"."schedule_type_enum" NOT NULL DEFAULT 'PERSONAL',
                 "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                 CONSTRAINT "PK_schedules" PRIMARY KEY ("scheduleId")
@@ -69,10 +81,10 @@ export class CreateSchedulesAndParticipants1748247203492 implements MigrationInt
         await queryRunner.query(`
             INSERT INTO "schedules" (
                 "scheduleId", "title", "description", "startDate", "endDate",
-                "notifyBeforeStart", "notifyMinutesBeforeStart", "createdAt", "updatedAt"
+                "notifyBeforeStart", "notifyMinutesBeforeStart", "scheduleType", "createdAt", "updatedAt"
             )
             SELECT r."reservationId", r."title", r."description", r."startDate", r."endDate",
-                   r."notifyBeforeStart", r."notifyMinutesBeforeStart", now(), now()
+                   r."notifyBeforeStart", r."notifyMinutesBeforeStart", 'PERSONAL', now(), now()
             FROM "reservations" r
             WHERE NOT EXISTS (
                 SELECT 1 FROM "schedules" s WHERE s."scheduleId" = r."reservationId"
@@ -134,12 +146,21 @@ export class CreateSchedulesAndParticipants1748247203492 implements MigrationInt
         await queryRunner.query(`DROP TABLE IF EXISTS "schedule_relations"`);
         await queryRunner.query(`DROP TABLE IF EXISTS "schedule_participants"`);
         await queryRunner.query(`DROP TABLE IF EXISTS "schedules"`);
-        // drop enum type if exists
+        // drop enum types if exist
         await queryRunner.query(`
             DO $$
             BEGIN
                 IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'schedule_participants_type_enum') THEN
                     DROP TYPE "public"."schedule_participants_type_enum";
+                END IF;
+            END
+            $$;
+        `);
+        await queryRunner.query(`
+            DO $$
+            BEGIN
+                IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'schedule_type_enum') THEN
+                    DROP TYPE "public"."schedule_type_enum";
                 END IF;
             END
             $$;

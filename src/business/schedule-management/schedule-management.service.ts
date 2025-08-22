@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { Employee } from '@libs/entities/employee.entity';
 import { ScheduleCalendarQueryDto } from './dtos/schedule-calendar-query.dto';
-import { ScheduleCalendarResponseDto } from './dtos/schedule-calendar-response.dto';
+import { ScheduleCalendarItemDto, ScheduleCalendarResponseDto } from './dtos/schedule-calendar-response.dto';
 import { MyScheduleQueryDto, ScheduleCategoryType } from './dtos/my-schedule-query.dto';
 import { MyScheduleResponseDto } from './dtos/my-schedule-response.dto';
 import {
@@ -13,10 +13,12 @@ import { ResourceScheduleQueryDto } from './dtos/resource-schedule-query.dto';
 import { ResourceScheduleResponseDto } from './dtos/resource-schedule-response.dto';
 import { ParticipantsType } from '@libs/enums/reservation-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { ScheduleContextService } from '../../context/schedule/schedule.context.service';
+import { ScheduleType } from '@libs/enums/schedule-type.enum';
 
 @Injectable()
 export class ScheduleManagementService {
-    constructor() {}
+    constructor(private readonly scheduleContextService: ScheduleContextService) {}
 
     async findCalendar(user: Employee, query: ScheduleCalendarQueryDto): Promise<ScheduleCalendarResponseDto> {
         // TODO: 일정 캘린더 조회 로직 구현
@@ -24,9 +26,64 @@ export class ScheduleManagementService {
         // 2. 카테고리 필터 적용 (query.category)
         // 3. 내 일정만 조회 옵션 (query.mySchedule)
 
-        // 임시 응답 데이터 (실제 구현 시 데이터베이스에서 조회)
+        const { date, category, mySchedule } = query;
+        const monthlySchedules = await this.scheduleContextService.월별_일정을_조회한다(date);
+        let scheduleIds = monthlySchedules.map((schedule) => schedule.scheduleId);
+        if (mySchedule) {
+            const mySchedules = await this.scheduleContextService.직원의_일정을_조회한다(user.employeeId, scheduleIds);
+            scheduleIds = mySchedules.map((mySchedule) => mySchedule.scheduleId);
+        }
+        let scheduleRelations = await this.scheduleContextService.일정관계정보를_조회한다(scheduleIds);
+        if (category) {
+            switch (category) {
+                case ScheduleCategoryType.PROJECT:
+                    scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.projectId);
+                    break;
+                case ScheduleCategoryType.RESOURCE:
+                    scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.reservationId);
+                    break;
+                default:
+                    scheduleRelations = scheduleRelations.filter(
+                        (scheduleRelation) => !scheduleRelation.projectId && !scheduleRelation.reservationId,
+                    );
+                    break;
+            }
+        }
+        scheduleIds = scheduleRelations.map((scheduleRelation) => scheduleRelation.scheduleId);
+        const schedules = await this.scheduleContextService.일정들을_조회한다(scheduleIds);
+        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(scheduleIds);
+        const projectMap = await this.scheduleContextService.일정들의_프로젝트정보를_조회한다(scheduleRelations);
+        const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelations);
+
+        // 일정관계정보를 조회할 때 scheduleId배열을 만들어서 In()을 통해 조회한다,
+        // 예약자정보도 scheduleId 배열을 통해 조회한다.
+        // domainScheduleRelationService 일정관계정보를 최종 조회 후 관계쩡보들을 조회하여 최종응답형태로 만든다.
+        const scheduleCalendarItems: ScheduleCalendarItemDto[] = [];
+        schedules.forEach((schedule) => {
+            const scheduleId = schedule.scheduleId;
+            const reserver = reserverMap.get(scheduleId);
+            const project = projectMap.get(scheduleId);
+            const reservation = reservationMap.get(scheduleId);
+            const scheduleCalendarItem: ScheduleCalendarItemDto = {
+                scheduleId,
+                scheduleTitle: schedule.title,
+                startDate: schedule.startDate,
+                endDate: schedule.endDate,
+                reserverName: reserver?.employee.name || '',
+                project: project ? { projectId: project.projectId } : undefined,
+                reservation: reservation
+                    ? {
+                          reservationId: reservation.reservationId,
+                          resourceName: reservation.resource.name,
+                          resourceType: reservation.resource.type,
+                      }
+                    : undefined,
+                hasUnreadNotification: false,
+            };
+            scheduleCalendarItems.push(scheduleCalendarItem);
+        });
         const responseData: ScheduleCalendarResponseDto = {
-            schedules: [],
+            schedules: scheduleCalendarItems,
         };
 
         return responseData;

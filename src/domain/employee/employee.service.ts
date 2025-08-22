@@ -3,7 +3,7 @@ import { DomainEmployeeRepository } from './employee.repository';
 import { BaseService } from '@libs/services/base.service';
 import { Employee } from '@libs/entities/employee.entity';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
-import { FindOneOptions, FindOptionsWhere } from 'typeorm';
+import { FindOneOptions, FindOptionsWhere, In } from 'typeorm';
 @Injectable()
 export class DomainEmployeeService extends BaseService<Employee> {
     constructor(private readonly employeeRepository: DomainEmployeeRepository) {
@@ -18,7 +18,10 @@ export class DomainEmployeeService extends BaseService<Employee> {
         }
         return employee;
     }
-    // 필요에 따라 Employee 관련 메서드를 추가하세요.
+
+    async findByEmployeeIds(employeeIds: string[]): Promise<Employee[]> {
+        return this.employeeRepository.findAll({ where: { employeeId: In(employeeIds) } });
+    }
 
     async findByEmail(email: string): Promise<Employee> {
         const employee = await this.employeeRepository.findOne({

@@ -2193,11 +2193,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Schedule = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const schedule_participant_entity_1 = __webpack_require__(/*! ./schedule-participant.entity */ "./libs/entities/schedule-participant.entity.ts");
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 let Schedule = class Schedule {
 };
 exports.Schedule = Schedule;
@@ -2230,12 +2231,21 @@ __decorate([
     __metadata("design:type", Array)
 ], Schedule.prototype, "notifyMinutesBeforeStart", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: schedule_type_enum_1.ScheduleType,
+        default: schedule_type_enum_1.ScheduleType.PERSONAL,
+        comment: '일정 유형 (회사전체/부서/개인)',
+    }),
+    __metadata("design:type", typeof (_c = typeof schedule_type_enum_1.ScheduleType !== "undefined" && schedule_type_enum_1.ScheduleType) === "function" ? _c : Object)
+], Schedule.prototype, "scheduleType", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)({ type: 'timestamp with time zone' }),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], Schedule.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp with time zone' }),
-    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
 ], Schedule.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => schedule_participant_entity_1.ScheduleParticipant, (participant) => participant.schedule),
@@ -3070,6 +3080,25 @@ var Role;
     Role["RESOURCE_ADMIN"] = "RESOURCE_ADMIN";
     Role["SYSTEM_ADMIN"] = "SYSTEM_ADMIN";
 })(Role || (exports.Role = Role = {}));
+
+
+/***/ }),
+
+/***/ "./libs/enums/schedule-type.enum.ts":
+/*!******************************************!*\
+  !*** ./libs/enums/schedule-type.enum.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleType = void 0;
+var ScheduleType;
+(function (ScheduleType) {
+    ScheduleType["COMPANY"] = "COMPANY";
+    ScheduleType["DEPARTMENT"] = "DEPARTMENT";
+    ScheduleType["PERSONAL"] = "PERSONAL";
+})(ScheduleType || (exports.ScheduleType = ScheduleType = {}));
 
 
 /***/ }),
@@ -25498,11 +25527,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleCalendarQueryDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const my_schedule_query_dto_1 = __webpack_require__(/*! ./my-schedule-query.dto */ "./src/business/schedule-management/dtos/my-schedule-query.dto.ts");
 class ScheduleCalendarQueryDto {
 }
 exports.ScheduleCalendarQueryDto = ScheduleCalendarQueryDto;
@@ -25518,12 +25549,13 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '카테고리 필터 (전체, 일정, 프로젝트, 자원)',
-        example: '전체',
+        enum: my_schedule_query_dto_1.ScheduleCategoryType,
+        example: my_schedule_query_dto_1.ScheduleCategoryType.ALL,
         required: false,
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsEnum)(my_schedule_query_dto_1.ScheduleCategoryType),
+    __metadata("design:type", typeof (_a = typeof my_schedule_query_dto_1.ScheduleCategoryType !== "undefined" && my_schedule_query_dto_1.ScheduleCategoryType) === "function" ? _a : Object)
 ], ScheduleCalendarQueryDto.prototype, "category", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
@@ -25695,12 +25727,13 @@ exports.ScheduleManagementModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const schedule_controllers_1 = __webpack_require__(/*! ./controllers/schedule.controllers */ "./src/business/schedule-management/controllers/schedule.controllers.ts");
 const schedule_management_service_1 = __webpack_require__(/*! ./schedule-management.service */ "./src/business/schedule-management/schedule-management.service.ts");
+const schedule_context_module_1 = __webpack_require__(/*! ../../context/schedule/schedule.context.module */ "./src/context/schedule/schedule.context.module.ts");
 let ScheduleManagementModule = class ScheduleManagementModule {
 };
 exports.ScheduleManagementModule = ScheduleManagementModule;
 exports.ScheduleManagementModule = ScheduleManagementModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
+        imports: [schedule_context_module_1.ScheduleContextModule],
         controllers: [schedule_controllers_1.ScheduleController],
         providers: [schedule_management_service_1.ScheduleManagementService],
         exports: [],
@@ -25726,17 +25759,72 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleManagementService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const my_schedule_query_dto_1 = __webpack_require__(/*! ./dtos/my-schedule-query.dto */ "./src/business/schedule-management/dtos/my-schedule-query.dto.ts");
 const my_schedule_statistics_query_dto_1 = __webpack_require__(/*! ./dtos/my-schedule-statistics-query.dto */ "./src/business/schedule-management/dtos/my-schedule-statistics-query.dto.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const schedule_context_service_1 = __webpack_require__(/*! ../../context/schedule/schedule.context.service */ "./src/context/schedule/schedule.context.service.ts");
 let ScheduleManagementService = class ScheduleManagementService {
-    constructor() { }
+    constructor(scheduleContextService) {
+        this.scheduleContextService = scheduleContextService;
+    }
     async findCalendar(user, query) {
+        const { date, category, mySchedule } = query;
+        const monthlySchedules = await this.scheduleContextService.월별_일정을_조회한다(date);
+        let scheduleIds = monthlySchedules.map((schedule) => schedule.scheduleId);
+        if (mySchedule) {
+            const mySchedules = await this.scheduleContextService.직원의_일정을_조회한다(user.employeeId, scheduleIds);
+            scheduleIds = mySchedules.map((mySchedule) => mySchedule.scheduleId);
+        }
+        let scheduleRelations = await this.scheduleContextService.일정관계정보를_조회한다(scheduleIds);
+        if (category) {
+            switch (category) {
+                case my_schedule_query_dto_1.ScheduleCategoryType.PROJECT:
+                    scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.projectId);
+                    break;
+                case my_schedule_query_dto_1.ScheduleCategoryType.RESOURCE:
+                    scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.reservationId);
+                    break;
+                default:
+                    scheduleRelations = scheduleRelations.filter((scheduleRelation) => !scheduleRelation.projectId && !scheduleRelation.reservationId);
+                    break;
+            }
+        }
+        scheduleIds = scheduleRelations.map((scheduleRelation) => scheduleRelation.scheduleId);
+        const schedules = await this.scheduleContextService.일정들을_조회한다(scheduleIds);
+        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(scheduleIds);
+        const projectMap = await this.scheduleContextService.일정들의_프로젝트정보를_조회한다(scheduleRelations);
+        const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelations);
+        const scheduleCalendarItems = [];
+        schedules.forEach((schedule) => {
+            const scheduleId = schedule.scheduleId;
+            const reserver = reserverMap.get(scheduleId);
+            const project = projectMap.get(scheduleId);
+            const reservation = reservationMap.get(scheduleId);
+            const scheduleCalendarItem = {
+                scheduleId,
+                scheduleTitle: schedule.title,
+                startDate: schedule.startDate,
+                endDate: schedule.endDate,
+                reserverName: reserver?.employee.name || '',
+                project: project ? { projectId: project.projectId } : undefined,
+                reservation: reservation
+                    ? {
+                        reservationId: reservation.reservationId,
+                        resourceName: reservation.resource.name,
+                        resourceType: reservation.resource.type,
+                    }
+                    : undefined,
+                hasUnreadNotification: false,
+            };
+            scheduleCalendarItems.push(scheduleCalendarItem);
+        });
         const responseData = {
-            schedules: [],
+            schedules: scheduleCalendarItems,
         };
         return responseData;
     }
@@ -25881,7 +25969,7 @@ let ScheduleManagementService = class ScheduleManagementService {
 exports.ScheduleManagementService = ScheduleManagementService;
 exports.ScheduleManagementService = ScheduleManagementService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_context_service_1.ScheduleContextService !== "undefined" && schedule_context_service_1.ScheduleContextService) === "function" ? _a : Object])
 ], ScheduleManagementService);
 
 
@@ -30257,6 +30345,161 @@ exports.VehicleInfoContextService = VehicleInfoContextService = __decorate([
 
 /***/ }),
 
+/***/ "./src/context/schedule/schedule.context.module.ts":
+/*!*********************************************************!*\
+  !*** ./src/context/schedule/schedule.context.module.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleContextModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_module_1 = __webpack_require__(/*! @src/domain/schedule/schedule.module */ "./src/domain/schedule/schedule.module.ts");
+const schedule_participant_module_1 = __webpack_require__(/*! @src/domain/schedule-participant/schedule-participant.module */ "./src/domain/schedule-participant/schedule-participant.module.ts");
+const schedule_relation_module_1 = __webpack_require__(/*! @src/domain/schedule-relation/schedule-relation.module */ "./src/domain/schedule-relation/schedule-relation.module.ts");
+const schedule_context_service_1 = __webpack_require__(/*! ./schedule.context.service */ "./src/context/schedule/schedule.context.service.ts");
+const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
+let ScheduleContextModule = class ScheduleContextModule {
+};
+exports.ScheduleContextModule = ScheduleContextModule;
+exports.ScheduleContextModule = ScheduleContextModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            schedule_module_1.DomainScheduleModule,
+            schedule_participant_module_1.DomainScheduleParticipantModule,
+            schedule_relation_module_1.DomainScheduleRelationModule,
+            employee_module_1.DomainEmployeeModule,
+            reservation_module_1.DomainReservationModule,
+        ],
+        providers: [schedule_context_service_1.ScheduleContextService],
+        exports: [schedule_context_service_1.ScheduleContextService],
+    })
+], ScheduleContextModule);
+
+
+/***/ }),
+
+/***/ "./src/context/schedule/schedule.context.service.ts":
+/*!**********************************************************!*\
+  !*** ./src/context/schedule/schedule.context.service.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var ScheduleContextService_1;
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_service_1 = __webpack_require__(/*! @src/domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
+const schedule_participant_service_1 = __webpack_require__(/*! @src/domain/schedule-participant/schedule-participant.service */ "./src/domain/schedule-participant/schedule-participant.service.ts");
+const schedule_relation_service_1 = __webpack_require__(/*! @src/domain/schedule-relation/schedule-relation.service */ "./src/domain/schedule-relation/schedule-relation.service.ts");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+let ScheduleContextService = ScheduleContextService_1 = class ScheduleContextService {
+    constructor(domainScheduleService, domainScheduleParticipantService, domainScheduleRelationService, domainEmployeeService, domainReservationService) {
+        this.domainScheduleService = domainScheduleService;
+        this.domainScheduleParticipantService = domainScheduleParticipantService;
+        this.domainScheduleRelationService = domainScheduleRelationService;
+        this.domainEmployeeService = domainEmployeeService;
+        this.domainReservationService = domainReservationService;
+        this.logger = new common_1.Logger(ScheduleContextService_1.name);
+    }
+    async 일정들을_조회한다(scheduleIds) {
+        return await this.domainScheduleService.findByScheduleIds(scheduleIds);
+    }
+    async 월별_일정을_조회한다(date) {
+        try {
+            this.logger.log(`월별 일정 조회 요청: ${date}`);
+            const startDateOfMonth = new Date(`${date}-01`);
+            const endDateOfMonth = new Date(`${date}-01`);
+            endDateOfMonth.setMonth(endDateOfMonth.getMonth() + 1);
+            endDateOfMonth.setDate(0);
+            endDateOfMonth.setHours(23, 59, 59);
+            console.log(startDateOfMonth, endDateOfMonth);
+            return await this.domainScheduleService.findByDateRange(startDateOfMonth, endDateOfMonth);
+        }
+        catch (error) {
+            this.logger.error(`월별 일정 조회 실패: ${error.message}`, error.stack);
+            throw new common_1.BadRequestException('월별 일정 조회 중 오류가 발생했습니다.');
+        }
+    }
+    async 일정관계정보를_조회한다(scheduleIds) {
+        return await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
+    }
+    async 직원의_일정을_조회한다(employeeId, scheduleIds) {
+        return await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(employeeId, scheduleIds);
+    }
+    async 일정들의_예약자정보를_조회한다(scheduleIds) {
+        const reservers = await this.domainScheduleParticipantService.findReserversByScheduleIds(scheduleIds);
+        const employeeIds = [...new Set(reservers.map((reserver) => reserver.employeeId))];
+        const employees = await this.domainEmployeeService.findByEmployeeIds(employeeIds);
+        const employeeMap = new Map();
+        employees.forEach((employee) => {
+            employeeMap.set(employee.employeeId, employee);
+        });
+        const result = new Map();
+        reservers.forEach((reserver) => {
+            const employee = employeeMap.get(reserver.employeeId);
+            result.set(reserver.scheduleId, {
+                participant: reserver,
+                employee,
+            });
+        });
+        return result;
+    }
+    async 일정들의_프로젝트정보를_조회한다(scheduleRelations) {
+        const validRelations = scheduleRelations.filter((relation) => relation.projectId);
+        const scheduleProjectMap = new Map();
+        validRelations.forEach((relation) => {
+            scheduleProjectMap.set(relation.scheduleId, { projectId: relation.projectId });
+        });
+        return scheduleProjectMap;
+    }
+    async 일정들의_예약정보를_조회한다(scheduleRelations) {
+        const validRelations = scheduleRelations.filter((relation) => relation.reservationId);
+        const reservationIds = validRelations.map((scheduleRelation) => scheduleRelation.reservationId);
+        const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
+        const reservationByIdMap = new Map();
+        reservations.forEach((reservation) => {
+            reservationByIdMap.set(reservation.reservationId, reservation);
+        });
+        const scheduleReservationMap = new Map();
+        validRelations.forEach((relation) => {
+            const reservation = reservationByIdMap.get(relation.reservationId);
+            if (reservation) {
+                scheduleReservationMap.set(relation.scheduleId, reservation);
+            }
+        });
+        return scheduleReservationMap;
+    }
+};
+exports.ScheduleContextService = ScheduleContextService;
+exports.ScheduleContextService = ScheduleContextService = ScheduleContextService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _a : Object, typeof (_b = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _b : Object, typeof (_c = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _e : Object])
+], ScheduleContextService);
+
+
+/***/ }),
+
 /***/ "./src/domain/accommodation-info/accommodation-info.module.ts":
 /*!********************************************************************!*\
   !*** ./src/domain/accommodation-info/accommodation-info.module.ts ***!
@@ -31059,6 +31302,7 @@ exports.DomainEmployeeService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_repository_1 = __webpack_require__(/*! ./employee.repository */ "./src/domain/employee/employee.repository.ts");
 const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let DomainEmployeeService = class DomainEmployeeService extends base_service_1.BaseService {
     constructor(employeeRepository) {
         super(employeeRepository);
@@ -31070,6 +31314,9 @@ let DomainEmployeeService = class DomainEmployeeService extends base_service_1.B
             throw new common_1.NotFoundException('직원을 찾을 수 없습니다.');
         }
         return employee;
+    }
+    async findByEmployeeIds(employeeIds) {
+        return this.employeeRepository.findAll({ where: { employeeId: (0, typeorm_1.In)(employeeIds) } });
     }
     async findByEmail(email) {
         const employee = await this.employeeRepository.findOne({
@@ -32767,10 +33014,17 @@ exports.DomainReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const reservation_repository_1 = __webpack_require__(/*! ./reservation.repository */ "./src/domain/reservation/reservation.repository.ts");
 const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let DomainReservationService = class DomainReservationService extends base_service_1.BaseService {
     constructor(reservationRepository) {
         super(reservationRepository);
         this.reservationRepository = reservationRepository;
+    }
+    async findByReservationIds(reservationIds) {
+        return this.reservationRepository.findAll({
+            where: { reservationId: (0, typeorm_1.In)(reservationIds) },
+            relations: ['resource'],
+        });
     }
 };
 exports.DomainReservationService = DomainReservationService;
@@ -33156,6 +33410,377 @@ exports.DomainResourceService = DomainResourceService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_repository_1.DomainResourceRepository !== "undefined" && resource_repository_1.DomainResourceRepository) === "function" ? _a : Object])
 ], DomainResourceService);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule-participant/schedule-participant.module.ts":
+/*!************************************************************************!*\
+  !*** ./src/domain/schedule-participant/schedule-participant.module.ts ***!
+  \************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleParticipantModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const schedule_participant_service_1 = __webpack_require__(/*! ./schedule-participant.service */ "./src/domain/schedule-participant/schedule-participant.service.ts");
+const schedule_participant_repository_1 = __webpack_require__(/*! ./schedule-participant.repository */ "./src/domain/schedule-participant/schedule-participant.repository.ts");
+const schedule_participant_entity_1 = __webpack_require__(/*! @libs/entities/schedule-participant.entity */ "./libs/entities/schedule-participant.entity.ts");
+let DomainScheduleParticipantModule = class DomainScheduleParticipantModule {
+};
+exports.DomainScheduleParticipantModule = DomainScheduleParticipantModule;
+exports.DomainScheduleParticipantModule = DomainScheduleParticipantModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([schedule_participant_entity_1.ScheduleParticipant])],
+        providers: [schedule_participant_service_1.DomainScheduleParticipantService, schedule_participant_repository_1.DomainScheduleParticipantRepository],
+        exports: [schedule_participant_service_1.DomainScheduleParticipantService],
+    })
+], DomainScheduleParticipantModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule-participant/schedule-participant.repository.ts":
+/*!****************************************************************************!*\
+  !*** ./src/domain/schedule-participant/schedule-participant.repository.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleParticipantRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const schedule_participant_entity_1 = __webpack_require__(/*! @libs/entities/schedule-participant.entity */ "./libs/entities/schedule-participant.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainScheduleParticipantRepository = class DomainScheduleParticipantRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainScheduleParticipantRepository = DomainScheduleParticipantRepository;
+exports.DomainScheduleParticipantRepository = DomainScheduleParticipantRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(schedule_participant_entity_1.ScheduleParticipant)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainScheduleParticipantRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule-participant/schedule-participant.service.ts":
+/*!*************************************************************************!*\
+  !*** ./src/domain/schedule-participant/schedule-participant.service.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleParticipantService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_participant_repository_1 = __webpack_require__(/*! ./schedule-participant.repository */ "./src/domain/schedule-participant/schedule-participant.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let DomainScheduleParticipantService = class DomainScheduleParticipantService extends base_service_1.BaseService {
+    constructor(scheduleParticipantRepository) {
+        super(scheduleParticipantRepository);
+        this.scheduleParticipantRepository = scheduleParticipantRepository;
+    }
+    async findReserversByScheduleIds(scheduleIds) {
+        return this.scheduleParticipantRepository.findAll({
+            where: { scheduleId: (0, typeorm_1.In)(scheduleIds), type: reservation_type_enum_1.ParticipantsType.RESERVER },
+        });
+    }
+    async findByEmployeeIdAndScheduleIds(employeeId, scheduleIds) {
+        return this.scheduleParticipantRepository.findAll({
+            where: { employeeId, scheduleId: (0, typeorm_1.In)(scheduleIds) },
+        });
+    }
+};
+exports.DomainScheduleParticipantService = DomainScheduleParticipantService;
+exports.DomainScheduleParticipantService = DomainScheduleParticipantService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_participant_repository_1.DomainScheduleParticipantRepository !== "undefined" && schedule_participant_repository_1.DomainScheduleParticipantRepository) === "function" ? _a : Object])
+], DomainScheduleParticipantService);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule-relation/schedule-relation.module.ts":
+/*!******************************************************************!*\
+  !*** ./src/domain/schedule-relation/schedule-relation.module.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleRelationModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const schedule_relation_service_1 = __webpack_require__(/*! ./schedule-relation.service */ "./src/domain/schedule-relation/schedule-relation.service.ts");
+const schedule_relation_repository_1 = __webpack_require__(/*! ./schedule-relation.repository */ "./src/domain/schedule-relation/schedule-relation.repository.ts");
+const schedule_relations_entity_1 = __webpack_require__(/*! @libs/entities/schedule-relations.entity */ "./libs/entities/schedule-relations.entity.ts");
+let DomainScheduleRelationModule = class DomainScheduleRelationModule {
+};
+exports.DomainScheduleRelationModule = DomainScheduleRelationModule;
+exports.DomainScheduleRelationModule = DomainScheduleRelationModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([schedule_relations_entity_1.ScheduleRelation])],
+        providers: [schedule_relation_service_1.DomainScheduleRelationService, schedule_relation_repository_1.DomainScheduleRelationRepository],
+        exports: [schedule_relation_service_1.DomainScheduleRelationService],
+    })
+], DomainScheduleRelationModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule-relation/schedule-relation.repository.ts":
+/*!**********************************************************************!*\
+  !*** ./src/domain/schedule-relation/schedule-relation.repository.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleRelationRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const schedule_relations_entity_1 = __webpack_require__(/*! @libs/entities/schedule-relations.entity */ "./libs/entities/schedule-relations.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainScheduleRelationRepository = class DomainScheduleRelationRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainScheduleRelationRepository = DomainScheduleRelationRepository;
+exports.DomainScheduleRelationRepository = DomainScheduleRelationRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(schedule_relations_entity_1.ScheduleRelation)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainScheduleRelationRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule-relation/schedule-relation.service.ts":
+/*!*******************************************************************!*\
+  !*** ./src/domain/schedule-relation/schedule-relation.service.ts ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleRelationService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_relation_repository_1 = __webpack_require__(/*! ./schedule-relation.repository */ "./src/domain/schedule-relation/schedule-relation.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let DomainScheduleRelationService = class DomainScheduleRelationService extends base_service_1.BaseService {
+    constructor(scheduleRelationRepository) {
+        super(scheduleRelationRepository);
+        this.scheduleRelationRepository = scheduleRelationRepository;
+    }
+    async findByScheduleIds(scheduleIds) {
+        return this.scheduleRelationRepository.findAll({
+            where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
+        });
+    }
+};
+exports.DomainScheduleRelationService = DomainScheduleRelationService;
+exports.DomainScheduleRelationService = DomainScheduleRelationService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_relation_repository_1.DomainScheduleRelationRepository !== "undefined" && schedule_relation_repository_1.DomainScheduleRelationRepository) === "function" ? _a : Object])
+], DomainScheduleRelationService);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule/schedule.module.ts":
+/*!************************************************!*\
+  !*** ./src/domain/schedule/schedule.module.ts ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const schedule_service_1 = __webpack_require__(/*! ./schedule.service */ "./src/domain/schedule/schedule.service.ts");
+const schedule_repository_1 = __webpack_require__(/*! ./schedule.repository */ "./src/domain/schedule/schedule.repository.ts");
+const schedule_entity_1 = __webpack_require__(/*! @libs/entities/schedule.entity */ "./libs/entities/schedule.entity.ts");
+let DomainScheduleModule = class DomainScheduleModule {
+};
+exports.DomainScheduleModule = DomainScheduleModule;
+exports.DomainScheduleModule = DomainScheduleModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([schedule_entity_1.Schedule])],
+        providers: [schedule_service_1.DomainScheduleService, schedule_repository_1.DomainScheduleRepository],
+        exports: [schedule_service_1.DomainScheduleService],
+    })
+], DomainScheduleModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule/schedule.repository.ts":
+/*!****************************************************!*\
+  !*** ./src/domain/schedule/schedule.repository.ts ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const schedule_entity_1 = __webpack_require__(/*! @libs/entities/schedule.entity */ "./libs/entities/schedule.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainScheduleRepository = class DomainScheduleRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainScheduleRepository = DomainScheduleRepository;
+exports.DomainScheduleRepository = DomainScheduleRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(schedule_entity_1.Schedule)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainScheduleRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule/schedule.service.ts":
+/*!*************************************************!*\
+  !*** ./src/domain/schedule/schedule.service.ts ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const schedule_repository_1 = __webpack_require__(/*! ./schedule.repository */ "./src/domain/schedule/schedule.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let DomainScheduleService = class DomainScheduleService extends base_service_1.BaseService {
+    constructor(scheduleRepository) {
+        super(scheduleRepository);
+        this.scheduleRepository = scheduleRepository;
+    }
+    async findByDateRange(startDate, endDate) {
+        return this.scheduleRepository.findAll({
+            where: {
+                startDate: (0, typeorm_1.LessThanOrEqual)(endDate),
+                endDate: (0, typeorm_1.MoreThanOrEqual)(startDate),
+            },
+        });
+    }
+    async findByScheduleIds(scheduleIds) {
+        return this.scheduleRepository.findAll({
+            where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
+        });
+    }
+};
+exports.DomainScheduleService = DomainScheduleService;
+exports.DomainScheduleService = DomainScheduleService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_repository_1.DomainScheduleRepository !== "undefined" && schedule_repository_1.DomainScheduleRepository) === "function" ? _a : Object])
+], DomainScheduleService);
 
 
 /***/ }),

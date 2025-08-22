@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { ScheduleParticipant } from './schedule-participant.entity';
+import { ScheduleType } from '@libs/enums/schedule-type.enum';
 
 @Entity('schedules')
 export class Schedule {
@@ -23,6 +24,14 @@ export class Schedule {
 
     @Column('jsonb', { nullable: true })
     notifyMinutesBeforeStart: number[];
+
+    @Column({
+        type: 'enum',
+        enum: ScheduleType,
+        default: ScheduleType.PERSONAL,
+        comment: '일정 유형 (회사전체/부서/개인)',
+    })
+    scheduleType: ScheduleType;
 
     @CreateDateColumn({ type: 'timestamp with time zone' })
     createdAt: Date;

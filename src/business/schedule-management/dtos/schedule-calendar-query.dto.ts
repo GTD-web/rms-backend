@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { ScheduleCategoryType } from './my-schedule-query.dto';
 
 export class ScheduleCalendarQueryDto {
     @ApiProperty({
@@ -13,12 +14,13 @@ export class ScheduleCalendarQueryDto {
 
     @ApiProperty({
         description: '카테고리 필터 (전체, 일정, 프로젝트, 자원)',
-        example: '전체',
+        enum: ScheduleCategoryType,
+        example: ScheduleCategoryType.ALL,
         required: false,
     })
     @IsOptional()
-    @IsString()
-    category?: string;
+    @IsEnum(ScheduleCategoryType)
+    category?: ScheduleCategoryType;
 
     @ApiProperty({
         description: '내 일정만 조회 여부',
