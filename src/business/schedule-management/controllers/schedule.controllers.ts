@@ -9,6 +9,8 @@ import { MyScheduleQueryDto } from '../dtos/my-schedule-query.dto';
 import { MyScheduleResponseDto } from '../dtos/my-schedule-response.dto';
 import { ResourceScheduleQueryDto } from '../dtos/resource-schedule-query.dto';
 import { ResourceScheduleResponseDto } from '../dtos/resource-schedule-response.dto';
+import { ScheduleDetailQueryDto } from '../dtos/schedule-detail-query.dto';
+import { ScheduleDetailResponseDto } from '../dtos/schedule-detail-response.dto';
 
 @ApiTags('v2 일정')
 @Controller('v2/schedule')
@@ -86,5 +88,25 @@ export class ScheduleController {
         @Query() query: ResourceScheduleQueryDto,
     ): Promise<ResourceScheduleResponseDto> {
         return this.scheduleManagementService.findResourceSchedules(user, query);
+    }
+
+    /**
+     * 일정 상세 조회
+     * 일정 상세정보에 타입별 정보를 추가하는 식으로 구현한다.
+     */
+    @ApiOperation({
+        summary: '일정 상세 조회',
+        description: '일정 상세 정보를 조회합니다.',
+    })
+    @ApiOkResponse({
+        description: '일정 상세 조회 성공',
+        type: ScheduleDetailResponseDto,
+    })
+    @Get('detail')
+    async findScheduleDetail(
+        @User() user: Employee,
+        @Query() query: ScheduleDetailQueryDto,
+    ): Promise<ScheduleDetailResponseDto> {
+        return this.scheduleManagementService.findScheduleDetail(user, query);
     }
 }

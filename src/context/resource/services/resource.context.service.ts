@@ -342,4 +342,22 @@ export class ResourceContextService {
 
         await this.domainResourceService.delete(resourceId);
     }
+
+    /**
+     * 자원 타입 라벨 반환
+     */
+    자원타입_라벨을_가져온다(type: string): string {
+        switch (type) {
+            case 'MEETING_ROOM':
+                return '회의실';
+            case 'VEHICLE':
+                return '차량';
+            case 'ACCOMMODATION':
+                return '숙소';
+            case 'EQUIPMENT':
+                return '장비';
+            default:
+                return type;
+        }
+    }
 }

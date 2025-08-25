@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DomainFileService } from '@src/domain/file/file.service';
 import { DomainFileReservationVehicleService } from '@src/domain/file-reservation-vehicle/file-reservation-vehicle.service';
+import { DomainFileVehicleInfoService } from '@src/domain/file-vehicle-info/file-vehicle-info.service';
 import { In, LessThan } from 'typeorm';
 import { File } from '@libs/entities/file.entity';
 import { ReservationVehicleFileResponseDto } from '../dtos';
@@ -18,6 +19,7 @@ export class FileContextService {
     constructor(
         private readonly domainFileService: DomainFileService,
         private readonly domainFileReservationVehicleService: DomainFileReservationVehicleService,
+        private readonly domainFileVehicleInfoService: DomainFileVehicleInfoService,
         private readonly s3Service: S3Service,
     ) {}
 
@@ -120,5 +122,55 @@ export class FileContextService {
             filePath: this.s3Service.getFileUrl(fileName),
         });
         return await this.domainFileService.save(file);
+    }
+
+    /**
+     * 차량정보의 파일들을 조회
+     */
+    async 차량정보_파일을_조회한다(vehicleInfoId: string): Promise<{
+        parkingLocationImages: File[];
+        odometerImages: File[];
+        indoorImages: File[];
+    }> {
+        const fileVehicleInfos = await this.domainFileVehicleInfoService.findByVehicleInfoId(vehicleInfoId);
+
+        const result = {
+            parkingLocationImages: [],
+            odometerImages: [],
+            indoorImages: [],
+        };
+
+        // 타입별로 파일 ID 분류
+        for (const fileVehicleInfo of fileVehicleInfos) {
+            if (fileVehicleInfo.type === 'PARKING_LOCATION') {
+                result.parkingLocationImages.push(fileVehicleInfo.fileId);
+            } else if (fileVehicleInfo.type === 'ODOMETER') {
+                result.odometerImages.push(fileVehicleInfo.fileId);
+            } else if (fileVehicleInfo.type === 'INDOOR') {
+                result.indoorImages.push(fileVehicleInfo.fileId);
+            }
+        }
+
+        // 파일 ID로 실제 파일 정보 조회
+        return {
+            parkingLocationImages:
+                result.parkingLocationImages.length > 0
+                    ? await this.domainFileService.findAll({
+                          where: { fileId: In(result.parkingLocationImages) },
+                      })
+                    : [],
+            odometerImages:
+                result.odometerImages.length > 0
+                    ? await this.domainFileService.findAll({
+                          where: { fileId: In(result.odometerImages) },
+                      })
+                    : [],
+            indoorImages:
+                result.indoorImages.length > 0
+                    ? await this.domainFileService.findAll({
+                          where: { fileId: In(result.indoorImages) },
+                      })
+                    : [],
+        };
     }
 }

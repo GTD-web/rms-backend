@@ -13,7 +13,6 @@ import {
     ResourceScheduleItemDto,
 } from './dtos/resource-schedule-response.dto';
 import { ParticipantsType } from '@libs/enums/reservation-type.enum';
-import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Schedule } from '@libs/entities/schedule.entity';
 import { ScheduleRelation } from '@libs/entities/schedule-relations.entity';
 import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
@@ -21,10 +20,34 @@ import { Resource } from '@libs/entities/resource.entity';
 import { ResourceGroup } from '@libs/entities/resource-group.entity';
 import { ScheduleType } from '@libs/enums/schedule-type.enum';
 import { ScheduleContextService } from '../../context/schedule/schedule.context.service';
+import { ResourceContextService } from '../../context/resource/services/resource.context.service';
+
+import { ScheduleDetailQueryDto } from './dtos/schedule-detail-query.dto';
+import {
+    ScheduleDetailResponseDto,
+    ScheduleDetailProjectDto,
+    ScheduleDetailReservationDto,
+    ScheduleDetailParticipantDto,
+    ScheduleDetailResourceDto,
+} from './dtos/schedule-detail-response.dto';
+import { ResourceType } from '@libs/enums/resource-type.enum';
+import { VehicleInfoContextService } from '../../context/resource/services/vehicle-info.context.service';
+import { MeetingRoomInfoContextService } from '../../context/resource/services/meeting-room-info.context.service';
+import { AccommodationInfoContextService } from '../../context/resource/services/accommodation-info.context.service';
+import { EquipmentInfoContextService } from '../../context/resource/services/equipment-info.context.service';
+import { FileContextService } from '../../context/file/services/file.context.service';
 
 @Injectable()
 export class ScheduleManagementService {
-    constructor(private readonly scheduleContextService: ScheduleContextService) {}
+    constructor(
+        private readonly scheduleContextService: ScheduleContextService,
+        private readonly resourceContextService: ResourceContextService,
+        private readonly vehicleInfoContextService: VehicleInfoContextService,
+        private readonly meetingRoomInfoContextService: MeetingRoomInfoContextService,
+        private readonly accommodationInfoContextService: AccommodationInfoContextService,
+        private readonly equipmentInfoContextService: EquipmentInfoContextService,
+        private readonly fileContextService: FileContextService,
+    ) {}
 
     async findCalendar(user: Employee, query: ScheduleCalendarQueryDto): Promise<ScheduleCalendarResponseDto> {
         const { date, category, mySchedule } = query;
@@ -89,14 +112,15 @@ export class ScheduleManagementService {
         return responseData;
     }
 
-    private async generateCategoryStatistics(
-        schedules: Schedule[],
-        scheduleRelations: ScheduleRelation[],
+    /**
+     * 카테고리별 통계 생성 (데이터 가공만, 조회 안함)
+     */
+    private generateCategoryStatistics(
+        scheduleTypeStats: Map<string, Schedule[]>,
+        projectStats: Schedule[],
+        resourceStats: Map<string, Schedule[]>,
         category?: ScheduleCategoryType,
-    ): Promise<StatisticsItemDto[]> {
-        const { scheduleTypeStats, projectStats, resourceStats } =
-            this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelations);
-
+    ): StatisticsItemDto[] {
         const statistics: StatisticsItemDto[] = [];
 
         if (!category || category === ScheduleCategoryType.ALL) {
@@ -120,7 +144,7 @@ export class ScheduleManagementService {
             Object.values(ScheduleType).forEach((scheduleType) => {
                 const scheduleList = scheduleTypeStats.get(scheduleType) || [];
                 statistics.push({
-                    label: this.getScheduleTypeLabel(scheduleType),
+                    label: this.scheduleContextService.일정타입_라벨을_가져온다(scheduleType),
                     count: scheduleList.length,
                 });
             });
@@ -135,41 +159,13 @@ export class ScheduleManagementService {
             Object.values(ResourceType).forEach((resourceType) => {
                 const scheduleList = resourceStats.get(resourceType) || [];
                 statistics.push({
-                    label: this.getResourceTypeLabel(resourceType),
+                    label: this.resourceContextService.자원타입_라벨을_가져온다(resourceType),
                     count: scheduleList.length,
                 });
             });
         }
 
         return statistics;
-    }
-
-    private getScheduleTypeLabel(type: ScheduleType): string {
-        switch (type) {
-            case ScheduleType.COMPANY:
-                return '회사전체일정';
-            case ScheduleType.DEPARTMENT:
-                return '부서일정';
-            case ScheduleType.PERSONAL:
-                return '개인일정';
-            default:
-                return type;
-        }
-    }
-
-    private getResourceTypeLabel(type: ResourceType): string {
-        switch (type) {
-            case ResourceType.MEETING_ROOM:
-                return '회의실';
-            case ResourceType.VEHICLE:
-                return '차량';
-            case ResourceType.ACCOMMODATION:
-                return '숙소';
-            case ResourceType.EQUIPMENT:
-                return '장비';
-            default:
-                return type;
-        }
     }
 
     async findMySchedules(user: Employee, query: MyScheduleQueryDto): Promise<MyScheduleResponseDto> {
@@ -186,19 +182,32 @@ export class ScheduleManagementService {
             query.role,
         );
 
-        // 3. 카테고리별 필터링 적용 (TODO: 구체적인 카테고리 필터링 로직 구현)
+        // 3. 카테고리별 필터링 적용
         if (query.category && query.category !== ScheduleCategoryType.ALL) {
             const scheduleRelations = await this.scheduleContextService.일정관계정보를_조회한다(
                 schedules.map((schedule) => schedule.scheduleId),
             );
-            schedules = this.filterByCategory(schedules, scheduleRelations, query.category);
+            // 카테고리별 분류 데이터 조회
+            const { scheduleTypeStats, projectStats, resourceStats } =
+                this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelations);
+
+            schedules = this.filterByCategory(scheduleTypeStats, projectStats, resourceStats, query.category);
         }
 
         // 4. 통계 계산 (검색 전 데이터로 계산)
         const scheduleRelationsForStats = await this.scheduleContextService.일정관계정보를_조회한다(
             schedules.map((schedule) => schedule.scheduleId),
         );
-        const statistics = await this.generateCategoryStatistics(schedules, scheduleRelationsForStats, query.category);
+        // 카테고리별 분류 데이터 조회
+        const { scheduleTypeStats, projectStats, resourceStats } =
+            this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelationsForStats);
+
+        const statistics = this.generateCategoryStatistics(
+            scheduleTypeStats,
+            projectStats,
+            resourceStats,
+            query.category,
+        );
         const totalCount = schedules.length;
 
         // 5. 키워드 검색 적용 (통계 계산 후)
@@ -210,7 +219,25 @@ export class ScheduleManagementService {
             this.scheduleContextService.일정들을_페이지네이션_적용한다(searchedSchedules, page, limit);
 
         // 7. DTO 변환
-        const scheduleItems = await this.convertToMyScheduleItems(paginatedSchedules, scheduleRelationsForStats);
+        // 예약자 정보 조회
+        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(
+            paginatedSchedules.map((s) => s.scheduleId),
+        );
+
+        // 프로젝트 정보 조회
+        const projectMap =
+            await this.scheduleContextService.일정들의_프로젝트정보를_조회한다(scheduleRelationsForStats);
+
+        // 예약 정보 조회
+        const reservationMap =
+            await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelationsForStats);
+
+        const scheduleItems = this.convertToMyScheduleItems(
+            paginatedSchedules,
+            reserverMap,
+            projectMap,
+            reservationMap,
+        );
 
         const responseData: MyScheduleResponseDto = {
             statistics,
@@ -227,14 +254,15 @@ export class ScheduleManagementService {
         return responseData;
     }
 
+    /**
+     * 카테고리별 필터링 (데이터 가공만, 조회 안함)
+     */
     private filterByCategory(
-        schedules: Schedule[],
-        scheduleRelations: ScheduleRelation[],
+        scheduleTypeStats: Map<string, Schedule[]>,
+        projectStats: Schedule[],
+        resourceStats: Map<string, Schedule[]>,
         category: ScheduleCategoryType,
     ): Schedule[] {
-        const { scheduleTypeStats, projectStats, resourceStats } =
-            this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelations);
-
         switch (category) {
             case ScheduleCategoryType.SCHEDULE:
                 return Array.from(scheduleTypeStats.values()).flat();
@@ -243,25 +271,19 @@ export class ScheduleManagementService {
             case ScheduleCategoryType.RESOURCE:
                 return Array.from(resourceStats.values()).flat();
             default:
-                return schedules;
+                return [];
         }
     }
 
-    private async convertToMyScheduleItems(
+    /**
+     * 일정 DTO 변환 (데이터 가공만, 조회 안함)
+     */
+    private convertToMyScheduleItems(
         schedules: Schedule[],
-        scheduleRelations: ScheduleRelation[],
-    ): Promise<MyScheduleItemDto[]> {
-        // 예약자 정보 조회
-        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(
-            schedules.map((s) => s.scheduleId),
-        );
-
-        // 프로젝트 정보 조회
-        const projectMap = await this.scheduleContextService.일정들의_프로젝트정보를_조회한다(scheduleRelations);
-
-        // 예약 정보 조회
-        const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelations);
-
+        reserverMap: Map<string, { participant: ScheduleParticipant; employee: Employee }>,
+        projectMap: Map<string, any>,
+        reservationMap: Map<string, any>,
+    ): MyScheduleItemDto[] {
         return schedules.map((schedule) => {
             const reserver = reserverMap.get(schedule.scheduleId);
             const project = projectMap.get(schedule.scheduleId);
@@ -273,7 +295,7 @@ export class ScheduleManagementService {
                 description: schedule.description,
                 startDate: schedule.startDate,
                 endDate: schedule.endDate,
-                scheduleType: this.getScheduleTypeLabel(schedule.scheduleType),
+                scheduleType: this.scheduleContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
                 project: project
                     ? {
                           projectId: project.projectId,
@@ -310,7 +332,7 @@ export class ScheduleManagementService {
         );
 
         // 5. 자원그룹별 DTO 구성
-        const resourceGroupDtos = await this.buildResourceGroupDtos(
+        const resourceGroupDtos = this.buildResourceGroupDtos(
             resourceGroups,
             resourceMap,
             resourceScheduleMap,
@@ -326,13 +348,16 @@ export class ScheduleManagementService {
         return responseData;
     }
 
-    private async buildResourceGroupDtos(
+    /**
+     * 자원 그룹 DTO 구성 (데이터 가공만, 조회 안함)
+     */
+    private buildResourceGroupDtos(
         resourceGroups: ResourceGroup[],
         resourceMap: Map<string, Resource[]>,
         resourceScheduleMap: Map<string, Schedule[]>,
         reserverMap: Map<string, { participant: ScheduleParticipant; employee: Employee }>,
         currentEmployeeId: string,
-    ): Promise<ResourceGroupDto[]> {
+    ): ResourceGroupDto[] {
         const resourceGroupDtos: ResourceGroupDto[] = [];
 
         for (const group of resourceGroups) {
@@ -376,5 +401,130 @@ export class ScheduleManagementService {
         }
 
         return resourceGroupDtos.sort((a, b) => a.order - b.order);
+    }
+
+    async findScheduleDetail(user: Employee, query: ScheduleDetailQueryDto): Promise<ScheduleDetailResponseDto> {
+        const { scheduleId, includeProject, includeReservation } = query;
+
+        // 1. 일정 기본 정보 조회
+        const schedules = await this.scheduleContextService.일정들을_조회한다([scheduleId]);
+        if (schedules.length === 0) {
+            throw new NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
+        }
+        const schedule = schedules[0];
+
+        // 2. 참가자 정보 조회 (예약자와 일반 참가자 분리)
+        const { reserver, participants } =
+            await this.scheduleContextService.일정의_참가자들을_분리하여_조회한다(scheduleId);
+
+        // 3. 일정 관계 정보 조회 (프로젝트, 예약 정보 확인용)
+        const scheduleRelations = await this.scheduleContextService.일정관계정보를_조회한다([scheduleId]);
+        const scheduleRelation = scheduleRelations.length > 0 ? scheduleRelations[0] : null;
+
+        // 4. 옵션에 따른 추가 정보 조회
+        let project: ScheduleDetailProjectDto | undefined;
+        let reservation: ScheduleDetailReservationDto | undefined;
+
+        if (includeProject && scheduleRelation?.projectId) {
+            // TODO: 실제 프로젝트 서비스 구현 후 실제 데이터 조회로 변경
+            project = this.buildProjectDetailDto(scheduleRelation.projectId);
+        }
+
+        if (includeReservation && scheduleRelation?.reservationId) {
+            // 예약 정보 조회
+            const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다([
+                { scheduleId: '', reservationId: scheduleRelation.reservationId, projectId: null } as ScheduleRelation,
+            ]);
+
+            const reservationData = Array.from(reservationMap.values())[0];
+            if (!reservationData) {
+                throw new NotFoundException(`예약 정보를 찾을 수 없습니다. ID: ${scheduleRelation.reservationId}`);
+            }
+
+            // 자원 타입별 상세 정보 조회
+            let typeInfo: any = null;
+            if (reservationData.resource.type === 'VEHICLE') {
+                const vehicleInfo = await this.vehicleInfoContextService.차량정보만_조회한다(
+                    reservationData.resourceId,
+                );
+                if (vehicleInfo) {
+                    const vehicleFiles = await this.fileContextService.차량정보_파일을_조회한다(
+                        vehicleInfo.vehicleInfoId,
+                    );
+                    typeInfo = this.buildVehicleTypeInfo(vehicleInfo, vehicleFiles);
+                }
+            } else if (reservationData.resource.type === 'MEETING_ROOM') {
+                typeInfo = await this.meetingRoomInfoContextService.회의실정보만_조회한다(reservationData.resourceId);
+            } else if (reservationData.resource.type === 'ACCOMMODATION') {
+                typeInfo = await this.accommodationInfoContextService.숙소정보만_조회한다(reservationData.resourceId);
+            } else if (reservationData.resource.type === 'EQUIPMENT') {
+                typeInfo = await this.equipmentInfoContextService.장비정보만_조회한다(reservationData.resourceId);
+            }
+
+            reservation = this.buildReservationDetailDto(reservationData, typeInfo);
+        }
+
+        // 5. DTO 구성
+        const response: ScheduleDetailResponseDto = {
+            scheduleId: schedule.scheduleId,
+            title: schedule.title,
+            description: schedule.description,
+            startDate: schedule.startDate,
+            endDate: schedule.endDate,
+            scheduleType: schedule.scheduleType,
+            notifyBeforeStart: schedule.notifyBeforeStart,
+            notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
+            reserver,
+            participants,
+            project,
+            reservation,
+        };
+
+        return response;
+    }
+
+    /**
+     * 프로젝트 상세 DTO 구성 (데이터 가공만, 조회 안함)
+     */
+    private buildProjectDetailDto(projectId: string): ScheduleDetailProjectDto {
+        // TODO: 실제 프로젝트 서비스 구현 후 실제 데이터 조회로 변경
+        return {
+            projectId,
+            projectName: `프로젝트_${projectId.slice(-4)}`, // 임시 데이터
+        };
+    }
+
+    /**
+     * 예약 상세 DTO 구성 (데이터 가공만, 조회 안함)
+     */
+    private buildReservationDetailDto(reservationData: any, typeInfo: any): ScheduleDetailReservationDto {
+        const resourceInfo = {
+            resourceId: reservationData.resource.resourceId,
+            name: reservationData.resource.name,
+            type: reservationData.resource.type,
+            description: reservationData.resource.description,
+            location: reservationData.resource.location,
+            typeInfo,
+        };
+
+        return {
+            reservationId: reservationData.reservationId,
+            title: reservationData.title,
+            description: reservationData.description,
+            status: reservationData.status,
+            resource: resourceInfo,
+        };
+    }
+
+    /**
+     * 차량 타입 정보 구성 (데이터 가공만, 조회 안함)
+     */
+    private buildVehicleTypeInfo(vehicleInfo: any, vehicleFiles: any): any {
+        return {
+            ...vehicleInfo,
+            parkingLocationImages: vehicleFiles.parkingLocationImages.map((file: any) => file.filePath),
+            odometerImages: vehicleFiles.odometerImages.map((file: any) => file.filePath),
+            indoorImages: vehicleFiles.indoorImages.map((file: any) => file.filePath),
+        };
     }
 }

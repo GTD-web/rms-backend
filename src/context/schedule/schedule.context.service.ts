@@ -92,6 +92,39 @@ export class ScheduleContextService {
         return result;
     }
 
+    async 일정들의_모든참가자정보를_조회한다(
+        scheduleIds: string[],
+    ): Promise<Map<string, { participant: ScheduleParticipant; employee: Employee }[]>> {
+        const allParticipants = await this.domainScheduleParticipantService.findAllByScheduleIds(scheduleIds);
+        const employeeIds = [...new Set(allParticipants.map((participant) => participant.employeeId))];
+        const employees = await this.domainEmployeeService.findByEmployeeIds(employeeIds);
+
+        // Employee 배열을 Map으로 변환 (빠른 조회를 위해)
+        const employeeMap = new Map<string, Employee>();
+        employees.forEach((employee) => {
+            employeeMap.set(employee.employeeId, employee);
+        });
+
+        // 일정별로 참가자 정보를 그룹핑
+        const result = new Map<string, { participant: ScheduleParticipant; employee: Employee }[]>();
+
+        allParticipants.forEach((participant) => {
+            const employee = employeeMap.get(participant.employeeId);
+            if (employee) {
+                const scheduleId = participant.scheduleId;
+                if (!result.has(scheduleId)) {
+                    result.set(scheduleId, []);
+                }
+                result.get(scheduleId)!.push({
+                    participant,
+                    employee,
+                });
+            }
+        });
+
+        return result;
+    }
+
     async 일정들의_프로젝트정보를_조회한다(
         scheduleRelations: ScheduleRelation[],
     ): Promise<Map<string, { projectId: string }>> {
@@ -441,5 +474,67 @@ export class ScheduleContextService {
         });
 
         return resourceScheduleMap;
+    }
+
+    /**
+     * 일정의 참가자들을 예약자와 일반 참가자로 분리하여 조회
+     */
+    async 일정의_참가자들을_분리하여_조회한다(scheduleId: string): Promise<{
+        reserver?: {
+            participantId: string;
+            employeeId: string;
+            employeeName: string;
+            participantType: string;
+        };
+        participants: {
+            participantId: string;
+            employeeId: string;
+            employeeName: string;
+            participantType: string;
+        }[];
+    }> {
+        // 일정의 모든 참가자 정보 조회
+        const allParticipantsMap = await this.일정들의_모든참가자정보를_조회한다([scheduleId]);
+        const allParticipants = allParticipantsMap.get(scheduleId) || [];
+
+        let reserver: any = undefined;
+        const participants: any[] = [];
+
+        // 참가자들을 예약자와 일반 참가자로 분리
+        allParticipants.forEach(({ participant, employee }) => {
+            const participantDto = {
+                participantId: participant.participantId,
+                employeeId: employee.employeeId,
+                employeeName: employee.name,
+                participantType: participant.type,
+            };
+
+            if (participant.type === ParticipantsType.RESERVER) {
+                reserver = participantDto;
+            } else {
+                participants.push(participantDto);
+            }
+        });
+
+        return {
+            reserver,
+            participants,
+        };
+    }
+
+    /**
+     * 일정 타입 라벨 반환
+     */
+    일정타입_라벨을_가져온다(type: string): string {
+        switch (type) {
+            case 'COMPANY':
+                return '회사전체일정';
+            case 'DEPARTMENT':
+                return '부서일정';
+            case 'PERSONAL':
+                return '개인일정';
+            default:
+                return type;
+        }
     }
 }

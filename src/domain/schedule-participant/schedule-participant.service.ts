@@ -22,4 +22,10 @@ export class DomainScheduleParticipantService extends BaseService<SchedulePartic
             where: { employeeId, scheduleId: In(scheduleIds) },
         });
     }
+
+    async findAllByScheduleIds(scheduleIds: string[]): Promise<ScheduleParticipant[]> {
+        return this.scheduleParticipantRepository.findAll({
+            where: { scheduleId: In(scheduleIds) },
+        });
+    }
 }

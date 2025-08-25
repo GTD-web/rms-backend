@@ -24834,7 +24834,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -24848,6 +24848,8 @@ const my_schedule_query_dto_1 = __webpack_require__(/*! ../dtos/my-schedule-quer
 const my_schedule_response_dto_1 = __webpack_require__(/*! ../dtos/my-schedule-response.dto */ "./src/business/schedule-management/dtos/my-schedule-response.dto.ts");
 const resource_schedule_query_dto_1 = __webpack_require__(/*! ../dtos/resource-schedule-query.dto */ "./src/business/schedule-management/dtos/resource-schedule-query.dto.ts");
 const resource_schedule_response_dto_1 = __webpack_require__(/*! ../dtos/resource-schedule-response.dto */ "./src/business/schedule-management/dtos/resource-schedule-response.dto.ts");
+const schedule_detail_query_dto_1 = __webpack_require__(/*! ../dtos/schedule-detail-query.dto */ "./src/business/schedule-management/dtos/schedule-detail-query.dto.ts");
+const schedule_detail_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-detail-response.dto */ "./src/business/schedule-management/dtos/schedule-detail-response.dto.ts");
 let ScheduleController = class ScheduleController {
     constructor(scheduleManagementService) {
         this.scheduleManagementService = scheduleManagementService;
@@ -24860,6 +24862,9 @@ let ScheduleController = class ScheduleController {
     }
     async findResourceSchedules(user, query) {
         return this.scheduleManagementService.findResourceSchedules(user, query);
+    }
+    async findScheduleDetail(user, query) {
+        return this.scheduleManagementService.findScheduleDetail(user, query);
     }
 };
 exports.ScheduleController = ScheduleController;
@@ -24911,6 +24916,22 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_h = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _h : Object, typeof (_j = typeof resource_schedule_query_dto_1.ResourceScheduleQueryDto !== "undefined" && resource_schedule_query_dto_1.ResourceScheduleQueryDto) === "function" ? _j : Object]),
     __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], ScheduleController.prototype, "findResourceSchedules", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: '일정 상세 조회',
+        description: '일정 상세 정보를 조회합니다.',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '일정 상세 조회 성공',
+        type: schedule_detail_response_dto_1.ScheduleDetailResponseDto,
+    }),
+    (0, common_1.Get)('detail'),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_l = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _l : Object, typeof (_m = typeof schedule_detail_query_dto_1.ScheduleDetailQueryDto !== "undefined" && schedule_detail_query_dto_1.ScheduleDetailQueryDto) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+], ScheduleController.prototype, "findScheduleDetail", null);
 exports.ScheduleController = ScheduleController = __decorate([
     (0, swagger_1.ApiTags)('v2 일정'),
     (0, common_1.Controller)('v2/schedule'),
@@ -25694,6 +25715,338 @@ __decorate([
 
 /***/ }),
 
+/***/ "./src/business/schedule-management/dtos/schedule-detail-query.dto.ts":
+/*!****************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-detail-query.dto.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleDetailQueryDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+class ScheduleDetailQueryDto {
+    constructor() {
+        this.includeProject = false;
+        this.includeReservation = false;
+    }
+}
+exports.ScheduleDetailQueryDto = ScheduleDetailQueryDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 ID',
+        example: 'uuid-string',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ScheduleDetailQueryDto.prototype, "scheduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 정보 포함 여부',
+        required: false,
+        example: true,
+        default: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value === 'true' || value === true),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], ScheduleDetailQueryDto.prototype, "includeProject", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원예약 정보 포함 여부',
+        required: false,
+        example: true,
+        default: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value === 'true' || value === true),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], ScheduleDetailQueryDto.prototype, "includeReservation", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/schedule-detail-response.dto.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-detail-response.dto.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleDetailResponseDto = exports.ScheduleDetailReservationDto = exports.ScheduleDetailResourceDto = exports.ScheduleDetailParticipantDto = exports.ScheduleDetailProjectDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const vehicle_response_dto_1 = __webpack_require__(/*! @src/business/resource-management/dtos/vehicle/vehicle-response.dto */ "./src/business/resource-management/dtos/vehicle/vehicle-response.dto.ts");
+const meeting_room_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/meeting-room/dtos/meeting-room-info-response.dto */ "./src/application/resource/meeting-room/dtos/meeting-room-info-response.dto.ts");
+const accommodation_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/accommodation/dtos/accommodation-info-response.dto */ "./src/application/resource/accommodation/dtos/accommodation-info-response.dto.ts");
+const equipment_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/equipment/dtos/equipment-info-response.dto */ "./src/application/resource/equipment/dtos/equipment-info-response.dto.ts");
+class ScheduleDetailProjectDto {
+}
+exports.ScheduleDetailProjectDto = ScheduleDetailProjectDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailProjectDto.prototype, "projectId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 이름 (추후 프로젝트 테이블 구현 시 실제 데이터로 대체)',
+        example: '신규 시스템 개발',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailProjectDto.prototype, "projectName", void 0);
+class ScheduleDetailParticipantDto {
+}
+exports.ScheduleDetailParticipantDto = ScheduleDetailParticipantDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참가자 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailParticipantDto.prototype, "participantId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailParticipantDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원 이름',
+        example: '김철수',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailParticipantDto.prototype, "employeeName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참가자 유형 (예약자/참석자)',
+        example: 'RESERVER',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailParticipantDto.prototype, "participantType", void 0);
+class ScheduleDetailResourceDto {
+}
+exports.ScheduleDetailResourceDto = ScheduleDetailResourceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailResourceDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 이름',
+        example: '회의실 A',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailResourceDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 타입',
+        enum: resource_type_enum_1.ResourceType,
+        example: resource_type_enum_1.ResourceType.MEETING_ROOM,
+    }),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], ScheduleDetailResourceDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 설명',
+        required: false,
+        example: '대형 회의실, 프로젝터 완비',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailResourceDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 위치 정보',
+        required: false,
+        type: 'object',
+    }),
+    __metadata("design:type", Object)
+], ScheduleDetailResourceDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 타입별 상세 정보',
+        required: false,
+        oneOf: [
+            { $ref: (0, swagger_1.getSchemaPath)(vehicle_response_dto_1.VehicleInfoResponseDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(meeting_room_info_response_dto_1.MeetingRoomInfoResponseDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(accommodation_info_response_dto_1.AccommodationInfoResponseDto) },
+            { $ref: (0, swagger_1.getSchemaPath)(equipment_info_response_dto_1.EquipmentInfoResponseDto) },
+        ],
+    }),
+    __metadata("design:type", Object)
+], ScheduleDetailResourceDto.prototype, "typeInfo", void 0);
+class ScheduleDetailReservationDto {
+}
+exports.ScheduleDetailReservationDto = ScheduleDetailReservationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailReservationDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 제목',
+        example: '회의실 A 예약',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailReservationDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 설명',
+        required: false,
+        example: '주간 회의를 위한 예약',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailReservationDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 상태',
+        enum: reservation_type_enum_1.ReservationStatus,
+        example: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+    }),
+    __metadata("design:type", typeof (_c = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _c : Object)
+], ScheduleDetailReservationDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 정보',
+        type: ScheduleDetailResourceDto,
+    }),
+    __metadata("design:type", ScheduleDetailResourceDto)
+], ScheduleDetailReservationDto.prototype, "resource", void 0);
+class ScheduleDetailResponseDto {
+}
+exports.ScheduleDetailResponseDto = ScheduleDetailResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailResponseDto.prototype, "scheduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 제목',
+        example: '주간 프로젝트 회의',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 설명',
+        required: false,
+        example: '주간 진행사항 점검 및 이슈 논의',
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailResponseDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '시작 날짜 및 시간',
+        example: '2024-01-15T09:00:00Z',
+    }),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], ScheduleDetailResponseDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '종료 날짜 및 시간',
+        example: '2024-01-15T10:00:00Z',
+    }),
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+], ScheduleDetailResponseDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 유형',
+        enum: schedule_type_enum_1.ScheduleType,
+        example: schedule_type_enum_1.ScheduleType.COMPANY,
+    }),
+    __metadata("design:type", typeof (_f = typeof schedule_type_enum_1.ScheduleType !== "undefined" && schedule_type_enum_1.ScheduleType) === "function" ? _f : Object)
+], ScheduleDetailResponseDto.prototype, "scheduleType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '시작 전 알림 여부',
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], ScheduleDetailResponseDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '시작 전 알림 시점 (분 단위)',
+        type: [Number],
+        required: false,
+        example: [10, 30],
+    }),
+    __metadata("design:type", Array)
+], ScheduleDetailResponseDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약자 정보',
+        type: ScheduleDetailParticipantDto,
+        required: false,
+    }),
+    __metadata("design:type", ScheduleDetailParticipantDto)
+], ScheduleDetailResponseDto.prototype, "reserver", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참가자 목록 (예약자 제외)',
+        type: [ScheduleDetailParticipantDto],
+    }),
+    __metadata("design:type", Array)
+], ScheduleDetailResponseDto.prototype, "participants", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '관련 프로젝트 정보 (옵션)',
+        type: ScheduleDetailProjectDto,
+        required: false,
+    }),
+    __metadata("design:type", ScheduleDetailProjectDto)
+], ScheduleDetailResponseDto.prototype, "project", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '관련 자원예약 정보 (옵션)',
+        type: ScheduleDetailReservationDto,
+        required: false,
+    }),
+    __metadata("design:type", ScheduleDetailReservationDto)
+], ScheduleDetailResponseDto.prototype, "reservation", void 0);
+
+
+/***/ }),
+
 /***/ "./src/business/schedule-management/schedule-management.module.ts":
 /*!************************************************************************!*\
   !*** ./src/business/schedule-management/schedule-management.module.ts ***!
@@ -25713,12 +26066,14 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const schedule_controllers_1 = __webpack_require__(/*! ./controllers/schedule.controllers */ "./src/business/schedule-management/controllers/schedule.controllers.ts");
 const schedule_management_service_1 = __webpack_require__(/*! ./schedule-management.service */ "./src/business/schedule-management/schedule-management.service.ts");
 const schedule_context_module_1 = __webpack_require__(/*! ../../context/schedule/schedule.context.module */ "./src/context/schedule/schedule.context.module.ts");
+const resource_context_module_1 = __webpack_require__(/*! ../../context/resource/resource.context.module */ "./src/context/resource/resource.context.module.ts");
+const file_context_module_1 = __webpack_require__(/*! ../../context/file/file.context.module */ "./src/context/file/file.context.module.ts");
 let ScheduleManagementModule = class ScheduleManagementModule {
 };
 exports.ScheduleManagementModule = ScheduleManagementModule;
 exports.ScheduleManagementModule = ScheduleManagementModule = __decorate([
     (0, common_1.Module)({
-        imports: [schedule_context_module_1.ScheduleContextModule],
+        imports: [schedule_context_module_1.ScheduleContextModule, resource_context_module_1.ResourceContextModule, file_context_module_1.FileContextModule],
         controllers: [schedule_controllers_1.ScheduleController],
         providers: [schedule_management_service_1.ScheduleManagementService],
         exports: [],
@@ -25744,17 +26099,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleManagementService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const my_schedule_query_dto_1 = __webpack_require__(/*! ./dtos/my-schedule-query.dto */ "./src/business/schedule-management/dtos/my-schedule-query.dto.ts");
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const schedule_context_service_1 = __webpack_require__(/*! ../../context/schedule/schedule.context.service */ "./src/context/schedule/schedule.context.service.ts");
+const resource_context_service_1 = __webpack_require__(/*! ../../context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const vehicle_info_context_service_1 = __webpack_require__(/*! ../../context/resource/services/vehicle-info.context.service */ "./src/context/resource/services/vehicle-info.context.service.ts");
+const meeting_room_info_context_service_1 = __webpack_require__(/*! ../../context/resource/services/meeting-room-info.context.service */ "./src/context/resource/services/meeting-room-info.context.service.ts");
+const accommodation_info_context_service_1 = __webpack_require__(/*! ../../context/resource/services/accommodation-info.context.service */ "./src/context/resource/services/accommodation-info.context.service.ts");
+const equipment_info_context_service_1 = __webpack_require__(/*! ../../context/resource/services/equipment-info.context.service */ "./src/context/resource/services/equipment-info.context.service.ts");
+const file_context_service_1 = __webpack_require__(/*! ../../context/file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
 let ScheduleManagementService = class ScheduleManagementService {
-    constructor(scheduleContextService) {
+    constructor(scheduleContextService, resourceContextService, vehicleInfoContextService, meetingRoomInfoContextService, accommodationInfoContextService, equipmentInfoContextService, fileContextService) {
         this.scheduleContextService = scheduleContextService;
+        this.resourceContextService = resourceContextService;
+        this.vehicleInfoContextService = vehicleInfoContextService;
+        this.meetingRoomInfoContextService = meetingRoomInfoContextService;
+        this.accommodationInfoContextService = accommodationInfoContextService;
+        this.equipmentInfoContextService = equipmentInfoContextService;
+        this.fileContextService = fileContextService;
     }
     async findCalendar(user, query) {
         const { date, category, mySchedule } = query;
@@ -25812,8 +26179,7 @@ let ScheduleManagementService = class ScheduleManagementService {
         };
         return responseData;
     }
-    async generateCategoryStatistics(schedules, scheduleRelations, category) {
-        const { scheduleTypeStats, projectStats, resourceStats } = this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelations);
+    generateCategoryStatistics(scheduleTypeStats, projectStats, resourceStats, category) {
         const statistics = [];
         if (!category || category === my_schedule_query_dto_1.ScheduleCategoryType.ALL) {
             statistics.push({
@@ -25833,7 +26199,7 @@ let ScheduleManagementService = class ScheduleManagementService {
             Object.values(schedule_type_enum_1.ScheduleType).forEach((scheduleType) => {
                 const scheduleList = scheduleTypeStats.get(scheduleType) || [];
                 statistics.push({
-                    label: this.getScheduleTypeLabel(scheduleType),
+                    label: this.scheduleContextService.일정타입_라벨을_가져온다(scheduleType),
                     count: scheduleList.length,
                 });
             });
@@ -25848,38 +26214,12 @@ let ScheduleManagementService = class ScheduleManagementService {
             Object.values(resource_type_enum_1.ResourceType).forEach((resourceType) => {
                 const scheduleList = resourceStats.get(resourceType) || [];
                 statistics.push({
-                    label: this.getResourceTypeLabel(resourceType),
+                    label: this.resourceContextService.자원타입_라벨을_가져온다(resourceType),
                     count: scheduleList.length,
                 });
             });
         }
         return statistics;
-    }
-    getScheduleTypeLabel(type) {
-        switch (type) {
-            case schedule_type_enum_1.ScheduleType.COMPANY:
-                return '회사전체일정';
-            case schedule_type_enum_1.ScheduleType.DEPARTMENT:
-                return '부서일정';
-            case schedule_type_enum_1.ScheduleType.PERSONAL:
-                return '개인일정';
-            default:
-                return type;
-        }
-    }
-    getResourceTypeLabel(type) {
-        switch (type) {
-            case resource_type_enum_1.ResourceType.MEETING_ROOM:
-                return '회의실';
-            case resource_type_enum_1.ResourceType.VEHICLE:
-                return '차량';
-            case resource_type_enum_1.ResourceType.ACCOMMODATION:
-                return '숙소';
-            case resource_type_enum_1.ResourceType.EQUIPMENT:
-                return '장비';
-            default:
-                return type;
-        }
     }
     async findMySchedules(user, query) {
         const page = query.page || 1;
@@ -25888,15 +26228,20 @@ let ScheduleManagementService = class ScheduleManagementService {
         schedules = await this.scheduleContextService.일정들을_역할별로_필터링한다(schedules, user.employeeId, query.role);
         if (query.category && query.category !== my_schedule_query_dto_1.ScheduleCategoryType.ALL) {
             const scheduleRelations = await this.scheduleContextService.일정관계정보를_조회한다(schedules.map((schedule) => schedule.scheduleId));
-            schedules = this.filterByCategory(schedules, scheduleRelations, query.category);
+            const { scheduleTypeStats, projectStats, resourceStats } = this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelations);
+            schedules = this.filterByCategory(scheduleTypeStats, projectStats, resourceStats, query.category);
         }
         const scheduleRelationsForStats = await this.scheduleContextService.일정관계정보를_조회한다(schedules.map((schedule) => schedule.scheduleId));
-        const statistics = await this.generateCategoryStatistics(schedules, scheduleRelationsForStats, query.category);
+        const { scheduleTypeStats, projectStats, resourceStats } = this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelationsForStats);
+        const statistics = this.generateCategoryStatistics(scheduleTypeStats, projectStats, resourceStats, query.category);
         const totalCount = schedules.length;
         const searchedSchedules = this.scheduleContextService.일정들을_키워드로_필터링한다(schedules, query.keyword);
         const filteredCount = searchedSchedules.length;
         const { paginatedSchedules, totalPages, hasNext, hasPrevious } = this.scheduleContextService.일정들을_페이지네이션_적용한다(searchedSchedules, page, limit);
-        const scheduleItems = await this.convertToMyScheduleItems(paginatedSchedules, scheduleRelationsForStats);
+        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(paginatedSchedules.map((s) => s.scheduleId));
+        const projectMap = await this.scheduleContextService.일정들의_프로젝트정보를_조회한다(scheduleRelationsForStats);
+        const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelationsForStats);
+        const scheduleItems = this.convertToMyScheduleItems(paginatedSchedules, reserverMap, projectMap, reservationMap);
         const responseData = {
             statistics,
             totalCount,
@@ -25910,8 +26255,7 @@ let ScheduleManagementService = class ScheduleManagementService {
         };
         return responseData;
     }
-    filterByCategory(schedules, scheduleRelations, category) {
-        const { scheduleTypeStats, projectStats, resourceStats } = this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelations);
+    filterByCategory(scheduleTypeStats, projectStats, resourceStats, category) {
         switch (category) {
             case my_schedule_query_dto_1.ScheduleCategoryType.SCHEDULE:
                 return Array.from(scheduleTypeStats.values()).flat();
@@ -25920,13 +26264,10 @@ let ScheduleManagementService = class ScheduleManagementService {
             case my_schedule_query_dto_1.ScheduleCategoryType.RESOURCE:
                 return Array.from(resourceStats.values()).flat();
             default:
-                return schedules;
+                return [];
         }
     }
-    async convertToMyScheduleItems(schedules, scheduleRelations) {
-        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(schedules.map((s) => s.scheduleId));
-        const projectMap = await this.scheduleContextService.일정들의_프로젝트정보를_조회한다(scheduleRelations);
-        const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelations);
+    convertToMyScheduleItems(schedules, reserverMap, projectMap, reservationMap) {
         return schedules.map((schedule) => {
             const reserver = reserverMap.get(schedule.scheduleId);
             const project = projectMap.get(schedule.scheduleId);
@@ -25937,7 +26278,7 @@ let ScheduleManagementService = class ScheduleManagementService {
                 description: schedule.description,
                 startDate: schedule.startDate,
                 endDate: schedule.endDate,
-                scheduleType: this.getScheduleTypeLabel(schedule.scheduleType),
+                scheduleType: this.scheduleContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
                 project: project
                     ? {
                         projectId: project.projectId,
@@ -25960,14 +26301,14 @@ let ScheduleManagementService = class ScheduleManagementService {
         const resourceScheduleMap = await this.scheduleContextService.자원별_일정정보를_맵핑한다(schedules);
         const { resourceGroups, resourceMap } = await this.scheduleContextService.자원그룹별_자원정보를_조회한다(resourceType);
         const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(schedules.map((s) => s.scheduleId));
-        const resourceGroupDtos = await this.buildResourceGroupDtos(resourceGroups, resourceMap, resourceScheduleMap, reserverMap, user.employeeId);
+        const resourceGroupDtos = this.buildResourceGroupDtos(resourceGroups, resourceMap, resourceScheduleMap, reserverMap, user.employeeId);
         const responseData = {
             type: resourceType,
             resourceGroups: resourceGroupDtos,
         };
         return responseData;
     }
-    async buildResourceGroupDtos(resourceGroups, resourceMap, resourceScheduleMap, reserverMap, currentEmployeeId) {
+    buildResourceGroupDtos(resourceGroups, resourceMap, resourceScheduleMap, reserverMap, currentEmployeeId) {
         const resourceGroupDtos = [];
         for (const group of resourceGroups) {
             const resources = [];
@@ -26005,11 +26346,100 @@ let ScheduleManagementService = class ScheduleManagementService {
         }
         return resourceGroupDtos.sort((a, b) => a.order - b.order);
     }
+    async findScheduleDetail(user, query) {
+        const { scheduleId, includeProject, includeReservation } = query;
+        const schedules = await this.scheduleContextService.일정들을_조회한다([scheduleId]);
+        if (schedules.length === 0) {
+            throw new common_1.NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
+        }
+        const schedule = schedules[0];
+        const { reserver, participants } = await this.scheduleContextService.일정의_참가자들을_분리하여_조회한다(scheduleId);
+        const scheduleRelations = await this.scheduleContextService.일정관계정보를_조회한다([scheduleId]);
+        const scheduleRelation = scheduleRelations.length > 0 ? scheduleRelations[0] : null;
+        let project;
+        let reservation;
+        if (includeProject && scheduleRelation?.projectId) {
+            project = this.buildProjectDetailDto(scheduleRelation.projectId);
+        }
+        if (includeReservation && scheduleRelation?.reservationId) {
+            const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다([
+                { scheduleId: '', reservationId: scheduleRelation.reservationId, projectId: null },
+            ]);
+            const reservationData = Array.from(reservationMap.values())[0];
+            if (!reservationData) {
+                throw new common_1.NotFoundException(`예약 정보를 찾을 수 없습니다. ID: ${scheduleRelation.reservationId}`);
+            }
+            let typeInfo = null;
+            if (reservationData.resource.type === 'VEHICLE') {
+                const vehicleInfo = await this.vehicleInfoContextService.차량정보만_조회한다(reservationData.resourceId);
+                if (vehicleInfo) {
+                    const vehicleFiles = await this.fileContextService.차량정보_파일을_조회한다(vehicleInfo.vehicleInfoId);
+                    typeInfo = this.buildVehicleTypeInfo(vehicleInfo, vehicleFiles);
+                }
+            }
+            else if (reservationData.resource.type === 'MEETING_ROOM') {
+                typeInfo = await this.meetingRoomInfoContextService.회의실정보만_조회한다(reservationData.resourceId);
+            }
+            else if (reservationData.resource.type === 'ACCOMMODATION') {
+                typeInfo = await this.accommodationInfoContextService.숙소정보만_조회한다(reservationData.resourceId);
+            }
+            else if (reservationData.resource.type === 'EQUIPMENT') {
+                typeInfo = await this.equipmentInfoContextService.장비정보만_조회한다(reservationData.resourceId);
+            }
+            reservation = this.buildReservationDetailDto(reservationData, typeInfo);
+        }
+        const response = {
+            scheduleId: schedule.scheduleId,
+            title: schedule.title,
+            description: schedule.description,
+            startDate: schedule.startDate,
+            endDate: schedule.endDate,
+            scheduleType: schedule.scheduleType,
+            notifyBeforeStart: schedule.notifyBeforeStart,
+            notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
+            reserver,
+            participants,
+            project,
+            reservation,
+        };
+        return response;
+    }
+    buildProjectDetailDto(projectId) {
+        return {
+            projectId,
+            projectName: `프로젝트_${projectId.slice(-4)}`,
+        };
+    }
+    buildReservationDetailDto(reservationData, typeInfo) {
+        const resourceInfo = {
+            resourceId: reservationData.resource.resourceId,
+            name: reservationData.resource.name,
+            type: reservationData.resource.type,
+            description: reservationData.resource.description,
+            location: reservationData.resource.location,
+            typeInfo,
+        };
+        return {
+            reservationId: reservationData.reservationId,
+            title: reservationData.title,
+            description: reservationData.description,
+            status: reservationData.status,
+            resource: resourceInfo,
+        };
+    }
+    buildVehicleTypeInfo(vehicleInfo, vehicleFiles) {
+        return {
+            ...vehicleInfo,
+            parkingLocationImages: vehicleFiles.parkingLocationImages.map((file) => file.filePath),
+            odometerImages: vehicleFiles.odometerImages.map((file) => file.filePath),
+            indoorImages: vehicleFiles.indoorImages.map((file) => file.filePath),
+        };
+    }
 };
 exports.ScheduleManagementService = ScheduleManagementService;
 exports.ScheduleManagementService = ScheduleManagementService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof schedule_context_service_1.ScheduleContextService !== "undefined" && schedule_context_service_1.ScheduleContextService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_context_service_1.ScheduleContextService !== "undefined" && schedule_context_service_1.ScheduleContextService) === "function" ? _a : Object, typeof (_b = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _c : Object, typeof (_d = typeof meeting_room_info_context_service_1.MeetingRoomInfoContextService !== "undefined" && meeting_room_info_context_service_1.MeetingRoomInfoContextService) === "function" ? _d : Object, typeof (_e = typeof accommodation_info_context_service_1.AccommodationInfoContextService !== "undefined" && accommodation_info_context_service_1.AccommodationInfoContextService) === "function" ? _e : Object, typeof (_f = typeof equipment_info_context_service_1.EquipmentInfoContextService !== "undefined" && equipment_info_context_service_1.EquipmentInfoContextService) === "function" ? _f : Object, typeof (_g = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _g : Object])
 ], ScheduleManagementService);
 
 
@@ -26438,20 +26868,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 const file_reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/file-reservation-vehicle/file-reservation-vehicle.service */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.service.ts");
+const file_vehicle_info_service_1 = __webpack_require__(/*! @src/domain/file-vehicle-info/file-vehicle-info.service */ "./src/domain/file-vehicle-info/file-vehicle-info.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const s3_service_1 = __webpack_require__(/*! ../adapter/s3.service */ "./src/context/file/adapter/s3.service.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let FileContextService = class FileContextService {
-    constructor(domainFileService, domainFileReservationVehicleService, s3Service) {
+    constructor(domainFileService, domainFileReservationVehicleService, domainFileVehicleInfoService, s3Service) {
         this.domainFileService = domainFileService;
         this.domainFileReservationVehicleService = domainFileReservationVehicleService;
+        this.domainFileVehicleInfoService = domainFileVehicleInfoService;
         this.s3Service = s3Service;
     }
     async 차량예약_파일을_조회한다(reservationVehicleId) {
@@ -26540,11 +26972,47 @@ let FileContextService = class FileContextService {
         });
         return await this.domainFileService.save(file);
     }
+    async 차량정보_파일을_조회한다(vehicleInfoId) {
+        const fileVehicleInfos = await this.domainFileVehicleInfoService.findByVehicleInfoId(vehicleInfoId);
+        const result = {
+            parkingLocationImages: [],
+            odometerImages: [],
+            indoorImages: [],
+        };
+        for (const fileVehicleInfo of fileVehicleInfos) {
+            if (fileVehicleInfo.type === 'PARKING_LOCATION') {
+                result.parkingLocationImages.push(fileVehicleInfo.fileId);
+            }
+            else if (fileVehicleInfo.type === 'ODOMETER') {
+                result.odometerImages.push(fileVehicleInfo.fileId);
+            }
+            else if (fileVehicleInfo.type === 'INDOOR') {
+                result.indoorImages.push(fileVehicleInfo.fileId);
+            }
+        }
+        return {
+            parkingLocationImages: result.parkingLocationImages.length > 0
+                ? await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_1.In)(result.parkingLocationImages) },
+                })
+                : [],
+            odometerImages: result.odometerImages.length > 0
+                ? await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_1.In)(result.odometerImages) },
+                })
+                : [],
+            indoorImages: result.indoorImages.length > 0
+                ? await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_1.In)(result.indoorImages) },
+                })
+                : [],
+        };
+    }
 };
 exports.FileContextService = FileContextService;
 exports.FileContextService = FileContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object, typeof (_b = typeof file_reservation_vehicle_service_1.DomainFileReservationVehicleService !== "undefined" && file_reservation_vehicle_service_1.DomainFileReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object, typeof (_b = typeof file_reservation_vehicle_service_1.DomainFileReservationVehicleService !== "undefined" && file_reservation_vehicle_service_1.DomainFileReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof file_vehicle_info_service_1.DomainFileVehicleInfoService !== "undefined" && file_vehicle_info_service_1.DomainFileVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _d : Object])
 ], FileContextService);
 
 
@@ -29382,6 +29850,9 @@ const notification_module_1 = __webpack_require__(/*! @src/application/notificat
 const resource_context_service_1 = __webpack_require__(/*! ./services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
 const resource_group_context_service_1 = __webpack_require__(/*! ./services/resource-group.context.service */ "./src/context/resource/services/resource-group.context.service.ts");
 const vehicle_info_context_service_1 = __webpack_require__(/*! ./services/vehicle-info.context.service */ "./src/context/resource/services/vehicle-info.context.service.ts");
+const meeting_room_info_context_service_1 = __webpack_require__(/*! ./services/meeting-room-info.context.service */ "./src/context/resource/services/meeting-room-info.context.service.ts");
+const accommodation_info_context_service_1 = __webpack_require__(/*! ./services/accommodation-info.context.service */ "./src/context/resource/services/accommodation-info.context.service.ts");
+const equipment_info_context_service_1 = __webpack_require__(/*! ./services/equipment-info.context.service */ "./src/context/resource/services/equipment-info.context.service.ts");
 const consumable_context_service_1 = __webpack_require__(/*! ./services/consumable.context.service */ "./src/context/resource/services/consumable.context.service.ts");
 const maintenance_context_service_1 = __webpack_require__(/*! ./services/maintenance.context.service */ "./src/context/resource/services/maintenance.context.service.ts");
 let ResourceContextModule = class ResourceContextModule {
@@ -29408,6 +29879,9 @@ exports.ResourceContextModule = ResourceContextModule = __decorate([
             resource_context_service_1.ResourceContextService,
             resource_group_context_service_1.ResourceGroupContextService,
             vehicle_info_context_service_1.VehicleInfoContextService,
+            meeting_room_info_context_service_1.MeetingRoomInfoContextService,
+            accommodation_info_context_service_1.AccommodationInfoContextService,
+            equipment_info_context_service_1.EquipmentInfoContextService,
             consumable_context_service_1.ConsumableContextService,
             maintenance_context_service_1.MaintenanceContextService,
         ],
@@ -29415,11 +29889,55 @@ exports.ResourceContextModule = ResourceContextModule = __decorate([
             resource_context_service_1.ResourceContextService,
             resource_group_context_service_1.ResourceGroupContextService,
             vehicle_info_context_service_1.VehicleInfoContextService,
+            meeting_room_info_context_service_1.MeetingRoomInfoContextService,
+            accommodation_info_context_service_1.AccommodationInfoContextService,
+            equipment_info_context_service_1.EquipmentInfoContextService,
             consumable_context_service_1.ConsumableContextService,
             maintenance_context_service_1.MaintenanceContextService,
         ],
     })
 ], ResourceContextModule);
+
+
+/***/ }),
+
+/***/ "./src/context/resource/services/accommodation-info.context.service.ts":
+/*!*****************************************************************************!*\
+  !*** ./src/context/resource/services/accommodation-info.context.service.ts ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AccommodationInfoContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const accommodation_info_service_1 = __webpack_require__(/*! @src/domain/accommodation-info/accommodation-info.service */ "./src/domain/accommodation-info/accommodation-info.service.ts");
+let AccommodationInfoContextService = class AccommodationInfoContextService {
+    constructor(domainAccommodationInfoService) {
+        this.domainAccommodationInfoService = domainAccommodationInfoService;
+    }
+    async 숙소정보만_조회한다(resourceId) {
+        const accommodationInfo = await this.domainAccommodationInfoService.findOne({
+            where: { resourceId },
+        });
+        return accommodationInfo;
+    }
+};
+exports.AccommodationInfoContextService = AccommodationInfoContextService;
+exports.AccommodationInfoContextService = AccommodationInfoContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _a : Object])
+], AccommodationInfoContextService);
 
 
 /***/ }),
@@ -29557,6 +30075,47 @@ exports.ConsumableContextService = ConsumableContextService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _a : Object, typeof (_b = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _b : Object])
 ], ConsumableContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/resource/services/equipment-info.context.service.ts":
+/*!*************************************************************************!*\
+  !*** ./src/context/resource/services/equipment-info.context.service.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EquipmentInfoContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const equipment_info_service_1 = __webpack_require__(/*! @src/domain/equipment-info/equipment-info.service */ "./src/domain/equipment-info/equipment-info.service.ts");
+let EquipmentInfoContextService = class EquipmentInfoContextService {
+    constructor(domainEquipmentInfoService) {
+        this.domainEquipmentInfoService = domainEquipmentInfoService;
+    }
+    async 장비정보만_조회한다(resourceId) {
+        const equipmentInfo = await this.domainEquipmentInfoService.findOne({
+            where: { resourceId },
+        });
+        return equipmentInfo;
+    }
+};
+exports.EquipmentInfoContextService = EquipmentInfoContextService;
+exports.EquipmentInfoContextService = EquipmentInfoContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _a : Object])
+], EquipmentInfoContextService);
 
 
 /***/ }),
@@ -29791,6 +30350,47 @@ exports.MaintenanceContextService = MaintenanceContextService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _e : Object, typeof (_f = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
 ], MaintenanceContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/resource/services/meeting-room-info.context.service.ts":
+/*!****************************************************************************!*\
+  !*** ./src/context/resource/services/meeting-room-info.context.service.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MeetingRoomInfoContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const meeting_room_info_service_1 = __webpack_require__(/*! @src/domain/meeting-room-info/meeting-room-info.service */ "./src/domain/meeting-room-info/meeting-room-info.service.ts");
+let MeetingRoomInfoContextService = class MeetingRoomInfoContextService {
+    constructor(domainMeetingRoomInfoService) {
+        this.domainMeetingRoomInfoService = domainMeetingRoomInfoService;
+    }
+    async 회의실정보만_조회한다(resourceId) {
+        const meetingRoomInfo = await this.domainMeetingRoomInfoService.findOne({
+            where: { resourceId },
+        });
+        return meetingRoomInfo;
+    }
+};
+exports.MeetingRoomInfoContextService = MeetingRoomInfoContextService;
+exports.MeetingRoomInfoContextService = MeetingRoomInfoContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _a : Object])
+], MeetingRoomInfoContextService);
 
 
 /***/ }),
@@ -30212,6 +30812,20 @@ let ResourceContextService = class ResourceContextService {
         }
         await this.domainResourceService.delete(resourceId);
     }
+    자원타입_라벨을_가져온다(type) {
+        switch (type) {
+            case 'MEETING_ROOM':
+                return '회의실';
+            case 'VEHICLE':
+                return '차량';
+            case 'ACCOMMODATION':
+                return '숙소';
+            case 'EQUIPMENT':
+                return '장비';
+            default:
+                return type;
+        }
+    }
 };
 exports.ResourceContextService = ResourceContextService;
 exports.ResourceContextService = ResourceContextService = __decorate([
@@ -30375,6 +30989,12 @@ let VehicleInfoContextService = class VehicleInfoContextService {
         reservationVehicle.returnedBy = employee.name;
         return reservationVehicle;
     }
+    async 차량정보만_조회한다(resourceId) {
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { resourceId },
+        });
+        return vehicleInfo;
+    }
 };
 exports.VehicleInfoContextService = VehicleInfoContextService;
 exports.VehicleInfoContextService = VehicleInfoContextService = __decorate([
@@ -30455,6 +31075,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const schedule_service_1 = __webpack_require__(/*! @src/domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
 const schedule_participant_service_1 = __webpack_require__(/*! @src/domain/schedule-participant/schedule-participant.service */ "./src/domain/schedule-participant/schedule-participant.service.ts");
 const schedule_relation_service_1 = __webpack_require__(/*! @src/domain/schedule-relation/schedule-relation.service */ "./src/domain/schedule-relation/schedule-relation.service.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
@@ -30513,6 +31134,30 @@ let ScheduleContextService = ScheduleContextService_1 = class ScheduleContextSer
                 participant: reserver,
                 employee,
             });
+        });
+        return result;
+    }
+    async 일정들의_모든참가자정보를_조회한다(scheduleIds) {
+        const allParticipants = await this.domainScheduleParticipantService.findAllByScheduleIds(scheduleIds);
+        const employeeIds = [...new Set(allParticipants.map((participant) => participant.employeeId))];
+        const employees = await this.domainEmployeeService.findByEmployeeIds(employeeIds);
+        const employeeMap = new Map();
+        employees.forEach((employee) => {
+            employeeMap.set(employee.employeeId, employee);
+        });
+        const result = new Map();
+        allParticipants.forEach((participant) => {
+            const employee = employeeMap.get(participant.employeeId);
+            if (employee) {
+                const scheduleId = participant.scheduleId;
+                if (!result.has(scheduleId)) {
+                    result.set(scheduleId, []);
+                }
+                result.get(scheduleId).push({
+                    participant,
+                    employee,
+                });
+            }
         });
         return result;
     }
@@ -30741,6 +31386,42 @@ let ScheduleContextService = ScheduleContextService_1 = class ScheduleContextSer
             }
         });
         return resourceScheduleMap;
+    }
+    async 일정의_참가자들을_분리하여_조회한다(scheduleId) {
+        const allParticipantsMap = await this.일정들의_모든참가자정보를_조회한다([scheduleId]);
+        const allParticipants = allParticipantsMap.get(scheduleId) || [];
+        let reserver = undefined;
+        const participants = [];
+        allParticipants.forEach(({ participant, employee }) => {
+            const participantDto = {
+                participantId: participant.participantId,
+                employeeId: employee.employeeId,
+                employeeName: employee.name,
+                participantType: participant.type,
+            };
+            if (participant.type === reservation_type_enum_1.ParticipantsType.RESERVER) {
+                reserver = participantDto;
+            }
+            else {
+                participants.push(participantDto);
+            }
+        });
+        return {
+            reserver,
+            participants,
+        };
+    }
+    일정타입_라벨을_가져온다(type) {
+        switch (type) {
+            case 'COMPANY':
+                return '회사전체일정';
+            case 'DEPARTMENT':
+                return '부서일정';
+            case 'PERSONAL':
+                return '개인일정';
+            default:
+                return type;
+        }
     }
 };
 exports.ScheduleContextService = ScheduleContextService;
@@ -33785,6 +34466,11 @@ let DomainScheduleParticipantService = class DomainScheduleParticipantService ex
     async findByEmployeeIdAndScheduleIds(employeeId, scheduleIds) {
         return this.scheduleParticipantRepository.findAll({
             where: { employeeId, scheduleId: (0, typeorm_1.In)(scheduleIds) },
+        });
+    }
+    async findAllByScheduleIds(scheduleIds) {
+        return this.scheduleParticipantRepository.findAll({
+            where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
         });
     }
 };

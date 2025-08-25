@@ -164,4 +164,14 @@ export class VehicleInfoContextService {
         reservationVehicle.returnedBy = employee.name;
         return reservationVehicle;
     }
+
+    /**
+     * resourceId로 차량 정보만 조회
+     */
+    async 차량정보만_조회한다(resourceId: string) {
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { resourceId },
+        });
+        return vehicleInfo;
+    }
 }

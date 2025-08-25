@@ -21,6 +21,9 @@ import { NotificationModule } from '@src/application/notification/notification.m
 import { ResourceContextService } from './services/resource.context.service';
 import { ResourceGroupContextService } from './services/resource-group.context.service';
 import { VehicleInfoContextService } from './services/vehicle-info.context.service';
+import { MeetingRoomInfoContextService } from './services/meeting-room-info.context.service';
+import { AccommodationInfoContextService } from './services/accommodation-info.context.service';
+import { EquipmentInfoContextService } from './services/equipment-info.context.service';
 import { ConsumableContextService } from './services/consumable.context.service';
 import { MaintenanceContextService } from './services/maintenance.context.service';
 
@@ -62,6 +65,9 @@ import { MaintenanceContextService } from './services/maintenance.context.servic
         ResourceContextService,
         ResourceGroupContextService,
         VehicleInfoContextService,
+        MeetingRoomInfoContextService,
+        AccommodationInfoContextService,
+        EquipmentInfoContextService,
         ConsumableContextService,
         MaintenanceContextService,
     ],
@@ -70,6 +76,9 @@ import { MaintenanceContextService } from './services/maintenance.context.servic
         ResourceContextService,
         ResourceGroupContextService,
         VehicleInfoContextService,
+        MeetingRoomInfoContextService,
+        AccommodationInfoContextService,
+        EquipmentInfoContextService,
         ConsumableContextService,
         MaintenanceContextService,
     ],
