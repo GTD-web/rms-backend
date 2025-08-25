@@ -16,7 +16,7 @@ import { FCMAdapter } from '../adapter/fcm-push.adapter';
 import { EmployeeMicroserviceAdapter } from '@src/domain/employee/adapters';
 import { DateUtil } from '@libs/utils/date.util';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { Raw } from 'typeorm';
+import { Raw, MoreThan } from 'typeorm';
 
 @Injectable()
 export class NotificationContextService {
@@ -528,5 +528,25 @@ export class NotificationContextService {
             await this.domainEmployeeNotificationService.deleteByNotificationId(notification.notificationId);
             await this.domainNotificationService.delete(notification.notificationId);
         }
+    }
+
+    // ==================== 태스크 관련 메서드들 ====================
+
+    /**
+     * 소모품 교체 알림을 조회한다
+     */
+    async 소모품교체_알림을_조회한다(resourceId: string, consumableName: string, date: Date): Promise<any[]> {
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationType: NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
+                notificationData: Raw(
+                    (alias) =>
+                        `${alias} ->> 'resourceId' = '${resourceId}' AND ${alias} ->> 'consumableName' = '${consumableName}'`,
+                ),
+                createdAt: MoreThan(DateUtil.date(date).format('YYYY-MM-DD HH:mm')),
+            },
+        });
+
+        return notifications;
     }
 }

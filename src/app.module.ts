@@ -23,6 +23,8 @@ import { NotificationContextModule } from './context/notification/notification.c
 import { ResourceManagementModule } from './business/resource-management/resource-management.module';
 import { ReservationManagementModule } from './business/reservation-management/reservation-management.module';
 import { ScheduleManagementModule } from './business/schedule-management/schedule-management.module';
+import { EmployeeManagementModule } from './business/employee-management/employee-management.module';
+import { TaskManagementModule } from './business/task-management/task-management.module';
 
 @Module({
     imports: [
@@ -53,6 +55,8 @@ import { ScheduleManagementModule } from './business/schedule-management/schedul
         ResourceManagementModule,
         ReservationManagementModule,
         ScheduleManagementModule,
+        EmployeeManagementModule,
+        TaskManagementModule,
     ],
     providers: [
         // ApiDocService, DbDocService

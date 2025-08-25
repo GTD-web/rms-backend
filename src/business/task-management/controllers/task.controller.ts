@@ -1,0 +1,49 @@
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { User } from '@libs/decorators/user.decorator';
+import { Employee } from '@libs/entities';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Roles } from '@libs/decorators/role.decorator';
+import { Role } from '@libs/enums/role-type.enum';
+import { JwtAuthGuard } from '@libs/guards/jwt-auth.guard';
+import { RolesGuard } from '@libs/guards/role.guard';
+import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import { TaskManagementService } from '../task-management.service';
+import { TaskListResponseDto, TaskResponseDto } from '../dtos/task-response.dto';
+
+@ApiTags('v2 태스크 관리')
+@ApiBearerAuth()
+@Controller('v2/tasks')
+@Roles(Role.USER)
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class TaskController {
+    constructor(private readonly taskManagementService: TaskManagementService) {}
+
+    @Get('user')
+    @ApiOperation({ summary: '태스크 목록 조회' })
+    @ApiDataResponse({
+        status: 200,
+        description: '태스크 목록 조회 성공',
+        type: TaskResponseDto,
+    })
+    async getUserTasks(@User() user: Employee): Promise<TaskListResponseDto> {
+        return this.taskManagementService.getTaskList(user);
+    }
+
+    @Get('admin')
+    @ApiOperation({ summary: '태스크 목록 조회 (관리자용)' })
+    @ApiDataResponse({
+        status: 200,
+        description: '태스크 목록 조회 성공',
+        type: [TaskResponseDto],
+    })
+    @ApiQuery({
+        name: 'type',
+        type: String,
+        required: false,
+        description: '태스크 타입',
+        enum: ['차량반납지연', '소모품교체'],
+    })
+    async getAdminTasks(@Query('type') type?: string): Promise<TaskResponseDto[]> {
+        return this.taskManagementService.getAdminTaskList(type);
+    }
+}

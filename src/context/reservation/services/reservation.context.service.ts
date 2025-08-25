@@ -1547,4 +1547,66 @@ export class ReservationContextService {
             console.log(`Failed to delete job ${jobName}: ${error.message}`);
         }
     }
+
+    // ==================== 태스크 관련 메서드들 ====================
+
+    /**
+     * 사용자별 지연 반납 예약을 조회한다
+     */
+    async 지연반납_예약을_조회한다(employeeId: string): Promise<any[]> {
+        const delayedReturnReservations = await this.domainReservationService.findAll({
+            where: {
+                participants: {
+                    employeeId: employeeId,
+                    type: ParticipantsType.RESERVER,
+                },
+                status: ReservationStatus.CONFIRMED,
+                endDate: LessThan(DateUtil.now().toDate()),
+                reservationVehicles: {
+                    isReturned: false,
+                },
+            },
+            relations: ['participants', 'resource', 'reservationVehicles'],
+        });
+
+        return delayedReturnReservations;
+    }
+
+    /**
+     * 모든 지연 반납 차량을 조회한다 (관리자용)
+     */
+    async 모든_지연반납_차량을_조회한다(): Promise<any[]> {
+        const delayedReturnVehicles = await this.domainReservationService.findAll({
+            where: {
+                status: ReservationStatus.CONFIRMED,
+                endDate: LessThan(DateUtil.now().toDate()),
+                reservationVehicles: {
+                    isReturned: false,
+                },
+            },
+            relations: ['participants', 'participants.employee', 'resource', 'reservationVehicles'],
+        });
+
+        return delayedReturnVehicles.map((reservation) => {
+            const manager = reservation.participants.find(
+                (participant) => participant.type === ParticipantsType.RESERVER,
+            );
+            return {
+                type: '차량반납지연',
+                title: `${reservation.resource.name} 반납 지연 중`,
+                reservationId: reservation.reservationId,
+                resourceId: reservation.resource.resourceId,
+                resourceName: reservation.resource.name,
+                startDate: reservation.startDate,
+                endDate: reservation.endDate,
+                manager: {
+                    employeeId: manager.employee.employeeId,
+                    name: manager.employee.name,
+                    employeeNumber: manager.employee.employeeNumber,
+                    department: manager.employee.department,
+                    position: manager.employee.position,
+                },
+            };
+        });
+    }
 }

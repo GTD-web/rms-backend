@@ -3729,6 +3729,8 @@ const notification_context_module_1 = __webpack_require__(/*! ./context/notifica
 const resource_management_module_1 = __webpack_require__(/*! ./business/resource-management/resource-management.module */ "./src/business/resource-management/resource-management.module.ts");
 const reservation_management_module_1 = __webpack_require__(/*! ./business/reservation-management/reservation-management.module */ "./src/business/reservation-management/reservation-management.module.ts");
 const schedule_management_module_1 = __webpack_require__(/*! ./business/schedule-management/schedule-management.module */ "./src/business/schedule-management/schedule-management.module.ts");
+const employee_management_module_1 = __webpack_require__(/*! ./business/employee-management/employee-management.module */ "./src/business/employee-management/employee-management.module.ts");
+const task_management_module_1 = __webpack_require__(/*! ./business/task-management/task-management.module */ "./src/business/task-management/task-management.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -3756,6 +3758,8 @@ exports.AppModule = AppModule = __decorate([
             resource_management_module_1.ResourceManagementModule,
             reservation_management_module_1.ReservationManagementModule,
             schedule_management_module_1.ScheduleManagementModule,
+            employee_management_module_1.EmployeeManagementModule,
+            task_management_module_1.TaskManagementModule,
         ],
         providers: [],
     })
@@ -14485,7 +14489,7 @@ const accommodation_info_response_dto_1 = __webpack_require__(/*! @src/applicati
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const create_resource_dto_1 = __webpack_require__(/*! ./create-resource.dto */ "./src/application/resource/core/dtos/create-resource.dto.ts");
 const reservation_response_dto_1 = __webpack_require__(/*! @src/application/reservation/core/dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
-const employee_response_dto_1 = __webpack_require__(/*! @src/application/employee/dtos/employee-response.dto */ "./src/application/employee/dtos/employee-response.dto.ts");
+const employee_response_dto_1 = __webpack_require__(/*! @src/business/employee-management/dtos/employee-response.dto */ "./src/business/employee-management/dtos/employee-response.dto.ts");
 const file_response_dto_1 = __webpack_require__(/*! @src/application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
 const equipment_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/equipment/dtos/equipment-info-response.dto */ "./src/application/resource/equipment/dtos/equipment-info-response.dto.ts");
 class CreateResourceResponseDto {
@@ -20695,6 +20699,758 @@ __exportStar(__webpack_require__(/*! ./business/resource-management/dtos/vehicle
 
 /***/ }),
 
+/***/ "./src/business/employee-management/controllers/employee.controller.ts":
+/*!*****************************************************************************!*\
+  !*** ./src/business/employee-management/controllers/employee.controller.ts ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const employees_by_department_response_dto_1 = __webpack_require__(/*! ../dtos/employees-by-department-response.dto */ "./src/business/employee-management/dtos/employees-by-department-response.dto.ts");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const employee_management_service_1 = __webpack_require__(/*! ../employee-management.service */ "./src/business/employee-management/employee-management.service.ts");
+let EmployeeController = class EmployeeController {
+    constructor(employeeManagementService) {
+        this.employeeManagementService = employeeManagementService;
+    }
+    async findAllEmplyeesByDepartment() {
+        return this.employeeManagementService.findEmployeeList();
+    }
+};
+exports.EmployeeController = EmployeeController;
+__decorate([
+    (0, common_1.Get)('department'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    (0, swagger_1.ApiOperation)({ summary: '부서별 직원 목록 조회 #사용자/참석자설정/모달' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '부서별 직원 목록을 성공적으로 조회했습니다.',
+        type: [employees_by_department_response_dto_1.EmplyeesByDepartmentResponseDto],
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], EmployeeController.prototype, "findAllEmplyeesByDepartment", null);
+exports.EmployeeController = EmployeeController = __decorate([
+    (0, swagger_1.ApiTags)('v2 직원'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Controller)('v2/employees'),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_management_service_1.EmployeeManagementService !== "undefined" && employee_management_service_1.EmployeeManagementService) === "function" ? _a : Object])
+], EmployeeController);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/controllers/resource-manager.controller.ts":
+/*!*************************************************************************************!*\
+  !*** ./src/business/employee-management/controllers/resource-manager.controller.ts ***!
+  \*************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceManagerController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const employee_management_service_1 = __webpack_require__(/*! ../employee-management.service */ "./src/business/employee-management/employee-management.service.ts");
+const employees_by_department_response_dto_1 = __webpack_require__(/*! ../dtos/employees-by-department-response.dto */ "./src/business/employee-management/dtos/employees-by-department-response.dto.ts");
+let ResourceManagerController = class ResourceManagerController {
+    constructor(employeeManagementService) {
+        this.employeeManagementService = employeeManagementService;
+    }
+    async findAllResourceManagers() {
+        return this.employeeManagementService.findResourceManagers();
+    }
+};
+exports.ResourceManagerController = ResourceManagerController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '자원 관리자 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '자원 관리자 목록 조회 성공',
+        type: [employees_by_department_response_dto_1.EmplyeesByDepartmentResponseDto],
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], ResourceManagerController.prototype, "findAllResourceManagers", null);
+exports.ResourceManagerController = ResourceManagerController = __decorate([
+    (0, swagger_1.ApiTags)('v2 자원 관리자'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Controller)('v2/resource-managers'),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_management_service_1.EmployeeManagementService !== "undefined" && employee_management_service_1.EmployeeManagementService) === "function" ? _a : Object])
+], ResourceManagerController);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/controllers/user.controller.ts":
+/*!*************************************************************************!*\
+  !*** ./src/business/employee-management/controllers/user.controller.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const user_response_dto_1 = __webpack_require__(/*! ../dtos/user-response.dto */ "./src/business/employee-management/dtos/user-response.dto.ts");
+const check_password_dto_1 = __webpack_require__(/*! ../dtos/check-password.dto */ "./src/business/employee-management/dtos/check-password.dto.ts");
+const change_password_dto_1 = __webpack_require__(/*! ../dtos/change-password.dto */ "./src/business/employee-management/dtos/change-password.dto.ts");
+const notification_settings_dto_1 = __webpack_require__(/*! ../dtos/notification-settings.dto */ "./src/business/employee-management/dtos/notification-settings.dto.ts");
+const employee_management_service_1 = __webpack_require__(/*! ../employee-management.service */ "./src/business/employee-management/employee-management.service.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const change_role_dto_1 = __webpack_require__(/*! ../dtos/change-role.dto */ "./src/business/employee-management/dtos/change-role.dto.ts");
+let UserController = class UserController {
+    constructor(employeeManagementService) {
+        this.employeeManagementService = employeeManagementService;
+    }
+    findUser() {
+        return this.employeeManagementService.findManagerCandidates();
+    }
+    changeRole(changeRoleDto) {
+        return this.employeeManagementService.changeRole(changeRoleDto);
+    }
+    findMe(user) {
+        return this.employeeManagementService.findEmployeeDetail(user.employeeId);
+    }
+    checkPassword(user, checkPasswordDto) {
+        return this.employeeManagementService.checkPassword(user.employeeId, checkPasswordDto.password);
+    }
+    changePassword(user, changePasswordDto) {
+        return this.employeeManagementService.changePassword(user.employeeId, changePasswordDto.newPassword);
+    }
+    async changeNotificationSettings(user, updateDto) {
+        return this.employeeManagementService.changeNotificationSettings(user.employeeId, updateDto);
+    }
+};
+exports.UserController = UserController;
+__decorate([
+    (0, common_1.Get)(''),
+    (0, swagger_1.ApiOperation)({ summary: '직원 목록 조회 - 자원담당자로 설정하기 위한 직원 목록' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '직원 목록 조회 성공', type: [user_response_dto_1.UserResponseDto] }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "findUser", null);
+__decorate([
+    (0, common_1.Patch)('change/role'),
+    (0, swagger_1.ApiOperation)({ summary: '자원 담당자 설정 - 자원별 담당자 설정 또는 토글 방식' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '자원 담당자 설정 성공' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof change_role_dto_1.ChangeRoleDto !== "undefined" && change_role_dto_1.ChangeRoleDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "changeRole", null);
+__decorate([
+    (0, common_1.Get)('me'),
+    (0, swagger_1.ApiOperation)({ summary: '내 상세 정보 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '내 상세 정보 조회 성공', type: user_response_dto_1.UserResponseDto }),
+    __param(0, (0, user_decorator_1.User)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _c : Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "findMe", null);
+__decorate([
+    (0, common_1.Post)('check-password'),
+    (0, swagger_1.ApiOperation)({ summary: '비밀번호 확인' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '비밀번호 확인 성공' }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _d : Object, typeof (_e = typeof check_password_dto_1.CheckPasswordDto !== "undefined" && check_password_dto_1.CheckPasswordDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "checkPassword", null);
+__decorate([
+    (0, common_1.Post)('change-password'),
+    (0, swagger_1.ApiOperation)({ summary: '비밀번호 변경' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({ status: 200, description: '비밀번호 변경 성공' }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _f : Object, typeof (_g = typeof change_password_dto_1.ChangePasswordDto !== "undefined" && change_password_dto_1.ChangePasswordDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "changePassword", null);
+__decorate([
+    (0, common_1.Patch)('me/notification-settings'),
+    (0, swagger_1.ApiOperation)({ summary: '알림 설정' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '알림 설정 성공',
+        type: user_response_dto_1.UserResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_h = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _h : Object, typeof (_j = typeof notification_settings_dto_1.UpdateNotificationSettingsDto !== "undefined" && notification_settings_dto_1.UpdateNotificationSettingsDto) === "function" ? _j : Object]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+], UserController.prototype, "changeNotificationSettings", null);
+exports.UserController = UserController = __decorate([
+    (0, swagger_1.ApiTags)('v2 유저'),
+    (0, common_1.Controller)('v2/users'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_management_service_1.EmployeeManagementService !== "undefined" && employee_management_service_1.EmployeeManagementService) === "function" ? _a : Object])
+], UserController);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/dtos/change-password.dto.ts":
+/*!**********************************************************************!*\
+  !*** ./src/business/employee-management/dtos/change-password.dto.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ChangePasswordDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class ChangePasswordDto {
+}
+exports.ChangePasswordDto = ChangePasswordDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'newPassword123',
+        description: '새로운 비밀번호',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ChangePasswordDto.prototype, "newPassword", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/dtos/change-role.dto.ts":
+/*!******************************************************************!*\
+  !*** ./src/business/employee-management/dtos/change-role.dto.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ChangeRoleDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class ChangeRoleDto {
+}
+exports.ChangeRoleDto = ChangeRoleDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'employeeId',
+        description: '직원 아이디',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ChangeRoleDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: true,
+        description: '자원 담당자 여부',
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Boolean)
+], ChangeRoleDto.prototype, "isResourceAdmin", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/dtos/check-password.dto.ts":
+/*!*********************************************************************!*\
+  !*** ./src/business/employee-management/dtos/check-password.dto.ts ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CheckPasswordDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CheckPasswordDto {
+}
+exports.CheckPasswordDto = CheckPasswordDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'currentPassword123',
+        description: '현재 비밀번호',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CheckPasswordDto.prototype, "password", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/dtos/employee-response.dto.ts":
+/*!************************************************************************!*\
+  !*** ./src/business/employee-management/dtos/employee-response.dto.ts ***!
+  \************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class EmployeeResponseDto {
+}
+exports.EmployeeResponseDto = EmployeeResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], EmployeeResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], EmployeeResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], EmployeeResponseDto.prototype, "employeeNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], EmployeeResponseDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], EmployeeResponseDto.prototype, "position", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/dtos/employees-by-department-response.dto.ts":
+/*!***************************************************************************************!*\
+  !*** ./src/business/employee-management/dtos/employees-by-department-response.dto.ts ***!
+  \***************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmplyeesByDepartmentResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class EmplyeesByDepartmentResponseDto {
+}
+exports.EmplyeesByDepartmentResponseDto = EmplyeesByDepartmentResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], EmplyeesByDepartmentResponseDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Array)
+], EmplyeesByDepartmentResponseDto.prototype, "employees", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/dtos/mms-employee-response.dto.ts":
+/*!****************************************************************************!*\
+  !*** ./src/business/employee-management/dtos/mms-employee-response.dto.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MMSWebhookRequestDto = exports.MMSEmployeeResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class MMSEmployeeResponseDto {
+    constructor(employee) {
+        this.id = employee.id;
+        this.employee_number = employee.employee_number;
+        this.name = employee.name;
+        this.email = employee.email;
+        this.phone_number = employee.phone_number;
+        this.date_of_birth = employee.date_of_birth;
+        this.gender = employee.gender;
+        this.hire_date = employee.hire_date;
+        this.status = employee.status;
+        this.department = employee.department?.department_code;
+        this.position = employee.position?.position_title;
+        this.rank = employee.rank?.rank_name;
+    }
+}
+exports.MMSEmployeeResponseDto = MMSEmployeeResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직원 ID', example: '67d116b591e5366c327915d2' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '사번', example: '24020' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "employee_number", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이름', example: '구석현' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이메일', example: 'koo.sukhyun@lumir.space' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '전화번호', example: '010-1234-5678' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "phone_number", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '생년월일', example: '1980-07-04T00:00:00.000Z' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], MMSEmployeeResponseDto.prototype, "date_of_birth", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '성별', example: 'MALE' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "gender", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '입사일', example: '2024-05-21T00:00:00.000Z' }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], MMSEmployeeResponseDto.prototype, "hire_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '재직 상태', example: '재직중' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서', example: '대표이사' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직위', example: '대표이사' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "position", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직급', example: '대표이사' }),
+    __metadata("design:type", String)
+], MMSEmployeeResponseDto.prototype, "rank", void 0);
+class MMSWebhookRequestDto {
+}
+exports.MMSWebhookRequestDto = MMSWebhookRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이벤트 타입', example: 'employee.updated' }),
+    __metadata("design:type", String)
+], MMSWebhookRequestDto.prototype, "event_type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '엔티티 타입', example: 'employee' }),
+    __metadata("design:type", String)
+], MMSWebhookRequestDto.prototype, "entity_type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '타임스탬프', example: '2025-04-29T02:11:51.794Z' }),
+    __metadata("design:type", String)
+], MMSWebhookRequestDto.prototype, "timestamp", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '페이로드' }),
+    __metadata("design:type", MMSEmployeeResponseDto)
+], MMSWebhookRequestDto.prototype, "payload", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/dtos/notification-settings.dto.ts":
+/*!****************************************************************************!*\
+  !*** ./src/business/employee-management/dtos/notification-settings.dto.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateNotificationSettingsDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class UpdateNotificationSettingsDto {
+}
+exports.UpdateNotificationSettingsDto = UpdateNotificationSettingsDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '웹푸시 알림 설정 여부',
+        default: true,
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateNotificationSettingsDto.prototype, "isPushNotificationEnabled", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/dtos/user-response.dto.ts":
+/*!********************************************************************!*\
+  !*** ./src/business/employee-management/dtos/user-response.dto.ts ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class UserResponseDto {
+}
+exports.UserResponseDto = UserResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '550e8400-e29b-41d4-a716-446655440000',
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'test@lumir.space',
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '01012345678',
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "mobile", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '홍길동',
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Web 파트',
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '연구원',
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "position", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: ['USER', 'RESOURCE_ADMIN', 'SYSTEM_ADMIN'],
+    }),
+    __metadata("design:type", Array)
+], UserResponseDto.prototype, "roles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], UserResponseDto.prototype, "isPushNotificationEnabled", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/employee-management.module.ts":
+/*!************************************************************************!*\
+  !*** ./src/business/employee-management/employee-management.module.ts ***!
+  \************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeManagementModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_manager_controller_1 = __webpack_require__(/*! ./controllers/resource-manager.controller */ "./src/business/employee-management/controllers/resource-manager.controller.ts");
+const employee_controller_1 = __webpack_require__(/*! ./controllers/employee.controller */ "./src/business/employee-management/controllers/employee.controller.ts");
+const user_controller_1 = __webpack_require__(/*! ./controllers/user.controller */ "./src/business/employee-management/controllers/user.controller.ts");
+const employee_management_service_1 = __webpack_require__(/*! ./employee-management.service */ "./src/business/employee-management/employee-management.service.ts");
+const employee_context_module_1 = __webpack_require__(/*! @src/context/employee/employee.context.module */ "./src/context/employee/employee.context.module.ts");
+let EmployeeManagementModule = class EmployeeManagementModule {
+};
+exports.EmployeeManagementModule = EmployeeManagementModule;
+exports.EmployeeManagementModule = EmployeeManagementModule = __decorate([
+    (0, common_1.Module)({
+        imports: [employee_context_module_1.EmployeeContextModule],
+        controllers: [resource_manager_controller_1.ResourceManagerController, employee_controller_1.EmployeeController, user_controller_1.UserController],
+        providers: [employee_management_service_1.EmployeeManagementService],
+        exports: [employee_management_service_1.EmployeeManagementService],
+    })
+], EmployeeManagementModule);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/employee-management.service.ts":
+/*!*************************************************************************!*\
+  !*** ./src/business/employee-management/employee-management.service.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeManagementService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_context_service_1 = __webpack_require__(/*! @src/context/employee/employee.context.service */ "./src/context/employee/employee.context.service.ts");
+let EmployeeManagementService = class EmployeeManagementService {
+    constructor(employeeContextService) {
+        this.employeeContextService = employeeContextService;
+    }
+    async findResourceManagers() {
+        return this.employeeContextService.자원관리자_목록을_조회한다();
+    }
+    async findManagerCandidates() {
+        return this.employeeContextService.관리자_후보_목록을_조회한다();
+    }
+    async changeRole(changeRoleDto) {
+        await this.employeeContextService.직원_역할을_변경한다(changeRoleDto);
+        return { success: true };
+    }
+    async findEmployeeList() {
+        return this.employeeContextService.직원_목록을_조회한다();
+    }
+    async findEmployeeDetail(employeeId) {
+        return this.employeeContextService.직원_상세정보를_조회한다(employeeId);
+    }
+    async checkPassword(employeeId, password) {
+        const isValid = await this.employeeContextService.비밀번호를_확인한다(employeeId, password);
+        return { isValid };
+    }
+    async changePassword(employeeId, newPassword) {
+        await this.employeeContextService.비밀번호를_변경한다(employeeId, newPassword);
+        return { success: true };
+    }
+    async changeNotificationSettings(employeeId, updateDto) {
+        return this.employeeContextService.알림설정을_변경한다(employeeId, updateDto);
+    }
+};
+exports.EmployeeManagementService = EmployeeManagementService;
+exports.EmployeeManagementService = EmployeeManagementService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_context_service_1.EmployeeContextService !== "undefined" && employee_context_service_1.EmployeeContextService) === "function" ? _a : Object])
+], EmployeeManagementService);
+
+
+/***/ }),
+
 /***/ "./src/business/reservation-management/controllers/cron.reservation.controller.ts":
 /*!****************************************************************************************!*\
   !*** ./src/business/reservation-management/controllers/cron.reservation.controller.ts ***!
@@ -23448,7 +24204,7 @@ const accommodation_info_response_dto_1 = __webpack_require__(/*! @src/applicati
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const create_resource_dto_1 = __webpack_require__(/*! ./create-resource.dto */ "./src/business/resource-management/dtos/resource/create-resource.dto.ts");
 const reservation_response_dto_1 = __webpack_require__(/*! @src/application/reservation/core/dtos/reservation-response.dto */ "./src/application/reservation/core/dtos/reservation-response.dto.ts");
-const employee_response_dto_1 = __webpack_require__(/*! @src/application/employee/dtos/employee-response.dto */ "./src/application/employee/dtos/employee-response.dto.ts");
+const employee_response_dto_1 = __webpack_require__(/*! @src/business/employee-management/dtos/employee-response.dto */ "./src/business/employee-management/dtos/employee-response.dto.ts");
 const file_response_dto_1 = __webpack_require__(/*! @src/application/file/dtos/file-response.dto */ "./src/application/file/dtos/file-response.dto.ts");
 const equipment_info_response_dto_1 = __webpack_require__(/*! @src/application/resource/equipment/dtos/equipment-info-response.dto */ "./src/application/resource/equipment/dtos/equipment-info-response.dto.ts");
 class CreateResourceResponseDto {
@@ -24834,7 +25590,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -24850,6 +25606,8 @@ const resource_schedule_query_dto_1 = __webpack_require__(/*! ../dtos/resource-s
 const resource_schedule_response_dto_1 = __webpack_require__(/*! ../dtos/resource-schedule-response.dto */ "./src/business/schedule-management/dtos/resource-schedule-response.dto.ts");
 const schedule_detail_query_dto_1 = __webpack_require__(/*! ../dtos/schedule-detail-query.dto */ "./src/business/schedule-management/dtos/schedule-detail-query.dto.ts");
 const schedule_detail_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-detail-response.dto */ "./src/business/schedule-management/dtos/schedule-detail-response.dto.ts");
+const schedule_create_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-create-request.dto */ "./src/business/schedule-management/dtos/schedule-create-request.dto.ts");
+const schedule_create_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-create-response.dto */ "./src/business/schedule-management/dtos/schedule-create-response.dto.ts");
 let ScheduleController = class ScheduleController {
     constructor(scheduleManagementService) {
         this.scheduleManagementService = scheduleManagementService;
@@ -24865,6 +25623,9 @@ let ScheduleController = class ScheduleController {
     }
     async findScheduleDetail(user, query) {
         return this.scheduleManagementService.findScheduleDetail(user, query);
+    }
+    async createSchedule(user, createScheduleDto) {
+        return this.scheduleManagementService.createSchedule(user, createScheduleDto);
     }
 };
 exports.ScheduleController = ScheduleController;
@@ -24932,6 +25693,22 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_l = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _l : Object, typeof (_m = typeof schedule_detail_query_dto_1.ScheduleDetailQueryDto !== "undefined" && schedule_detail_query_dto_1.ScheduleDetailQueryDto) === "function" ? _m : Object]),
     __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], ScheduleController.prototype, "findScheduleDetail", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({
+        summary: '일정 추가',
+        description: '일정을 생성합니다.',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '일정 추가 성공',
+        type: schedule_create_response_dto_1.ScheduleCreateResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_p = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _p : Object, typeof (_q = typeof schedule_create_request_dto_1.ScheduleCreateRequestDto !== "undefined" && schedule_create_request_dto_1.ScheduleCreateRequestDto) === "function" ? _q : Object]),
+    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
+], ScheduleController.prototype, "createSchedule", null);
 exports.ScheduleController = ScheduleController = __decorate([
     (0, swagger_1.ApiTags)('v2 일정'),
     (0, common_1.Controller)('v2/schedule'),
@@ -25715,6 +26492,281 @@ __decorate([
 
 /***/ }),
 
+/***/ "./src/business/schedule-management/dtos/schedule-create-request.dto.ts":
+/*!******************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-create-request.dto.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleCreateRequestDto = exports.ResourceSelectionDto = exports.ProjectSelectionDto = exports.ScheduleParticipantDto = exports.ScheduleDateRangeDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+class ScheduleDateRangeDto {
+}
+exports.ScheduleDateRangeDto = ScheduleDateRangeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '시작 날짜 및 시간',
+        example: '2025-08-25T10:00:00Z',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], ScheduleDateRangeDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '종료 날짜 및 시간',
+        example: '2025-08-25T11:00:00Z',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], ScheduleDateRangeDto.prototype, "endDate", void 0);
+class ScheduleParticipantDto {
+}
+exports.ScheduleParticipantDto = ScheduleParticipantDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참석자 직원 ID',
+        example: 'uuid-string',
+    }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], ScheduleParticipantDto.prototype, "employeeId", void 0);
+class ProjectSelectionDto {
+}
+exports.ProjectSelectionDto = ProjectSelectionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 ID',
+        example: 'uuid-string',
+    }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], ProjectSelectionDto.prototype, "projectId", void 0);
+class ResourceSelectionDto {
+}
+exports.ResourceSelectionDto = ResourceSelectionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 유형',
+        enum: resource_type_enum_1.ResourceType,
+        example: resource_type_enum_1.ResourceType.MEETING_ROOM,
+    }),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], ResourceSelectionDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 ID',
+        example: 'uuid-string',
+    }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], ResourceSelectionDto.prototype, "resourceId", void 0);
+class ScheduleCreateRequestDto {
+}
+exports.ScheduleCreateRequestDto = ScheduleCreateRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 날짜 범위 목록 (연속되지 않은 여러 날짜 가능)',
+        type: [ScheduleDateRangeDto],
+        example: [
+            { startDate: '2025-08-25T10:00:00Z', endDate: '2025-08-25T11:00:00Z' },
+            { startDate: '2025-08-29T10:00:00Z', endDate: '2025-08-29T11:00:00Z' },
+        ],
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => ScheduleDateRangeDto),
+    __metadata("design:type", Array)
+], ScheduleCreateRequestDto.prototype, "datesSelection", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 제목',
+        example: '주간 팀 회의',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ScheduleCreateRequestDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 내용',
+        example: '주간 업무 공유 및 계획 수립',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ScheduleCreateRequestDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 장소',
+        example: '회의실 A',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ScheduleCreateRequestDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 시작 전 알림 여부',
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], ScheduleCreateRequestDto.prototype, "notifyBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '알림 시간 (분 단위)',
+        example: [5, 10, 30],
+        type: [Number],
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsInt)({ each: true }),
+    (0, class_validator_1.Min)(0, { each: true }),
+    __metadata("design:type", Array)
+], ScheduleCreateRequestDto.prototype, "notificationMinutes", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 유형',
+        enum: schedule_type_enum_1.ScheduleType,
+        example: schedule_type_enum_1.ScheduleType.DEPARTMENT,
+    }),
+    (0, class_validator_1.IsEnum)(schedule_type_enum_1.ScheduleType),
+    __metadata("design:type", typeof (_b = typeof schedule_type_enum_1.ScheduleType !== "undefined" && schedule_type_enum_1.ScheduleType) === "function" ? _b : Object)
+], ScheduleCreateRequestDto.prototype, "scheduleType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참석자 목록',
+        type: [ScheduleParticipantDto],
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => ScheduleParticipantDto),
+    __metadata("design:type", Array)
+], ScheduleCreateRequestDto.prototype, "participants", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 선택',
+        type: ProjectSelectionDto,
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => ProjectSelectionDto),
+    __metadata("design:type", ProjectSelectionDto)
+], ScheduleCreateRequestDto.prototype, "projectSelection", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 선택',
+        type: ResourceSelectionDto,
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => ResourceSelectionDto),
+    __metadata("design:type", ResourceSelectionDto)
+], ScheduleCreateRequestDto.prototype, "resourceSelection", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/schedule-create-response.dto.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-create-response.dto.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleCreateResponseDto = exports.FailedScheduleDto = exports.CreatedScheduleDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
+class CreatedScheduleDto {
+}
+exports.CreatedScheduleDto = CreatedScheduleDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '일정 ID', example: 'uuid-string' }),
+    __metadata("design:type", String)
+], CreatedScheduleDto.prototype, "scheduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '일정 제목', example: '주간 팀 회의' }),
+    __metadata("design:type", String)
+], CreatedScheduleDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '시작 날짜 및 시간', example: '2025-08-25T10:00:00Z' }),
+    __metadata("design:type", String)
+], CreatedScheduleDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '종료 날짜 및 시간', example: '2025-08-25T11:00:00Z' }),
+    __metadata("design:type", String)
+], CreatedScheduleDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '일정 유형', enum: schedule_type_enum_1.ScheduleType, example: schedule_type_enum_1.ScheduleType.DEPARTMENT }),
+    __metadata("design:type", typeof (_a = typeof schedule_type_enum_1.ScheduleType !== "undefined" && schedule_type_enum_1.ScheduleType) === "function" ? _a : Object)
+], CreatedScheduleDto.prototype, "scheduleType", void 0);
+class FailedScheduleDto {
+}
+exports.FailedScheduleDto = FailedScheduleDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '시작 날짜 및 시간', example: '2025-08-25T10:00:00Z' }),
+    __metadata("design:type", String)
+], FailedScheduleDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '종료 날짜 및 시간', example: '2025-08-25T11:00:00Z' }),
+    __metadata("design:type", String)
+], FailedScheduleDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '실패 사유', example: '선택한 시간대에 자원이 이미 예약되어 있습니다.' }),
+    __metadata("design:type", String)
+], FailedScheduleDto.prototype, "reason", void 0);
+class ScheduleCreateResponseDto {
+}
+exports.ScheduleCreateResponseDto = ScheduleCreateResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '성공적으로 생성된 일정 목록',
+        type: [CreatedScheduleDto],
+    }),
+    __metadata("design:type", Array)
+], ScheduleCreateResponseDto.prototype, "createdSchedules", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '생성에 실패한 일정 목록',
+        type: [FailedScheduleDto],
+    }),
+    __metadata("design:type", Array)
+], ScheduleCreateResponseDto.prototype, "failedSchedules", void 0);
+
+
+/***/ }),
+
 /***/ "./src/business/schedule-management/dtos/schedule-detail-query.dto.ts":
 /*!****************************************************************************!*\
   !*** ./src/business/schedule-management/dtos/schedule-detail-query.dto.ts ***!
@@ -26404,6 +27456,15 @@ let ScheduleManagementService = class ScheduleManagementService {
         };
         return response;
     }
+    async createSchedule(user, createScheduleDto) {
+        const { datesSelection, title, description, location, notifyBeforeStart, notificationMinutes, scheduleType, participants, projectSelection, resourceSelection, } = createScheduleDto;
+        const createdSchedules = [];
+        const failedSchedules = [];
+        return {
+            createdSchedules: createdSchedules,
+            failedSchedules: failedSchedules,
+        };
+    }
     buildProjectDetailDto(projectId) {
         return {
             projectId,
@@ -26441,6 +27502,631 @@ exports.ScheduleManagementService = ScheduleManagementService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof schedule_context_service_1.ScheduleContextService !== "undefined" && schedule_context_service_1.ScheduleContextService) === "function" ? _a : Object, typeof (_b = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _c : Object, typeof (_d = typeof meeting_room_info_context_service_1.MeetingRoomInfoContextService !== "undefined" && meeting_room_info_context_service_1.MeetingRoomInfoContextService) === "function" ? _d : Object, typeof (_e = typeof accommodation_info_context_service_1.AccommodationInfoContextService !== "undefined" && accommodation_info_context_service_1.AccommodationInfoContextService) === "function" ? _e : Object, typeof (_f = typeof equipment_info_context_service_1.EquipmentInfoContextService !== "undefined" && equipment_info_context_service_1.EquipmentInfoContextService) === "function" ? _f : Object, typeof (_g = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _g : Object])
 ], ScheduleManagementService);
+
+
+/***/ }),
+
+/***/ "./src/business/task-management/controllers/task.controller.ts":
+/*!*********************************************************************!*\
+  !*** ./src/business/task-management/controllers/task.controller.ts ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TaskController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const jwt_auth_guard_1 = __webpack_require__(/*! @libs/guards/jwt-auth.guard */ "./libs/guards/jwt-auth.guard.ts");
+const role_guard_1 = __webpack_require__(/*! @libs/guards/role.guard */ "./libs/guards/role.guard.ts");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const task_management_service_1 = __webpack_require__(/*! ../task-management.service */ "./src/business/task-management/task-management.service.ts");
+const task_response_dto_1 = __webpack_require__(/*! ../dtos/task-response.dto */ "./src/business/task-management/dtos/task-response.dto.ts");
+let TaskController = class TaskController {
+    constructor(taskManagementService) {
+        this.taskManagementService = taskManagementService;
+    }
+    async getUserTasks(user) {
+        return this.taskManagementService.getTaskList(user);
+    }
+    async getAdminTasks(type) {
+        return this.taskManagementService.getAdminTaskList(type);
+    }
+};
+exports.TaskController = TaskController;
+__decorate([
+    (0, common_1.Get)('user'),
+    (0, swagger_1.ApiOperation)({ summary: '태스크 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '태스크 목록 조회 성공',
+        type: task_response_dto_1.TaskResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], TaskController.prototype, "getUserTasks", null);
+__decorate([
+    (0, common_1.Get)('admin'),
+    (0, swagger_1.ApiOperation)({ summary: '태스크 목록 조회 (관리자용)' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '태스크 목록 조회 성공',
+        type: [task_response_dto_1.TaskResponseDto],
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'type',
+        type: String,
+        required: false,
+        description: '태스크 타입',
+        enum: ['차량반납지연', '소모품교체'],
+    }),
+    __param(0, (0, common_1.Query)('type')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], TaskController.prototype, "getAdminTasks", null);
+exports.TaskController = TaskController = __decorate([
+    (0, swagger_1.ApiTags)('v2 태스크 관리'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Controller)('v2/tasks'),
+    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, role_guard_1.RolesGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof task_management_service_1.TaskManagementService !== "undefined" && task_management_service_1.TaskManagementService) === "function" ? _a : Object])
+], TaskController);
+
+
+/***/ }),
+
+/***/ "./src/business/task-management/dtos/task-response.dto.ts":
+/*!****************************************************************!*\
+  !*** ./src/business/task-management/dtos/task-response.dto.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TaskListResponseDto = exports.TaskResponseDto = exports.ManagerResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class ManagerResponseDto {
+}
+exports.ManagerResponseDto = ManagerResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+    }),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "employeeNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "position", void 0);
+class TaskResponseDto {
+}
+exports.TaskResponseDto = TaskResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '태스크 타입',
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '태스크 제목',
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '예약 ID',
+        nullable: true,
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '자원 ID',
+        nullable: true,
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '자원 이름',
+        nullable: true,
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '시작 날짜',
+        nullable: true,
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        description: '종료 날짜',
+        nullable: true,
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: ManagerResponseDto,
+        description: '관리자',
+        required: false,
+    }),
+    __metadata("design:type", ManagerResponseDto)
+], TaskResponseDto.prototype, "manager", void 0);
+class TaskListResponseDto {
+}
+exports.TaskListResponseDto = TaskListResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'number',
+        description: '총 작업 수',
+    }),
+    __metadata("design:type", Number)
+], TaskListResponseDto.prototype, "totalCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [TaskResponseDto],
+        description: '작업 목록',
+    }),
+    __metadata("design:type", Array)
+], TaskListResponseDto.prototype, "items", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/task-management/task-management.module.ts":
+/*!****************************************************************!*\
+  !*** ./src/business/task-management/task-management.module.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TaskManagementModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const task_controller_1 = __webpack_require__(/*! ./controllers/task.controller */ "./src/business/task-management/controllers/task.controller.ts");
+const task_management_service_1 = __webpack_require__(/*! ./task-management.service */ "./src/business/task-management/task-management.service.ts");
+const resource_context_module_1 = __webpack_require__(/*! @src/context/resource/resource.context.module */ "./src/context/resource/resource.context.module.ts");
+const reservation_context_module_1 = __webpack_require__(/*! @src/context/reservation/reservation.context.module */ "./src/context/reservation/reservation.context.module.ts");
+const notification_context_module_1 = __webpack_require__(/*! @src/context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
+let TaskManagementModule = class TaskManagementModule {
+};
+exports.TaskManagementModule = TaskManagementModule;
+exports.TaskManagementModule = TaskManagementModule = __decorate([
+    (0, common_1.Module)({
+        imports: [resource_context_module_1.ResourceContextModule, reservation_context_module_1.ReservationContextModule, notification_context_module_1.NotificationContextModule],
+        controllers: [task_controller_1.TaskController],
+        providers: [task_management_service_1.TaskManagementService],
+        exports: [task_management_service_1.TaskManagementService],
+    })
+], TaskManagementModule);
+
+
+/***/ }),
+
+/***/ "./src/business/task-management/task-management.service.ts":
+/*!*****************************************************************!*\
+  !*** ./src/business/task-management/task-management.service.ts ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TaskManagementService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_context_service_1 = __webpack_require__(/*! @src/context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
+const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
+const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+let TaskManagementService = class TaskManagementService {
+    constructor(resourceContextService, reservationContextService, notificationContextService) {
+        this.resourceContextService = resourceContextService;
+        this.reservationContextService = reservationContextService;
+        this.notificationContextService = notificationContextService;
+    }
+    async getTaskList(user) {
+        const delayedReturnReservations = await this.reservationContextService.지연반납_예약을_조회한다(user.employeeId);
+        const isResourceAdmin = user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN);
+        const isSystemAdmin = user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN);
+        let needReplaceConsumable = [];
+        if (isResourceAdmin || isSystemAdmin) {
+            needReplaceConsumable = await this.교체필요한_소모품을_조회한다(user, isSystemAdmin);
+        }
+        const delayedReturnTasks = delayedReturnReservations.map((reservation) => ({
+            type: '반납지연',
+            title: `${reservation.resource.name} 반납 지연 중`,
+            reservationId: reservation.reservationId,
+            resourceId: reservation.resource.resourceId,
+            resourceName: reservation.resource.name,
+            startDate: reservation.startDate,
+            endDate: reservation.endDate,
+        }));
+        const consumableReplaceTasks = needReplaceConsumable.map((item) => ({
+            type: '소모품교체',
+            title: item.title,
+            reservationId: null,
+            resourceId: item.resourceId,
+            resourceName: item.resourceName,
+            startDate: null,
+            endDate: null,
+        }));
+        const items = [...delayedReturnTasks, ...consumableReplaceTasks];
+        return {
+            totalCount: items.length,
+            items,
+        };
+    }
+    async getAdminTaskList(type) {
+        if (type === '차량반납지연') {
+            return this.reservationContextService.모든_지연반납_차량을_조회한다();
+        }
+        else if (type === '소모품교체') {
+            return this.교체필요한_모든_소모품을_조회한다();
+        }
+        else {
+            return [];
+        }
+    }
+    async 교체필요한_모든_소모품을_조회한다() {
+        const resources = await this.resourceContextService.소모품정보와_함께_모든자원을_조회한다();
+        const needReplaceConsumables = [];
+        for (const resource of resources) {
+            for (const consumable of resource.vehicleInfo?.consumables || []) {
+                const latestMaintenance = consumable.maintenances[consumable.maintenances.length - 1] || null;
+                if (latestMaintenance) {
+                    const maintenanceRequired = resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
+                    if (maintenanceRequired) {
+                        const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(resource.resourceId, consumable.name, latestMaintenance.date);
+                        needReplaceConsumables.push({
+                            type: '소모품교체',
+                            title: `${consumable.name} 교체 필요`,
+                            reservationId: null,
+                            resourceId: resource.resourceId,
+                            resourceName: resource.name,
+                            startDate: null,
+                            endDate: null,
+                            manager: {
+                                employeeId: resource.resourceManagers[0].employee.employeeId,
+                                name: resource.resourceManagers[0].employee.name,
+                                employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
+                                department: resource.resourceManagers[0].employee.department,
+                                position: resource.resourceManagers[0].employee.position,
+                            },
+                            notifications: notifications,
+                        });
+                    }
+                }
+            }
+        }
+        return needReplaceConsumables;
+    }
+    async 교체필요한_소모품을_조회한다(user, isSystemAdmin) {
+        const resources = await this.resourceContextService.관리자별_자원을_소모품정보와_함께_조회한다(user.employeeId, isSystemAdmin);
+        const needReplaceConsumables = [];
+        for (const resource of resources) {
+            for (const consumable of resource.vehicleInfo?.consumables || []) {
+                const latestMaintenance = consumable.maintenances[0] || null;
+                if (latestMaintenance) {
+                    const maintenanceRequired = resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
+                    if (maintenanceRequired) {
+                        needReplaceConsumables.push({
+                            type: '소모품교체',
+                            title: `${consumable.name} 교체 필요`,
+                            reservationId: null,
+                            resourceId: resource.resourceId,
+                            resourceName: resource.name,
+                            startDate: null,
+                            endDate: null,
+                        });
+                    }
+                }
+            }
+        }
+        return needReplaceConsumables;
+    }
+};
+exports.TaskManagementService = TaskManagementService;
+exports.TaskManagementService = TaskManagementService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _c : Object])
+], TaskManagementService);
+
+
+/***/ }),
+
+/***/ "./src/context/employee/employee.context.module.ts":
+/*!*********************************************************!*\
+  !*** ./src/context/employee/employee.context.module.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeContextModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_context_service_1 = __webpack_require__(/*! ./employee.context.service */ "./src/context/employee/employee.context.service.ts");
+const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+let EmployeeContextModule = class EmployeeContextModule {
+};
+exports.EmployeeContextModule = EmployeeContextModule;
+exports.EmployeeContextModule = EmployeeContextModule = __decorate([
+    (0, common_1.Module)({
+        imports: [employee_module_1.DomainEmployeeModule],
+        providers: [employee_context_service_1.EmployeeContextService],
+        exports: [employee_context_service_1.EmployeeContextService],
+    })
+], EmployeeContextModule);
+
+
+/***/ }),
+
+/***/ "./src/context/employee/employee.context.service.ts":
+/*!**********************************************************!*\
+  !*** ./src/context/employee/employee.context.service.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const mms_employee_response_dto_1 = __webpack_require__(/*! @src/business/employee-management/dtos/mms-employee-response.dto */ "./src/business/employee-management/dtos/mms-employee-response.dto.ts");
+const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
+const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const axios_1 = __webpack_require__(/*! axios */ "axios");
+let EmployeeContextService = class EmployeeContextService {
+    constructor(domainEmployeeService) {
+        this.domainEmployeeService = domainEmployeeService;
+    }
+    async 자원관리자_목록을_조회한다() {
+        const resourceManagers = await this.domainEmployeeService.findAll({
+            where: {
+                roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.RESOURCE_ADMIN}' = ANY("roles")`),
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+            },
+            select: {
+                employeeId: true,
+                name: true,
+                employeeNumber: true,
+                department: true,
+                position: true,
+            },
+        });
+        return this.부서별로_그룹핑한다(resourceManagers);
+    }
+    async 관리자_후보_목록을_조회한다() {
+        const candidates = await this.domainEmployeeService.findAll({
+            where: {
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+            },
+            select: {
+                employeeId: true,
+                name: true,
+                employeeNumber: true,
+                department: true,
+                position: true,
+                roles: true,
+            },
+        });
+        const candidatesWithRole = candidates.map((candidate) => ({
+            ...candidate,
+            isResourceAdmin: candidate.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN),
+        }));
+        return this.부서별로_그룹핑한다(candidatesWithRole);
+    }
+    async 직원_목록을_조회한다() {
+        const employees = await this.domainEmployeeService.findAll({
+            where: {
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+            },
+            select: {
+                employeeId: true,
+                name: true,
+                employeeNumber: true,
+                department: true,
+                position: true,
+            },
+        });
+        return this.부서별로_그룹핑한다(employees);
+    }
+    async 직원_상세정보를_조회한다(employeeId) {
+        const employee = await this.domainEmployeeService.findByEmployeeId(employeeId);
+        if (!employee) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
+        }
+        return {
+            employeeId: employee.employeeId,
+            email: employee.email,
+            mobile: employee.mobile,
+            name: employee.name,
+            department: employee.department,
+            position: employee.position,
+            roles: employee.roles,
+            isPushNotificationEnabled: employee.isPushNotificationEnabled,
+        };
+    }
+    async 비밀번호를_확인한다(employeeId, password) {
+        const employee = await this.domainEmployeeService.findByEmployeeId(employeeId);
+        if (!employee) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
+        }
+        try {
+            const ssoApiUrl = process.env.SSO_API_URL;
+            const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/check-password`, {
+                currentPassword: password,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${employee.accessToken}`,
+                },
+            });
+            const data = response.data;
+            return data.isValid;
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
+        }
+    }
+    async 비밀번호를_변경한다(employeeId, password) {
+        const employee = await this.domainEmployeeService.findByEmployeeId(employeeId);
+        if (!employee) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
+        }
+        try {
+            const ssoApiUrl = process.env.SSO_API_URL;
+            const response = await axios_1.default.post(`${ssoApiUrl}/api/auth/change-password`, {
+                newPassword: password,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${employee.accessToken}`,
+                },
+            });
+            const data = response.data;
+            console.log(data);
+            employee.password = await bcrypt.hash(password, 10);
+            await this.domainEmployeeService.update(employee.employeeId, employee);
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.UnauthorizedException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.SSO_LOGIN_FAILED);
+        }
+    }
+    async 직원_역할을_변경한다(changeRoleDto) {
+        const employee = await this.domainEmployeeService.findByEmployeeId(changeRoleDto.employeeId);
+        if (!employee) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
+        }
+        employee.roles = changeRoleDto.isResourceAdmin
+            ? [...employee.roles, role_type_enum_1.Role.RESOURCE_ADMIN]
+            : employee.roles.filter((role) => role !== role_type_enum_1.Role.RESOURCE_ADMIN);
+        await this.domainEmployeeService.update(employee.employeeId, employee);
+    }
+    async 알림설정을_변경한다(employeeId, updateDto) {
+        const employee = await this.domainEmployeeService.findByEmployeeId(employeeId);
+        if (!employee) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.AUTH.USER_NOT_FOUND);
+        }
+        employee.isPushNotificationEnabled = updateDto.isPushNotificationEnabled;
+        await this.domainEmployeeService.update(employee.employeeId, employee);
+        return this.직원_상세정보를_조회한다(employeeId);
+    }
+    async 외부_직원정보를_조회한다(employeeNumber) {
+        let url = `${process.env.METADATA_MANAGER_URL}/api/employees?detailed=true`;
+        if (employeeNumber) {
+            url += `&employeeNumber=${employeeNumber}`;
+        }
+        const result = await axios_1.default.get(url);
+        if (employeeNumber) {
+            return [new mms_employee_response_dto_1.MMSEmployeeResponseDto(result.data)];
+        }
+        return result.data.map((employee) => new mms_employee_response_dto_1.MMSEmployeeResponseDto(employee));
+    }
+    부서별로_그룹핑한다(employees) {
+        const departments = new Map();
+        employees.forEach((employee) => {
+            if (!departments.has(employee.department)) {
+                departments.set(employee.department, []);
+            }
+            departments.get(employee.department)?.push(employee);
+        });
+        return Array.from(departments.entries()).map(([department, employees]) => ({
+            department,
+            employees,
+        }));
+    }
+};
+exports.EmployeeContextService = EmployeeContextService;
+exports.EmployeeContextService = EmployeeContextService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
+], EmployeeContextService);
 
 
 /***/ }),
@@ -28381,6 +30067,16 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             await this.domainNotificationService.delete(notification.notificationId);
         }
     }
+    async 소모품교체_알림을_조회한다(resourceId, consumableName, date) {
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'resourceId' = '${resourceId}' AND ${alias} ->> 'consumableName' = '${consumableName}'`),
+                createdAt: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(date).format('YYYY-MM-DD HH:mm')),
+            },
+        });
+        return notifications;
+    }
 };
 exports.NotificationContextService = NotificationContextService;
 exports.NotificationContextService = NotificationContextService = NotificationContextService_1 = __decorate([
@@ -29808,6 +31504,54 @@ let ReservationContextService = class ReservationContextService {
             console.log(`Failed to delete job ${jobName}: ${error.message}`);
         }
     }
+    async 지연반납_예약을_조회한다(employeeId) {
+        const delayedReturnReservations = await this.domainReservationService.findAll({
+            where: {
+                participants: {
+                    employeeId: employeeId,
+                    type: reservation_type_enum_1.ParticipantsType.RESERVER,
+                },
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                endDate: (0, typeorm_2.LessThan)(date_util_1.DateUtil.now().toDate()),
+                reservationVehicles: {
+                    isReturned: false,
+                },
+            },
+            relations: ['participants', 'resource', 'reservationVehicles'],
+        });
+        return delayedReturnReservations;
+    }
+    async 모든_지연반납_차량을_조회한다() {
+        const delayedReturnVehicles = await this.domainReservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                endDate: (0, typeorm_2.LessThan)(date_util_1.DateUtil.now().toDate()),
+                reservationVehicles: {
+                    isReturned: false,
+                },
+            },
+            relations: ['participants', 'participants.employee', 'resource', 'reservationVehicles'],
+        });
+        return delayedReturnVehicles.map((reservation) => {
+            const manager = reservation.participants.find((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER);
+            return {
+                type: '차량반납지연',
+                title: `${reservation.resource.name} 반납 지연 중`,
+                reservationId: reservation.reservationId,
+                resourceId: reservation.resource.resourceId,
+                resourceName: reservation.resource.name,
+                startDate: reservation.startDate,
+                endDate: reservation.endDate,
+                manager: {
+                    employeeId: manager.employee.employeeId,
+                    name: manager.employee.name,
+                    employeeNumber: manager.employee.employeeNumber,
+                    department: manager.employee.department,
+                    position: manager.employee.position,
+                },
+            };
+        });
+    }
 };
 exports.ReservationContextService = ReservationContextService;
 exports.ReservationContextService = ReservationContextService = __decorate([
@@ -30825,6 +32569,41 @@ let ResourceContextService = class ResourceContextService {
             default:
                 return type;
         }
+    }
+    async 관리자별_자원을_소모품정보와_함께_조회한다(employeeId, isSystemAdmin) {
+        const resources = await this.domainResourceService.findAll({
+            where: {
+                ...(isSystemAdmin ? {} : { resourceManagers: { employeeId: employeeId } }),
+            },
+            relations: [
+                'resourceManagers',
+                'vehicleInfo',
+                'vehicleInfo.consumables',
+                'vehicleInfo.consumables.maintenances',
+            ],
+            order: {
+                vehicleInfo: {
+                    consumables: {
+                        maintenances: {
+                            date: 'DESC',
+                        },
+                    },
+                },
+            },
+        });
+        return resources;
+    }
+    async 소모품정보와_함께_모든자원을_조회한다() {
+        const resources = await this.domainResourceService.findAll({
+            relations: [
+                'resourceManagers',
+                'resourceManagers.employee',
+                'vehicleInfo',
+                'vehicleInfo.consumables',
+                'vehicleInfo.consumables.maintenances',
+            ],
+        });
+        return resources;
     }
 };
 exports.ResourceContextService = ResourceContextService;

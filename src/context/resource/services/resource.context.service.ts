@@ -360,4 +360,51 @@ export class ResourceContextService {
                 return type;
         }
     }
+
+    // ==================== 태스크 관련 메서드들 ====================
+
+    /**
+     * 관리자별 자원을 소모품 정보와 함께 조회한다
+     */
+    async 관리자별_자원을_소모품정보와_함께_조회한다(employeeId: string, isSystemAdmin: boolean): Promise<any[]> {
+        const resources = await this.domainResourceService.findAll({
+            where: {
+                ...(isSystemAdmin ? {} : { resourceManagers: { employeeId: employeeId } }),
+            },
+            relations: [
+                'resourceManagers',
+                'vehicleInfo',
+                'vehicleInfo.consumables',
+                'vehicleInfo.consumables.maintenances',
+            ],
+            order: {
+                vehicleInfo: {
+                    consumables: {
+                        maintenances: {
+                            date: 'DESC',
+                        },
+                    },
+                },
+            },
+        });
+
+        return resources;
+    }
+
+    /**
+     * 소모품 정보와 함께 모든 자원을 조회한다
+     */
+    async 소모품정보와_함께_모든자원을_조회한다(): Promise<any[]> {
+        const resources = await this.domainResourceService.findAll({
+            relations: [
+                'resourceManagers',
+                'resourceManagers.employee',
+                'vehicleInfo',
+                'vehicleInfo.consumables',
+                'vehicleInfo.consumables.maintenances',
+            ],
+        });
+
+        return resources;
+    }
 }

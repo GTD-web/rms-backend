@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { ScheduleManagementService } from '../schedule-management.service';
 import { Employee } from '@libs/entities/employee.entity';
@@ -11,6 +11,8 @@ import { ResourceScheduleQueryDto } from '../dtos/resource-schedule-query.dto';
 import { ResourceScheduleResponseDto } from '../dtos/resource-schedule-response.dto';
 import { ScheduleDetailQueryDto } from '../dtos/schedule-detail-query.dto';
 import { ScheduleDetailResponseDto } from '../dtos/schedule-detail-response.dto';
+import { ScheduleCreateRequestDto } from '../dtos/schedule-create-request.dto';
+import { ScheduleCreateResponseDto } from '../dtos/schedule-create-response.dto';
 
 @ApiTags('v2 일정')
 @Controller('v2/schedule')
@@ -108,5 +110,21 @@ export class ScheduleController {
         @Query() query: ScheduleDetailQueryDto,
     ): Promise<ScheduleDetailResponseDto> {
         return this.scheduleManagementService.findScheduleDetail(user, query);
+    }
+
+    @Post()
+    @ApiOperation({
+        summary: '일정 추가',
+        description: '일정을 생성합니다.',
+    })
+    @ApiOkResponse({
+        description: '일정 추가 성공',
+        type: ScheduleCreateResponseDto,
+    })
+    async createSchedule(
+        @User() user: Employee,
+        @Body() createScheduleDto: ScheduleCreateRequestDto,
+    ): Promise<ScheduleCreateResponseDto> {
+        return this.scheduleManagementService.createSchedule(user, createScheduleDto);
     }
 }

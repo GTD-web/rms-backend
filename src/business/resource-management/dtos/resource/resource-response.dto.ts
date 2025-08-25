@@ -5,7 +5,7 @@ import { AccommodationInfoResponseDto } from '@src/application/resource/accommod
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ResourceLocation, ResourceLocationURL } from './create-resource.dto';
 import { ReservationResponseDto } from '@src/application/reservation/core/dtos/reservation-response.dto';
-import { EmployeeResponseDto } from '@src/application/employee/dtos/employee-response.dto';
+import { EmployeeResponseDto } from '@src/business/employee-management/dtos/employee-response.dto';
 import { Resource } from '@libs/entities/resource.entity';
 import { FileResponseDto } from '@src/application/file/dtos/file-response.dto';
 import { EquipmentInfoResponseDto } from '@src/application/resource/equipment/dtos/equipment-info-response.dto';

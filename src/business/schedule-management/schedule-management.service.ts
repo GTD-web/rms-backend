@@ -30,6 +30,8 @@ import {
     ScheduleDetailParticipantDto,
     ScheduleDetailResourceDto,
 } from './dtos/schedule-detail-response.dto';
+import { ScheduleCreateRequestDto } from './dtos/schedule-create-request.dto';
+import { ScheduleCreateResponseDto } from './dtos/schedule-create-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { VehicleInfoContextService } from '../../context/resource/services/vehicle-info.context.service';
 import { MeetingRoomInfoContextService } from '../../context/resource/services/meeting-room-info.context.service';
@@ -481,6 +483,161 @@ export class ScheduleManagementService {
         };
 
         return response;
+    }
+
+    async createSchedule(
+        user: Employee,
+        createScheduleDto: ScheduleCreateRequestDto,
+    ): Promise<ScheduleCreateResponseDto> {
+        const {
+            datesSelection,
+            title,
+            description,
+            location,
+            notifyBeforeStart,
+            notificationMinutes,
+            scheduleType,
+            participants,
+            projectSelection,
+            resourceSelection,
+        } = createScheduleDto;
+
+        // 1. 날짜 범위별로 개별 일정 생성 (자원 예약 가능 여부 체크 포함)
+        const createdSchedules = [];
+        const failedSchedules = [];
+
+        // for (const dateRange of datesSelection) {
+        //     // 자원예약일 경우 해당 일정이 예약가능한지 시간 체크
+        //     if (resourceSelection) {
+        //         const isAvailable = await this.resourceContextService.자원예약이_가능한지_확인한다(
+        //             resourceSelection.resourceId,
+        //             dateRange.startDate,
+        //             dateRange.endDate,
+        //         );
+
+        //         if (!isAvailable) {
+        //             failedSchedules.push({
+        //                 startDate: dateRange.startDate,
+        //                 endDate: dateRange.endDate,
+        //                 reason: '선택한 시간대에 자원이 이미 예약되어 있습니다.',
+        //             });
+        //             continue; // 다음 날짜 범위로 넘어감
+        //         }
+        //     }
+
+        //     try {
+        //         const scheduleData = {
+        //             title,
+        //             description,
+        //             location,
+        //             startDate: dateRange.startDate,
+        //             endDate: dateRange.endDate,
+        //             scheduleType,
+        //             notifyBeforeStart,
+        //             notifyMinutesBeforeStart: notificationMinutes?.[0], // 첫 번째 알림 시간 사용
+        //             createdBy: user.employeeId,
+        //         };
+
+        //         const createdSchedule = await this.scheduleContextService.일정을_생성한다(scheduleData);
+        //         createdSchedules.push(createdSchedule);
+        //     } catch (error) {
+        //         failedSchedules.push({
+        //             startDate: dateRange.startDate,
+        //             endDate: dateRange.endDate,
+        //             reason: `일정 생성 실패: ${error.message}`,
+        //         });
+        //     }
+        // }
+
+        // // 2. 참석자 정보 처리
+        // for (const schedule of createdSchedules) {
+        //     // 예약자(요청자) 추가
+        //     await this.scheduleContextService.일정_참가자를_추가한다(schedule.scheduleId, user.employeeId, 'RESERVER');
+
+        //     // 다른 참석자들 추가
+        //     for (const participant of participants) {
+        //         if (participant.employeeId !== user.employeeId) {
+        //             await this.scheduleContextService.일정_참가자를_추가한다(
+        //                 schedule.scheduleId,
+        //                 participant.employeeId,
+        //                 'PARTICIPANT',
+        //             );
+        //         }
+        //     }
+        // }
+
+        // // 3. 프로젝트 연결 (있는 경우)
+        // let projectId: string | null = null;
+        // if (projectSelection) {
+        //     projectId = projectSelection.projectId;
+        //     // 프로젝트 존재 여부 확인
+        //     await this.scheduleContextService.프로젝트_존재여부를_확인한다(projectId);
+        // }
+
+        // // 4. 자원 예약 생성 (있는 경우, 성공한 일정이 있을 때만)
+        // if (resourceSelection && createdSchedules.length > 0) {
+        //     try {
+        //         // 자원 존재 여부 확인
+        //         const resource = await this.resourceContextService.자원정보를_조회한다(resourceSelection.resourceId);
+        //         if (!resource) {
+        //             throw new Error('존재하지 않는 자원입니다.');
+        //         }
+
+        //         // 자원 예약 생성 (첫 번째 일정의 시간으로)
+        //         const firstSchedule = createdSchedules[0];
+        //         const reservationData = {
+        //             title: `${resource.name} 예약`,
+        //             description: `${title} - 자원 예약`,
+        //             resourceId: resourceSelection.resourceId,
+        //             startDate: firstSchedule.startDate,
+        //             endDate: firstSchedule.endDate,
+        //             createdBy: user.employeeId,
+        //         };
+
+        //         await this.scheduleContextService.자원예약을_생성한다(reservationData);
+        //     } catch (error) {
+        //         // 자원 예약 실패 시 로그만 남기고 계속 진행
+        //         console.error('자원 예약 생성 실패:', error.message);
+        //     }
+        // }
+
+        // // 5. 알림 설정 처리 (있는 경우)
+        // if (notifyBeforeStart && notificationMinutes && notificationMinutes.length > 0) {
+        //     for (const schedule of createdSchedules) {
+        //         for (const minutes of notificationMinutes) {
+        //             await this.scheduleContextService.알림설정을_생성한다(
+        //                 schedule.scheduleId,
+        //                 user.employeeId,
+        //                 minutes,
+        //             );
+        //         }
+        //     }
+        // }
+
+        // // 6. 일정-관계 정보 생성
+        // for (const schedule of createdSchedules) {
+        //     const relationData = {
+        //         scheduleId: schedule.scheduleId,
+        //         projectId: projectId,
+        //         reservationId: null, // 자원 예약 ID는 별도 처리로 변경
+        //     };
+
+        //     await this.scheduleContextService.일정관계정보를_생성한다(relationData);
+        // }
+
+        // // 응답 DTO 구성
+        // const createdSchedulesDtos = createdSchedules.map((schedule) => ({
+        //     scheduleId: schedule.scheduleId,
+        //     title: schedule.title,
+        //     startDate: schedule.startDate,
+        //     endDate: schedule.endDate,
+        //     scheduleType: schedule.scheduleType,
+        // }));
+
+        return {
+            createdSchedules: createdSchedules,
+            failedSchedules: failedSchedules,
+        };
     }
 
     /**
