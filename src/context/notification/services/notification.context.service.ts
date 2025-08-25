@@ -16,7 +16,7 @@ import { FCMAdapter } from '../adapter/fcm-push.adapter';
 import { EmployeeMicroserviceAdapter } from '@src/domain/employee/adapters';
 import { DateUtil } from '@libs/utils/date.util';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { Raw, MoreThan } from 'typeorm';
+import { Raw, MoreThan, QueryRunner } from 'typeorm';
 
 @Injectable()
 export class NotificationContextService {

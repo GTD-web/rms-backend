@@ -3,10 +3,20 @@ import { ScheduleController } from './controllers/schedule.controllers';
 import { ScheduleManagementService } from './schedule-management.service';
 import { ScheduleContextModule } from '../../context/schedule/schedule.context.module';
 import { ResourceContextModule } from '../../context/resource/resource.context.module';
+import { ReservationContextModule } from '../../context/reservation/reservation.context.module';
+import { NotificationContextModule } from '../../context/notification/notification.context.module';
 import { FileContextModule } from '../../context/file/file.context.module';
+import { ProjectContextModule } from '../../context/project/project.context.module';
 
 @Module({
-    imports: [ScheduleContextModule, ResourceContextModule, FileContextModule],
+    imports: [
+        ScheduleContextModule,
+        ResourceContextModule,
+        ReservationContextModule,
+        NotificationContextModule,
+        FileContextModule,
+        ProjectContextModule,
+    ],
     controllers: [ScheduleController],
     providers: [ScheduleManagementService],
     exports: [],

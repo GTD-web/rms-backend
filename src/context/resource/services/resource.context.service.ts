@@ -171,6 +171,10 @@ export class ResourceContextService {
         }
     }
 
+    async 자원정보를_조회한다(resourceId: string): Promise<ResourceResponseDto> {
+        return this.자원_상세정보를_조회한다(resourceId);
+    }
+
     async 자원_상세정보를_조회한다(resourceId: string): Promise<ResourceResponseDto> {
         const resource = await this.domainResourceService.findOne({
             where: { resourceId },

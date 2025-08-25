@@ -34,12 +34,14 @@ export class UpdateReservationVehicleAddColumns1748247203495 implements Migratio
             WHERE vi."vehicleInfoId" = rv."vehicleInfoId" AND r."location" IS NOT NULL;
         `);
 
-        // Backfill returnedBy from reservation's RESERVER participant
+        // Backfill returnedBy from reservation's RESERVER participant (only for returned vehicles)
         await queryRunner.query(`
             UPDATE "reservation_vehicles" rv
             SET "returnedBy" = rp."employeeId"
             FROM "reservation_participants" rp
-            WHERE rp."reservationId" = rv."reservationId" AND rp."type" = 'RESERVER';
+            WHERE rp."reservationId" = rv."reservationId" 
+                AND rp."type" = 'RESERVER' 
+                AND rv."isReturned" = true;
         `);
     }
 

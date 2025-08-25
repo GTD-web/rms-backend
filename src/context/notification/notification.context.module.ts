@@ -4,6 +4,7 @@ import { Employee, EmployeeNotification, Notification, Reservation } from '@libs
 import { DomainNotificationModule } from '@src/domain/notification/notification.module';
 import { DomainEmployeeNotificationModule } from '@src/domain/employee-notification/employee-notification.module';
 import { NotificationContextService } from './services/notification.context.service';
+import { ImprovedScheduleNotificationContextService } from './services/improved-schedule-notification.context.service';
 import { NotificationController } from './controllers/notification.controller';
 import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -26,7 +27,12 @@ import { CronNotificationContextService } from './services/cron-notification.con
         DomainReservationModule,
     ],
     controllers: [NotificationController, CronNotificationController, AdminNotificationController],
-    providers: [NotificationContextService, CronNotificationContextService, FCMAdapter],
-    exports: [NotificationContextService],
+    providers: [
+        NotificationContextService,
+        ImprovedScheduleNotificationContextService,
+        CronNotificationContextService,
+        FCMAdapter,
+    ],
+    exports: [NotificationContextService, ImprovedScheduleNotificationContextService],
 })
 export class NotificationContextModule {}

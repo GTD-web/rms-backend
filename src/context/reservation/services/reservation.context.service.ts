@@ -16,7 +16,7 @@ import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.
 import { DomainFileService } from '@src/domain/file/file.service';
 import { NotificationService } from '@src/application/notification/services/notification.service';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { DataSource } from 'typeorm';
+import { DataSource, QueryRunner } from 'typeorm';
 import { Employee, Reservation, ReservationParticipant, ReservationVehicle } from '@libs/entities';
 import { PaginationData } from '@libs/dtos/paginate-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
@@ -39,6 +39,7 @@ import { In, Raw, FindOptionsWhere, Between, MoreThan, LessThan, MoreThanOrEqual
 import { CronJob } from 'cron';
 import { Role } from '@libs/enums/role-type.enum';
 import { CreateReservationDto } from '@src/application/reservation/core/dtos/create-reservation.dto';
+import { CreateReservationDto as ContextCreateReservationDto } from '../dtos/create-reservation.dto';
 import {
     CreateReservationResponseDto,
     ReservationResponseDto,
@@ -793,6 +794,66 @@ export class ReservationContextService {
     }
 
     // ==================== 예약 생성 ====================
+    async 자원예약이_가능한지_확인한다(resourceId: string, startDate: Date, endDate: Date): Promise<boolean> {
+        const conflicts = await this.domainReservationService.findAll({
+            where: {
+                resourceId,
+                status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
+                startDate: LessThan(endDate),
+                endDate: MoreThan(startDate),
+                // ...(reservationId && { reservationId: Not(reservationId) }),
+            },
+        });
+        return conflicts.length === 0;
+    }
+
+    async 자원예약을_생성한다(
+        reservationData: ContextCreateReservationDto,
+        queryRunner?: QueryRunner,
+    ): Promise<Reservation> {
+        const reservationEntity = {
+            title: reservationData.title,
+            description: reservationData.description,
+            resourceId: reservationData.resourceId,
+            startDate: reservationData.startDate,
+            endDate: reservationData.endDate,
+            status: reservationData.status,
+        };
+
+        // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
+        const savedReservation = await this.domainReservationService.save(reservationEntity, {
+            queryRunner: queryRunner,
+        });
+
+        // TODO : 자원 유형별로 예약정보가 필요할 경우 스위치 문으로 정리
+        // 차량 예약 정보 생성
+        if (reservationData.resourceType === ResourceType.VEHICLE) {
+            // 차량 리소스 정보 조회
+            const resource = await this.domainResourceService.findOne({
+                where: { resourceId: reservationData.resourceId },
+            });
+            const vehicleInfo = await this.domainVehicleInfoService.findByResourceId(reservationData.resourceId);
+            if (!vehicleInfo) {
+                throw new NotFoundException('차량 정보를 찾을 수 없습니다.');
+            }
+
+            const reservationVehicleEntity = {
+                reservationId: savedReservation.reservationId!,
+                vehicleInfoId: vehicleInfo.vehicleInfoId,
+                startOdometer: vehicleInfo.totalMileage,
+                isReturned: false,
+                returnedAt: null,
+                location: resource.location,
+            };
+
+            await this.domainReservationVehicleService.save(reservationVehicleEntity, {
+                queryRunner,
+            });
+        }
+
+        return savedReservation;
+    }
+
     async 예약을_생성한다(user: Employee, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
         const conflicts = await this.충돌_예약을_조회한다(
             createDto.resourceId,
@@ -842,6 +903,7 @@ export class ReservationContextService {
                 reservationVehicle.startOdometer = resource.vehicleInfo.totalMileage;
                 reservationVehicle.isReturned = false;
                 reservationVehicle.returnedAt = null;
+                reservationVehicle.location = resource.location;
 
                 await this.domainReservationVehicleService.save(reservationVehicle, {
                     queryRunner,

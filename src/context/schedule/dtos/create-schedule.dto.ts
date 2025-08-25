@@ -1,0 +1,23 @@
+import { ScheduleType } from '@libs/enums/schedule-type.enum';
+
+export interface CreateScheduleDto {
+    title: string;
+    description?: string;
+    startDate: Date;
+    endDate: Date;
+    notifyBeforeStart?: boolean;
+    notifyMinutesBeforeStart?: number[];
+    scheduleType: ScheduleType;
+}
+
+export interface CreateScheduleParticipantDto {
+    scheduleId: string;
+    employeeId: string;
+    type: string;
+}
+
+export interface CreateScheduleRelationDto {
+    scheduleId: string;
+    projectId?: string;
+    reservationId?: string;
+}

@@ -2,6 +2,8 @@ import { Injectable, Logger, NotFoundException, BadRequestException } from '@nes
 import { DomainScheduleService } from '@src/domain/schedule/schedule.service';
 import { DomainScheduleParticipantService } from '@src/domain/schedule-participant/schedule-participant.service';
 import { DomainScheduleRelationService } from '@src/domain/schedule-relation/schedule-relation.service';
+import { CreateScheduleDto, CreateScheduleParticipantDto, CreateScheduleRelationDto } from './dtos/create-schedule.dto';
+import { QueryRunner } from 'typeorm';
 import { Schedule } from '@libs/entities/schedule.entity';
 import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
 import { ScheduleRelation } from '@libs/entities/schedule-relations.entity';
@@ -536,5 +538,61 @@ export class ScheduleContextService {
             default:
                 return type;
         }
+    }
+
+    async 일정을_생성한다(scheduleData: CreateScheduleDto, queryRunner?: QueryRunner): Promise<Schedule> {
+        const scheduleEntity = {
+            title: scheduleData.title,
+            description: scheduleData.description,
+            startDate: scheduleData.startDate,
+            endDate: scheduleData.endDate,
+            notifyBeforeStart: scheduleData.notifyBeforeStart || false,
+            notifyMinutesBeforeStart: scheduleData.notifyMinutesBeforeStart || [],
+            scheduleType: scheduleData.scheduleType,
+        };
+
+        // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
+        const savedSchedule = await this.domainScheduleService.save(scheduleEntity, {
+            queryRunner: queryRunner,
+        });
+
+        return savedSchedule;
+    }
+
+    async 일정_참가자를_추가한다(
+        scheduleId: string,
+        employeeId: string,
+        type: string,
+        queryRunner?: QueryRunner,
+    ): Promise<void> {
+        const participantDto: CreateScheduleParticipantDto = {
+            scheduleId,
+            employeeId,
+            type,
+        };
+
+        const participantEntity = {
+            scheduleId: participantDto.scheduleId,
+            employeeId: participantDto.employeeId,
+            type: participantDto.type as ParticipantsType,
+        };
+
+        // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
+        await this.domainScheduleParticipantService.save(participantEntity, {
+            queryRunner: queryRunner,
+        });
+    }
+
+    async 일정관계정보를_생성한다(relationData: CreateScheduleRelationDto, queryRunner?: QueryRunner): Promise<void> {
+        const relationEntity = {
+            scheduleId: relationData.scheduleId,
+            projectId: relationData.projectId,
+            reservationId: relationData.reservationId,
+        };
+
+        // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
+        await this.domainScheduleRelationService.save(relationEntity, {
+            queryRunner: queryRunner,
+        });
     }
 }
