@@ -31890,7 +31890,7 @@ let ReservationContextService = class ReservationContextService {
                     isReturned: false,
                 },
             },
-            relations: ['participants', 'participants.employee', 'resource', 'reservationVehicles'],
+            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
         });
         return delayedReturnVehicles.map((reservation) => {
             const manager = reservation.participants.find((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER);
@@ -31902,13 +31902,15 @@ let ReservationContextService = class ReservationContextService {
                 resourceName: reservation.resource.name,
                 startDate: reservation.startDate,
                 endDate: reservation.endDate,
-                manager: {
-                    employeeId: manager.employee.employeeId,
-                    name: manager.employee.name,
-                    employeeNumber: manager.employee.employeeNumber,
-                    department: manager.employee.department,
-                    position: manager.employee.position,
-                },
+                manager: manager
+                    ? {
+                        employeeId: manager.employee.employeeId,
+                        name: manager.employee.name,
+                        employeeNumber: manager.employee.employeeNumber,
+                        department: manager.employee.department,
+                        position: manager.employee.position,
+                    }
+                    : null,
             };
         });
     }

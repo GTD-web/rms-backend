@@ -1646,7 +1646,7 @@ export class ReservationContextService {
                     isReturned: false,
                 },
             },
-            relations: ['participants', 'participants.employee', 'resource', 'reservationVehicles'],
+            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
         });
 
         return delayedReturnVehicles.map((reservation) => {
@@ -1661,13 +1661,15 @@ export class ReservationContextService {
                 resourceName: reservation.resource.name,
                 startDate: reservation.startDate,
                 endDate: reservation.endDate,
-                manager: {
-                    employeeId: manager.employee.employeeId,
-                    name: manager.employee.name,
-                    employeeNumber: manager.employee.employeeNumber,
-                    department: manager.employee.department,
-                    position: manager.employee.position,
-                },
+                manager: manager
+                    ? {
+                          employeeId: manager.employee.employeeId,
+                          name: manager.employee.name,
+                          employeeNumber: manager.employee.employeeNumber,
+                          department: manager.employee.department,
+                          position: manager.employee.position,
+                      }
+                    : null,
             };
         });
     }
