@@ -19,7 +19,7 @@ import { NotificationService } from '@src/application/notification/services/noti
 import { CreateMaintenanceDto } from '@src/business/resource-management/dtos/vehicle/create-vehicle-info.dto';
 import { UpdateMaintenanceDto } from '@src/business/resource-management/dtos/vehicle/update-vehicle-info.dto';
 import { MaintenanceResponseDto } from '@src/business/resource-management/dtos/vehicle/vehicle-response.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 
 @Injectable()

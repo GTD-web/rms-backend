@@ -3,8 +3,8 @@ import { Notification } from '@libs/entities';
 import { PushNotificationPayload } from '../dtos/send-notification.dto';
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
 import { ResponseNotificationDto, NotificationDataDto } from '../dtos/response-notification.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { CreateNotificationDataDto, CreateNotificationDto } from '../dtos/create-notification.dto';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
@@ -17,6 +17,7 @@ import { EmployeeMicroserviceAdapter } from '@src/domain/employee/adapters';
 import { DateUtil } from '@libs/utils/date.util';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Raw, MoreThan, QueryRunner } from 'typeorm';
+import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api';
 
 @Injectable()
 export class NotificationContextService {
@@ -67,11 +68,11 @@ export class NotificationContextService {
     }
 
     async 직접_알림을_전송한다(subscription: PushSubscriptionDto, payload: PushNotificationPayload): Promise<void> {
-        await this.fcmAdapter.sendBulkNotification([subscription], payload);
+        await this.fcmAdapter.sendBulkNotification([subscription.fcm.token], payload);
     }
 
-    async 다중_알림을_전송한다(subscriptions: PushSubscriptionDto[], payload: PushNotificationPayload): Promise<any> {
-        return await this.fcmAdapter.sendBulkNotification(subscriptions, payload);
+    async 다중_알림을_전송한다(tokens: string[], payload: PushNotificationPayload): Promise<BatchResponse> {
+        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
     }
 
     // 알림 조회 관련 메서드들
@@ -116,7 +117,7 @@ export class NotificationContextService {
                     notificationId: notification.notificationId,
                     title: notification.title,
                     body: notification.body,
-                    notificationData: notification.notificationData as NotificationDataDto,
+                    notificationData: notification.notificationData,
                     notificationType: notification.notificationType,
                     createdAt: notification.createdAt,
                     isRead: notification.employees.find((employee) => employee.employeeId === employeeId).isRead,
@@ -283,56 +284,56 @@ export class NotificationContextService {
 
         switch (notificationType) {
             case NotificationType.RESERVATION_DATE_UPCOMING:
-                createNotificationDto.title = `예약 시간이 ${createNotificationDataDto.beforeMinutes}분 남았습니다.`;
-                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
-                createNotificationDto.createdAt = DateUtil.parse(createNotificationDataDto.reservationDate)
-                    .addMinutes(-createNotificationDataDto.beforeMinutes)
+                createNotificationDto.title = `예약 시간이 ${createNotificationDataDto.schedule.beforeMinutes}분 남았습니다.`;
+                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
+                createNotificationDto.createdAt = DateUtil.parse(createNotificationDataDto.schedule.startDate)
+                    .addMinutes(-createNotificationDataDto.schedule.beforeMinutes)
                     .format('YYYY-MM-DD HH:mm');
                 createNotificationDto.isSent = false;
                 break;
             case NotificationType.RESERVATION_STATUS_PENDING:
-                createNotificationDto.title = `[숙소 확정 대기중] ${createNotificationDataDto.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                createNotificationDto.title = `[숙소 확정 대기중] ${createNotificationDataDto.reservation.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
                 break;
             case NotificationType.RESERVATION_STATUS_CONFIRMED:
-                createNotificationDto.title = `[예약 확정] ${createNotificationDataDto.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                createNotificationDto.title = `[예약 확정] ${createNotificationDataDto.reservation.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
                 break;
             case NotificationType.RESERVATION_STATUS_CANCELLED:
-                createNotificationDto.title = `[예약 취소] ${createNotificationDataDto.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                createNotificationDto.title = `[예약 취소] ${createNotificationDataDto.reservation.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
                 break;
             case NotificationType.RESERVATION_STATUS_REJECTED:
-                createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDataDto.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDataDto.reservation.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
                 break;
             case NotificationType.RESERVATION_TIME_CHANGED:
-                createNotificationDto.title = `[예약 시간 변경] ${createNotificationDataDto.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                createNotificationDto.title = `[예약 시간 변경] ${createNotificationDataDto.reservation.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
                 break;
             case NotificationType.RESERVATION_PARTICIPANT_CHANGED:
-                createNotificationDto.title = `[참가자 변경] ${createNotificationDataDto.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                createNotificationDto.title = `[참가자 변경] ${createNotificationDataDto.reservation.reservationTitle}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
                 break;
             case NotificationType.RESOURCE_CONSUMABLE_REPLACING:
-                createNotificationDto.title = `[교체 주기 알림] ${createNotificationDataDto.consumableName}`;
-                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                createNotificationDto.title = `[교체 주기 알림] ${createNotificationDataDto.resource.vehicleInfo.consumable.consumableName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
                 break;
             case NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING:
-                createNotificationDto.title = `[교체 지연 알림] ${createNotificationDataDto.consumableName}`;
-                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                createNotificationDto.title = `[교체 지연 알림] ${createNotificationDataDto.resource.vehicleInfo.consumable.consumableName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
                 break;
             case NotificationType.RESOURCE_VEHICLE_RETURNED:
                 createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
-                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
                 break;
             case NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED:
-                createNotificationDto.title = `[차량 반납 지연 알림] ${createNotificationDataDto.resourceName}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservationDate}`;
+                createNotificationDto.title = `[차량 반납 지연 알림] ${createNotificationDataDto.resource.resourceName}`;
+                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
                 break;
             case NotificationType.RESOURCE_MAINTENANCE_COMPLETED:
-                createNotificationDto.title = `[정비 완료] ${createNotificationDataDto.consumableName}`;
-                createNotificationDto.body = `${createNotificationDataDto.resourceName}`;
+                createNotificationDto.title = `[정비 완료] ${createNotificationDataDto.resource.vehicleInfo.consumable.consumableName}`;
+                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
                 break;
         }
 
@@ -364,7 +365,7 @@ export class NotificationContextService {
         const now = DateUtil.now().toDate();
         const reservation = await this.domainReservationService.findOne({
             where: {
-                reservationId: createNotificationDataDto.reservationId,
+                reservationId: createNotificationDataDto.reservation.reservationId,
             },
         });
         const diffInMilliseconds = reservation.startDate.getTime() - now.getTime();
@@ -376,7 +377,7 @@ export class NotificationContextService {
 
         const parts: string[] = [];
         if (diffInMilliseconds > 0) {
-            switch (createNotificationDataDto.resourceType) {
+            switch (createNotificationDataDto.resource.resourceType) {
                 case ResourceType.MEETING_ROOM:
                     parts.push('회의 시작까지');
                     break;
@@ -403,7 +404,7 @@ export class NotificationContextService {
 
             parts.push('남았습니다.');
         } else {
-            switch (createNotificationDataDto.resourceType) {
+            switch (createNotificationDataDto.resource.resourceType) {
                 case ResourceType.MEETING_ROOM:
                     parts.push('회의 참여 알림');
                     break;
@@ -422,8 +423,8 @@ export class NotificationContextService {
         const timeDifferencePhrase = parts.join(' ');
 
         return {
-            title: `[${createNotificationDataDto.reservationTitle}]\n${timeDifferencePhrase}`,
-            body: createNotificationDataDto.reservationDate,
+            title: `[${createNotificationDataDto.reservation.reservationTitle}]\n${timeDifferencePhrase}`,
+            body: createNotificationDataDto.reservation.reservationDate,
             notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
             notificationData: createNotificationDataDto,
             createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
@@ -452,12 +453,15 @@ export class NotificationContextService {
                 // this.스케줄_작업을_생성한다(notification, totalSubscriptions);
                 break;
             default:
-                await this.다중_알림을_전송한다(totalSubscriptions, {
-                    title: notification.title,
-                    body: notification.body,
-                    notificationType: notification.notificationType,
-                    notificationData: notification.notificationData,
-                });
+                await this.다중_알림을_전송한다(
+                    totalSubscriptions.map((subscription) => subscription.fcm.token),
+                    {
+                        title: notification.title,
+                        body: notification.body,
+                        notificationType: notification.notificationType,
+                        notificationData: notification.notificationData,
+                    },
+                );
                 break;
         }
     }
@@ -481,12 +485,15 @@ export class NotificationContextService {
             totalSubscriptions.push(...subscriptions);
         }
 
-        await this.다중_알림을_전송한다(totalSubscriptions, {
-            title: notification.title,
-            body: notification.body,
-            notificationType: notification.notificationType,
-            notificationData: notification.notificationData,
-        });
+        await this.다중_알림을_전송한다(
+            totalSubscriptions.map((subscription) => subscription.fcm.token),
+            {
+                title: notification.title,
+                body: notification.body,
+                notificationType: notification.notificationType,
+                notificationData: notification.notificationData,
+            },
+        );
     }
 
     async 요청_알림을_전송한다(
@@ -508,12 +515,15 @@ export class NotificationContextService {
             totalSubscriptions.push(...subscriptions);
         }
 
-        await this.다중_알림을_전송한다(totalSubscriptions, {
-            title: notification.title,
-            body: notification.body,
-            notificationType: notification.notificationType,
-            notificationData: notification.notificationData,
-        });
+        await this.다중_알림을_전송한다(
+            totalSubscriptions.map((subscription) => subscription.fcm.token),
+            {
+                title: notification.title,
+                body: notification.body,
+                notificationType: notification.notificationType,
+                notificationData: notification.notificationData,
+            },
+        );
     }
 
     async 스케줄_작업을_삭제한다(reservationId: string) {

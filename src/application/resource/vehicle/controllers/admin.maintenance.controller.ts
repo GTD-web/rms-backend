@@ -10,8 +10,8 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
 import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { MaintenanceService } from '@src/application/resource/vehicle/services/maintenance.service';
 
 @ApiTags('4. 차량 정비 이력 - 관리자 ')

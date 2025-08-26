@@ -6,8 +6,8 @@ import { MaintenanceResponseDto } from '../../dtos/vehicle/vehicle-response.dto'
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { MaintenanceService } from '../../services/maintenance.service';
 
 @ApiTags('v2 차량 정비 이력')

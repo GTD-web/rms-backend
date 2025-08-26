@@ -18,8 +18,8 @@ import { NotificationService } from '@src/application/notification/services/noti
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { DataSource, QueryRunner } from 'typeorm';
 import { Employee, Reservation, ReservationParticipant, ReservationVehicle } from '@libs/entities';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-type.enum';

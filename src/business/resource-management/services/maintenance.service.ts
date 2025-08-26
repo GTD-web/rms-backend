@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 
 // Context Services
 import { MaintenanceContextService } from '@src/context/resource/services/maintenance.context.service';
-import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
+import { NotificationContextService } from '@src/context/notification/services/v2-notification.context.service';
 
 // DTOs
 import { CreateMaintenanceDto } from '../dtos/vehicle/create-vehicle-info.dto';
@@ -19,7 +19,7 @@ export class MaintenanceService {
 
     async save(createMaintenanceDto: CreateMaintenanceDto): Promise<MaintenanceResponseDto> {
         const maintenance = await this.maintenanceContextService.정비이력을_저장한다(createMaintenanceDto);
-        await this.notificationContextService.시스템_관리자들에게_알림을_발송한다();
+        // await this.notificationContextService.시스템_관리자들에게_알림을_발송한다();
         return maintenance;
     }
 

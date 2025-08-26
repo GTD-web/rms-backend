@@ -43,3 +43,39 @@ export * from './business/resource-management/dtos/vehicle/create-vehicle-info.d
 export * from './business/resource-management/dtos/vehicle/update-vehicle-info.dto';
 export * from './business/resource-management/dtos/vehicle/vehicle-response.dto';
 // Note: return-vehicle-response.dto already exported from reservation-management
+
+// ============================================================================
+// 📋 CONTEXT LAYER DTOs
+// ============================================================================
+
+// 📢 Context Notification DTOs
+export {
+    CreateNotificationDto as ContextCreateNotificationDto,
+    CreateNotificationDataDto as ContextCreateNotificationDataDto,
+    CreateEmployeeNotificationDto as ContextCreateEmployeeNotificationDto,
+    SendNotificationDto as ContextSendNotificationDto,
+} from './context/notification/dtos/create-notification.dto';
+
+export {
+    ResponseNotificationDto as ContextResponseNotificationDto,
+    NotificationDataDto as ContextNotificationDataDto,
+    PushNotificationSendResult,
+    ScheduleResponseDto,
+    ReservationResponseDto,
+    ResourceResponseDto as ContextResourceResponseDto,
+    ProjectResponseDto,
+    ConsumableResponseDto as ContextConsumableResponseDto,
+    VehicleInfoResponseDto as ContextVehicleInfoResponseDto,
+} from './context/notification/dtos/response-notification.dto';
+
+export { PushSubscriptionDto as ContextPushSubscriptionDto } from './context/notification/dtos/push-subscription.dto';
+export {
+    PushNotificationDto as ContextPushNotificationDto,
+    PushNotificationPayload as ContextPushNotificationPayload,
+} from './context/notification/dtos/send-notification.dto';
+
+// 📁 Context File DTOs
+export { CreateFileDataDto as ContextCreateFileDataDto } from './context/file/dtos/create-filedata.dto';
+export { FileResponseDto as ContextFileResponseDto } from './context/file/dtos/file-response.dto';
+export { ReservationVehicleFileResponseDto } from './context/file/dtos/reservation-vehicle-file-response.dto';
+export * from './context/file/dtos/index';

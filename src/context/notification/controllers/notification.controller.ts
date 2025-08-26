@@ -3,8 +3,8 @@ import { Controller, Get, Post, Patch, Param, Body, Query, Req, Type } from '@ne
 import { Request } from 'express';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
@@ -15,7 +15,8 @@ import { ResponseNotificationDto } from '../dtos/response-notification.dto';
 import { SendNotificationDto } from '../dtos/create-notification.dto';
 import { PushNotificationDto } from '../dtos/send-notification.dto';
 
-import { NotificationContextService } from '../services/notification.context.service';
+import { NotificationContextService } from '../services/v2-notification.context.service';
+import { NotificationType } from '@libs/enums/notification-type.enum';
 
 @ApiTags('v2 알림 ')
 @Controller('v2/notifications')
@@ -31,14 +32,14 @@ export class NotificationController {
         type: ResponseNotificationDto,
     })
     async subscribe(
-        @Req() request: Request,
+        // @Req() request: Request,
         @User() user: Employee,
         @Body() subscription: PushSubscriptionDto,
     ): Promise<void> {
-        const authorization = Array.isArray(request.headers.authorization)
-            ? request.headers.authorization[0]
-            : request.headers.authorization || '';
-        await this.notificationContextService.푸시_알림을_구독한다(authorization, user.employeeId, subscription);
+        // const authorization = Array.isArray(request.headers.authorization)
+        //     ? request.headers.authorization[0]
+        //     : request.headers.authorization || '';
+        await this.notificationContextService.PUSH_알림을_구독한다(user.employeeId, subscription);
     }
 
     @Post('subscribe/success')
@@ -48,17 +49,31 @@ export class NotificationController {
         description: '웹 푸시 구독 성공',
     })
     async sendSuccess(@Body() body: PushNotificationDto) {
-        await this.notificationContextService.직접_알림을_전송한다(body.subscription, body.payload);
+        await this.notificationContextService.알림을_전송한다([body.subscription.fcm.token], body.payload);
     }
 
     @Post('send/reminder')
-    @ApiOperation({ summary: '웹 푸시 알림 전송' })
+    @ApiOperation({ summary: '예약 리마인더 알림 전송' })
     @ApiOkResponse({
         status: 200,
-        description: '웹 푸시 알림 전송 성공',
+        description: '예약 리마인더 알림 전송 성공',
+    })
+    async sendReminder(@Body() sendNotificationDto: SendNotificationDto) {
+        await this.notificationContextService.알림_전송_프로세스를_진행한다(
+            NotificationType.RESERVATION_DATE_UPCOMING,
+            sendNotificationDto.notificationData,
+            sendNotificationDto.notificationTarget,
+        );
+    }
+
+    @Post('send')
+    @ApiOperation({ summary: '알림 전송' })
+    @ApiOkResponse({
+        status: 200,
+        description: '알림 전송 성공',
     })
     async send(@Body() sendNotificationDto: SendNotificationDto) {
-        await this.notificationContextService.리마인더_알림을_전송한다(
+        await this.notificationContextService.알림_전송_프로세스를_진행한다(
             sendNotificationDto.notificationType,
             sendNotificationDto.notificationData,
             sendNotificationDto.notificationTarget,
@@ -115,25 +130,25 @@ export class NotificationController {
         await this.notificationContextService.모든_알림을_읽음_처리한다(employeeId);
     }
 
-    @Get('subscription')
-    @ApiOperation({ summary: '구독 정보 조회' })
-    @ApiOkResponse({
-        status: 200,
-        description: '구독 정보 조회 성공',
-    })
-    @ApiQuery({
-        name: 'token',
-        type: String,
-        required: false,
-        description: '구독 토큰',
-    })
-    @ApiQuery({
-        name: 'employeeId',
-        type: String,
-        required: false,
-        description: '직원 ID',
-    })
-    async findSubscription(@Query('token') token?: string, @Query('employeeId') employeeId?: string) {
-        return await this.notificationContextService.구독_정보를_조회한다(token, employeeId);
-    }
+    // @Get('subscription')
+    // @ApiOperation({ summary: '구독 정보 조회' })
+    // @ApiOkResponse({
+    //     status: 200,
+    //     description: '구독 정보 조회 성공',
+    // })
+    // @ApiQuery({
+    //     name: 'token',
+    //     type: String,
+    //     required: false,
+    //     description: '구독 토큰',
+    // })
+    // @ApiQuery({
+    //     name: 'employeeId',
+    //     type: String,
+    //     required: false,
+    //     description: '직원 ID',
+    // })
+    // async findSubscription(@Query('token') token?: string, @Query('employeeId') employeeId?: string) {
+    //     return await this.notificationContextService.구독_정보를_조회한다(token, employeeId);
+    // }
 }

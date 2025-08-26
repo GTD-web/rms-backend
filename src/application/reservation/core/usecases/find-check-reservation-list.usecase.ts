@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { FindOptionsWhere, Between } from 'typeorm';
 import { Reservation } from '@libs/entities';
 import { DateUtil } from '@libs/utils/date.util';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 

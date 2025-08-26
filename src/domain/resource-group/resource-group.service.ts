@@ -25,7 +25,7 @@ export class DomainResourceGroupService extends BaseService<ResourceGroup> {
     async findByType(type: ResourceType): Promise<ResourceGroup[]> {
         return this.resourceGroupRepository.findAll({
             where: { type },
-            relations: ['resources', 'parent', 'children'],
+            relations: ['parent', 'children'],
             order: { order: 'ASC' },
         });
     }
@@ -33,7 +33,7 @@ export class DomainResourceGroupService extends BaseService<ResourceGroup> {
     async findByParentId(parentResourceGroupId: string): Promise<ResourceGroup[]> {
         return this.resourceGroupRepository.findAll({
             where: { parentResourceGroupId },
-            relations: ['resources', 'children'],
+            relations: ['children'],
             order: { order: 'ASC' },
         });
     }
@@ -41,7 +41,7 @@ export class DomainResourceGroupService extends BaseService<ResourceGroup> {
     async findRootGroups(): Promise<ResourceGroup[]> {
         return this.resourceGroupRepository.findAll({
             where: { parentResourceGroupId: null },
-            relations: ['resources', 'children'],
+            relations: ['children'],
             order: { order: 'ASC' },
         });
     }

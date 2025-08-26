@@ -4,7 +4,7 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { TaskResponseDto } from '../dtos/task-response.dto';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { AdminTaskService } from '../services/admin.task.service';
 import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
 import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';

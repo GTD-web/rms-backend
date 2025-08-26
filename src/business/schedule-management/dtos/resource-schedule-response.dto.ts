@@ -67,6 +67,20 @@ export class ResourceInfoDto {
     resourceDescription?: string;
 
     @ApiProperty({
+        description: '자원 사용 가능 여부',
+        required: false,
+        example: true,
+    })
+    isAvailable?: boolean;
+
+    @ApiProperty({
+        description: '자원 사용 불가능 이유',
+        required: false,
+        example: '자원 사용 불가능',
+    })
+    unavailableReason?: string;
+
+    @ApiProperty({
         description: '해당 자원의 일정 목록',
         type: [ResourceScheduleItemDto],
     })

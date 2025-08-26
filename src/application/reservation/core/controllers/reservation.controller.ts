@@ -16,8 +16,8 @@ import {
     CreateReservationResponseDto,
     CalendarResponseDto,
 } from '../dtos/reservation-response.dto';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { UpdateReservationDto, ReturnVehicleDto, UpdateReservationTimeDto } from '../dtos/update-reservation.dto';
 import { ReservationService } from '../services/reservation.service';
 import { ReservationResponseDto } from '../dtos/reservation-response.dto';

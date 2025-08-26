@@ -398,15 +398,11 @@ export class ScheduleContextService {
 
         // 각 자원 그룹의 자원들을 조회하여 맵에 저장
         for (const group of resourceGroups) {
-            if (group.resources && group.resources.length > 0) {
-                resourceMap.set(group.resourceGroupId, group.resources);
-            } else {
-                // relations에서 로드되지 않은 경우 별도 조회
-                const resources = await this.domainResourceService.findAll({
-                    where: { resourceGroupId: group.resourceGroupId },
-                });
-                resourceMap.set(group.resourceGroupId, resources);
-            }
+            const resources = await this.domainResourceService.findAll({
+                where: { resourceGroupId: group.resourceGroupId },
+                order: { order: 'ASC' },
+            });
+            resourceMap.set(group.resourceGroupId, resources);
         }
 
         return { resourceGroups, resourceMap };

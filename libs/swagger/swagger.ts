@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { BaseResponseDto } from '../dtos/response.dto';
-import { PaginationData } from '../dtos/paginate-response.dto';
+import { PaginationData } from '../dtos/pagination-response.dto';
 
 export function setupSwagger(app: INestApplication, dtos: any[]) {
     const config = new DocumentBuilder()

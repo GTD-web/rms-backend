@@ -55,6 +55,14 @@ export class TaskResponseDto {
 
     @ApiProperty({
         type: 'string',
+        description: '소모품 이름',
+        nullable: true,
+        required: false,
+    })
+    consumableName?: string | null;
+
+    @ApiProperty({
+        type: 'string',
         description: '시작 날짜',
         nullable: true,
     })

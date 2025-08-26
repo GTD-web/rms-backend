@@ -1,81 +1,113 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { NotificationType } from '@libs/enums/notification-type.enum';
-import { NotificationData } from '@libs/entities/notification.entity';
-import { ResourceType } from '@libs/enums/resource-type.enum';
-import { IsString, IsOptional, IsNumber, IsEnum } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsString, IsOptional, ValidateNested, IsBoolean, IsEnum } from 'class-validator';
 
-export class NotificationDataDto implements NotificationData {
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    resourceId?: string;
+// 공통 DTO들을 create-notification.dto.ts에서 가져와서 response용 alias로 사용
+import {
+    NotificationConsumableDto,
+    NotificationVehicleInfoDto,
+    NotificationResourceDto,
+    NotificationReservationDto,
+    NotificationScheduleDto,
+    NotificationProjectDto,
+} from './create-notification.dto';
 
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    resourceName?: string;
+// Response용 alias 정의 (호환성 유지)
+export { NotificationConsumableDto as ConsumableResponseDto };
+export { NotificationVehicleInfoDto as VehicleInfoResponseDto };
+export { NotificationResourceDto as ResourceResponseDto };
+export { NotificationReservationDto as ReservationResponseDto };
+export { NotificationScheduleDto as ScheduleResponseDto };
+export { NotificationProjectDto as ProjectResponseDto };
 
-    @ApiProperty({ enum: ResourceType, required: false })
-    @IsEnum(ResourceType)
+export class NotificationDataDto {
+    @ApiPropertyOptional({
+        type: NotificationScheduleDto,
+        description: '일정 관련 정보',
+    })
     @IsOptional()
-    resourceType?: ResourceType;
+    @ValidateNested()
+    @Type(() => NotificationScheduleDto)
+    schedule?: NotificationScheduleDto;
 
-    @ApiProperty({ required: false })
-    @IsString()
+    @ApiPropertyOptional({
+        type: NotificationReservationDto,
+        description: '예약 관련 정보',
+    })
     @IsOptional()
-    consumableName?: string;
+    @ValidateNested()
+    @Type(() => NotificationReservationDto)
+    reservation?: NotificationReservationDto;
 
-    @ApiProperty({ required: false })
-    @IsString()
+    @ApiPropertyOptional({
+        type: NotificationResourceDto,
+        description: '자원 관련 정보',
+    })
     @IsOptional()
-    reservationId?: string;
+    @ValidateNested()
+    @Type(() => NotificationResourceDto)
+    resource?: NotificationResourceDto;
 
-    @ApiProperty({ required: false })
-    @IsString()
+    @ApiPropertyOptional({
+        type: NotificationProjectDto,
+        description: '프로젝트 관련 정보',
+    })
     @IsOptional()
-    reservationTitle?: string;
-
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    reservationDate?: string;
-
-    @ApiProperty({ required: false })
-    @IsNumber()
-    @IsOptional()
-    beforeMinutes?: number;
+    @ValidateNested()
+    @Type(() => NotificationProjectDto)
+    project?: NotificationProjectDto;
 }
 
 export class ResponseNotificationDto {
-    @ApiProperty()
+    @ApiProperty({ description: '알림 ID' })
+    @IsString()
     notificationId: string;
 
-    @ApiProperty()
+    @ApiProperty({ description: '알림 제목' })
+    @IsString()
     title: string;
 
-    @ApiProperty()
+    @ApiProperty({ description: '알림 내용' })
+    @IsString()
     body: string;
 
-    @ApiProperty({ type: NotificationDataDto })
+    @ApiProperty({
+        type: NotificationDataDto,
+        description: '알림 데이터 (타입별 정보)',
+    })
+    @ValidateNested()
+    @Type(() => NotificationDataDto)
     notificationData: NotificationDataDto;
 
-    @ApiProperty()
+    @ApiProperty({ description: '생성 시간' })
+    @IsString()
     createdAt: string;
 
-    @ApiProperty({ enum: NotificationType })
+    @ApiProperty({
+        enum: NotificationType,
+        description: '알림 타입',
+        example: NotificationType.RESERVATION_STATUS_CONFIRMED,
+    })
+    @IsEnum(NotificationType)
     notificationType: NotificationType;
 
-    @ApiProperty({ required: false })
+    @ApiPropertyOptional({ description: '읽음 여부', default: false })
+    @IsOptional()
+    @IsBoolean()
     isRead?: boolean;
 }
 
 export class PushNotificationSendResult {
-    @ApiProperty()
+    @ApiProperty({ description: '전송 성공 여부' })
+    @IsBoolean()
     success: boolean;
 
-    @ApiProperty()
+    @ApiProperty({ description: '응답 메시지' })
     message: any;
 
-    @ApiProperty()
-    error: string;
+    @ApiPropertyOptional({ description: '에러 메시지 (실패시)' })
+    @IsOptional()
+    @IsString()
+    error?: string;
 }

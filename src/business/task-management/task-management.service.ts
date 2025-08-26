@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Employee } from '@libs/entities';
 import { ResourceContextService } from '@src/context/resource/services/resource.context.service';
 import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
-import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
+import { NotificationContextService } from '@src/context/notification/services/v2-notification.context.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { NotificationType } from '@libs/enums/notification-type.enum';
@@ -54,6 +54,7 @@ export class TaskManagementService {
             reservationId: null,
             resourceId: item.resourceId,
             resourceName: item.resourceName,
+            consumableName: item.consumableName,
             startDate: null,
             endDate: null,
         }));
@@ -110,6 +111,7 @@ export class TaskManagementService {
                             reservationId: null,
                             resourceId: resource.resourceId,
                             resourceName: resource.name,
+                            consumableName: consumable.name,
                             startDate: null,
                             endDate: null,
                             manager: {
@@ -155,6 +157,7 @@ export class TaskManagementService {
                             reservationId: null,
                             resourceId: resource.resourceId,
                             resourceName: resource.name,
+                            consumableName: consumable.name,
                             startDate: null,
                             endDate: null,
                         });

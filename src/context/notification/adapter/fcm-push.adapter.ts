@@ -83,12 +83,8 @@ export class FCMAdapter {
         }
     }
 
-    async sendBulkNotification(
-        subscriptions: PushSubscriptionDto[],
-        payload: PushNotificationPayload,
-    ): Promise<BatchResponse> {
+    async sendBulkNotification(tokens: string[], payload: PushNotificationPayload): Promise<BatchResponse> {
         try {
-            const tokens = subscriptions.map((subscription) => subscription.fcm.token);
             console.log('알림 전송 - tokens', tokens);
             console.log('알림 전송 - payload', payload);
             const response = await getMessaging()
@@ -118,40 +114,6 @@ export class FCMAdapter {
                 stack: error.stack,
             });
             return { responses: [], successCount: -1, failureCount: -1 };
-        }
-    }
-
-    async sendTestNotification(subscription: PushSubscriptionDto, payload: any) {
-        try {
-            const message = {
-                token: subscription.fcm.token,
-                ...payload,
-            };
-
-            const response = await getMessaging()
-                .send(message)
-                .then((response) => {
-                    console.log('FCM send successful. Message ID:', response);
-                    return { success: true, message: response, error: null };
-                })
-                .catch((error) => {
-                    console.error('FCM send error:', {
-                        code: error.code,
-                        message: error.message,
-                        details: error.details,
-                        stack: error.stack,
-                    });
-                    return { success: false, message: 'failed', error: error.message };
-                });
-            return response;
-        } catch (error) {
-            console.error('FCM send error:', {
-                code: error.code,
-                message: error.message,
-                details: error.details,
-                stack: error.stack,
-            });
-            return { success: false, message: 'failed', error: error.message };
         }
     }
 }

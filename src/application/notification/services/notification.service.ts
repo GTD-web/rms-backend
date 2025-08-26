@@ -5,8 +5,8 @@ import { PushNotificationPayload } from '@src/application/notification/dtos/send
 import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
 import { SendMultiNotificationUsecase } from '../usecases/sendMultiNotification.usecase';
 import { ResponseNotificationDto } from '@src/application/notification/dtos/response-notification.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { GetMyNotificationUsecase } from '../usecases/getMyNotification.usecase';
 import { MarkAsReadUsecase } from '../usecases/markAsRead.usecase';
 import { CreateNotificationUsecase } from '../usecases/createNotification.usecase';

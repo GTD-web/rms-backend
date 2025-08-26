@@ -36,12 +36,15 @@ export class CronNotificationContextService {
                 continue;
             }
             try {
-                await this.fcmAdapter.sendBulkNotification(totalSubscriptions, {
-                    title: notification.title,
-                    body: notification.body,
-                    notificationType: notification.notificationType,
-                    notificationData: notification.notificationData,
-                });
+                await this.fcmAdapter.sendBulkNotification(
+                    totalSubscriptions.map((subscription) => subscription.fcm.token),
+                    {
+                        title: notification.title,
+                        body: notification.body,
+                        notificationType: notification.notificationType,
+                        notificationData: notification.notificationData,
+                    },
+                );
             } catch (error) {
                 console.error(`Failed to send notification: ${error}`);
             } finally {

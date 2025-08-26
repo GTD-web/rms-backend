@@ -2,8 +2,8 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiTags } 
 import { Controller, Get, Post, Patch, Param, Body, Query, UseInterceptors } from '@nestjs/common';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
