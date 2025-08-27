@@ -23,7 +23,7 @@ import { ScheduleType } from '@libs/enums/schedule-type.enum';
 import { ScheduleContextService } from '../../context/schedule/schedule.context.service';
 import { ResourceContextService } from '../../context/resource/services/resource.context.service';
 import { ReservationContextService } from '../../context/reservation/services/reservation.context.service';
-import { NotificationContextService } from '../../context/notification/services/v2-notification.context.service';
+import { NotificationContextService } from '../../context/notification/services/notification.context.service';
 
 import { ScheduleDetailQueryDto } from './dtos/schedule-detail-query.dto';
 import {

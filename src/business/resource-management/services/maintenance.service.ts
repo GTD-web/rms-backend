@@ -3,7 +3,7 @@ import { PaginationData } from '@libs/dtos/pagination-response.dto';
 
 // Context Services
 import { MaintenanceContextService } from '@src/context/resource/services/maintenance.context.service';
-import { NotificationContextService } from '@src/context/notification/services/v2-notification.context.service';
+import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
 
 // DTOs
 import { CreateMaintenanceDto } from '../dtos/vehicle/create-vehicle-info.dto';

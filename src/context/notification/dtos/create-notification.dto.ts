@@ -8,9 +8,14 @@ import { IsOptional, IsString, IsNumber, IsEnum, IsDateString, ValidateNested, I
 
 // 공통 알림 데이터 DTOs (create와 response에서 공통 사용)
 export class NotificationConsumableDto {
-    @ApiProperty({ description: '소모품 이름' })
+    @ApiProperty({ description: '소모품 ID' })
     @IsString()
-    consumableName: string;
+    consumableId: string;
+
+    @ApiProperty({ description: '소모품 이름' })
+    @IsOptional()
+    @IsString()
+    consumableName?: string;
 }
 
 export class NotificationVehicleInfoDto {
@@ -27,12 +32,14 @@ export class NotificationResourceDto {
     resourceId: string;
 
     @ApiProperty({ description: '자원 이름' })
+    @IsOptional()
     @IsString()
-    resourceName: string;
+    resourceName?: string;
 
     @ApiProperty({ enum: ResourceType, description: '자원 타입' })
+    @IsOptional()
     @IsEnum(ResourceType)
-    resourceType: ResourceType;
+    resourceType?: ResourceType;
 
     @ApiPropertyOptional({ type: NotificationVehicleInfoDto, description: '차량 정보 (차량 자원인 경우)' })
     @IsOptional()
@@ -47,12 +54,14 @@ export class NotificationReservationDto {
     reservationId: string;
 
     @ApiProperty({ description: '예약 제목' })
+    @IsOptional()
     @IsString()
-    reservationTitle: string;
+    reservationTitle?: string;
 
     @ApiProperty({ description: '예약 날짜' })
+    @IsOptional()
     @IsString()
-    reservationDate: string;
+    reservationDate?: string;
 
     @ApiPropertyOptional({ enum: ReservationStatus, description: '예약 상태' })
     @IsOptional()
@@ -66,8 +75,9 @@ export class NotificationScheduleDto {
     scheduleId: string;
 
     @ApiProperty({ description: '일정 제목' })
+    @IsOptional()
     @IsString()
-    scheduleTitle: string;
+    scheduleTitle?: string;
 
     @ApiPropertyOptional({ description: '알림 전 분 수' })
     @IsOptional()
@@ -75,12 +85,14 @@ export class NotificationScheduleDto {
     beforeMinutes?: number;
 
     @ApiProperty({ description: '시작 날짜' })
+    @IsOptional()
     @IsDateString()
-    startDate: string;
+    startDate?: string;
 
     @ApiProperty({ description: '종료 날짜' })
+    @IsOptional()
     @IsDateString()
-    endDate: string;
+    endDate?: string;
 }
 
 export class NotificationProjectDto {

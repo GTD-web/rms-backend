@@ -9,20 +9,23 @@ import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
-
-import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
-import { ResponseNotificationDto } from '../dtos/response-notification.dto';
-import { SendNotificationDto } from '../dtos/create-notification.dto';
-import { PushNotificationDto } from '../dtos/send-notification.dto';
-
-import { NotificationContextService } from '../services/v2-notification.context.service';
 import { NotificationType } from '@libs/enums/notification-type.enum';
+
+// Context DTOs (business layer에서 context layer DTO 사용)
+import { PushSubscriptionDto } from '@src/context/notification/dtos/push-subscription.dto';
+import { ResponseNotificationDto } from '@src/context/notification/dtos/response-notification.dto';
+import { NotificationTypeResponseDto } from '@src/context/notification/dtos/notification-type-response.dto';
+import { SendNotificationDto } from '@src/context/notification/dtos/create-notification.dto';
+import { PushNotificationDto } from '@src/context/notification/dtos/send-notification.dto';
+
+// Business Service
+import { NotificationManagementService } from '../notification-management.service';
 
 @ApiTags('v2 알림 ')
 @Controller('v2/notifications')
 @ApiBearerAuth()
 export class NotificationController {
-    constructor(private readonly notificationContextService: NotificationContextService) {}
+    constructor(private readonly notificationManagementService: NotificationManagementService) {}
 
     @Post('subscribe')
     @ApiOperation({ summary: '웹 푸시 구독' })
@@ -39,7 +42,7 @@ export class NotificationController {
         // const authorization = Array.isArray(request.headers.authorization)
         //     ? request.headers.authorization[0]
         //     : request.headers.authorization || '';
-        await this.notificationContextService.PUSH_알림을_구독한다(user.employeeId, subscription);
+        await this.notificationManagementService.웹푸시를_구독한다(user.employeeId, subscription);
     }
 
     @Post('subscribe/success')
@@ -49,22 +52,21 @@ export class NotificationController {
         description: '웹 푸시 구독 성공',
     })
     async sendSuccess(@Body() body: PushNotificationDto) {
-        await this.notificationContextService.알림을_전송한다([body.subscription.fcm.token], body.payload);
+        await this.notificationManagementService.푸시_알림을_직접_전송한다([body.subscription.fcm.token], body.payload);
     }
 
-    @Post('send/reminder')
-    @ApiOperation({ summary: '예약 리마인더 알림 전송' })
-    @ApiOkResponse({
-        status: 200,
-        description: '예약 리마인더 알림 전송 성공',
-    })
-    async sendReminder(@Body() sendNotificationDto: SendNotificationDto) {
-        await this.notificationContextService.알림_전송_프로세스를_진행한다(
-            NotificationType.RESERVATION_DATE_UPCOMING,
-            sendNotificationDto.notificationData,
-            sendNotificationDto.notificationTarget,
-        );
-    }
+    // @Post('send/reminder')
+    // @ApiOperation({ summary: '예약 리마인더 알림 전송' })
+    // @ApiOkResponse({
+    //     status: 200,
+    //     description: '예약 리마인더 알림 전송 성공',
+    // })
+    // async sendReminder(@Body() sendNotificationDto: SendNotificationDto) {
+    //     await this.notificationManagementService.리마인더_알림을_전송한다(
+    //         sendNotificationDto.notificationData,
+    //         sendNotificationDto.notificationTarget,
+    //     );
+    // }
 
     @Post('send')
     @ApiOperation({ summary: '알림 전송' })
@@ -73,11 +75,21 @@ export class NotificationController {
         description: '알림 전송 성공',
     })
     async send(@Body() sendNotificationDto: SendNotificationDto) {
-        await this.notificationContextService.알림_전송_프로세스를_진행한다(
+        await this.notificationManagementService.알림을_전송한다(
             sendNotificationDto.notificationType,
             sendNotificationDto.notificationData,
             sendNotificationDto.notificationTarget,
         );
+    }
+
+    @Get('types')
+    @ApiOperation({ summary: '알림 타입 목록 조회' })
+    @ApiOkResponse({
+        description: '알림 타입 목록 조회 성공',
+        type: [NotificationTypeResponseDto],
+    })
+    async getNotificationTypes(): Promise<NotificationTypeResponseDto[]> {
+        return await this.notificationManagementService.알림_타입_목록을_조회한다();
     }
 
     @Get()
@@ -107,7 +119,7 @@ export class NotificationController {
         @Query() query: PaginationQueryDto,
         @Query('resourceType') resourceType?: ResourceType,
     ): Promise<PaginationData<ResponseNotificationDto>> {
-        return await this.notificationContextService.내_알림_목록을_조회한다(employeeId, query, resourceType);
+        return await this.notificationManagementService.내_알림_목록을_조회한다(employeeId, query, resourceType);
     }
 
     @Patch(':notificationId/read')
@@ -117,7 +129,7 @@ export class NotificationController {
         description: '알람 읽음 처리 성공',
     })
     async markAsRead(@User() user: Employee, @Param('notificationId') notificationId: string) {
-        await this.notificationContextService.알림을_읽음_처리한다(user.employeeId, notificationId);
+        await this.notificationManagementService.알림을_읽음_처리한다(user.employeeId, notificationId);
     }
 
     @Patch('mark-all-read')
@@ -127,7 +139,7 @@ export class NotificationController {
         description: '모든 알람 읽음 처리 성공',
     })
     async markAllAsRead(@User('employeeId') employeeId: string) {
-        await this.notificationContextService.모든_알림을_읽음_처리한다(employeeId);
+        await this.notificationManagementService.모든_알림을_읽음_처리한다(employeeId);
     }
 
     // @Get('subscription')

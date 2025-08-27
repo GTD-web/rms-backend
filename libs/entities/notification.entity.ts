@@ -30,24 +30,25 @@ export interface NotificationData {
     // ==================== 새로운 Nested 구조 (타입 안전성 향상) ====================
     schedule?: {
         scheduleId: string;
-        scheduleTitle: string;
+        scheduleTitle?: string;
         beforeMinutes?: number;
-        startDate: string;
-        endDate: string;
+        startDate?: string;
+        endDate?: string;
     };
     reservation?: {
         reservationId: string;
-        reservationTitle: string;
-        reservationDate: string;
+        reservationTitle?: string;
+        reservationDate?: string;
         status?: ReservationStatus;
     };
     resource?: {
         resourceId: string;
-        resourceName: string;
-        resourceType: ResourceType;
+        resourceName?: string;
+        resourceType?: ResourceType;
         vehicleInfo?: {
             consumable?: {
-                consumableName: string;
+                consumableId: string;
+                consumableName?: string;
             };
         };
     };

@@ -11,6 +11,7 @@ import { ResourceManager } from './resource-manager.entity';
 import { Consumable } from './consumable.entity';
 import { Maintenance } from './maintenance.entity';
 import { Notification } from './notification.entity';
+import { NotificationTypeEntity } from './notification-type.entity';
 import { EmployeeNotification } from './employee-notification.entity';
 import { File } from './file.entity';
 import {
@@ -45,6 +46,7 @@ export const Entities = [
     Consumable,
     Maintenance,
     Notification,
+    NotificationTypeEntity,
     EmployeeNotification,
     File,
     EmployeeReservationStats,
@@ -76,6 +78,7 @@ export const EntitiesMap = {
     Consumable,
     Maintenance,
     Notification,
+    NotificationTypeEntity,
     EmployeeNotification,
     File,
     EmployeeReservationStats,
@@ -107,6 +110,7 @@ export {
     Consumable,
     Maintenance,
     Notification,
+    NotificationTypeEntity,
     EmployeeNotification,
     File,
     EmployeeReservationStats,

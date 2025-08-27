@@ -68,6 +68,17 @@ export {
     VehicleInfoResponseDto as ContextVehicleInfoResponseDto,
 } from './context/notification/dtos/response-notification.dto';
 
+export {
+    NotificationTypeResponseDto as ContextNotificationTypeResponseDto,
+    NotificationTypeRequirementsDto as ContextNotificationTypeRequirementsDto,
+    NotificationTypeScheduleRequirementsDto as ContextNotificationTypeScheduleRequirementsDto,
+    NotificationTypeReservationRequirementsDto as ContextNotificationTypeReservationRequirementsDto,
+    NotificationTypeResourceRequirementsDto as ContextNotificationTypeResourceRequirementsDto,
+    NotificationTypeProjectRequirementsDto as ContextNotificationTypeProjectRequirementsDto,
+    NotificationTypeVehicleInfoRequirementsDto as ContextNotificationTypeVehicleInfoRequirementsDto,
+    NotificationTypeConsumableRequirementsDto as ContextNotificationTypeConsumableRequirementsDto,
+} from './context/notification/dtos/notification-type-response.dto';
+
 export { PushSubscriptionDto as ContextPushSubscriptionDto } from './context/notification/dtos/push-subscription.dto';
 export {
     PushNotificationDto as ContextPushNotificationDto,

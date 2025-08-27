@@ -1,79 +1,68 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { Notification } from '@libs/entities';
-import { PushNotificationPayload } from '../dtos/send-notification.dto';
+import { EmployeeMicroserviceAdapter } from '@src/domain/employee/adapters/employee-microservice.adapter';
+import { ResourceType } from '@libs/enums/resource-type.enum';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
-import { ResponseNotificationDto, NotificationDataDto } from '../dtos/response-notification.dto';
-import { PaginationData } from '@libs/dtos/pagination-response.dto';
+import { PushNotificationPayload } from '../dtos/send-notification.dto';
+import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api';
+import { FCMAdapter } from '../adapter/fcm-push.adapter';
+import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
+import { Notification } from '@libs/entities';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
+import { ResponseNotificationDto, NotificationDataDto } from '../dtos/response-notification.dto';
+import { NotificationTypeResponseDto } from '../dtos/notification-type-response.dto';
+import { DataSource, In, MoreThan, QueryRunner, Raw } from 'typeorm';
+import { DomainNotificationService } from '@src/domain/notification/notification.service';
+import { DomainNotificationTypeService } from '@src/domain/notification-type/notification-type.service';
+import { DomainEmployeeNotificationService } from '@src/domain/employee-notification/employee-notification.service';
+import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { CreateNotificationDataDto, CreateNotificationDto } from '../dtos/create-notification.dto';
-import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
-import { DomainNotificationService } from '@src/domain/notification/notification.service';
-import { DomainEmployeeService } from '@src/domain/employee/employee.service';
-import { DomainEmployeeNotificationService } from '@src/domain/employee-notification/employee-notification.service';
-import { DomainReservationService } from '@src/domain/reservation/reservation.service';
-import { FCMAdapter } from '../adapter/fcm-push.adapter';
-import { EmployeeMicroserviceAdapter } from '@src/domain/employee/adapters';
 import { DateUtil } from '@libs/utils/date.util';
-import { ResourceType } from '@libs/enums/resource-type.enum';
-import { Raw, MoreThan, QueryRunner } from 'typeorm';
-import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api';
+
+export interface NotificationData {
+    schedule: {
+        scheduleId: string;
+        scheduleTitle: string;
+        beforeMinutes?: number;
+        startDate: Date;
+        endDate: Date;
+    };
+    reservation: {
+        reservationId: string;
+        reservationTitle: string;
+        reservationDate: string;
+        status: ReservationStatus;
+    };
+    resource: {
+        resourceId: string;
+        resourceName: string;
+        resourceType: ResourceType;
+        vehicleInfo: {
+            consumable: {
+                consumableName: string;
+            };
+        };
+    };
+    project: {
+        projectId: string;
+        projectName?: string;
+    };
+}
 
 @Injectable()
 export class NotificationContextService {
     private readonly logger = new Logger(NotificationContextService.name);
-
     constructor(
-        private readonly domainNotificationService: DomainNotificationService,
-        private readonly domainEmployeeService: DomainEmployeeService,
-        private readonly domainEmployeeNotificationService: DomainEmployeeNotificationService,
-        private readonly domainReservationService: DomainReservationService,
-        private readonly fcmAdapter: FCMAdapter,
         private readonly employeeMicroserviceAdapter: EmployeeMicroserviceAdapter,
+        private readonly fcmAdapter: FCMAdapter,
+        private readonly domainNotificationService: DomainNotificationService,
+        private readonly domainNotificationTypeService: DomainNotificationTypeService,
+        private readonly domainEmployeeNotificationService: DomainEmployeeNotificationService,
+        private readonly domainEmployeeService: DomainEmployeeService,
+        private readonly dataSource: DataSource,
     ) {}
-
-    isProduction = process.env.NODE_ENV === 'production';
-
-    // 구독 관련 메서드들
-    async 푸시_알림을_구독한다(
-        authorization: string,
-        employeeId: string,
-        subscription: PushSubscriptionDto,
-    ): Promise<boolean> {
-        try {
-            // SSO 서버로 FCM 토큰 구독 요청
-            const fcmSubscribeDto = {
-                fcmToken: subscription.fcm?.token,
-            };
-
-            if (!fcmSubscribeDto.fcmToken) {
-                throw new BadRequestException('FCM 토큰이 필요합니다.');
-            }
-
-            const response = await this.employeeMicroserviceAdapter.subscribeFcm(
-                authorization,
-                employeeId,
-                fcmSubscribeDto,
-            );
-
-            if (response.success) {
-                return true;
-            }
-
-            return false;
-        } catch (error) {
-            console.log('SSO 서버 구독 실패:', error);
-            return false;
-        }
-    }
-
-    async 직접_알림을_전송한다(subscription: PushSubscriptionDto, payload: PushNotificationPayload): Promise<void> {
-        await this.fcmAdapter.sendBulkNotification([subscription.fcm.token], payload);
-    }
-
-    async 다중_알림을_전송한다(tokens: string[], payload: PushNotificationPayload): Promise<BatchResponse> {
-        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
-    }
 
     // 알림 조회 관련 메서드들
     async 내_알림_목록을_조회한다(
@@ -132,6 +121,51 @@ export class NotificationContextService {
         };
     }
 
+    async 시스템_관리자들에게_알림을_발송한다() {
+        // createNotificationDataDto: CreateNotificationDataDto, // notificationType: NotificationType,
+        // // 시스템 관리자들에게 알림 발송
+        // const systemAdmins = await this.domainEmployeeService.findAll({
+        //     where: {
+        //         roles: Raw(() => `'${Role.SYSTEM_ADMIN}' = ANY("roles")`),
+        //     },
+        // });
+        // const consumable = await this.domainConsumableService.findOne({
+        //     where: { consumableId: maintenance.consumableId },
+        //     relations: ['vehicleInfo', 'vehicleInfo.resource'],
+        //     withDeleted: true,
+        // });
+        // await this.notificationService.createNotification(
+        //     NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
+        //     {
+        //         resourceId: consumable.vehicleInfo.resource.resourceId,
+        //         resourceType: consumable.vehicleInfo.resource.type,
+        //         consumableName: consumable.name,
+        //         resourceName: consumable.vehicleInfo.resource.name,
+        //     },
+        //     systemAdmins.map((admin) => admin.employeeId),
+        // );
+    }
+
+    // ==================== 태스크 관련 메서드들 ====================
+
+    /**
+     * 소모품 교체 알림을 조회한다
+     */
+    async 소모품교체_알림을_조회한다(resourceId: string, consumableName: string, date: Date): Promise<any[]> {
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationType: NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
+                notificationData: Raw(
+                    (alias) =>
+                        `${alias} ->> 'resourceId' = '${resourceId}' AND ${alias} ->> 'consumableName' = '${consumableName}'`,
+                ),
+                createdAt: MoreThan(DateUtil.date(date).format('YYYY-MM-DD HH:mm')),
+            },
+        });
+
+        return notifications;
+    }
+
     async 알림을_읽음_처리한다(employeeId: string, notificationId: string): Promise<void> {
         const employeeNotification = await this.domainEmployeeNotificationService.findOne({
             where: {
@@ -181,203 +215,236 @@ export class NotificationContextService {
         }
     }
 
-    // 구독 정보 조회 관련 메서드들
-    async 구독_정보를_조회한다(token?: string, employeeId?: string) {
-        if (!token && !employeeId) {
-            return null;
-        }
-
-        if (employeeId) {
-            return await this.직원별_구독정보를_조회한다(employeeId);
-        }
-
-        return await this.토큰별_구독정보를_조회한다(token);
-    }
-
-    async 시스템_관리자들에게_알림을_발송한다() {
-        // createNotificationDataDto: CreateNotificationDataDto, // notificationType: NotificationType,
-        // // 시스템 관리자들에게 알림 발송
-        // const systemAdmins = await this.domainEmployeeService.findAll({
-        //     where: {
-        //         roles: Raw(() => `'${Role.SYSTEM_ADMIN}' = ANY("roles")`),
-        //     },
-        // });
-        // const consumable = await this.domainConsumableService.findOne({
-        //     where: { consumableId: maintenance.consumableId },
-        //     relations: ['vehicleInfo', 'vehicleInfo.resource'],
-        //     withDeleted: true,
-        // });
-        // await this.notificationService.createNotification(
-        //     NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
-        //     {
-        //         resourceId: consumable.vehicleInfo.resource.resourceId,
-        //         resourceType: consumable.vehicleInfo.resource.type,
-        //         consumableName: consumable.name,
-        //         resourceName: consumable.vehicleInfo.resource.name,
-        //     },
-        //     systemAdmins.map((admin) => admin.employeeId),
-        // );
-    }
-
-    async 토큰별_구독정보를_조회한다(token: string) {
-        const employee = await this.domainEmployeeService.findOne({
-            where: {
-                subscriptions: Raw(
-                    (alias) => `
-                EXISTS (
-                  SELECT 1 FROM jsonb_array_elements(${alias}) AS elem
-                  WHERE elem -> 'fcm' ->> 'token' = '${token}'
-                )
-              `,
-                ),
-            },
-        });
-
-        return {
-            employeeId: employee.employeeId,
-            employeeName: employee.name,
-            subscriptions: employee.subscriptions,
-        };
-    }
-
-    async 직원별_구독정보를_조회한다(employeeId: string) {
+    async PUSH_알림을_구독한다(employeeId: string, subscription: PushSubscriptionDto): Promise<boolean> {
         const employee = await this.domainEmployeeService.findOne({
             where: { employeeId },
         });
-        return {
-            employeeId: employee.employeeId,
-            employeeName: employee.name,
-            subscriptions: employee.subscriptions,
-        };
+
+        if (!employee) {
+            throw new BadRequestException('Employee not found');
+        }
+
+        employee.subscriptions = [subscription as any];
+        const updatedEmployee = await this.domainEmployeeService.save(employee);
+
+        return updatedEmployee.subscriptions.length > 0;
+        // try {
+        //     // SSO 서버로 FCM 토큰 구독 요청
+        //     const fcmSubscribeDto = {
+        //         fcmToken: subscription.fcm?.token,
+        //     };
+
+        //     if (!fcmSubscribeDto.fcmToken) {
+        //         throw new BadRequestException('FCM 토큰이 필요합니다.');
+        //     }
+
+        //     const response = await this.employeeMicroserviceAdapter.subscribeFcm(
+        //         authorization,
+        //         employeeId,
+        //         fcmSubscribeDto,
+        //     );
+
+        //     if (response.success) {
+        //         return true;
+        //     }
+
+        //     return false;
+        // } catch (error) {
+        //     console.log('SSO 서버 구독 실패:', error);
+        //     return false;
+        // }
     }
 
-    async 구독_목록을_조회한다(employeeId: string): Promise<PushSubscriptionDto[]> {
-        const employee = await this.domainEmployeeService.findOne({
-            where: { employeeId },
+    async 구독_목록을_조회한다(employeeIds: string[]): Promise<string[]> {
+        const employees = await this.domainEmployeeService.findAll({
+            where: { employeeId: In(employeeIds) },
             select: { subscriptions: true, isPushNotificationEnabled: true },
         });
 
-        if (
-            !employee ||
-            !employee.subscriptions ||
-            employee.subscriptions.length === 0 ||
-            !employee.isPushNotificationEnabled
-        ) {
+        if (!employees || employees.length === 0 || !employees.some((employee) => employee.isPushNotificationEnabled)) {
             return [];
         }
-        return employee.subscriptions;
+        return employees.flatMap((employee) => employee.subscriptions.map((subscription) => subscription.fcm.token));
+
+        // const tokens = await this.employeeMicroserviceAdapter.getFcmTokens(authorization, [employeeId]);
+        // if (tokens.length === 0) {
+        //     return [];
+        // }
+        // return tokens.map((token) => token.fcmToken);
     }
 
-    // 알림 생성 관련 메서드들
+    /**
+     * 알림 내용을 생성한다 (데이터베이스 템플릿 기반)
+     */
     async 알림_내용을_생성한다(
         notificationType: NotificationType,
-        createNotificationDataDto: CreateNotificationDataDto,
+        notificationData: CreateNotificationDataDto,
     ): Promise<CreateNotificationDto> {
         const createNotificationDto: CreateNotificationDto = {
             title: '',
             body: '',
             notificationType: notificationType,
-            notificationData: createNotificationDataDto,
+            notificationData: notificationData,
             createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
-            isSent: true,
+            isSent: false,
         };
 
-        switch (notificationType) {
-            case NotificationType.RESERVATION_DATE_UPCOMING:
-                createNotificationDto.title = `예약 시간이 ${createNotificationDataDto.schedule.beforeMinutes}분 남았습니다.`;
-                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
-                createNotificationDto.createdAt = DateUtil.parse(createNotificationDataDto.schedule.startDate)
-                    .addMinutes(-createNotificationDataDto.schedule.beforeMinutes)
-                    .format('YYYY-MM-DD HH:mm');
-                createNotificationDto.isSent = false;
-                break;
-            case NotificationType.RESERVATION_STATUS_PENDING:
-                createNotificationDto.title = `[숙소 확정 대기중] ${createNotificationDataDto.reservation.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
-                break;
-            case NotificationType.RESERVATION_STATUS_CONFIRMED:
-                createNotificationDto.title = `[예약 확정] ${createNotificationDataDto.reservation.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
-                break;
-            case NotificationType.RESERVATION_STATUS_CANCELLED:
-                createNotificationDto.title = `[예약 취소] ${createNotificationDataDto.reservation.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
-                break;
-            case NotificationType.RESERVATION_STATUS_REJECTED:
-                createNotificationDto.title = `[예약 취소 (관리자)] ${createNotificationDataDto.reservation.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
-                break;
-            case NotificationType.RESERVATION_TIME_CHANGED:
-                createNotificationDto.title = `[예약 시간 변경] ${createNotificationDataDto.reservation.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
-                break;
-            case NotificationType.RESERVATION_PARTICIPANT_CHANGED:
-                createNotificationDto.title = `[참가자 변경] ${createNotificationDataDto.reservation.reservationTitle}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
-                break;
-            case NotificationType.RESOURCE_CONSUMABLE_REPLACING:
-                createNotificationDto.title = `[교체 주기 알림] ${createNotificationDataDto.resource.vehicleInfo.consumable.consumableName}`;
-                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
-                break;
-            case NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING:
-                createNotificationDto.title = `[교체 지연 알림] ${createNotificationDataDto.resource.vehicleInfo.consumable.consumableName}`;
-                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
-                break;
-            case NotificationType.RESOURCE_VEHICLE_RETURNED:
-                createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
-                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
-                break;
-            case NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED:
-                createNotificationDto.title = `[차량 반납 지연 알림] ${createNotificationDataDto.resource.resourceName}`;
-                createNotificationDto.body = `${createNotificationDataDto.reservation.reservationDate}`;
-                break;
-            case NotificationType.RESOURCE_MAINTENANCE_COMPLETED:
-                createNotificationDto.title = `[정비 완료] ${createNotificationDataDto.resource.vehicleInfo.consumable.consumableName}`;
-                createNotificationDto.body = `${createNotificationDataDto.resource.resourceName}`;
-                break;
+        // 데이터베이스에서 알림 타입별 템플릿 조회
+        try {
+            const template = await this.domainNotificationTypeService.findTemplateByType(notificationType);
+
+            if (template) {
+                // 일반적인 템플릿 변수 치환
+                createNotificationDto.title =
+                    notificationType === NotificationType.RESERVATION_DATE_REMINDING
+                        ? this._생성_리마인더_알림(notificationData)
+                        : this._템플릿_변수를_치환한다(template.defaultTitleTemplate, notificationData);
+                createNotificationDto.body = this._템플릿_변수를_치환한다(
+                    template.defaultBodyTemplate,
+                    notificationData,
+                );
+            } else {
+                // 템플릿이 없으면 기본 형식 사용
+                this.logger.warn(`알림 타입 템플릿을 찾을 수 없습니다: ${notificationType}`);
+                createNotificationDto.title = `[알림] ${this._제목_추출(notificationData)}`;
+                createNotificationDto.body = this._날짜_추출(notificationData);
+            }
+        } catch (error) {
+            this.logger.error(`알림 템플릿 조회 중 오류 발생: ${error.message}`, error.stack);
+            // 오류 발생 시 기본 형식 사용
+            createNotificationDto.title = `[알림] ${this._제목_추출(notificationData)}`;
+            createNotificationDto.body = this._날짜_추출(notificationData);
         }
 
         return createNotificationDto;
     }
 
-    async 알림을_저장한다(
-        createNotificationDto: CreateNotificationDto,
-        notiTarget: string[],
-        repositoryOptions?: IRepositoryOptions<Notification>,
-    ) {
-        const notification = await this.domainNotificationService.save(createNotificationDto, repositoryOptions);
-        // employee 와 연결 필요
-        for (const employeeId of notiTarget) {
-            await this.domainEmployeeNotificationService.save(
-                {
-                    employeeId: employeeId,
-                    notificationId: notification.notificationId,
-                },
-                repositoryOptions,
-            );
+    // ==================== 알림 타입 관리 ====================
+
+    /**
+     * 모든 알림 타입 목록을 조회한다
+     */
+    async 알림_타입_목록을_조회한다(): Promise<NotificationTypeResponseDto[]> {
+        const notificationTypes = await this.domainNotificationTypeService.findAll();
+
+        return notificationTypes.map((notificationType) => ({
+            notificationType: notificationType.notificationType,
+            requirements: notificationType.requirements,
+            description: notificationType.description,
+        }));
+    }
+
+    async 알림을_저장한다(notificationDto: CreateNotificationDto, employeeIds: string[]): Promise<Notification> {
+        const notification = await this.domainNotificationService.save(notificationDto);
+        for (const employeeId of employeeIds) {
+            await this.domainEmployeeNotificationService.save({
+                employeeId,
+                notificationId: notification.notificationId,
+                isRead: false,
+            });
         }
         return notification;
     }
 
-    async 리마인더_알림_내용을_생성한다(
-        createNotificationDataDto: CreateNotificationDataDto,
-    ): Promise<CreateNotificationDto> {
-        const now = DateUtil.now().toDate();
-        const reservation = await this.domainReservationService.findOne({
-            where: {
-                reservationId: createNotificationDataDto.reservation.reservationId,
-            },
+    async 알림을_전송한다(tokens: string[], payload: PushNotificationPayload): Promise<BatchResponse> {
+        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
+    }
+
+    async 알림_전송_프로세스를_진행한다(
+        notificationType: NotificationType,
+        notificationData: CreateNotificationDataDto,
+        targetEmployeeIds: string[],
+    ) {
+        // 알림에 들어갈 title과 body 생성
+        const notificationContent = await this.알림_내용을_생성한다(notificationType, notificationData);
+        // 알림데이터(Notification) 생성
+        const notification = await this.알림을_저장한다(notificationContent, targetEmployeeIds);
+        // 알림 전송을 위한 구독 정보 조회
+        const tokens = await this.구독_목록을_조회한다(targetEmployeeIds);
+        if (tokens.length === 0) {
+            return;
+        }
+        // 실제 알림 전송
+        await this.알림을_전송한다(tokens, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
         });
-        const diffInMilliseconds = reservation.startDate.getTime() - now.getTime();
+        // 알림 전송 후 전송상태 업데이트
+        await this.domainNotificationService.setSentTrue([notification.notificationId]);
+    }
+
+    // ==================== Private Helper Functions ====================
+
+    /**
+     * 템플릿 변수를 실제 값으로 치환한다
+     */
+    private _템플릿_변수를_치환한다(template: string, data: CreateNotificationDataDto): string {
+        let result = template;
+
+        // 기본 변수들 치환
+        result = result.replace(/\{title\}/g, this._제목_추출(data));
+        result = result.replace(/\{dateRange\}/g, this._날짜_추출(data));
+        result = result.replace(/\{resourceName\}/g, this._자원명_추출(data));
+
+        // 소모품 이름 치환
+        const consumableName = data.resource?.vehicleInfo?.consumable?.consumableName || '소모품';
+        result = result.replace(/\{consumableName\}/g, consumableName);
+
+        // 예약 전 분 수 치환
+        const beforeMinutes = data.schedule?.beforeMinutes || 10;
+        result = result.replace(/\{beforeMinutes\}/g, beforeMinutes.toString());
+
+        return result;
+    }
+
+    /**
+     * 제목을 추출한다 (scheduleTitle 또는 reservationTitle 우선)
+     */
+    private _제목_추출(data: CreateNotificationDataDto): string {
+        return data.schedule?.scheduleTitle || data.reservation?.reservationTitle || '제목 없음';
+    }
+
+    /**
+     * 날짜를 추출한다 (기존 reservationDate 또는 startDate~endDate를 변형하여 생성)
+     */
+    private _날짜_추출(data: CreateNotificationDataDto): string {
+        // 기존 reservation의 reservationDate가 있으면 사용
+        if (data.reservation?.reservationDate) {
+            return data.reservation.reservationDate;
+        }
+        // schedule의 startDate, endDate가 있으면 toAlarmRangeString으로 변형
+        if (data.schedule?.startDate && data.schedule?.endDate) {
+            return DateUtil.toAlarmRangeString(
+                DateUtil.format(data.schedule.startDate),
+                DateUtil.format(data.schedule.endDate),
+            );
+        }
+        return '';
+    }
+
+    /**
+     * 자원명을 추출한다
+     */
+    private _자원명_추출(data: CreateNotificationDataDto): string {
+        return data.resource?.resourceName || '자원 정보 없음';
+    }
+
+    /**
+     * 리마인더 알림을 생성한다 (기존 복잡한 시간 계산 로직 포함)
+     */
+    private _생성_리마인더_알림(data: CreateNotificationDataDto): string {
+        const now = DateUtil.now().toDate();
+        const diffInMilliseconds = DateUtil.parse(data.schedule.startDate).toDate().getTime() - now.getTime();
         const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
 
         const days = Math.floor(diffInMinutes / (24 * 60));
         const hours = Math.floor((diffInMinutes % (24 * 60)) / 60);
         const minutes = diffInMinutes % 60;
-
         const parts: string[] = [];
         if (diffInMilliseconds > 0) {
-            switch (createNotificationDataDto.resource.resourceType) {
+            switch (data.resource.resourceType) {
                 case ResourceType.MEETING_ROOM:
                     parts.push('회의 시작까지');
                     break;
@@ -404,7 +471,7 @@ export class NotificationContextService {
 
             parts.push('남았습니다.');
         } else {
-            switch (createNotificationDataDto.resource.resourceType) {
+            switch (data.resource.resourceType) {
                 case ResourceType.MEETING_ROOM:
                     parts.push('회의 참여 알림');
                     break;
@@ -421,142 +488,6 @@ export class NotificationContextService {
         }
 
         const timeDifferencePhrase = parts.join(' ');
-
-        return {
-            title: `[${createNotificationDataDto.reservation.reservationTitle}]\n${timeDifferencePhrase}`,
-            body: createNotificationDataDto.reservation.reservationDate,
-            notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
-            notificationData: createNotificationDataDto,
-            createdAt: DateUtil.now().format('YYYY-MM-DD HH:mm'),
-            isSent: true,
-        };
-    }
-
-    async 알림을_생성한다(
-        notificationType: NotificationType,
-        createNotificationDataDto: CreateNotificationDataDto,
-        notiTarget: string[],
-        repositoryOptions?: IRepositoryOptions<Notification>,
-    ): Promise<void> {
-        notiTarget = Array.from(new Set(notiTarget));
-        const notificationDto = await this.알림_내용을_생성한다(notificationType, createNotificationDataDto);
-        const notification = await this.알림을_저장한다(notificationDto, notiTarget, repositoryOptions);
-
-        const totalSubscriptions: PushSubscriptionDto[] = [];
-        for (const employeeId of notiTarget) {
-            const subscriptions = await this.구독_목록을_조회한다(employeeId);
-            totalSubscriptions.push(...subscriptions);
-        }
-
-        switch (notificationType) {
-            case NotificationType.RESERVATION_DATE_UPCOMING:
-                // this.스케줄_작업을_생성한다(notification, totalSubscriptions);
-                break;
-            default:
-                await this.다중_알림을_전송한다(
-                    totalSubscriptions.map((subscription) => subscription.fcm.token),
-                    {
-                        title: notification.title,
-                        body: notification.body,
-                        notificationType: notification.notificationType,
-                        notificationData: notification.notificationData,
-                    },
-                );
-                break;
-        }
-    }
-
-    async 리마인더_알림을_전송한다(
-        notificationType: NotificationType,
-        createNotificationDataDto: CreateNotificationDataDto,
-        notiTarget: string[],
-    ): Promise<void> {
-        const createNotificationDto = await this.리마인더_알림_내용을_생성한다(createNotificationDataDto);
-
-        if (!createNotificationDto) {
-            return;
-        }
-
-        const notification = await this.알림을_저장한다(createNotificationDto, notiTarget);
-
-        const totalSubscriptions: PushSubscriptionDto[] = [];
-        for (const employeeId of notiTarget) {
-            const subscriptions = await this.구독_목록을_조회한다(employeeId);
-            totalSubscriptions.push(...subscriptions);
-        }
-
-        await this.다중_알림을_전송한다(
-            totalSubscriptions.map((subscription) => subscription.fcm.token),
-            {
-                title: notification.title,
-                body: notification.body,
-                notificationType: notification.notificationType,
-                notificationData: notification.notificationData,
-            },
-        );
-    }
-
-    async 요청_알림을_전송한다(
-        notificationType: NotificationType,
-        createNotificationDataDto: CreateNotificationDataDto,
-        notiTarget: string[],
-    ): Promise<void> {
-        const createNotificationDto = await this.알림_내용을_생성한다(notificationType, createNotificationDataDto);
-
-        if (!createNotificationDto) {
-            return;
-        }
-
-        const notification = await this.알림을_저장한다(createNotificationDto, notiTarget);
-
-        const totalSubscriptions: PushSubscriptionDto[] = [];
-        for (const employeeId of notiTarget) {
-            const subscriptions = await this.구독_목록을_조회한다(employeeId);
-            totalSubscriptions.push(...subscriptions);
-        }
-
-        await this.다중_알림을_전송한다(
-            totalSubscriptions.map((subscription) => subscription.fcm.token),
-            {
-                title: notification.title,
-                body: notification.body,
-                notificationType: notification.notificationType,
-                notificationData: notification.notificationData,
-            },
-        );
-    }
-
-    async 스케줄_작업을_삭제한다(reservationId: string) {
-        const notifications = await this.domainNotificationService.findAll({
-            where: {
-                notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
-                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
-                isSent: false,
-            },
-        });
-        for (const notification of notifications) {
-            await this.domainEmployeeNotificationService.deleteByNotificationId(notification.notificationId);
-            await this.domainNotificationService.delete(notification.notificationId);
-        }
-    }
-
-    // ==================== 태스크 관련 메서드들 ====================
-
-    /**
-     * 소모품 교체 알림을 조회한다
-     */
-    async 소모품교체_알림을_조회한다(resourceId: string, consumableName: string, date: Date): Promise<any[]> {
-        const notifications = await this.domainNotificationService.findAll({
-            where: {
-                notificationType: NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
-                notificationData: Raw(
-                    (alias) =>
-                        `${alias} ->> 'resourceId' = '${resourceId}' AND ${alias} ->> 'consumableName' = '${consumableName}'`,
-                ),
-                createdAt: MoreThan(DateUtil.date(date).format('YYYY-MM-DD HH:mm')),
-            },
-        });
-
-        return notifications;
+        return `[${data.reservation.reservationTitle}]\n${timeDifferencePhrase}`;
     }
 }

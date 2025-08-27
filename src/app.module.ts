@@ -19,12 +19,12 @@ import { Entities } from '@libs/entities';
 
 import { LegacyApplicationModule } from './legacy-application.module';
 import { FileContextModule } from './context/file/file.context.module';
-import { NotificationContextModule } from './context/notification/notification.context.module';
 import { ResourceManagementModule } from './business/resource-management/resource-management.module';
 import { ReservationManagementModule } from './business/reservation-management/reservation-management.module';
 import { ScheduleManagementModule } from './business/schedule-management/schedule-management.module';
 import { EmployeeManagementModule } from './business/employee-management/employee-management.module';
 import { TaskManagementModule } from './business/task-management/task-management.module';
+import { NotificationManagementModule } from './business/notification-management/notification-management.module';
 
 @Module({
     imports: [
@@ -51,12 +51,12 @@ import { TaskManagementModule } from './business/task-management/task-management
 
         /** 비즈니스 */
         FileContextModule,
-        NotificationContextModule,
         ResourceManagementModule,
         ReservationManagementModule,
         ScheduleManagementModule,
         EmployeeManagementModule,
         TaskManagementModule,
+        NotificationManagementModule,
     ],
     providers: [
         // ApiDocService, DbDocService

@@ -1151,7 +1151,7 @@ exports.File = File = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleRelation = exports.ScheduleParticipant = exports.Schedule = exports.FileVehicleInfo = exports.FileResource = exports.FileReservationVehicle = exports.FileMaintenance = exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
+exports.ScheduleRelation = exports.ScheduleParticipant = exports.Schedule = exports.FileVehicleInfo = exports.FileResource = exports.FileReservationVehicle = exports.FileMaintenance = exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.NotificationTypeEntity = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
 const employee_entity_1 = __webpack_require__(/*! ./employee.entity */ "./libs/entities/employee.entity.ts");
 Object.defineProperty(exports, "Employee", ({ enumerable: true, get: function () { return employee_entity_1.Employee; } }));
 const resource_entity_1 = __webpack_require__(/*! ./resource.entity */ "./libs/entities/resource.entity.ts");
@@ -1178,6 +1178,8 @@ const maintenance_entity_1 = __webpack_require__(/*! ./maintenance.entity */ "./
 Object.defineProperty(exports, "Maintenance", ({ enumerable: true, get: function () { return maintenance_entity_1.Maintenance; } }));
 const notification_entity_1 = __webpack_require__(/*! ./notification.entity */ "./libs/entities/notification.entity.ts");
 Object.defineProperty(exports, "Notification", ({ enumerable: true, get: function () { return notification_entity_1.Notification; } }));
+const notification_type_entity_1 = __webpack_require__(/*! ./notification-type.entity */ "./libs/entities/notification-type.entity.ts");
+Object.defineProperty(exports, "NotificationTypeEntity", ({ enumerable: true, get: function () { return notification_type_entity_1.NotificationTypeEntity; } }));
 const employee_notification_entity_1 = __webpack_require__(/*! ./employee-notification.entity */ "./libs/entities/employee-notification.entity.ts");
 Object.defineProperty(exports, "EmployeeNotification", ({ enumerable: true, get: function () { return employee_notification_entity_1.EmployeeNotification; } }));
 const file_entity_1 = __webpack_require__(/*! ./file.entity */ "./libs/entities/file.entity.ts");
@@ -1221,6 +1223,7 @@ exports.Entities = [
     consumable_entity_1.Consumable,
     maintenance_entity_1.Maintenance,
     notification_entity_1.Notification,
+    notification_type_entity_1.NotificationTypeEntity,
     employee_notification_entity_1.EmployeeNotification,
     file_entity_1.File,
     view_1.EmployeeReservationStats,
@@ -1251,6 +1254,7 @@ exports.EntitiesMap = {
     Consumable: consumable_entity_1.Consumable,
     Maintenance: maintenance_entity_1.Maintenance,
     Notification: notification_entity_1.Notification,
+    NotificationTypeEntity: notification_type_entity_1.NotificationTypeEntity,
     EmployeeNotification: employee_notification_entity_1.EmployeeNotification,
     File: file_entity_1.File,
     EmployeeReservationStats: view_1.EmployeeReservationStats,
@@ -1385,6 +1389,72 @@ __decorate([
 exports.MeetingRoomInfo = MeetingRoomInfo = __decorate([
     (0, typeorm_1.Entity)('meeting_room_infos')
 ], MeetingRoomInfo);
+
+
+/***/ }),
+
+/***/ "./libs/entities/notification-type.entity.ts":
+/*!***************************************************!*\
+  !*** ./libs/entities/notification-type.entity.ts ***!
+  \***************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationTypeEntity = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+let NotificationTypeEntity = class NotificationTypeEntity {
+};
+exports.NotificationTypeEntity = NotificationTypeEntity;
+__decorate([
+    (0, typeorm_1.PrimaryColumn)({
+        type: 'enum',
+        enum: notification_type_enum_1.NotificationType,
+        enumName: 'notifications_notificationtype_enum',
+        comment: '알림 타입 (기존 notifications 테이블과 동일한 ENUM 사용)',
+    }),
+    __metadata("design:type", typeof (_a = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _a : Object)
+], NotificationTypeEntity.prototype, "notificationType", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'jsonb',
+        comment: '알림 발송 시 필요한 정보 요구사항',
+    }),
+    __metadata("design:type", Object)
+], NotificationTypeEntity.prototype, "requirements", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        comment: '기본 알림 제목 템플릿',
+    }),
+    __metadata("design:type", String)
+], NotificationTypeEntity.prototype, "defaultTitleTemplate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        comment: '기본 알림 내용 템플릿',
+    }),
+    __metadata("design:type", String)
+], NotificationTypeEntity.prototype, "defaultBodyTemplate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        nullable: true,
+        comment: '알림 설명',
+    }),
+    __metadata("design:type", String)
+], NotificationTypeEntity.prototype, "description", void 0);
+exports.NotificationTypeEntity = NotificationTypeEntity = __decorate([
+    (0, typeorm_1.Entity)('notification_types')
+], NotificationTypeEntity);
 
 
 /***/ }),
@@ -3006,6 +3076,7 @@ var NotificationType;
     NotificationType["RESERVATION_STATUS_CANCELLED"] = "RESERVATION_STATUS_CANCELLED";
     NotificationType["RESERVATION_STATUS_REJECTED"] = "RESERVATION_STATUS_REJECTED";
     NotificationType["RESERVATION_DATE_UPCOMING"] = "RESERVATION_DATE_UPCOMING";
+    NotificationType["RESERVATION_DATE_REMINDING"] = "RESERVATION_DATE_REMINDING";
     NotificationType["RESERVATION_TIME_CHANGED"] = "RESERVATION_TIME_CHANGED";
     NotificationType["RESERVATION_PARTICIPANT_CHANGED"] = "RESERVATION_PARTICIPANT_CHANGED";
     NotificationType["RESOURCE_CONSUMABLE_REPLACING"] = "RESOURCE_CONSUMABLE_REPLACING";
@@ -3725,12 +3796,12 @@ const jwt_config_1 = __webpack_require__(/*! @libs/configs/jwt.config */ "./libs
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const legacy_application_module_1 = __webpack_require__(/*! ./legacy-application.module */ "./src/legacy-application.module.ts");
 const file_context_module_1 = __webpack_require__(/*! ./context/file/file.context.module */ "./src/context/file/file.context.module.ts");
-const notification_context_module_1 = __webpack_require__(/*! ./context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
 const resource_management_module_1 = __webpack_require__(/*! ./business/resource-management/resource-management.module */ "./src/business/resource-management/resource-management.module.ts");
 const reservation_management_module_1 = __webpack_require__(/*! ./business/reservation-management/reservation-management.module */ "./src/business/reservation-management/reservation-management.module.ts");
 const schedule_management_module_1 = __webpack_require__(/*! ./business/schedule-management/schedule-management.module */ "./src/business/schedule-management/schedule-management.module.ts");
 const employee_management_module_1 = __webpack_require__(/*! ./business/employee-management/employee-management.module */ "./src/business/employee-management/employee-management.module.ts");
 const task_management_module_1 = __webpack_require__(/*! ./business/task-management/task-management.module */ "./src/business/task-management/task-management.module.ts");
+const notification_management_module_1 = __webpack_require__(/*! ./business/notification-management/notification-management.module */ "./src/business/notification-management/notification-management.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -3754,12 +3825,12 @@ exports.AppModule = AppModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature(entities_1.Entities),
             legacy_application_module_1.LegacyApplicationModule,
             file_context_module_1.FileContextModule,
-            notification_context_module_1.NotificationContextModule,
             resource_management_module_1.ResourceManagementModule,
             reservation_management_module_1.ReservationManagementModule,
             schedule_management_module_1.ScheduleManagementModule,
             employee_management_module_1.EmployeeManagementModule,
             task_management_module_1.TaskManagementModule,
+            notification_management_module_1.NotificationManagementModule,
         ],
         providers: [],
     })
@@ -20669,7 +20740,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReservationVehicleFileResponseDto = exports.ContextFileResponseDto = exports.ContextCreateFileDataDto = exports.ContextPushNotificationPayload = exports.ContextPushNotificationDto = exports.ContextPushSubscriptionDto = exports.ContextVehicleInfoResponseDto = exports.ContextConsumableResponseDto = exports.ProjectResponseDto = exports.ContextResourceResponseDto = exports.ReservationResponseDto = exports.ScheduleResponseDto = exports.PushNotificationSendResult = exports.ContextNotificationDataDto = exports.ContextResponseNotificationDto = exports.ContextSendNotificationDto = exports.ContextCreateEmployeeNotificationDto = exports.ContextCreateNotificationDataDto = exports.ContextCreateNotificationDto = exports.ResourceAvailabilityDto = void 0;
+exports.ReservationVehicleFileResponseDto = exports.ContextFileResponseDto = exports.ContextCreateFileDataDto = exports.ContextPushNotificationPayload = exports.ContextPushNotificationDto = exports.ContextPushSubscriptionDto = exports.ContextNotificationTypeConsumableRequirementsDto = exports.ContextNotificationTypeVehicleInfoRequirementsDto = exports.ContextNotificationTypeProjectRequirementsDto = exports.ContextNotificationTypeResourceRequirementsDto = exports.ContextNotificationTypeReservationRequirementsDto = exports.ContextNotificationTypeScheduleRequirementsDto = exports.ContextNotificationTypeRequirementsDto = exports.ContextNotificationTypeResponseDto = exports.ContextVehicleInfoResponseDto = exports.ContextConsumableResponseDto = exports.ProjectResponseDto = exports.ContextResourceResponseDto = exports.ReservationResponseDto = exports.ScheduleResponseDto = exports.PushNotificationSendResult = exports.ContextNotificationDataDto = exports.ContextResponseNotificationDto = exports.ContextSendNotificationDto = exports.ContextCreateEmployeeNotificationDto = exports.ContextCreateNotificationDataDto = exports.ContextCreateNotificationDto = exports.ResourceAvailabilityDto = void 0;
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/create-reservation.dto */ "./src/business/reservation-management/dtos/create-reservation.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservaion-query.dto */ "./src/business/reservation-management/dtos/reservaion-query.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservation-response.dto */ "./src/business/reservation-management/dtos/reservation-response.dto.ts"), exports);
@@ -20710,6 +20781,15 @@ Object.defineProperty(exports, "ContextResourceResponseDto", ({ enumerable: true
 Object.defineProperty(exports, "ProjectResponseDto", ({ enumerable: true, get: function () { return response_notification_dto_1.ProjectResponseDto; } }));
 Object.defineProperty(exports, "ContextConsumableResponseDto", ({ enumerable: true, get: function () { return response_notification_dto_1.ConsumableResponseDto; } }));
 Object.defineProperty(exports, "ContextVehicleInfoResponseDto", ({ enumerable: true, get: function () { return response_notification_dto_1.VehicleInfoResponseDto; } }));
+var notification_type_response_dto_1 = __webpack_require__(/*! ./context/notification/dtos/notification-type-response.dto */ "./src/context/notification/dtos/notification-type-response.dto.ts");
+Object.defineProperty(exports, "ContextNotificationTypeResponseDto", ({ enumerable: true, get: function () { return notification_type_response_dto_1.NotificationTypeResponseDto; } }));
+Object.defineProperty(exports, "ContextNotificationTypeRequirementsDto", ({ enumerable: true, get: function () { return notification_type_response_dto_1.NotificationTypeRequirementsDto; } }));
+Object.defineProperty(exports, "ContextNotificationTypeScheduleRequirementsDto", ({ enumerable: true, get: function () { return notification_type_response_dto_1.NotificationTypeScheduleRequirementsDto; } }));
+Object.defineProperty(exports, "ContextNotificationTypeReservationRequirementsDto", ({ enumerable: true, get: function () { return notification_type_response_dto_1.NotificationTypeReservationRequirementsDto; } }));
+Object.defineProperty(exports, "ContextNotificationTypeResourceRequirementsDto", ({ enumerable: true, get: function () { return notification_type_response_dto_1.NotificationTypeResourceRequirementsDto; } }));
+Object.defineProperty(exports, "ContextNotificationTypeProjectRequirementsDto", ({ enumerable: true, get: function () { return notification_type_response_dto_1.NotificationTypeProjectRequirementsDto; } }));
+Object.defineProperty(exports, "ContextNotificationTypeVehicleInfoRequirementsDto", ({ enumerable: true, get: function () { return notification_type_response_dto_1.NotificationTypeVehicleInfoRequirementsDto; } }));
+Object.defineProperty(exports, "ContextNotificationTypeConsumableRequirementsDto", ({ enumerable: true, get: function () { return notification_type_response_dto_1.NotificationTypeConsumableRequirementsDto; } }));
 var push_subscription_dto_1 = __webpack_require__(/*! ./context/notification/dtos/push-subscription.dto */ "./src/context/notification/dtos/push-subscription.dto.ts");
 Object.defineProperty(exports, "ContextPushSubscriptionDto", ({ enumerable: true, get: function () { return push_subscription_dto_1.PushSubscriptionDto; } }));
 var send_notification_dto_1 = __webpack_require__(/*! ./context/notification/dtos/send-notification.dto */ "./src/context/notification/dtos/send-notification.dto.ts");
@@ -21474,6 +21554,333 @@ exports.EmployeeManagementService = EmployeeManagementService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof employee_context_service_1.EmployeeContextService !== "undefined" && employee_context_service_1.EmployeeContextService) === "function" ? _a : Object])
 ], EmployeeManagementService);
+
+
+/***/ }),
+
+/***/ "./src/business/notification-management/controllers/cron.notification.controller.ts":
+/*!******************************************************************************************!*\
+  !*** ./src/business/notification-management/controllers/cron.notification.controller.ts ***!
+  \******************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronNotificationController = void 0;
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const notification_management_service_1 = __webpack_require__(/*! ../notification-management.service */ "./src/business/notification-management/notification-management.service.ts");
+let CronNotificationController = class CronNotificationController {
+    constructor(notificationManagementService) {
+        this.notificationManagementService = notificationManagementService;
+    }
+    async sendUpcomingNotification() {
+        return this.notificationManagementService.다가오는_알림을_전송한다();
+    }
+};
+exports.CronNotificationController = CronNotificationController;
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/send-upcoming-notification'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronNotificationController.prototype, "sendUpcomingNotification", null);
+exports.CronNotificationController = CronNotificationController = __decorate([
+    (0, swagger_1.ApiTags)('v2 알림 '),
+    (0, common_1.Controller)('v2/notifications'),
+    (0, public_decorator_1.Public)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_management_service_1.NotificationManagementService !== "undefined" && notification_management_service_1.NotificationManagementService) === "function" ? _a : Object])
+], CronNotificationController);
+
+
+/***/ }),
+
+/***/ "./src/business/notification-management/controllers/notification.controller.ts":
+/*!*************************************************************************************!*\
+  !*** ./src/business/notification-management/controllers/notification.controller.ts ***!
+  \*************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationController = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const pagination_query_dto_1 = __webpack_require__(/*! @libs/dtos/pagination-query.dto */ "./libs/dtos/pagination-query.dto.ts");
+const pagination_response_dto_1 = __webpack_require__(/*! @libs/dtos/pagination-response.dto */ "./libs/dtos/pagination-response.dto.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const push_subscription_dto_1 = __webpack_require__(/*! @src/context/notification/dtos/push-subscription.dto */ "./src/context/notification/dtos/push-subscription.dto.ts");
+const response_notification_dto_1 = __webpack_require__(/*! @src/context/notification/dtos/response-notification.dto */ "./src/context/notification/dtos/response-notification.dto.ts");
+const notification_type_response_dto_1 = __webpack_require__(/*! @src/context/notification/dtos/notification-type-response.dto */ "./src/context/notification/dtos/notification-type-response.dto.ts");
+const create_notification_dto_1 = __webpack_require__(/*! @src/context/notification/dtos/create-notification.dto */ "./src/context/notification/dtos/create-notification.dto.ts");
+const send_notification_dto_1 = __webpack_require__(/*! @src/context/notification/dtos/send-notification.dto */ "./src/context/notification/dtos/send-notification.dto.ts");
+const notification_management_service_1 = __webpack_require__(/*! ../notification-management.service */ "./src/business/notification-management/notification-management.service.ts");
+let NotificationController = class NotificationController {
+    constructor(notificationManagementService) {
+        this.notificationManagementService = notificationManagementService;
+    }
+    async subscribe(user, subscription) {
+        await this.notificationManagementService.웹푸시를_구독한다(user.employeeId, subscription);
+    }
+    async sendSuccess(body) {
+        await this.notificationManagementService.푸시_알림을_직접_전송한다([body.subscription.fcm.token], body.payload);
+    }
+    async send(sendNotificationDto) {
+        await this.notificationManagementService.알림을_전송한다(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
+    }
+    async getNotificationTypes() {
+        return await this.notificationManagementService.알림_타입_목록을_조회한다();
+    }
+    async findAllByEmployeeId(employeeId, query, resourceType) {
+        return await this.notificationManagementService.내_알림_목록을_조회한다(employeeId, query, resourceType);
+    }
+    async markAsRead(user, notificationId) {
+        await this.notificationManagementService.알림을_읽음_처리한다(user.employeeId, notificationId);
+    }
+    async markAllAsRead(employeeId) {
+        await this.notificationManagementService.모든_알림을_읽음_처리한다(employeeId);
+    }
+};
+exports.NotificationController = NotificationController;
+__decorate([
+    (0, common_1.Post)('subscribe'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '웹 푸시 구독 성공',
+        type: response_notification_dto_1.ResponseNotificationDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object, typeof (_c = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], NotificationController.prototype, "subscribe", null);
+__decorate([
+    (0, common_1.Post)('subscribe/success'),
+    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독 성공' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '웹 푸시 구독 성공',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof send_notification_dto_1.PushNotificationDto !== "undefined" && send_notification_dto_1.PushNotificationDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "sendSuccess", null);
+__decorate([
+    (0, common_1.Post)('send'),
+    (0, swagger_1.ApiOperation)({ summary: '알림 전송' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '알림 전송 성공',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "send", null);
+__decorate([
+    (0, common_1.Get)('types'),
+    (0, swagger_1.ApiOperation)({ summary: '알림 타입 목록 조회' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '알림 타입 목록 조회 성공',
+        type: [notification_type_response_dto_1.NotificationTypeResponseDto],
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], NotificationController.prototype, "getNotificationTypes", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '알람 목록 조회' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '알람 목록 조회 성공',
+        type: (pagination_response_dto_1.PaginationData),
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'page',
+        type: Number,
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'limit',
+        type: Number,
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'resourceType',
+        enum: resource_type_enum_1.ResourceType,
+        required: false,
+        description: '자원 타입별 필터링 (차량, 회의실, 숙박시설, 장비)',
+    }),
+    __param(0, (0, user_decorator_1.User)('employeeId')),
+    __param(1, (0, common_1.Query)()),
+    __param(2, (0, common_1.Query)('resourceType')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof pagination_query_dto_1.PaginationQueryDto !== "undefined" && pagination_query_dto_1.PaginationQueryDto) === "function" ? _h : Object, typeof (_j = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _j : Object]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+], NotificationController.prototype, "findAllByEmployeeId", null);
+__decorate([
+    (0, common_1.Patch)(':notificationId/read'),
+    (0, swagger_1.ApiOperation)({ summary: '알람 읽음 처리' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '알람 읽음 처리 성공',
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('notificationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_l = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _l : Object, String]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "markAsRead", null);
+__decorate([
+    (0, common_1.Patch)('mark-all-read'),
+    (0, swagger_1.ApiOperation)({ summary: '모든 알람 읽음 처리' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '모든 알람 읽음 처리 성공',
+    }),
+    __param(0, (0, user_decorator_1.User)('employeeId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "markAllAsRead", null);
+exports.NotificationController = NotificationController = __decorate([
+    (0, swagger_1.ApiTags)('v2 알림 '),
+    (0, common_1.Controller)('v2/notifications'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_management_service_1.NotificationManagementService !== "undefined" && notification_management_service_1.NotificationManagementService) === "function" ? _a : Object])
+], NotificationController);
+
+
+/***/ }),
+
+/***/ "./src/business/notification-management/notification-management.module.ts":
+/*!********************************************************************************!*\
+  !*** ./src/business/notification-management/notification-management.module.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationManagementModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const notification_context_module_1 = __webpack_require__(/*! @src/context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
+const notification_management_service_1 = __webpack_require__(/*! ./notification-management.service */ "./src/business/notification-management/notification-management.service.ts");
+const notification_controller_1 = __webpack_require__(/*! ./controllers/notification.controller */ "./src/business/notification-management/controllers/notification.controller.ts");
+const cron_notification_controller_1 = __webpack_require__(/*! ./controllers/cron.notification.controller */ "./src/business/notification-management/controllers/cron.notification.controller.ts");
+let NotificationManagementModule = class NotificationManagementModule {
+};
+exports.NotificationManagementModule = NotificationManagementModule;
+exports.NotificationManagementModule = NotificationManagementModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            notification_context_module_1.NotificationContextModule,
+        ],
+        controllers: [notification_controller_1.NotificationController, cron_notification_controller_1.CronNotificationController],
+        providers: [notification_management_service_1.NotificationManagementService],
+        exports: [notification_management_service_1.NotificationManagementService],
+    })
+], NotificationManagementModule);
+
+
+/***/ }),
+
+/***/ "./src/business/notification-management/notification-management.service.ts":
+/*!*********************************************************************************!*\
+  !*** ./src/business/notification-management/notification-management.service.ts ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationManagementService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+const cron_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/cron-notification.context.service */ "./src/context/notification/services/cron-notification.context.service.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+let NotificationManagementService = class NotificationManagementService {
+    constructor(notificationContextService, cronNotificationContextService) {
+        this.notificationContextService = notificationContextService;
+        this.cronNotificationContextService = cronNotificationContextService;
+    }
+    async 웹푸시를_구독한다(employeeId, subscription) {
+        await this.notificationContextService.PUSH_알림을_구독한다(employeeId, subscription);
+    }
+    async 알림을_전송한다(notificationType, notificationData, notificationTarget) {
+        await this.notificationContextService.알림_전송_프로세스를_진행한다(notificationType, notificationData, notificationTarget);
+    }
+    async 리마인더_알림을_전송한다(notificationData, notificationTarget) {
+        await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, notificationData, notificationTarget);
+    }
+    async 푸시_알림을_직접_전송한다(tokens, payload) {
+        await this.notificationContextService.알림을_전송한다(tokens, payload);
+    }
+    async 내_알림_목록을_조회한다(employeeId, query, resourceType) {
+        return await this.notificationContextService.내_알림_목록을_조회한다(employeeId, query, resourceType);
+    }
+    async 알림을_읽음_처리한다(employeeId, notificationId) {
+        await this.notificationContextService.알림을_읽음_처리한다(employeeId, notificationId);
+    }
+    async 모든_알림을_읽음_처리한다(employeeId) {
+        await this.notificationContextService.모든_알림을_읽음_처리한다(employeeId);
+    }
+    async 다가오는_알림을_전송한다() {
+        return await this.cronNotificationContextService.다가오는_알림을_전송한다();
+    }
+    async 알림_타입_목록을_조회한다() {
+        return await this.notificationContextService.알림_타입_목록을_조회한다();
+    }
+};
+exports.NotificationManagementService = NotificationManagementService;
+exports.NotificationManagementService = NotificationManagementService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _a : Object, typeof (_b = typeof cron_notification_context_service_1.CronNotificationContextService !== "undefined" && cron_notification_context_service_1.CronNotificationContextService) === "function" ? _b : Object])
+], NotificationManagementService);
 
 
 /***/ }),
@@ -25369,7 +25776,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const maintenance_context_service_1 = __webpack_require__(/*! @src/context/resource/services/maintenance.context.service */ "./src/context/resource/services/maintenance.context.service.ts");
-const v2_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/v2-notification.context.service */ "./src/context/notification/services/v2-notification.context.service.ts");
+const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 let MaintenanceService = class MaintenanceService {
     constructor(maintenanceContextService, notificationContextService) {
         this.maintenanceContextService = maintenanceContextService;
@@ -25395,7 +25802,7 @@ let MaintenanceService = class MaintenanceService {
 exports.MaintenanceService = MaintenanceService;
 exports.MaintenanceService = MaintenanceService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_context_service_1.MaintenanceContextService !== "undefined" && maintenance_context_service_1.MaintenanceContextService) === "function" ? _a : Object, typeof (_b = typeof v2_notification_context_service_1.NotificationContextService !== "undefined" && v2_notification_context_service_1.NotificationContextService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_context_service_1.MaintenanceContextService !== "undefined" && maintenance_context_service_1.MaintenanceContextService) === "function" ? _a : Object, typeof (_b = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _b : Object])
 ], MaintenanceService);
 
 
@@ -27214,7 +27621,7 @@ const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.e
 const schedule_context_service_1 = __webpack_require__(/*! ../../context/schedule/schedule.context.service */ "./src/context/schedule/schedule.context.service.ts");
 const resource_context_service_1 = __webpack_require__(/*! ../../context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
 const reservation_context_service_1 = __webpack_require__(/*! ../../context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
-const v2_notification_context_service_1 = __webpack_require__(/*! ../../context/notification/services/v2-notification.context.service */ "./src/context/notification/services/v2-notification.context.service.ts");
+const notification_context_service_1 = __webpack_require__(/*! ../../context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const vehicle_info_context_service_1 = __webpack_require__(/*! ../../context/resource/services/vehicle-info.context.service */ "./src/context/resource/services/vehicle-info.context.service.ts");
 const meeting_room_info_context_service_1 = __webpack_require__(/*! ../../context/resource/services/meeting-room-info.context.service */ "./src/context/resource/services/meeting-room-info.context.service.ts");
@@ -27654,7 +28061,7 @@ let ScheduleManagementService = class ScheduleManagementService {
 exports.ScheduleManagementService = ScheduleManagementService;
 exports.ScheduleManagementService = ScheduleManagementService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof schedule_context_service_1.ScheduleContextService !== "undefined" && schedule_context_service_1.ScheduleContextService) === "function" ? _a : Object, typeof (_b = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _b : Object, typeof (_c = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _c : Object, typeof (_d = typeof v2_notification_context_service_1.NotificationContextService !== "undefined" && v2_notification_context_service_1.NotificationContextService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _e : Object, typeof (_f = typeof meeting_room_info_context_service_1.MeetingRoomInfoContextService !== "undefined" && meeting_room_info_context_service_1.MeetingRoomInfoContextService) === "function" ? _f : Object, typeof (_g = typeof accommodation_info_context_service_1.AccommodationInfoContextService !== "undefined" && accommodation_info_context_service_1.AccommodationInfoContextService) === "function" ? _g : Object, typeof (_h = typeof equipment_info_context_service_1.EquipmentInfoContextService !== "undefined" && equipment_info_context_service_1.EquipmentInfoContextService) === "function" ? _h : Object, typeof (_j = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _j : Object, typeof (_k = typeof project_context_service_1.ProjectContextService !== "undefined" && project_context_service_1.ProjectContextService) === "function" ? _k : Object, typeof (_l = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _l : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_context_service_1.ScheduleContextService !== "undefined" && schedule_context_service_1.ScheduleContextService) === "function" ? _a : Object, typeof (_b = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _b : Object, typeof (_c = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _c : Object, typeof (_d = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _e : Object, typeof (_f = typeof meeting_room_info_context_service_1.MeetingRoomInfoContextService !== "undefined" && meeting_room_info_context_service_1.MeetingRoomInfoContextService) === "function" ? _f : Object, typeof (_g = typeof accommodation_info_context_service_1.AccommodationInfoContextService !== "undefined" && accommodation_info_context_service_1.AccommodationInfoContextService) === "function" ? _g : Object, typeof (_h = typeof equipment_info_context_service_1.EquipmentInfoContextService !== "undefined" && equipment_info_context_service_1.EquipmentInfoContextService) === "function" ? _h : Object, typeof (_j = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _j : Object, typeof (_k = typeof project_context_service_1.ProjectContextService !== "undefined" && project_context_service_1.ProjectContextService) === "function" ? _k : Object, typeof (_l = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _l : Object])
 ], ScheduleManagementService);
 
 
@@ -27947,7 +28354,7 @@ exports.TaskManagementService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const resource_context_service_1 = __webpack_require__(/*! @src/context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
 const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
-const v2_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/v2-notification.context.service */ "./src/context/notification/services/v2-notification.context.service.ts");
+const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 let TaskManagementService = class TaskManagementService {
     constructor(resourceContextService, reservationContextService, notificationContextService) {
@@ -28062,7 +28469,7 @@ let TaskManagementService = class TaskManagementService {
 exports.TaskManagementService = TaskManagementService;
 exports.TaskManagementService = TaskManagementService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof v2_notification_context_service_1.NotificationContextService !== "undefined" && v2_notification_context_service_1.NotificationContextService) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _c : Object])
 ], TaskManagementService);
 
 
@@ -29111,232 +29518,6 @@ exports.FCMAdapter = FCMAdapter = __decorate([
 
 /***/ }),
 
-/***/ "./src/context/notification/controllers/cron.notification.controller.ts":
-/*!******************************************************************************!*\
-  !*** ./src/context/notification/controllers/cron.notification.controller.ts ***!
-  \******************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CronNotificationController = void 0;
-const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const cron_notification_context_service_1 = __webpack_require__(/*! ../services/cron-notification.context.service */ "./src/context/notification/services/cron-notification.context.service.ts");
-let CronNotificationController = class CronNotificationController {
-    constructor(cronNotificationContextService) {
-        this.cronNotificationContextService = cronNotificationContextService;
-    }
-    async sendUpcomingNotification() {
-        return this.cronNotificationContextService.다가오는_알림을_전송한다();
-    }
-};
-exports.CronNotificationController = CronNotificationController;
-__decorate([
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, common_1.Get)('cron-job/send-upcoming-notification'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], CronNotificationController.prototype, "sendUpcomingNotification", null);
-exports.CronNotificationController = CronNotificationController = __decorate([
-    (0, swagger_1.ApiTags)('v2 알림 '),
-    (0, common_1.Controller)('v2/notifications'),
-    (0, public_decorator_1.Public)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof cron_notification_context_service_1.CronNotificationContextService !== "undefined" && cron_notification_context_service_1.CronNotificationContextService) === "function" ? _a : Object])
-], CronNotificationController);
-
-
-/***/ }),
-
-/***/ "./src/context/notification/controllers/notification.controller.ts":
-/*!*************************************************************************!*\
-  !*** ./src/context/notification/controllers/notification.controller.ts ***!
-  \*************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.NotificationController = void 0;
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
-const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const pagination_query_dto_1 = __webpack_require__(/*! @libs/dtos/pagination-query.dto */ "./libs/dtos/pagination-query.dto.ts");
-const pagination_response_dto_1 = __webpack_require__(/*! @libs/dtos/pagination-response.dto */ "./libs/dtos/pagination-response.dto.ts");
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
-const push_subscription_dto_1 = __webpack_require__(/*! ../dtos/push-subscription.dto */ "./src/context/notification/dtos/push-subscription.dto.ts");
-const response_notification_dto_1 = __webpack_require__(/*! ../dtos/response-notification.dto */ "./src/context/notification/dtos/response-notification.dto.ts");
-const create_notification_dto_1 = __webpack_require__(/*! ../dtos/create-notification.dto */ "./src/context/notification/dtos/create-notification.dto.ts");
-const send_notification_dto_1 = __webpack_require__(/*! ../dtos/send-notification.dto */ "./src/context/notification/dtos/send-notification.dto.ts");
-const v2_notification_context_service_1 = __webpack_require__(/*! ../services/v2-notification.context.service */ "./src/context/notification/services/v2-notification.context.service.ts");
-const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
-let NotificationController = class NotificationController {
-    constructor(notificationContextService) {
-        this.notificationContextService = notificationContextService;
-    }
-    async subscribe(user, subscription) {
-        await this.notificationContextService.PUSH_알림을_구독한다(user.employeeId, subscription);
-    }
-    async sendSuccess(body) {
-        await this.notificationContextService.알림을_전송한다([body.subscription.fcm.token], body.payload);
-    }
-    async sendReminder(sendNotificationDto) {
-        await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
-    }
-    async send(sendNotificationDto) {
-        await this.notificationContextService.알림_전송_프로세스를_진행한다(sendNotificationDto.notificationType, sendNotificationDto.notificationData, sendNotificationDto.notificationTarget);
-    }
-    async findAllByEmployeeId(employeeId, query, resourceType) {
-        return await this.notificationContextService.내_알림_목록을_조회한다(employeeId, query, resourceType);
-    }
-    async markAsRead(user, notificationId) {
-        await this.notificationContextService.알림을_읽음_처리한다(user.employeeId, notificationId);
-    }
-    async markAllAsRead(employeeId) {
-        await this.notificationContextService.모든_알림을_읽음_처리한다(employeeId);
-    }
-};
-exports.NotificationController = NotificationController;
-__decorate([
-    (0, common_1.Post)('subscribe'),
-    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독' }),
-    (0, swagger_1.ApiOkResponse)({
-        status: 200,
-        description: '웹 푸시 구독 성공',
-        type: response_notification_dto_1.ResponseNotificationDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object, typeof (_c = typeof push_subscription_dto_1.PushSubscriptionDto !== "undefined" && push_subscription_dto_1.PushSubscriptionDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], NotificationController.prototype, "subscribe", null);
-__decorate([
-    (0, common_1.Post)('subscribe/success'),
-    (0, swagger_1.ApiOperation)({ summary: '웹 푸시 구독 성공' }),
-    (0, swagger_1.ApiOkResponse)({
-        status: 200,
-        description: '웹 푸시 구독 성공',
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof send_notification_dto_1.PushNotificationDto !== "undefined" && send_notification_dto_1.PushNotificationDto) === "function" ? _e : Object]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "sendSuccess", null);
-__decorate([
-    (0, common_1.Post)('send/reminder'),
-    (0, swagger_1.ApiOperation)({ summary: '예약 리마인더 알림 전송' }),
-    (0, swagger_1.ApiOkResponse)({
-        status: 200,
-        description: '예약 리마인더 알림 전송 성공',
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "sendReminder", null);
-__decorate([
-    (0, common_1.Post)('send'),
-    (0, swagger_1.ApiOperation)({ summary: '알림 전송' }),
-    (0, swagger_1.ApiOkResponse)({
-        status: 200,
-        description: '알림 전송 성공',
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof create_notification_dto_1.SendNotificationDto !== "undefined" && create_notification_dto_1.SendNotificationDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "send", null);
-__decorate([
-    (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: '알람 목록 조회' }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '알람 목록 조회 성공',
-        type: (pagination_response_dto_1.PaginationData),
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'page',
-        type: Number,
-        required: false,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'limit',
-        type: Number,
-        required: false,
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'resourceType',
-        enum: resource_type_enum_1.ResourceType,
-        required: false,
-        description: '자원 타입별 필터링 (차량, 회의실, 숙박시설, 장비)',
-    }),
-    __param(0, (0, user_decorator_1.User)('employeeId')),
-    __param(1, (0, common_1.Query)()),
-    __param(2, (0, common_1.Query)('resourceType')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_h = typeof pagination_query_dto_1.PaginationQueryDto !== "undefined" && pagination_query_dto_1.PaginationQueryDto) === "function" ? _h : Object, typeof (_j = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _j : Object]),
-    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
-], NotificationController.prototype, "findAllByEmployeeId", null);
-__decorate([
-    (0, common_1.Patch)(':notificationId/read'),
-    (0, swagger_1.ApiOperation)({ summary: '알람 읽음 처리' }),
-    (0, swagger_1.ApiOkResponse)({
-        status: 200,
-        description: '알람 읽음 처리 성공',
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('notificationId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_l = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _l : Object, String]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "markAsRead", null);
-__decorate([
-    (0, common_1.Patch)('mark-all-read'),
-    (0, swagger_1.ApiOperation)({ summary: '모든 알람 읽음 처리' }),
-    (0, swagger_1.ApiOkResponse)({
-        status: 200,
-        description: '모든 알람 읽음 처리 성공',
-    }),
-    __param(0, (0, user_decorator_1.User)('employeeId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "markAllAsRead", null);
-exports.NotificationController = NotificationController = __decorate([
-    (0, swagger_1.ApiTags)('v2 알림 '),
-    (0, common_1.Controller)('v2/notifications'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof v2_notification_context_service_1.NotificationContextService !== "undefined" && v2_notification_context_service_1.NotificationContextService) === "function" ? _a : Object])
-], NotificationController);
-
-
-/***/ }),
-
 /***/ "./src/context/notification/dtos/create-notification.dto.ts":
 /*!******************************************************************!*\
   !*** ./src/context/notification/dtos/create-notification.dto.ts ***!
@@ -29366,7 +29547,13 @@ class NotificationConsumableDto {
 }
 exports.NotificationConsumableDto = NotificationConsumableDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 ID' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], NotificationConsumableDto.prototype, "consumableId", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], NotificationConsumableDto.prototype, "consumableName", void 0);
@@ -29390,11 +29577,13 @@ __decorate([
 ], NotificationResourceDto.prototype, "resourceId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '자원 이름' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], NotificationResourceDto.prototype, "resourceName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, description: '자원 타입' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
     __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
 ], NotificationResourceDto.prototype, "resourceType", void 0);
@@ -29415,11 +29604,13 @@ __decorate([
 ], NotificationReservationDto.prototype, "reservationId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '예약 제목' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], NotificationReservationDto.prototype, "reservationTitle", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '예약 날짜' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], NotificationReservationDto.prototype, "reservationDate", void 0);
@@ -29439,6 +29630,7 @@ __decorate([
 ], NotificationScheduleDto.prototype, "scheduleId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '일정 제목' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], NotificationScheduleDto.prototype, "scheduleTitle", void 0);
@@ -29450,11 +29642,13 @@ __decorate([
 ], NotificationScheduleDto.prototype, "beforeMinutes", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '시작 날짜' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], NotificationScheduleDto.prototype, "startDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '종료 날짜' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], NotificationScheduleDto.prototype, "endDate", void 0);
@@ -29607,6 +29801,192 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], SendNotificationDto.prototype, "notificationTarget", void 0);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/dtos/notification-type-response.dto.ts":
+/*!*************************************************************************!*\
+  !*** ./src/context/notification/dtos/notification-type-response.dto.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NotificationTypeResponseDto = exports.NotificationTypeRequirementsDto = exports.NotificationTypeProjectRequirementsDto = exports.NotificationTypeReservationRequirementsDto = exports.NotificationTypeScheduleRequirementsDto = exports.NotificationTypeResourceRequirementsDto = exports.NotificationTypeVehicleInfoRequirementsDto = exports.NotificationTypeConsumableRequirementsDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+class NotificationTypeConsumableRequirementsDto {
+}
+exports.NotificationTypeConsumableRequirementsDto = NotificationTypeConsumableRequirementsDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '소모품 정보 객체 필요 여부',
+        example: true,
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], NotificationTypeConsumableRequirementsDto.prototype, "required", void 0);
+class NotificationTypeVehicleInfoRequirementsDto {
+}
+exports.NotificationTypeVehicleInfoRequirementsDto = NotificationTypeVehicleInfoRequirementsDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '차량 정보 객체 필요 여부',
+        example: true,
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], NotificationTypeVehicleInfoRequirementsDto.prototype, "required", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: NotificationTypeConsumableRequirementsDto,
+        description: '소모품 정보 중첩 요구사항',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => NotificationTypeConsumableRequirementsDto),
+    __metadata("design:type", NotificationTypeConsumableRequirementsDto)
+], NotificationTypeVehicleInfoRequirementsDto.prototype, "consumable", void 0);
+class NotificationTypeResourceRequirementsDto {
+}
+exports.NotificationTypeResourceRequirementsDto = NotificationTypeResourceRequirementsDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 객체 전체 필요 여부',
+        example: true,
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], NotificationTypeResourceRequirementsDto.prototype, "required", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: NotificationTypeVehicleInfoRequirementsDto,
+        description: '차량 정보 중첩 요구사항',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => NotificationTypeVehicleInfoRequirementsDto),
+    __metadata("design:type", NotificationTypeVehicleInfoRequirementsDto)
+], NotificationTypeResourceRequirementsDto.prototype, "vehicleInfo", void 0);
+class NotificationTypeScheduleRequirementsDto {
+}
+exports.NotificationTypeScheduleRequirementsDto = NotificationTypeScheduleRequirementsDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 객체 전체 필요 여부',
+        example: true,
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], NotificationTypeScheduleRequirementsDto.prototype, "required", void 0);
+class NotificationTypeReservationRequirementsDto {
+}
+exports.NotificationTypeReservationRequirementsDto = NotificationTypeReservationRequirementsDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 객체 전체 필요 여부',
+        example: true,
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], NotificationTypeReservationRequirementsDto.prototype, "required", void 0);
+class NotificationTypeProjectRequirementsDto {
+}
+exports.NotificationTypeProjectRequirementsDto = NotificationTypeProjectRequirementsDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 객체 전체 필요 여부',
+        example: true,
+    }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], NotificationTypeProjectRequirementsDto.prototype, "required", void 0);
+class NotificationTypeRequirementsDto {
+}
+exports.NotificationTypeRequirementsDto = NotificationTypeRequirementsDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: NotificationTypeScheduleRequirementsDto,
+        description: '일정 정보 관련 요구사항',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => NotificationTypeScheduleRequirementsDto),
+    __metadata("design:type", NotificationTypeScheduleRequirementsDto)
+], NotificationTypeRequirementsDto.prototype, "schedule", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: NotificationTypeReservationRequirementsDto,
+        description: '예약 정보 관련 요구사항',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => NotificationTypeReservationRequirementsDto),
+    __metadata("design:type", NotificationTypeReservationRequirementsDto)
+], NotificationTypeRequirementsDto.prototype, "reservation", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: NotificationTypeResourceRequirementsDto,
+        description: '자원 정보 관련 요구사항',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => NotificationTypeResourceRequirementsDto),
+    __metadata("design:type", NotificationTypeResourceRequirementsDto)
+], NotificationTypeRequirementsDto.prototype, "resource", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: NotificationTypeProjectRequirementsDto,
+        description: '프로젝트 정보 관련 요구사항',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => NotificationTypeProjectRequirementsDto),
+    __metadata("design:type", NotificationTypeProjectRequirementsDto)
+], NotificationTypeRequirementsDto.prototype, "project", void 0);
+class NotificationTypeResponseDto {
+}
+exports.NotificationTypeResponseDto = NotificationTypeResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        enum: notification_type_enum_1.NotificationType,
+        description: '알림 타입',
+        example: notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED,
+    }),
+    (0, class_validator_1.IsEnum)(notification_type_enum_1.NotificationType),
+    __metadata("design:type", typeof (_a = typeof notification_type_enum_1.NotificationType !== "undefined" && notification_type_enum_1.NotificationType) === "function" ? _a : Object)
+], NotificationTypeResponseDto.prototype, "notificationType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: NotificationTypeRequirementsDto,
+        description: '알림 발송 시 필요한 정보 요구사항',
+    }),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => NotificationTypeRequirementsDto),
+    __metadata("design:type", NotificationTypeRequirementsDto)
+], NotificationTypeResponseDto.prototype, "requirements", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '알림 타입 설명',
+        example: '예약이 확정되었을 때 발송되는 알림',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], NotificationTypeResponseDto.prototype, "description", void 0);
 
 
 /***/ }),
@@ -29866,14 +30246,13 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const notification_module_1 = __webpack_require__(/*! @src/domain/notification/notification.module */ "./src/domain/notification/notification.module.ts");
+const notification_type_module_1 = __webpack_require__(/*! @src/domain/notification-type/notification-type.module */ "./src/domain/notification-type/notification-type.module.ts");
 const employee_notification_module_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.module */ "./src/domain/employee-notification/employee-notification.module.ts");
-const v2_notification_context_service_1 = __webpack_require__(/*! ./services/v2-notification.context.service */ "./src/context/notification/services/v2-notification.context.service.ts");
-const notification_controller_1 = __webpack_require__(/*! ./controllers/notification.controller */ "./src/context/notification/controllers/notification.controller.ts");
+const notification_context_service_1 = __webpack_require__(/*! ./services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
 const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
-const cron_notification_controller_1 = __webpack_require__(/*! ./controllers/cron.notification.controller */ "./src/context/notification/controllers/cron.notification.controller.ts");
 const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
 const fcm_push_adapter_1 = __webpack_require__(/*! ./adapter/fcm-push.adapter */ "./src/context/notification/adapter/fcm-push.adapter.ts");
 const cron_notification_context_service_1 = __webpack_require__(/*! ./services/cron-notification.context.service */ "./src/context/notification/services/cron-notification.context.service.ts");
@@ -29883,17 +30262,18 @@ exports.NotificationContextModule = NotificationContextModule;
 exports.NotificationContextModule = NotificationContextModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([entities_1.Employee, entities_1.Notification, entities_1.EmployeeNotification, entities_1.Reservation]),
+            typeorm_1.TypeOrmModule.forFeature([entities_1.Employee, entities_1.Notification, entities_1.EmployeeNotification, entities_1.Reservation, entities_1.NotificationTypeEntity]),
             config_1.ConfigModule.forFeature(env_config_1.FIREBASE_CONFIG),
             schedule_1.ScheduleModule.forRoot(),
             employee_module_1.DomainEmployeeModule,
             employee_notification_module_1.DomainEmployeeNotificationModule,
             notification_module_1.DomainNotificationModule,
+            notification_type_module_1.DomainNotificationTypeModule,
             reservation_module_1.DomainReservationModule,
         ],
-        controllers: [notification_controller_1.NotificationController, cron_notification_controller_1.CronNotificationController],
-        providers: [v2_notification_context_service_1.NotificationContextService, cron_notification_context_service_1.CronNotificationContextService, fcm_push_adapter_1.FCMAdapter],
-        exports: [v2_notification_context_service_1.NotificationContextService],
+        controllers: [],
+        providers: [notification_context_service_1.NotificationContextService, cron_notification_context_service_1.CronNotificationContextService, fcm_push_adapter_1.FCMAdapter],
+        exports: [notification_context_service_1.NotificationContextService, cron_notification_context_service_1.CronNotificationContextService],
     })
 ], NotificationContextModule);
 
@@ -29989,10 +30369,10 @@ exports.CronNotificationContextService = CronNotificationContextService = __deco
 
 /***/ }),
 
-/***/ "./src/context/notification/services/v2-notification.context.service.ts":
-/*!******************************************************************************!*\
-  !*** ./src/context/notification/services/v2-notification.context.service.ts ***!
-  \******************************************************************************/
+/***/ "./src/context/notification/services/notification.context.service.ts":
+/*!***************************************************************************!*\
+  !*** ./src/context/notification/services/notification.context.service.ts ***!
+  \***************************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30006,7 +30386,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var NotificationContextService_1;
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -30015,15 +30395,17 @@ const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.e
 const fcm_push_adapter_1 = __webpack_require__(/*! ../adapter/fcm-push.adapter */ "./src/context/notification/adapter/fcm-push.adapter.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const notification_service_1 = __webpack_require__(/*! @src/domain/notification/notification.service */ "./src/domain/notification/notification.service.ts");
+const notification_type_service_1 = __webpack_require__(/*! @src/domain/notification-type/notification-type.service */ "./src/domain/notification-type/notification-type.service.ts");
 const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let NotificationContextService = NotificationContextService_1 = class NotificationContextService {
-    constructor(employeeMicroserviceAdapter, fcmAdapter, domainNotificationService, domainEmployeeNotificationService, domainEmployeeService, dataSource) {
+    constructor(employeeMicroserviceAdapter, fcmAdapter, domainNotificationService, domainNotificationTypeService, domainEmployeeNotificationService, domainEmployeeService, dataSource) {
         this.employeeMicroserviceAdapter = employeeMicroserviceAdapter;
         this.fcmAdapter = fcmAdapter;
         this.domainNotificationService = domainNotificationService;
+        this.domainNotificationTypeService = domainNotificationTypeService;
         this.domainEmployeeNotificationService = domainEmployeeNotificationService;
         this.domainEmployeeService = domainEmployeeService;
         this.dataSource = dataSource;
@@ -30157,74 +30539,35 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             createdAt: date_util_1.DateUtil.now().format('YYYY-MM-DD HH:mm'),
             isSent: false,
         };
-        switch (notificationType) {
-            case notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING:
-                if (notificationData.schedule?.beforeMinutes) {
-                    createNotificationDto.title = `예약 시간이 ${notificationData.schedule?.beforeMinutes}분 남았습니다.`;
-                    createNotificationDto.body = this._자원명_추출(notificationData);
-                    if (notificationData.schedule?.startDate) {
-                        createNotificationDto.createdAt = date_util_1.DateUtil.parse(notificationData.schedule.startDate)
-                            .addMinutes(-(notificationData.schedule?.beforeMinutes || 10))
-                            .format('YYYY-MM-DD HH:mm');
-                    }
-                }
-                else {
-                    const { title, body, createdAt } = await this._생성_리마인더_알림(notificationData);
-                    createNotificationDto.title = title;
-                    createNotificationDto.body = body;
-                    createNotificationDto.createdAt = createdAt;
-                }
-                break;
-            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING:
-                createNotificationDto.title = `[숙소 확정 대기중] ${this._제목_추출(notificationData)}`;
-                createNotificationDto.body = this._날짜_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED:
-                createNotificationDto.title = `[예약 확정] ${this._제목_추출(notificationData)}`;
-                createNotificationDto.body = this._날짜_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED:
-                createNotificationDto.title = `[예약 취소] ${this._제목_추출(notificationData)}`;
-                createNotificationDto.body = this._날짜_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESERVATION_STATUS_REJECTED:
-                createNotificationDto.title = `[예약 취소 (관리자)] ${this._제목_추출(notificationData)}`;
-                createNotificationDto.body = this._날짜_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED:
-                createNotificationDto.title = `[예약 시간 변경] ${this._제목_추출(notificationData)}`;
-                createNotificationDto.body = this._날짜_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED:
-                createNotificationDto.title = `[참가자 변경] ${this._제목_추출(notificationData)}`;
-                createNotificationDto.body = this._날짜_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_REPLACING:
-                createNotificationDto.title = `[교체 주기 알림] ${notificationData.resource?.vehicleInfo?.consumable?.consumableName || '소모품'}`;
-                createNotificationDto.body = this._자원명_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING:
-                createNotificationDto.title = `[교체 지연 알림] ${notificationData.resource?.vehicleInfo?.consumable?.consumableName || '소모품'}`;
-                createNotificationDto.body = this._자원명_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED:
-                createNotificationDto.title = `[차량 반납] 차량이 반납되었습니다.`;
-                createNotificationDto.body = this._자원명_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED:
-                createNotificationDto.title = `[차량 반납 지연 알림] ${this._자원명_추출(notificationData)}`;
-                createNotificationDto.body = this._날짜_추출(notificationData);
-                break;
-            case notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED:
-                createNotificationDto.title = `[정비 완료] ${notificationData.resource?.vehicleInfo?.consumable?.consumableName || '소모품'}`;
-                createNotificationDto.body = this._자원명_추출(notificationData);
-                break;
-            default:
+        try {
+            const template = await this.domainNotificationTypeService.findTemplateByType(notificationType);
+            if (template) {
+                createNotificationDto.title =
+                    notificationType === notification_type_enum_1.NotificationType.RESERVATION_DATE_REMINDING
+                        ? this._생성_리마인더_알림(notificationData)
+                        : this._템플릿_변수를_치환한다(template.defaultTitleTemplate, notificationData);
+                createNotificationDto.body = this._템플릿_변수를_치환한다(template.defaultBodyTemplate, notificationData);
+            }
+            else {
+                this.logger.warn(`알림 타입 템플릿을 찾을 수 없습니다: ${notificationType}`);
                 createNotificationDto.title = `[알림] ${this._제목_추출(notificationData)}`;
                 createNotificationDto.body = this._날짜_추출(notificationData);
-                break;
+            }
+        }
+        catch (error) {
+            this.logger.error(`알림 템플릿 조회 중 오류 발생: ${error.message}`, error.stack);
+            createNotificationDto.title = `[알림] ${this._제목_추출(notificationData)}`;
+            createNotificationDto.body = this._날짜_추출(notificationData);
         }
         return createNotificationDto;
+    }
+    async 알림_타입_목록을_조회한다() {
+        const notificationTypes = await this.domainNotificationTypeService.findAll();
+        return notificationTypes.map((notificationType) => ({
+            notificationType: notificationType.notificationType,
+            requirements: notificationType.requirements,
+            description: notificationType.description,
+        }));
     }
     async 알림을_저장한다(notificationDto, employeeIds) {
         const notification = await this.domainNotificationService.save(notificationDto);
@@ -30255,6 +30598,17 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         });
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }
+    _템플릿_변수를_치환한다(template, data) {
+        let result = template;
+        result = result.replace(/\{title\}/g, this._제목_추출(data));
+        result = result.replace(/\{dateRange\}/g, this._날짜_추출(data));
+        result = result.replace(/\{resourceName\}/g, this._자원명_추출(data));
+        const consumableName = data.resource?.vehicleInfo?.consumable?.consumableName || '소모품';
+        result = result.replace(/\{consumableName\}/g, consumableName);
+        const beforeMinutes = data.schedule?.beforeMinutes || 10;
+        result = result.replace(/\{beforeMinutes\}/g, beforeMinutes.toString());
+        return result;
+    }
     _제목_추출(data) {
         return data.schedule?.scheduleTitle || data.reservation?.reservationTitle || '제목 없음';
     }
@@ -30270,7 +30624,7 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
     _자원명_추출(data) {
         return data.resource?.resourceName || '자원 정보 없음';
     }
-    async _생성_리마인더_알림(data) {
+    _생성_리마인더_알림(data) {
         const now = date_util_1.DateUtil.now().toDate();
         const diffInMilliseconds = date_util_1.DateUtil.parse(data.schedule.startDate).toDate().getTime() - now.getTime();
         const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
@@ -30321,17 +30675,13 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             }
         }
         const timeDifferencePhrase = parts.join(' ');
-        return {
-            title: `[${data.reservation.reservationTitle}]\n${timeDifferencePhrase}`,
-            body: data.reservation.reservationDate,
-            createdAt: date_util_1.DateUtil.now().format('YYYY-MM-DD HH:mm'),
-        };
+        return `[${data.reservation.reservationTitle}]\n${timeDifferencePhrase}`;
     }
 };
 exports.NotificationContextService = NotificationContextService;
 exports.NotificationContextService = NotificationContextService = NotificationContextService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_microservice_adapter_1.EmployeeMicroserviceAdapter !== "undefined" && employee_microservice_adapter_1.EmployeeMicroserviceAdapter) === "function" ? _a : Object, typeof (_b = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object, typeof (_d = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _d : Object, typeof (_e = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_microservice_adapter_1.EmployeeMicroserviceAdapter !== "undefined" && employee_microservice_adapter_1.EmployeeMicroserviceAdapter) === "function" ? _a : Object, typeof (_b = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object, typeof (_d = typeof notification_type_service_1.DomainNotificationTypeService !== "undefined" && notification_type_service_1.DomainNotificationTypeService) === "function" ? _d : Object, typeof (_e = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _e : Object, typeof (_f = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
 ], NotificationContextService);
 
 
@@ -35504,6 +35854,113 @@ exports.DomainMeetingRoomInfoService = DomainMeetingRoomInfoService = __decorate
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof meeting_room_info_repository_1.DomainMeetingRoomInfoRepository !== "undefined" && meeting_room_info_repository_1.DomainMeetingRoomInfoRepository) === "function" ? _a : Object])
 ], DomainMeetingRoomInfoService);
+
+
+/***/ }),
+
+/***/ "./src/domain/notification-type/notification-type.module.ts":
+/*!******************************************************************!*\
+  !*** ./src/domain/notification-type/notification-type.module.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainNotificationTypeModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const notification_type_entity_1 = __webpack_require__(/*! @libs/entities/notification-type.entity */ "./libs/entities/notification-type.entity.ts");
+const notification_type_service_1 = __webpack_require__(/*! ./notification-type.service */ "./src/domain/notification-type/notification-type.service.ts");
+let DomainNotificationTypeModule = class DomainNotificationTypeModule {
+};
+exports.DomainNotificationTypeModule = DomainNotificationTypeModule;
+exports.DomainNotificationTypeModule = DomainNotificationTypeModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([notification_type_entity_1.NotificationTypeEntity])],
+        providers: [notification_type_service_1.DomainNotificationTypeService],
+        exports: [notification_type_service_1.DomainNotificationTypeService],
+    })
+], DomainNotificationTypeModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/notification-type/notification-type.service.ts":
+/*!*******************************************************************!*\
+  !*** ./src/domain/notification-type/notification-type.service.ts ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainNotificationTypeService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const notification_type_entity_1 = __webpack_require__(/*! @libs/entities/notification-type.entity */ "./libs/entities/notification-type.entity.ts");
+let DomainNotificationTypeService = class DomainNotificationTypeService {
+    constructor(notificationTypeRepository) {
+        this.notificationTypeRepository = notificationTypeRepository;
+    }
+    async findAll() {
+        return await this.notificationTypeRepository.find();
+    }
+    async findByType(notificationType) {
+        return await this.notificationTypeRepository.findOne({
+            where: { notificationType },
+        });
+    }
+    async create(notificationTypeEntity) {
+        const entity = this.notificationTypeRepository.create(notificationTypeEntity);
+        return await this.notificationTypeRepository.save(entity);
+    }
+    async update(notificationType, updateData) {
+        await this.notificationTypeRepository.update({ notificationType }, updateData);
+        return await this.findByType(notificationType);
+    }
+    async delete(notificationType) {
+        await this.notificationTypeRepository.delete({ notificationType });
+    }
+    async findTemplateByType(notificationType) {
+        const result = await this.notificationTypeRepository.findOne({
+            where: { notificationType },
+            select: ['defaultTitleTemplate', 'defaultBodyTemplate', 'description'],
+        });
+        return result || null;
+    }
+    async findRequirementsByType(notificationType) {
+        const result = await this.notificationTypeRepository.findOne({
+            where: { notificationType },
+            select: ['requirements'],
+        });
+        return result?.requirements || null;
+    }
+};
+exports.DomainNotificationTypeService = DomainNotificationTypeService;
+exports.DomainNotificationTypeService = DomainNotificationTypeService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(notification_type_entity_1.NotificationTypeEntity)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainNotificationTypeService);
 
 
 /***/ }),
