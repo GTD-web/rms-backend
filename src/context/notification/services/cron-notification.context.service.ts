@@ -5,6 +5,7 @@ import { LessThanOrEqual } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
+import { Schedule } from '@libs/entities/schedule.entity';
 
 @Injectable()
 export class CronNotificationContextService {
@@ -14,7 +15,7 @@ export class CronNotificationContextService {
         private readonly domainEmployeeService: DomainEmployeeService,
     ) {}
 
-    async 다가오는_알림을_전송한다(): Promise<void> {
+    async 다가오는_일정의_알림을_전송한다(schedules: Schedule[]): Promise<void> {
         const now = DateUtil.now().format('YYYY-MM-DD HH:mm');
         const notifications = await this.domainNotificationService.findAll({
             where: {

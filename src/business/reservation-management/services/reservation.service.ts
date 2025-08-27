@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
+import { LegacyReservationContextService } from '@src/context/reservation/services/legacy-reservation.context.service';
 import { Employee } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
@@ -19,7 +19,7 @@ import {
 
 @Injectable()
 export class ReservationService {
-    constructor(private readonly reservationContextService: ReservationContextService) {}
+    constructor(private readonly reservationContextService: LegacyReservationContextService) {}
 
     // ==================== 예약 생성 ====================
     async create(user: Employee, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {

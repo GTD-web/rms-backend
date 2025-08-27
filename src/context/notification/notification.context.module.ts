@@ -12,6 +12,7 @@ import { FIREBASE_CONFIG } from '@libs/configs/env.config';
 import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
 import { FCMAdapter } from './adapter/fcm-push.adapter';
 import { CronNotificationContextService } from './services/cron-notification.context.service';
+import { ScheduleNotificationContextService } from './services/schedule-notification.context.service';
 
 /**
  * 알림 컨텍스트 모듈
@@ -39,7 +40,12 @@ import { CronNotificationContextService } from './services/cron-notification.con
         DomainReservationModule,
     ],
     controllers: [], // 컨트롤러들은 Business layer로 이전됨
-    providers: [NotificationContextService, CronNotificationContextService, FCMAdapter],
-    exports: [NotificationContextService, CronNotificationContextService],
+    providers: [
+        NotificationContextService,
+        CronNotificationContextService,
+        ScheduleNotificationContextService,
+        FCMAdapter,
+    ],
+    exports: [NotificationContextService, CronNotificationContextService, ScheduleNotificationContextService],
 })
 export class NotificationContextModule {}

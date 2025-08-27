@@ -11,10 +11,20 @@ import { MMSEmployeeResponseDto } from '@src/business/employee-management/dtos/m
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import * as bcrypt from 'bcrypt';
 import axios from 'axios';
+import { Employee } from '@libs/entities/employee.entity';
 
 @Injectable()
 export class EmployeeContextService {
     constructor(private readonly domainEmployeeService: DomainEmployeeService) {}
+
+    async 시스템관리자_목록을_조회한다(): Promise<Employee[]> {
+        const systemAdmins = await this.domainEmployeeService.findAll({
+            where: {
+                roles: Raw(() => `'${Role.SYSTEM_ADMIN}' = ANY("roles")`),
+            },
+        });
+        return systemAdmins;
+    }
 
     /**
      * 자원 관리자 목록을 부서별로 조회한다

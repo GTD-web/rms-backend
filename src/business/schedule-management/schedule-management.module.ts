@@ -7,6 +7,7 @@ import { ReservationContextModule } from '../../context/reservation/reservation.
 import { NotificationContextModule } from '../../context/notification/notification.context.module';
 import { FileContextModule } from '../../context/file/file.context.module';
 import { ProjectContextModule } from '../../context/project/project.context.module';
+import { EmployeeContextModule } from '@src/context/employee/employee.context.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { ProjectContextModule } from '../../context/project/project.context.modu
         NotificationContextModule,
         FileContextModule,
         ProjectContextModule,
+        EmployeeContextModule,
     ],
     controllers: [ScheduleController],
     providers: [ScheduleManagementService],

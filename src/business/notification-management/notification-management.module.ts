@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 // Context Modules
 import { NotificationContextModule } from '@src/context/notification/notification.context.module';
+import { ScheduleContextModule } from '@src/context/schedule/schedule.context.module';
 
 // Business Services
 import { NotificationManagementService } from './notification-management.service';
@@ -27,6 +28,7 @@ import { CronNotificationController } from './controllers/cron.notification.cont
     imports: [
         // Context Layer Dependencies
         NotificationContextModule,
+        ScheduleContextModule,
     ],
     controllers: [NotificationController, CronNotificationController],
     providers: [NotificationManagementService],

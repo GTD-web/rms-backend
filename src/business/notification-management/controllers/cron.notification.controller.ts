@@ -14,6 +14,6 @@ export class CronNotificationController {
     @ApiExcludeEndpoint()
     @Get('cron-job/send-upcoming-notification')
     async sendUpcomingNotification() {
-        return this.notificationManagementService.다가오는_알림을_전송한다();
+        return this.notificationManagementService.다가오는_일정의_알림을_전송한다();
     }
 }

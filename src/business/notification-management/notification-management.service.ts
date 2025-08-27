@@ -3,6 +3,7 @@ import { NotificationContextService } from '@src/context/notification/services/n
 import { CronNotificationContextService } from '@src/context/notification/services/cron-notification.context.service';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { ScheduleContextService } from '@src/context/schedule/schedule.context.service';
 
 // Import DTOs from business layer index
 import {
@@ -12,6 +13,7 @@ import {
     ContextNotificationTypeResponseDto as NotificationTypeResponseDto,
     ContextCreateNotificationDataDto as CreateNotificationDataDto,
 } from '@src/business.dto.index';
+import { DateUtil } from '@libs/utils/date.util';
 
 /**
  * 알림 관리 비즈니스 서비스
@@ -26,7 +28,24 @@ export class NotificationManagementService {
     constructor(
         private readonly notificationContextService: NotificationContextService,
         private readonly cronNotificationContextService: CronNotificationContextService,
+        private readonly scheduleContextService: ScheduleContextService,
     ) {}
+    async onModuleInit() {
+        // 테스트 코드
+        // 00초를 찾은 순간부터 반복문 실행
+        // let isFirst = true;
+        // while (isFirst) {
+        //     const now = DateUtil.now().toDate();
+        //     const seconds = now.getSeconds();
+        //     if (seconds === 0) {
+        //         isFirst = false;
+        //     }
+        // }
+        // for (let i = 0; i < 1000; i++) {
+        //     await this.다가오는_일정의_알림을_전송한다();
+        //     await new Promise((resolve) => setTimeout(resolve, 1000 * 60));
+        // }
+    }
 
     // ==================== 알림 구독 관리 ====================
 
@@ -103,16 +122,6 @@ export class NotificationManagementService {
     async 모든_알림을_읽음_처리한다(employeeId: string): Promise<void> {
         await this.notificationContextService.모든_알림을_읽음_처리한다(employeeId);
     }
-
-    // ==================== 크론 작업 ====================
-
-    /**
-     * 다가오는 예약 알림을 전송한다 (크론 작업)
-     */
-    async 다가오는_알림을_전송한다(): Promise<any> {
-        return await this.cronNotificationContextService.다가오는_알림을_전송한다();
-    }
-
     // ==================== 알림 타입 관리 ====================
 
     /**
@@ -120,5 +129,59 @@ export class NotificationManagementService {
      */
     async 알림_타입_목록을_조회한다(): Promise<NotificationTypeResponseDto[]> {
         return await this.notificationContextService.알림_타입_목록을_조회한다();
+    }
+
+    // ==================== 크론 작업 ====================
+
+    /**
+     * 다가오는 예약 알림을 전송한다 (크론 작업)
+     */
+    async 다가오는_일정의_알림을_전송한다(): Promise<any> {
+        const schedules = await this.scheduleContextService.다가오는_일정을_조회한다();
+        console.log(schedules);
+        if (schedules.length === 0) {
+            return;
+        }
+        const scheduleRelations = await this.scheduleContextService.일정관계정보들을_조회한다(
+            schedules.map((schedule) => schedule.scheduleId),
+        );
+        const reservations = await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelations);
+        const resources = await this.scheduleContextService.일정들의_자원정보를_조회한다(scheduleRelations);
+        const participantIds = await this.scheduleContextService.일정들의_모든참가자정보를_조회한다(
+            schedules.map((schedule) => schedule.scheduleId),
+        );
+
+        for (const schedule of schedules) {
+            const notificationData: CreateNotificationDataDto = {
+                schedule: {
+                    scheduleId: schedule.scheduleId,
+                    scheduleTitle: schedule.title,
+                    startDate: DateUtil.format(schedule.startDate, 'YYYY-MM-DD HH:mm'),
+                    endDate: DateUtil.format(schedule.endDate, 'YYYY-MM-DD HH:mm'),
+                },
+                reservation: {
+                    reservationId: reservations.get(schedule.scheduleId)?.reservationId,
+                    reservationTitle: reservations.get(schedule.scheduleId)?.title,
+                    reservationDate: DateUtil.format(
+                        reservations.get(schedule.scheduleId)?.startDate,
+                        'YYYY-MM-DD HH:mm',
+                    ),
+                    status: reservations.get(schedule.scheduleId)?.status,
+                },
+                resource: {
+                    resourceId: resources.get(schedule.scheduleId)?.resourceId,
+                    resourceName: resources.get(schedule.scheduleId)?.resourceName,
+                    resourceType: resources.get(schedule.scheduleId)?.resourceType,
+                },
+            };
+            const notificationTarget = participantIds
+                .get(schedule.scheduleId)
+                .map((participant) => participant.employee.employeeId);
+            await this.notificationContextService.알림_전송_프로세스를_진행한다(
+                NotificationType.RESERVATION_DATE_UPCOMING,
+                notificationData,
+                notificationTarget,
+            );
+        }
     }
 }

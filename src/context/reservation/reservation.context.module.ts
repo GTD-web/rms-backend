@@ -16,10 +16,11 @@ import { NotificationModule } from '@src/application/notification/notification.m
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Context Services
-import { ReservationContextService } from './services/reservation.context.service';
+import { LegacyReservationContextService } from './services/legacy-reservation.context.service';
 import { ReservationManagementService } from './services/reservation-management.service';
 import { ReservationValidationService } from './services/reservation-validation.service';
 import { ReservationConflictService } from './services/reservation-conflict.service';
+import { ReservationContextService } from './services/reservation.context.service';
 
 /**
  * 예약 관리 컨텍스트 모듈
@@ -53,17 +54,19 @@ import { ReservationConflictService } from './services/reservation-conflict.serv
     controllers: [],
     providers: [
         // Context Services
-        ReservationContextService,
+        LegacyReservationContextService,
         ReservationManagementService,
         ReservationValidationService,
         ReservationConflictService,
+        ReservationContextService,
     ],
     exports: [
         // Context Services
-        ReservationContextService,
+        LegacyReservationContextService,
         ReservationManagementService,
         ReservationValidationService,
         ReservationConflictService,
+        ReservationContextService,
     ],
 })
 export class ReservationContextModule {}

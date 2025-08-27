@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
+import { LegacyReservationContextService } from '@src/context/reservation/services/legacy-reservation.context.service';
 
 @Injectable()
 export class CronReservationService {
-    constructor(private readonly reservationContextService: ReservationContextService) {}
+    constructor(private readonly reservationContextService: LegacyReservationContextService) {}
 
     // ==================== 크론 작업 처리 ====================
     async closeReservation(): Promise<void> {

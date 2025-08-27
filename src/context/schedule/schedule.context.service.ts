@@ -3,7 +3,7 @@ import { DomainScheduleService } from '@src/domain/schedule/schedule.service';
 import { DomainScheduleParticipantService } from '@src/domain/schedule-participant/schedule-participant.service';
 import { DomainScheduleRelationService } from '@src/domain/schedule-relation/schedule-relation.service';
 import { CreateScheduleDto, CreateScheduleParticipantDto, CreateScheduleRelationDto } from './dtos/create-schedule.dto';
-import { QueryRunner } from 'typeorm';
+import { QueryRunner, MoreThan } from 'typeorm';
 import { Schedule } from '@libs/entities/schedule.entity';
 import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
 import { ScheduleRelation } from '@libs/entities/schedule-relations.entity';
@@ -19,6 +19,7 @@ import { DomainResourceService } from '@src/domain/resource/resource.service';
 import { DomainResourceGroupService } from '@src/domain/resource-group/resource-group.service';
 import { Resource } from '@libs/entities/resource.entity';
 import { ResourceGroup } from '@libs/entities/resource-group.entity';
+import { DateUtil } from '@libs/utils/date.util';
 
 @Injectable()
 export class ScheduleContextService {
@@ -34,6 +35,56 @@ export class ScheduleContextService {
         private readonly domainResourceService: DomainResourceService,
         private readonly domainResourceGroupService: DomainResourceGroupService,
     ) {}
+
+    async 다가오는_일정을_조회한다(): Promise<Schedule[]> {
+        const now = DateUtil.now().toDate();
+
+        // 1. 기본 조건으로 후보 일정들을 먼저 조회
+        const candidateSchedules = await this.domainScheduleService.findAll({
+            where: {
+                notifyBeforeStart: true,
+                startDate: MoreThan(now), // 미래 일정만
+            },
+        });
+
+        // 2. JavaScript에서 정확한 알림 시간 조건 필터링
+        const currentMinute = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            now.getHours(),
+            now.getMinutes(),
+            0,
+            0,
+        );
+
+        return candidateSchedules.filter((schedule) => {
+            // notifyMinutesBeforeStart 배열의 각 분 수만큼 뺀 시간들 계산
+            const notifyTimes = schedule.notifyMinutesBeforeStart.map((minutes) => {
+                const notifyTime = new Date(schedule.startDate);
+                notifyTime.setMinutes(notifyTime.getMinutes() - minutes);
+                // 분 단위로 반올림
+                return new Date(
+                    notifyTime.getFullYear(),
+                    notifyTime.getMonth(),
+                    notifyTime.getDate(),
+                    notifyTime.getHours(),
+                    notifyTime.getMinutes(),
+                    0,
+                    0,
+                );
+            });
+
+            // 현재 시간이 알림 시간들 중 하나와 일치하는지 확인
+            return notifyTimes.some((notifyTime) => notifyTime.getTime() === currentMinute.getTime());
+        });
+    }
+
+    async 일정을_조회한다(scheduleId: string): Promise<Schedule> {
+        return await this.domainScheduleService.findOne({
+            where: { scheduleId },
+        });
+    }
 
     async 일정들을_조회한다(scheduleIds: string[]): Promise<Schedule[]> {
         return await this.domainScheduleService.findByScheduleIds(scheduleIds);
@@ -59,7 +110,7 @@ export class ScheduleContextService {
         return await this.domainScheduleService.findByEmployeeIdFromNow(employeeId);
     }
 
-    async 일정관계정보를_조회한다(scheduleIds: string[]): Promise<ScheduleRelation[]> {
+    async 일정관계정보들을_조회한다(scheduleIds: string[]): Promise<ScheduleRelation[]> {
         return await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
     }
 
@@ -191,43 +242,59 @@ export class ScheduleContextService {
 
     async 일정들의_자원정보를_조회한다(
         scheduleRelations: ScheduleRelation[],
-    ): Promise<Map<string, { resourceName: string; resourceType: ResourceType }[]>> {
+    ): Promise<Map<string, { resourceId: string; resourceName: string; resourceType: ResourceType }>> {
         const validRelations = scheduleRelations.filter((relation) => relation.reservationId);
         const reservationIds = validRelations.map((relation) => relation.reservationId!);
 
         const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
 
-        // TODO: Reservation에서 자원 정보를 가져오는 로직 (실제 구현 시 자원 도메인 서비스 사용)
-        // 임시로 예약 ID를 기반으로 자원 정보 맵핑
-        const scheduleResourceMap = new Map<string, { resourceName: string; resourceType: ResourceType }[]>();
+        // 예약에서 자원 ID들을 추출
+        const resourceIds = [...new Set(reservations.map((reservation) => reservation.resourceId))];
+
+        // 자원 정보를 일괄 조회
+        const resources = await this.domainResourceService.findAll({
+            where: resourceIds.map((resourceId) => ({ resourceId })),
+        });
+
+        // 자원 ID별 자원 정보 맵 생성
+        const resourceMap = new Map();
+        resources.forEach((resource) => {
+            resourceMap.set(resource.resourceId, resource);
+        });
+
+        // 일정별 자원 정보 맵 생성
+        const scheduleResourceMap = new Map<
+            string,
+            { resourceId: string; resourceName: string; resourceType: ResourceType }
+        >();
 
         validRelations.forEach((relation) => {
             const reservation = reservations.find((r) => r.reservationId === relation.reservationId);
             if (reservation) {
-                // TODO: 실제 자원 정보 조회 로직으로 교체
-                const resourceInfo = {
-                    resourceName: `자원_${reservation.reservationId.slice(-4)}`,
-                    resourceType: ResourceType.MEETING_ROOM, // 임시값
-                };
-
-                if (!scheduleResourceMap.has(relation.scheduleId)) {
-                    scheduleResourceMap.set(relation.scheduleId, []);
+                const resource = resourceMap.get(reservation.resourceId);
+                if (resource) {
+                    const resourceInfo = {
+                        resourceId: resource.resourceId,
+                        resourceName: resource.name,
+                        resourceType: resource.type,
+                    };
+                    if (!scheduleResourceMap.has(relation.scheduleId)) {
+                        scheduleResourceMap.set(relation.scheduleId, resourceInfo);
+                    }
                 }
-                scheduleResourceMap.get(relation.scheduleId)!.push(resourceInfo);
             }
         });
-
         return scheduleResourceMap;
     }
 
-    일정들을_카테고리별로_분류한다(
+    async 일정들을_카테고리별로_분류한다(
         schedules: Schedule[],
         scheduleRelations: ScheduleRelation[],
-    ): {
+    ): Promise<{
         scheduleTypeStats: Map<ScheduleType, Schedule[]>;
         projectStats: Schedule[];
         resourceStats: Map<ResourceType, Schedule[]>;
-    } {
+    }> {
         const scheduleTypeStats = new Map<ScheduleType, Schedule[]>();
         const projectStats: Schedule[] = [];
         const resourceStats = new Map<ResourceType, Schedule[]>();
@@ -240,6 +307,18 @@ export class ScheduleContextService {
             }
             relationMap.get(relation.scheduleId)!.push(relation);
         });
+
+        // 예약 관련 관계들을 먼저 수집
+        const reservationRelations = scheduleRelations.filter((relation) => relation.reservationId);
+
+        // 자원 정보를 일괄 조회 (성능 최적화)
+        let scheduleResourceMap = new Map<
+            string,
+            { resourceId: string; resourceName: string; resourceType: ResourceType }
+        >();
+        if (reservationRelations.length > 0) {
+            scheduleResourceMap = await this.일정들의_자원정보를_조회한다(reservationRelations);
+        }
 
         schedules.forEach((schedule) => {
             const relations = relationMap.get(schedule.scheduleId) || [];
@@ -254,16 +333,17 @@ export class ScheduleContextService {
             if (relations.some((r) => r.projectId)) {
                 projectStats.push(schedule);
             }
-
             // 자원 관련 일정 분류 (예약이 있는 경우)
             if (relations.some((r) => r.reservationId)) {
-                // TODO: 실제 자원 타입 조회 로직 구현
-                // 임시로 MEETING_ROOM으로 설정
-                const resourceType = ResourceType.MEETING_ROOM;
-                if (!resourceStats.has(resourceType)) {
-                    resourceStats.set(resourceType, []);
+                const scheduleResources = scheduleResourceMap.get(schedule.scheduleId);
+                if (scheduleResources) {
+                    // 실제 자원 타입을 사용하여 분류
+                    const resourceType = scheduleResources.resourceType;
+                    if (!resourceStats.has(resourceType)) {
+                        resourceStats.set(resourceType, []);
+                    }
+                    resourceStats.get(resourceType)!.push(schedule);
                 }
-                resourceStats.get(resourceType)!.push(schedule);
             }
         });
 
@@ -406,21 +486,6 @@ export class ScheduleContextService {
         }
 
         return { resourceGroups, resourceMap };
-    }
-
-    private getResourceTypeKoreanName(resourceType: ResourceType): string {
-        switch (resourceType) {
-            case ResourceType.MEETING_ROOM:
-                return '회의실';
-            case ResourceType.VEHICLE:
-                return '차량';
-            case ResourceType.ACCOMMODATION:
-                return '숙소';
-            case ResourceType.EQUIPMENT:
-                return '장비';
-            default:
-                return '자원';
-        }
     }
 
     async 자원별_일정정보를_맵핑한다(schedules: Schedule[]): Promise<Map<string, Schedule[]>> {
@@ -579,7 +644,10 @@ export class ScheduleContextService {
         });
     }
 
-    async 일정관계정보를_생성한다(relationData: CreateScheduleRelationDto, queryRunner?: QueryRunner): Promise<void> {
+    async 일정관계정보를_생성한다(
+        relationData: CreateScheduleRelationDto,
+        queryRunner?: QueryRunner,
+    ): Promise<ScheduleRelation> {
         const relationEntity = {
             scheduleId: relationData.scheduleId,
             projectId: relationData.projectId,
@@ -587,7 +655,7 @@ export class ScheduleContextService {
         };
 
         // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
-        await this.domainScheduleRelationService.save(relationEntity, {
+        return await this.domainScheduleRelationService.save(relationEntity, {
             queryRunner: queryRunner,
         });
     }
