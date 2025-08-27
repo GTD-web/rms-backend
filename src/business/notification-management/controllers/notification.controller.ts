@@ -3,20 +3,22 @@ import { Controller, Get, Post, Patch, Param, Body, Query, Req, Type } from '@ne
 import { Request } from 'express';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
-import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
-import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Public } from '@libs/decorators/public.decorator';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 
-// Context DTOs (business layer에서 context layer DTO 사용)
-import { PushSubscriptionDto } from '@src/context/notification/dtos/push-subscription.dto';
-import { ResponseNotificationDto } from '@src/context/notification/dtos/response-notification.dto';
-import { NotificationTypeResponseDto } from '@src/context/notification/dtos/notification-type-response.dto';
-import { SendNotificationDto } from '@src/context/notification/dtos/create-notification.dto';
-import { PushNotificationDto } from '@src/context/notification/dtos/send-notification.dto';
+// Business Layer DTOs (중앙집중식 import)
+import {
+    PaginationQueryDto,
+    NotificationListResponseDto,
+    ContextPushSubscriptionDto as PushSubscriptionDto,
+    ContextResponseNotificationDto as ResponseNotificationDto,
+    ContextNotificationTypeResponseDto as NotificationTypeResponseDto,
+    ContextSendNotificationDto as SendNotificationDto,
+    ContextPushNotificationDto as PushNotificationDto,
+} from '@src/business.dto.index';
 
 // Business Service
 import { NotificationManagementService } from '../notification-management.service';
@@ -96,7 +98,7 @@ export class NotificationController {
     @ApiOperation({ summary: '알람 목록 조회' })
     @ApiOkResponse({
         description: '알람 목록 조회 성공',
-        type: PaginationData<ResponseNotificationDto>,
+        type: NotificationListResponseDto,
     })
     @ApiQuery({
         name: 'page',
@@ -118,7 +120,7 @@ export class NotificationController {
         @User('employeeId') employeeId: string,
         @Query() query: PaginationQueryDto,
         @Query('resourceType') resourceType?: ResourceType,
-    ): Promise<PaginationData<ResponseNotificationDto>> {
+    ): Promise<NotificationListResponseDto> {
         return await this.notificationManagementService.내_알림_목록을_조회한다(employeeId, query, resourceType);
     }
 

@@ -3,15 +3,15 @@ import { NotificationContextService } from '@src/context/notification/services/n
 import { CronNotificationContextService } from '@src/context/notification/services/cron-notification.context.service';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
-import { PaginationData } from '@libs/dtos/pagination-response.dto';
 
-// Import context DTOs
-import { PushSubscriptionDto } from '@src/context/notification/dtos/push-subscription.dto';
-import { ResponseNotificationDto } from '@src/context/notification/dtos/response-notification.dto';
-import { NotificationTypeResponseDto } from '@src/context/notification/dtos/notification-type-response.dto';
-import { CreateNotificationDataDto } from '@src/context/notification/dtos/create-notification.dto';
-import { PushNotificationDto } from '@src/context/notification/dtos/send-notification.dto';
+// Import DTOs from business layer index
+import {
+    PaginationQueryDto,
+    NotificationListResponseDto,
+    ContextPushSubscriptionDto as PushSubscriptionDto,
+    ContextNotificationTypeResponseDto as NotificationTypeResponseDto,
+    ContextCreateNotificationDataDto as CreateNotificationDataDto,
+} from '@src/business.dto.index';
 
 /**
  * 알림 관리 비즈니스 서비스
@@ -84,7 +84,7 @@ export class NotificationManagementService {
         employeeId: string,
         query: PaginationQueryDto,
         resourceType?: ResourceType,
-    ): Promise<PaginationData<ResponseNotificationDto>> {
+    ): Promise<NotificationListResponseDto> {
         return await this.notificationContextService.내_알림_목록을_조회한다(employeeId, query, resourceType);
     }
 

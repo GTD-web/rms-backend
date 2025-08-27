@@ -1,6 +1,12 @@
 // 🎯 Business Layer DTOs - 비즈니스 레이어 모든 DTO Export
 
 // ============================================================================
+// 📋 SHARED/COMMON DTOs (from libs)
+// ============================================================================
+export { PaginationQueryDto } from '../libs/dtos/pagination-query.dto';
+export { PaginationData, PaginationMetaDto } from '../libs/dtos/pagination-response.dto';
+
+// ============================================================================
 // 📋 RESERVATION MANAGEMENT DTOs
 // ============================================================================
 export * from './business/reservation-management/dtos/create-reservation.dto';
@@ -90,3 +96,10 @@ export { CreateFileDataDto as ContextCreateFileDataDto } from './context/file/dt
 export { FileResponseDto as ContextFileResponseDto } from './context/file/dtos/file-response.dto';
 export { ReservationVehicleFileResponseDto } from './context/file/dtos/reservation-vehicle-file-response.dto';
 export * from './context/file/dtos/index';
+
+// ============================================================================
+// 📋 BUSINESS LAYER SPECIFIC DTOs
+// ============================================================================
+
+// 📢 Notification Management DTOs
+export { NotificationListResponseDto } from './business/notification-management/dtos/notification-list-response.dto';
