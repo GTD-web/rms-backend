@@ -3,7 +3,7 @@ import { DomainScheduleService } from '@src/domain/schedule/schedule.service';
 import { DomainScheduleParticipantService } from '@src/domain/schedule-participant/schedule-participant.service';
 import { DomainScheduleRelationService } from '@src/domain/schedule-relation/schedule-relation.service';
 import { CreateScheduleDto, CreateScheduleParticipantDto, CreateScheduleRelationDto } from './dtos/create-schedule.dto';
-import { QueryRunner, MoreThan } from 'typeorm';
+import { QueryRunner, MoreThan, Between } from 'typeorm';
 import { Schedule } from '@libs/entities/schedule.entity';
 import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
 import { ScheduleRelation } from '@libs/entities/schedule-relations.entity';
@@ -38,12 +38,13 @@ export class ScheduleContextService {
 
     async 다가오는_일정을_조회한다(): Promise<Schedule[]> {
         const now = DateUtil.now().toDate();
+        const endOfDay = DateUtil.now().addMinutes(90).toDate();
 
         // 1. 기본 조건으로 후보 일정들을 먼저 조회
         const candidateSchedules = await this.domainScheduleService.findAll({
             where: {
                 notifyBeforeStart: true,
-                startDate: MoreThan(now), // 미래 일정만
+                startDate: Between(now, endOfDay), // 미래 일정만
             },
         });
 
@@ -64,19 +65,31 @@ export class ScheduleContextService {
                 const notifyTime = new Date(schedule.startDate);
                 notifyTime.setMinutes(notifyTime.getMinutes() - minutes);
                 // 분 단위로 반올림
-                return new Date(
-                    notifyTime.getFullYear(),
-                    notifyTime.getMonth(),
-                    notifyTime.getDate(),
-                    notifyTime.getHours(),
-                    notifyTime.getMinutes(),
-                    0,
-                    0,
-                );
+                return {
+                    minutes,
+                    notifyTime: new Date(
+                        notifyTime.getFullYear(),
+                        notifyTime.getMonth(),
+                        notifyTime.getDate(),
+                        notifyTime.getHours(),
+                        notifyTime.getMinutes(),
+                        0,
+                        0,
+                    ),
+                };
             });
 
             // 현재 시간이 알림 시간들 중 하나와 일치하는지 확인
-            return notifyTimes.some((notifyTime) => notifyTime.getTime() === currentMinute.getTime());
+            const isMatch = notifyTimes.some(
+                (notifyTime) => notifyTime.notifyTime.getTime() === currentMinute.getTime(),
+            );
+            if (isMatch) {
+                schedule.notifyMinutesBeforeStart = [
+                    notifyTimes.find((notifyTime) => notifyTime.notifyTime.getTime() === currentMinute.getTime())
+                        ?.minutes,
+                ];
+            }
+            return isMatch;
         });
     }
 

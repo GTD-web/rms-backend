@@ -21935,6 +21935,7 @@ let NotificationManagementService = class NotificationManagementService {
                 schedule: {
                     scheduleId: schedule.scheduleId,
                     scheduleTitle: schedule.title,
+                    beforeMinutes: schedule.notifyMinutesBeforeStart[0],
                     startDate: date_util_1.DateUtil.format(schedule.startDate, 'YYYY-MM-DD HH:mm'),
                     endDate: date_util_1.DateUtil.format(schedule.endDate, 'YYYY-MM-DD HH:mm'),
                 },
@@ -34126,10 +34127,11 @@ let ScheduleContextService = ScheduleContextService_1 = class ScheduleContextSer
     }
     async 다가오는_일정을_조회한다() {
         const now = date_util_1.DateUtil.now().toDate();
+        const endOfDay = date_util_1.DateUtil.now().addMinutes(90).toDate();
         const candidateSchedules = await this.domainScheduleService.findAll({
             where: {
                 notifyBeforeStart: true,
-                startDate: (0, typeorm_1.MoreThan)(now),
+                startDate: (0, typeorm_1.Between)(now, endOfDay),
             },
         });
         const currentMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
@@ -34137,9 +34139,19 @@ let ScheduleContextService = ScheduleContextService_1 = class ScheduleContextSer
             const notifyTimes = schedule.notifyMinutesBeforeStart.map((minutes) => {
                 const notifyTime = new Date(schedule.startDate);
                 notifyTime.setMinutes(notifyTime.getMinutes() - minutes);
-                return new Date(notifyTime.getFullYear(), notifyTime.getMonth(), notifyTime.getDate(), notifyTime.getHours(), notifyTime.getMinutes(), 0, 0);
+                return {
+                    minutes,
+                    notifyTime: new Date(notifyTime.getFullYear(), notifyTime.getMonth(), notifyTime.getDate(), notifyTime.getHours(), notifyTime.getMinutes(), 0, 0),
+                };
             });
-            return notifyTimes.some((notifyTime) => notifyTime.getTime() === currentMinute.getTime());
+            const isMatch = notifyTimes.some((notifyTime) => notifyTime.notifyTime.getTime() === currentMinute.getTime());
+            if (isMatch) {
+                schedule.notifyMinutesBeforeStart = [
+                    notifyTimes.find((notifyTime) => notifyTime.notifyTime.getTime() === currentMinute.getTime())
+                        ?.minutes,
+                ];
+            }
+            return isMatch;
         });
     }
     async 일정을_조회한다(scheduleId) {

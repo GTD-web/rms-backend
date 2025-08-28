@@ -156,6 +156,7 @@ export class NotificationManagementService {
                 schedule: {
                     scheduleId: schedule.scheduleId,
                     scheduleTitle: schedule.title,
+                    beforeMinutes: schedule.notifyMinutesBeforeStart[0],
                     startDate: DateUtil.format(schedule.startDate, 'YYYY-MM-DD HH:mm'),
                     endDate: DateUtil.format(schedule.endDate, 'YYYY-MM-DD HH:mm'),
                 },
