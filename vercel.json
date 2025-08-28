@@ -41,6 +41,10 @@
         {
             "path": "/api/v1/employees/sync",
             "schedule": "0 0 * * *"
+        },
+        {
+            "path": "/api/v2/notifications/cron-job/send-upcoming-notification",
+            "schedule": "* * * * 1-5"
         }
     ]
 }

@@ -38709,8 +38709,6 @@ async function bootstrap() {
     app.enableCors({
         origin: isProduction
             ? function (origin, callback) {
-                console.log('isProduction :', isProduction);
-                console.log('origin :', origin);
                 const whitelist = [
                     'https://lrms.lumir.space',
                     'https://rms-backend-iota.vercel.app',
