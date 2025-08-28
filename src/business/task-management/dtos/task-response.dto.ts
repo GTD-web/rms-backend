@@ -55,6 +55,13 @@ export class TaskResponseDto {
 
     @ApiProperty({
         type: 'string',
+        description: '소모품 ID',
+        nullable: true,
+    })
+    consumableId?: string | null;
+
+    @ApiProperty({
+        type: 'string',
         description: '소모품 이름',
         nullable: true,
         required: false,

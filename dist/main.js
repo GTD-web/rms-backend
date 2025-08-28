@@ -3163,13 +3163,20 @@ var Role;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleType = void 0;
+exports.ScheduleStatus = exports.ScheduleType = void 0;
 var ScheduleType;
 (function (ScheduleType) {
     ScheduleType["COMPANY"] = "COMPANY";
     ScheduleType["DEPARTMENT"] = "DEPARTMENT";
     ScheduleType["PERSONAL"] = "PERSONAL";
 })(ScheduleType || (exports.ScheduleType = ScheduleType = {}));
+var ScheduleStatus;
+(function (ScheduleStatus) {
+    ScheduleStatus["PENDING"] = "PENDING";
+    ScheduleStatus["PROCESSING"] = "PROCESSING";
+    ScheduleStatus["COMPLETED"] = "COMPLETED";
+    ScheduleStatus["CANCELLED"] = "CANCELLED";
+})(ScheduleStatus || (exports.ScheduleStatus = ScheduleStatus = {}));
 
 
 /***/ }),
@@ -28341,6 +28348,14 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: 'string',
+        description: '소모품 ID',
+        nullable: true,
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "consumableId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
         description: '소모품 이름',
         nullable: true,
         required: false,
@@ -28481,6 +28496,7 @@ let TaskManagementService = class TaskManagementService {
             reservationId: null,
             resourceId: item.resourceId,
             resourceName: item.resourceName,
+            consumableId: item.consumableId,
             consumableName: item.consumableName,
             startDate: null,
             endDate: null,
@@ -28518,6 +28534,7 @@ let TaskManagementService = class TaskManagementService {
                             reservationId: null,
                             resourceId: resource.resourceId,
                             resourceName: resource.name,
+                            consumableId: consumable.consumableId,
                             consumableName: consumable.name,
                             startDate: null,
                             endDate: null,
@@ -28551,6 +28568,7 @@ let TaskManagementService = class TaskManagementService {
                             reservationId: null,
                             resourceId: resource.resourceId,
                             resourceName: resource.name,
+                            consumableId: consumable.consumableId,
                             consumableName: consumable.name,
                             startDate: null,
                             endDate: null,
