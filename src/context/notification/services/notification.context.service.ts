@@ -151,7 +151,7 @@ export class NotificationContextService {
     /**
      * 소모품 교체 알림을 조회한다
      */
-    async 소모품교체_알림을_조회한다(resourceId: string, consumableName: string, date: Date): Promise<any[]> {
+    async 소모품교체_알림을_조회한다(resourceId: string, consumableName: string): Promise<any[]> {
         const notifications = await this.domainNotificationService.findAll({
             where: {
                 notificationType: NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
@@ -159,7 +159,7 @@ export class NotificationContextService {
                     (alias) =>
                         `${alias} ->> 'resourceId' = '${resourceId}' AND ${alias} ->> 'consumableName' = '${consumableName}'`,
                 ),
-                createdAt: MoreThan(DateUtil.date(date).format('YYYY-MM-DD HH:mm')),
+                // createdAt: MoreThan(DateUtil.date(date).format('YYYY-MM-DD HH:mm')),
             },
         });
 

@@ -103,7 +103,7 @@ export class TaskManagementService {
                         const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(
                             resource.resourceId,
                             consumable.name,
-                            latestMaintenance.date,
+                            // latestMaintenance.date,
                         );
 
                         needReplaceConsumables.push({

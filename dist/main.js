@@ -28527,7 +28527,7 @@ let TaskManagementService = class TaskManagementService {
                 if (latestMaintenance) {
                     const maintenanceRequired = resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
                     if (maintenanceRequired) {
-                        const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(resource.resourceId, consumable.name, latestMaintenance.date);
+                        const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(resource.resourceId, consumable.name);
                         needReplaceConsumables.push({
                             type: '소모품교체',
                             title: `${consumable.name} 교체 필요`,
@@ -30588,12 +30588,11 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
     }
     async 시스템_관리자들에게_알림을_발송한다() {
     }
-    async 소모품교체_알림을_조회한다(resourceId, consumableName, date) {
+    async 소모품교체_알림을_조회한다(resourceId, consumableName) {
         const notifications = await this.domainNotificationService.findAll({
             where: {
                 notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
                 notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'resourceId' = '${resourceId}' AND ${alias} ->> 'consumableName' = '${consumableName}'`),
-                createdAt: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(date).format('YYYY-MM-DD HH:mm')),
             },
         });
         return notifications;
