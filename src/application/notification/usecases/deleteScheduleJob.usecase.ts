@@ -19,7 +19,7 @@ export class DeleteScheduleJobUsecase {
         const notifications = await this.notificationService.findAll({
             where: {
                 notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
-                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                notificationData: Raw((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservationId}'`),
                 isSent: false,
             },
         });

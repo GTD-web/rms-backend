@@ -313,7 +313,7 @@ export class LegacyReservationContextService {
     async 지연_차량_알림을_조회한다(reservationId: string): Promise<ResponseNotificationDto[]> {
         const notifications = await this.domainNotificationService.findAll({
             where: {
-                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                notificationData: Raw((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservationId}'`),
                 notificationType: NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED,
             },
         });
@@ -705,7 +705,9 @@ export class LegacyReservationContextService {
 
         const notifications = await this.domainNotificationService.findAll({
             where: {
-                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`),
+                notificationData: Raw(
+                    (alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservation.reservationId}'`,
+                ),
                 employees: {
                     employeeId: user.employeeId,
                     isRead: false,

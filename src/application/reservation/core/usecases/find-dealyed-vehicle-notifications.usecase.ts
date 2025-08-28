@@ -15,7 +15,7 @@ export class FindDelayedVehicleNotificationsUsecase {
     async execute(reservationId: string): Promise<ResponseNotificationDto[]> {
         const notifications = await this.notificationService.findAll({
             where: {
-                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                notificationData: Raw((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservationId}'`),
                 notificationType: NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED,
             },
         });

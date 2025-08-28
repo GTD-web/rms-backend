@@ -88,9 +88,12 @@ export class NotificationContextService {
 
         // ResourceType 필터링 추가 (JSON 컬럼 접근)
         if (resourceType) {
-            whereCondition.notificationData = Raw((alias) => `${alias} ->> 'resourceType' = :resourceType`, {
-                resourceType,
-            });
+            whereCondition.notificationData = Raw(
+                (alias) => `${alias} -> 'resource' ->> 'resourceType' = :resourceType`,
+                {
+                    resourceType,
+                },
+            );
         }
 
         const options: IRepositoryOptions<Notification> = {
@@ -530,7 +533,7 @@ export class NotificationContextService {
         const notifications = await this.domainNotificationService.findAll({
             where: {
                 notificationType: NotificationType.RESERVATION_DATE_UPCOMING,
-                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                notificationData: Raw((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservationId}'`),
                 isSent: false,
             },
         });
@@ -551,9 +554,8 @@ export class NotificationContextService {
                 notificationType: NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
                 notificationData: Raw(
                     (alias) =>
-                        `${alias} ->> 'resourceId' = '${resourceId}' AND ${alias} ->> 'consumableName' = '${consumableName}'`,
+                        `${alias} -> 'resource' ->> 'resourceId' = '${resourceId}' AND ${alias} -> 'resource' -> 'vehicleInfo' -> 'consumable' ->> 'consumableName' = '${consumableName}'`,
                 ),
-                createdAt: MoreThan(DateUtil.date(date).format('YYYY-MM-DD HH:mm')),
             },
         });
 

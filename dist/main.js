@@ -8510,7 +8510,7 @@ let DeleteScheduleJobUsecase = class DeleteScheduleJobUsecase {
         const notifications = await this.notificationService.findAll({
             where: {
                 notificationType: notification_type_enum_1.NotificationType.RESERVATION_DATE_UPCOMING,
-                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservationId}'`),
                 isSent: false,
             },
         });
@@ -11158,7 +11158,7 @@ let FindDelayedVehicleNotificationsUsecase = class FindDelayedVehicleNotificatio
     async execute(reservationId) {
         const notifications = await this.notificationService.findAll({
             where: {
-                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservationId}'`),
                 notificationType: notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED,
             },
         });
@@ -11605,7 +11605,7 @@ let FindReservationDetailUsecase = class FindReservationDetailUsecase {
                 reservationResponseDto.endDate > date_util_1.DateUtil.now().format();
         const notifications = await this.notificationService.findAll({
             where: {
-                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`),
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservation.reservationId}'`),
                 employees: {
                     employeeId: user.employeeId,
                     isRead: false,
@@ -20402,7 +20402,7 @@ let GetNeedRaplaceConsumablesUsecase = class GetNeedRaplaceConsumablesUsecase {
                         const notifications = await this.notificationService.findAll({
                             where: {
                                 notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
-                                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'resourceId' = '${resource.resourceId}' AND ${alias} ->> 'consumableName' = '${consumable.name}'`),
+                                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} -> 'resource' ->> 'resourceId' = '${resource.resourceId}' AND ${alias} -> 'resource' -> 'vehicleInfo' -> 'consumable'  ->> 'consumableName' = '${consumable.name}'`),
                                 createdAt: (0, typeorm_1.MoreThan)(date_util_1.DateUtil.date(latestMaintenance.date).format('YYYY-MM-DD HH:mm')),
                             },
                         });
@@ -31274,7 +31274,7 @@ let LegacyReservationContextService = class LegacyReservationContextService {
     async 지연_차량_알림을_조회한다(reservationId) {
         const notifications = await this.domainNotificationService.findAll({
             where: {
-                notificationData: (0, typeorm_2.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservationId}'`),
+                notificationData: (0, typeorm_2.Raw)((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservationId}'`),
                 notificationType: notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED,
             },
         });
@@ -31574,7 +31574,7 @@ let LegacyReservationContextService = class LegacyReservationContextService {
                 reservationResponseDto.endDate > date_util_1.DateUtil.now().format();
         const notifications = await this.domainNotificationService.findAll({
             where: {
-                notificationData: (0, typeorm_2.Raw)((alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`),
+                notificationData: (0, typeorm_2.Raw)((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservation.reservationId}'`),
                 employees: {
                     employeeId: user.employeeId,
                     isRead: false,
