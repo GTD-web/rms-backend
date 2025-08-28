@@ -77,9 +77,12 @@ export class NotificationContextService {
 
         // ResourceType 필터링 추가 (JSON 컬럼 접근)
         if (resourceType) {
-            whereCondition.notificationData = Raw((alias) => `${alias} ->> 'resourceType' = :resourceType`, {
-                resourceType,
-            });
+            whereCondition.notificationData = Raw(
+                (alias) => `${alias} -> 'resource' ->> 'resourceType' = :resourceType`,
+                {
+                    resourceType,
+                },
+            );
         }
 
         const options: IRepositoryOptions<Notification> = {
@@ -152,16 +155,18 @@ export class NotificationContextService {
      * 소모품 교체 알림을 조회한다
      */
     async 소모품교체_알림을_조회한다(resourceId: string, consumableName: string): Promise<any[]> {
+        console.log(resourceId, consumableName);
         const notifications = await this.domainNotificationService.findAll({
             where: {
                 notificationType: NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
                 notificationData: Raw(
                     (alias) =>
-                        `${alias} ->> 'resourceId' = '${resourceId}' AND ${alias} ->> 'consumableName' = '${consumableName}'`,
+                        `${alias} -> 'resource' ->> 'resourceId' = '${resourceId}' AND ${alias} -> 'resource' -> 'vehicleInfo' -> 'consumable' ->> 'consumableName' = '${consumableName}'`,
                 ),
                 // createdAt: MoreThan(DateUtil.date(date).format('YYYY-MM-DD HH:mm')),
             },
         });
+        console.log(notifications);
 
         return notifications;
     }

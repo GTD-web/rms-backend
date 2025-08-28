@@ -30545,7 +30545,7 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             isSent: true,
         };
         if (resourceType) {
-            whereCondition.notificationData = (0, typeorm_1.Raw)((alias) => `${alias} ->> 'resourceType' = :resourceType`, {
+            whereCondition.notificationData = (0, typeorm_1.Raw)((alias) => `${alias} -> 'resource' ->> 'resourceType' = :resourceType`, {
                 resourceType,
             });
         }
@@ -30589,12 +30589,14 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
     async 시스템_관리자들에게_알림을_발송한다() {
     }
     async 소모품교체_알림을_조회한다(resourceId, consumableName) {
+        console.log(resourceId, consumableName);
         const notifications = await this.domainNotificationService.findAll({
             where: {
                 notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
-                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} ->> 'resourceId' = '${resourceId}' AND ${alias} ->> 'consumableName' = '${consumableName}'`),
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} -> 'resource' ->> 'resourceId' = '${resourceId}' AND ${alias} -> 'resource' -> 'vehicleInfo' -> 'consumable' ->> 'consumableName' = '${consumableName}'`),
             },
         });
+        console.log(notifications);
         return notifications;
     }
     async 알림을_읽음_처리한다(employeeId, notificationId) {
