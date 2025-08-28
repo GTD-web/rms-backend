@@ -561,4 +561,15 @@ export class NotificationContextService {
 
         return notifications;
     }
+
+    async 차량반납_알림을_조회한다(reservationId: string) {
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationData: Raw((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservationId}'`),
+                notificationType: NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED,
+            },
+        });
+
+        return notifications;
+    }
 }

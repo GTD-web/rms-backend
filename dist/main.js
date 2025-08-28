@@ -23138,6 +23138,7 @@ const cron_reservation_controller_1 = __webpack_require__(/*! ./controllers/cron
 const reservation_context_module_1 = __webpack_require__(/*! @src/context/reservation/reservation.context.module */ "./src/context/reservation/reservation.context.module.ts");
 const reservation_service_1 = __webpack_require__(/*! ./services/reservation.service */ "./src/business/reservation-management/services/reservation.service.ts");
 const cron_reservation_service_1 = __webpack_require__(/*! ./services/cron-reservation.service */ "./src/business/reservation-management/services/cron-reservation.service.ts");
+const notification_context_module_1 = __webpack_require__(/*! @src/context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
 let ReservationManagementModule = class ReservationManagementModule {
 };
 exports.ReservationManagementModule = ReservationManagementModule;
@@ -23145,6 +23146,7 @@ exports.ReservationManagementModule = ReservationManagementModule = __decorate([
     (0, common_1.Module)({
         imports: [
             reservation_context_module_1.ReservationContextModule,
+            notification_context_module_1.NotificationContextModule,
         ],
         controllers: [reservation_controller_1.ReservationController, cron_reservation_controller_1.CronReservationController],
         providers: [reservation_service_1.ReservationService, cron_reservation_service_1.CronReservationService],
@@ -23212,14 +23214,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const legacy_reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/legacy-reservation.context.service */ "./src/context/reservation/services/legacy-reservation.context.service.ts");
+const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 let ReservationService = class ReservationService {
-    constructor(reservationContextService) {
+    constructor(reservationContextService, notificationContextService) {
         this.reservationContextService = reservationContextService;
+        this.notificationContextService = notificationContextService;
     }
     async create(user, createDto) {
         return this.reservationContextService.예약을_생성한다(user, createDto);
@@ -23249,7 +23253,9 @@ let ReservationService = class ReservationService {
         return this.reservationContextService.캘린더를_조회한다(user, query);
     }
     async findOne(user, reservationId) {
-        return this.reservationContextService.예약_상세를_조회한다(user, reservationId);
+        const reservation = await this.reservationContextService.예약_상세를_조회한다(user, reservationId);
+        const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
+        return { ...reservation, notifications };
     }
     async updateReservation(user, reservationId, updateDto) {
         await this.reservationContextService.예약_접근권한을_확인한다(reservationId, user.employeeId);
@@ -23275,7 +23281,7 @@ let ReservationService = class ReservationService {
 exports.ReservationService = ReservationService;
 exports.ReservationService = ReservationService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof legacy_reservation_context_service_1.LegacyReservationContextService !== "undefined" && legacy_reservation_context_service_1.LegacyReservationContextService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof legacy_reservation_context_service_1.LegacyReservationContextService !== "undefined" && legacy_reservation_context_service_1.LegacyReservationContextService) === "function" ? _a : Object, typeof (_b = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _b : Object])
 ], ReservationService);
 
 
@@ -30596,7 +30602,15 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
                 notificationData: (0, typeorm_1.Raw)((alias) => `${alias} -> 'resource' ->> 'resourceId' = '${resourceId}' AND ${alias} -> 'resource' -> 'vehicleInfo' -> 'consumable' ->> 'consumableName' = '${consumableName}'`),
             },
         });
-        console.log(notifications);
+        return notifications;
+    }
+    async 차량반납_알림을_조회한다(reservationId) {
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationData: (0, typeorm_1.Raw)((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservationId}'`),
+                notificationType: notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_DELAYED_RETURNED,
+            },
+        });
         return notifications;
     }
     async 알림을_읽음_처리한다(employeeId, notificationId) {

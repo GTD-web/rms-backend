@@ -16,10 +16,14 @@ import {
     ReservationResponseDto,
     ReservationWithRelationsResponseDto,
 } from '../dtos/reservation-response.dto';
+import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
 
 @Injectable()
 export class ReservationService {
-    constructor(private readonly reservationContextService: LegacyReservationContextService) {}
+    constructor(
+        private readonly reservationContextService: LegacyReservationContextService,
+        private readonly notificationContextService: NotificationContextService,
+    ) {}
 
     // ==================== 예약 생성 ====================
     async create(user: Employee, createDto: CreateReservationDto): Promise<CreateReservationResponseDto> {
@@ -105,7 +109,9 @@ export class ReservationService {
     }
 
     async findOne(user: Employee, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
-        return this.reservationContextService.예약_상세를_조회한다(user, reservationId);
+        const reservation = await this.reservationContextService.예약_상세를_조회한다(user, reservationId);
+        const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
+        return { ...reservation, notifications };
     }
 
     // ==================== 예약 수정 ====================
