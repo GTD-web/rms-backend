@@ -6,7 +6,7 @@ import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { NotificationManagementService } from '../notification-management.service';
 
 @ApiTags('v2 알림 ')
-@Controller('v2/notifications')
+@Controller('v1/notifications')
 @Public()
 export class CronNotificationController {
     constructor(private readonly notificationManagementService: NotificationManagementService) {}

@@ -7182,58 +7182,6 @@ exports.AdminNotificationController = AdminNotificationController = __decorate([
 
 /***/ }),
 
-/***/ "./src/application/notification/controllers/cron.notification.controller.ts":
-/*!**********************************************************************************!*\
-  !*** ./src/application/notification/controllers/cron.notification.controller.ts ***!
-  \**********************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CronNotificationController = void 0;
-const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const cron_notification_service_1 = __webpack_require__(/*! ../services/cron-notification.service */ "./src/application/notification/services/cron-notification.service.ts");
-const response_interceptor_1 = __webpack_require__(/*! @libs/interceptors/response.interceptor */ "./libs/interceptors/response.interceptor.ts");
-const error_interceptor_1 = __webpack_require__(/*! @libs/interceptors/error.interceptor */ "./libs/interceptors/error.interceptor.ts");
-let CronNotificationController = class CronNotificationController {
-    constructor(cronNotificationService) {
-        this.cronNotificationService = cronNotificationService;
-    }
-    async sendUpcomingNotification() {
-        return this.cronNotificationService.sendUpcomingNotification();
-    }
-};
-exports.CronNotificationController = CronNotificationController;
-__decorate([
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, common_1.Get)('cron-job/send-upcoming-notification'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], CronNotificationController.prototype, "sendUpcomingNotification", null);
-exports.CronNotificationController = CronNotificationController = __decorate([
-    (0, swagger_1.ApiTags)('5. 알림 '),
-    (0, common_1.Controller)('v1/notifications'),
-    (0, public_decorator_1.Public)(),
-    (0, common_1.UseInterceptors)(response_interceptor_1.ResponseInterceptor, error_interceptor_1.ErrorInterceptor),
-    __metadata("design:paramtypes", [typeof (_a = typeof cron_notification_service_1.CronNotificationService !== "undefined" && cron_notification_service_1.CronNotificationService) === "function" ? _a : Object])
-], CronNotificationController);
-
-
-/***/ }),
-
 /***/ "./src/application/notification/controllers/notification.controller.ts":
 /*!*****************************************************************************!*\
   !*** ./src/application/notification/controllers/notification.controller.ts ***!
@@ -7952,7 +7900,6 @@ const usecases_1 = __webpack_require__(/*! ./usecases */ "./src/application/noti
 const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
-const cron_notification_controller_1 = __webpack_require__(/*! ./controllers/cron.notification.controller */ "./src/application/notification/controllers/cron.notification.controller.ts");
 const cron_notification_service_1 = __webpack_require__(/*! ./services/cron-notification.service */ "./src/application/notification/services/cron-notification.service.ts");
 const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
 const admin_notification_controller_1 = __webpack_require__(/*! ./controllers/admin.notification.controller */ "./src/application/notification/controllers/admin.notification.controller.ts");
@@ -7987,7 +7934,7 @@ exports.NotificationModule = NotificationModule = __decorate([
             usecases_1.CronSendUpcomingNotificationUsecase,
             usecases_1.CreateReminderNotificationUsecase,
         ],
-        controllers: [notification_controller_1.NotificationController, cron_notification_controller_1.CronNotificationController, admin_notification_controller_1.AdminNotificationController],
+        controllers: [notification_controller_1.NotificationController, admin_notification_controller_1.AdminNotificationController],
         exports: [notification_service_1.NotificationService],
     })
 ], NotificationModule);
@@ -21606,7 +21553,7 @@ __decorate([
 ], CronNotificationController.prototype, "sendUpcomingNotification", null);
 exports.CronNotificationController = CronNotificationController = __decorate([
     (0, swagger_1.ApiTags)('v2 알림 '),
-    (0, common_1.Controller)('v2/notifications'),
+    (0, common_1.Controller)('v1/notifications'),
     (0, public_decorator_1.Public)(),
     __metadata("design:paramtypes", [typeof (_a = typeof notification_management_service_1.NotificationManagementService !== "undefined" && notification_management_service_1.NotificationManagementService) === "function" ? _a : Object])
 ], CronNotificationController);
