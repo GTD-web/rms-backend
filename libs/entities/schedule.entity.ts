@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { ScheduleParticipant } from './schedule-participant.entity';
-import { ScheduleType } from '@libs/enums/schedule-type.enum';
+import { ScheduleType, ScheduleStatus } from '@libs/enums/schedule-type.enum';
 
 @Entity('schedules')
 export class Schedule {
@@ -32,6 +32,17 @@ export class Schedule {
         comment: '일정 유형 (회사전체/부서/개인)',
     })
     scheduleType: ScheduleType;
+
+    @Column({
+        type: 'enum',
+        enum: ScheduleStatus,
+        default: ScheduleStatus.PENDING,
+        comment: '일정 상태 (대기/진행중/완료/취소)',
+    })
+    status: ScheduleStatus;
+
+    @Column({ nullable: true, comment: '완료 사유' })
+    completionReason: string;
 
     @CreateDateColumn({ type: 'timestamp with time zone' })
     createdAt: Date;

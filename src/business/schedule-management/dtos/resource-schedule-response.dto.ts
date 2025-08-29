@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { ParticipantsType } from '@libs/enums/reservation-type.enum';
+import { Schedule } from '@libs/entities/schedule.entity';
+import { Resource } from '@libs/entities/resource.entity';
+import { Reservation } from '@libs/entities/reservation.entity';
+import { ResourceGroup } from '@libs/entities/resource-group.entity';
+import { ScheduleParticipantsWithEmployee } from '@src/context/schedule/services/schedule-query.context.service';
 
 export class ResourceScheduleItemDto {
     @ApiProperty({
@@ -44,6 +50,33 @@ export class ResourceScheduleItemDto {
         example: true,
     })
     isMine: boolean;
+
+    /**
+     * 일정 아이템 DTO 생성
+     */
+    static fromScheduleData(
+        scheduleData: {
+            schedule: Schedule;
+            participants?: ScheduleParticipantsWithEmployee[];
+        },
+        currentEmployeeId: string,
+    ): ResourceScheduleItemDto {
+        const dto = new ResourceScheduleItemDto();
+        const { schedule, participants } = scheduleData;
+
+        // 예약자 찾기
+        const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
+
+        dto.scheduleId = schedule.scheduleId;
+        dto.title = schedule.title;
+        dto.description = schedule.description;
+        dto.startDate = schedule.startDate;
+        dto.endDate = schedule.endDate;
+        dto.reserverName = reserver?.employee?.name || '알 수 없음';
+        dto.isMine = reserver?.employeeId === currentEmployeeId;
+
+        return dto;
+    }
 }
 
 export class ResourceInfoDto {
@@ -85,6 +118,31 @@ export class ResourceInfoDto {
         type: [ResourceScheduleItemDto],
     })
     schedules: ResourceScheduleItemDto[];
+
+    /**
+     * 자원 상세 DTO 생성
+     */
+    static fromResourceAndSchedules(
+        resource: Resource,
+        scheduleDataList: {
+            schedule: Schedule;
+            participants?: ScheduleParticipantsWithEmployee[];
+        }[],
+        currentEmployeeId: string,
+    ): ResourceInfoDto {
+        const dto = new ResourceInfoDto();
+
+        dto.resourceId = resource.resourceId;
+        dto.resourceName = resource.name;
+        dto.resourceDescription = resource.description;
+        dto.isAvailable = resource.isAvailable;
+        dto.unavailableReason = resource.unavailableReason;
+        dto.schedules = scheduleDataList.map((scheduleData) =>
+            ResourceScheduleItemDto.fromScheduleData(scheduleData, currentEmployeeId),
+        );
+
+        return dto;
+    }
 }
 
 export class ResourceGroupDto {
@@ -115,6 +173,79 @@ export class ResourceGroupDto {
         type: [ResourceInfoDto],
     })
     resources: ResourceInfoDto[];
+
+    /**
+     * 자원 그룹 DTO 생성
+     */
+    static fromResourceGroupAndData(
+        resourceGroup: ResourceGroup,
+        resources: Resource[],
+        scheduleDataMap: Map<
+            string,
+            {
+                schedule: Schedule;
+                participants?: ScheduleParticipantsWithEmployee[];
+            }[]
+        >,
+        currentEmployeeId: string,
+    ): ResourceGroupDto {
+        const dto = new ResourceGroupDto();
+
+        dto.resourceGroupId = resourceGroup.resourceGroupId;
+        dto.resourceGroupName = resourceGroup.title;
+        dto.resourceGroupDescription = resourceGroup.description;
+        dto.order = resourceGroup.order;
+        dto.resources = resources.map((resource) => {
+            const resourceSchedules = scheduleDataMap.get(resource.resourceId) || [];
+            return ResourceInfoDto.fromResourceAndSchedules(resource, resourceSchedules, currentEmployeeId);
+        });
+
+        return dto;
+    }
+
+    /**
+     * 자원 그룹 배열을 DTO 배열로 변환
+     */
+    static fromResourceGroupsAndData(
+        resourceGroups: ResourceGroup[],
+        resourceMap: Map<string, Resource[]>,
+        scheduleDataList: {
+            schedule: Schedule;
+            reservation?: Reservation;
+            resource?: Resource;
+            participants?: ScheduleParticipantsWithEmployee[];
+        }[],
+        currentEmployeeId: string,
+    ): ResourceGroupDto[] {
+        // 자원별 일정 데이터 맵 생성
+        const scheduleDataMap = new Map<
+            string,
+            {
+                schedule: Schedule;
+                participants?: ScheduleParticipantsWithEmployee[];
+            }[]
+        >();
+
+        scheduleDataList.forEach(({ schedule, resource, participants }) => {
+            if (resource) {
+                if (!scheduleDataMap.has(resource.resourceId)) {
+                    scheduleDataMap.set(resource.resourceId, []);
+                }
+                scheduleDataMap.get(resource.resourceId)!.push({
+                    schedule,
+                    participants,
+                });
+            }
+        });
+
+        // 자원 그룹별 DTO 생성
+        const resourceGroupDtos = resourceGroups.map((group) => {
+            const resources = resourceMap.get(group.resourceGroupId) || [];
+            return ResourceGroupDto.fromResourceGroupAndData(group, resources, scheduleDataMap, currentEmployeeId);
+        });
+
+        return resourceGroupDtos.sort((a, b) => a.order - b.order);
+    }
 }
 
 export class ResourceScheduleResponseDto {

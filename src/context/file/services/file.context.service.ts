@@ -2,13 +2,14 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { DomainFileService } from '@src/domain/file/file.service';
 import { DomainFileReservationVehicleService } from '@src/domain/file-reservation-vehicle/file-reservation-vehicle.service';
 import { DomainFileVehicleInfoService } from '@src/domain/file-vehicle-info/file-vehicle-info.service';
-import { In, LessThan } from 'typeorm';
+import { In, LessThan, Like } from 'typeorm';
 import { File } from '@libs/entities/file.entity';
 import { ReservationVehicleFileResponseDto } from '../dtos';
 import { S3Service } from '../adapter/s3.service';
 import { MimeType } from '@libs/enums/mime-type.enum';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { DateUtil } from '@libs/utils/date.util';
+import { DomainFileResourceService } from '@src/domain/file-resource/file-resource.service';
 
 export interface CreateFileDataDto {
     filePath: string;
@@ -20,6 +21,7 @@ export class FileContextService {
         private readonly domainFileService: DomainFileService,
         private readonly domainFileReservationVehicleService: DomainFileReservationVehicleService,
         private readonly domainFileVehicleInfoService: DomainFileVehicleInfoService,
+        private readonly domainFileResourceService: DomainFileResourceService,
         private readonly s3Service: S3Service,
     ) {}
 
@@ -122,6 +124,21 @@ export class FileContextService {
             filePath: this.s3Service.getFileUrl(fileName),
         });
         return await this.domainFileService.save(file);
+    }
+
+    async 자원_파일을_조회한다(resourceId: string): Promise<{
+        images: File[];
+    }> {
+        const resourceFiles = await this.domainFileResourceService.findAll({
+            where: { resourceId },
+        });
+
+        const files = await this.domainFileService.findAll({
+            where: { fileId: In(resourceFiles.map((file) => file.fileId)) },
+        });
+        return {
+            images: files,
+        };
     }
 
     /**

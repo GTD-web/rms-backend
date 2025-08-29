@@ -1,12 +1,18 @@
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { ScheduleType } from '@libs/enums/schedule-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-type.enum';
 import { VehicleInfoResponseDto } from '@src/business/resource-management/dtos/vehicle/vehicle-response.dto';
 import { MeetingRoomInfoResponseDto } from '@src/application/resource/meeting-room/dtos/meeting-room-info-response.dto';
 import { AccommodationInfoResponseDto } from '@src/application/resource/accommodation/dtos/accommodation-info-response.dto';
 import { EquipmentInfoResponseDto } from '@src/application/resource/equipment/dtos/equipment-info-response.dto';
 import { File } from '@libs/entities/file.entity';
+import { Resource } from '@libs/entities/resource.entity';
+import { Reservation } from '@libs/entities/reservation.entity';
+import {
+    ProjectInfo,
+    ScheduleParticipantsWithEmployee,
+} from '@src/context/schedule/services/schedule-query.context.service';
 
 export class ScheduleDetailProjectDto {
     @ApiProperty({
@@ -20,6 +26,16 @@ export class ScheduleDetailProjectDto {
         example: '신규 시스템 개발',
     })
     projectName: string;
+
+    /**
+     * 프로젝트 상세 DTO 생성
+     */
+    static fromProject(project: ProjectInfo): ScheduleDetailProjectDto {
+        const dto = new ScheduleDetailProjectDto();
+        dto.projectId = project.projectId;
+        dto.projectName = project.projectName;
+        return dto;
+    }
 }
 
 export class ScheduleDetailParticipantDto {
@@ -46,6 +62,27 @@ export class ScheduleDetailParticipantDto {
         example: 'RESERVER',
     })
     participantType: string;
+
+    /**
+     * 참가자 DTO 생성
+     */
+    static fromParticipantWithEmployee(
+        participantWithEmployee: ScheduleParticipantsWithEmployee,
+    ): ScheduleDetailParticipantDto {
+        const dto = new ScheduleDetailParticipantDto();
+        dto.participantId = participantWithEmployee.participantId;
+        dto.employeeId = participantWithEmployee.employeeId;
+        dto.employeeName = participantWithEmployee.employee?.name || '';
+        dto.participantType = participantWithEmployee.type;
+        return dto;
+    }
+
+    /**
+     * 참가자 배열을 DTO 배열로 변환
+     */
+    static fromParticipantsArray(participants: ScheduleParticipantsWithEmployee[]): ScheduleDetailParticipantDto[] {
+        return participants.map((p) => this.fromParticipantWithEmployee(p));
+    }
 }
 
 export class ScheduleDetailResourceDto {
@@ -74,6 +111,14 @@ export class ScheduleDetailResourceDto {
         example: '대형 회의실, 프로젝터 완비',
     })
     description?: string;
+
+    @ApiProperty({
+        description: '자원 이미지',
+        isArray: true,
+        required: false,
+        type: [String],
+    })
+    images?: string[];
 
     @ApiProperty({
         description: '자원 위치 정보',
@@ -109,6 +154,21 @@ export class ScheduleDetailResourceDto {
         | MeetingRoomInfoResponseDto
         | AccommodationInfoResponseDto
         | EquipmentInfoResponseDto;
+
+    /**
+     * 자원 상세 DTO 생성
+     */
+    static fromResourceAndTypeInfo(resource: Resource, typeInfo: any): ScheduleDetailResourceDto {
+        const dto = new ScheduleDetailResourceDto();
+        dto.resourceId = resource.resourceId;
+        dto.name = resource.name;
+        dto.type = resource.type;
+        dto.images = resource.images;
+        dto.description = resource.description;
+        dto.location = resource.location;
+        dto.typeInfo = typeInfo;
+        return dto;
+    }
 }
 
 export class ScheduleDetailReservationDto {
@@ -143,6 +203,23 @@ export class ScheduleDetailReservationDto {
         type: ScheduleDetailResourceDto,
     })
     resource: ScheduleDetailResourceDto;
+
+    /**
+     * 예약 상세 DTO 생성
+     */
+    static fromReservationAndResource(
+        reservation: Reservation,
+        resource: Resource,
+        typeInfo: any,
+    ): ScheduleDetailReservationDto {
+        const dto = new ScheduleDetailReservationDto();
+        dto.reservationId = reservation.reservationId;
+        dto.title = reservation.title;
+        dto.description = reservation.description;
+        dto.status = reservation.status;
+        dto.resource = ScheduleDetailResourceDto.fromResourceAndTypeInfo(resource, typeInfo);
+        return dto;
+    }
 }
 
 export class ScheduleDetailResponseDto {
@@ -197,6 +274,13 @@ export class ScheduleDetailResponseDto {
         example: [10, 30],
     })
     notifyMinutesBeforeStart?: number[];
+
+    @ApiProperty({
+        description: '일정 소유자 여부',
+        example: true,
+        required: false,
+    })
+    isMine?: boolean;
 
     @ApiProperty({
         description: '예약자 정보',

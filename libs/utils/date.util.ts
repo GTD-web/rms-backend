@@ -20,6 +20,10 @@ class DateUtilWrapper {
         return this.date.format(format);
     }
 
+    addMonth(months: number) {
+        return new DateUtilWrapper(this.date.add(months, 'month'));
+    }
+
     addDays(days: number) {
         return new DateUtilWrapper(this.date.add(days, 'day'));
     }

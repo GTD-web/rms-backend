@@ -411,4 +411,35 @@ export class ResourceContextService {
 
         return resources;
     }
+
+    /**
+     * 자원 타입별 상세 정보를 조회한다
+     */
+    async 자원의_타입별_상세정보를_조회한다(resource: Resource): Promise<any> {
+        switch (resource.type) {
+            case ResourceType.VEHICLE:
+                const vehicleInfo = await this.domainVehicleInfoService.findOne({
+                    where: { resourceId: resource.resourceId },
+                });
+                return vehicleInfo;
+
+            case ResourceType.MEETING_ROOM:
+                return await this.domainMeetingRoomInfoService.findOne({
+                    where: { resourceId: resource.resourceId },
+                });
+
+            case ResourceType.ACCOMMODATION:
+                return await this.domainAccommodationInfoService.findOne({
+                    where: { resourceId: resource.resourceId },
+                });
+
+            case ResourceType.EQUIPMENT:
+                return await this.domainEquipmentInfoService.findOne({
+                    where: { resourceId: resource.resourceId },
+                });
+
+            default:
+                return null;
+        }
+    }
 }

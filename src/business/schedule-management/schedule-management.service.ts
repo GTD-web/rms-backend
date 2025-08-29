@@ -1,203 +1,182 @@
-import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { Employee } from '@libs/entities/employee.entity';
-import { DataSource } from 'typeorm';
-import { ScheduleCalendarQueryDto } from './dtos/schedule-calendar-query.dto';
-import { ScheduleCalendarItemDto, ScheduleCalendarResponseDto } from './dtos/schedule-calendar-response.dto';
-import { MyScheduleQueryDto, ScheduleCategoryType } from './dtos/my-schedule-query.dto';
-import { MyScheduleResponseDto, MyScheduleItemDto } from './dtos/my-schedule-response.dto';
-import { StatisticsItemDto } from './dtos/my-schedule-statistics-response.dto';
-import { ResourceScheduleQueryDto } from './dtos/resource-schedule-query.dto';
-import {
-    ResourceScheduleResponseDto,
-    ResourceGroupDto,
-    ResourceInfoDto,
-    ResourceScheduleItemDto,
-} from './dtos/resource-schedule-response.dto';
-import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
-import { Schedule } from '@libs/entities/schedule.entity';
-import { ScheduleRelation } from '@libs/entities/schedule-relations.entity';
-import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
-import { Resource } from '@libs/entities/resource.entity';
-import { ResourceGroup } from '@libs/entities/resource-group.entity';
-import { ScheduleType } from '@libs/enums/schedule-type.enum';
-import { ScheduleContextService } from '../../context/schedule/schedule.context.service';
-import { ResourceContextService } from '../../context/resource/services/resource.context.service';
-import { LegacyReservationContextService } from '../../context/reservation/services/legacy-reservation.context.service';
-import { NotificationContextService } from '../../context/notification/services/notification.context.service';
-import { ScheduleNotificationContextService } from '../../context/notification/services/schedule-notification.context.service';
 
+// 기존 DTO들 import
+import { ScheduleCalendarQueryDto } from './dtos/schedule-calendar-query.dto';
+import { ScheduleCalendarResponseDto } from './dtos/schedule-calendar-response.dto';
+import { MyScheduleQueryDto, ScheduleCategoryType } from './dtos/my-schedule-query.dto';
+import { MyScheduleResponseDto } from './dtos/my-schedule-response.dto';
+import { ResourceScheduleQueryDto } from './dtos/resource-schedule-query.dto';
+import { ResourceScheduleResponseDto } from './dtos/resource-schedule-response.dto';
 import { ScheduleDetailQueryDto } from './dtos/schedule-detail-query.dto';
-import {
-    ScheduleDetailResponseDto,
-    ScheduleDetailProjectDto,
-    ScheduleDetailReservationDto,
-    ScheduleDetailParticipantDto,
-    ScheduleDetailResourceDto,
-} from './dtos/schedule-detail-response.dto';
+import { ScheduleDetailResponseDto } from './dtos/schedule-detail-response.dto';
 import { ScheduleCreateRequestDto } from './dtos/schedule-create-request.dto';
 import { ScheduleCreateResponseDto } from './dtos/schedule-create-response.dto';
-import { ResourceType } from '@libs/enums/resource-type.enum';
+
+// 새로운 일정 관리 DTO들 import
+import { ScheduleCancelRequestDto } from './dtos/schedule-cancel-request.dto';
+import { ScheduleCancelResponseDto } from './dtos/schedule-cancel-response.dto';
+import { ScheduleCompleteRequestDto } from './dtos/schedule-complete-request.dto';
+import { ScheduleCompleteResponseDto } from './dtos/schedule-complete-response.dto';
+import { ScheduleExtendRequestDto } from './dtos/schedule-extend-request.dto';
+import { ScheduleExtendResponseDto } from './dtos/schedule-extend-response.dto';
+import { ScheduleUpdateRequestDto } from './dtos/schedule-update-request.dto';
+import { ScheduleUpdateResponseDto } from './dtos/schedule-update-response.dto';
+
+// Context Services
+import { ScheduleQueryContextService } from '../../context/schedule/services/schedule-query.context.service';
+
+import { ReservationContextService } from '../../context/reservation/services/reservation.context.service';
+import { ResourceContextService } from '../../context/resource/services/resource.context.service';
+import { ProjectContextService } from '../../context/project/project.context.service';
 import { VehicleInfoContextService } from '../../context/resource/services/vehicle-info.context.service';
 import { MeetingRoomInfoContextService } from '../../context/resource/services/meeting-room-info.context.service';
 import { AccommodationInfoContextService } from '../../context/resource/services/accommodation-info.context.service';
 import { EquipmentInfoContextService } from '../../context/resource/services/equipment-info.context.service';
 import { FileContextService } from '../../context/file/services/file.context.service';
-import { ProjectContextService } from '../../context/project/project.context.service';
-import { ReservationContextService } from '../../context/reservation/services/reservation.context.service';
-import { EmployeeContextService } from '@src/context/employee/employee.context.service';
+
+// 새로운 Policy/Authorization Services (컨텍스트로 이동)
+import { ScheduleAuthorizationService } from '../../context/schedule/services/schedule-authorization.service';
+import { SchedulePolicyService } from '../../context/schedule/services/schedule-policy.service';
+import { ScheduleStateTransitionService } from '../../context/schedule/services/schedule-state-transition.service';
+import { ScheduleMutationContextService } from '../../context/schedule/services/schedule-mutation.context.service';
+import { SchedulePostProcessingService } from '../../context/schedule/services/schedule-post-processing.service';
+import { ScheduleAction } from '../../context/schedule/services/schedule-authorization.service';
+import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
+import {
+    ScheduleDetailProjectDto,
+    ScheduleDetailParticipantDto,
+    ScheduleDetailReservationDto,
+} from './dtos/schedule-detail-response.dto';
+import { ResourceGroupDto } from './dtos/resource-schedule-response.dto';
+import { ResourceType } from '@libs/enums/resource-type.enum';
+import { DataSource } from 'typeorm';
+import { Schedule } from '@libs/entities';
+import { ScheduleType } from '@libs/enums/schedule-type.enum';
 
 @Injectable()
 export class ScheduleManagementService {
+    private readonly logger = new Logger(ScheduleManagementService.name);
+
     constructor(
-        private readonly scheduleContextService: ScheduleContextService,
-        private readonly resourceContextService: ResourceContextService,
-        private readonly reservationContextService: ReservationContextService,
-        private readonly employeeContextService: EmployeeContextService,
-        private readonly vehicleInfoContextService: VehicleInfoContextService,
-        private readonly meetingRoomInfoContextService: MeetingRoomInfoContextService,
-        private readonly accommodationInfoContextService: AccommodationInfoContextService,
-        private readonly equipmentInfoContextService: EquipmentInfoContextService,
-        private readonly fileContextService: FileContextService,
-        private readonly projectContextService: ProjectContextService,
         private readonly dataSource: DataSource,
-        private readonly scheduleNotificationContextService: ScheduleNotificationContextService,
+        private readonly reservationContextService: ReservationContextService,
+        private readonly resourceContextService: ResourceContextService,
+        private readonly projectContextService: ProjectContextService,
+        private readonly vehicleInfoContextService: VehicleInfoContextService,
+        private readonly fileContextService: FileContextService,
+
+        private readonly scheduleAuthorizationService: ScheduleAuthorizationService,
+        private readonly schedulePolicyService: SchedulePolicyService,
+        private readonly scheduleQueryContextService: ScheduleQueryContextService,
+        private readonly scheduleMutationService: ScheduleMutationContextService,
+        private readonly scheduleStateTransitionService: ScheduleStateTransitionService,
+        private readonly schedulePostProcessingService: SchedulePostProcessingService,
     ) {}
 
+    // ============================================================================
+    // 조회 전용 UC들 (3~5단계 생략, 기존 로직 위임)
+    // ============================================================================
+
+    /**
+     * 캘린더 조회 (표준 파이프라인 적용)
+     */
     async findCalendar(user: Employee, query: ScheduleCalendarQueryDto): Promise<ScheduleCalendarResponseDto> {
-        const { date, category, mySchedule } = query;
-        const monthlySchedules = await this.scheduleContextService.월별_일정을_조회한다(date);
-        let scheduleIds = monthlySchedules.map((schedule) => schedule.scheduleId);
-        if (mySchedule) {
-            const mySchedules = await this.scheduleContextService.직원의_일정을_조회한다(user.employeeId, scheduleIds);
-            scheduleIds = mySchedules.map((mySchedule) => mySchedule.scheduleId);
-        }
-        let scheduleRelations = await this.scheduleContextService.일정관계정보들을_조회한다(scheduleIds);
-        if (category) {
-            switch (category) {
-                case ScheduleCategoryType.SCHEDULE:
-                    scheduleRelations = scheduleRelations.filter(
-                        (scheduleRelation) => !scheduleRelation.projectId && !scheduleRelation.reservationId,
-                    );
-                    break;
-                case ScheduleCategoryType.PROJECT:
-                    scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.projectId);
-                    break;
-                case ScheduleCategoryType.RESOURCE:
-                    scheduleRelations = scheduleRelations.filter((scheduleRelation) => scheduleRelation.reservationId);
-                    break;
-            }
-        }
-        scheduleIds = scheduleRelations.map((scheduleRelation) => scheduleRelation.scheduleId);
+        this.logger.log(`캘린더 조회 요청 - 사용자: ${user.employeeId}, 날짜: ${query.date}`);
 
-        const schedules = await this.scheduleContextService.일정들을_조회한다(scheduleIds);
-        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(scheduleIds);
-        const projectMap = await this.scheduleContextService.일정들의_프로젝트정보를_조회한다(scheduleRelations);
-        const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelations);
+        // 1. 권한: 조회는 별도 권한 체크 없음 (모든 직원이 캘린더 조회 가능)
 
-        const scheduleCalendarItems: ScheduleCalendarItemDto[] = [];
-        schedules.forEach((schedule) => {
-            const scheduleId = schedule.scheduleId;
-            const reserver = reserverMap.get(scheduleId);
-            const project = projectMap.get(scheduleId);
-            const reservation = reservationMap.get(scheduleId);
-            const scheduleCalendarItem: ScheduleCalendarItemDto = {
-                scheduleId,
+        // 2. 그래프 조회: 조건에 맞는 일정 ID들 조회
+        const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(
+            query.date,
+            query.category,
+            query.mySchedule ? user.employeeId : undefined,
+        );
+
+        if (scheduleIds.length === 0) {
+            return { schedules: [] };
+        }
+
+        // 3. 벌크 데이터 조회 (한 번의 호출로 모든 관련 데이터 조회)
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
+            withReservation: true,
+            withResource: true,
+            withParticipants: true, // 예약자 정보 필요
+        });
+
+        const scheduleCalendarItems = scheduleDataList.map(({ schedule, reservation, resource, participants }) => {
+            // 예약자 찾기 (RESERVER 타입의 참가자)
+            const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
+
+            return {
+                scheduleId: schedule.scheduleId,
                 scheduleTitle: schedule.title,
                 startDate: schedule.startDate,
                 endDate: schedule.endDate,
-                reserverName: reserver?.employee.name || '',
-                project: project ? { projectId: project.projectId } : undefined,
-                reservation: reservation
-                    ? {
-                          reservationId: reservation.reservationId,
-                          resourceName: reservation.resource.name,
-                          resourceType: reservation.resource.type,
-                      }
-                    : undefined,
+                reserverName: reserver?.employee?.name || '',
+                project: undefined, // TODO: 프로젝트 구현 후 추가
+                reservation:
+                    reservation && resource
+                        ? {
+                              reservationId: reservation.reservationId,
+                              resourceName: resource.name,
+                              resourceType: resource.type,
+                          }
+                        : undefined,
                 // TODO : 알림관련 기능 리팩토링 후 작업
                 hasUnreadNotification: false,
             };
-            scheduleCalendarItems.push(scheduleCalendarItem);
         });
-        const responseData: ScheduleCalendarResponseDto = {
+
+        return {
             schedules: scheduleCalendarItems,
         };
-
-        return responseData;
     }
 
+    /**
+     * 내 일정 조회 (표준 파이프라인 적용)
+     */
     async findMySchedules(user: Employee, query: MyScheduleQueryDto): Promise<MyScheduleResponseDto> {
+        this.logger.log(`내 일정 조회 요청 - 사용자: ${user.employeeId}`);
+
         const page = query.page || 1;
         const limit = query.limit || 20;
 
-        // 1. 기본 일정 조회 (오늘 이후의 일정)
-        let schedules = await this.scheduleContextService.직원의_다가올_일정을_조회한다(user.employeeId);
+        const { scheduleIds, statistics, totalCount, filteredCount, totalPages, hasNext, hasPrevious } =
+            await this.scheduleQueryContextService.내_일정을_조회한다(user.employeeId, query);
 
-        // 2. 역할별 필터링 적용
-        schedules = await this.scheduleContextService.일정들을_역할별로_필터링한다(
-            schedules,
-            user.employeeId,
-            query.role,
-        );
+        // 3. 벌크 데이터 조회 (한 번의 호출로 모든 관련 데이터 조회)
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
+            withProject: true,
+            withReservation: true,
+            withResource: true,
+        });
 
-        // 3. 카테고리별 필터링 적용
-        if (query.category && query.category !== ScheduleCategoryType.ALL) {
-            const scheduleRelations = await this.scheduleContextService.일정관계정보들을_조회한다(
-                schedules.map((schedule) => schedule.scheduleId),
-            );
-            // 카테고리별 분류 데이터 조회
-            const { scheduleTypeStats, projectStats, resourceStats } =
-                await this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelations);
+        const scheduleCalendarItems = scheduleDataList.map(({ schedule, project, reservation, resource }) => {
+            return {
+                scheduleId: schedule.scheduleId,
+                title: schedule.title,
+                description: schedule.description,
+                startDate: schedule.startDate,
+                endDate: schedule.endDate,
+                scheduleType: this.scheduleQueryContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
+                project: project
+                    ? {
+                          projectId: project.projectId,
+                          projectName: project.projectName, // TODO: 실제 프로젝트 이름 조회
+                      }
+                    : undefined,
+                resource: reservation
+                    ? {
+                          resourceId: reservation.reservationId,
+                          resourceName: resource.name,
+                          resourceType: resource.type,
+                      }
+                    : undefined,
+            };
+        });
 
-            schedules = this.filterByCategory(scheduleTypeStats, projectStats, resourceStats, query.category);
-        }
-
-        // 4. 통계 계산 (검색 전 데이터로 계산)
-        const scheduleRelationsForStats = await this.scheduleContextService.일정관계정보들을_조회한다(
-            schedules.map((schedule) => schedule.scheduleId),
-        );
-        // 카테고리별 분류 데이터 조회
-        const { scheduleTypeStats, projectStats, resourceStats } =
-            await this.scheduleContextService.일정들을_카테고리별로_분류한다(schedules, scheduleRelationsForStats);
-
-        const statistics = this.generateCategoryStatistics(
-            scheduleTypeStats,
-            projectStats,
-            resourceStats,
-            query.category,
-        );
-        const totalCount = schedules.length;
-
-        // 5. 키워드 검색 적용 (통계 계산 후)
-        const searchedSchedules = this.scheduleContextService.일정들을_키워드로_필터링한다(schedules, query.keyword);
-        const filteredCount = searchedSchedules.length;
-
-        // 6. 페이지네이션 적용
-        const { paginatedSchedules, totalPages, hasNext, hasPrevious } =
-            this.scheduleContextService.일정들을_페이지네이션_적용한다(searchedSchedules, page, limit);
-
-        // 7. DTO 변환
-        // 예약자 정보 조회
-        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(
-            paginatedSchedules.map((s) => s.scheduleId),
-        );
-
-        // 프로젝트 정보 조회
-        const projectMap =
-            await this.scheduleContextService.일정들의_프로젝트정보를_조회한다(scheduleRelationsForStats);
-
-        // 예약 정보 조회
-        const reservationMap =
-            await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelationsForStats);
-
-        const scheduleItems = this.convertToMyScheduleItems(
-            paginatedSchedules,
-            reserverMap,
-            projectMap,
-            reservationMap,
-        );
-
-        const responseData: MyScheduleResponseDto = {
+        return {
             statistics,
             totalCount,
             filteredCount,
@@ -206,282 +185,100 @@ export class ScheduleManagementService {
             totalPages,
             hasNext,
             hasPrevious,
-            schedules: scheduleItems,
+            schedules: scheduleCalendarItems,
         };
-
-        return responseData;
     }
 
     /**
-     * 카테고리별 통계 생성 (데이터 가공만, 조회 안함)
+     * 자원별 일정 조회 (표준 파이프라인 적용 - 최적화 버전)
      */
-    private generateCategoryStatistics(
-        scheduleTypeStats: Map<string, Schedule[]>,
-        projectStats: Schedule[],
-        resourceStats: Map<string, Schedule[]>,
-        category?: ScheduleCategoryType,
-    ): StatisticsItemDto[] {
-        const statistics: StatisticsItemDto[] = [];
-
-        if (!category || category === ScheduleCategoryType.ALL) {
-            // 전체 카테고리 통계
-            statistics.push({
-                label: '일정',
-                count: Array.from(scheduleTypeStats.values()).reduce((sum, arr) => sum + arr.length, 0),
-            });
-
-            statistics.push({
-                label: '프로젝트',
-                count: projectStats.length,
-            });
-
-            statistics.push({
-                label: '자원',
-                count: Array.from(resourceStats.values()).reduce((sum, arr) => sum + arr.length, 0),
-            });
-        } else if (category === ScheduleCategoryType.SCHEDULE) {
-            // 일정 타입별 세부 통계 (모든 ScheduleType 표시)
-            Object.values(ScheduleType).forEach((scheduleType) => {
-                const scheduleList = scheduleTypeStats.get(scheduleType) || [];
-                statistics.push({
-                    label: this.scheduleContextService.일정타입_라벨을_가져온다(scheduleType),
-                    count: scheduleList.length,
-                });
-            });
-        } else if (category === ScheduleCategoryType.PROJECT) {
-            // 프로젝트는 단일 통계
-            statistics.push({
-                label: '프로젝트',
-                count: projectStats.length,
-            });
-        } else if (category === ScheduleCategoryType.RESOURCE) {
-            // 자원 타입별 세부 통계 (모든 ResourceType 표시)
-            Object.values(ResourceType).forEach((resourceType) => {
-                const scheduleList = resourceStats.get(resourceType) || [];
-                statistics.push({
-                    label: this.resourceContextService.자원타입_라벨을_가져온다(resourceType),
-                    count: scheduleList.length,
-                });
-            });
-        }
-
-        return statistics;
-    }
-
-    /**
-     * 카테고리별 필터링 (데이터 가공만, 조회 안함)
-     */
-    private filterByCategory(
-        scheduleTypeStats: Map<string, Schedule[]>,
-        projectStats: Schedule[],
-        resourceStats: Map<string, Schedule[]>,
-        category: ScheduleCategoryType,
-    ): Schedule[] {
-        switch (category) {
-            case ScheduleCategoryType.SCHEDULE:
-                return Array.from(scheduleTypeStats.values()).flat();
-            case ScheduleCategoryType.PROJECT:
-                return projectStats;
-            case ScheduleCategoryType.RESOURCE:
-                return Array.from(resourceStats.values()).flat();
-            default:
-                return [];
-        }
-    }
-
-    /**
-     * 일정 DTO 변환 (데이터 가공만, 조회 안함)
-     */
-    private convertToMyScheduleItems(
-        schedules: Schedule[],
-        reserverMap: Map<string, { participant: ScheduleParticipant; employee: Employee }>,
-        projectMap: Map<string, any>,
-        reservationMap: Map<string, any>,
-    ): MyScheduleItemDto[] {
-        return schedules.map((schedule) => {
-            const reserver = reserverMap.get(schedule.scheduleId);
-            const project = projectMap.get(schedule.scheduleId);
-            const reservation = reservationMap.get(schedule.scheduleId);
-
-            return {
-                scheduleId: schedule.scheduleId,
-                title: schedule.title,
-                description: schedule.description,
-                startDate: schedule.startDate,
-                endDate: schedule.endDate,
-                scheduleType: this.scheduleContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
-                project: project
-                    ? {
-                          projectId: project.projectId,
-                          projectName: `프로젝트_${project.projectId.slice(-4)}`, // TODO: 실제 프로젝트 이름 조회
-                      }
-                    : undefined,
-                resource: reservation
-                    ? {
-                          resourceId: reservation.reservationId,
-                          resourceName: reservation.resource.name,
-                          resourceType: reservation.resource.type,
-                      }
-                    : undefined,
-            };
-        });
-    }
-
     async findResourceSchedules(user: Employee, query: ResourceScheduleQueryDto): Promise<ResourceScheduleResponseDto> {
-        const { resourceType, date, month } = query;
+        this.logger.log(`자원별 일정 조회 요청 - 사용자: ${user.employeeId}, 자원타입: ${query.resourceType}`);
 
-        // 1. 자원유형별 일정 조회 (숙소는 월별, 그 외는 일별)
-        const schedules = await this.scheduleContextService.자원유형별_일정을_조회한다(resourceType, date, month);
+        // 1. 권한: 자원별 일정 조회는 모든 직원이 가능
 
-        // 2. 자원별로 일정을 그룹핑
-        const resourceScheduleMap = await this.scheduleContextService.자원별_일정정보를_맵핑한다(schedules);
+        // 2. 그래프 조회: 단일 벌크 조회로 모든 관련 데이터 획득
+        const { scheduleDataList, resourceGroups, resourceMap } =
+            await this.scheduleQueryContextService.자원별_일정_조회_데이터를_조회한다(
+                query.resourceType,
+                query.date,
+                query.month,
+            );
 
-        // 3. 자원그룹별 자원정보 조회
-        const { resourceGroups, resourceMap } =
-            await this.scheduleContextService.자원그룹별_자원정보를_조회한다(resourceType);
+        // 3~5. 정책/실행/후처리: 조회이므로 생략
 
-        // 4. 예약자 정보 조회
-        const reserverMap = await this.scheduleContextService.일정들의_예약자정보를_조회한다(
-            schedules.map((s) => s.scheduleId),
-        );
-
-        // 5. 자원그룹별 DTO 구성
-        const resourceGroupDtos = this.buildResourceGroupDtos(
+        // 6. 응답 DTO 변환 (DTO factory 메서드 활용)
+        const resourceGroupDtos = ResourceGroupDto.fromResourceGroupsAndData(
             resourceGroups,
             resourceMap,
-            resourceScheduleMap,
-            reserverMap,
+            scheduleDataList,
             user.employeeId,
         );
 
-        const responseData: ResourceScheduleResponseDto = {
-            type: resourceType,
+        return {
+            type: query.resourceType,
             resourceGroups: resourceGroupDtos,
         };
-
-        return responseData;
     }
 
     /**
-     * 자원 그룹 DTO 구성 (데이터 가공만, 조회 안함)
+     * 일정 상세 조회 (표준 파이프라인 적용)
      */
-    private buildResourceGroupDtos(
-        resourceGroups: ResourceGroup[],
-        resourceMap: Map<string, Resource[]>,
-        resourceScheduleMap: Map<string, Schedule[]>,
-        reserverMap: Map<string, { participant: ScheduleParticipant; employee: Employee }>,
-        currentEmployeeId: string,
-    ): ResourceGroupDto[] {
-        const resourceGroupDtos: ResourceGroupDto[] = [];
-
-        for (const group of resourceGroups) {
-            const resources: ResourceInfoDto[] = [];
-            const groupResources = resourceMap.get(group.resourceGroupId) || [];
-
-            for (const resource of groupResources) {
-                const resourceSchedules = resourceScheduleMap.get(resource.resourceId) || [];
-
-                const scheduleItems: ResourceScheduleItemDto[] = resourceSchedules.map((schedule) => {
-                    const reserver = reserverMap.get(schedule.scheduleId);
-                    const reserverName = reserver ? reserver.employee.name || '알 수 없음' : '알 수 없음';
-                    const isMine = reserver ? reserver.employee.employeeId === currentEmployeeId : false;
-
-                    return {
-                        scheduleId: schedule.scheduleId,
-                        title: schedule.title,
-                        description: schedule.description,
-                        startDate: schedule.startDate,
-                        endDate: schedule.endDate,
-                        reserverName,
-                        isMine,
-                    };
-                });
-
-                resources.push({
-                    resourceId: resource.resourceId,
-                    resourceName: resource.name,
-                    resourceDescription: resource.description,
-                    isAvailable: resource.isAvailable,
-                    unavailableReason: resource.unavailableReason,
-                    schedules: scheduleItems,
-                });
-            }
-
-            resourceGroupDtos.push({
-                resourceGroupId: group.resourceGroupId,
-                resourceGroupName: group.title,
-                resourceGroupDescription: group.description,
-                order: group.order,
-                resources,
-            });
-        }
-
-        return resourceGroupDtos.sort((a, b) => a.order - b.order);
-    }
-
     async findScheduleDetail(user: Employee, query: ScheduleDetailQueryDto): Promise<ScheduleDetailResponseDto> {
+        this.logger.log(`일정 상세 조회 요청 - 사용자: ${user.employeeId}, 일정ID: ${query.scheduleId}`);
+
+        // 1. 권한: 요청자/역할 확인
+        const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(
+            user,
+            query.scheduleId,
+            ScheduleAction.VIEW,
+        );
+        this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
+
+        // 2. 그래프 조회: 컨텍스트에서 데이터 조회
         const { scheduleId, includeProject, includeReservation } = query;
 
-        // 1. 일정 기본 정보 조회
-        const schedules = await this.scheduleContextService.일정들을_조회한다([scheduleId]);
-        if (schedules.length === 0) {
+        const scheduleData = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
+            withProject: includeProject,
+            withReservation: includeReservation,
+            withResource: includeReservation,
+            withParticipants: true,
+        });
+        if (scheduleData === null) {
             throw new NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
         }
-        const schedule = schedules[0];
+        const { schedule, project, reservation, resource, participants } = scheduleData;
+        console.log(resource);
+        const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
+        const regularParticipants = participants?.filter((p) => p.type !== ParticipantsType.RESERVER) || [];
 
-        // 2. 참가자 정보 조회 (예약자와 일반 참가자 분리)
-        const { reserver, participants } =
-            await this.scheduleContextService.일정의_참가자들을_분리하여_조회한다(scheduleId);
+        // 3~5. 정책/실행/후처리: 조회이므로 생략
 
-        // 3. 일정 관계 정보 조회 (프로젝트, 예약 정보 확인용)
-        const scheduleRelations = await this.scheduleContextService.일정관계정보들을_조회한다([scheduleId]);
-        const scheduleRelation = scheduleRelations.length > 0 ? scheduleRelations[0] : null;
+        // 6. 응답 DTO 변환 (각 DTO의 factory 메서드 활용)
+        const reserverDto = reserver ? ScheduleDetailParticipantDto.fromParticipantWithEmployee(reserver) : undefined;
 
-        // 4. 옵션에 따른 추가 정보 조회
-        let project: ScheduleDetailProjectDto | undefined;
-        let reservation: ScheduleDetailReservationDto | undefined;
+        const participantsDto = ScheduleDetailParticipantDto.fromParticipantsArray(regularParticipants);
 
-        if (includeProject && scheduleRelation?.projectId) {
-            // TODO: 실제 프로젝트 서비스 구현 후 실제 데이터 조회로 변경
-            project = this.buildProjectDetailDto(scheduleRelation.projectId);
+        const projectDto = project ? ScheduleDetailProjectDto.fromProject(project) : undefined;
+
+        // 예약 정보 DTO 변환 (자원 타입별 상세 정보 포함)
+        let reservationDto: ScheduleDetailReservationDto | undefined = undefined;
+        if (reservation && resource) {
+            const resourceImages = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
+            resource.images = resourceImages.images.map((image) => image.filePath);
+            const typeInfo = await this.resourceContextService.자원의_타입별_상세정보를_조회한다(resource);
+            if (resource.type === ResourceType.VEHICLE) {
+                const vehicleInfo = await this.vehicleInfoContextService.차량정보만_조회한다(resource.resourceId);
+                const { parkingLocationImages, odometerImages, indoorImages } =
+                    await this.fileContextService.차량정보_파일을_조회한다(vehicleInfo.vehicleInfoId);
+                typeInfo.parkingLocationImages = parkingLocationImages;
+                typeInfo.odometerImages = odometerImages;
+                typeInfo.indoorImages = indoorImages;
+            }
+            reservationDto = ScheduleDetailReservationDto.fromReservationAndResource(reservation, resource, typeInfo);
         }
 
-        if (includeReservation && scheduleRelation?.reservationId) {
-            // 예약 정보 조회
-            const reservationMap = await this.scheduleContextService.일정들의_예약정보를_조회한다([
-                { scheduleId: '', reservationId: scheduleRelation.reservationId, projectId: null } as ScheduleRelation,
-            ]);
-
-            const reservationData = Array.from(reservationMap.values())[0];
-            if (!reservationData) {
-                throw new NotFoundException(`예약 정보를 찾을 수 없습니다. ID: ${scheduleRelation.reservationId}`);
-            }
-
-            // 자원 타입별 상세 정보 조회
-            let typeInfo: any = null;
-            if (reservationData.resource.type === 'VEHICLE') {
-                const vehicleInfo = await this.vehicleInfoContextService.차량정보만_조회한다(
-                    reservationData.resourceId,
-                );
-                if (vehicleInfo) {
-                    const vehicleFiles = await this.fileContextService.차량정보_파일을_조회한다(
-                        vehicleInfo.vehicleInfoId,
-                    );
-                    typeInfo = this.buildVehicleTypeInfo(vehicleInfo, vehicleFiles);
-                }
-            } else if (reservationData.resource.type === 'MEETING_ROOM') {
-                typeInfo = await this.meetingRoomInfoContextService.회의실정보만_조회한다(reservationData.resourceId);
-            } else if (reservationData.resource.type === 'ACCOMMODATION') {
-                typeInfo = await this.accommodationInfoContextService.숙소정보만_조회한다(reservationData.resourceId);
-            } else if (reservationData.resource.type === 'EQUIPMENT') {
-                typeInfo = await this.equipmentInfoContextService.장비정보만_조회한다(reservationData.resourceId);
-            }
-
-            reservation = this.buildReservationDetailDto(reservationData, typeInfo);
-        }
-
-        // 5. DTO 구성
-        const response: ScheduleDetailResponseDto = {
+        return {
             scheduleId: schedule.scheduleId,
             title: schedule.title,
             description: schedule.description,
@@ -490,64 +287,162 @@ export class ScheduleManagementService {
             scheduleType: schedule.scheduleType,
             notifyBeforeStart: schedule.notifyBeforeStart,
             notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
-            reserver,
-            participants,
-            project,
-            reservation,
+            isMine: reserver?.employeeId === user.employeeId,
+            reserver: reserverDto,
+            participants: participantsDto,
+            project: projectDto,
+            reservation: reservationDto,
         };
+    }
 
-        return response;
+    // ============================================================================
+    // 생성/수정 UC들 (표준 파이프라인 적용)
+    // ============================================================================
+
+    /**
+     * 단일 일정을 예약과 함께 하나의 트랜잭션으로 생성
+     */
+    private async 일정생성_예약생성_트랜잭션을_실행한다(
+        user: Employee,
+        data: {
+            title: string;
+            description?: string;
+            location?: string;
+            scheduleType: ScheduleType;
+            notifyBeforeStart?: boolean;
+            notifyMinutesBeforeStart?: number[];
+            participants: { employeeId: string }[];
+            dateRange: { startDate: string; endDate: string };
+            resourceSelection?: {
+                resourceId: string;
+                resourceType: ResourceType;
+            };
+            projectSelection?: {
+                projectId: string;
+            };
+        },
+    ): Promise<{ success: boolean; schedule?: Schedule; reason?: string }> {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            let reservationId: string | null = null;
+
+            // 1) 자원 예약 생성 (있는 경우)
+            if (data.resourceSelection) {
+                // 예약 가능 여부 확인
+                const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(
+                    data.resourceSelection.resourceId,
+                    new Date(data.dateRange.startDate),
+                    new Date(data.dateRange.endDate),
+                );
+
+                if (!isAvailable) {
+                    await queryRunner.rollbackTransaction();
+                    return {
+                        success: false,
+                        reason: '선택한 시간대에 자원이 이미 예약되어 있습니다.',
+                    };
+                }
+
+                // 예약 생성 (QueryRunner 전달)
+                const reservationData = {
+                    title: data.title,
+                    description: data.description || '',
+                    resourceId: data.resourceSelection.resourceId,
+                    resourceType: data.resourceSelection.resourceType,
+                    status:
+                        data.resourceSelection.resourceType === ResourceType.ACCOMMODATION
+                            ? ReservationStatus.PENDING
+                            : ReservationStatus.CONFIRMED,
+                    startDate: new Date(data.dateRange.startDate),
+                    endDate: new Date(data.dateRange.endDate),
+                };
+
+                const createdReservation = await this.reservationContextService.자원예약을_생성한다(
+                    reservationData,
+                    queryRunner, // 🔥 QueryRunner 전달
+                );
+                reservationId = createdReservation.reservationId;
+            }
+
+            // 2) 일정 생성 (QueryRunner 전달)
+            const scheduleData = {
+                title: data.title,
+                description: data.location
+                    ? `${data.description || ''}\n장소: ${data.location}`.trim()
+                    : data.description,
+                startDate: new Date(data.dateRange.startDate),
+                endDate: new Date(data.dateRange.endDate),
+                scheduleType: data.scheduleType,
+                notifyBeforeStart: data.notifyBeforeStart || false,
+                notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
+            };
+
+            const createdSchedule = await this.scheduleMutationService.일정을_생성한다(
+                scheduleData,
+                queryRunner, // 🔥 QueryRunner 전달
+            );
+
+            // 3) 참가자 생성
+            await this.scheduleMutationService.일정_참가자를_추가한다(
+                createdSchedule.scheduleId!,
+                user.employeeId,
+                'RESERVER',
+                queryRunner,
+            );
+
+            for (const participant of data.participants) {
+                if (participant.employeeId !== user.employeeId) {
+                    await this.scheduleMutationService.일정_참가자를_추가한다(
+                        createdSchedule.scheduleId!,
+                        participant.employeeId,
+                        'PARTICIPANT',
+                        queryRunner,
+                    );
+                }
+            }
+
+            // 4) 일정관계정보 생성
+            const relationData = {
+                scheduleId: createdSchedule.scheduleId!,
+                projectId: data.projectSelection?.projectId || null,
+                reservationId: reservationId,
+            };
+
+            await this.scheduleMutationService.일정관계정보를_생성한다(relationData, queryRunner);
+
+            // 트랜잭션 커밋
+            await queryRunner.commitTransaction();
+
+            return {
+                success: true,
+                schedule: createdSchedule,
+            };
+        } catch (error) {
+            // 트랜잭션 롤백
+            await queryRunner.rollbackTransaction();
+
+            return {
+                success: false,
+                reason: `일정 생성 실패: ${error.message}`,
+            };
+        } finally {
+            // 쿼리러너 해제
+            await queryRunner.release();
+        }
     }
 
     /**
-     * 프로젝트 상세 DTO 구성 (데이터 가공만, 조회 안함)
+     * 일정 생성 (표준 파이프라인 적용, 레거시 로직 완전 보존)
      */
-    private buildProjectDetailDto(projectId: string): ScheduleDetailProjectDto {
-        // TODO: 실제 프로젝트 서비스 구현 후 실제 데이터 조회로 변경
-        return {
-            projectId,
-            projectName: `프로젝트_${projectId.slice(-4)}`, // 임시 데이터
-        };
-    }
-
-    /**
-     * 예약 상세 DTO 구성 (데이터 가공만, 조회 안함)
-     */
-    private buildReservationDetailDto(reservationData: any, typeInfo: any): ScheduleDetailReservationDto {
-        const resourceInfo = {
-            resourceId: reservationData.resource.resourceId,
-            name: reservationData.resource.name,
-            type: reservationData.resource.type,
-            description: reservationData.resource.description,
-            location: reservationData.resource.location,
-            typeInfo,
-        };
-
-        return {
-            reservationId: reservationData.reservationId,
-            title: reservationData.title,
-            description: reservationData.description,
-            status: reservationData.status,
-            resource: resourceInfo,
-        };
-    }
-
-    /**
-     * 차량 타입 정보 구성 (데이터 가공만, 조회 안함)
-     */
-    private buildVehicleTypeInfo(vehicleInfo: any, vehicleFiles: any): any {
-        return {
-            ...vehicleInfo,
-            parkingLocationImages: vehicleFiles.parkingLocationImages.map((file: any) => file.filePath),
-            odometerImages: vehicleFiles.odometerImages.map((file: any) => file.filePath),
-            indoorImages: vehicleFiles.indoorImages.map((file: any) => file.filePath),
-        };
-    }
-
     async createSchedule(
         user: Employee,
         createScheduleDto: ScheduleCreateRequestDto,
     ): Promise<ScheduleCreateResponseDto> {
+        this.logger.log(`일정 생성 요청 - 사용자: ${user.employeeId}, 제목: ${createScheduleDto.title}`);
+
         const {
             datesSelection,
             title,
@@ -561,11 +456,15 @@ export class ScheduleManagementService {
             resourceSelection,
         } = createScheduleDto;
 
-        // 1. 사전 검증 단계 - 프로젝트나 자원이 있을 경우 미리 검증
+        // 1. 권한: 요청자/역할 확인
+        const authResult = await this.scheduleAuthorizationService.일정_생성_권한을_확인한다(user);
+        this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
+
+        // 2. 그래프 조회: 컨텍스트에서 사전 검증 및 정보 조회 (레거시 로직 유지)
         let projectId: string | null = null;
         let resourceInfo = null;
 
-        // 프로젝트 존재 여부 확인
+        // 프로젝트 존재 여부 확인 (레거시 로직 유지)
         if (projectSelection) {
             projectId = projectSelection.projectId;
             const projectExists = await this.projectContextService.프로젝트_존재여부를_확인한다(projectId);
@@ -574,7 +473,7 @@ export class ScheduleManagementService {
             }
         }
 
-        // 자원 존재 여부 확인
+        // 자원 존재 여부 확인 (레거시 로직 유지)
         if (resourceSelection) {
             resourceInfo = await this.resourceContextService.자원정보를_조회한다(resourceSelection.resourceId);
             if (!resourceInfo) {
@@ -582,144 +481,323 @@ export class ScheduleManagementService {
             }
         }
 
-        // 2. 날짜별 트랜잭션 처리
+        // 3. 정책 판단: 기본 정책 체크 (자원 충돌은 State Transition에서 처리)
+        const createRequest = {
+            title,
+            description,
+            location,
+            scheduleType,
+            participants,
+            datesSelection,
+            resourceSelection,
+            projectSelection,
+        };
+
+        const policyResult = await this.schedulePolicyService.다중_일정_생성이_가능한지_확인한다(createRequest);
+        this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
+
+        // 4. 실행/전이: 다중 일정 생성 (레거시 로직 완전 유지)
+        // 자원예약일 경우 각 날짜별로 예약 가능 여부 확인 후 실패/성공 분리
         const createdSchedules = [];
         const failedSchedules = [];
 
         for (const dateRange of datesSelection) {
-            // 자원예약일 경우 해당 시간대 예약 가능 여부 확인
-            if (resourceSelection) {
-                const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(
-                    resourceSelection.resourceId,
-                    new Date(dateRange.startDate),
-                    new Date(dateRange.endDate),
-                );
-                if (!isAvailable) {
-                    failedSchedules.push({
-                        startDate: dateRange.startDate,
-                        endDate: dateRange.endDate,
-                        reason: '선택한 시간대에 자원이 이미 예약되어 있습니다.',
-                    });
-                    continue;
-                }
-            }
+            // 각 날짜별로 통합 트랜잭션 실행
+            const result = await this.일정생성_예약생성_트랜잭션을_실행한다(user, {
+                title,
+                description,
+                location,
+                scheduleType,
+                notifyBeforeStart,
+                notifyMinutesBeforeStart: notificationMinutes || [],
+                participants,
+                dateRange,
+                resourceSelection,
+                projectSelection,
+            });
 
-            // 트랜잭션 시작 - 개별 일정에 대한 모든 작업
-            const queryRunner = this.dataSource.createQueryRunner();
-            await queryRunner.connect();
-            await queryRunner.startTransaction();
-
-            try {
-                // 1) 일정 생성
-                const scheduleData = {
-                    title,
-                    description: location ? `${description || ''}\n장소: ${location}`.trim() : description,
-                    startDate: new Date(dateRange.startDate),
-                    endDate: new Date(dateRange.endDate),
-                    scheduleType,
-                    notifyBeforeStart,
-                    notifyMinutesBeforeStart: notificationMinutes || [],
-                };
-
-                const createdSchedule = await this.scheduleContextService.일정을_생성한다(scheduleData, queryRunner);
-                // 2) 참가자 생성
-                // 예약자(요청자) 추가
-                await this.scheduleContextService.일정_참가자를_추가한다(
-                    createdSchedule.scheduleId!,
-                    user.employeeId,
-                    'RESERVER',
-                    queryRunner,
-                );
-
-                // 다른 참석자들 추가
-                for (const participant of participants) {
-                    if (participant.employeeId !== user.employeeId) {
-                        await this.scheduleContextService.일정_참가자를_추가한다(
-                            createdSchedule.scheduleId!,
-                            participant.employeeId,
-                            'PARTICIPANT',
-                            queryRunner,
-                        );
-                    }
-                }
-                // 3) 자원예약 생성 (있는 경우)
-                let reservationId: string | null = null;
-                if (resourceSelection && resourceInfo) {
-                    const reservationData = {
-                        title: title,
-                        description: description,
-                        resourceId: resourceSelection.resourceId,
-                        resourceType: resourceSelection.resourceType,
-                        status:
-                            resourceSelection.resourceType === ResourceType.ACCOMMODATION
-                                ? ReservationStatus.PENDING
-                                : ReservationStatus.CONFIRMED,
-                        startDate: new Date(dateRange.startDate),
-                        endDate: new Date(dateRange.endDate),
-                    };
-
-                    const createdReservation = await this.reservationContextService.자원예약을_생성한다(
-                        reservationData,
-                        queryRunner,
-                    );
-                    reservationId = createdReservation.reservationId!;
-                }
-
-                // 4) 일정관계정보 생성
-                const relationData = {
-                    scheduleId: createdSchedule.scheduleId!,
-                    projectId: projectId,
-                    reservationId: reservationId,
-                };
-
-                await this.scheduleContextService.일정관계정보를_생성한다(relationData, queryRunner);
-
-                // 트랜잭션 커밋
-                await queryRunner.commitTransaction();
-                createdSchedules.push(createdSchedule);
-            } catch (error) {
-                // 트랜잭션 롤백
-                await queryRunner.rollbackTransaction();
-
+            if (result.success) {
+                createdSchedules.push(result.schedule!);
+            } else {
                 failedSchedules.push({
                     startDate: dateRange.startDate,
                     endDate: dateRange.endDate,
-                    reason: `일정 생성 실패: ${error.message}`,
+                    reason: result.reason!,
                 });
-            } finally {
-                // 쿼리러너 해제
-                await queryRunner.release();
             }
         }
 
-        // 알림 전송
-        const scheduleRelation = await this.scheduleContextService.일정관계정보들을_조회한다([
-            createdSchedules[0].scheduleId!,
-        ]);
-        const data = {
-            schedule: await this.scheduleContextService.일정을_조회한다(scheduleRelation[0].scheduleId),
-            reservation: await this.reservationContextService.예약을_조회한다(scheduleRelation[0].reservationId),
-            resource: resourceInfo,
-        };
-        const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
-        await this.scheduleNotificationContextService.일정_생성_알림을_전송한다(
-            data,
-            [user.employeeId, ...participants.map((participant) => participant.employeeId)],
-            systemAdmins.map((admin) => admin.employeeId),
-        );
+        // 5. 후처리: TODO : 컨텍스트 정리 필요
+        // await this.schedulePostProcessingService.일정_생성_후처리(user, createResult.createdSchedules[0], participants);
 
-        // 응답 DTO 구성
+        // 6. 응답 DTO 변환
         const createdSchedulesDtos = createdSchedules.map((schedule) => ({
             scheduleId: schedule.scheduleId,
             title: schedule.title,
-            startDate: schedule.startDate,
-            endDate: schedule.endDate,
+            startDate: schedule.startDate.toISOString(),
+            endDate: schedule.endDate.toISOString(),
             scheduleType: schedule.scheduleType,
         }));
 
         return {
             createdSchedules: createdSchedulesDtos,
-            failedSchedules: failedSchedules,
+            failedSchedules,
+        };
+    }
+
+    /**
+     * 일정 취소 (표준 파이프라인 적용)
+     */
+    async cancelSchedule(
+        user: Employee,
+        scheduleId: string,
+        cancelDto: ScheduleCancelRequestDto,
+    ): Promise<ScheduleCancelResponseDto> {
+        this.logger.log(`일정 취소 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+
+        // 1. 권한: 요청자/역할 확인
+        const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(
+            user,
+            scheduleId,
+            ScheduleAction.CANCEL,
+        );
+        this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
+
+        // 2. 그래프 조회: 컨텍스트에서 벌크 로딩 (N+1 금지)
+        const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+            scheduleId,
+            {
+                withReservation: true,
+            },
+        );
+        // const schedule = await this.scheduleQueryContextService.일정을_조회한다(scheduleId);
+        // const scheduleRelations = await this.scheduleQueryContextService.일정관계정보들을_조회한다([scheduleId]);
+
+        // let reservation = undefined;
+        // if (scheduleRelations.length > 0 && scheduleRelations[0].reservationId) {
+        //     const reservationMap =
+        //         await this.scheduleQueryContextService.일정들의_예약정보를_조회한다(scheduleRelations);
+        //     reservation = reservationMap.get(scheduleId);
+        // }
+
+        // 3. 정책 판단: 가능/불가(사유 코드 포함)
+        const policyResult = await this.schedulePolicyService.일정_취소가_가능한지_확인한다(schedule, reservation);
+        this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
+
+        // 4. 실행/전이: 상태 변경/생성/삭제 (트랜잭션)
+        const cancelResult = await this.scheduleStateTransitionService.일정을_취소한다(
+            schedule,
+            reservation,
+            cancelDto.reason,
+        );
+
+        // 5. 후처리: 알림/감사/도메인이벤트
+        // await this.schedulePostProcessingService.일정_취소_후처리(user, cancelResult);
+
+        // 6. 응답 DTO 변환
+        return {
+            scheduleId: cancelResult.schedule.scheduleId,
+            title: cancelResult.schedule.title,
+            status: 'CANCELLED',
+            cancelledAt: cancelResult.cancelledAt,
+            reason: cancelDto.reason,
+            reservation: cancelResult.reservation
+                ? {
+                      reservationId: cancelResult.reservation.reservationId,
+                      status: cancelResult.reservation.status,
+                  }
+                : undefined,
+        };
+    }
+
+    /**
+     * 일정 완료 (표준 파이프라인 적용)
+     */
+    async completeSchedule(
+        user: Employee,
+        scheduleId: string,
+        completeDto: ScheduleCompleteRequestDto,
+    ): Promise<ScheduleCompleteResponseDto> {
+        this.logger.log(`일정 완료 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+
+        // 1. 권한: 요청자/역할 확인
+        const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(
+            user,
+            scheduleId,
+            ScheduleAction.COMPLETE,
+        );
+        this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
+
+        // 2. 그래프 조회: 컨텍스트에서 벌크 로딩 (N+1 금지)
+        const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+            scheduleId,
+            {
+                withReservation: true,
+            },
+        );
+
+        // 3. 정책 판단: 가능/불가(사유 코드 포함)
+        const policyResult = await this.schedulePolicyService.일정_완료가_가능한지_확인한다(schedule, reservation);
+        this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
+
+        // 4. 실행/전이: 상태 변경/생성/삭제 (트랜잭션)
+        const completeResult = await this.scheduleStateTransitionService.일정을_완료한다(
+            schedule,
+            reservation,
+            completeDto.completionNotes,
+        );
+
+        // 5. 후처리: 알림/감사/도메인이벤트
+        // await this.schedulePostProcessingService.일정_완료_후처리(user, completeResult);
+
+        // 6. 응답 DTO 변환
+        return {
+            scheduleId: completeResult.schedule.scheduleId,
+            title: completeResult.schedule.title,
+            status: 'COMPLETED',
+            completedAt: completeResult.completedAt,
+            completionNotes: completeDto.completionNotes,
+            reservation: completeResult.reservation
+                ? {
+                      reservationId: completeResult.reservation.reservationId,
+                      status: completeResult.reservation.status,
+                  }
+                : undefined,
+        };
+    }
+
+    /**
+     * 일정 연장 (표준 파이프라인 적용)
+     */
+    async extendSchedule(
+        user: Employee,
+        scheduleId: string,
+        extendDto: ScheduleExtendRequestDto,
+    ): Promise<ScheduleExtendResponseDto> {
+        this.logger.log(`일정 연장 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+
+        // 1. 권한: 요청자/역할 확인
+        const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(
+            user,
+            scheduleId,
+            ScheduleAction.EXTEND,
+        );
+        this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
+
+        // 2. 그래프 조회: 컨텍스트에서 벌크 로딩 (N+1 금지)
+        const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+            scheduleId,
+            {
+                withReservation: true,
+            },
+        );
+
+        // 3. 정책 판단: 가능/불가(사유 코드 포함)
+        const policyResult = await this.schedulePolicyService.일정_연장이_가능한지_확인한다(
+            schedule,
+            { newEndDate: new Date(extendDto.newEndDate) },
+            reservation,
+        );
+        this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
+
+        // 4. 실행/전이: 상태 변경/생성/삭제 (트랜잭션)
+        const extendResult = await this.scheduleStateTransitionService.일정을_연장한다(
+            schedule,
+            reservation,
+            new Date(extendDto.newEndDate),
+            extendDto.reason,
+        );
+
+        // 5. 후처리: 알림/감사/도메인이벤트
+        // await this.schedulePostProcessingService.일정_연장_후처리(user, extendResult);
+
+        // 6. 응답 DTO 변환
+        return {
+            scheduleId: extendResult.schedule.scheduleId,
+            title: extendResult.schedule.title,
+            originalEndDate: extendResult.originalEndDate,
+            newEndDate: extendResult.newEndDate,
+            reason: extendDto.reason,
+            reservation: extendResult.reservation
+                ? {
+                      reservationId: extendResult.reservation.reservationId,
+                      endDate: extendResult.reservation.endDate,
+                  }
+                : undefined,
+        };
+    }
+
+    /**
+     * 일정 수정 (표준 파이프라인 적용)
+     */
+    async updateSchedule(
+        user: Employee,
+        scheduleId: string,
+        updateDto: ScheduleUpdateRequestDto,
+    ): Promise<ScheduleUpdateResponseDto> {
+        this.logger.log(`일정 수정 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+
+        // 1. 권한: 요청자/역할 확인
+        const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(
+            user,
+            scheduleId,
+            ScheduleAction.UPDATE,
+        );
+        this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
+
+        // 2. 그래프 조회: 컨텍스트에서 벌크 로딩 (N+1 금지)
+        const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+            scheduleId,
+            {
+                withReservation: true,
+            },
+        );
+
+        // 3. 정책 판단: 가능/불가(사유 코드 포함)
+        const updateRequest = {
+            title: updateDto.title,
+            description: updateDto.description,
+            startDate: updateDto.startDate ? new Date(updateDto.startDate) : undefined,
+            endDate: updateDto.endDate ? new Date(updateDto.endDate) : undefined,
+            notifyBeforeStart: updateDto.notifyBeforeStart,
+            notifyMinutesBeforeStart: updateDto.notifyMinutesBeforeStart,
+        };
+
+        const policyResult = await this.schedulePolicyService.일정_수정이_가능한지_확인한다(
+            schedule,
+            updateRequest,
+            reservation,
+        );
+        this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
+
+        // 4. 실행/전이: 상태 변경/생성/삭제 (트랜잭션)
+        const updateResult = await this.scheduleStateTransitionService.일정을_수정한다(
+            schedule,
+            reservation,
+            updateRequest,
+            updateDto.reason,
+        );
+
+        // 5. 후처리: 알림/감사/도메인이벤트
+        // await this.schedulePostProcessingService.일정_수정_후처리(user, updateResult);
+
+        // 6. 응답 DTO 변환
+        return {
+            scheduleId: updateResult.schedule.scheduleId,
+            title: updateResult.schedule.title,
+            description: updateResult.schedule.description,
+            startDate: updateResult.schedule.startDate,
+            endDate: updateResult.schedule.endDate,
+            changes: updateResult.changes,
+            reason: updateDto.reason,
+            reservation: updateResult.reservation
+                ? {
+                      reservationId: updateResult.reservation.reservationId,
+                      title: updateResult.reservation.title,
+                      startDate: updateResult.reservation.startDate,
+                      endDate: updateResult.reservation.endDate,
+                  }
+                : undefined,
         };
     }
 }

@@ -3,7 +3,7 @@ import { NotificationContextService } from '@src/context/notification/services/n
 import { CronNotificationContextService } from '@src/context/notification/services/cron-notification.context.service';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { ScheduleContextService } from '@src/context/schedule/schedule.context.service';
+import { ScheduleQueryContextService } from '@src/context/schedule/services/schedule-query.context.service';
 
 // Import DTOs from business layer index
 import {
@@ -28,7 +28,7 @@ export class NotificationManagementService {
     constructor(
         private readonly notificationContextService: NotificationContextService,
         private readonly cronNotificationContextService: CronNotificationContextService,
-        private readonly scheduleContextService: ScheduleContextService,
+        private readonly scheduleContextService: ScheduleQueryContextService,
     ) {}
     async onModuleInit() {
         // 테스트 코드
@@ -137,21 +137,21 @@ export class NotificationManagementService {
      * 다가오는 예약 알림을 전송한다 (크론 작업)
      */
     async 다가오는_일정의_알림을_전송한다(): Promise<any> {
-        const schedules = await this.scheduleContextService.다가오는_일정을_조회한다();
-        console.log(schedules);
-        if (schedules.length === 0) {
+        const upcomingSchedules = await this.scheduleContextService.다가오는_일정을_조회한다();
+        if (upcomingSchedules.length === 0) {
             return;
         }
-        const scheduleRelations = await this.scheduleContextService.일정관계정보들을_조회한다(
-            schedules.map((schedule) => schedule.scheduleId),
-        );
-        const reservations = await this.scheduleContextService.일정들의_예약정보를_조회한다(scheduleRelations);
-        const resources = await this.scheduleContextService.일정들의_자원정보를_조회한다(scheduleRelations);
-        const participantIds = await this.scheduleContextService.일정들의_모든참가자정보를_조회한다(
-            schedules.map((schedule) => schedule.scheduleId),
+        const scheduledInfos = await this.scheduleContextService.복수_일정과_관계정보들을_조회한다(
+            upcomingSchedules.map((schedule) => schedule.scheduleId),
+            {
+                withReservation: true,
+                withResource: true,
+                withParticipants: true,
+            },
         );
 
-        for (const schedule of schedules) {
+        for (const scheduledInfo of scheduledInfos) {
+            const { schedule, reservation, resource, participants } = scheduledInfo;
             const notificationData: CreateNotificationDataDto = {
                 schedule: {
                     scheduleId: schedule.scheduleId,
@@ -161,23 +161,18 @@ export class NotificationManagementService {
                     endDate: DateUtil.format(schedule.endDate, 'YYYY-MM-DD HH:mm'),
                 },
                 reservation: {
-                    reservationId: reservations.get(schedule.scheduleId)?.reservationId,
-                    reservationTitle: reservations.get(schedule.scheduleId)?.title,
-                    reservationDate: DateUtil.format(
-                        reservations.get(schedule.scheduleId)?.startDate,
-                        'YYYY-MM-DD HH:mm',
-                    ),
-                    status: reservations.get(schedule.scheduleId)?.status,
+                    reservationId: reservation?.reservationId,
+                    reservationTitle: reservation?.title,
+                    reservationDate: DateUtil.format(reservation?.startDate, 'YYYY-MM-DD HH:mm'),
+                    status: reservation?.status,
                 },
                 resource: {
-                    resourceId: resources.get(schedule.scheduleId)?.resourceId,
-                    resourceName: resources.get(schedule.scheduleId)?.resourceName,
-                    resourceType: resources.get(schedule.scheduleId)?.resourceType,
+                    resourceId: resource?.resourceId,
+                    resourceName: resource?.name,
+                    resourceType: resource?.type,
                 },
             };
-            const notificationTarget = participantIds
-                .get(schedule.scheduleId)
-                .map((participant) => participant.employee.employeeId);
+            const notificationTarget = participants.map((participant) => participant.employee.employeeId);
             await this.notificationContextService.알림_전송_프로세스를_진행한다(
                 NotificationType.RESERVATION_DATE_UPCOMING,
                 notificationData,

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { ScheduleManagementService } from '../schedule-management.service';
 import { Employee } from '@libs/entities/employee.entity';
@@ -13,6 +13,14 @@ import { ScheduleDetailQueryDto } from '../dtos/schedule-detail-query.dto';
 import { ScheduleDetailResponseDto } from '../dtos/schedule-detail-response.dto';
 import { ScheduleCreateRequestDto } from '../dtos/schedule-create-request.dto';
 import { ScheduleCreateResponseDto } from '../dtos/schedule-create-response.dto';
+import { ScheduleCancelRequestDto } from '../dtos/schedule-cancel-request.dto';
+import { ScheduleCancelResponseDto } from '../dtos/schedule-cancel-response.dto';
+import { ScheduleCompleteRequestDto } from '../dtos/schedule-complete-request.dto';
+import { ScheduleCompleteResponseDto } from '../dtos/schedule-complete-response.dto';
+import { ScheduleExtendRequestDto } from '../dtos/schedule-extend-request.dto';
+import { ScheduleExtendResponseDto } from '../dtos/schedule-extend-response.dto';
+import { ScheduleUpdateRequestDto } from '../dtos/schedule-update-request.dto';
+import { ScheduleUpdateResponseDto } from '../dtos/schedule-update-response.dto';
 
 @ApiTags('v2 일정')
 @Controller('v2/schedule')
@@ -126,5 +134,89 @@ export class ScheduleController {
         @Body() createScheduleDto: ScheduleCreateRequestDto,
     ): Promise<ScheduleCreateResponseDto> {
         return this.scheduleManagementService.createSchedule(user, createScheduleDto);
+    }
+
+    /**
+     * 일정 삭제 (취소)
+     * 일정의 상태를 CANCELLED로 변경합니다.
+     */
+    @ApiOperation({
+        summary: '일정 삭제 (취소)',
+        description: '일정을 취소 상태로 변경합니다.',
+    })
+    @ApiOkResponse({
+        description: '일정 취소 성공',
+        type: ScheduleCancelResponseDto,
+    })
+    @Patch(':scheduleId/cancel')
+    async cancelSchedule(
+        @User() user: Employee,
+        @Param('scheduleId') scheduleId: string,
+        @Body() cancelScheduleDto: ScheduleCancelRequestDto,
+    ): Promise<ScheduleCancelResponseDto> {
+        return this.scheduleManagementService.cancelSchedule(user, scheduleId, cancelScheduleDto);
+    }
+
+    /**
+     * 일정 완료 (종료)
+     * 일정의 상태를 COMPLETED로 변경하고 관련 정보를 수정합니다.
+     */
+    @ApiOperation({
+        summary: '일정 완료 (종료)',
+        description: '일정을 완료 상태로 변경하고 관련 정보를 업데이트합니다.',
+    })
+    @ApiOkResponse({
+        description: '일정 완료 성공',
+        type: ScheduleCompleteResponseDto,
+    })
+    @Patch(':scheduleId/complete')
+    async completeSchedule(
+        @User() user: Employee,
+        @Param('scheduleId') scheduleId: string,
+        @Body() completeScheduleDto: ScheduleCompleteRequestDto,
+    ): Promise<ScheduleCompleteResponseDto> {
+        return this.scheduleManagementService.completeSchedule(user, scheduleId, completeScheduleDto);
+    }
+
+    /**
+     * 일정 연장
+     * 일정의 종료 시간을 연장합니다.
+     */
+    @ApiOperation({
+        summary: '일정 연장',
+        description: '일정의 종료 시간을 연장합니다.',
+    })
+    @ApiOkResponse({
+        description: '일정 연장 성공',
+        type: ScheduleExtendResponseDto,
+    })
+    @Patch(':scheduleId/extend')
+    async extendSchedule(
+        @User() user: Employee,
+        @Param('scheduleId') scheduleId: string,
+        @Body() extendScheduleDto: ScheduleExtendRequestDto,
+    ): Promise<ScheduleExtendResponseDto> {
+        return this.scheduleManagementService.extendSchedule(user, scheduleId, extendScheduleDto);
+    }
+
+    /**
+     * 일정 수정
+     * 일정의 날짜, 시간 및 기타 정보를 수정합니다.
+     */
+    @ApiOperation({
+        summary: '일정 수정',
+        description: '일정의 날짜, 시간 및 기타 정보를 수정합니다.',
+    })
+    @ApiOkResponse({
+        description: '일정 수정 성공',
+        type: ScheduleUpdateResponseDto,
+    })
+    @Patch(':scheduleId')
+    async updateSchedule(
+        @User() user: Employee,
+        @Param('scheduleId') scheduleId: string,
+        @Body() updateScheduleDto: ScheduleUpdateRequestDto,
+    ): Promise<ScheduleUpdateResponseDto> {
+        return this.scheduleManagementService.updateSchedule(user, scheduleId, updateScheduleDto);
     }
 }

@@ -11,6 +11,12 @@ export class DomainScheduleParticipantService extends BaseService<SchedulePartic
         super(scheduleParticipantRepository);
     }
 
+    async findByScheduleId(scheduleId: string): Promise<ScheduleParticipant[]> {
+        return this.scheduleParticipantRepository.findAll({
+            where: { scheduleId },
+        });
+    }
+
     async findReserversByScheduleIds(scheduleIds: string[]): Promise<ScheduleParticipant[]> {
         return this.scheduleParticipantRepository.findAll({
             where: { scheduleId: In(scheduleIds), type: ParticipantsType.RESERVER },
@@ -27,5 +33,12 @@ export class DomainScheduleParticipantService extends BaseService<SchedulePartic
         return this.scheduleParticipantRepository.findAll({
             where: { scheduleId: In(scheduleIds) },
         });
+    }
+
+    async checkReserverByScheduleId(employeeId: string, scheduleId: string): Promise<boolean> {
+        const reserver = await this.scheduleParticipantRepository.findOne({
+            where: { scheduleId, employeeId, type: ParticipantsType.RESERVER },
+        });
+        return reserver !== null;
     }
 }
