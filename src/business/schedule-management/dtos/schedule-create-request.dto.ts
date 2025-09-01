@@ -87,12 +87,12 @@ export class ScheduleCreateRequestDto {
         type: [ScheduleDateRangeDto],
         example: [
             {
-                startDate: DateUtil.now().format('YYYY-MM-DD 10:00:00'),
-                endDate: DateUtil.now().format('YYYY-MM-DD 11:00:00'),
+                startDate: new Date('2025-09-05T01:00:00Z').toISOString(),
+                endDate: new Date('2025-09-05T02:00:00Z').toISOString(),
             },
             {
-                startDate: DateUtil.now().addDays(1).format('YYYY-MM-DD 10:00:00'),
-                endDate: DateUtil.now().addDays(1).format('YYYY-MM-DD 11:00:00'),
+                startDate: new Date('2025-09-06T01:00:00Z').toISOString(),
+                endDate: new Date('2025-09-06T02:00:00Z').toISOString(),
             },
         ],
     })

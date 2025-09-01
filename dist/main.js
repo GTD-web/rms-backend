@@ -27297,7 +27297,6 @@ const class_validator_1 = __webpack_require__(/*! class-validator */ "class-vali
 const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
-const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 class ScheduleDateRangeDto {
 }
 exports.ScheduleDateRangeDto = ScheduleDateRangeDto;
@@ -27368,12 +27367,12 @@ __decorate([
         type: [ScheduleDateRangeDto],
         example: [
             {
-                startDate: date_util_1.DateUtil.now().format('YYYY-MM-DD 10:00:00'),
-                endDate: date_util_1.DateUtil.now().format('YYYY-MM-DD 11:00:00'),
+                startDate: new Date('2025-09-05T01:00:00Z').toISOString(),
+                endDate: new Date('2025-09-05T02:00:00Z').toISOString(),
             },
             {
-                startDate: date_util_1.DateUtil.now().addDays(1).format('YYYY-MM-DD 10:00:00'),
-                endDate: date_util_1.DateUtil.now().addDays(1).format('YYYY-MM-DD 11:00:00'),
+                startDate: new Date('2025-09-06T01:00:00Z').toISOString(),
+                endDate: new Date('2025-09-06T02:00:00Z').toISOString(),
             },
         ],
     }),
@@ -34484,12 +34483,53 @@ let ResourceContextService = class ResourceContextService {
     }
     async 자원을_삭제한다(resourceId) {
         const resource = await this.domainResourceService.findOne({
-            where: { resourceId },
+            where: {
+                resourceId: resourceId,
+            },
         });
         if (!resource) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
-        await this.domainResourceService.delete(resourceId);
+        if (resource.isAvailable) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.IS_AVAILABLE);
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            await this.domainResourceService.update(resourceId, { resourceGroupId: null }, { queryRunner });
+            const resourceManagers = await this.domainResourceManagerService.findAll({
+                where: {
+                    resourceId: resourceId,
+                },
+            });
+            for (const manager of resourceManagers) {
+                await this.domainResourceManagerService.delete(manager.resourceManagerId, { queryRunner });
+            }
+            await this.domainResourceService.softDelete(resourceId, { queryRunner });
+            const resources = await this.domainResourceService.findAll({
+                where: {
+                    resourceId: (0, typeorm_1.Not)(resourceId),
+                    resourceGroupId: resource.resourceGroupId,
+                    deletedAt: (0, typeorm_1.IsNull)(),
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+            for (let i = 0; i < resources.length; i++) {
+                await this.domainResourceService.update(resources[i].resourceId, { order: i }, { queryRunner });
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            console.error(err);
+            await queryRunner.rollbackTransaction();
+            throw new common_1.InternalServerErrorException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_DELETE);
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     자원타입_라벨을_가져온다(type) {
         switch (type) {

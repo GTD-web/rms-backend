@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { DataSource, In } from 'typeorm';
+import { DataSource, In, IsNull, Not } from 'typeorm';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { Resource } from '@libs/entities/resource.entity';
@@ -337,14 +337,68 @@ export class ResourceContextService {
 
     async 자원을_삭제한다(resourceId: string): Promise<void> {
         const resource = await this.domainResourceService.findOne({
-            where: { resourceId },
+            where: {
+                resourceId: resourceId,
+            },
         });
-
         if (!resource) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
+        if (resource.isAvailable) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.IS_AVAILABLE);
+        }
 
-        await this.domainResourceService.delete(resourceId);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await this.domainResourceService.update(resourceId, { resourceGroupId: null }, { queryRunner });
+
+            const resourceManagers = await this.domainResourceManagerService.findAll({
+                where: {
+                    resourceId: resourceId,
+                },
+            });
+            for (const manager of resourceManagers) {
+                await this.domainResourceManagerService.delete(manager.resourceManagerId, { queryRunner });
+            }
+
+            await this.domainResourceService.softDelete(resourceId, { queryRunner });
+
+            const resources = await this.domainResourceService.findAll({
+                where: {
+                    resourceId: Not(resourceId),
+                    resourceGroupId: resource.resourceGroupId,
+                    deletedAt: IsNull(),
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+
+            for (let i = 0; i < resources.length; i++) {
+                await this.domainResourceService.update(resources[i].resourceId, { order: i }, { queryRunner });
+            }
+
+            await queryRunner.commitTransaction();
+        } catch (err) {
+            console.error(err);
+            await queryRunner.rollbackTransaction();
+            throw new InternalServerErrorException(ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_DELETE);
+        } finally {
+            await queryRunner.release();
+        }
+
+        // const resource = await this.domainResourceService.findOne({
+        //     where: { resourceId },
+        // });
+
+        // if (!resource) {
+        //     throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
+        // }
+
+        // await this.domainResourceService.delete(resourceId);
     }
 
     /**
