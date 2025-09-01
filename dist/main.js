@@ -26155,7 +26155,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -26173,7 +26173,6 @@ const schedule_detail_query_dto_1 = __webpack_require__(/*! ../dtos/schedule-det
 const schedule_detail_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-detail-response.dto */ "./src/business/schedule-management/dtos/schedule-detail-response.dto.ts");
 const schedule_create_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-create-request.dto */ "./src/business/schedule-management/dtos/schedule-create-request.dto.ts");
 const schedule_create_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-create-response.dto */ "./src/business/schedule-management/dtos/schedule-create-response.dto.ts");
-const schedule_extend_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-extend-request.dto */ "./src/business/schedule-management/dtos/schedule-extend-request.dto.ts");
 const schedule_extend_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-extend-response.dto */ "./src/business/schedule-management/dtos/schedule-extend-response.dto.ts");
 const schedule_update_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-update-request.dto */ "./src/business/schedule-management/dtos/schedule-update-request.dto.ts");
 const schedule_update_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-update-response.dto */ "./src/business/schedule-management/dtos/schedule-update-response.dto.ts");
@@ -26205,8 +26204,11 @@ let ScheduleController = class ScheduleController {
     async completeSchedule(user, scheduleId) {
         return this.scheduleManagementService.completeSchedule(user, scheduleId);
     }
-    async extendSchedule(user, scheduleId, extendScheduleDto) {
-        return this.scheduleManagementService.extendSchedule(user, scheduleId, extendScheduleDto);
+    async checkScheduleExtendable(user, scheduleId) {
+        return this.scheduleManagementService.checkScheduleExtendable(user, scheduleId);
+    }
+    async extendSchedule30Min(user, scheduleId) {
+        return this.scheduleManagementService.extendSchedule30Min(user, scheduleId);
     }
     async updateSchedule(user, scheduleId, updateScheduleDto) {
         return this.scheduleManagementService.updateSchedule(user, scheduleId, updateScheduleDto);
@@ -26334,21 +26336,36 @@ __decorate([
 ], ScheduleController.prototype, "completeSchedule", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: '일정 연장',
-        description: '일정의 종료 시간을 연장합니다.',
+        summary: '일정 연장 가능 여부 확인',
+        description: '자원예약이 포함된 일정의 30분 연장 가능 여부를 확인합니다. 일정 종료 15분 전부터 확인 가능합니다.',
     }),
     (0, swagger_1.ApiOkResponse)({
-        description: '일정 연장 성공',
+        description: '일정 연장 가능 여부',
+        type: Boolean,
+    }),
+    (0, common_1.Get)(':scheduleId/check/extendable'),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('scheduleId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_x = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _x : Object, String]),
+    __metadata("design:returntype", typeof (_y = typeof Promise !== "undefined" && Promise) === "function" ? _y : Object)
+], ScheduleController.prototype, "checkScheduleExtendable", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: '일정 30분 연장',
+        description: '자원예약이 포함된 일정을 현재 종료시간에서 30분 연장합니다.',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '일정 30분 연장 성공',
         type: schedule_extend_response_dto_1.ScheduleExtendResponseDto,
     }),
     (0, common_1.Patch)(':scheduleId/extend'),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('scheduleId')),
-    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_x = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _x : Object, String, typeof (_y = typeof schedule_extend_request_dto_1.ScheduleExtendRequestDto !== "undefined" && schedule_extend_request_dto_1.ScheduleExtendRequestDto) === "function" ? _y : Object]),
-    __metadata("design:returntype", typeof (_z = typeof Promise !== "undefined" && Promise) === "function" ? _z : Object)
-], ScheduleController.prototype, "extendSchedule", null);
+    __metadata("design:paramtypes", [typeof (_z = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _z : Object, String]),
+    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
+], ScheduleController.prototype, "extendSchedule30Min", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: '일정 수정',
@@ -26363,8 +26380,8 @@ __decorate([
     __param(1, (0, common_1.Param)('scheduleId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_0 = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _0 : Object, String, typeof (_1 = typeof schedule_update_request_dto_1.ScheduleUpdateRequestDto !== "undefined" && schedule_update_request_dto_1.ScheduleUpdateRequestDto) === "function" ? _1 : Object]),
-    __metadata("design:returntype", typeof (_2 = typeof Promise !== "undefined" && Promise) === "function" ? _2 : Object)
+    __metadata("design:paramtypes", [typeof (_1 = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _1 : Object, String, typeof (_2 = typeof schedule_update_request_dto_1.ScheduleUpdateRequestDto !== "undefined" && schedule_update_request_dto_1.ScheduleUpdateRequestDto) === "function" ? _2 : Object]),
+    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
 ], ScheduleController.prototype, "updateSchedule", null);
 exports.ScheduleController = ScheduleController = __decorate([
     (0, swagger_1.ApiTags)('v2 일정'),
@@ -27582,7 +27599,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleDetailResponseDto = exports.ScheduleDetailReservationDto = exports.ScheduleDetailResourceDto = exports.ScheduleDetailParticipantDto = exports.ScheduleDetailProjectDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -27830,6 +27847,14 @@ __decorate([
 ], ScheduleDetailResponseDto.prototype, "scheduleType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        description: '일정 상태',
+        enum: schedule_type_enum_1.ScheduleStatus,
+        example: schedule_type_enum_1.ScheduleStatus.PROCESSING,
+    }),
+    __metadata("design:type", typeof (_g = typeof schedule_type_enum_1.ScheduleStatus !== "undefined" && schedule_type_enum_1.ScheduleStatus) === "function" ? _g : Object)
+], ScheduleDetailResponseDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         description: '시작 전 알림 여부',
         example: true,
     }),
@@ -27883,53 +27908,6 @@ __decorate([
     }),
     __metadata("design:type", ScheduleDetailReservationDto)
 ], ScheduleDetailResponseDto.prototype, "reservation", void 0);
-
-
-/***/ }),
-
-/***/ "./src/business/schedule-management/dtos/schedule-extend-request.dto.ts":
-/*!******************************************************************************!*\
-  !*** ./src/business/schedule-management/dtos/schedule-extend-request.dto.ts ***!
-  \******************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleExtendRequestDto = void 0;
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
-class ScheduleExtendRequestDto {
-}
-exports.ScheduleExtendRequestDto = ScheduleExtendRequestDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '새로운 종료 날짜 및 시간',
-        example: '2025-08-25T13:00:00Z',
-    }),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
-], ScheduleExtendRequestDto.prototype, "newEndDate", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '연장 사유',
-        example: '논의할 내용이 많아 30분 연장합니다.',
-        required: false,
-        maxLength: 500,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(500, { message: '연장 사유는 500자를 초과할 수 없습니다.' }),
-    __metadata("design:type", String)
-], ScheduleExtendRequestDto.prototype, "reason", void 0);
 
 
 /***/ }),
@@ -28456,6 +28434,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             startDate: schedule.startDate,
             endDate: schedule.endDate,
             scheduleType: schedule.scheduleType,
+            status: schedule.status,
             notifyBeforeStart: schedule.notifyBeforeStart,
             notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
             isMine: reserver?.employeeId === user.employeeId,
@@ -28643,22 +28622,41 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         const completeResult = await this.scheduleStateTransitionService.일정을_완료한다(schedule, reservation);
         return completeResult;
     }
-    async extendSchedule(user, scheduleId, extendDto) {
-        this.logger.log(`일정 연장 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+    async checkScheduleExtendable(user, scheduleId) {
+        this.logger.log(`일정 연장 가능 여부 확인 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+        try {
+            const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(user, scheduleId, schedule_authorization_service_2.ScheduleAction.EXTEND);
+            this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
+            const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
+                withReservation: true,
+            });
+            const policyResult = await this.schedulePolicyService.일정_30분_연장이_가능한지_확인한다(schedule, reservation);
+            console.log(policyResult);
+            return policyResult.isAllowed;
+        }
+        catch (error) {
+            this.logger.warn(`일정 연장 가능 여부 확인 실패: ${error.message}`);
+            return false;
+        }
+    }
+    async extendSchedule30Min(user, scheduleId) {
+        this.logger.log(`일정 30분 연장 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
         const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(user, scheduleId, schedule_authorization_service_2.ScheduleAction.EXTEND);
         this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
         const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
         });
-        const policyResult = await this.schedulePolicyService.일정_연장이_가능한지_확인한다(schedule, { newEndDate: new Date(extendDto.newEndDate) }, reservation);
+        const policyResult = await this.schedulePolicyService.일정_30분_연장이_가능한지_확인한다(schedule, reservation);
         this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
-        const extendResult = await this.scheduleStateTransitionService.일정을_연장한다(schedule, reservation, new Date(extendDto.newEndDate), extendDto.reason);
+        const newEndDate = new Date(schedule.endDate);
+        newEndDate.setMinutes(newEndDate.getMinutes() + 30);
+        const extendResult = await this.scheduleStateTransitionService.일정을_연장한다(schedule, reservation, newEndDate, '30분 자동 연장');
         return {
             scheduleId: extendResult.schedule.scheduleId,
             title: extendResult.schedule.title,
             originalEndDate: extendResult.originalEndDate,
             newEndDate: extendResult.newEndDate,
-            reason: extendDto.reason,
+            reason: '30분 자동 연장',
             reservation: extendResult.reservation
                 ? {
                     reservationId: extendResult.reservation.reservationId,
@@ -34957,7 +34955,7 @@ let ScheduleMutationContextService = ScheduleMutationContextService_1 = class Sc
             notifyBeforeStart: scheduleData.notifyBeforeStart || false,
             notifyMinutesBeforeStart: scheduleData.notifyMinutesBeforeStart || [],
             scheduleType: scheduleData.scheduleType,
-            status: schedule_type_enum_1.ScheduleStatus.PENDING,
+            status: scheduleData.startDate < new Date() ? schedule_type_enum_1.ScheduleStatus.PROCESSING : schedule_type_enum_1.ScheduleStatus.PENDING,
         };
         const savedSchedule = await this.domainScheduleService.save(scheduleEntity, {
             queryRunner: queryRunner,
@@ -35186,11 +35184,19 @@ let SchedulePolicyService = class SchedulePolicyService {
         for (const dateRange of createRequest.datesSelection) {
             const startDate = new Date(dateRange.startDate);
             const endDate = new Date(dateRange.endDate);
-            if (startDate < now) {
+            const current30MinStart = new Date(now);
+            const currentMinutes = current30MinStart.getMinutes();
+            if (currentMinutes < 30) {
+                current30MinStart.setMinutes(0, 0, 0);
+            }
+            else {
+                current30MinStart.setMinutes(30, 0, 0);
+            }
+            if (startDate < current30MinStart) {
                 return {
                     isAllowed: false,
-                    reason: '과거 시간으로는 일정을 생성할 수 없습니다.',
-                    reasonCode: 'PAST_TIME_NOT_ALLOWED',
+                    reason: '현재 30분 단위 시간대 이전으로는 일정을 생성할 수 없습니다.',
+                    reasonCode: 'PAST_30MIN_SLOT_NOT_ALLOWED',
                 };
             }
             if (startDate >= endDate) {
@@ -35202,6 +35208,45 @@ let SchedulePolicyService = class SchedulePolicyService {
             }
         }
         return { isAllowed: true };
+    }
+    async 일정_30분_연장이_가능한지_확인한다(schedule, reservation) {
+        if (!reservation) {
+            return {
+                isAllowed: false,
+                reason: '자원예약이 포함된 일정만 연장할 수 있습니다.',
+                reasonCode: 'NO_RESOURCE_RESERVATION',
+            };
+        }
+        if (schedule.status !== schedule_type_enum_1.ScheduleStatus.PROCESSING && reservation.status !== reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+            return {
+                isAllowed: false,
+                reason: '활성 상태인 예약만 연장할 수 있습니다.',
+                reasonCode: 'RESERVATION_INACTIVE',
+            };
+        }
+        const extendedEndTime = new Date(schedule.endDate);
+        extendedEndTime.setMinutes(extendedEndTime.getMinutes() + 30);
+        try {
+            const isAvailable = await this.domainReservationService.checkReservationConflicts(reservation.resourceId, schedule.endDate, extendedEndTime, reservation.reservationId);
+            if (!isAvailable) {
+                return {
+                    isAllowed: false,
+                    reason: '연장하려는 시간에 다른 예약이 있습니다.',
+                    reasonCode: 'RESERVATION_CONFLICT',
+                };
+            }
+        }
+        catch (error) {
+            return {
+                isAllowed: false,
+                reason: '예약 충돌 확인 중 오류가 발생했습니다.',
+                reasonCode: 'CONFLICT_CHECK_ERROR',
+            };
+        }
+        return {
+            isAllowed: true,
+            reason: '일정 연장이 가능합니다.',
+        };
     }
     정책_체크_실패시_예외를_던진다(policyResult) {
         if (!policyResult.isAllowed) {
@@ -36279,9 +36324,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
                     where: { reservationId: reservation.reservationId },
                 });
             }
-            const extendInfo = `[${date_util_1.DateUtil.format(date_util_1.DateUtil.now().toDate(), 'YYYY-MM-DD HH:mm')}] 일정이 ${date_util_1.DateUtil.format(originalEndDate, 'HH:mm')}에서 ${date_util_1.DateUtil.format(newEndDate, 'HH:mm')}로 연장되었습니다.${extendReason ? ` 사유: ${extendReason}` : ''}`;
-            const updatedDescription = schedule.description ? `${schedule.description}\n\n${extendInfo}` : extendInfo;
-            await this.domainScheduleService.update(schedule.scheduleId, { endDate: newEndDate, description: updatedDescription }, { queryRunner });
+            await this.domainScheduleService.update(schedule.scheduleId, { endDate: newEndDate }, { queryRunner });
             if (shouldManageTransaction) {
                 await queryRunner.commitTransaction();
             }

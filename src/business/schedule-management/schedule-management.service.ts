@@ -292,6 +292,7 @@ export class ScheduleManagementService {
             startDate: schedule.startDate,
             endDate: schedule.endDate,
             scheduleType: schedule.scheduleType,
+            status: schedule.status,
             notifyBeforeStart: schedule.notifyBeforeStart,
             notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
             isMine: reserver?.employeeId === user.employeeId,
@@ -645,14 +646,47 @@ export class ScheduleManagementService {
     }
 
     /**
-     * 일정 연장 (표준 파이프라인 적용)
+     * 일정 30분 연장 가능 여부 확인 (표준 파이프라인 적용)
      */
-    async extendSchedule(
-        user: Employee,
-        scheduleId: string,
-        extendDto: ScheduleExtendRequestDto,
-    ): Promise<ScheduleExtendResponseDto> {
-        this.logger.log(`일정 연장 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+    async checkScheduleExtendable(user: Employee, scheduleId: string): Promise<boolean> {
+        this.logger.log(`일정 연장 가능 여부 확인 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+
+        try {
+            // 1. 권한: 요청자/역할 확인
+            const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(
+                user,
+                scheduleId,
+                ScheduleAction.EXTEND,
+            );
+            this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
+
+            // 2. 그래프 조회: 컨텍스트에서 벌크 로딩 (N+1 금지)
+            const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+                scheduleId,
+                {
+                    withReservation: true,
+                },
+            );
+
+            // 3. 정책 판단: 30분 연장 가능 여부 확인
+            const policyResult = await this.schedulePolicyService.일정_30분_연장이_가능한지_확인한다(
+                schedule,
+                reservation,
+            );
+            console.log(policyResult);
+            return policyResult.isAllowed;
+        } catch (error) {
+            // 에러 발생 시 연장 불가능으로 처리
+            this.logger.warn(`일정 연장 가능 여부 확인 실패: ${error.message}`);
+            return false;
+        }
+    }
+
+    /**
+     * 일정 30분 연장 (표준 파이프라인 적용)
+     */
+    async extendSchedule30Min(user: Employee, scheduleId: string): Promise<ScheduleExtendResponseDto> {
+        this.logger.log(`일정 30분 연장 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
 
         // 1. 권한: 요청자/역할 확인
         const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(
@@ -670,20 +704,19 @@ export class ScheduleManagementService {
             },
         );
 
-        // 3. 정책 판단: 가능/불가(사유 코드 포함)
-        const policyResult = await this.schedulePolicyService.일정_연장이_가능한지_확인한다(
-            schedule,
-            { newEndDate: new Date(extendDto.newEndDate) },
-            reservation,
-        );
+        // 3. 정책 판단: 30분 연장 가능 여부 확인
+        const policyResult = await this.schedulePolicyService.일정_30분_연장이_가능한지_확인한다(schedule, reservation);
         this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
 
-        // 4. 실행/전이: 상태 변경/생성/삭제 (트랜잭션)
+        // 4. 실행/전이: 30분 연장된 새로운 종료시간 계산
+        const newEndDate = new Date(schedule.endDate);
+        newEndDate.setMinutes(newEndDate.getMinutes() + 30);
+
         const extendResult = await this.scheduleStateTransitionService.일정을_연장한다(
             schedule,
             reservation,
-            new Date(extendDto.newEndDate),
-            extendDto.reason,
+            newEndDate,
+            '30분 자동 연장',
         );
 
         // 5. 후처리: 알림/감사/도메인이벤트
@@ -695,7 +728,7 @@ export class ScheduleManagementService {
             title: extendResult.schedule.title,
             originalEndDate: extendResult.originalEndDate,
             newEndDate: extendResult.newEndDate,
-            reason: extendDto.reason,
+            reason: '30분 자동 연장',
             reservation: extendResult.reservation
                 ? {
                       reservationId: extendResult.reservation.reservationId,

@@ -278,12 +278,23 @@ export class SchedulePolicyService {
             const startDate = new Date(dateRange.startDate);
             const endDate = new Date(dateRange.endDate);
 
-            // 과거 시간 체크
-            if (startDate < now) {
+            // 과거 시간 체크 - 현재 시간이 속한 30분 단위 시간대부터 예약 가능
+            const current30MinStart = new Date(now);
+            const currentMinutes = current30MinStart.getMinutes();
+
+            if (currentMinutes < 30) {
+                // 0~29분: 해당 시간의 정각(00분)부터 가능
+                current30MinStart.setMinutes(0, 0, 0);
+            } else {
+                // 30~59분: 해당 시간의 30분부터 가능
+                current30MinStart.setMinutes(30, 0, 0);
+            }
+
+            if (startDate < current30MinStart) {
                 return {
                     isAllowed: false,
-                    reason: '과거 시간으로는 일정을 생성할 수 없습니다.',
-                    reasonCode: 'PAST_TIME_NOT_ALLOWED',
+                    reason: '현재 30분 단위 시간대 이전으로는 일정을 생성할 수 없습니다.',
+                    reasonCode: 'PAST_30MIN_SLOT_NOT_ALLOWED',
                 };
             }
 
@@ -306,6 +317,77 @@ export class SchedulePolicyService {
     /**
      * 정책 체크 실패 시 예외를 던집니다
      */
+    /**
+     * 일정 30분 연장 가능 여부를 판단합니다
+     * 1. 자원예약이 포함된 일정인지 확인
+     * 2. 현재 시간이 일정 종료 15분 전부터 일정 종료시간 사이인지 확인
+     * 3. 30분 연장 시 충돌하는 예약이 있는지 확인
+     */
+    async 일정_30분_연장이_가능한지_확인한다(schedule: Schedule, reservation?: Reservation): Promise<PolicyResult> {
+        // 1. 자원예약이 포함된 일정인지 확인
+        if (!reservation) {
+            return {
+                isAllowed: false,
+                reason: '자원예약이 포함된 일정만 연장할 수 있습니다.',
+                reasonCode: 'NO_RESOURCE_RESERVATION',
+            };
+        }
+
+        // 2. 예약 상태 확인 (활성 상태인지)
+        if (schedule.status !== ScheduleStatus.PROCESSING && reservation.status !== ReservationStatus.CONFIRMED) {
+            return {
+                isAllowed: false,
+                reason: '활성 상태인 예약만 연장할 수 있습니다.',
+                reasonCode: 'RESERVATION_INACTIVE',
+            };
+        }
+
+        // 3. 현재 시간이 연장 가능 시간 범위에 있는지 확인 (일정 종료 15분 전부터 일정 종료시간 사이)
+        // const currentTime = new Date();
+        // const extendableStartTime = new Date(schedule.endDate);
+        // extendableStartTime.setMinutes(extendableStartTime.getMinutes() - 15);
+
+        // if (currentTime < extendableStartTime || currentTime > schedule.endDate) {
+        //     return {
+        //         isAllowed: false,
+        //         reason: '일정 종료 15분 전부터 종료시간까지만 연장할 수 있습니다.',
+        //         reasonCode: 'INVALID_EXTEND_TIME',
+        //     };
+        // }
+
+        // 4. 30분 연장 시 충돌하는 예약이 있는지 확인
+        const extendedEndTime = new Date(schedule.endDate);
+        extendedEndTime.setMinutes(extendedEndTime.getMinutes() + 30);
+
+        try {
+            const isAvailable = await this.domainReservationService.checkReservationConflicts(
+                reservation.resourceId,
+                schedule.endDate,
+                extendedEndTime,
+                reservation.reservationId,
+            );
+
+            if (!isAvailable) {
+                return {
+                    isAllowed: false,
+                    reason: '연장하려는 시간에 다른 예약이 있습니다.',
+                    reasonCode: 'RESERVATION_CONFLICT',
+                };
+            }
+        } catch (error) {
+            return {
+                isAllowed: false,
+                reason: '예약 충돌 확인 중 오류가 발생했습니다.',
+                reasonCode: 'CONFLICT_CHECK_ERROR',
+            };
+        }
+
+        return {
+            isAllowed: true,
+            reason: '일정 연장이 가능합니다.',
+        };
+    }
+
     정책_체크_실패시_예외를_던진다(policyResult: PolicyResult): void {
         if (!policyResult.isAllowed) {
             throw new BadRequestException({

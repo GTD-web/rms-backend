@@ -59,6 +59,7 @@ export class DomainReservationService extends BaseService<Reservation> {
                 ...(reservationId && { reservationId: Not(reservationId) }),
             },
         });
+
         return conflicts.length === 0;
     }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
-import { ScheduleType } from '@libs/enums/schedule-type.enum';
+import { ScheduleStatus, ScheduleType } from '@libs/enums/schedule-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-type.enum';
 import { VehicleInfoResponseDto } from '@src/business/resource-management/dtos/vehicle/vehicle-response.dto';
@@ -260,6 +260,13 @@ export class ScheduleDetailResponseDto {
         example: ScheduleType.COMPANY,
     })
     scheduleType: ScheduleType;
+
+    @ApiProperty({
+        description: '일정 상태',
+        enum: ScheduleStatus,
+        example: ScheduleStatus.PROCESSING,
+    })
+    status: ScheduleStatus;
 
     @ApiProperty({
         description: '시작 전 알림 여부',

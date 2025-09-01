@@ -185,24 +185,41 @@ export class ScheduleController {
     }
 
     /**
-     * 일정 연장
-     * 일정의 종료 시간을 연장합니다.
+     * 일정 연장 가능 여부 확인
+     * 자원예약이 포함된 일정의 30분 연장 가능 여부를 확인합니다.
      */
     @ApiOperation({
-        summary: '일정 연장',
-        description: '일정의 종료 시간을 연장합니다.',
+        summary: '일정 연장 가능 여부 확인',
+        description:
+            '자원예약이 포함된 일정의 30분 연장 가능 여부를 확인합니다. 일정 종료 15분 전부터 확인 가능합니다.',
     })
     @ApiOkResponse({
-        description: '일정 연장 성공',
+        description: '일정 연장 가능 여부',
+        type: Boolean,
+    })
+    @Get(':scheduleId/check/extendable')
+    async checkScheduleExtendable(@User() user: Employee, @Param('scheduleId') scheduleId: string): Promise<boolean> {
+        return this.scheduleManagementService.checkScheduleExtendable(user, scheduleId);
+    }
+
+    /**
+     * 일정 30분 연장
+     * 자원예약이 포함된 일정을 30분 연장합니다.
+     */
+    @ApiOperation({
+        summary: '일정 30분 연장',
+        description: '자원예약이 포함된 일정을 현재 종료시간에서 30분 연장합니다.',
+    })
+    @ApiOkResponse({
+        description: '일정 30분 연장 성공',
         type: ScheduleExtendResponseDto,
     })
     @Patch(':scheduleId/extend')
-    async extendSchedule(
+    async extendSchedule30Min(
         @User() user: Employee,
         @Param('scheduleId') scheduleId: string,
-        @Body() extendScheduleDto: ScheduleExtendRequestDto,
     ): Promise<ScheduleExtendResponseDto> {
-        return this.scheduleManagementService.extendSchedule(user, scheduleId, extendScheduleDto);
+        return this.scheduleManagementService.extendSchedule30Min(user, scheduleId);
     }
 
     /**

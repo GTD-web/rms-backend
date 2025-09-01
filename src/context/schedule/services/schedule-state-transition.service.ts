@@ -217,14 +217,7 @@ export class ScheduleStateTransitionService {
                 });
             }
 
-            const extendInfo = `[${DateUtil.format(DateUtil.now().toDate(), 'YYYY-MM-DD HH:mm')}] 일정이 ${DateUtil.format(originalEndDate, 'HH:mm')}에서 ${DateUtil.format(newEndDate, 'HH:mm')}로 연장되었습니다.${extendReason ? ` 사유: ${extendReason}` : ''}`;
-            const updatedDescription = schedule.description ? `${schedule.description}\n\n${extendInfo}` : extendInfo;
-
-            await this.domainScheduleService.update(
-                schedule.scheduleId,
-                { endDate: newEndDate, description: updatedDescription },
-                { queryRunner },
-            );
+            await this.domainScheduleService.update(schedule.scheduleId, { endDate: newEndDate }, { queryRunner });
 
             if (shouldManageTransaction) {
                 await queryRunner.commitTransaction();

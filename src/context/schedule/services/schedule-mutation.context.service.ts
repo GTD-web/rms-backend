@@ -42,7 +42,7 @@ export class ScheduleMutationContextService {
             notifyBeforeStart: scheduleData.notifyBeforeStart || false,
             notifyMinutesBeforeStart: scheduleData.notifyMinutesBeforeStart || [],
             scheduleType: scheduleData.scheduleType,
-            status: ScheduleStatus.PENDING, // 기본 상태 설정
+            status: scheduleData.startDate < new Date() ? ScheduleStatus.PROCESSING : ScheduleStatus.PENDING, // 기본 상태 설정
         };
 
         // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
