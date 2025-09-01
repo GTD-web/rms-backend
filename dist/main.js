@@ -3842,6 +3842,7 @@ const schedule_management_module_1 = __webpack_require__(/*! ./business/schedule
 const employee_management_module_1 = __webpack_require__(/*! ./business/employee-management/employee-management.module */ "./src/business/employee-management/employee-management.module.ts");
 const task_management_module_1 = __webpack_require__(/*! ./business/task-management/task-management.module */ "./src/business/task-management/task-management.module.ts");
 const notification_management_module_1 = __webpack_require__(/*! ./business/notification-management/notification-management.module */ "./src/business/notification-management/notification-management.module.ts");
+const statistics_module_1 = __webpack_require__(/*! ./business/statistics/statistics.module */ "./src/business/statistics/statistics.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -3871,6 +3872,7 @@ exports.AppModule = AppModule = __decorate([
             employee_management_module_1.EmployeeManagementModule,
             task_management_module_1.TaskManagementModule,
             notification_management_module_1.NotificationManagementModule,
+            statistics_module_1.StatisticsModule,
         ],
         providers: [],
     })
@@ -29427,6 +29429,929 @@ exports.ScheduleManagementService = ScheduleManagementService = ScheduleManageme
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _c : Object, typeof (_d = typeof project_context_service_1.ProjectContextService !== "undefined" && project_context_service_1.ProjectContextService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _e : Object, typeof (_f = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _f : Object, typeof (_g = typeof employee_context_service_1.EmployeeContextService !== "undefined" && employee_context_service_1.EmployeeContextService) === "function" ? _g : Object, typeof (_h = typeof schedule_notification_context_service_1.ScheduleNotificationContextService !== "undefined" && schedule_notification_context_service_1.ScheduleNotificationContextService) === "function" ? _h : Object, typeof (_j = typeof schedule_authorization_service_1.ScheduleAuthorizationService !== "undefined" && schedule_authorization_service_1.ScheduleAuthorizationService) === "function" ? _j : Object, typeof (_k = typeof schedule_policy_service_1.SchedulePolicyService !== "undefined" && schedule_policy_service_1.SchedulePolicyService) === "function" ? _k : Object, typeof (_l = typeof schedule_query_context_service_1.ScheduleQueryContextService !== "undefined" && schedule_query_context_service_1.ScheduleQueryContextService) === "function" ? _l : Object, typeof (_m = typeof schedule_mutation_context_service_1.ScheduleMutationContextService !== "undefined" && schedule_mutation_context_service_1.ScheduleMutationContextService) === "function" ? _m : Object, typeof (_o = typeof schedule_state_transition_service_1.ScheduleStateTransitionService !== "undefined" && schedule_state_transition_service_1.ScheduleStateTransitionService) === "function" ? _o : Object, typeof (_p = typeof schedule_post_processing_service_1.SchedulePostProcessingService !== "undefined" && schedule_post_processing_service_1.SchedulePostProcessingService) === "function" ? _p : Object])
 ], ScheduleManagementService);
+
+
+/***/ }),
+
+/***/ "./src/business/statistics/dtos/base.dto.ts":
+/*!**************************************************!*\
+  !*** ./src/business/statistics/dtos/base.dto.ts ***!
+  \**************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StatisticsResponseDto = exports.YearMonthFilterDto = exports.DateRangeFilterDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+class DateRangeFilterDto {
+}
+exports.DateRangeFilterDto = DateRangeFilterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '시작 날짜' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DateRangeFilterDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '종료 날짜' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DateRangeFilterDto.prototype, "endDate", void 0);
+class YearMonthFilterDto {
+}
+exports.YearMonthFilterDto = YearMonthFilterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '연도' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], YearMonthFilterDto.prototype, "year", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '월' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], YearMonthFilterDto.prototype, "month", void 0);
+class StatisticsResponseDto {
+}
+exports.StatisticsResponseDto = StatisticsResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직원 예약 통계', type: 'array' }),
+    __metadata("design:type", Array)
+], StatisticsResponseDto.prototype, "employeeReservationStats", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '자원 사용 통계', type: 'array' }),
+    __metadata("design:type", Array)
+], StatisticsResponseDto.prototype, "resourceUsageStats", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '차량 정비 이력', type: 'array' }),
+    __metadata("design:type", Array)
+], StatisticsResponseDto.prototype, "vehicleMaintenanceHistory", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 정비 통계', type: 'array' }),
+    __metadata("design:type", Array)
+], StatisticsResponseDto.prototype, "consumableMaintenanceStats", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/statistics/dtos/consumable-maintenance-stats.dto.ts":
+/*!**************************************************************************!*\
+  !*** ./src/business/statistics/dtos/consumable-maintenance-stats.dto.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const base_dto_1 = __webpack_require__(/*! ./base.dto */ "./src/business/statistics/dtos/base.dto.ts");
+class ConsumableMaintenanceStatsFilterDto extends base_dto_1.YearMonthFilterDto {
+}
+exports.ConsumableMaintenanceStatsFilterDto = ConsumableMaintenanceStatsFilterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '자원 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsFilterDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '차량 정보 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsFilterDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '소모품 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsFilterDto.prototype, "consumableId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '최소 정비 횟수' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsFilterDto.prototype, "minMaintenanceCount", void 0);
+class ConsumableMaintenanceStatsResponseDto {
+}
+exports.ConsumableMaintenanceStatsResponseDto = ConsumableMaintenanceStatsResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '자원 ID' }),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '자원 이름' }),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsResponseDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '자원 유형' }),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsResponseDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '차량 정보 ID' }),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsResponseDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '차량 번호' }),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsResponseDto.prototype, "vehicleNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 ID' }),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsResponseDto.prototype, "consumableId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
+    __metadata("design:type", String)
+], ConsumableMaintenanceStatsResponseDto.prototype, "consumableName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '교체 주기' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "replaceCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '교체 주기 알림 여부' }),
+    __metadata("design:type", Boolean)
+], ConsumableMaintenanceStatsResponseDto.prototype, "notifyReplacementCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '정비 횟수' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "maintenanceCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '첫 정비 날짜' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], ConsumableMaintenanceStatsResponseDto.prototype, "firstMaintenanceDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '마지막 정비 날짜' }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], ConsumableMaintenanceStatsResponseDto.prototype, "lastMaintenanceDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '총 비용' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "totalCost", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '평균 비용' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "averageCost", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '최소 주행 거리' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "minMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '최대 주행 거리' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "maxMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '평균 주행 거리' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "averageMileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '정비 간 평균 일수' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "averageDaysBetweenMaintenances", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '현재 연도' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "currentYear", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '현재 월' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "currentMonth", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '최근 3개월 정비 횟수' }),
+    __metadata("design:type", Number)
+], ConsumableMaintenanceStatsResponseDto.prototype, "recentMaintenanceCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '통계 계산 시점' }),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], ConsumableMaintenanceStatsResponseDto.prototype, "computedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/statistics/dtos/employee-reservation-stats.dto.ts":
+/*!************************************************************************!*\
+  !*** ./src/business/statistics/dtos/employee-reservation-stats.dto.ts ***!
+  \************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const base_dto_1 = __webpack_require__(/*! ./base.dto */ "./src/business/statistics/dtos/base.dto.ts");
+class EmployeeReservationStatsFilterDto extends base_dto_1.YearMonthFilterDto {
+}
+exports.EmployeeReservationStatsFilterDto = EmployeeReservationStatsFilterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '직원 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EmployeeReservationStatsFilterDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '직원 이름' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EmployeeReservationStatsFilterDto.prototype, "employeeName", void 0);
+class EmployeeReservationStatsResponseDto {
+}
+exports.EmployeeReservationStatsResponseDto = EmployeeReservationStatsResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '연도' }),
+    __metadata("design:type", Number)
+], EmployeeReservationStatsResponseDto.prototype, "year", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '월' }),
+    __metadata("design:type", Number)
+], EmployeeReservationStatsResponseDto.prototype, "month", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '연월 (YYYY-MM)' }),
+    __metadata("design:type", String)
+], EmployeeReservationStatsResponseDto.prototype, "yearMonth", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직원 ID' }),
+    __metadata("design:type", String)
+], EmployeeReservationStatsResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직원 이름' }),
+    __metadata("design:type", String)
+], EmployeeReservationStatsResponseDto.prototype, "employeeName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '총 예약 횟수' }),
+    __metadata("design:type", Number)
+], EmployeeReservationStatsResponseDto.prototype, "reservationCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '총 이용 시간 (시간)' }),
+    __metadata("design:type", Number)
+], EmployeeReservationStatsResponseDto.prototype, "totalHours", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '예약당 평균 이용 시간 (시간)' }),
+    __metadata("design:type", Number)
+], EmployeeReservationStatsResponseDto.prototype, "avgHoursPerReservation", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '차량 예약 횟수' }),
+    __metadata("design:type", Number)
+], EmployeeReservationStatsResponseDto.prototype, "vehicleCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '회의실 예약 횟수' }),
+    __metadata("design:type", Number)
+], EmployeeReservationStatsResponseDto.prototype, "meetingRoomCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '숙소 예약 횟수' }),
+    __metadata("design:type", Number)
+], EmployeeReservationStatsResponseDto.prototype, "accommodationCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '취소 횟수' }),
+    __metadata("design:type", Number)
+], EmployeeReservationStatsResponseDto.prototype, "cancellationCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '통계 계산 시점' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], EmployeeReservationStatsResponseDto.prototype, "computedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/statistics/dtos/index.ts":
+/*!***********************************************!*\
+  !*** ./src/business/statistics/dtos/index.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = void 0;
+var employee_reservation_stats_dto_1 = __webpack_require__(/*! ./employee-reservation-stats.dto */ "./src/business/statistics/dtos/employee-reservation-stats.dto.ts");
+Object.defineProperty(exports, "EmployeeReservationStatsFilterDto", ({ enumerable: true, get: function () { return employee_reservation_stats_dto_1.EmployeeReservationStatsFilterDto; } }));
+Object.defineProperty(exports, "EmployeeReservationStatsResponseDto", ({ enumerable: true, get: function () { return employee_reservation_stats_dto_1.EmployeeReservationStatsResponseDto; } }));
+var resource_usage_stats_dto_1 = __webpack_require__(/*! ./resource-usage-stats.dto */ "./src/business/statistics/dtos/resource-usage-stats.dto.ts");
+Object.defineProperty(exports, "ResourceUsageStatsFilterDto", ({ enumerable: true, get: function () { return resource_usage_stats_dto_1.ResourceUsageStatsFilterDto; } }));
+Object.defineProperty(exports, "ResourceUsageStatsResponseDto", ({ enumerable: true, get: function () { return resource_usage_stats_dto_1.ResourceUsageStatsResponseDto; } }));
+var vehicle_maintenance_history_dto_1 = __webpack_require__(/*! ./vehicle-maintenance-history.dto */ "./src/business/statistics/dtos/vehicle-maintenance-history.dto.ts");
+Object.defineProperty(exports, "VehicleMaintenanceHistoryFilterDto", ({ enumerable: true, get: function () { return vehicle_maintenance_history_dto_1.VehicleMaintenanceHistoryFilterDto; } }));
+Object.defineProperty(exports, "VehicleMaintenanceHistoryResponseDto", ({ enumerable: true, get: function () { return vehicle_maintenance_history_dto_1.VehicleMaintenanceHistoryResponseDto; } }));
+var consumable_maintenance_stats_dto_1 = __webpack_require__(/*! ./consumable-maintenance-stats.dto */ "./src/business/statistics/dtos/consumable-maintenance-stats.dto.ts");
+Object.defineProperty(exports, "ConsumableMaintenanceStatsFilterDto", ({ enumerable: true, get: function () { return consumable_maintenance_stats_dto_1.ConsumableMaintenanceStatsFilterDto; } }));
+Object.defineProperty(exports, "ConsumableMaintenanceStatsResponseDto", ({ enumerable: true, get: function () { return consumable_maintenance_stats_dto_1.ConsumableMaintenanceStatsResponseDto; } }));
+__exportStar(__webpack_require__(/*! ./base.dto */ "./src/business/statistics/dtos/base.dto.ts"), exports);
+
+
+/***/ }),
+
+/***/ "./src/business/statistics/dtos/resource-usage-stats.dto.ts":
+/*!******************************************************************!*\
+  !*** ./src/business/statistics/dtos/resource-usage-stats.dto.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const base_dto_1 = __webpack_require__(/*! ./base.dto */ "./src/business/statistics/dtos/base.dto.ts");
+class ResourceUsageStatsFilterDto extends base_dto_1.YearMonthFilterDto {
+}
+exports.ResourceUsageStatsFilterDto = ResourceUsageStatsFilterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '자원 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceUsageStatsFilterDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '직원 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceUsageStatsFilterDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '자원 유형' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceUsageStatsFilterDto.prototype, "resourceType", void 0);
+class ResourceUsageStatsResponseDto {
+}
+exports.ResourceUsageStatsResponseDto = ResourceUsageStatsResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '자원 ID' }),
+    __metadata("design:type", String)
+], ResourceUsageStatsResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '자원 이름' }),
+    __metadata("design:type", String)
+], ResourceUsageStatsResponseDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '자원 유형' }),
+    __metadata("design:type", String)
+], ResourceUsageStatsResponseDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직원 ID' }),
+    __metadata("design:type", String)
+], ResourceUsageStatsResponseDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직원 이름' }),
+    __metadata("design:type", String)
+], ResourceUsageStatsResponseDto.prototype, "employeeName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '연도' }),
+    __metadata("design:type", Number)
+], ResourceUsageStatsResponseDto.prototype, "year", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '월' }),
+    __metadata("design:type", Number)
+], ResourceUsageStatsResponseDto.prototype, "month", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '연월 (YYYY-MM)' }),
+    __metadata("design:type", String)
+], ResourceUsageStatsResponseDto.prototype, "yearMonth", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '예약 횟수' }),
+    __metadata("design:type", Number)
+], ResourceUsageStatsResponseDto.prototype, "reservationCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '총 이용 시간 (시간)' }),
+    __metadata("design:type", Number)
+], ResourceUsageStatsResponseDto.prototype, "totalHours", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '예약 횟수 순위' }),
+    __metadata("design:type", Number)
+], ResourceUsageStatsResponseDto.prototype, "countRank", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '이용 시간 순위' }),
+    __metadata("design:type", Number)
+], ResourceUsageStatsResponseDto.prototype, "hoursRank", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '통계 계산 시점' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], ResourceUsageStatsResponseDto.prototype, "computedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/statistics/dtos/vehicle-maintenance-history.dto.ts":
+/*!*************************************************************************!*\
+  !*** ./src/business/statistics/dtos/vehicle-maintenance-history.dto.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const base_dto_1 = __webpack_require__(/*! ./base.dto */ "./src/business/statistics/dtos/base.dto.ts");
+class VehicleMaintenanceHistoryFilterDto extends base_dto_1.DateRangeFilterDto {
+}
+exports.VehicleMaintenanceHistoryFilterDto = VehicleMaintenanceHistoryFilterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '자원 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryFilterDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '차량 정보 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryFilterDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '소모품 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryFilterDto.prototype, "consumableId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: '담당자 ID' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryFilterDto.prototype, "responsibleEmployeeId", void 0);
+class VehicleMaintenanceHistoryResponseDto {
+}
+exports.VehicleMaintenanceHistoryResponseDto = VehicleMaintenanceHistoryResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '자원 ID' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '자원 이름' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '차량 정보 ID' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "vehicleInfoId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '차량 번호' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "vehicleNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 ID' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "consumableId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '소모품 이름' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "consumableName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '교체 주기' }),
+    __metadata("design:type", Number)
+], VehicleMaintenanceHistoryResponseDto.prototype, "replaceCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '교체 주기 알림 여부' }),
+    __metadata("design:type", Boolean)
+], VehicleMaintenanceHistoryResponseDto.prototype, "notifyReplacementCycle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '정비 ID' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "maintenanceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '정비 날짜' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "maintenanceDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '주행 거리' }),
+    __metadata("design:type", Number)
+], VehicleMaintenanceHistoryResponseDto.prototype, "mileage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '비용' }),
+    __metadata("design:type", Number)
+], VehicleMaintenanceHistoryResponseDto.prototype, "cost", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '정비 담당자 ID' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "maintananceBy", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '정비 이미지' }),
+    __metadata("design:type", Array)
+], VehicleMaintenanceHistoryResponseDto.prototype, "images", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '생성 시간' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], VehicleMaintenanceHistoryResponseDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '업데이트 시간' }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], VehicleMaintenanceHistoryResponseDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '담당 직원 ID' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "responsibleEmployeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '담당 직원 이름' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "responsibleEmployeeName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '직급' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "position", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '연도' }),
+    __metadata("design:type", Number)
+], VehicleMaintenanceHistoryResponseDto.prototype, "year", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '월' }),
+    __metadata("design:type", Number)
+], VehicleMaintenanceHistoryResponseDto.prototype, "month", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '날짜 문자열' }),
+    __metadata("design:type", String)
+], VehicleMaintenanceHistoryResponseDto.prototype, "dateStr", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/statistics/statistics.controller.ts":
+/*!**********************************************************!*\
+  !*** ./src/business/statistics/statistics.controller.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StatisticsController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const response_interceptor_1 = __webpack_require__(/*! @libs/interceptors/response.interceptor */ "./libs/interceptors/response.interceptor.ts");
+const error_interceptor_1 = __webpack_require__(/*! @libs/interceptors/error.interceptor */ "./libs/interceptors/error.interceptor.ts");
+const statistics_service_1 = __webpack_require__(/*! ./statistics.service */ "./src/business/statistics/statistics.service.ts");
+const dtos_1 = __webpack_require__(/*! ./dtos */ "./src/business/statistics/dtos/index.ts");
+let StatisticsController = class StatisticsController {
+    constructor(statisticsService) {
+        this.statisticsService = statisticsService;
+    }
+    async getVersion() {
+        return {
+            version: '1.0.0',
+            date: date_util_1.DateUtil.now().format(),
+        };
+    }
+    async getResourceUsageStats(filter) {
+        const stats = await this.statisticsService.getResourceUsageStats(filter);
+        return stats;
+    }
+    async getVehicleMaintenanceHistory(filter) {
+        const history = await this.statisticsService.getVehicleMaintenanceHistory(filter);
+        return history;
+    }
+    async getConsumableMaintenanceStats(filter) {
+        const stats = await this.statisticsService.getConsumableMaintenanceStats(filter);
+        return stats;
+    }
+    async getEmployeeReservationStats(filter) {
+        const stats = await this.statisticsService.getEmployeeReservationStats(filter);
+        return stats;
+    }
+    async getAllStatistics() {
+        const [employeeReservationStats, resourceUsageStats, vehicleMaintenanceHistory, consumableMaintenanceStats] = await Promise.all([
+            this.statisticsService.getEmployeeReservationStats({}),
+            this.statisticsService.getResourceUsageStats({}),
+            this.statisticsService.getVehicleMaintenanceHistory({}),
+            this.statisticsService.getConsumableMaintenanceStats({}),
+        ]);
+        return {
+            employeeReservationStats: employeeReservationStats,
+            resourceUsageStats: resourceUsageStats,
+            vehicleMaintenanceHistory: vehicleMaintenanceHistory,
+            consumableMaintenanceStats: consumableMaintenanceStats,
+        };
+    }
+};
+exports.StatisticsController = StatisticsController;
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('version'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], StatisticsController.prototype, "getVersion", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('resource-usage-stats'),
+    (0, swagger_1.ApiOkResponse)({
+        description: '자원 사용 통계 조회 성공',
+        type: [dtos_1.ResourceUsageStatsResponseDto],
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof dtos_1.ResourceUsageStatsFilterDto !== "undefined" && dtos_1.ResourceUsageStatsFilterDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], StatisticsController.prototype, "getResourceUsageStats", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('vehicle-maintenance-history'),
+    (0, swagger_1.ApiOkResponse)({
+        description: '차량 정비 이력 조회 성공',
+        type: [dtos_1.VehicleMaintenanceHistoryResponseDto],
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof dtos_1.VehicleMaintenanceHistoryFilterDto !== "undefined" && dtos_1.VehicleMaintenanceHistoryFilterDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], StatisticsController.prototype, "getVehicleMaintenanceHistory", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('consumable-maintenance-stats'),
+    (0, swagger_1.ApiOkResponse)({
+        description: '소모품 정비 통계 조회 성공',
+        type: [dtos_1.ConsumableMaintenanceStatsResponseDto],
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_g = typeof dtos_1.ConsumableMaintenanceStatsFilterDto !== "undefined" && dtos_1.ConsumableMaintenanceStatsFilterDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], StatisticsController.prototype, "getConsumableMaintenanceStats", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('employee-reservation-stats'),
+    (0, swagger_1.ApiOkResponse)({
+        description: '직원 예약 통계 조회 성공',
+        type: [dtos_1.EmployeeReservationStatsResponseDto],
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_j = typeof dtos_1.EmployeeReservationStatsFilterDto !== "undefined" && dtos_1.EmployeeReservationStatsFilterDto) === "function" ? _j : Object]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+], StatisticsController.prototype, "getEmployeeReservationStats", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('statistics'),
+    (0, swagger_1.ApiOkResponse)({
+        description: '모든 통계 데이터 조회 성공',
+        type: dtos_1.StatisticsResponseDto,
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+], StatisticsController.prototype, "getAllStatistics", null);
+exports.StatisticsController = StatisticsController = __decorate([
+    (0, swagger_1.ApiTags)('v2 통계'),
+    (0, common_1.Controller)('v2/statistics'),
+    (0, common_1.UseInterceptors)(response_interceptor_1.ResponseInterceptor, error_interceptor_1.ErrorInterceptor),
+    __metadata("design:paramtypes", [typeof (_a = typeof statistics_service_1.StatisticsService !== "undefined" && statistics_service_1.StatisticsService) === "function" ? _a : Object])
+], StatisticsController);
+
+
+/***/ }),
+
+/***/ "./src/business/statistics/statistics.module.ts":
+/*!******************************************************!*\
+  !*** ./src/business/statistics/statistics.module.ts ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StatisticsModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const statistics_controller_1 = __webpack_require__(/*! ./statistics.controller */ "./src/business/statistics/statistics.controller.ts");
+const statistics_service_1 = __webpack_require__(/*! ./statistics.service */ "./src/business/statistics/statistics.service.ts");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+let StatisticsModule = class StatisticsModule {
+};
+exports.StatisticsModule = StatisticsModule;
+exports.StatisticsModule = StatisticsModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([
+                entities_1.EmployeeReservationStats,
+                entities_1.ResourceUsageStats,
+                entities_1.VehicleMaintenanceHistory,
+                entities_1.ConsumableMaintenanceStats,
+            ]),
+        ],
+        controllers: [statistics_controller_1.StatisticsController],
+        providers: [statistics_service_1.StatisticsService],
+    })
+], StatisticsModule);
+
+
+/***/ }),
+
+/***/ "./src/business/statistics/statistics.service.ts":
+/*!*******************************************************!*\
+  !*** ./src/business/statistics/statistics.service.ts ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StatisticsService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
+const typeorm_2 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+let StatisticsService = class StatisticsService {
+    constructor(resourceUsageStatsRepository, vehicleMaintenanceHistoryRepository, consumableMaintenanceStatsRepository, employeeReservationStatsRepository) {
+        this.resourceUsageStatsRepository = resourceUsageStatsRepository;
+        this.vehicleMaintenanceHistoryRepository = vehicleMaintenanceHistoryRepository;
+        this.consumableMaintenanceStatsRepository = consumableMaintenanceStatsRepository;
+        this.employeeReservationStatsRepository = employeeReservationStatsRepository;
+    }
+    async getResourceUsageStats(filter) {
+        const where = {};
+        if (filter?.year) {
+            where.year = filter.year;
+        }
+        if (filter?.month) {
+            where.month = filter.month;
+        }
+        if (filter?.resourceId) {
+            where.resourceId = filter.resourceId;
+        }
+        if (filter?.employeeId) {
+            where.employeeId = filter.employeeId;
+        }
+        if (filter?.resourceType) {
+            where.resourceType = filter.resourceType;
+        }
+        return this.resourceUsageStatsRepository.find({ where });
+    }
+    async getVehicleMaintenanceHistory(filter) {
+        const where = {};
+        if (filter?.startDate && filter?.endDate) {
+            where.maintenanceDate = (0, typeorm_1.Between)(filter.startDate, filter.endDate);
+        }
+        else if (filter?.startDate) {
+            where.maintenanceDate = (0, typeorm_1.Between)(filter.startDate, new Date().toISOString());
+        }
+        if (filter?.resourceId) {
+            where.resourceId = filter.resourceId;
+        }
+        if (filter?.vehicleInfoId) {
+            where.vehicleInfoId = filter.vehicleInfoId;
+        }
+        if (filter?.consumableId) {
+            where.consumableId = filter.consumableId;
+        }
+        if (filter?.responsibleEmployeeId) {
+            where.responsibleEmployeeId = filter.responsibleEmployeeId;
+        }
+        return this.vehicleMaintenanceHistoryRepository.find({ where });
+    }
+    async getConsumableMaintenanceStats(filter) {
+        const where = {};
+        if (filter?.year) {
+            where.currentYear = filter.year;
+        }
+        if (filter?.month) {
+            where.currentMonth = filter.month;
+        }
+        if (filter?.resourceId) {
+            where.resourceId = filter.resourceId;
+        }
+        if (filter?.vehicleInfoId) {
+            where.vehicleInfoId = filter.vehicleInfoId;
+        }
+        if (filter?.consumableId) {
+            where.consumableId = filter.consumableId;
+        }
+        if (filter?.minMaintenanceCount) {
+            where.maintenanceCount = (0, typeorm_1.MoreThanOrEqual)(filter.minMaintenanceCount);
+        }
+        return this.consumableMaintenanceStatsRepository.find({ where });
+    }
+    async getEmployeeReservationStats(filter) {
+        const where = {};
+        if (filter?.year) {
+            where.year = filter.year;
+        }
+        if (filter?.month) {
+            where.month = filter.month;
+        }
+        if (filter?.employeeId) {
+            where.employeeId = filter.employeeId;
+        }
+        if (filter?.employeeName) {
+            where.employeeName = (0, typeorm_1.Like)(`%${filter.employeeName}%`);
+        }
+        return this.employeeReservationStatsRepository.find({ where });
+    }
+};
+exports.StatisticsService = StatisticsService;
+exports.StatisticsService = StatisticsService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_2.InjectRepository)(entities_1.ResourceUsageStats)),
+    __param(1, (0, typeorm_2.InjectRepository)(entities_1.VehicleMaintenanceHistory)),
+    __param(2, (0, typeorm_2.InjectRepository)(entities_1.ConsumableMaintenanceStats)),
+    __param(3, (0, typeorm_2.InjectRepository)(entities_1.EmployeeReservationStats)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.Repository !== "undefined" && typeorm_1.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_1.Repository !== "undefined" && typeorm_1.Repository) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.Repository !== "undefined" && typeorm_1.Repository) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.Repository !== "undefined" && typeorm_1.Repository) === "function" ? _d : Object])
+], StatisticsService);
 
 
 /***/ }),

@@ -25,6 +25,7 @@ import { ScheduleManagementModule } from './business/schedule-management/schedul
 import { EmployeeManagementModule } from './business/employee-management/employee-management.module';
 import { TaskManagementModule } from './business/task-management/task-management.module';
 import { NotificationManagementModule } from './business/notification-management/notification-management.module';
+import { StatisticsModule } from './business/statistics/statistics.module';
 
 @Module({
     imports: [
@@ -57,6 +58,7 @@ import { NotificationManagementModule } from './business/notification-management
         EmployeeManagementModule,
         TaskManagementModule,
         NotificationManagementModule,
+        StatisticsModule,
     ],
     providers: [
         // ApiDocService, DbDocService
