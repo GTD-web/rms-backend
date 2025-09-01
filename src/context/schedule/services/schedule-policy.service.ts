@@ -89,7 +89,7 @@ export class SchedulePolicyService {
         const now = DateUtil.now().toDate();
 
         // 1. 시간 정책 체크 - 일정이 시작되어야 완료 가능
-        if (schedule.startDate > now) {
+        if (schedule.startDate > now || schedule.status === ScheduleStatus.PENDING) {
             return {
                 isAllowed: false,
                 reason: '아직 시작되지 않은 일정은 완료할 수 없습니다.',

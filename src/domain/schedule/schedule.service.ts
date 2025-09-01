@@ -74,7 +74,7 @@ export class DomainScheduleService extends BaseService<Schedule> {
         return this.scheduleRepository.findAll({
             where: {
                 status: ScheduleStatus.PENDING,
-                startDate: MoreThanOrEqual(now),
+                startDate: LessThanOrEqual(now),
             },
         });
     }
@@ -84,7 +84,7 @@ export class DomainScheduleService extends BaseService<Schedule> {
         return this.scheduleRepository.findAll({
             where: {
                 status: ScheduleStatus.PROCESSING,
-                endDate: MoreThanOrEqual(now),
+                endDate: LessThanOrEqual(now),
             },
         });
     }

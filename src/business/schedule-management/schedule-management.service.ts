@@ -610,7 +610,7 @@ export class ScheduleManagementService {
         user: Employee,
         scheduleId: string,
         completeDto?: ScheduleCompleteRequestDto,
-    ): Promise<ScheduleCompleteResponseDto> {
+    ): Promise<boolean> {
         this.logger.log(`일정 완료 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
 
         // 1. 권한: 요청자/역할 확인
@@ -637,26 +637,11 @@ export class ScheduleManagementService {
         const completeResult = await this.scheduleStateTransitionService.일정을_완료한다(
             schedule,
             reservation,
-            completeDto.completionNotes,
+            // completeDto.completionNotes,
         );
 
-        // 5. 후처리: 알림/감사/도메인이벤트
-        // await this.schedulePostProcessingService.일정_완료_후처리(user, completeResult);
-
         // 6. 응답 DTO 변환
-        return {
-            scheduleId: completeResult.schedule.scheduleId,
-            title: completeResult.schedule.title,
-            status: 'COMPLETED',
-            completedAt: completeResult.completedAt,
-            completionNotes: completeDto.completionNotes,
-            reservation: completeResult.reservation
-                ? {
-                      reservationId: completeResult.reservation.reservationId,
-                      status: completeResult.reservation.status,
-                  }
-                : undefined,
-        };
+        return completeResult;
     }
 
     /**

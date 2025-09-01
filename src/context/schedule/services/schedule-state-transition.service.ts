@@ -91,7 +91,7 @@ export class ScheduleStateTransitionService {
         reservation: Reservation | undefined,
         completionNotes?: string,
         queryRunner?: QueryRunner,
-    ): Promise<ScheduleCompleteResult> {
+    ): Promise<boolean> {
         const shouldManageTransaction = !queryRunner;
         if (shouldManageTransaction) {
             queryRunner = this.dataSource.createQueryRunner();
@@ -100,9 +100,42 @@ export class ScheduleStateTransitionService {
         }
 
         try {
-            const completedAt = DateUtil.now().toDate();
+            const completedAt = new Date();
 
-            if (reservation) {
+            // 현재 시간을 30분 단위로 올림하여 새로운 종료시간 계산
+            const newEndTime = new Date(completedAt);
+            const minutes = newEndTime.getMinutes();
+
+            if (minutes === 0) {
+                // 정각이면 그대로 유지
+                newEndTime.setSeconds(0, 0);
+            } else if (minutes <= 30) {
+                // 1~30분이면 30분으로 설정
+                newEndTime.setMinutes(30, 0, 0);
+            } else {
+                // 31~59분이면 다음 시간 0분으로 설정
+                newEndTime.setHours(newEndTime.getHours() + 1, 0, 0, 0);
+            }
+
+            // 기존 종료시간보다 이른 경우에만 종료시간 수정
+            const shouldUpdateEndTime = newEndTime < schedule.endDate;
+            const actualEndTime = shouldUpdateEndTime ? newEndTime : schedule.endDate;
+
+            if (reservation && shouldUpdateEndTime) {
+                // 예약의 종료시간도 함께 수정
+                await this.domainReservationService.update(
+                    reservation.reservationId,
+                    {
+                        status: ReservationStatus.CLOSED,
+                        endDate: actualEndTime,
+                    },
+                    { queryRunner },
+                );
+
+                reservation = await this.domainReservationService.findOne({
+                    where: { reservationId: reservation.reservationId },
+                });
+            } else if (reservation) {
                 await this.domainReservationService.update(
                     reservation.reservationId,
                     { status: ReservationStatus.CLOSED },
@@ -114,17 +147,23 @@ export class ScheduleStateTransitionService {
                 });
             }
 
-            const completionInfo = `[${DateUtil.format(completedAt, 'YYYY-MM-DD HH:mm')}] 일정이 완료되었습니다.${completionNotes ? ` 완료 메모: ${completionNotes}` : ''}`;
-            const updatedDescription = schedule.description
-                ? `${schedule.description}\n\n${completionInfo}`
-                : completionInfo;
+            // // 날짜 포맷팅 헬퍼 함수 (YYYY-MM-DD HH:mm 형식)
+            // const formatDateTime = (date: Date) => {
+            //     return date.toISOString().slice(0, 16).replace('T', ' ');
+            // };
+
+            // const completionInfo = `[${formatDateTime(completedAt)}] 일정이 완료되었습니다.${completionNotes ? ` 완료 메모: ${completionNotes}` : ''}${shouldUpdateEndTime ? `\n원래 종료시간: ${formatDateTime(schedule.endDate)}, 수정된 종료시간: ${formatDateTime(actualEndTime)}` : ''}`;
+            // const updatedDescription = schedule.description
+            //     ? `${schedule.description}\n\n${completionInfo}`
+            //     : completionInfo;
 
             await this.domainScheduleService.update(
                 schedule.scheduleId,
                 {
                     status: ScheduleStatus.COMPLETED,
-                    description: updatedDescription,
-                    completionReason: completionNotes,
+                    // description: updatedDescription,
+                    // completionReason: completionNotes,
+                    // ...(shouldUpdateEndTime && { endDate: actualEndTime }),
                 },
                 { queryRunner },
             );
@@ -136,13 +175,12 @@ export class ScheduleStateTransitionService {
             const updatedSchedule = await this.domainScheduleService.findOne({
                 where: { scheduleId: schedule.scheduleId },
             });
-
-            return { schedule: updatedSchedule!, reservation, completedAt };
+            return true;
         } catch (error) {
             if (shouldManageTransaction) {
                 await queryRunner.rollbackTransaction();
             }
-            throw error;
+            return false;
         } finally {
             if (shouldManageTransaction) {
                 await queryRunner.release();

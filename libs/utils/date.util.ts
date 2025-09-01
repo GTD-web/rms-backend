@@ -118,6 +118,26 @@ export class DateUtil {
     }
 
     /**
+     * 주어진 시간을 30분 단위로 올림합니다.
+     * 예: 11:05 → 11:30, 11:35 → 12:00, 11:00 → 11:00
+     */
+    static ceilTo30Minutes(date: Date | string | number = new Date()) {
+        const d = this.date(date);
+        const minutes = d.toDate().getMinutes();
+
+        if (minutes === 0) {
+            // 정각이면 그대로 반환
+            return d.second(0);
+        } else if (minutes <= 30) {
+            // 1~30분이면 30분으로 설정
+            return d.minute(30).second(0);
+        } else {
+            // 31~59분이면 다음 시간 0분으로 설정
+            return d.addMinutes(60 - minutes).second(0);
+        }
+    }
+
+    /**
      * 주어진 날짜의 연도를 가져옵니다.
      */
     static getYear(date: Date | string | number = new Date()) {

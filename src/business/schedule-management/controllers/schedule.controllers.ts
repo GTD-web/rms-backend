@@ -173,14 +173,14 @@ export class ScheduleController {
     })
     @ApiOkResponse({
         description: '일정 완료 성공',
-        type: ScheduleCompleteResponseDto,
+        type: Boolean,
     })
     @Patch(':scheduleId/complete')
     async completeSchedule(
         @User() user: Employee,
         @Param('scheduleId') scheduleId: string,
         // @Body() completeScheduleDto: ScheduleCompleteRequestDto,
-    ): Promise<ScheduleCompleteResponseDto> {
+    ): Promise<boolean> {
         return this.scheduleManagementService.completeSchedule(user, scheduleId);
     }
 

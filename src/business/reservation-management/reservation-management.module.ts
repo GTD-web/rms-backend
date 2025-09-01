@@ -5,11 +5,13 @@ import { ReservationContextModule } from '@src/context/reservation/reservation.c
 import { ReservationService } from './services/reservation.service';
 import { CronReservationService } from './services/cron-reservation.service';
 import { NotificationContextModule } from '@src/context/notification/notification.context.module';
+import { ScheduleContextModule } from '@src/context/schedule/schedule.context.module';
 
 @Module({
     imports: [
         ReservationContextModule, // Context 레이어의 서비스들을 사용하기 위해 import
         NotificationContextModule,
+        ScheduleContextModule,
     ],
     controllers: [ReservationController, CronReservationController],
     providers: [ReservationService, CronReservationService],
