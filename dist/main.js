@@ -20738,6 +20738,37 @@ __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/rese
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservation-response.dto */ "./src/business/reservation-management/dtos/reservation-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/return-vehicle-response.dto */ "./src/business/reservation-management/dtos/return-vehicle-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/update-reservation.dto */ "./src/business/reservation-management/dtos/update-reservation.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-create-request.dto */ "./src/business/schedule-management/dtos/schedule-create-request.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-update-request.dto */ "./src/business/schedule-management/dtos/schedule-update-request.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-cancel-request.dto */ "./src/business/schedule-management/dtos/schedule-cancel-request.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-complete-request.dto */ "./src/business/schedule-management/dtos/schedule-complete-request.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-extend-request.dto */ "./src/business/schedule-management/dtos/schedule-extend-request.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-create-response.dto */ "./src/business/schedule-management/dtos/schedule-create-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-update-response.dto */ "./src/business/schedule-management/dtos/schedule-update-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-detail-response.dto */ "./src/business/schedule-management/dtos/schedule-detail-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-cancel-response.dto */ "./src/business/schedule-management/dtos/schedule-cancel-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-complete-response.dto */ "./src/business/schedule-management/dtos/schedule-complete-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-extend-response.dto */ "./src/business/schedule-management/dtos/schedule-extend-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/resource-schedule-response.dto */ "./src/business/schedule-management/dtos/resource-schedule-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-calendar-response.dto */ "./src/business/schedule-management/dtos/schedule-calendar-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/my-schedule-response.dto */ "./src/business/schedule-management/dtos/my-schedule-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/my-schedule-statistics-response.dto */ "./src/business/schedule-management/dtos/my-schedule-statistics-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-detail-query.dto */ "./src/business/schedule-management/dtos/schedule-detail-query.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedule-calendar-query.dto */ "./src/business/schedule-management/dtos/schedule-calendar-query.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/resource-schedule-query.dto */ "./src/business/schedule-management/dtos/resource-schedule-query.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/my-schedule-query.dto */ "./src/business/schedule-management/dtos/my-schedule-query.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/my-schedule-statistics-query.dto */ "./src/business/schedule-management/dtos/my-schedule-statistics-query.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/create-employee.dto */ "./src/business/employee-management/dtos/create-employee.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/update-employee.dto */ "./src/business/employee-management/dtos/update-employee.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/employee-response.dto */ "./src/business/employee-management/dtos/employee-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/user-response.dto */ "./src/business/employee-management/dtos/user-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/employees-by-department-response.dto */ "./src/business/employee-management/dtos/employees-by-department-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/mms-employee-response.dto */ "./src/business/employee-management/dtos/mms-employee-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/change-password.dto */ "./src/business/employee-management/dtos/change-password.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/check-password.dto */ "./src/business/employee-management/dtos/check-password.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/change-role.dto */ "./src/business/employee-management/dtos/change-role.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/notification-settings.dto */ "./src/business/employee-management/dtos/notification-settings.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/task-management/dtos/task-response.dto */ "./src/business/task-management/dtos/task-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/resource-management/dtos/accommodation/dtos/accommodation-info-response.dto */ "./src/business/resource-management/dtos/accommodation/dtos/accommodation-info-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/resource-management/dtos/accommodation/dtos/create-accommodation-info.dto */ "./src/business/resource-management/dtos/accommodation/dtos/create-accommodation-info.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/resource-management/dtos/accommodation/dtos/update-accommodation-info.dto */ "./src/business/resource-management/dtos/accommodation/dtos/update-accommodation-info.dto.ts"), exports);
@@ -21157,6 +21188,53 @@ __decorate([
 
 /***/ }),
 
+/***/ "./src/business/employee-management/dtos/create-employee.dto.ts":
+/*!**********************************************************************!*\
+  !*** ./src/business/employee-management/dtos/create-employee.dto.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateEmployeeDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateEmployeeDto {
+}
+exports.CreateEmployeeDto = CreateEmployeeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmployeeDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmployeeDto.prototype, "employeeNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmployeeDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmployeeDto.prototype, "position", void 0);
+
+
+/***/ }),
+
 /***/ "./src/business/employee-management/dtos/employee-response.dto.ts":
 /*!************************************************************************!*\
   !*** ./src/business/employee-management/dtos/employee-response.dto.ts ***!
@@ -21376,6 +21454,57 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateNotificationSettingsDto.prototype, "isPushNotificationEnabled", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/employee-management/dtos/update-employee.dto.ts":
+/*!**********************************************************************!*\
+  !*** ./src/business/employee-management/dtos/update-employee.dto.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateEmployeeDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class UpdateEmployeeDto {
+}
+exports.UpdateEmployeeDto = UpdateEmployeeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateEmployeeDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateEmployeeDto.prototype, "employeeNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateEmployeeDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateEmployeeDto.prototype, "position", void 0);
 
 
 /***/ }),
@@ -23479,7 +23608,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -23489,6 +23618,9 @@ const resource_response_dto_1 = __webpack_require__(/*! ../../dtos/resource/reso
 const create_resource_dto_1 = __webpack_require__(/*! ../../dtos/resource/create-resource.dto */ "./src/business/resource-management/dtos/resource/create-resource.dto.ts");
 const update_resource_dto_1 = __webpack_require__(/*! ../../dtos/resource/update-resource.dto */ "./src/business/resource-management/dtos/resource/update-resource.dto.ts");
 const resource_service_1 = __webpack_require__(/*! ../../services/resource.service */ "./src/business/resource-management/services/resource.service.ts");
+const available_time_response_dto_1 = __webpack_require__(/*! ../../dtos/resource/available-time-response.dto */ "./src/business/resource-management/dtos/resource/available-time-response.dto.ts");
+const resource_query_dto_1 = __webpack_require__(/*! ../../dtos/resource/resource-query.dto */ "./src/business/resource-management/dtos/resource/resource-query.dto.ts");
+const check_availability_dto_1 = __webpack_require__(/*! ../../dtos/resource/check-availability.dto */ "./src/business/resource-management/dtos/resource/check-availability.dto.ts");
 let ResourceController = class ResourceController {
     constructor(resourceService) {
         this.resourceService = resourceService;
@@ -23498,6 +23630,12 @@ let ResourceController = class ResourceController {
     }
     async findAll(type) {
         return this.resourceService.findResources(type);
+    }
+    async findAvailableTime(query) {
+        return this.resourceService.findAvailableTime(query);
+    }
+    async checkAvailability(query) {
+        return this.resourceService.checkAvailability(query.resourceId, query.startDate, query.endDate, query.reservationId);
     }
     async findOne(resourceId) {
         return this.resourceService.findResourceDetailForAdmin(resourceId);
@@ -23547,6 +23685,58 @@ __decorate([
     __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], ResourceController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('availability'),
+    (0, swagger_1.ApiOperation)({
+        summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지',
+        description: `
+## 자원 가용성 조회 API
+
+이 API는 세 가지 시나리오로 사용할 수 있습니다:
+
+### 🎯 시나리오 1: 시간 슬롯 방식 (회의실, 장비) => 
+30분 단위로 사용 가능한 시간 슬롯을 조회합니다.
+- **필수**: resourceType, resourceGroupId, startDate, endDate(=startDate), timeUnit
+- **선택**: am, pm (시간대 필터)
+
+**예시**: \`?resourceType=MEETING_ROOM&resourceGroupId=xxx&startDate=2024-01-15&endDate=2024-01-15&timeUnit=30&pm=true\`
+
+### 🎯 시나리오 2: 시간 범위 방식 (정확한 시간 지정)
+특정 시간 범위에서 자원 가용성을 확인합니다.
+- **필수**: resourceType, startDate, endDate, startTime, endTime
+- **선택**: resourceGroupId
+
+**예시**: \`?resourceType=EQUIPMENT&resourceGroupId=xxx&startDate=2024-01-15&endDate=2024-01-15&startTime=09:00:00&endTime=17:00:00\`
+
+### 🎯 시나리오 3: 날짜 범위 방식 (숙소, 다일자)
+여러 날짜에 걸친 자원 가용성을 확인합니다.
+- **필수**: resourceType, resourceGroupId, startDate, endDate
+- **선택**: startTime, endTime (체크인/체크아웃 시간)
+
+**예시**: \`?resourceType=ACCOMMODATION&resourceGroupId=xxx&startDate=2024-01-15&endDate=2024-01-17&startTime=15:00:00&endTime=11:00:00\`
+        `,
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '예약 가능 시간 조회 성공',
+        type: [available_time_response_dto_1.ResourceAvailabilityDto],
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof resource_query_dto_1.ResourceQueryDto !== "undefined" && resource_query_dto_1.ResourceQueryDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], ResourceController.prototype, "findAvailableTime", null);
+__decorate([
+    (0, common_1.Get)('check-availability'),
+    (0, swagger_1.ApiOperation)({ summary: '예약 시간 가용성 확인' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '예약 시간 가용성 확인 결과',
+        type: Boolean,
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_h = typeof check_availability_dto_1.CheckAvailabilityQueryDto !== "undefined" && check_availability_dto_1.CheckAvailabilityQueryDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], ResourceController.prototype, "checkAvailability", null);
+__decorate([
     (0, common_1.Get)(':resourceId'),
     (0, swagger_1.ApiOperation)({ summary: '자원 상세 조회 #관리자/자원관리/상세' }),
     (0, swagger_1.ApiOkResponse)({
@@ -23557,7 +23747,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], ResourceController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)('resource-group/:resourceGroupId'),
@@ -23570,7 +23760,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceGroupId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ResourceController.prototype, "findResourcesByResourceGroupId", null);
 __decorate([
     (0, common_1.Patch)('order'),
@@ -23581,8 +23771,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:paramtypes", [typeof (_m = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], ResourceController.prototype, "reorder", null);
 __decorate([
     (0, common_1.Patch)(':resourceId'),
@@ -23595,8 +23785,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_k = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:paramtypes", [String, typeof (_p = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _p : Object]),
+    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
 ], ResourceController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':resourceId/availability'),
@@ -23609,8 +23799,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_m = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [String, typeof (_r = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _r : Object]),
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
 ], ResourceController.prototype, "updateAvailability", null);
 __decorate([
     (0, common_1.Delete)(':resourceId'),
@@ -23622,7 +23812,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
+    __metadata("design:returntype", typeof (_t = typeof Promise !== "undefined" && Promise) === "function" ? _t : Object)
 ], ResourceController.prototype, "remove", null);
 exports.ResourceController = ResourceController = __decorate([
     (0, swagger_1.ApiTags)('v2 자원'),
@@ -24399,7 +24589,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = void 0;
+exports.CheckAvailabilityQueryDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 class CheckAvailabilityQueryDto {
@@ -24426,13 +24616,6 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CheckAvailabilityQueryDto.prototype, "reservationId", void 0);
-class CheckAvailabilityResponseDto {
-}
-exports.CheckAvailabilityResponseDto = CheckAvailabilityResponseDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: '예약 가능 여부' }),
-    __metadata("design:type", Boolean)
-], CheckAvailabilityResponseDto.prototype, "isAvailable", void 0);
 
 
 /***/ }),
@@ -24647,9 +24830,10 @@ class ResourceQueryDto extends pagination_query_dto_1.PaginationQueryDto {
 }
 exports.ResourceQueryDto = ResourceQueryDto;
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({
+    (0, swagger_1.ApiProperty)({
         description: '리소스 타입',
         enum: resource_type_enum_1.ResourceType,
+        required: true,
         example: resource_type_enum_1.ResourceType.MEETING_ROOM,
     }),
     (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
@@ -25802,6 +25986,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceManagementModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const resource_context_module_1 = __webpack_require__(/*! @src/context/resource/resource.context.module */ "./src/context/resource/resource.context.module.ts");
+const reservation_context_module_1 = __webpack_require__(/*! @src/context/reservation/reservation.context.module */ "./src/context/reservation/reservation.context.module.ts");
 const file_context_module_1 = __webpack_require__(/*! @src/context/file/file.context.module */ "./src/context/file/file.context.module.ts");
 const notification_context_module_1 = __webpack_require__(/*! @src/context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
 const resource_controller_1 = __webpack_require__(/*! ./controllers/resource/resource.controller */ "./src/business/resource-management/controllers/resource/resource.controller.ts");
@@ -25820,7 +26005,7 @@ let ResourceManagementModule = class ResourceManagementModule {
 exports.ResourceManagementModule = ResourceManagementModule;
 exports.ResourceManagementModule = ResourceManagementModule = __decorate([
     (0, common_1.Module)({
-        imports: [resource_context_module_1.ResourceContextModule, file_context_module_1.FileContextModule, notification_context_module_1.NotificationContextModule],
+        imports: [resource_context_module_1.ResourceContextModule, reservation_context_module_1.ReservationContextModule, file_context_module_1.FileContextModule, notification_context_module_1.NotificationContextModule],
         controllers: [
             resource_controller_1.ResourceController,
             resource_group_controller_1.ResourceGroupController,
@@ -26015,14 +26200,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const resource_context_service_1 = __webpack_require__(/*! @src/context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
+const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
+const available_time_response_dto_1 = __webpack_require__(/*! ../dtos/resource/available-time-response.dto */ "./src/business/resource-management/dtos/resource/available-time-response.dto.ts");
 let ResourceService = class ResourceService {
-    constructor(resourceContextService) {
+    constructor(resourceContextService, reservationContextService) {
         this.resourceContextService = resourceContextService;
+        this.reservationContextService = reservationContextService;
     }
     async createResourceWithInfos(createResourceInfo) {
         return this.resourceContextService.자원과_상세정보를_생성한다(createResourceInfo);
@@ -26049,10 +26238,114 @@ let ResourceService = class ResourceService {
         return [];
     }
     async findAvailableTime(query) {
-        return [];
+        const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservationId, } = query;
+        this.validateAvailabilityQuery(query);
+        const resources = await this.resourceContextService.그룹별_사용가능한_자원_목록을_조회한다(resourceGroupId, resourceType);
+        if (resources.length === 0) {
+            return [];
+        }
+        const isAccommodation = resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION;
+        const isSameDay = startDate === endDate;
+        const isTimeSlotRequest = !isAccommodation && isSameDay && timeUnit;
+        const result = [];
+        for (const resource of resources) {
+            const dateRangeStart = startTime
+                ? new Date(`${startDate} ${startTime}`)
+                : new Date(`${startDate} 00:00:00`);
+            const dateRangeEnd = endTime ? new Date(`${endDate} ${endTime}`) : new Date(`${endDate} 23:59:59`);
+            const reservations = await this.reservationContextService.자원의_날짜범위_예약을_조회한다(resource.resourceId, dateRangeStart, dateRangeEnd, reservationId);
+            if (isTimeSlotRequest) {
+                const availabilityDto = await this.calculateTimeSlotAvailability(resource, startDate, endDate, am, pm, timeUnit, reservations);
+                result.push(availabilityDto);
+            }
+            else if (isAccommodation || !isSameDay) {
+                const hasConflict = this.checkDateRangeConflict(reservations, dateRangeStart, dateRangeEnd);
+                if (!hasConflict) {
+                    const availabilityDto = new available_time_response_dto_1.ResourceAvailabilityDto();
+                    availabilityDto.resourceId = resource.resourceId;
+                    availabilityDto.resourceName = resource.name;
+                    if (resource.location) {
+                        const location = resource.location;
+                        availabilityDto.resourceLocation =
+                            location.address + (location.detailAddress ? ` ${location.detailAddress}` : '');
+                    }
+                    result.push(availabilityDto);
+                }
+            }
+            else {
+                throw new common_1.BadRequestException('시간 조회 조건이 올바르지 않습니다.');
+            }
+        }
+        return result;
+    }
+    validateAvailabilityQuery(query) {
+        const { startDate, endDate, startTime, endTime, am, pm, timeUnit } = query;
+        if (!startDate && !endDate) {
+            throw new common_1.BadRequestException('시작날짜 또는 종료날짜가 필요합니다.');
+        }
+        if (startDate && endDate && startDate > endDate) {
+            throw new common_1.BadRequestException('시작날짜가 종료날짜보다 늦을 수 없습니다.');
+        }
+        const isTimeRange = startTime && endTime;
+        const isTimeSelected = (am !== undefined || pm !== undefined) && timeUnit;
+        if (isTimeRange && isTimeSelected) {
+            throw new common_1.BadRequestException('시간 범위와 시간대 선택을 동시에 할 수 없습니다.');
+        }
+    }
+    async calculateTimeSlotAvailability(resource, startDate, endDate, am, pm, timeUnit, reservations = []) {
+        const availabilityDto = new available_time_response_dto_1.ResourceAvailabilityDto();
+        availabilityDto.resourceId = resource.resourceId;
+        availabilityDto.resourceName = resource.name;
+        const isToday = startDate === new Date().toISOString().slice(0, 10);
+        const timeRange = this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, startDate, isToday);
+        const availableSlots = this.calculateAvailableTimeSlots(startDate, timeRange.startTime, timeRange.endTime, timeUnit, am, pm, reservations);
+        availabilityDto.availableTimeSlots = availableSlots;
+        return availabilityDto;
+    }
+    calculateAvailableTimeSlots(dateStr, startTime, endTime, timeUnit, am, pm, reservations = []) {
+        const availableSlots = [];
+        const slotIntervalMinutes = 30;
+        let actualStartTime = startTime;
+        let actualEndTime = endTime;
+        if (am && !pm) {
+            actualEndTime = '12:00:00';
+        }
+        else if (!am && pm) {
+            actualStartTime = '12:00:00';
+        }
+        const startDateTime = new Date(`${dateStr} ${actualStartTime}`);
+        const endDateTime = new Date(`${dateStr} ${actualEndTime}`);
+        const slotStart = new Date(startDateTime);
+        while (slotStart < endDateTime) {
+            const slotEnd = new Date(slotStart);
+            slotEnd.setMinutes(slotEnd.getMinutes() + timeUnit);
+            if (slotEnd > endDateTime) {
+                slotStart.setMinutes(slotStart.getMinutes() + slotIntervalMinutes);
+                continue;
+            }
+            const isAvailable = this.reservationContextService.시간슬롯별_예약가능여부를_계산한다(reservations, slotStart, slotEnd);
+            if (isAvailable) {
+                availableSlots.push({
+                    startTime: slotStart.toISOString(),
+                    endTime: slotEnd.toISOString(),
+                });
+            }
+            slotStart.setMinutes(slotStart.getMinutes() + slotIntervalMinutes);
+        }
+        return availableSlots;
+    }
+    checkDateRangeConflict(reservations, requestStart, requestEnd) {
+        return reservations.some((reservation) => {
+            const reservationStart = new Date(reservation.startDate);
+            const reservationEnd = new Date(reservation.endDate);
+            return ((requestStart >= reservationStart && requestStart < reservationEnd) ||
+                (requestEnd > reservationStart && requestEnd <= reservationEnd) ||
+                (requestStart < reservationStart && requestEnd > reservationEnd));
+        });
     }
     async checkAvailability(resourceId, startDate, endDate, reservationId) {
-        return true;
+        const result = await this.resourceContextService.자원의_해당시간_예약을_확인한다(resourceId, startDate, endDate, reservationId);
+        return !result;
     }
     async findResourceDetailForUser(employeeId, resourceId) {
         return this.resourceContextService.자원_상세정보를_조회한다(resourceId);
@@ -26061,7 +26354,7 @@ let ResourceService = class ResourceService {
 exports.ResourceService = ResourceService;
 exports.ResourceService = ResourceService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object])
 ], ResourceService);
 
 
@@ -26175,7 +26468,6 @@ const schedule_create_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-c
 const schedule_create_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-create-response.dto */ "./src/business/schedule-management/dtos/schedule-create-response.dto.ts");
 const schedule_extend_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-extend-response.dto */ "./src/business/schedule-management/dtos/schedule-extend-response.dto.ts");
 const schedule_update_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-update-request.dto */ "./src/business/schedule-management/dtos/schedule-update-request.dto.ts");
-const schedule_update_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-update-response.dto */ "./src/business/schedule-management/dtos/schedule-update-response.dto.ts");
 let ScheduleController = class ScheduleController {
     constructor(scheduleManagementService) {
         this.scheduleManagementService = scheduleManagementService;
@@ -26373,7 +26665,7 @@ __decorate([
     }),
     (0, swagger_1.ApiOkResponse)({
         description: '일정 수정 성공',
-        type: schedule_update_response_dto_1.ScheduleUpdateResponseDto,
+        type: Boolean,
     }),
     (0, common_1.Patch)(':scheduleId'),
     __param(0, (0, user_decorator_1.User)()),
@@ -26680,6 +26972,58 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], MyScheduleResponseDto.prototype, "schedules", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/my-schedule-statistics-query.dto.ts":
+/*!***********************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/my-schedule-statistics-query.dto.ts ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MyScheduleStatisticsQueryDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const my_schedule_query_dto_1 = __webpack_require__(/*! ./my-schedule-query.dto */ "./src/business/schedule-management/dtos/my-schedule-query.dto.ts");
+class MyScheduleStatisticsQueryDto {
+}
+exports.MyScheduleStatisticsQueryDto = MyScheduleStatisticsQueryDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '역할 기준 필터 (예약자, 참석자)',
+        enum: reservation_type_enum_1.ParticipantsType,
+        required: false,
+        example: reservation_type_enum_1.ParticipantsType.RESERVER,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ParticipantsType),
+    __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ParticipantsType !== "undefined" && reservation_type_enum_1.ParticipantsType) === "function" ? _a : Object)
+], MyScheduleStatisticsQueryDto.prototype, "role", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '카테고리 필터 (전체, 일정, 프로젝트, 자원)',
+        enum: my_schedule_query_dto_1.ScheduleCategoryType,
+        required: false,
+        example: my_schedule_query_dto_1.ScheduleCategoryType.ALL,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(my_schedule_query_dto_1.ScheduleCategoryType),
+    __metadata("design:type", typeof (_b = typeof my_schedule_query_dto_1.ScheduleCategoryType !== "undefined" && my_schedule_query_dto_1.ScheduleCategoryType) === "function" ? _b : Object)
+], MyScheduleStatisticsQueryDto.prototype, "category", void 0);
 
 
 /***/ }),
@@ -27233,6 +27577,224 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], ScheduleCalendarResponseDto.prototype, "schedules", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/schedule-cancel-request.dto.ts":
+/*!******************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-cancel-request.dto.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleCancelRequestDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class ScheduleCancelRequestDto {
+}
+exports.ScheduleCancelRequestDto = ScheduleCancelRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '취소 사유',
+        example: '급한 업무로 인해 일정을 취소합니다.',
+        required: false,
+        maxLength: 500,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(500, { message: '취소 사유는 500자를 초과할 수 없습니다.' }),
+    __metadata("design:type", String)
+], ScheduleCancelRequestDto.prototype, "reason", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/schedule-cancel-response.dto.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-cancel-response.dto.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleCancelResponseDto = exports.CancelledReservationDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class CancelledReservationDto {
+}
+exports.CancelledReservationDto = CancelledReservationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '예약 ID', example: 'uuid-string' }),
+    __metadata("design:type", String)
+], CancelledReservationDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '예약 상태', example: 'CANCELLED' }),
+    __metadata("design:type", String)
+], CancelledReservationDto.prototype, "status", void 0);
+class ScheduleCancelResponseDto {
+}
+exports.ScheduleCancelResponseDto = ScheduleCancelResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '일정 ID', example: 'uuid-string' }),
+    __metadata("design:type", String)
+], ScheduleCancelResponseDto.prototype, "scheduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '일정 제목', example: '주간 팀 회의' }),
+    __metadata("design:type", String)
+], ScheduleCancelResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '일정 상태', example: 'CANCELLED' }),
+    __metadata("design:type", String)
+], ScheduleCancelResponseDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '취소된 시간', example: '2025-01-20T15:30:00.000Z' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], ScheduleCancelResponseDto.prototype, "cancelledAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '취소 사유',
+        example: '급한 업무로 인해 일정을 취소합니다.',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], ScheduleCancelResponseDto.prototype, "reason", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '연결된 예약 정보',
+        type: CancelledReservationDto,
+        required: false,
+    }),
+    __metadata("design:type", CancelledReservationDto)
+], ScheduleCancelResponseDto.prototype, "reservation", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/schedule-complete-request.dto.ts":
+/*!********************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-complete-request.dto.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleCompleteRequestDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class ScheduleCompleteRequestDto {
+}
+exports.ScheduleCompleteRequestDto = ScheduleCompleteRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '완료 메모',
+        example: '회의가 성공적으로 완료되었습니다. 다음 액션 아이템들이 논의되었습니다.',
+        required: false,
+        maxLength: 1000,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(1000, { message: '완료 메모는 1000자를 초과할 수 없습니다.' }),
+    __metadata("design:type", String)
+], ScheduleCompleteRequestDto.prototype, "completionNotes", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/schedule-complete-response.dto.ts":
+/*!*********************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-complete-response.dto.ts ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleCompleteResponseDto = exports.CompletedReservationDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class CompletedReservationDto {
+}
+exports.CompletedReservationDto = CompletedReservationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '예약 ID', example: 'uuid-string' }),
+    __metadata("design:type", String)
+], CompletedReservationDto.prototype, "reservationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '예약 상태', example: 'CLOSED' }),
+    __metadata("design:type", String)
+], CompletedReservationDto.prototype, "status", void 0);
+class ScheduleCompleteResponseDto {
+}
+exports.ScheduleCompleteResponseDto = ScheduleCompleteResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '일정 ID', example: 'uuid-string' }),
+    __metadata("design:type", String)
+], ScheduleCompleteResponseDto.prototype, "scheduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '일정 제목', example: '주간 팀 회의' }),
+    __metadata("design:type", String)
+], ScheduleCompleteResponseDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '일정 상태', example: 'COMPLETED' }),
+    __metadata("design:type", String)
+], ScheduleCompleteResponseDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '완료된 시간', example: '2025-01-20T15:30:00.000Z' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], ScheduleCompleteResponseDto.prototype, "completedAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '완료 메모',
+        example: '회의가 성공적으로 완료되었습니다.',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], ScheduleCompleteResponseDto.prototype, "completionNotes", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '연결된 예약 정보',
+        type: CompletedReservationDto,
+        required: false,
+    }),
+    __metadata("design:type", CompletedReservationDto)
+], ScheduleCompleteResponseDto.prototype, "reservation", void 0);
 
 
 /***/ }),
@@ -27912,6 +28474,53 @@ __decorate([
 
 /***/ }),
 
+/***/ "./src/business/schedule-management/dtos/schedule-extend-request.dto.ts":
+/*!******************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/schedule-extend-request.dto.ts ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleExtendRequestDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class ScheduleExtendRequestDto {
+}
+exports.ScheduleExtendRequestDto = ScheduleExtendRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '새로운 종료 날짜 및 시간',
+        example: '2025-08-25T13:00:00Z',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], ScheduleExtendRequestDto.prototype, "newEndDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '연장 사유',
+        example: '논의할 내용이 많아 30분 연장합니다.',
+        required: false,
+        maxLength: 500,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(500, { message: '연장 사유는 500자를 초과할 수 없습니다.' }),
+    __metadata("design:type", String)
+], ScheduleExtendRequestDto.prototype, "reason", void 0);
+
+
+/***/ }),
+
 /***/ "./src/business/schedule-management/dtos/schedule-extend-response.dto.ts":
 /*!*******************************************************************************!*\
   !*** ./src/business/schedule-management/dtos/schedule-extend-response.dto.ts ***!
@@ -27998,13 +28607,36 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleUpdateRequestDto = void 0;
+exports.ScheduleUpdateRequestDto = exports.ScheduleUpdateResourceDto = exports.ScheduleUpdateInfoDto = exports.ScheduleUpdateDateDto = void 0;
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
-class ScheduleUpdateRequestDto {
+class ScheduleUpdateDateDto {
 }
-exports.ScheduleUpdateRequestDto = ScheduleUpdateRequestDto;
+exports.ScheduleUpdateDateDto = ScheduleUpdateDateDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '시작 날짜 및 시간',
+        example: '2025-08-25T10:00:00Z',
+        required: true,
+    }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], ScheduleUpdateDateDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '종료 날짜 및 시간',
+        example: '2025-08-25T11:00:00Z',
+        required: true,
+    }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], ScheduleUpdateDateDto.prototype, "endDate", void 0);
+class ScheduleUpdateInfoDto {
+}
+exports.ScheduleUpdateInfoDto = ScheduleUpdateInfoDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '일정 제목',
@@ -28016,7 +28648,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(100, { message: '제목은 100자를 초과할 수 없습니다.' }),
     __metadata("design:type", String)
-], ScheduleUpdateRequestDto.prototype, "title", void 0);
+], ScheduleUpdateInfoDto.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '일정 설명',
@@ -28028,62 +28660,120 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(1000, { message: '설명은 1000자를 초과할 수 없습니다.' }),
     __metadata("design:type", String)
-], ScheduleUpdateRequestDto.prototype, "description", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '시작 날짜 및 시간',
-        example: '2025-08-25T10:00:00Z',
-        required: false,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
-], ScheduleUpdateRequestDto.prototype, "startDate", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '종료 날짜 및 시간',
-        example: '2025-08-25T11:00:00Z',
-        required: false,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
-], ScheduleUpdateRequestDto.prototype, "endDate", void 0);
+], ScheduleUpdateInfoDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '시작 전 알림 여부',
+        type: Boolean,
         example: true,
         required: false,
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
-], ScheduleUpdateRequestDto.prototype, "notifyBeforeStart", void 0);
+], ScheduleUpdateInfoDto.prototype, "notifyBeforeStart", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '시작 전 알림 시간 (분)',
+        type: [Number],
         example: [10, 30],
         required: false,
-        type: [Number],
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsInt)({ each: true }),
     (0, class_validator_1.Min)(1, { each: true }),
     __metadata("design:type", Array)
-], ScheduleUpdateRequestDto.prototype, "notifyMinutesBeforeStart", void 0);
+], ScheduleUpdateInfoDto.prototype, "notifyMinutesBeforeStart", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: '수정 사유',
-        example: '시간 변경 요청으로 인한 수정입니다.',
+        description: '위치',
+        type: String,
+        example: '123e4567-e89b-12d3-a456-426614174000',
         required: false,
-        maxLength: 500,
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(500, { message: '수정 사유는 500자를 초과할 수 없습니다.' }),
     __metadata("design:type", String)
-], ScheduleUpdateRequestDto.prototype, "reason", void 0);
+], ScheduleUpdateInfoDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 타입',
+        example: schedule_type_enum_1.ScheduleType.PERSONAL,
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(schedule_type_enum_1.ScheduleType),
+    __metadata("design:type", typeof (_a = typeof schedule_type_enum_1.ScheduleType !== "undefined" && schedule_type_enum_1.ScheduleType) === "function" ? _a : Object)
+], ScheduleUpdateInfoDto.prototype, "scheduleType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 ID',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ScheduleUpdateInfoDto.prototype, "projectId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참여자',
+        example: ['123e4567-e89b-12d3-a456-426614174000'],
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], ScheduleUpdateInfoDto.prototype, "participants", void 0);
+class ScheduleUpdateResourceDto {
+}
+exports.ScheduleUpdateResourceDto = ScheduleUpdateResourceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 ID',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        required: true,
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ScheduleUpdateResourceDto.prototype, "resourceId", void 0);
+class ScheduleUpdateRequestDto {
+}
+exports.ScheduleUpdateRequestDto = ScheduleUpdateRequestDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '날짜 정보',
+        type: ScheduleUpdateDateDto,
+        example: {
+            startDate: '2025-08-25T10:00:00Z',
+            endDate: '2025-08-25T11:00:00Z',
+        },
+    }),
+    __metadata("design:type", ScheduleUpdateDateDto)
+], ScheduleUpdateRequestDto.prototype, "date", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '정보 정보',
+        type: ScheduleUpdateInfoDto,
+        example: {
+            title: '수정된 주간 팀 회의',
+            description: '수정된 회의 설명입니다.',
+        },
+    }),
+    __metadata("design:type", ScheduleUpdateInfoDto)
+], ScheduleUpdateRequestDto.prototype, "info", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '자원 정보',
+        type: ScheduleUpdateResourceDto,
+        example: {
+            resourceId: '123e4567-e89b-12d3-a456-426614174000',
+        },
+    }),
+    __metadata("design:type", ScheduleUpdateResourceDto)
+], ScheduleUpdateRequestDto.prototype, "resource", void 0);
 
 
 /***/ }),
@@ -28395,8 +29085,6 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
     }
     async findScheduleDetail(user, query) {
         this.logger.log(`일정 상세 조회 요청 - 사용자: ${user.employeeId}, 일정ID: ${query.scheduleId}`);
-        const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(user, query.scheduleId, schedule_authorization_service_2.ScheduleAction.VIEW);
-        this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
         const { scheduleId, includeProject, includeReservation } = query;
         const scheduleData = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withProject: includeProject,
@@ -28667,39 +29355,71 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
     }
     async updateSchedule(user, scheduleId, updateDto) {
         this.logger.log(`일정 수정 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+        const updateScenarios = this.schedulePolicyService.수정_시나리오를_분석한다(updateDto);
+        this.schedulePolicyService.수정요청을_기본검증한다(updateDto, updateScenarios);
         const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(user, scheduleId, schedule_authorization_service_2.ScheduleAction.UPDATE);
         this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
         const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
         });
-        const updateRequest = {
-            title: updateDto.title,
-            description: updateDto.description,
-            startDate: updateDto.startDate ? new Date(updateDto.startDate) : undefined,
-            endDate: updateDto.endDate ? new Date(updateDto.endDate) : undefined,
-            notifyBeforeStart: updateDto.notifyBeforeStart,
-            notifyMinutesBeforeStart: updateDto.notifyMinutesBeforeStart,
-        };
-        const policyResult = await this.schedulePolicyService.일정_수정이_가능한지_확인한다(schedule, updateRequest, reservation);
-        this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
-        const updateResult = await this.scheduleStateTransitionService.일정을_수정한다(schedule, reservation, updateRequest, updateDto.reason);
-        return {
-            scheduleId: updateResult.schedule.scheduleId,
-            title: updateResult.schedule.title,
-            description: updateResult.schedule.description,
-            startDate: updateResult.schedule.startDate,
-            endDate: updateResult.schedule.endDate,
-            changes: updateResult.changes,
-            reason: updateDto.reason,
-            reservation: updateResult.reservation
+        if (updateScenarios.isDateUpdate) {
+            const datePolicy = await this.schedulePolicyService.일정_날짜수정이_가능한지_확인한다(schedule, reservation, {
+                newStartDate: updateDto.date?.startDate ? new Date(updateDto.date.startDate) : undefined,
+                newEndDate: updateDto.date?.endDate ? new Date(updateDto.date.endDate) : undefined,
+            });
+            this.schedulePolicyService.정책_체크_실패시_예외를_던진다(datePolicy);
+        }
+        if (updateScenarios.isInfoUpdate) {
+            const infoPolicy = await this.schedulePolicyService.일정_정보수정이_가능한지_확인한다(schedule, updateDto.info);
+            this.schedulePolicyService.정책_체크_실패시_예외를_던진다(infoPolicy);
+        }
+        if (updateScenarios.isResourceUpdate) {
+            const resourcePolicy = await this.schedulePolicyService.일정_자원수정이_가능한지_확인한다(schedule, reservation, updateDto.resource.resourceId);
+            this.schedulePolicyService.정책_체크_실패시_예외를_던진다(resourcePolicy);
+        }
+        const updateResult = await this.scheduleStateTransitionService.일정을_시나리오별로_수정한다(schedule, reservation, {
+            dateChanges: updateScenarios.isDateUpdate
                 ? {
-                    reservationId: updateResult.reservation.reservationId,
-                    title: updateResult.reservation.title,
-                    startDate: updateResult.reservation.startDate,
-                    endDate: updateResult.reservation.endDate,
+                    startDate: updateDto.date?.startDate ? new Date(updateDto.date.startDate) : undefined,
+                    endDate: updateDto.date?.endDate ? new Date(updateDto.date.endDate) : undefined,
                 }
                 : undefined,
-        };
+            infoChanges: updateScenarios.isInfoUpdate
+                ? {
+                    title: updateDto.info?.title,
+                    description: updateDto.info?.description,
+                    notifyBeforeStart: updateDto.info?.notifyBeforeStart,
+                    notifyMinutesBeforeStart: updateDto.info?.notifyMinutesBeforeStart,
+                    location: updateDto.info?.location,
+                    scheduleType: updateDto.info?.scheduleType,
+                    projectId: updateDto.info?.projectId,
+                    participants: updateDto.info?.participants,
+                }
+                : undefined,
+            resourceChanges: updateScenarios.isResourceUpdate
+                ? {
+                    newResourceId: updateDto.resource.resourceId,
+                }
+                : undefined,
+        });
+        const { resource, participants } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
+            withReservation: true,
+            withResource: true,
+            withParticipants: true,
+        });
+        const employeeIds = updateScenarios.isInfoUpdate
+            ? Array.from(new Set([
+                ...updateResult.participantChanges.previousParticipants.map((participant) => participant.employeeId),
+                ...updateResult.participantChanges.newParticipants.map((participant) => participant.employeeId),
+            ]))
+            : participants.map((participant) => participant.employeeId);
+        console.log(employeeIds);
+        await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(updateScenarios, {
+            schedule,
+            reservation,
+            resource,
+        }, employeeIds);
+        return true;
     }
 };
 exports.ScheduleManagementService = ScheduleManagementService;
@@ -31467,6 +32187,30 @@ let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = 
         };
         await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED, notificationData, targetEmployeeIds);
     }
+    async 일정_수정_알림을_전송한다(updateScenarios, data, targetEmployeeIds) {
+        const notificationData = {
+            schedule: {
+                scheduleId: data.schedule.scheduleId,
+                scheduleTitle: data.schedule.title,
+                startDate: date_util_1.DateUtil.format(data.schedule.startDate, 'YYYY-MM-DD HH:mm'),
+                endDate: date_util_1.DateUtil.format(data.schedule.endDate, 'YYYY-MM-DD HH:mm'),
+            },
+            reservation: {
+                reservationId: data.reservation.reservationId,
+            },
+            resource: {
+                resourceId: data.resource.resourceId,
+                resourceName: data.resource.name,
+                resourceType: data.resource.type,
+            },
+        };
+        if (updateScenarios.isDateUpdate || updateScenarios.isResourceUpdate) {
+            await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_TIME_CHANGED, notificationData, targetEmployeeIds);
+        }
+        else if (updateScenarios.isInfoUpdate && targetEmployeeIds.length > 0) {
+            await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED, notificationData, targetEmployeeIds);
+        }
+    }
 };
 exports.ScheduleNotificationContextService = ScheduleNotificationContextService;
 exports.ScheduleNotificationContextService = ScheduleNotificationContextService = ScheduleNotificationContextService_1 = __decorate([
@@ -33416,6 +34160,31 @@ let ReservationContextService = class ReservationContextService {
             };
         });
     }
+    async 시간슬롯_예약충돌을_확인한다(resourceId, slotStartTime, slotEndTime, excludeReservationId) {
+        const conflictReservations = await this.충돌_예약을_조회한다(resourceId, slotStartTime, slotEndTime, excludeReservationId);
+        return conflictReservations.length > 0;
+    }
+    async 자원의_날짜범위_예약을_조회한다(resourceId, startDate, endDate, excludeReservationId) {
+        return await this.domainReservationService.findAll({
+            where: {
+                resourceId,
+                ...(excludeReservationId && { reservationId: (0, typeorm_2.Not)(excludeReservationId) }),
+                startDate: (0, typeorm_2.LessThan)(endDate),
+                endDate: (0, typeorm_2.MoreThan)(startDate),
+                status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+            },
+            order: { startDate: 'ASC' },
+        });
+    }
+    시간슬롯별_예약가능여부를_계산한다(reservations, slotStartTime, slotEndTime) {
+        return !reservations.some((reservation) => {
+            const reservationStart = new Date(reservation.startDate);
+            const reservationEnd = new Date(reservation.endDate);
+            return ((slotStartTime >= reservationStart && slotStartTime < reservationEnd) ||
+                (slotEndTime > reservationStart && slotEndTime <= reservationEnd) ||
+                (slotStartTime < reservationStart && slotEndTime > reservationEnd));
+        });
+    }
 };
 exports.ReservationContextService = ReservationContextService;
 exports.ReservationContextService = ReservationContextService = __decorate([
@@ -34190,6 +34959,7 @@ const accommodation_info_service_1 = __webpack_require__(/*! @src/domain/accommo
 const equipment_info_service_1 = __webpack_require__(/*! @src/domain/equipment-info/equipment-info.service */ "./src/domain/equipment-info/equipment-info.service.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 const resource_response_dto_1 = __webpack_require__(/*! @src/business/resource-management/dtos/resource/resource-response.dto */ "./src/business/resource-management/dtos/resource/resource-response.dto.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 let ResourceContextService = class ResourceContextService {
     constructor(domainResourceService, domainResourceGroupService, domainResourceManagerService, domainVehicleInfoService, domainMeetingRoomInfoService, domainAccommodationInfoService, domainEquipmentInfoService, domainFileService, dataSource) {
         this.domainResourceService = domainResourceService;
@@ -34536,6 +35306,82 @@ let ResourceContextService = class ResourceContextService {
                 return null;
         }
     }
+    자원_타입별_운영시간_규칙을_가져온다(resourceType) {
+        switch (resourceType) {
+            case resource_type_enum_1.ResourceType.VEHICLE:
+                return { startTime: '00:00:00', endTime: '24:00:00', is24Hour: true };
+            case resource_type_enum_1.ResourceType.MEETING_ROOM:
+            case resource_type_enum_1.ResourceType.EQUIPMENT:
+                return { startTime: '09:00:00', endTime: '18:00:00', is24Hour: false };
+            case resource_type_enum_1.ResourceType.ACCOMMODATION:
+                return { startTime: '00:00:00', endTime: '24:00:00', is24Hour: true };
+            default:
+                return { startTime: '09:00:00', endTime: '18:00:00', is24Hour: false };
+        }
+    }
+    async 그룹별_사용가능한_자원_목록을_조회한다(resourceGroupId, resourceType) {
+        const whereCondition = {
+            isAvailable: true,
+        };
+        if (resourceGroupId) {
+            whereCondition.resourceGroupId = resourceGroupId;
+        }
+        if (resourceType) {
+            whereCondition.type = resourceType;
+        }
+        return await this.domainResourceService.findAll({
+            where: whereCondition,
+            relations: ['resourceGroup'],
+            order: { order: 'ASC' },
+        });
+    }
+    현재시간_기준_가용시간대를_계산한다(resourceType, targetDate, isToday) {
+        const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
+        if (!isToday) {
+            return operatingHours;
+        }
+        const now = new Date();
+        const currentMinutes = now.getMinutes();
+        const roundedStartTime = new Date(now);
+        if (currentMinutes < 30) {
+            roundedStartTime.setMinutes(0, 0, 0);
+        }
+        else {
+            roundedStartTime.setMinutes(30, 0, 0);
+        }
+        let calculatedStartTime;
+        if (resourceType === resource_type_enum_1.ResourceType.VEHICLE) {
+            calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
+        }
+        else {
+            const operatingStartTime = new Date(`${targetDate} ${operatingHours.startTime}`);
+            calculatedStartTime =
+                roundedStartTime > operatingStartTime
+                    ? roundedStartTime.toTimeString().slice(0, 8)
+                    : operatingHours.startTime;
+        }
+        return {
+            startTime: calculatedStartTime,
+            endTime: operatingHours.endTime,
+        };
+    }
+    async 자원의_해당시간_예약을_확인한다(resourceId, startDate, endDate, reservationId) {
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        const resource = await this.domainResourceService.findOne({
+            where: {
+                resourceId: resourceId,
+                reservations: {
+                    reservationId: reservationId ? (0, typeorm_1.Not)(reservationId) : undefined,
+                    status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                    startDate: (0, typeorm_1.LessThan)(endDateObj),
+                    endDate: (0, typeorm_1.MoreThan)(startDateObj),
+                },
+            },
+            relations: ['reservations'],
+        });
+        return !!resource;
+    }
 };
 exports.ResourceContextService = ResourceContextService;
 exports.ResourceContextService = ResourceContextService = __decorate([
@@ -34822,15 +35668,14 @@ let ScheduleAuthorizationService = class ScheduleAuthorizationService {
         if (!schedule) {
             throw new common_1.NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
         }
-        const participants = await this.domainScheduleParticipantService.findByScheduleId(scheduleId);
-        if (participants.length === 0) {
+        const reserver = await this.domainScheduleParticipantService.findReserverByScheduleId(user.employeeId, scheduleId);
+        if (!reserver) {
             return {
                 isAuthorized: false,
-                reason: '해당 일정의 참가자가 아닙니다.',
+                reason: '해당 일정의 예약자가 아닙니다.',
             };
         }
-        const userParticipant = participants[0];
-        const userRole = userParticipant.type;
+        const userRole = reserver.type;
         const authResult = this._액션별_권한을_체크한다(userRole, action, schedule);
         return {
             ...authResult,
@@ -35131,47 +35976,6 @@ let SchedulePolicyService = class SchedulePolicyService {
         }
         return { isAllowed: true };
     }
-    async 일정_수정이_가능한지_확인한다(schedule, updateRequest, reservation) {
-        const now = date_util_1.DateUtil.now().toDate();
-        const modificationDeadline = new Date(schedule.startDate);
-        modificationDeadline.setHours(modificationDeadline.getHours() - 1);
-        if (now > modificationDeadline) {
-            return {
-                isAllowed: false,
-                reason: '일정 시작 1시간 전까지만 수정이 가능합니다.',
-                reasonCode: 'MODIFICATION_TIME_EXCEEDED',
-            };
-        }
-        if (updateRequest.startDate || updateRequest.endDate) {
-            const newStartDate = updateRequest.startDate || schedule.startDate;
-            const newEndDate = updateRequest.endDate || schedule.endDate;
-            if (newStartDate >= newEndDate) {
-                return {
-                    isAllowed: false,
-                    reason: '시작 시간은 종료 시간보다 빨라야 합니다.',
-                    reasonCode: 'INVALID_TIME_RANGE',
-                };
-            }
-            if (newStartDate < now) {
-                return {
-                    isAllowed: false,
-                    reason: '과거 시간으로는 수정할 수 없습니다.',
-                    reasonCode: 'PAST_TIME_NOT_ALLOWED',
-                };
-            }
-            if (reservation && (updateRequest.startDate || updateRequest.endDate)) {
-                const isAvailable = await this.domainReservationService.checkReservationConflicts(reservation.resourceId, newStartDate, newEndDate);
-                if (!isAvailable) {
-                    return {
-                        isAllowed: false,
-                        reason: '수정하려는 시간대에 다른 예약이 있습니다.',
-                        reasonCode: 'RESOURCE_CONFLICT',
-                    };
-                }
-            }
-        }
-        return { isAllowed: true };
-    }
     async 다중_일정_생성이_가능한지_확인한다(createRequest) {
         const now = date_util_1.DateUtil.now().toDate();
         if (!createRequest.datesSelection || createRequest.datesSelection.length === 0) {
@@ -35254,6 +36058,91 @@ let SchedulePolicyService = class SchedulePolicyService {
                 message: policyResult.reason || '정책 위반',
                 code: policyResult.reasonCode || 'POLICY_VIOLATION',
             });
+        }
+    }
+    async 일정_날짜수정이_가능한지_확인한다(schedule, reservation, dateChanges) {
+        if (schedule.status === schedule_type_enum_1.ScheduleStatus.COMPLETED || schedule.status === schedule_type_enum_1.ScheduleStatus.CANCELLED) {
+            return {
+                isAllowed: false,
+                reason: '완료되거나 취소된 일정은 수정할 수 없습니다.',
+                reasonCode: 'SCHEDULE_STATUS_NOT_MODIFIABLE',
+            };
+        }
+        const newStartDate = dateChanges.newStartDate || schedule.startDate;
+        const newEndDate = dateChanges.newEndDate || schedule.endDate;
+        if (newStartDate >= newEndDate) {
+            return {
+                isAllowed: false,
+                reason: '시작 시간이 종료 시간보다 늦을 수 없습니다.',
+                reasonCode: 'INVALID_DATE_RANGE',
+            };
+        }
+        if (reservation) {
+            const isAvailable = await this.domainReservationService.checkReservationConflicts(reservation.resourceId, newStartDate, newEndDate, reservation.reservationId);
+            if (!isAvailable) {
+                return {
+                    isAllowed: false,
+                    reason: '해당 시간대에 다른 예약이 있습니다.',
+                    reasonCode: 'RESERVATION_CONFLICT',
+                };
+            }
+        }
+        return { isAllowed: true, reason: '일정 날짜 수정이 가능합니다.' };
+    }
+    async 일정_정보수정이_가능한지_확인한다(schedule, infoChanges) {
+        return { isAllowed: true, reason: '일정 정보 수정이 가능합니다.' };
+    }
+    async 일정_자원수정이_가능한지_확인한다(schedule, reservation, newResourceId) {
+        if (schedule.status === schedule_type_enum_1.ScheduleStatus.COMPLETED || schedule.status === schedule_type_enum_1.ScheduleStatus.CANCELLED) {
+            return {
+                isAllowed: false,
+                reason: '완료되거나 취소된 일정은 수정할 수 없습니다.',
+                reasonCode: 'SCHEDULE_STATUS_NOT_MODIFIABLE',
+            };
+        }
+        if (reservation) {
+            const isAvailable = await this.domainReservationService.checkReservationConflicts(newResourceId, schedule.startDate, schedule.endDate, reservation.reservationId);
+            if (!isAvailable) {
+                return {
+                    isAllowed: false,
+                    reason: '새로운 자원의 해당 시간대에 다른 예약이 있습니다.',
+                    reasonCode: 'NEW_RESOURCE_CONFLICT',
+                };
+            }
+        }
+        return { isAllowed: true, reason: '일정 자원 수정이 가능합니다.' };
+    }
+    수정_시나리오를_분석한다(updateDto) {
+        return {
+            isDateUpdate: !!(updateDto.date?.startDate || updateDto.date?.endDate),
+            isInfoUpdate: !!(updateDto.info?.title ||
+                updateDto.info?.description ||
+                updateDto.info?.notifyBeforeStart !== undefined ||
+                updateDto.info?.notifyMinutesBeforeStart ||
+                updateDto.info?.location ||
+                updateDto.info?.scheduleType ||
+                updateDto.info?.projectId ||
+                updateDto.info?.participants),
+            isResourceUpdate: !!updateDto.resource?.resourceId,
+        };
+    }
+    수정요청을_기본검증한다(updateDto, scenarios) {
+        if (!scenarios.isDateUpdate && !scenarios.isInfoUpdate && !scenarios.isResourceUpdate) {
+            throw new common_1.BadRequestException('수정할 항목이 없습니다.');
+        }
+        const activeScenarios = [scenarios.isDateUpdate, scenarios.isInfoUpdate, scenarios.isResourceUpdate].filter(Boolean);
+        if (activeScenarios.length > 1) {
+            throw new common_1.BadRequestException('한 번에 하나의 수정 유형만 가능합니다.');
+        }
+        if (scenarios.isDateUpdate) {
+            if (!updateDto.date?.startDate || !updateDto.date?.endDate) {
+                throw new common_1.BadRequestException('날짜 수정 시 시작일과 종료일이 모두 필요합니다.');
+            }
+        }
+        if (scenarios.isResourceUpdate) {
+            if (!updateDto.resource?.resourceId) {
+                throw new common_1.BadRequestException('자원 수정 시 자원 ID가 필요합니다.');
+            }
         }
     }
 };
@@ -36204,7 +37093,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleStateTransitionService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -36213,12 +37102,16 @@ const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const schedule_service_1 = __webpack_require__(/*! ../../../domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
 const reservation_service_1 = __webpack_require__(/*! ../../../domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const schedule_relation_service_1 = __webpack_require__(/*! ../../../domain/schedule-relation/schedule-relation.service */ "./src/domain/schedule-relation/schedule-relation.service.ts");
+const schedule_participant_service_1 = __webpack_require__(/*! ../../../domain/schedule-participant/schedule-participant.service */ "./src/domain/schedule-participant/schedule-participant.service.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ScheduleStateTransitionService = class ScheduleStateTransitionService {
-    constructor(dataSource, domainScheduleService, domainReservationService) {
+    constructor(dataSource, domainScheduleService, domainReservationService, domainScheduleRelationService, domainScheduleParticipantService) {
         this.dataSource = dataSource;
         this.domainScheduleService = domainScheduleService;
         this.domainReservationService = domainReservationService;
+        this.domainScheduleRelationService = domainScheduleRelationService;
+        this.domainScheduleParticipantService = domainScheduleParticipantService;
     }
     async 일정을_취소한다(schedule, reservation, cancelReason, queryRunner) {
         const shouldManageTransaction = !queryRunner;
@@ -36384,7 +37277,11 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             const updatedSchedule = await this.domainScheduleService.findOne({
                 where: { scheduleId: schedule.scheduleId },
             });
-            return { schedule: updatedSchedule, reservation, changes };
+            return {
+                schedule: updatedSchedule,
+                reservation,
+                changes: Object.keys(changes).map((key) => `${key}: ${changes[key].from} → ${changes[key].to}`),
+            };
         }
         catch (error) {
             if (shouldManageTransaction) {
@@ -36398,11 +37295,142 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             }
         }
     }
+    async 일정을_시나리오별로_수정한다(schedule, reservation, changes, queryRunner) {
+        const shouldManageTransaction = !queryRunner;
+        queryRunner = queryRunner || this.dataSource.createQueryRunner();
+        if (shouldManageTransaction) {
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+        }
+        try {
+            const updateResult = {
+                schedule,
+                reservation,
+                changes: [],
+            };
+            if (changes.dateChanges) {
+                await this.일정_날짜를_수정한다(schedule, reservation, changes.dateChanges, queryRunner);
+                updateResult.changes.push('날짜 수정');
+            }
+            if (changes.infoChanges) {
+                const infoUpdateResult = await this.일정_정보를_수정한다(schedule, changes.infoChanges, queryRunner);
+                updateResult.changes.push('정보 수정');
+                if (infoUpdateResult.participantChanges) {
+                    updateResult.participantChanges = infoUpdateResult.participantChanges;
+                }
+            }
+            if (changes.resourceChanges) {
+                await this.일정_자원을_수정한다(schedule, reservation, changes.resourceChanges, queryRunner);
+                updateResult.changes.push('자원 수정');
+            }
+            if (shouldManageTransaction) {
+                await queryRunner.commitTransaction();
+            }
+            return updateResult;
+        }
+        catch (error) {
+            if (shouldManageTransaction) {
+                await queryRunner.rollbackTransaction();
+            }
+            throw error;
+        }
+        finally {
+            if (shouldManageTransaction) {
+                await queryRunner.release();
+            }
+        }
+    }
+    async 일정_날짜를_수정한다(schedule, reservation, dateChanges, queryRunner) {
+        const newStartDate = dateChanges.startDate || schedule.startDate;
+        const newEndDate = dateChanges.endDate || schedule.endDate;
+        await this.domainScheduleService.update(schedule.scheduleId, {
+            startDate: newStartDate,
+            endDate: newEndDate,
+        }, { queryRunner });
+        if (reservation) {
+            await this.domainReservationService.update(reservation.reservationId, {
+                startDate: newStartDate,
+                endDate: newEndDate,
+            }, { queryRunner });
+        }
+        schedule.startDate = newStartDate;
+        schedule.endDate = newEndDate;
+        if (reservation) {
+            reservation.startDate = newStartDate;
+            reservation.endDate = newEndDate;
+        }
+    }
+    async 일정_정보를_수정한다(schedule, infoChanges, queryRunner) {
+        const updateData = {};
+        let participantChanges;
+        if (infoChanges.title !== undefined)
+            updateData.title = infoChanges.title;
+        if (infoChanges.description !== undefined)
+            updateData.description = infoChanges.description;
+        if (infoChanges.notifyBeforeStart !== undefined)
+            updateData.notifyBeforeStart = infoChanges.notifyBeforeStart;
+        if (infoChanges.notifyMinutesBeforeStart !== undefined)
+            updateData.notifyMinutesBeforeStart = infoChanges.notifyMinutesBeforeStart;
+        if (infoChanges.location !== undefined)
+            updateData.location = infoChanges.location;
+        if (infoChanges.scheduleType !== undefined)
+            updateData.scheduleType = infoChanges.scheduleType;
+        if (infoChanges.projectId !== undefined) {
+            await this.프로젝트_관계를_업데이트한다(schedule.scheduleId, infoChanges.projectId, queryRunner);
+        }
+        if (Object.keys(updateData).length > 0) {
+            await this.domainScheduleService.update(schedule.scheduleId, updateData, { queryRunner });
+            Object.assign(schedule, updateData);
+        }
+        if (infoChanges.participants && infoChanges.participants.length > 0) {
+            participantChanges = await this.참여자를_업데이트한다(schedule.scheduleId, infoChanges.participants, queryRunner);
+        }
+        return {
+            schedule,
+            participantChanges,
+        };
+    }
+    async 프로젝트_관계를_업데이트한다(scheduleId, newProjectId, queryRunner) {
+        const existingRelation = await this.domainScheduleRelationService.findByScheduleId(scheduleId);
+        await this.domainScheduleRelationService.update(existingRelation.scheduleRelationId, { projectId: newProjectId }, { queryRunner });
+    }
+    async 참여자를_업데이트한다(scheduleId, newParticipants, queryRunner) {
+        const previousParticipants = await this.domainScheduleParticipantService.findByScheduleId(scheduleId);
+        if (previousParticipants.length > 0) {
+            for (const participant of previousParticipants) {
+                if (participant.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT) {
+                    await this.domainScheduleParticipantService.delete(participant.participantId, { queryRunner });
+                }
+            }
+        }
+        const createdParticipants = [];
+        for (const participant of newParticipants) {
+            const newParticipant = await this.domainScheduleParticipantService.save({
+                scheduleId,
+                employeeId: participant,
+                type: reservation_type_enum_1.ParticipantsType.PARTICIPANT,
+            }, { queryRunner });
+            createdParticipants.push(newParticipant);
+        }
+        return {
+            previousParticipants,
+            newParticipants: createdParticipants,
+        };
+    }
+    async 일정_자원을_수정한다(schedule, reservation, resourceChanges, queryRunner) {
+        if (!reservation) {
+            throw new Error('자원 수정을 위해서는 기존 예약이 있어야 합니다.');
+        }
+        await this.domainReservationService.update(reservation.reservationId, {
+            resourceId: resourceChanges.newResourceId,
+        }, { queryRunner });
+        reservation.resourceId = resourceChanges.newResourceId;
+    }
 };
 exports.ScheduleStateTransitionService = ScheduleStateTransitionService;
 exports.ScheduleStateTransitionService = ScheduleStateTransitionService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _b : Object, typeof (_c = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _b : Object, typeof (_c = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _c : Object, typeof (_d = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _d : Object, typeof (_e = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _e : Object])
 ], ScheduleStateTransitionService);
 
 
@@ -39595,6 +40623,11 @@ let DomainScheduleParticipantService = class DomainScheduleParticipantService ex
     async findAllByScheduleIds(scheduleIds) {
         return this.scheduleParticipantRepository.findAll({
             where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
+        });
+    }
+    async findReserverByScheduleId(employeeId, scheduleId) {
+        return this.scheduleParticipantRepository.findOne({
+            where: { scheduleId, employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
         });
     }
     async checkReserverByScheduleId(employeeId, scheduleId) {

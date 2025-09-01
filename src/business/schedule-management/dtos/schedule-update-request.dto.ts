@@ -1,10 +1,37 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsDateString, IsBoolean, IsArray, IsInt, Min, MaxLength } from 'class-validator';
+import { ScheduleType } from '@libs/enums/schedule-type.enum';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+    IsOptional,
+    IsString,
+    IsDateString,
+    IsBoolean,
+    IsArray,
+    IsInt,
+    Min,
+    MaxLength,
+    IsObject,
+    IsEnum,
+} from 'class-validator';
 
-/**
- * 일정 수정 요청 DTO
- */
-export class ScheduleUpdateRequestDto {
+export class ScheduleUpdateDateDto {
+    @ApiProperty({
+        description: '시작 날짜 및 시간',
+        example: '2025-08-25T10:00:00Z',
+        required: true,
+    })
+    @IsDateString()
+    startDate: string;
+
+    @ApiProperty({
+        description: '종료 날짜 및 시간',
+        example: '2025-08-25T11:00:00Z',
+        required: true,
+    })
+    @IsDateString()
+    endDate: string;
+}
+
+export class ScheduleUpdateInfoDto {
     @ApiProperty({
         description: '일정 제목',
         example: '수정된 주간 팀 회의',
@@ -28,25 +55,8 @@ export class ScheduleUpdateRequestDto {
     description?: string;
 
     @ApiProperty({
-        description: '시작 날짜 및 시간',
-        example: '2025-08-25T10:00:00Z',
-        required: false,
-    })
-    @IsOptional()
-    @IsDateString()
-    startDate?: string;
-
-    @ApiProperty({
-        description: '종료 날짜 및 시간',
-        example: '2025-08-25T11:00:00Z',
-        required: false,
-    })
-    @IsOptional()
-    @IsDateString()
-    endDate?: string;
-
-    @ApiProperty({
         description: '시작 전 알림 여부',
+        type: Boolean,
         example: true,
         required: false,
     })
@@ -56,9 +66,9 @@ export class ScheduleUpdateRequestDto {
 
     @ApiProperty({
         description: '시작 전 알림 시간 (분)',
+        type: [Number],
         example: [10, 30],
         required: false,
-        type: [Number],
     })
     @IsOptional()
     @IsArray()
@@ -67,13 +77,84 @@ export class ScheduleUpdateRequestDto {
     notifyMinutesBeforeStart?: number[];
 
     @ApiProperty({
-        description: '수정 사유',
-        example: '시간 변경 요청으로 인한 수정입니다.',
+        description: '위치',
+        type: String,
+        example: '123e4567-e89b-12d3-a456-426614174000',
         required: false,
-        maxLength: 500,
     })
     @IsOptional()
     @IsString()
-    @MaxLength(500, { message: '수정 사유는 500자를 초과할 수 없습니다.' })
-    reason?: string;
+    location?: string;
+
+    @ApiProperty({
+        description: '일정 타입',
+        example: ScheduleType.PERSONAL,
+        required: false,
+    })
+    @IsOptional()
+    @IsEnum(ScheduleType)
+    scheduleType: ScheduleType;
+
+    @ApiProperty({
+        description: '프로젝트 ID',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        required: false,
+    })
+    @IsOptional()
+    @IsString()
+    projectId?: string;
+
+    @ApiProperty({
+        description: '참여자',
+        example: ['123e4567-e89b-12d3-a456-426614174000'],
+        required: false,
+    })
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    participants?: string[];
+}
+
+export class ScheduleUpdateResourceDto {
+    @ApiProperty({
+        description: '자원 ID',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        required: true,
+    })
+    @IsString()
+    resourceId: string;
+}
+
+/**
+ * 일정 수정 요청 DTO
+ */
+export class ScheduleUpdateRequestDto {
+    @ApiPropertyOptional({
+        description: '날짜 정보',
+        type: ScheduleUpdateDateDto,
+        example: {
+            startDate: '2025-08-25T10:00:00Z',
+            endDate: '2025-08-25T11:00:00Z',
+        },
+    })
+    date?: ScheduleUpdateDateDto;
+
+    @ApiPropertyOptional({
+        description: '정보 정보',
+        type: ScheduleUpdateInfoDto,
+        example: {
+            title: '수정된 주간 팀 회의',
+            description: '수정된 회의 설명입니다.',
+        },
+    })
+    info?: ScheduleUpdateInfoDto;
+
+    @ApiPropertyOptional({
+        description: '자원 정보',
+        type: ScheduleUpdateResourceDto,
+        example: {
+            resourceId: '123e4567-e89b-12d3-a456-426614174000',
+        },
+    })
+    resource?: ScheduleUpdateResourceDto;
 }

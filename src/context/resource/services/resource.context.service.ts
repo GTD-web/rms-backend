@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { DataSource, In, IsNull, Not } from 'typeorm';
+import { DataSource, In, IsNull, LessThan, MoreThan, Not } from 'typeorm';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { Resource } from '@libs/entities/resource.entity';
@@ -24,15 +24,13 @@ import {
     UpdateResourceInfoDto,
     UpdateResourceOrdersDto,
 } from '@src/business/resource-management/dtos/resource/update-resource.dto';
-import {
-    CheckAvailabilityQueryDto,
-    CheckAvailabilityResponseDto,
-} from '@src/business/resource-management/dtos/resource/check-availability.dto';
+import { CheckAvailabilityQueryDto } from '@src/business/resource-management/dtos/resource/check-availability.dto';
 import { ResourceAvailabilityDto } from '@src/business/resource-management/dtos/resource/available-time-response.dto';
 import { UpdateVehicleInfoDto } from '@src/business/resource-management/dtos/vehicle/update-vehicle-info.dto';
 import { UpdateMeetingRoomInfoDto } from '@src/business/resource-management/dtos/meeting-room/dtos/update-meeting-room-info.dto';
 import { UpdateAccommodationInfoDto } from '@src/business/resource-management/dtos/accommodation/dtos/update-accommodation-info.dto';
 import { UpdateEquipmentInfoDto } from '@src/business/resource-management/dtos/equipment/dtos/update-equipment-info.dto';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 
 @Injectable()
 export class ResourceContextService {
@@ -495,5 +493,120 @@ export class ResourceContextService {
             default:
                 return null;
         }
+    }
+
+    /**
+     * 자원 타입별 운영 시간 규칙을 가져온다
+     */
+    자원_타입별_운영시간_규칙을_가져온다(resourceType: ResourceType): {
+        startTime: string;
+        endTime: string;
+        is24Hour: boolean;
+    } {
+        switch (resourceType) {
+            case ResourceType.VEHICLE:
+                return { startTime: '00:00:00', endTime: '24:00:00', is24Hour: true };
+            case ResourceType.MEETING_ROOM:
+            case ResourceType.EQUIPMENT:
+                return { startTime: '09:00:00', endTime: '18:00:00', is24Hour: false };
+            case ResourceType.ACCOMMODATION:
+                return { startTime: '00:00:00', endTime: '24:00:00', is24Hour: true };
+            default:
+                return { startTime: '09:00:00', endTime: '18:00:00', is24Hour: false };
+        }
+    }
+
+    /**
+     * 자원 그룹별로 사용 가능한 자원 목록을 조회한다
+     */
+    async 그룹별_사용가능한_자원_목록을_조회한다(
+        resourceGroupId?: string,
+        resourceType?: ResourceType,
+    ): Promise<Resource[]> {
+        const whereCondition: any = {
+            isAvailable: true,
+        };
+
+        if (resourceGroupId) {
+            whereCondition.resourceGroupId = resourceGroupId;
+        }
+
+        if (resourceType) {
+            whereCondition.type = resourceType;
+        }
+
+        return await this.domainResourceService.findAll({
+            where: whereCondition,
+            relations: ['resourceGroup'],
+            order: { order: 'ASC' },
+        });
+    }
+
+    /**
+     * 현재 시간 기준으로 자원별 가용 시간대를 계산한다
+     */
+    현재시간_기준_가용시간대를_계산한다(
+        resourceType: ResourceType,
+        targetDate: string,
+        isToday: boolean,
+    ): { startTime: string; endTime: string } {
+        const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
+
+        if (!isToday) {
+            return operatingHours;
+        }
+
+        // 오늘인 경우 현재 시간의 30분 단위로 올림하여 시작 시간 계산
+        const now = new Date();
+        const currentMinutes = now.getMinutes();
+        const roundedStartTime = new Date(now);
+
+        if (currentMinutes < 30) {
+            roundedStartTime.setMinutes(0, 0, 0);
+        } else {
+            roundedStartTime.setMinutes(30, 0, 0);
+        }
+
+        // 차량은 24시간, 다른 자원은 운영 시간 고려
+        let calculatedStartTime: string;
+        if (resourceType === ResourceType.VEHICLE) {
+            calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
+        } else {
+            const operatingStartTime = new Date(`${targetDate} ${operatingHours.startTime}`);
+            calculatedStartTime =
+                roundedStartTime > operatingStartTime
+                    ? roundedStartTime.toTimeString().slice(0, 8)
+                    : operatingHours.startTime;
+        }
+
+        return {
+            startTime: calculatedStartTime,
+            endTime: operatingHours.endTime,
+        };
+    }
+
+    async 자원의_해당시간_예약을_확인한다(
+        resourceId: string,
+        startDate: string,
+        endDate: string,
+        reservationId?: string,
+    ): Promise<boolean> {
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+
+        const resource = await this.domainResourceService.findOne({
+            where: {
+                resourceId: resourceId,
+                reservations: {
+                    reservationId: reservationId ? Not(reservationId) : undefined,
+                    status: ReservationStatus.CONFIRMED,
+                    startDate: LessThan(endDateObj),
+                    endDate: MoreThan(startDateObj),
+                },
+            },
+            relations: ['reservations'],
+        });
+
+        return !!resource;
     }
 }

@@ -2,10 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, QueryRunner } from 'typeorm';
 import { Schedule } from '@libs/entities/schedule.entity';
 import { Reservation } from '@libs/entities/reservation.entity';
-import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
+import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ScheduleStatus } from '@libs/enums/schedule-type.enum';
 import { DomainScheduleService } from '../../../domain/schedule/schedule.service';
 import { DomainReservationService } from '../../../domain/reservation/reservation.service';
+import { DomainScheduleRelationService } from '../../../domain/schedule-relation/schedule-relation.service';
+import { DomainScheduleParticipantService } from '../../../domain/schedule-participant/schedule-participant.service';
 import { DateUtil } from '@libs/utils/date.util';
 
 export interface ScheduleCancelResult {
@@ -30,7 +33,19 @@ export interface ScheduleExtendResult {
 export interface ScheduleUpdateResult {
     schedule: Schedule;
     reservation?: Reservation;
-    changes: Record<string, { from: any; to: any }>;
+    changes: string[];
+    participantChanges?: {
+        previousParticipants: ScheduleParticipant[];
+        newParticipants: ScheduleParticipant[];
+    };
+}
+
+export interface ScheduleInfoUpdateResult {
+    schedule: Schedule;
+    participantChanges?: {
+        previousParticipants: ScheduleParticipant[];
+        newParticipants: ScheduleParticipant[];
+    };
 }
 
 @Injectable()
@@ -39,6 +54,8 @@ export class ScheduleStateTransitionService {
         private readonly dataSource: DataSource,
         private readonly domainScheduleService: DomainScheduleService,
         private readonly domainReservationService: DomainReservationService,
+        private readonly domainScheduleRelationService: DomainScheduleRelationService,
+        private readonly domainScheduleParticipantService: DomainScheduleParticipantService,
     ) {}
 
     async 일정을_취소한다(
@@ -303,7 +320,11 @@ export class ScheduleStateTransitionService {
                 where: { scheduleId: schedule.scheduleId },
             });
 
-            return { schedule: updatedSchedule!, reservation, changes };
+            return {
+                schedule: updatedSchedule!,
+                reservation,
+                changes: Object.keys(changes).map((key) => `${key}: ${changes[key].from} → ${changes[key].to}`),
+            };
         } catch (error) {
             if (shouldManageTransaction) {
                 await queryRunner.rollbackTransaction();
@@ -315,4 +336,271 @@ export class ScheduleStateTransitionService {
             }
         }
     }
+
+    /**
+     * 일정을 시나리오별로 수정한다
+     */
+    async 일정을_시나리오별로_수정한다(
+        schedule: Schedule,
+        reservation: Reservation,
+        changes: ScheduleUpdateChanges,
+        queryRunner?: QueryRunner,
+    ): Promise<ScheduleUpdateResult> {
+        const shouldManageTransaction = !queryRunner;
+        queryRunner = queryRunner || this.dataSource.createQueryRunner();
+
+        if (shouldManageTransaction) {
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+        }
+
+        try {
+            const updateResult: ScheduleUpdateResult = {
+                schedule,
+                reservation,
+                changes: [],
+            };
+
+            // 시나리오 1: 날짜 수정
+            if (changes.dateChanges) {
+                await this.일정_날짜를_수정한다(schedule, reservation, changes.dateChanges, queryRunner);
+                updateResult.changes.push('날짜 수정');
+            }
+
+            // 시나리오 2: 정보 수정
+            if (changes.infoChanges) {
+                const infoUpdateResult = await this.일정_정보를_수정한다(schedule, changes.infoChanges, queryRunner);
+                updateResult.changes.push('정보 수정');
+
+                // 참여자 변경사항이 있으면 알림 정보를 포함
+                if (infoUpdateResult.participantChanges) {
+                    updateResult.participantChanges = infoUpdateResult.participantChanges;
+                }
+            }
+
+            // 시나리오 3: 자원 수정
+            if (changes.resourceChanges) {
+                await this.일정_자원을_수정한다(schedule, reservation, changes.resourceChanges, queryRunner);
+                updateResult.changes.push('자원 수정');
+            }
+
+            if (shouldManageTransaction) {
+                await queryRunner.commitTransaction();
+            }
+
+            return updateResult;
+        } catch (error) {
+            if (shouldManageTransaction) {
+                await queryRunner.rollbackTransaction();
+            }
+            throw error;
+        } finally {
+            if (shouldManageTransaction) {
+                await queryRunner.release();
+            }
+        }
+    }
+
+    /**
+     * 일정 날짜를 수정한다 (schedule + reservation 둘 다 수정)
+     */
+    private async 일정_날짜를_수정한다(
+        schedule: Schedule,
+        reservation: Reservation,
+        dateChanges: DateChanges,
+        queryRunner: QueryRunner,
+    ): Promise<void> {
+        const newStartDate = dateChanges.startDate || schedule.startDate;
+        const newEndDate = dateChanges.endDate || schedule.endDate;
+
+        // 1. 일정(Schedule) 수정
+        await this.domainScheduleService.update(
+            schedule.scheduleId,
+            {
+                startDate: newStartDate,
+                endDate: newEndDate,
+            },
+            { queryRunner },
+        );
+
+        // 2. 예약(Reservation) 수정 (있는 경우)
+        if (reservation) {
+            await this.domainReservationService.update(
+                reservation.reservationId,
+                {
+                    startDate: newStartDate,
+                    endDate: newEndDate,
+                },
+                { queryRunner },
+            );
+        }
+
+        // 엔티티 상태 업데이트
+        schedule.startDate = newStartDate;
+        schedule.endDate = newEndDate;
+        if (reservation) {
+            reservation.startDate = newStartDate;
+            reservation.endDate = newEndDate;
+        }
+    }
+
+    /**
+     * 일정 정보를 수정한다 (schedule만 수정)
+     */
+    private async 일정_정보를_수정한다(
+        schedule: Schedule,
+        infoChanges: InfoChanges,
+        queryRunner: QueryRunner,
+    ): Promise<ScheduleInfoUpdateResult> {
+        const updateData: any = {};
+        let participantChanges: ScheduleInfoUpdateResult['participantChanges'];
+
+        // 선택적으로 업데이트할 필드들
+        if (infoChanges.title !== undefined) updateData.title = infoChanges.title;
+        if (infoChanges.description !== undefined) updateData.description = infoChanges.description;
+        if (infoChanges.notifyBeforeStart !== undefined) updateData.notifyBeforeStart = infoChanges.notifyBeforeStart;
+        if (infoChanges.notifyMinutesBeforeStart !== undefined)
+            updateData.notifyMinutesBeforeStart = infoChanges.notifyMinutesBeforeStart;
+        if (infoChanges.location !== undefined) updateData.location = infoChanges.location;
+        if (infoChanges.scheduleType !== undefined) updateData.scheduleType = infoChanges.scheduleType;
+
+        // projectId는 schedule-relations 테이블 업데이트
+        if (infoChanges.projectId !== undefined) {
+            await this.프로젝트_관계를_업데이트한다(schedule.scheduleId, infoChanges.projectId, queryRunner);
+        }
+
+        // 일정 정보 업데이트 (projectId 제외)
+        if (Object.keys(updateData).length > 0) {
+            await this.domainScheduleService.update(schedule.scheduleId, updateData, { queryRunner });
+            // await this.domainReservationService.update(reservation.reservationId, updateData, { queryRunner });
+
+            // 엔티티 상태 업데이트
+            Object.assign(schedule, updateData);
+        }
+
+        // 참여자 업데이트 (별도 처리)
+        if (infoChanges.participants && infoChanges.participants.length > 0) {
+            participantChanges = await this.참여자를_업데이트한다(
+                schedule.scheduleId,
+                infoChanges.participants,
+                queryRunner,
+            );
+        }
+
+        return {
+            schedule,
+            participantChanges,
+        };
+    }
+
+    /**
+     * 프로젝트 관계를 업데이트한다
+     */
+    private async 프로젝트_관계를_업데이트한다(
+        scheduleId: string,
+        newProjectId: string,
+        queryRunner: QueryRunner,
+    ): Promise<void> {
+        // 기존 관계 조회
+        const existingRelation = await this.domainScheduleRelationService.findByScheduleId(scheduleId);
+
+        await this.domainScheduleRelationService.update(
+            existingRelation.scheduleRelationId,
+            { projectId: newProjectId },
+            { queryRunner },
+        );
+    }
+
+    /**
+     * 참여자를 업데이트한다 (기존 삭제 후 새로 생성)
+     */
+    private async 참여자를_업데이트한다(
+        scheduleId: string,
+        newParticipants: string[],
+        queryRunner: QueryRunner,
+    ): Promise<{ previousParticipants: ScheduleParticipant[]; newParticipants: ScheduleParticipant[] }> {
+        // 1. 기존 참여자 조회 (알림용)
+        const previousParticipants = await this.domainScheduleParticipantService.findByScheduleId(scheduleId);
+
+        // 2. 기존 참여자 삭제
+        if (previousParticipants.length > 0) {
+            for (const participant of previousParticipants) {
+                if (participant.type === ParticipantsType.PARTICIPANT) {
+                    await this.domainScheduleParticipantService.delete(participant.participantId, { queryRunner });
+                }
+            }
+        }
+
+        // 3. 새 참여자 생성
+        const createdParticipants: ScheduleParticipant[] = [];
+        for (const participant of newParticipants) {
+            const newParticipant = await this.domainScheduleParticipantService.save(
+                {
+                    scheduleId,
+                    employeeId: participant,
+                    type: ParticipantsType.PARTICIPANT,
+                },
+                { queryRunner },
+            );
+            createdParticipants.push(newParticipant);
+        }
+
+        return {
+            previousParticipants,
+            newParticipants: createdParticipants,
+        };
+    }
+
+    /**
+     * 일정 자원을 수정한다 (기존 reservation 취소 후 새 reservation 생성)
+     */
+    private async 일정_자원을_수정한다(
+        schedule: Schedule,
+        reservation: Reservation,
+        resourceChanges: ResourceChanges,
+        queryRunner: QueryRunner,
+    ): Promise<void> {
+        if (!reservation) {
+            throw new Error('자원 수정을 위해서는 기존 예약이 있어야 합니다.');
+        }
+
+        // 기존 예약의 resourceId만 업데이트
+        await this.domainReservationService.update(
+            reservation.reservationId,
+            {
+                resourceId: resourceChanges.newResourceId,
+            },
+            { queryRunner },
+        );
+
+        // 엔티티 상태 업데이트
+        reservation.resourceId = resourceChanges.newResourceId;
+    }
+}
+
+// 타입 정의들
+export interface ScheduleUpdateChanges {
+    dateChanges?: DateChanges;
+    infoChanges?: InfoChanges;
+    resourceChanges?: ResourceChanges;
+}
+
+export interface DateChanges {
+    startDate?: Date;
+    endDate?: Date;
+}
+
+export interface InfoChanges {
+    title?: string;
+    description?: string;
+    notifyBeforeStart?: boolean;
+    notifyMinutesBeforeStart?: number[];
+    location?: string;
+    scheduleType?: any;
+    projectId?: string;
+    participants?: string[];
+}
+
+export interface ResourceChanges {
+    newResourceId: string;
 }

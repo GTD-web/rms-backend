@@ -6,6 +6,9 @@ import { CreateResourceResponseDto, ResourceResponseDto } from '../../dtos/resou
 import { CreateResourceInfoDto } from '../../dtos/resource/create-resource.dto';
 import { UpdateResourceInfoDto, UpdateResourceOrdersDto } from '../../dtos/resource/update-resource.dto';
 import { ResourceService } from '../../services/resource.service';
+import { ResourceAvailabilityDto } from '../../dtos/resource/available-time-response.dto';
+import { ResourceQueryDto } from '../../dtos/resource/resource-query.dto';
+import { CheckAvailabilityQueryDto } from '../../dtos/resource/check-availability.dto';
 
 @ApiTags('v2 자원')
 @Controller('v2/resources')
@@ -34,6 +37,59 @@ export class ResourceController {
     @ApiQuery({ name: 'type', enum: ResourceType })
     async findAll(@Query('type') type: ResourceType): Promise<ResourceResponseDto[]> {
         return this.resourceService.findResources(type);
+    }
+
+    @Get('availability')
+    @ApiOperation({
+        summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지',
+        description: `
+## 자원 가용성 조회 API
+
+이 API는 세 가지 시나리오로 사용할 수 있습니다:
+
+### 🎯 시나리오 1: 시간 슬롯 방식 (회의실, 장비) => 
+30분 단위로 사용 가능한 시간 슬롯을 조회합니다.
+- **필수**: resourceType, resourceGroupId, startDate, endDate(=startDate), timeUnit
+- **선택**: am, pm (시간대 필터)
+
+**예시**: \`?resourceType=MEETING_ROOM&resourceGroupId=xxx&startDate=2024-01-15&endDate=2024-01-15&timeUnit=30&pm=true\`
+
+### 🎯 시나리오 2: 시간 범위 방식 (정확한 시간 지정)
+특정 시간 범위에서 자원 가용성을 확인합니다.
+- **필수**: resourceType, startDate, endDate, startTime, endTime
+- **선택**: resourceGroupId
+
+**예시**: \`?resourceType=EQUIPMENT&resourceGroupId=xxx&startDate=2024-01-15&endDate=2024-01-15&startTime=09:00:00&endTime=17:00:00\`
+
+### 🎯 시나리오 3: 날짜 범위 방식 (숙소, 다일자)
+여러 날짜에 걸친 자원 가용성을 확인합니다.
+- **필수**: resourceType, resourceGroupId, startDate, endDate
+- **선택**: startTime, endTime (체크인/체크아웃 시간)
+
+**예시**: \`?resourceType=ACCOMMODATION&resourceGroupId=xxx&startDate=2024-01-15&endDate=2024-01-17&startTime=15:00:00&endTime=11:00:00\`
+        `,
+    })
+    @ApiOkResponse({
+        description: '예약 가능 시간 조회 성공',
+        type: [ResourceAvailabilityDto],
+    })
+    async findAvailableTime(@Query() query: ResourceQueryDto): Promise<ResourceAvailabilityDto[]> {
+        return this.resourceService.findAvailableTime(query);
+    }
+
+    @Get('check-availability')
+    @ApiOperation({ summary: '예약 시간 가용성 확인' })
+    @ApiOkResponse({
+        description: '예약 시간 가용성 확인 결과',
+        type: Boolean,
+    })
+    async checkAvailability(@Query() query: CheckAvailabilityQueryDto): Promise<boolean> {
+        return this.resourceService.checkAvailability(
+            query.resourceId,
+            query.startDate,
+            query.endDate,
+            query.reservationId,
+        );
     }
 
     @Get(':resourceId')

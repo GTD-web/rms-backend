@@ -19,11 +19,3 @@ export class CheckAvailabilityQueryDto {
     @IsOptional()
     reservationId?: string;
 }
-
-export class CheckAvailabilityResponseDto {
-    @ApiProperty({ description: '예약 가능 여부' })
-    isAvailable: boolean;
-
-    // @ApiProperty({ description: '예약 불가능한 경우, 이미 예약된 예약 ID', required: false })
-    // conflictingReservationId?: string;
-}

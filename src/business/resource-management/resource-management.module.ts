@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 // Context Modules
 import { ResourceContextModule } from '@src/context/resource/resource.context.module';
+import { ReservationContextModule } from '@src/context/reservation/reservation.context.module';
 import { FileContextModule } from '@src/context/file/file.context.module';
 import { NotificationContextModule } from '@src/context/notification/notification.context.module';
 
@@ -21,7 +22,7 @@ import { ConsumableService } from './services/consumable.service';
 import { MaintenanceService } from './services/maintenance.service';
 
 @Module({
-    imports: [ResourceContextModule, FileContextModule, NotificationContextModule],
+    imports: [ResourceContextModule, ReservationContextModule, FileContextModule, NotificationContextModule],
     controllers: [
         ResourceController,
         ResourceGroupController,

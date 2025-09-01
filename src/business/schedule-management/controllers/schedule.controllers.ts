@@ -232,14 +232,14 @@ export class ScheduleController {
     })
     @ApiOkResponse({
         description: '일정 수정 성공',
-        type: ScheduleUpdateResponseDto,
+        type: Boolean,
     })
     @Patch(':scheduleId')
     async updateSchedule(
         @User() user: Employee,
         @Param('scheduleId') scheduleId: string,
         @Body() updateScheduleDto: ScheduleUpdateRequestDto,
-    ): Promise<ScheduleUpdateResponseDto> {
+    ): Promise<boolean> {
         return this.scheduleManagementService.updateSchedule(user, scheduleId, updateScheduleDto);
     }
 }

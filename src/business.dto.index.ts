@@ -16,6 +16,61 @@ export * from './business/reservation-management/dtos/return-vehicle-response.dt
 export * from './business/reservation-management/dtos/update-reservation.dto';
 
 // ============================================================================
+// 📋 SCHEDULE MANAGEMENT DTOs
+// ============================================================================
+
+// 📅 Schedule Request DTOs
+export * from './business/schedule-management/dtos/schedule-create-request.dto';
+export * from './business/schedule-management/dtos/schedule-update-request.dto';
+export * from './business/schedule-management/dtos/schedule-cancel-request.dto';
+export * from './business/schedule-management/dtos/schedule-complete-request.dto';
+export * from './business/schedule-management/dtos/schedule-extend-request.dto';
+
+// 📅 Schedule Response DTOs
+export * from './business/schedule-management/dtos/schedule-create-response.dto';
+export * from './business/schedule-management/dtos/schedule-update-response.dto';
+export * from './business/schedule-management/dtos/schedule-detail-response.dto';
+export * from './business/schedule-management/dtos/schedule-cancel-response.dto';
+export * from './business/schedule-management/dtos/schedule-complete-response.dto';
+export * from './business/schedule-management/dtos/schedule-extend-response.dto';
+export * from './business/schedule-management/dtos/resource-schedule-response.dto';
+export * from './business/schedule-management/dtos/schedule-calendar-response.dto';
+export * from './business/schedule-management/dtos/my-schedule-response.dto';
+export * from './business/schedule-management/dtos/my-schedule-statistics-response.dto';
+
+// 📅 Schedule Query DTOs
+export * from './business/schedule-management/dtos/schedule-detail-query.dto';
+export * from './business/schedule-management/dtos/schedule-calendar-query.dto';
+export * from './business/schedule-management/dtos/resource-schedule-query.dto';
+export * from './business/schedule-management/dtos/my-schedule-query.dto';
+export * from './business/schedule-management/dtos/my-schedule-statistics-query.dto';
+
+// ============================================================================
+// 📋 EMPLOYEE MANAGEMENT DTOs
+// ============================================================================
+
+// 👤 Employee CRUD DTOs
+export * from './business/employee-management/dtos/create-employee.dto';
+export * from './business/employee-management/dtos/update-employee.dto';
+export * from './business/employee-management/dtos/employee-response.dto';
+export * from './business/employee-management/dtos/user-response.dto';
+export * from './business/employee-management/dtos/employees-by-department-response.dto';
+export * from './business/employee-management/dtos/mms-employee-response.dto';
+
+// 👤 Employee Auth/Security DTOs
+export * from './business/employee-management/dtos/change-password.dto';
+export * from './business/employee-management/dtos/check-password.dto';
+export * from './business/employee-management/dtos/change-role.dto';
+
+// 👤 Employee Settings DTOs
+export * from './business/employee-management/dtos/notification-settings.dto';
+
+// ============================================================================
+// 📋 TASK MANAGEMENT DTOs
+// ============================================================================
+export * from './business/task-management/dtos/task-response.dto';
+
+// ============================================================================
 // 📋 RESOURCE MANAGEMENT DTOs
 // ============================================================================
 

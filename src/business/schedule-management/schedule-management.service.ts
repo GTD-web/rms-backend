@@ -37,8 +37,12 @@ import { FileContextService } from '../../context/file/services/file.context.ser
 
 // 새로운 Policy/Authorization Services (컨텍스트로 이동)
 import { ScheduleAuthorizationService } from '../../context/schedule/services/schedule-authorization.service';
-import { SchedulePolicyService } from '../../context/schedule/services/schedule-policy.service';
-import { ScheduleStateTransitionService } from '../../context/schedule/services/schedule-state-transition.service';
+import { SchedulePolicyService, UpdateScenarios } from '../../context/schedule/services/schedule-policy.service';
+import {
+    ScheduleStateTransitionService,
+    ScheduleUpdateChanges,
+    ScheduleUpdateResult,
+} from '../../context/schedule/services/schedule-state-transition.service';
 import { ScheduleMutationContextService } from '../../context/schedule/services/schedule-mutation.context.service';
 import { SchedulePostProcessingService } from '../../context/schedule/services/schedule-post-processing.service';
 import { ScheduleAction } from '../../context/schedule/services/schedule-authorization.service';
@@ -51,7 +55,7 @@ import {
 import { ResourceGroupDto } from './dtos/resource-schedule-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DataSource } from 'typeorm';
-import { Schedule } from '@libs/entities';
+import { Reservation, Schedule } from '@libs/entities';
 import { ScheduleType } from '@libs/enums/schedule-type.enum';
 import { EmployeeContextService } from '@src/context/employee/employee.context.service';
 import { ScheduleNotificationContextService } from '@src/context/notification/services/schedule-notification.context.service';
@@ -234,14 +238,6 @@ export class ScheduleManagementService {
      */
     async findScheduleDetail(user: Employee, query: ScheduleDetailQueryDto): Promise<ScheduleDetailResponseDto> {
         this.logger.log(`일정 상세 조회 요청 - 사용자: ${user.employeeId}, 일정ID: ${query.scheduleId}`);
-
-        // 1. 권한: 요청자/역할 확인
-        const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(
-            user,
-            query.scheduleId,
-            ScheduleAction.VIEW,
-        );
-        this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
 
         // 2. 그래프 조회: 컨텍스트에서 데이터 조회
         const { scheduleId, includeProject, includeReservation } = query;
@@ -739,14 +735,14 @@ export class ScheduleManagementService {
     }
 
     /**
-     * 일정 수정 (표준 파이프라인 적용)
+     * 일정 수정 (표준 파이프라인 적용) - 세 가지 수정 시나리오 지원
      */
-    async updateSchedule(
-        user: Employee,
-        scheduleId: string,
-        updateDto: ScheduleUpdateRequestDto,
-    ): Promise<ScheduleUpdateResponseDto> {
+    async updateSchedule(user: Employee, scheduleId: string, updateDto: ScheduleUpdateRequestDto): Promise<boolean> {
         this.logger.log(`일정 수정 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
+
+        // 0. 수정 시나리오 분석 및 검증
+        const updateScenarios = this.schedulePolicyService.수정_시나리오를_분석한다(updateDto);
+        this.schedulePolicyService.수정요청을_기본검증한다(updateDto, updateScenarios);
 
         // 1. 권한: 요청자/역할 확인
         const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(
@@ -764,51 +760,101 @@ export class ScheduleManagementService {
             },
         );
 
-        // 3. 정책 판단: 가능/불가(사유 코드 포함)
-        const updateRequest = {
-            title: updateDto.title,
-            description: updateDto.description,
-            startDate: updateDto.startDate ? new Date(updateDto.startDate) : undefined,
-            endDate: updateDto.endDate ? new Date(updateDto.endDate) : undefined,
-            notifyBeforeStart: updateDto.notifyBeforeStart,
-            notifyMinutesBeforeStart: updateDto.notifyMinutesBeforeStart,
-        };
+        // 3. 정책 판단: 시나리오별 정책 검증
+        if (updateScenarios.isDateUpdate) {
+            const datePolicy = await this.schedulePolicyService.일정_날짜수정이_가능한지_확인한다(
+                schedule,
+                reservation,
+                {
+                    newStartDate: updateDto.date?.startDate ? new Date(updateDto.date.startDate) : undefined,
+                    newEndDate: updateDto.date?.endDate ? new Date(updateDto.date.endDate) : undefined,
+                },
+            );
+            this.schedulePolicyService.정책_체크_실패시_예외를_던진다(datePolicy);
+        }
 
-        const policyResult = await this.schedulePolicyService.일정_수정이_가능한지_확인한다(
+        if (updateScenarios.isInfoUpdate) {
+            const infoPolicy = await this.schedulePolicyService.일정_정보수정이_가능한지_확인한다(
+                schedule,
+                updateDto.info,
+            );
+            this.schedulePolicyService.정책_체크_실패시_예외를_던진다(infoPolicy);
+        }
+
+        if (updateScenarios.isResourceUpdate) {
+            const resourcePolicy = await this.schedulePolicyService.일정_자원수정이_가능한지_확인한다(
+                schedule,
+                reservation,
+                updateDto.resource.resourceId,
+            );
+            this.schedulePolicyService.정책_체크_실패시_예외를_던진다(resourcePolicy);
+        }
+
+        // 4. 실행/전이: 시나리오별 상태 변경 (트랜잭션)
+        const updateResult = await this.scheduleStateTransitionService.일정을_시나리오별로_수정한다(
             schedule,
-            updateRequest,
             reservation,
-        );
-        this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
+            {
+                dateChanges: updateScenarios.isDateUpdate
+                    ? {
+                          startDate: updateDto.date?.startDate ? new Date(updateDto.date.startDate) : undefined,
+                          endDate: updateDto.date?.endDate ? new Date(updateDto.date.endDate) : undefined,
+                      }
+                    : undefined,
 
-        // 4. 실행/전이: 상태 변경/생성/삭제 (트랜잭션)
-        const updateResult = await this.scheduleStateTransitionService.일정을_수정한다(
-            schedule,
-            reservation,
-            updateRequest,
-            updateDto.reason,
+                infoChanges: updateScenarios.isInfoUpdate
+                    ? {
+                          title: updateDto.info?.title,
+                          description: updateDto.info?.description,
+                          notifyBeforeStart: updateDto.info?.notifyBeforeStart,
+                          notifyMinutesBeforeStart: updateDto.info?.notifyMinutesBeforeStart,
+                          location: updateDto.info?.location,
+                          scheduleType: updateDto.info?.scheduleType,
+                          projectId: updateDto.info?.projectId,
+                          participants: updateDto.info?.participants,
+                      }
+                    : undefined,
+
+                resourceChanges: updateScenarios.isResourceUpdate
+                    ? {
+                          newResourceId: updateDto.resource.resourceId,
+                      }
+                    : undefined,
+            },
         );
 
-        // 5. 후처리: 알림/감사/도메인이벤트
-        // await this.schedulePostProcessingService.일정_수정_후처리(user, updateResult);
+        // 5. 후처리: 시나리오별 후처리
+        const { resource, participants } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+            scheduleId,
+            {
+                withReservation: true,
+                withResource: true,
+                withParticipants: true,
+            },
+        );
+        const employeeIds = updateScenarios.isInfoUpdate
+            ? Array.from(
+                  new Set([
+                      ...updateResult.participantChanges.previousParticipants.map(
+                          (participant) => participant.employeeId,
+                      ),
+                      ...updateResult.participantChanges.newParticipants.map((participant) => participant.employeeId),
+                  ]),
+              )
+            : participants.map((participant) => participant.employeeId);
+
+        console.log(employeeIds);
+        await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(
+            updateScenarios,
+            {
+                schedule,
+                reservation,
+                resource,
+            },
+            employeeIds,
+        );
 
         // 6. 응답 DTO 변환
-        return {
-            scheduleId: updateResult.schedule.scheduleId,
-            title: updateResult.schedule.title,
-            description: updateResult.schedule.description,
-            startDate: updateResult.schedule.startDate,
-            endDate: updateResult.schedule.endDate,
-            changes: updateResult.changes,
-            reason: updateDto.reason,
-            reservation: updateResult.reservation
-                ? {
-                      reservationId: updateResult.reservation.reservationId,
-                      title: updateResult.reservation.title,
-                      startDate: updateResult.reservation.startDate,
-                      endDate: updateResult.reservation.endDate,
-                  }
-                : undefined,
-        };
+        return true;
     }
 }

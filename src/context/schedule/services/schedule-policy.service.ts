@@ -41,6 +41,13 @@ export interface ScheduleCreateRequest {
     };
 }
 
+// 타입 정의
+export interface UpdateScenarios {
+    isDateUpdate: boolean; // 날짜 변경
+    isInfoUpdate: boolean; // 정보 변경
+    isResourceUpdate: boolean; // 자원 변경
+}
+
 @Injectable()
 export class SchedulePolicyService {
     constructor(private readonly domainReservationService: DomainReservationService) {}
@@ -189,72 +196,30 @@ export class SchedulePolicyService {
         return { isAllowed: true };
     }
 
-    /**
-     * 일정 수정 가능 여부를 판단합니다
-     */
-    async 일정_수정이_가능한지_확인한다(
-        schedule: Schedule,
-        updateRequest: ScheduleUpdateRequest,
-        reservation?: Reservation,
-    ): Promise<PolicyResult> {
-        const now = DateUtil.now().toDate();
+    // /**
+    //  * 일정 수정 가능 여부를 판단합니다
+    //  */
+    // async 일정_수정이_가능한지_확인한다(
+    //     schedule: Schedule,
+    //     updateRequest: ScheduleUpdateRequest,
+    //     reservation?: Reservation,
+    // ): Promise<PolicyResult> {
+    //     const isAvailable = await this.domainReservationService.checkReservationConflicts(
+    //         reservation.resourceId,
+    //         newStartDate,
+    //         newEndDate,
+    //     );
 
-        // 1. 시간 정책 체크 - 시작 1시간 전까지만 수정 가능
-        const modificationDeadline = new Date(schedule.startDate);
-        modificationDeadline.setHours(modificationDeadline.getHours() - 1);
+    //     if (!isAvailable) {
+    //         return {
+    //             isAllowed: false,
+    //             reason: '수정하려는 시간대에 다른 예약이 있습니다.',
+    //             reasonCode: 'RESOURCE_CONFLICT',
+    //         };
+    //     }
 
-        if (now > modificationDeadline) {
-            return {
-                isAllowed: false,
-                reason: '일정 시작 1시간 전까지만 수정이 가능합니다.',
-                reasonCode: 'MODIFICATION_TIME_EXCEEDED',
-            };
-        }
-
-        // 2. 날짜/시간 변경이 있는 경우 추가 체크
-        if (updateRequest.startDate || updateRequest.endDate) {
-            const newStartDate = updateRequest.startDate || schedule.startDate;
-            const newEndDate = updateRequest.endDate || schedule.endDate;
-
-            // 2-1. 시작 시간이 종료 시간보다 늦으면 안됨
-            if (newStartDate >= newEndDate) {
-                return {
-                    isAllowed: false,
-                    reason: '시작 시간은 종료 시간보다 빨라야 합니다.',
-                    reasonCode: 'INVALID_TIME_RANGE',
-                };
-            }
-
-            // 2-2. 과거 시간으로 변경 불가
-            if (newStartDate < now) {
-                return {
-                    isAllowed: false,
-                    reason: '과거 시간으로는 수정할 수 없습니다.',
-                    reasonCode: 'PAST_TIME_NOT_ALLOWED',
-                };
-            }
-
-            // 2-3. 예약이 있는 경우 자원 충돌 체크
-            if (reservation && (updateRequest.startDate || updateRequest.endDate)) {
-                // TODO: 본인 예약 제외 로직은 별도 구현 필요
-                const isAvailable = await this.domainReservationService.checkReservationConflicts(
-                    reservation.resourceId,
-                    newStartDate,
-                    newEndDate,
-                );
-
-                if (!isAvailable) {
-                    return {
-                        isAllowed: false,
-                        reason: '수정하려는 시간대에 다른 예약이 있습니다.',
-                        reasonCode: 'RESOURCE_CONFLICT',
-                    };
-                }
-            }
-        }
-
-        return { isAllowed: true };
-    }
+    //     return { isAllowed: true };
+    // }
 
     /**
      * 다중 일정 생성 가능 여부를 판단합니다 (레거시 로직 유지)
@@ -394,6 +359,164 @@ export class SchedulePolicyService {
                 message: policyResult.reason || '정책 위반',
                 code: policyResult.reasonCode || 'POLICY_VIOLATION',
             });
+        }
+    }
+
+    /**
+     * 일정 날짜 수정이 가능한지 확인한다
+     */
+    async 일정_날짜수정이_가능한지_확인한다(
+        schedule: Schedule,
+        reservation: Reservation,
+        dateChanges: { newStartDate?: Date; newEndDate?: Date },
+    ): Promise<PolicyResult> {
+        // 1. 일정 상태 확인 (완료/취소된 일정은 수정 불가)
+        if (schedule.status === ScheduleStatus.COMPLETED || schedule.status === ScheduleStatus.CANCELLED) {
+            return {
+                isAllowed: false,
+                reason: '완료되거나 취소된 일정은 수정할 수 없습니다.',
+                reasonCode: 'SCHEDULE_STATUS_NOT_MODIFIABLE',
+            };
+        }
+
+        // 3. 날짜 범위 검증
+        const newStartDate = dateChanges.newStartDate || schedule.startDate;
+        const newEndDate = dateChanges.newEndDate || schedule.endDate;
+
+        if (newStartDate >= newEndDate) {
+            return {
+                isAllowed: false,
+                reason: '시작 시간이 종료 시간보다 늦을 수 없습니다.',
+                reasonCode: 'INVALID_DATE_RANGE',
+            };
+        }
+
+        // 4. 예약 충돌 확인 (reservation이 있는 경우)
+        if (reservation) {
+            const isAvailable = await this.domainReservationService.checkReservationConflicts(
+                reservation.resourceId,
+                newStartDate,
+                newEndDate,
+                reservation.reservationId,
+            );
+
+            if (!isAvailable) {
+                return {
+                    isAllowed: false,
+                    reason: '해당 시간대에 다른 예약이 있습니다.',
+                    reasonCode: 'RESERVATION_CONFLICT',
+                };
+            }
+        }
+
+        return { isAllowed: true, reason: '일정 날짜 수정이 가능합니다.' };
+    }
+
+    /**
+     * 일정 정보 수정이 가능한지 확인한다
+     */
+    async 일정_정보수정이_가능한지_확인한다(schedule: Schedule, infoChanges: any): Promise<PolicyResult> {
+        // 정보 수정은 일반적으로 제약이 적음
+        // 필요한 경우에만 특별한 검증 로직 추가
+
+        // 예: 참여자 수 제한
+        // if (infoChanges.participants && infoChanges.participants.length > 50) {
+        //     return {
+        //         isAllowed: false,
+        //         reason: '참여자는 최대 50명까지 가능합니다.',
+        //         reasonCode: 'TOO_MANY_PARTICIPANTS',
+        //     };
+        // }
+
+        return { isAllowed: true, reason: '일정 정보 수정이 가능합니다.' };
+    }
+
+    /**
+     * 일정 자원 수정이 가능한지 확인한다
+     */
+    async 일정_자원수정이_가능한지_확인한다(
+        schedule: Schedule,
+        reservation: Reservation,
+        newResourceId: string,
+    ): Promise<PolicyResult> {
+        // 1. 일정 상태 확인
+        if (schedule.status === ScheduleStatus.COMPLETED || schedule.status === ScheduleStatus.CANCELLED) {
+            return {
+                isAllowed: false,
+                reason: '완료되거나 취소된 일정은 수정할 수 없습니다.',
+                reasonCode: 'SCHEDULE_STATUS_NOT_MODIFIABLE',
+            };
+        }
+
+        // 2. 새 자원의 예약 가능성 확인 (기존 시간대 기준)
+        if (reservation) {
+            const isAvailable = await this.domainReservationService.checkReservationConflicts(
+                newResourceId,
+                schedule.startDate,
+                schedule.endDate,
+                reservation.reservationId,
+            );
+
+            if (!isAvailable) {
+                return {
+                    isAllowed: false,
+                    reason: '새로운 자원의 해당 시간대에 다른 예약이 있습니다.',
+                    reasonCode: 'NEW_RESOURCE_CONFLICT',
+                };
+            }
+        }
+
+        return { isAllowed: true, reason: '일정 자원 수정이 가능합니다.' };
+    }
+
+    /**
+     * 수정 시나리오 분석
+     */
+    수정_시나리오를_분석한다(updateDto: any): UpdateScenarios {
+        return {
+            isDateUpdate: !!(updateDto.date?.startDate || updateDto.date?.endDate),
+            isInfoUpdate: !!(
+                updateDto.info?.title ||
+                updateDto.info?.description ||
+                updateDto.info?.notifyBeforeStart !== undefined ||
+                updateDto.info?.notifyMinutesBeforeStart ||
+                updateDto.info?.location ||
+                updateDto.info?.scheduleType ||
+                updateDto.info?.projectId ||
+                updateDto.info?.participants
+            ),
+            isResourceUpdate: !!updateDto.resource?.resourceId,
+        };
+    }
+
+    /**
+     * 수정 요청 기본 검증
+     */
+    수정요청을_기본검증한다(updateDto: any, scenarios: UpdateScenarios): void {
+        // 1. 최소 하나의 수정 항목은 있어야 함
+        if (!scenarios.isDateUpdate && !scenarios.isInfoUpdate && !scenarios.isResourceUpdate) {
+            throw new BadRequestException('수정할 항목이 없습니다.');
+        }
+
+        // 2. 하나의 시나리오만 실행되어야 함
+        const activeScenarios = [scenarios.isDateUpdate, scenarios.isInfoUpdate, scenarios.isResourceUpdate].filter(
+            Boolean,
+        );
+        if (activeScenarios.length > 1) {
+            throw new BadRequestException('한 번에 하나의 수정 유형만 가능합니다.');
+        }
+
+        // 3. 필수 값 검증
+        if (scenarios.isDateUpdate) {
+            if (!updateDto.date?.startDate || !updateDto.date?.endDate) {
+                throw new BadRequestException('날짜 수정 시 시작일과 종료일이 모두 필요합니다.');
+            }
+        }
+
+        if (scenarios.isResourceUpdate) {
+            if (!updateDto.resource?.resourceId) {
+                throw new BadRequestException('자원 수정 시 자원 ID가 필요합니다.');
+            }
         }
     }
 }

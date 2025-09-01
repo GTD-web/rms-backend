@@ -8,6 +8,8 @@ import { DateUtil } from '@libs/utils/date.util';
 import { CreateNotificationDataDto } from '@src/context/notification/dtos/create-notification.dto';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { ScheduleUpdateResult } from '@src/context/schedule/services/schedule-state-transition.service';
+import { UpdateScenarios } from '@src/context/schedule/services/schedule-policy.service';
 
 @Injectable()
 export class ScheduleNotificationContextService {
@@ -80,5 +82,41 @@ export class ScheduleNotificationContextService {
             notificationData,
             targetEmployeeIds,
         );
+    }
+
+    async 일정_수정_알림을_전송한다(
+        updateScenarios: UpdateScenarios,
+        data: { schedule: Schedule; reservation: Reservation; resource: Resource },
+        targetEmployeeIds: string[],
+    ): Promise<void> {
+        const notificationData: CreateNotificationDataDto = {
+            schedule: {
+                scheduleId: data.schedule.scheduleId,
+                scheduleTitle: data.schedule.title,
+                startDate: DateUtil.format(data.schedule.startDate, 'YYYY-MM-DD HH:mm'),
+                endDate: DateUtil.format(data.schedule.endDate, 'YYYY-MM-DD HH:mm'),
+            },
+            reservation: {
+                reservationId: data.reservation.reservationId,
+            },
+            resource: {
+                resourceId: data.resource.resourceId,
+                resourceName: data.resource.name,
+                resourceType: data.resource.type,
+            },
+        };
+        if (updateScenarios.isDateUpdate || updateScenarios.isResourceUpdate) {
+            await this.notificationContextService.알림_전송_프로세스를_진행한다(
+                NotificationType.RESERVATION_TIME_CHANGED,
+                notificationData,
+                targetEmployeeIds,
+            );
+        } else if (updateScenarios.isInfoUpdate && targetEmployeeIds.length > 0) {
+            await this.notificationContextService.알림_전송_프로세스를_진행한다(
+                NotificationType.RESERVATION_PARTICIPANT_CHANGED,
+                notificationData,
+                targetEmployeeIds,
+            );
+        }
     }
 }

@@ -43,17 +43,19 @@ export class ScheduleAuthorizationService {
         }
 
         // 2. 사용자의 일정 참여 정보 조회
-        const participants = await this.domainScheduleParticipantService.findByScheduleId(scheduleId);
+        const reserver = await this.domainScheduleParticipantService.findReserverByScheduleId(
+            user.employeeId,
+            scheduleId,
+        );
 
-        if (participants.length === 0) {
+        if (!reserver) {
             return {
                 isAuthorized: false,
-                reason: '해당 일정의 참가자가 아닙니다.',
+                reason: '해당 일정의 예약자가 아닙니다.',
             };
         }
 
-        const userParticipant = participants[0];
-        const userRole = userParticipant.type;
+        const userRole = reserver.type;
 
         // 3. 액션별 권한 체크
         const authResult = this._액션별_권한을_체크한다(userRole, action, schedule);

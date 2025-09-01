@@ -35,6 +35,12 @@ export class DomainScheduleParticipantService extends BaseService<SchedulePartic
         });
     }
 
+    async findReserverByScheduleId(employeeId: string, scheduleId: string): Promise<ScheduleParticipant> {
+        return this.scheduleParticipantRepository.findOne({
+            where: { scheduleId, employeeId, type: ParticipantsType.RESERVER },
+        });
+    }
+
     async checkReserverByScheduleId(employeeId: string, scheduleId: string): Promise<boolean> {
         const reserver = await this.scheduleParticipantRepository.findOne({
             where: { scheduleId, employeeId, type: ParticipantsType.RESERVER },

@@ -492,4 +492,63 @@ export class ReservationContextService {
             };
         });
     }
+
+    /**
+     * 특정 시간 슬롯에서 예약 충돌을 확인한다
+     */
+    async 시간슬롯_예약충돌을_확인한다(
+        resourceId: string,
+        slotStartTime: Date,
+        slotEndTime: Date,
+        excludeReservationId?: string,
+    ): Promise<boolean> {
+        const conflictReservations = await this.충돌_예약을_조회한다(
+            resourceId,
+            slotStartTime,
+            slotEndTime,
+            excludeReservationId,
+        );
+        return conflictReservations.length > 0;
+    }
+
+    /**
+     * 자원의 특정 날짜 범위 내 모든 예약을 조회한다
+     */
+    async 자원의_날짜범위_예약을_조회한다(
+        resourceId: string,
+        startDate: Date,
+        endDate: Date,
+        excludeReservationId?: string,
+    ): Promise<Reservation[]> {
+        return await this.domainReservationService.findAll({
+            where: {
+                resourceId,
+                ...(excludeReservationId && { reservationId: Not(excludeReservationId) }),
+                startDate: LessThan(endDate),
+                endDate: MoreThan(startDate),
+                status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
+            },
+            order: { startDate: 'ASC' },
+        });
+    }
+
+    /**
+     * 30분 단위 시간 슬롯별로 예약 가능 여부를 계산한다
+     */
+    시간슬롯별_예약가능여부를_계산한다(reservations: Reservation[], slotStartTime: Date, slotEndTime: Date): boolean {
+        return !reservations.some((reservation) => {
+            const reservationStart = new Date(reservation.startDate);
+            const reservationEnd = new Date(reservation.endDate);
+
+            // 겹치는 조건:
+            // 1. 슬롯 시작이 예약 시간 내에 있거나
+            // 2. 슬롯 종료가 예약 시간 내에 있거나
+            // 3. 슬롯이 예약 시간을 완전히 포함하거나
+            return (
+                (slotStartTime >= reservationStart && slotStartTime < reservationEnd) ||
+                (slotEndTime > reservationStart && slotEndTime <= reservationEnd) ||
+                (slotStartTime < reservationStart && slotEndTime > reservationEnd)
+            );
+        });
+    }
 }
