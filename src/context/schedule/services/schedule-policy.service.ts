@@ -4,6 +4,7 @@ import { Reservation } from '@libs/entities/reservation.entity';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { DateUtil } from '@libs/utils/date.util';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
+import { ScheduleStatus } from '@libs/enums/schedule-type.enum';
 
 export interface PolicyResult {
     isAllowed: boolean;
@@ -50,20 +51,8 @@ export class SchedulePolicyService {
     async 일정_취소가_가능한지_확인한다(schedule: Schedule, reservation?: Reservation): Promise<PolicyResult> {
         const now = DateUtil.now().toDate();
 
-        // 1. 시간 정책 체크 - 시작 시간 30분 전까지만 취소 가능
-        const cancellationDeadline = new Date(schedule.startDate);
-        cancellationDeadline.setMinutes(cancellationDeadline.getMinutes() - 30);
-
-        if (now > cancellationDeadline) {
-            return {
-                isAllowed: false,
-                reason: '일정 시작 30분 전까지만 취소가 가능합니다.',
-                reasonCode: 'CANCELLATION_TIME_EXCEEDED',
-            };
-        }
-
         // 2. 일정 상태 체크 - 이미 진행 중이거나 완료된 일정은 취소 불가
-        if (schedule.startDate <= now) {
+        if (schedule.startDate <= now || schedule.status === ScheduleStatus.PROCESSING) {
             return {
                 isAllowed: false,
                 reason: '이미 시작된 일정은 취소할 수 없습니다.',

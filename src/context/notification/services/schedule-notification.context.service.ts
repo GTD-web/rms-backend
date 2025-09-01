@@ -53,4 +53,32 @@ export class ScheduleNotificationContextService {
             );
         }
     }
+
+    async 일정_취소_알림을_전송한다(
+        data: { schedule: Schedule; reservation: Reservation; resource: Resource },
+        targetEmployeeIds: string[],
+    ): Promise<void> {
+        const notificationData: CreateNotificationDataDto = {
+            schedule: {
+                scheduleId: data.schedule.scheduleId,
+                scheduleTitle: data.schedule.title,
+                startDate: DateUtil.format(data.schedule.startDate, 'YYYY-MM-DD HH:mm'),
+                endDate: DateUtil.format(data.schedule.endDate, 'YYYY-MM-DD HH:mm'),
+            },
+            reservation: {
+                reservationId: data.reservation.reservationId,
+            },
+            resource: {
+                resourceId: data.resource.resourceId,
+                resourceName: data.resource.name,
+                resourceType: data.resource.type,
+            },
+        };
+
+        await this.notificationContextService.알림_전송_프로세스를_진행한다(
+            NotificationType.RESERVATION_STATUS_CANCELLED,
+            notificationData,
+            targetEmployeeIds,
+        );
+    }
 }

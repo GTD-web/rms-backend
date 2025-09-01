@@ -13,6 +13,7 @@ import {
 import { Type, Transform } from 'class-transformer';
 import { ScheduleType } from '@libs/enums/schedule-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { DateUtil } from '@libs/utils/date.util';
 
 /**
  * 일정 날짜 범위 DTO
@@ -85,8 +86,14 @@ export class ScheduleCreateRequestDto {
         description: '일정 날짜 범위 목록 (연속되지 않은 여러 날짜 가능)',
         type: [ScheduleDateRangeDto],
         example: [
-            { startDate: '2025-08-25T10:00:00Z', endDate: '2025-08-25T11:00:00Z' },
-            { startDate: '2025-08-29T10:00:00Z', endDate: '2025-08-29T11:00:00Z' },
+            {
+                startDate: DateUtil.now().format('YYYY-MM-DD 10:00:00'),
+                endDate: DateUtil.now().format('YYYY-MM-DD 11:00:00'),
+            },
+            {
+                startDate: DateUtil.now().addDays(1).format('YYYY-MM-DD 10:00:00'),
+                endDate: DateUtil.now().addDays(1).format('YYYY-MM-DD 11:00:00'),
+            },
         ],
     })
     @IsArray()

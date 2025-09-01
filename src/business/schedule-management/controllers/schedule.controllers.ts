@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiExcludeEndpoint } from '@nestjs/swagger';
 import { ScheduleManagementService } from '../schedule-management.service';
 import { Employee } from '@libs/entities/employee.entity';
 import { User } from '@libs/decorators/user.decorator';
@@ -27,6 +27,12 @@ import { ScheduleUpdateResponseDto } from '../dtos/schedule-update-response.dto'
 @ApiBearerAuth()
 export class ScheduleController {
     constructor(private readonly scheduleManagementService: ScheduleManagementService) {}
+
+    @ApiExcludeEndpoint()
+    @Get('cron-job/post-processing')
+    async cronJobPostProcessing(): Promise<void> {
+        return this.scheduleManagementService.postProcessingSchedules();
+    }
 
     /**
      * 일정 캘린더 조회
@@ -146,15 +152,15 @@ export class ScheduleController {
     })
     @ApiOkResponse({
         description: '일정 취소 성공',
-        type: ScheduleCancelResponseDto,
+        type: Boolean,
     })
     @Patch(':scheduleId/cancel')
     async cancelSchedule(
         @User() user: Employee,
         @Param('scheduleId') scheduleId: string,
-        @Body() cancelScheduleDto: ScheduleCancelRequestDto,
-    ): Promise<ScheduleCancelResponseDto> {
-        return this.scheduleManagementService.cancelSchedule(user, scheduleId, cancelScheduleDto);
+        // @Body() cancelScheduleDto: ScheduleCancelRequestDto,
+    ): Promise<boolean> {
+        return this.scheduleManagementService.cancelSchedule(user, scheduleId);
     }
 
     /**
@@ -173,9 +179,9 @@ export class ScheduleController {
     async completeSchedule(
         @User() user: Employee,
         @Param('scheduleId') scheduleId: string,
-        @Body() completeScheduleDto: ScheduleCompleteRequestDto,
+        // @Body() completeScheduleDto: ScheduleCompleteRequestDto,
     ): Promise<ScheduleCompleteResponseDto> {
-        return this.scheduleManagementService.completeSchedule(user, scheduleId, completeScheduleDto);
+        return this.scheduleManagementService.completeSchedule(user, scheduleId);
     }
 
     /**

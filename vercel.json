@@ -41,6 +41,14 @@
         {
             "path": "/api/v1/employees/sync",
             "schedule": "0 0 * * *"
+        },
+        {
+            "path": "/api/v2/schedule/cron-job/post-processing",
+            "schedule": "0 * * * *"
+        },
+        {
+            "path": "/api/v2/schedule/cron-job/post-processing",
+            "schedule": "30 * * * *"
         }
     ]
 }

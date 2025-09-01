@@ -25,8 +25,15 @@ export class TaskController {
         description: '태스크 목록 조회 성공',
         type: TaskResponseDto,
     })
-    async getUserTasks(@User() user: Employee): Promise<TaskListResponseDto> {
-        return this.taskManagementService.getTaskList(user);
+    @ApiQuery({
+        name: 'type',
+        type: String,
+        required: false,
+        description: '태스크 타입',
+        enum: ['차량반납지연', '소모품교체'],
+    })
+    async getUserTasks(@User() user: Employee, @Query('type') type?: string): Promise<TaskListResponseDto> {
+        return this.taskManagementService.getTaskList(user, type);
     }
 
     @Get('admin')

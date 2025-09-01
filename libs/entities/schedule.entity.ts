@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    CreateDateColumn,
+    UpdateDateColumn,
+    DeleteDateColumn,
+    OneToMany,
+} from 'typeorm';
 import { ScheduleParticipant } from './schedule-participant.entity';
 import { ScheduleType, ScheduleStatus } from '@libs/enums/schedule-type.enum';
 
@@ -49,6 +57,9 @@ export class Schedule {
 
     @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
+
+    @DeleteDateColumn({ type: 'timestamp with time zone' })
+    deletedAt: Date;
 
     @OneToMany(() => ScheduleParticipant, (participant) => participant.schedule)
     participants: ScheduleParticipant[];

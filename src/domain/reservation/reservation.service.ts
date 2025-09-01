@@ -6,6 +6,7 @@ import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 import { In, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Not } from 'typeorm';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { DateUtil } from '@libs/utils/date.util';
 
 @Injectable()
 export class DomainReservationService extends BaseService<Reservation> {

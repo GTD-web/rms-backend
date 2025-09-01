@@ -46,7 +46,7 @@ export class ScheduleStateTransitionService {
         reservation: Reservation | undefined,
         cancelReason?: string,
         queryRunner?: QueryRunner,
-    ): Promise<ScheduleCancelResult> {
+    ): Promise<boolean> {
         const shouldManageTransaction = !queryRunner;
         if (shouldManageTransaction) {
             queryRunner = this.dataSource.createQueryRunner();
@@ -55,48 +55,30 @@ export class ScheduleStateTransitionService {
         }
 
         try {
-            const cancelledAt = DateUtil.now().toDate();
-
             if (reservation) {
                 await this.domainReservationService.update(
                     reservation.reservationId,
                     { status: ReservationStatus.CANCELLED },
                     { queryRunner },
                 );
-
-                reservation = await this.domainReservationService.findOne({
-                    where: { reservationId: reservation.reservationId },
-                });
             }
 
-            const updatedDescription = schedule.description
-                ? `${schedule.description}\n\n[${DateUtil.format(cancelledAt, 'YYYY-MM-DD HH:mm')}] 일정이 취소되었습니다.${cancelReason ? ` 사유: ${cancelReason}` : ''}`
-                : `[${DateUtil.format(cancelledAt, 'YYYY-MM-DD HH:mm')}] 일정이 취소되었습니다.${cancelReason ? ` 사유: ${cancelReason}` : ''}`;
+            // const updatedDescription = schedule.description
+            //     ? `${schedule.description}\n\n[${DateUtil.format(cancelledAt, 'YYYY-MM-DD HH:mm')}] 일정이 취소되었습니다.${cancelReason ? ` 사유: ${cancelReason}` : ''}`
+            //     : `[${DateUtil.format(cancelledAt, 'YYYY-MM-DD HH:mm')}] 일정이 취소되었습니다.${cancelReason ? ` 사유: ${cancelReason}` : ''}`;
 
-            await this.domainScheduleService.update(
-                schedule.scheduleId,
-                {
-                    status: ScheduleStatus.CANCELLED,
-                    description: updatedDescription,
-                    completionReason: cancelReason,
-                },
-                { queryRunner },
-            );
+            await this.domainScheduleService.softDelete(schedule.scheduleId, { queryRunner });
 
             if (shouldManageTransaction) {
                 await queryRunner.commitTransaction();
             }
 
-            const updatedSchedule = await this.domainScheduleService.findOne({
-                where: { scheduleId: schedule.scheduleId },
-            });
-
-            return { schedule: updatedSchedule!, reservation, cancelledAt };
+            return true;
         } catch (error) {
             if (shouldManageTransaction) {
                 await queryRunner.rollbackTransaction();
             }
-            throw error;
+            return false;
         } finally {
             if (shouldManageTransaction) {
                 await queryRunner.release();

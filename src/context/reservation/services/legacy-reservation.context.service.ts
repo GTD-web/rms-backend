@@ -679,7 +679,7 @@ export class LegacyReservationContextService {
             ],
             withDeleted: true,
         });
-
+        console.log(reservation);
         if (!reservation) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }

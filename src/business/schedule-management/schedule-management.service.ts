@@ -53,6 +53,8 @@ import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DataSource } from 'typeorm';
 import { Schedule } from '@libs/entities';
 import { ScheduleType } from '@libs/enums/schedule-type.enum';
+import { EmployeeContextService } from '@src/context/employee/employee.context.service';
+import { ScheduleNotificationContextService } from '@src/context/notification/services/schedule-notification.context.service';
 
 @Injectable()
 export class ScheduleManagementService {
@@ -65,6 +67,8 @@ export class ScheduleManagementService {
         private readonly projectContextService: ProjectContextService,
         private readonly vehicleInfoContextService: VehicleInfoContextService,
         private readonly fileContextService: FileContextService,
+        private readonly employeeContextService: EmployeeContextService,
+        private readonly scheduleNotificationContextService: ScheduleNotificationContextService,
 
         private readonly scheduleAuthorizationService: ScheduleAuthorizationService,
         private readonly schedulePolicyService: SchedulePolicyService,
@@ -73,6 +77,10 @@ export class ScheduleManagementService {
         private readonly scheduleStateTransitionService: ScheduleStateTransitionService,
         private readonly schedulePostProcessingService: SchedulePostProcessingService,
     ) {}
+
+    async postProcessingSchedules(): Promise<void> {
+        return this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();
+    }
 
     // ============================================================================
     // 조회 전용 UC들 (3~5단계 생략, 기존 로직 위임)
@@ -248,7 +256,6 @@ export class ScheduleManagementService {
             throw new NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
         }
         const { schedule, project, reservation, resource, participants } = scheduleData;
-        console.log(resource);
         const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
         const regularParticipants = participants?.filter((p) => p.type !== ParticipantsType.RESERVER) || [];
 
@@ -527,8 +534,20 @@ export class ScheduleManagementService {
             }
         }
 
-        // 5. 후처리: TODO : 컨텍스트 정리 필요
-        // await this.schedulePostProcessingService.일정_생성_후처리(user, createResult.createdSchedules[0], participants);
+        if (createdSchedules.length > 0) {
+            // 5. 후처리: 여러 날짜에 일정이 생성되어도 일정 정보는 동일하기 때문에 첫 번째 일정의 정보를 사용
+            const { schedule, reservation, resource } =
+                await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(createdSchedules[0].scheduleId!, {
+                    withReservation: true,
+                    withResource: true,
+                });
+            const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
+            await this.scheduleNotificationContextService.일정_생성_알림을_전송한다(
+                { schedule, reservation, resource },
+                [user.employeeId, ...participants.map((participant) => participant.employeeId)],
+                systemAdmins.map((admin) => admin.employeeId),
+            );
+        }
 
         // 6. 응답 DTO 변환
         const createdSchedulesDtos = createdSchedules.map((schedule) => ({
@@ -546,13 +565,9 @@ export class ScheduleManagementService {
     }
 
     /**
-     * 일정 취소 (표준 파이프라인 적용)
+     * 일정 취소 (삭제)
      */
-    async cancelSchedule(
-        user: Employee,
-        scheduleId: string,
-        cancelDto: ScheduleCancelRequestDto,
-    ): Promise<ScheduleCancelResponseDto> {
+    async cancelSchedule(user: Employee, scheduleId: string, cancelDto?: ScheduleCancelRequestDto): Promise<boolean> {
         this.logger.log(`일정 취소 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
 
         // 1. 권한: 요청자/역할 확인
@@ -564,50 +579,28 @@ export class ScheduleManagementService {
         this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
 
         // 2. 그래프 조회: 컨텍스트에서 벌크 로딩 (N+1 금지)
-        const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
-            scheduleId,
-            {
+        const { schedule, reservation, resource, participants } =
+            await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
                 withReservation: true,
-            },
-        );
-        // const schedule = await this.scheduleQueryContextService.일정을_조회한다(scheduleId);
-        // const scheduleRelations = await this.scheduleQueryContextService.일정관계정보들을_조회한다([scheduleId]);
-
-        // let reservation = undefined;
-        // if (scheduleRelations.length > 0 && scheduleRelations[0].reservationId) {
-        //     const reservationMap =
-        //         await this.scheduleQueryContextService.일정들의_예약정보를_조회한다(scheduleRelations);
-        //     reservation = reservationMap.get(scheduleId);
-        // }
+                withResource: true,
+                withParticipants: true,
+            });
 
         // 3. 정책 판단: 가능/불가(사유 코드 포함)
         const policyResult = await this.schedulePolicyService.일정_취소가_가능한지_확인한다(schedule, reservation);
         this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
 
         // 4. 실행/전이: 상태 변경/생성/삭제 (트랜잭션)
-        const cancelResult = await this.scheduleStateTransitionService.일정을_취소한다(
-            schedule,
-            reservation,
-            cancelDto.reason,
-        );
+        const cancelResult = await this.scheduleStateTransitionService.일정을_취소한다(schedule, reservation);
 
         // 5. 후처리: 알림/감사/도메인이벤트
-        // await this.schedulePostProcessingService.일정_취소_후처리(user, cancelResult);
+        await this.scheduleNotificationContextService.일정_취소_알림을_전송한다({ schedule, reservation, resource }, [
+            user.employeeId,
+            ...participants.map((participant) => participant.employeeId),
+        ]);
 
         // 6. 응답 DTO 변환
-        return {
-            scheduleId: cancelResult.schedule.scheduleId,
-            title: cancelResult.schedule.title,
-            status: 'CANCELLED',
-            cancelledAt: cancelResult.cancelledAt,
-            reason: cancelDto.reason,
-            reservation: cancelResult.reservation
-                ? {
-                      reservationId: cancelResult.reservation.reservationId,
-                      status: cancelResult.reservation.status,
-                  }
-                : undefined,
-        };
+        return cancelResult;
     }
 
     /**
@@ -616,7 +609,7 @@ export class ScheduleManagementService {
     async completeSchedule(
         user: Employee,
         scheduleId: string,
-        completeDto: ScheduleCompleteRequestDto,
+        completeDto?: ScheduleCompleteRequestDto,
     ): Promise<ScheduleCompleteResponseDto> {
         this.logger.log(`일정 완료 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
 

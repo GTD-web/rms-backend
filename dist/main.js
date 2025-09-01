@@ -2263,7 +2263,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Schedule = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
@@ -2330,6 +2330,10 @@ __decorate([
     (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp with time zone' }),
     __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
 ], Schedule.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ type: 'timestamp with time zone' }),
+    __metadata("design:type", typeof (_g = typeof Date !== "undefined" && Date) === "function" ? _g : Object)
+], Schedule.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => schedule_participant_entity_1.ScheduleParticipant, (participant) => participant.schedule),
     __metadata("design:type", Array)
@@ -26133,7 +26137,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -26151,9 +26155,6 @@ const schedule_detail_query_dto_1 = __webpack_require__(/*! ../dtos/schedule-det
 const schedule_detail_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-detail-response.dto */ "./src/business/schedule-management/dtos/schedule-detail-response.dto.ts");
 const schedule_create_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-create-request.dto */ "./src/business/schedule-management/dtos/schedule-create-request.dto.ts");
 const schedule_create_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-create-response.dto */ "./src/business/schedule-management/dtos/schedule-create-response.dto.ts");
-const schedule_cancel_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-cancel-request.dto */ "./src/business/schedule-management/dtos/schedule-cancel-request.dto.ts");
-const schedule_cancel_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-cancel-response.dto */ "./src/business/schedule-management/dtos/schedule-cancel-response.dto.ts");
-const schedule_complete_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-complete-request.dto */ "./src/business/schedule-management/dtos/schedule-complete-request.dto.ts");
 const schedule_complete_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-complete-response.dto */ "./src/business/schedule-management/dtos/schedule-complete-response.dto.ts");
 const schedule_extend_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-extend-request.dto */ "./src/business/schedule-management/dtos/schedule-extend-request.dto.ts");
 const schedule_extend_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-extend-response.dto */ "./src/business/schedule-management/dtos/schedule-extend-response.dto.ts");
@@ -26162,6 +26163,9 @@ const schedule_update_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-
 let ScheduleController = class ScheduleController {
     constructor(scheduleManagementService) {
         this.scheduleManagementService = scheduleManagementService;
+    }
+    async cronJobPostProcessing() {
+        return this.scheduleManagementService.postProcessingSchedules();
     }
     async findCalendar(user, query) {
         return this.scheduleManagementService.findCalendar(user, query);
@@ -26178,11 +26182,11 @@ let ScheduleController = class ScheduleController {
     async createSchedule(user, createScheduleDto) {
         return this.scheduleManagementService.createSchedule(user, createScheduleDto);
     }
-    async cancelSchedule(user, scheduleId, cancelScheduleDto) {
-        return this.scheduleManagementService.cancelSchedule(user, scheduleId, cancelScheduleDto);
+    async cancelSchedule(user, scheduleId) {
+        return this.scheduleManagementService.cancelSchedule(user, scheduleId);
     }
-    async completeSchedule(user, scheduleId, completeScheduleDto) {
-        return this.scheduleManagementService.completeSchedule(user, scheduleId, completeScheduleDto);
+    async completeSchedule(user, scheduleId) {
+        return this.scheduleManagementService.completeSchedule(user, scheduleId);
     }
     async extendSchedule(user, scheduleId, extendScheduleDto) {
         return this.scheduleManagementService.extendSchedule(user, scheduleId, extendScheduleDto);
@@ -26192,6 +26196,13 @@ let ScheduleController = class ScheduleController {
     }
 };
 exports.ScheduleController = ScheduleController;
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/post-processing'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], ScheduleController.prototype, "cronJobPostProcessing", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: '일정 캘린더 조회',
@@ -26205,8 +26216,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _b : Object, typeof (_c = typeof schedule_calendar_query_dto_1.ScheduleCalendarQueryDto !== "undefined" && schedule_calendar_query_dto_1.ScheduleCalendarQueryDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+    __metadata("design:paramtypes", [typeof (_c = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _c : Object, typeof (_d = typeof schedule_calendar_query_dto_1.ScheduleCalendarQueryDto !== "undefined" && schedule_calendar_query_dto_1.ScheduleCalendarQueryDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], ScheduleController.prototype, "findCalendar", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -26221,8 +26232,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _e : Object, typeof (_f = typeof my_schedule_query_dto_1.MyScheduleQueryDto !== "undefined" && my_schedule_query_dto_1.MyScheduleQueryDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [typeof (_f = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _f : Object, typeof (_g = typeof my_schedule_query_dto_1.MyScheduleQueryDto !== "undefined" && my_schedule_query_dto_1.MyScheduleQueryDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], ScheduleController.prototype, "findMySchedules", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -26237,8 +26248,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _h : Object, typeof (_j = typeof resource_schedule_query_dto_1.ResourceScheduleQueryDto !== "undefined" && resource_schedule_query_dto_1.ResourceScheduleQueryDto) === "function" ? _j : Object]),
-    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+    __metadata("design:paramtypes", [typeof (_j = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _j : Object, typeof (_k = typeof resource_schedule_query_dto_1.ResourceScheduleQueryDto !== "undefined" && resource_schedule_query_dto_1.ResourceScheduleQueryDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ScheduleController.prototype, "findResourceSchedules", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -26253,8 +26264,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_l = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _l : Object, typeof (_m = typeof schedule_detail_query_dto_1.ScheduleDetailQueryDto !== "undefined" && schedule_detail_query_dto_1.ScheduleDetailQueryDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [typeof (_m = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _m : Object, typeof (_o = typeof schedule_detail_query_dto_1.ScheduleDetailQueryDto !== "undefined" && schedule_detail_query_dto_1.ScheduleDetailQueryDto) === "function" ? _o : Object]),
+    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], ScheduleController.prototype, "findScheduleDetail", null);
 __decorate([
     (0, common_1.Post)(),
@@ -26269,8 +26280,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_p = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _p : Object, typeof (_q = typeof schedule_create_request_dto_1.ScheduleCreateRequestDto !== "undefined" && schedule_create_request_dto_1.ScheduleCreateRequestDto) === "function" ? _q : Object]),
-    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
+    __metadata("design:paramtypes", [typeof (_q = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _q : Object, typeof (_r = typeof schedule_create_request_dto_1.ScheduleCreateRequestDto !== "undefined" && schedule_create_request_dto_1.ScheduleCreateRequestDto) === "function" ? _r : Object]),
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
 ], ScheduleController.prototype, "createSchedule", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -26279,14 +26290,13 @@ __decorate([
     }),
     (0, swagger_1.ApiOkResponse)({
         description: '일정 취소 성공',
-        type: schedule_cancel_response_dto_1.ScheduleCancelResponseDto,
+        type: Boolean,
     }),
     (0, common_1.Patch)(':scheduleId/cancel'),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('scheduleId')),
-    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_s = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _s : Object, String, typeof (_t = typeof schedule_cancel_request_dto_1.ScheduleCancelRequestDto !== "undefined" && schedule_cancel_request_dto_1.ScheduleCancelRequestDto) === "function" ? _t : Object]),
+    __metadata("design:paramtypes", [typeof (_t = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _t : Object, String]),
     __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
 ], ScheduleController.prototype, "cancelSchedule", null);
 __decorate([
@@ -26301,10 +26311,9 @@ __decorate([
     (0, common_1.Patch)(':scheduleId/complete'),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('scheduleId')),
-    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_v = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _v : Object, String, typeof (_w = typeof schedule_complete_request_dto_1.ScheduleCompleteRequestDto !== "undefined" && schedule_complete_request_dto_1.ScheduleCompleteRequestDto) === "function" ? _w : Object]),
-    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
+    __metadata("design:paramtypes", [typeof (_v = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _v : Object, String]),
+    __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
 ], ScheduleController.prototype, "completeSchedule", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -26320,8 +26329,8 @@ __decorate([
     __param(1, (0, common_1.Param)('scheduleId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_y = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _y : Object, String, typeof (_z = typeof schedule_extend_request_dto_1.ScheduleExtendRequestDto !== "undefined" && schedule_extend_request_dto_1.ScheduleExtendRequestDto) === "function" ? _z : Object]),
-    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
+    __metadata("design:paramtypes", [typeof (_x = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _x : Object, String, typeof (_y = typeof schedule_extend_request_dto_1.ScheduleExtendRequestDto !== "undefined" && schedule_extend_request_dto_1.ScheduleExtendRequestDto) === "function" ? _y : Object]),
+    __metadata("design:returntype", typeof (_z = typeof Promise !== "undefined" && Promise) === "function" ? _z : Object)
 ], ScheduleController.prototype, "extendSchedule", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -26337,8 +26346,8 @@ __decorate([
     __param(1, (0, common_1.Param)('scheduleId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_1 = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _1 : Object, String, typeof (_2 = typeof schedule_update_request_dto_1.ScheduleUpdateRequestDto !== "undefined" && schedule_update_request_dto_1.ScheduleUpdateRequestDto) === "function" ? _2 : Object]),
-    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
+    __metadata("design:paramtypes", [typeof (_0 = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _0 : Object, String, typeof (_1 = typeof schedule_update_request_dto_1.ScheduleUpdateRequestDto !== "undefined" && schedule_update_request_dto_1.ScheduleUpdateRequestDto) === "function" ? _1 : Object]),
+    __metadata("design:returntype", typeof (_2 = typeof Promise !== "undefined" && Promise) === "function" ? _2 : Object)
 ], ScheduleController.prototype, "updateSchedule", null);
 exports.ScheduleController = ScheduleController = __decorate([
     (0, swagger_1.ApiTags)('v2 일정'),
@@ -27194,154 +27203,6 @@ __decorate([
 
 /***/ }),
 
-/***/ "./src/business/schedule-management/dtos/schedule-cancel-request.dto.ts":
-/*!******************************************************************************!*\
-  !*** ./src/business/schedule-management/dtos/schedule-cancel-request.dto.ts ***!
-  \******************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleCancelRequestDto = void 0;
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
-class ScheduleCancelRequestDto {
-}
-exports.ScheduleCancelRequestDto = ScheduleCancelRequestDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '취소 사유',
-        example: '급한 업무로 인해 일정을 취소합니다.',
-        required: false,
-        maxLength: 500,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(500, { message: '취소 사유는 500자를 초과할 수 없습니다.' }),
-    __metadata("design:type", String)
-], ScheduleCancelRequestDto.prototype, "reason", void 0);
-
-
-/***/ }),
-
-/***/ "./src/business/schedule-management/dtos/schedule-cancel-response.dto.ts":
-/*!*******************************************************************************!*\
-  !*** ./src/business/schedule-management/dtos/schedule-cancel-response.dto.ts ***!
-  \*******************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleCancelResponseDto = exports.CancelledReservationDto = void 0;
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-class CancelledReservationDto {
-}
-exports.CancelledReservationDto = CancelledReservationDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: '예약 ID', example: 'uuid-string' }),
-    __metadata("design:type", String)
-], CancelledReservationDto.prototype, "reservationId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: '예약 상태', example: 'CANCELLED' }),
-    __metadata("design:type", String)
-], CancelledReservationDto.prototype, "status", void 0);
-class ScheduleCancelResponseDto {
-}
-exports.ScheduleCancelResponseDto = ScheduleCancelResponseDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: '일정 ID', example: 'uuid-string' }),
-    __metadata("design:type", String)
-], ScheduleCancelResponseDto.prototype, "scheduleId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: '일정 제목', example: '주간 팀 회의' }),
-    __metadata("design:type", String)
-], ScheduleCancelResponseDto.prototype, "title", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: '일정 상태', example: 'CANCELLED' }),
-    __metadata("design:type", String)
-], ScheduleCancelResponseDto.prototype, "status", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: '취소된 시간', example: '2025-01-20T15:30:00.000Z' }),
-    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
-], ScheduleCancelResponseDto.prototype, "cancelledAt", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '취소 사유',
-        example: '급한 업무로 인해 일정을 취소합니다.',
-        required: false,
-    }),
-    __metadata("design:type", String)
-], ScheduleCancelResponseDto.prototype, "reason", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '연결된 예약 정보',
-        type: CancelledReservationDto,
-        required: false,
-    }),
-    __metadata("design:type", CancelledReservationDto)
-], ScheduleCancelResponseDto.prototype, "reservation", void 0);
-
-
-/***/ }),
-
-/***/ "./src/business/schedule-management/dtos/schedule-complete-request.dto.ts":
-/*!********************************************************************************!*\
-  !*** ./src/business/schedule-management/dtos/schedule-complete-request.dto.ts ***!
-  \********************************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleCompleteRequestDto = void 0;
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
-class ScheduleCompleteRequestDto {
-}
-exports.ScheduleCompleteRequestDto = ScheduleCompleteRequestDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: '완료 메모',
-        example: '회의가 성공적으로 완료되었습니다. 다음 액션 아이템들이 논의되었습니다.',
-        required: false,
-        maxLength: 1000,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(1000, { message: '완료 메모는 1000자를 초과할 수 없습니다.' }),
-    __metadata("design:type", String)
-], ScheduleCompleteRequestDto.prototype, "completionNotes", void 0);
-
-
-/***/ }),
-
 /***/ "./src/business/schedule-management/dtos/schedule-complete-response.dto.ts":
 /*!*********************************************************************************!*\
   !*** ./src/business/schedule-management/dtos/schedule-complete-response.dto.ts ***!
@@ -27436,6 +27297,7 @@ const class_validator_1 = __webpack_require__(/*! class-validator */ "class-vali
 const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 class ScheduleDateRangeDto {
 }
 exports.ScheduleDateRangeDto = ScheduleDateRangeDto;
@@ -27505,8 +27367,14 @@ __decorate([
         description: '일정 날짜 범위 목록 (연속되지 않은 여러 날짜 가능)',
         type: [ScheduleDateRangeDto],
         example: [
-            { startDate: '2025-08-25T10:00:00Z', endDate: '2025-08-25T11:00:00Z' },
-            { startDate: '2025-08-29T10:00:00Z', endDate: '2025-08-29T11:00:00Z' },
+            {
+                startDate: date_util_1.DateUtil.now().format('YYYY-MM-DD 10:00:00'),
+                endDate: date_util_1.DateUtil.now().format('YYYY-MM-DD 11:00:00'),
+            },
+            {
+                startDate: date_util_1.DateUtil.now().addDays(1).format('YYYY-MM-DD 10:00:00'),
+                endDate: date_util_1.DateUtil.now().addDays(1).format('YYYY-MM-DD 11:00:00'),
+            },
         ],
     }),
     (0, class_validator_1.IsArray)(),
@@ -28469,7 +28337,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var ScheduleManagementService_1;
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleManagementService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -28490,14 +28358,18 @@ const schedule_detail_response_dto_1 = __webpack_require__(/*! ./dtos/schedule-d
 const resource_schedule_response_dto_1 = __webpack_require__(/*! ./dtos/resource-schedule-response.dto */ "./src/business/schedule-management/dtos/resource-schedule-response.dto.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const employee_context_service_1 = __webpack_require__(/*! @src/context/employee/employee.context.service */ "./src/context/employee/employee.context.service.ts");
+const schedule_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/schedule-notification.context.service */ "./src/context/notification/services/schedule-notification.context.service.ts");
 let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleManagementService {
-    constructor(dataSource, reservationContextService, resourceContextService, projectContextService, vehicleInfoContextService, fileContextService, scheduleAuthorizationService, schedulePolicyService, scheduleQueryContextService, scheduleMutationService, scheduleStateTransitionService, schedulePostProcessingService) {
+    constructor(dataSource, reservationContextService, resourceContextService, projectContextService, vehicleInfoContextService, fileContextService, employeeContextService, scheduleNotificationContextService, scheduleAuthorizationService, schedulePolicyService, scheduleQueryContextService, scheduleMutationService, scheduleStateTransitionService, schedulePostProcessingService) {
         this.dataSource = dataSource;
         this.reservationContextService = reservationContextService;
         this.resourceContextService = resourceContextService;
         this.projectContextService = projectContextService;
         this.vehicleInfoContextService = vehicleInfoContextService;
         this.fileContextService = fileContextService;
+        this.employeeContextService = employeeContextService;
+        this.scheduleNotificationContextService = scheduleNotificationContextService;
         this.scheduleAuthorizationService = scheduleAuthorizationService;
         this.schedulePolicyService = schedulePolicyService;
         this.scheduleQueryContextService = scheduleQueryContextService;
@@ -28505,6 +28377,9 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         this.scheduleStateTransitionService = scheduleStateTransitionService;
         this.schedulePostProcessingService = schedulePostProcessingService;
         this.logger = new common_1.Logger(ScheduleManagementService_1.name);
+    }
+    async postProcessingSchedules() {
+        return this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();
     }
     async findCalendar(user, query) {
         this.logger.log(`캘린더 조회 요청 - 사용자: ${user.employeeId}, 날짜: ${query.date}`);
@@ -28609,7 +28484,6 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             throw new common_1.NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
         }
         const { schedule, project, reservation, resource, participants } = scheduleData;
-        console.log(resource);
         const reserver = participants?.find((p) => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
         const regularParticipants = participants?.filter((p) => p.type !== reservation_type_enum_1.ParticipantsType.RESERVER) || [];
         const reserverDto = reserver ? schedule_detail_response_dto_1.ScheduleDetailParticipantDto.fromParticipantWithEmployee(reserver) : undefined;
@@ -28773,6 +28647,14 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 });
             }
         }
+        if (createdSchedules.length > 0) {
+            const { schedule, reservation, resource } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(createdSchedules[0].scheduleId, {
+                withReservation: true,
+                withResource: true,
+            });
+            const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
+            await this.scheduleNotificationContextService.일정_생성_알림을_전송한다({ schedule, reservation, resource }, [user.employeeId, ...participants.map((participant) => participant.employeeId)], systemAdmins.map((admin) => admin.employeeId));
+        }
         const createdSchedulesDtos = createdSchedules.map((schedule) => ({
             scheduleId: schedule.scheduleId,
             title: schedule.title,
@@ -28789,25 +28671,19 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         this.logger.log(`일정 취소 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
         const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(user, scheduleId, schedule_authorization_service_2.ScheduleAction.CANCEL);
         this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
-        const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
+        const { schedule, reservation, resource, participants } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
+            withResource: true,
+            withParticipants: true,
         });
         const policyResult = await this.schedulePolicyService.일정_취소가_가능한지_확인한다(schedule, reservation);
         this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
-        const cancelResult = await this.scheduleStateTransitionService.일정을_취소한다(schedule, reservation, cancelDto.reason);
-        return {
-            scheduleId: cancelResult.schedule.scheduleId,
-            title: cancelResult.schedule.title,
-            status: 'CANCELLED',
-            cancelledAt: cancelResult.cancelledAt,
-            reason: cancelDto.reason,
-            reservation: cancelResult.reservation
-                ? {
-                    reservationId: cancelResult.reservation.reservationId,
-                    status: cancelResult.reservation.status,
-                }
-                : undefined,
-        };
+        const cancelResult = await this.scheduleStateTransitionService.일정을_취소한다(schedule, reservation);
+        await this.scheduleNotificationContextService.일정_취소_알림을_전송한다({ schedule, reservation, resource }, [
+            user.employeeId,
+            ...participants.map((participant) => participant.employeeId),
+        ]);
+        return cancelResult;
     }
     async completeSchedule(user, scheduleId, completeDto) {
         this.logger.log(`일정 완료 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
@@ -28897,7 +28773,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
 exports.ScheduleManagementService = ScheduleManagementService;
 exports.ScheduleManagementService = ScheduleManagementService = ScheduleManagementService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _c : Object, typeof (_d = typeof project_context_service_1.ProjectContextService !== "undefined" && project_context_service_1.ProjectContextService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _e : Object, typeof (_f = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _f : Object, typeof (_g = typeof schedule_authorization_service_1.ScheduleAuthorizationService !== "undefined" && schedule_authorization_service_1.ScheduleAuthorizationService) === "function" ? _g : Object, typeof (_h = typeof schedule_policy_service_1.SchedulePolicyService !== "undefined" && schedule_policy_service_1.SchedulePolicyService) === "function" ? _h : Object, typeof (_j = typeof schedule_query_context_service_1.ScheduleQueryContextService !== "undefined" && schedule_query_context_service_1.ScheduleQueryContextService) === "function" ? _j : Object, typeof (_k = typeof schedule_mutation_context_service_1.ScheduleMutationContextService !== "undefined" && schedule_mutation_context_service_1.ScheduleMutationContextService) === "function" ? _k : Object, typeof (_l = typeof schedule_state_transition_service_1.ScheduleStateTransitionService !== "undefined" && schedule_state_transition_service_1.ScheduleStateTransitionService) === "function" ? _l : Object, typeof (_m = typeof schedule_post_processing_service_1.SchedulePostProcessingService !== "undefined" && schedule_post_processing_service_1.SchedulePostProcessingService) === "function" ? _m : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _c : Object, typeof (_d = typeof project_context_service_1.ProjectContextService !== "undefined" && project_context_service_1.ProjectContextService) === "function" ? _d : Object, typeof (_e = typeof vehicle_info_context_service_1.VehicleInfoContextService !== "undefined" && vehicle_info_context_service_1.VehicleInfoContextService) === "function" ? _e : Object, typeof (_f = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _f : Object, typeof (_g = typeof employee_context_service_1.EmployeeContextService !== "undefined" && employee_context_service_1.EmployeeContextService) === "function" ? _g : Object, typeof (_h = typeof schedule_notification_context_service_1.ScheduleNotificationContextService !== "undefined" && schedule_notification_context_service_1.ScheduleNotificationContextService) === "function" ? _h : Object, typeof (_j = typeof schedule_authorization_service_1.ScheduleAuthorizationService !== "undefined" && schedule_authorization_service_1.ScheduleAuthorizationService) === "function" ? _j : Object, typeof (_k = typeof schedule_policy_service_1.SchedulePolicyService !== "undefined" && schedule_policy_service_1.SchedulePolicyService) === "function" ? _k : Object, typeof (_l = typeof schedule_query_context_service_1.ScheduleQueryContextService !== "undefined" && schedule_query_context_service_1.ScheduleQueryContextService) === "function" ? _l : Object, typeof (_m = typeof schedule_mutation_context_service_1.ScheduleMutationContextService !== "undefined" && schedule_mutation_context_service_1.ScheduleMutationContextService) === "function" ? _m : Object, typeof (_o = typeof schedule_state_transition_service_1.ScheduleStateTransitionService !== "undefined" && schedule_state_transition_service_1.ScheduleStateTransitionService) === "function" ? _o : Object, typeof (_p = typeof schedule_post_processing_service_1.SchedulePostProcessingService !== "undefined" && schedule_post_processing_service_1.SchedulePostProcessingService) === "function" ? _p : Object])
 ], ScheduleManagementService);
 
 
@@ -28940,8 +28816,8 @@ let TaskController = class TaskController {
     constructor(taskManagementService) {
         this.taskManagementService = taskManagementService;
     }
-    async getUserTasks(user) {
-        return this.taskManagementService.getTaskList(user);
+    async getUserTasks(user, type) {
+        return this.taskManagementService.getTaskList(user, type);
     }
     async getAdminTasks(type) {
         return this.taskManagementService.getAdminTaskList(type);
@@ -28956,9 +28832,17 @@ __decorate([
         description: '태스크 목록 조회 성공',
         type: task_response_dto_1.TaskResponseDto,
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'type',
+        type: String,
+        required: false,
+        description: '태스크 타입',
+        enum: ['차량반납지연', '소모품교체'],
+    }),
     __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _b : Object, String]),
     __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
 ], TaskController.prototype, "getUserTasks", null);
 __decorate([
@@ -29206,35 +29090,41 @@ let TaskManagementService = class TaskManagementService {
         this.reservationContextService = reservationContextService;
         this.notificationContextService = notificationContextService;
     }
-    async getTaskList(user) {
-        const delayedReturnReservations = await this.reservationContextService.지연반납_예약을_조회한다(user.employeeId);
-        const isResourceAdmin = user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN);
-        const isSystemAdmin = user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN);
-        let needReplaceConsumable = [];
-        if (isResourceAdmin || isSystemAdmin) {
-            needReplaceConsumable = await this.교체필요한_소모품을_조회한다(user, isSystemAdmin);
+    async getTaskList(user, type) {
+        let delayedReturnTasks = [];
+        let consumableReplaceTasks = [];
+        if (type === '차량반납지연') {
+            const delayedReturnReservations = await this.reservationContextService.지연반납_예약을_조회한다(user.employeeId);
+            delayedReturnTasks = delayedReturnReservations.map((reservation) => ({
+                type: '반납지연',
+                title: `${reservation.resource.name} 반납 지연 중`,
+                reservationId: reservation.reservationId,
+                resourceId: reservation.resource.resourceId,
+                resourceName: reservation.resource.name,
+                startDate: reservation.startDate,
+                endDate: reservation.endDate,
+            }));
         }
-        const delayedReturnTasks = delayedReturnReservations.map((reservation) => ({
-            type: '반납지연',
-            title: `${reservation.resource.name} 반납 지연 중`,
-            reservationId: reservation.reservationId,
-            resourceId: reservation.resource.resourceId,
-            resourceName: reservation.resource.name,
-            startDate: reservation.startDate,
-            endDate: reservation.endDate,
-        }));
-        const consumableReplaceTasks = needReplaceConsumable.map((item) => ({
-            type: '소모품교체',
-            title: item.title,
-            reservationId: null,
-            resourceId: item.resourceId,
-            resourceName: item.resourceName,
-            consumableId: item.consumableId,
-            consumableName: item.consumableName,
-            startDate: null,
-            endDate: null,
-        }));
-        const items = [...delayedReturnTasks, ...consumableReplaceTasks];
+        else if (type === '소모품교체') {
+            const isResourceAdmin = user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN);
+            const isSystemAdmin = user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN);
+            let needReplaceConsumable = [];
+            if (isResourceAdmin || isSystemAdmin) {
+                needReplaceConsumable = await this.교체필요한_소모품을_조회한다(user, isSystemAdmin);
+            }
+            consumableReplaceTasks = needReplaceConsumable.map((item) => ({
+                type: '소모품교체',
+                title: item.title,
+                reservationId: null,
+                resourceId: item.resourceId,
+                resourceName: item.resourceName,
+                consumableId: item.consumableId,
+                consumableName: item.consumableName,
+                startDate: null,
+                endDate: null,
+            }));
+        }
+        const items = type === '차량반납지연' ? delayedReturnTasks : consumableReplaceTasks;
         return {
             totalCount: items.length,
             items,
@@ -31626,6 +31516,25 @@ let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = 
             await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, notificationData, targetEmployeeIds);
         }
     }
+    async 일정_취소_알림을_전송한다(data, targetEmployeeIds) {
+        const notificationData = {
+            schedule: {
+                scheduleId: data.schedule.scheduleId,
+                scheduleTitle: data.schedule.title,
+                startDate: date_util_1.DateUtil.format(data.schedule.startDate, 'YYYY-MM-DD HH:mm'),
+                endDate: date_util_1.DateUtil.format(data.schedule.endDate, 'YYYY-MM-DD HH:mm'),
+            },
+            reservation: {
+                reservationId: data.reservation.reservationId,
+            },
+            resource: {
+                resourceId: data.resource.resourceId,
+                resourceName: data.resource.name,
+                resourceType: data.resource.type,
+            },
+        };
+        await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED, notificationData, targetEmployeeIds);
+    }
 };
 exports.ScheduleNotificationContextService = ScheduleNotificationContextService;
 exports.ScheduleNotificationContextService = ScheduleNotificationContextService = ScheduleNotificationContextService_1 = __decorate([
@@ -32311,6 +32220,7 @@ let LegacyReservationContextService = class LegacyReservationContextService {
             ],
             withDeleted: true,
         });
+        console.log(reservation);
         if (!reservation) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
@@ -35144,22 +35054,14 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 let SchedulePolicyService = class SchedulePolicyService {
     constructor(domainReservationService) {
         this.domainReservationService = domainReservationService;
     }
     async 일정_취소가_가능한지_확인한다(schedule, reservation) {
         const now = date_util_1.DateUtil.now().toDate();
-        const cancellationDeadline = new Date(schedule.startDate);
-        cancellationDeadline.setMinutes(cancellationDeadline.getMinutes() - 30);
-        if (now > cancellationDeadline) {
-            return {
-                isAllowed: false,
-                reason: '일정 시작 30분 전까지만 취소가 가능합니다.',
-                reasonCode: 'CANCELLATION_TIME_EXCEEDED',
-            };
-        }
-        if (schedule.startDate <= now) {
+        if (schedule.startDate <= now || schedule.status === schedule_type_enum_1.ScheduleStatus.PROCESSING) {
             return {
                 isAllowed: false,
                 reason: '이미 시작된 일정은 취소할 수 없습니다.',
@@ -35361,18 +35263,36 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var SchedulePostProcessingService_1;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SchedulePostProcessingService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const schedule_service_1 = __webpack_require__(/*! @src/domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
+const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
 let SchedulePostProcessingService = SchedulePostProcessingService_1 = class SchedulePostProcessingService {
-    constructor() {
+    constructor(domainScheduleService, domainReservationService) {
+        this.domainScheduleService = domainScheduleService;
+        this.domainReservationService = domainReservationService;
         this.logger = new common_1.Logger(SchedulePostProcessingService_1.name);
+    }
+    async 일정관련_배치_작업을_처리한다() {
+        const now = date_util_1.DateUtil.now().format();
+        const pendingToChangeProcessing = await this.domainScheduleService.findByPendingToChangeProcessing();
+        for (const schedule of pendingToChangeProcessing) {
+            await this.domainScheduleService.update(schedule.scheduleId, { status: schedule_type_enum_1.ScheduleStatus.PROCESSING });
+        }
+        const processingToChangeCompleted = await this.domainScheduleService.findByProcessingToChangeCompleted();
+        for (const schedule of processingToChangeCompleted) {
+            await this.domainScheduleService.update(schedule.scheduleId, { status: schedule_type_enum_1.ScheduleStatus.COMPLETED });
+        }
     }
 };
 exports.SchedulePostProcessingService = SchedulePostProcessingService;
 exports.SchedulePostProcessingService = SchedulePostProcessingService = SchedulePostProcessingService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _a : Object, typeof (_b = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _b : Object])
 ], SchedulePostProcessingService);
 
 
@@ -35497,6 +35417,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             return [];
         }
         const schedules = await this.domainScheduleService.findByScheduleIds(scheduleIds);
+        console.log(schedules);
         const scheduleMap = new Map(schedules.map((schedule) => [schedule.scheduleId, schedule]));
         const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
         const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
@@ -36287,34 +36208,20 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             await queryRunner.startTransaction();
         }
         try {
-            const cancelledAt = date_util_1.DateUtil.now().toDate();
             if (reservation) {
                 await this.domainReservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CANCELLED }, { queryRunner });
-                reservation = await this.domainReservationService.findOne({
-                    where: { reservationId: reservation.reservationId },
-                });
             }
-            const updatedDescription = schedule.description
-                ? `${schedule.description}\n\n[${date_util_1.DateUtil.format(cancelledAt, 'YYYY-MM-DD HH:mm')}] 일정이 취소되었습니다.${cancelReason ? ` 사유: ${cancelReason}` : ''}`
-                : `[${date_util_1.DateUtil.format(cancelledAt, 'YYYY-MM-DD HH:mm')}] 일정이 취소되었습니다.${cancelReason ? ` 사유: ${cancelReason}` : ''}`;
-            await this.domainScheduleService.update(schedule.scheduleId, {
-                status: schedule_type_enum_1.ScheduleStatus.CANCELLED,
-                description: updatedDescription,
-                completionReason: cancelReason,
-            }, { queryRunner });
+            await this.domainScheduleService.softDelete(schedule.scheduleId, { queryRunner });
             if (shouldManageTransaction) {
                 await queryRunner.commitTransaction();
             }
-            const updatedSchedule = await this.domainScheduleService.findOne({
-                where: { scheduleId: schedule.scheduleId },
-            });
-            return { schedule: updatedSchedule, reservation, cancelledAt };
+            return true;
         }
         catch (error) {
             if (shouldManageTransaction) {
                 await queryRunner.rollbackTransaction();
             }
-            throw error;
+            return false;
         }
         finally {
             if (shouldManageTransaction) {
@@ -39866,6 +39773,12 @@ let DomainScheduleRepository = class DomainScheduleRepository extends base_repos
     constructor(repository) {
         super(repository);
     }
+    async softDelete(scheduleId, repositoryOptions) {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
+            : this.repository;
+        await repository.softDelete(scheduleId);
+    }
 };
 exports.DomainScheduleRepository = DomainScheduleRepository;
 exports.DomainScheduleRepository = DomainScheduleRepository = __decorate([
@@ -39900,6 +39813,8 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const schedule_repository_1 = __webpack_require__(/*! ./schedule.repository */ "./src/domain/schedule/schedule.repository.ts");
 const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 let DomainScheduleService = class DomainScheduleService extends base_service_1.BaseService {
     constructor(scheduleRepository) {
         super(scheduleRepository);
@@ -39949,6 +39864,28 @@ let DomainScheduleService = class DomainScheduleService extends base_service_1.B
         catch (error) {
             throw new common_1.BadRequestException(`잘못된 날짜 형식입니다: ${date}. YYYY-MM 형식으로 입력해주세요.`);
         }
+    }
+    async findByPendingToChangeProcessing() {
+        const now = date_util_1.DateUtil.now().toDate();
+        return this.scheduleRepository.findAll({
+            where: {
+                status: schedule_type_enum_1.ScheduleStatus.PENDING,
+                startDate: (0, typeorm_1.MoreThanOrEqual)(now),
+            },
+        });
+    }
+    async findByProcessingToChangeCompleted() {
+        const now = date_util_1.DateUtil.now().toDate();
+        return this.scheduleRepository.findAll({
+            where: {
+                status: schedule_type_enum_1.ScheduleStatus.PROCESSING,
+                endDate: (0, typeorm_1.MoreThanOrEqual)(now),
+            },
+        });
+    }
+    async softDelete(scheduleId, options) {
+        this.scheduleRepository.update(scheduleId, { status: schedule_type_enum_1.ScheduleStatus.CANCELLED }, options);
+        return this.scheduleRepository.softDelete(scheduleId, options);
     }
 };
 exports.DomainScheduleService = DomainScheduleService;

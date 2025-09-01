@@ -21,46 +21,49 @@ export class TaskManagementService {
     /**
      * 사용자의 작업 목록을 조회한다
      */
-    async getTaskList(user: Employee): Promise<TaskListResponseDto> {
-        // 반납 지연된 예약 조회
-        const delayedReturnReservations = await this.reservationContextService.지연반납_예약을_조회한다(
-            user.employeeId,
-        );
+    async getTaskList(user: Employee, type?: string): Promise<TaskListResponseDto> {
+        let delayedReturnTasks = [];
+        let consumableReplaceTasks = [];
 
-        const isResourceAdmin = user.roles.includes(Role.RESOURCE_ADMIN);
-        const isSystemAdmin = user.roles.includes(Role.SYSTEM_ADMIN);
+        if (type === '차량반납지연') {
+            // 반납 지연된 예약 조회
+            const delayedReturnReservations = await this.reservationContextService.지연반납_예약을_조회한다(
+                user.employeeId,
+            );
+            // 반납 지연 작업 목록 변환
+            delayedReturnTasks = delayedReturnReservations.map((reservation) => ({
+                type: '반납지연',
+                title: `${reservation.resource.name} 반납 지연 중`,
+                reservationId: reservation.reservationId,
+                resourceId: reservation.resource.resourceId,
+                resourceName: reservation.resource.name,
+                startDate: reservation.startDate,
+                endDate: reservation.endDate,
+            }));
+        } else if (type === '소모품교체') {
+            const isResourceAdmin = user.roles.includes(Role.RESOURCE_ADMIN);
+            const isSystemAdmin = user.roles.includes(Role.SYSTEM_ADMIN);
 
-        let needReplaceConsumable = [];
-        if (isResourceAdmin || isSystemAdmin) {
-            // 소모품 교체 필요한 자원들 조회
-            needReplaceConsumable = await this.교체필요한_소모품을_조회한다(user, isSystemAdmin);
+            let needReplaceConsumable = [];
+            if (isResourceAdmin || isSystemAdmin) {
+                // 소모품 교체 필요한 자원들 조회
+                needReplaceConsumable = await this.교체필요한_소모품을_조회한다(user, isSystemAdmin);
+            }
+            // 소모품 교체 작업 목록 변환
+            consumableReplaceTasks = needReplaceConsumable.map((item) => ({
+                type: '소모품교체',
+                title: item.title,
+                reservationId: null,
+                resourceId: item.resourceId,
+                resourceName: item.resourceName,
+                consumableId: item.consumableId,
+                consumableName: item.consumableName,
+                startDate: null,
+                endDate: null,
+            }));
         }
 
-        // 반납 지연 작업 목록 변환
-        const delayedReturnTasks = delayedReturnReservations.map((reservation) => ({
-            type: '반납지연',
-            title: `${reservation.resource.name} 반납 지연 중`,
-            reservationId: reservation.reservationId,
-            resourceId: reservation.resource.resourceId,
-            resourceName: reservation.resource.name,
-            startDate: reservation.startDate,
-            endDate: reservation.endDate,
-        }));
-
-        // 소모품 교체 작업 목록 변환
-        const consumableReplaceTasks = needReplaceConsumable.map((item) => ({
-            type: '소모품교체',
-            title: item.title,
-            reservationId: null,
-            resourceId: item.resourceId,
-            resourceName: item.resourceName,
-            consumableId: item.consumableId,
-            consumableName: item.consumableName,
-            startDate: null,
-            endDate: null,
-        }));
-
-        const items = [...delayedReturnTasks, ...consumableReplaceTasks];
+        const items = type === '차량반납지연' ? delayedReturnTasks : consumableReplaceTasks;
 
         return {
             totalCount: items.length,

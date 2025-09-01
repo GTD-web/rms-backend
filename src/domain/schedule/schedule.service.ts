@@ -2,8 +2,10 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { DomainScheduleRepository } from './schedule.repository';
 import { BaseService } from '@libs/services/base.service';
 import { Schedule } from '@libs/entities/schedule.entity';
-import { MoreThanOrEqual, LessThanOrEqual, Between, In, Raw } from 'typeorm';
+import { MoreThanOrEqual, LessThanOrEqual, Between, In, Raw, LessThan, MoreThan } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
+import { ScheduleStatus } from '@libs/enums/schedule-type.enum';
+import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 
 @Injectable()
 export class DomainScheduleService extends BaseService<Schedule> {
@@ -65,5 +67,30 @@ export class DomainScheduleService extends BaseService<Schedule> {
         } catch (error) {
             throw new BadRequestException(`잘못된 날짜 형식입니다: ${date}. YYYY-MM 형식으로 입력해주세요.`);
         }
+    }
+
+    async findByPendingToChangeProcessing(): Promise<Schedule[]> {
+        const now = DateUtil.now().toDate();
+        return this.scheduleRepository.findAll({
+            where: {
+                status: ScheduleStatus.PENDING,
+                startDate: MoreThanOrEqual(now),
+            },
+        });
+    }
+
+    async findByProcessingToChangeCompleted(): Promise<Schedule[]> {
+        const now = DateUtil.now().toDate();
+        return this.scheduleRepository.findAll({
+            where: {
+                status: ScheduleStatus.PROCESSING,
+                endDate: MoreThanOrEqual(now),
+            },
+        });
+    }
+
+    async softDelete(scheduleId: string, options?: IRepositoryOptions<Schedule>): Promise<void> {
+        this.scheduleRepository.update(scheduleId, { status: ScheduleStatus.CANCELLED }, options);
+        return this.scheduleRepository.softDelete(scheduleId, options);
     }
 }
