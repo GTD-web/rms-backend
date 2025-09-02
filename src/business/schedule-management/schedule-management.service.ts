@@ -843,7 +843,6 @@ export class ScheduleManagementService {
               )
             : participants.map((participant) => participant.employeeId);
 
-        console.log(employeeIds);
         await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(
             updateScenarios,
             {

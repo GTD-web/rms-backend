@@ -97,12 +97,12 @@ export class ScheduleNotificationContextService {
                 endDate: DateUtil.format(data.schedule.endDate, 'YYYY-MM-DD HH:mm'),
             },
             reservation: {
-                reservationId: data.reservation.reservationId,
+                reservationId: data.reservation?.reservationId,
             },
             resource: {
-                resourceId: data.resource.resourceId,
-                resourceName: data.resource.name,
-                resourceType: data.resource.type,
+                resourceId: data.resource?.resourceId,
+                resourceName: data.resource?.name,
+                resourceType: data.resource?.type,
             },
         };
         if (updateScenarios.isDateUpdate || updateScenarios.isResourceUpdate) {
