@@ -145,6 +145,12 @@ export class ScheduleUpdateRequestDto {
         example: {
             title: '수정된 주간 팀 회의',
             description: '수정된 회의 설명입니다.',
+            notifyBeforeStart: true,
+            notifyMinutesBeforeStart: [10, 30],
+            location: '11층 or 수지구 동천동',
+            scheduleType: ScheduleType.PERSONAL,
+            projectId: '123e4567-e89b-12d3-a456-426614174000',
+            participants: ['123e4567-e89b-12d3-a456-426614174000'],
         },
     })
     info?: ScheduleUpdateInfoDto;

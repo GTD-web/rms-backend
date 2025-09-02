@@ -31,18 +31,18 @@ import { DateUtil } from '@libs/utils/date.util';
 export class ReservationController {
     constructor(private readonly reservationService: ReservationService) {}
 
-    @Post()
-    @ApiOperation({ summary: '예약 생성' })
-    @ApiOkResponse({
-        description: '예약 생성 성공',
-        type: CreateReservationResponseDto,
-    })
-    async create(
-        @User() user: Employee,
-        @Body() createDto: CreateReservationDto,
-    ): Promise<CreateReservationResponseDto> {
-        return this.reservationService.create(user, createDto);
-    }
+    // @Post()
+    // @ApiOperation({ summary: '예약 생성' })
+    // @ApiOkResponse({
+    //     description: '예약 생성 성공',
+    //     type: CreateReservationResponseDto,
+    // })
+    // async create(
+    //     @User() user: Employee,
+    //     @Body() createDto: CreateReservationDto,
+    // ): Promise<CreateReservationResponseDto> {
+    //     return this.reservationService.create(user, createDto);
+    // }
 
     // ==================== 관리자 전용 메서드들 ====================
 
@@ -242,19 +242,19 @@ export class ReservationController {
         return this.reservationService.findOne(user, reservationId);
     }
 
-    @Patch(':reservationId')
-    @ApiOperation({ summary: '예약 수정' })
-    @ApiOkResponse({
-        description: '예약 수정 성공',
-        type: ReservationResponseDto,
-    })
-    async updateReservation(
-        @User() user: Employee,
-        @Param('reservationId') reservationId: string,
-        @Body() updateDto: UpdateReservationDto,
-    ): Promise<ReservationResponseDto> {
-        return this.reservationService.updateReservation(user, reservationId, updateDto);
-    }
+    // @Patch(':reservationId')
+    // @ApiOperation({ summary: '예약 수정' })
+    // @ApiOkResponse({
+    //     description: '예약 수정 성공',
+    //     type: ReservationResponseDto,
+    // })
+    // async updateReservation(
+    //     @User() user: Employee,
+    //     @Param('reservationId') reservationId: string,
+    //     @Body() updateDto: UpdateReservationDto,
+    // ): Promise<ReservationResponseDto> {
+    //     return this.reservationService.updateReservation(user, reservationId, updateDto);
+    // }
 
     @Patch(':reservationId/status')
     @ApiOperation({ summary: '예약 상태 수정 #관리자/예약관리/예약상세' })
@@ -297,26 +297,26 @@ export class ReservationController {
         return this.reservationService.returnVehicle(user, reservationId, returnDto);
     }
 
-    @Get(':reservationId/check/extendable')
-    @ApiOperation({ summary: '예약 시간 연장 가능 여부 조회' })
-    @ApiOkResponse({
-        description: '예약 시간 연장 가능 여부 조회 성공',
-    })
-    async checkExtendable(@User() user: Employee, @Param('reservationId') reservationId: string): Promise<boolean> {
-        return this.reservationService.checkExtendable(user.employeeId, reservationId);
-    }
+    // @Get(':reservationId/check/extendable')
+    // @ApiOperation({ summary: '예약 시간 연장 가능 여부 조회' })
+    // @ApiOkResponse({
+    //     description: '예약 시간 연장 가능 여부 조회 성공',
+    // })
+    // async checkExtendable(@User() user: Employee, @Param('reservationId') reservationId: string): Promise<boolean> {
+    //     return this.reservationService.checkExtendable(user.employeeId, reservationId);
+    // }
 
-    @Patch(':reservationId/extend')
-    @ApiOperation({ summary: '예약 시간 연장' })
-    @ApiOkResponse({
-        description: '예약 시간 연장 성공',
-        type: ReservationResponseDto,
-    })
-    async extendReservation(
-        @User() user: Employee,
-        @Param('reservationId') reservationId: string,
-        @Body() extendDto: UpdateReservationTimeDto,
-    ): Promise<ReservationResponseDto> {
-        return this.reservationService.extendReservation(user.employeeId, reservationId, extendDto);
-    }
+    // @Patch(':reservationId/extend')
+    // @ApiOperation({ summary: '예약 시간 연장' })
+    // @ApiOkResponse({
+    //     description: '예약 시간 연장 성공',
+    //     type: ReservationResponseDto,
+    // })
+    // async extendReservation(
+    //     @User() user: Employee,
+    //     @Param('reservationId') reservationId: string,
+    //     @Body() extendDto: UpdateReservationTimeDto,
+    // ): Promise<ReservationResponseDto> {
+    //     return this.reservationService.extendReservation(user.employeeId, reservationId, extendDto);
+    // }
 }
