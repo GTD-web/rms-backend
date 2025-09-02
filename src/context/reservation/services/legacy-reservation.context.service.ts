@@ -742,6 +742,8 @@ export class LegacyReservationContextService {
     ): Promise<ReservationWithRelationsResponseDto[]> {
         if (startDate && endDate && startDate > endDate) {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
+        } else if ((startDate && !endDate) || (!startDate && endDate)) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_REQUIRED);
         }
         if (status && status.filter((s) => ReservationStatus[s]).length === 0) {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
@@ -777,6 +779,7 @@ export class LegacyReservationContextService {
             relations: ['resource', 'participants', 'participants.employee'],
             withDeleted: true,
         });
+        console.log(reservations);
         const reservationResponseDtos = reservations.map(
             (reservation) => new ReservationWithRelationsResponseDto(reservation),
         );

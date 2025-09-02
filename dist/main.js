@@ -218,6 +218,7 @@ const BusinessErrorMessage = {
         VEHICLE_ALREADY_RETURNED: '이미 반납된 차량입니다.',
         INVALID_MILEAGE: '반납 주행거리는 이전 주행거리보다 작을 수 없습니다.',
         RESOURCE_UNAVAILABLE: '예약 가능한 자원이 아닙니다.',
+        INVALID_DATE_REQUIRED: '시작 날짜와 종료 날짜는 필수입니다.',
     },
     FILE: {
         NOT_FOUND: '요청한 파일을 찾을 수 없습니다.',
@@ -33657,6 +33658,9 @@ let LegacyReservationContextService = class LegacyReservationContextService {
         if (startDate && endDate && startDate > endDate) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         }
+        else if ((startDate && !endDate) || (!startDate && endDate)) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_REQUIRED);
+        }
         if (status && status.filter((s) => reservation_type_enum_1.ReservationStatus[s]).length === 0) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
         }
@@ -33687,6 +33691,7 @@ let LegacyReservationContextService = class LegacyReservationContextService {
             relations: ['resource', 'participants', 'participants.employee'],
             withDeleted: true,
         });
+        console.log(reservations);
         const reservationResponseDtos = reservations.map((reservation) => new reservation_response_dto_1.ReservationWithRelationsResponseDto(reservation));
         return reservationResponseDtos;
     }
