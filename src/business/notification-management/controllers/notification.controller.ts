@@ -13,11 +13,11 @@ import { NotificationType } from '@libs/enums/notification-type.enum';
 import {
     PaginationQueryDto,
     NotificationListResponseDto,
-    ContextPushSubscriptionDto as PushSubscriptionDto,
-    ContextResponseNotificationDto as ResponseNotificationDto,
-    ContextNotificationTypeResponseDto as NotificationTypeResponseDto,
-    ContextSendNotificationDto as SendNotificationDto,
-    ContextPushNotificationDto as PushNotificationDto,
+    PushSubscriptionDto,
+    ResponseNotificationDto,
+    NotificationTypeResponseDto,
+    SendNotificationDto,
+    PushNotificationDto,
 } from '@src/business.dto.index';
 
 // Business Service

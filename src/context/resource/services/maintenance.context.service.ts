@@ -12,9 +12,6 @@ import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { DomainFileService } from '@src/domain/file/file.service';
 
-// Application Services
-import { NotificationService } from '@src/application/notification/services/notification.service';
-
 // DTOs
 import { CreateMaintenanceDto } from '@src/business/resource-management/dtos/vehicle/create-vehicle-info.dto';
 import { UpdateMaintenanceDto } from '@src/business/resource-management/dtos/vehicle/update-vehicle-info.dto';
@@ -30,7 +27,6 @@ export class MaintenanceContextService {
         private readonly domainVehicleInfoService: DomainVehicleInfoService,
         private readonly domainEmployeeService: DomainEmployeeService,
         private readonly domainFileService: DomainFileService,
-        private readonly notificationService: NotificationService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -91,16 +87,16 @@ export class MaintenanceContextService {
                 withDeleted: true,
             });
 
-            await this.notificationService.createNotification(
-                NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
-                {
-                    resourceId: consumable.vehicleInfo.resource.resourceId,
-                    resourceType: consumable.vehicleInfo.resource.type,
-                    consumableName: consumable.name,
-                    resourceName: consumable.vehicleInfo.resource.name,
-                },
-                systemAdmins.map((admin) => admin.employeeId),
-            );
+            // await this.notificationService.createNotification(
+            //     NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
+            //     {
+            //         resourceId: consumable.vehicleInfo.resource.resourceId,
+            //         resourceType: consumable.vehicleInfo.resource.type,
+            //         consumableName: consumable.name,
+            //         resourceName: consumable.vehicleInfo.resource.name,
+            //     },
+            //     systemAdmins.map((admin) => admin.employeeId),
+            // );
 
             return {
                 maintenanceId: maintenance.maintenanceId,

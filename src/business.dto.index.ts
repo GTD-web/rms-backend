@@ -75,19 +75,19 @@ export * from './business/task-management/dtos/task-response.dto';
 // ============================================================================
 
 // 🏨 Accommodation DTOs
-export * from './business/resource-management/dtos/accommodation/dtos/accommodation-info-response.dto';
-export * from './business/resource-management/dtos/accommodation/dtos/create-accommodation-info.dto';
-export * from './business/resource-management/dtos/accommodation/dtos/update-accommodation-info.dto';
+export * from './business/resource-management/dtos/accommodation/accommodation-info-response.dto';
+export * from './business/resource-management/dtos/accommodation/create-accommodation-info.dto';
+export * from './business/resource-management/dtos/accommodation/update-accommodation-info.dto';
 
 // 🔧 Equipment DTOs
-export * from './business/resource-management/dtos/equipment/dtos/create-equipment-info.dto';
-export * from './business/resource-management/dtos/equipment/dtos/equipment-info-response.dto';
-export * from './business/resource-management/dtos/equipment/dtos/update-equipment-info.dto';
+export * from './business/resource-management/dtos/equipment/create-equipment-info.dto';
+export * from './business/resource-management/dtos/equipment/equipment-info-response.dto';
+export * from './business/resource-management/dtos/equipment/update-equipment-info.dto';
 
 // 🏢 Meeting Room DTOs
-export * from './business/resource-management/dtos/meeting-room/dtos/create-meeting-room-info.dto';
-export * from './business/resource-management/dtos/meeting-room/dtos/meeting-room-info-response.dto';
-export * from './business/resource-management/dtos/meeting-room/dtos/update-meeting-room-info.dto';
+export * from './business/resource-management/dtos/meeting-room/create-meeting-room-info.dto';
+export * from './business/resource-management/dtos/meeting-room/meeting-room-info-response.dto';
+export * from './business/resource-management/dtos/meeting-room/update-meeting-room-info.dto';
 
 // 📦 Resource DTOs
 export * from './business/resource-management/dtos/resource/check-availability.dto';
@@ -111,44 +111,35 @@ export * from './business/resource-management/dtos/vehicle/vehicle-response.dto'
 
 // 📢 Context Notification DTOs
 export {
-    CreateNotificationDto as ContextCreateNotificationDto,
-    CreateNotificationDataDto as ContextCreateNotificationDataDto,
-    CreateEmployeeNotificationDto as ContextCreateEmployeeNotificationDto,
-    SendNotificationDto as ContextSendNotificationDto,
+    CreateNotificationDto,
+    CreateNotificationDataDto,
+    CreateEmployeeNotificationDto,
+    SendNotificationDto,
 } from './context/notification/dtos/create-notification.dto';
 
 export {
-    ResponseNotificationDto as ContextResponseNotificationDto,
-    NotificationDataDto as ContextNotificationDataDto,
+    ResponseNotificationDto,
+    NotificationDataDto,
     PushNotificationSendResult,
-    ScheduleResponseDto,
-    ReservationResponseDto,
-    ResourceResponseDto as ContextResourceResponseDto,
-    ProjectResponseDto,
-    ConsumableResponseDto as ContextConsumableResponseDto,
-    VehicleInfoResponseDto as ContextVehicleInfoResponseDto,
 } from './context/notification/dtos/response-notification.dto';
 
 export {
-    NotificationTypeResponseDto as ContextNotificationTypeResponseDto,
-    NotificationTypeRequirementsDto as ContextNotificationTypeRequirementsDto,
-    NotificationTypeScheduleRequirementsDto as ContextNotificationTypeScheduleRequirementsDto,
-    NotificationTypeReservationRequirementsDto as ContextNotificationTypeReservationRequirementsDto,
-    NotificationTypeResourceRequirementsDto as ContextNotificationTypeResourceRequirementsDto,
-    NotificationTypeProjectRequirementsDto as ContextNotificationTypeProjectRequirementsDto,
-    NotificationTypeVehicleInfoRequirementsDto as ContextNotificationTypeVehicleInfoRequirementsDto,
-    NotificationTypeConsumableRequirementsDto as ContextNotificationTypeConsumableRequirementsDto,
+    NotificationTypeResponseDto,
+    NotificationTypeRequirementsDto,
+    NotificationTypeScheduleRequirementsDto,
+    NotificationTypeReservationRequirementsDto,
+    NotificationTypeResourceRequirementsDto,
+    NotificationTypeProjectRequirementsDto,
+    NotificationTypeVehicleInfoRequirementsDto,
+    NotificationTypeConsumableRequirementsDto,
 } from './context/notification/dtos/notification-type-response.dto';
 
-export { PushSubscriptionDto as ContextPushSubscriptionDto } from './context/notification/dtos/push-subscription.dto';
-export {
-    PushNotificationDto as ContextPushNotificationDto,
-    PushNotificationPayload as ContextPushNotificationPayload,
-} from './context/notification/dtos/send-notification.dto';
+export { PushSubscriptionDto } from './context/notification/dtos/push-subscription.dto';
+export { PushNotificationDto, PushNotificationPayload } from './context/notification/dtos/send-notification.dto';
 
 // 📁 Context File DTOs
-export { CreateFileDataDto as ContextCreateFileDataDto } from './context/file/dtos/create-filedata.dto';
-export { FileResponseDto as ContextFileResponseDto } from './context/file/dtos/file-response.dto';
+export { CreateFileDataDto } from './context/file/dtos/create-filedata.dto';
+export { FileResponseDto } from './context/file/dtos/file-response.dto';
 export { ReservationVehicleFileResponseDto } from './context/file/dtos/reservation-vehicle-file-response.dto';
 export * from './context/file/dtos/index';
 

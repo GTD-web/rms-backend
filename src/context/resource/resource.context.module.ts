@@ -14,9 +14,6 @@ import { DomainMaintenanceModule } from '@src/domain/maintenance/maintenance.mod
 import { DomainReservationVehicleModule } from '@src/domain/reservation-vehicle/reservation-vehicle.module';
 import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
 
-// Application Modules
-import { NotificationModule } from '@src/application/notification/notification.module';
-
 // Context Services
 import { ResourceContextService } from './services/resource.context.service';
 import { ResourceGroupContextService } from './services/resource-group.context.service';
@@ -58,7 +55,6 @@ import { MaintenanceContextService } from './services/maintenance.context.servic
         DomainEmployeeModule,
 
         // Application Layer Modules
-        NotificationModule,
     ],
     providers: [
         // Context Services

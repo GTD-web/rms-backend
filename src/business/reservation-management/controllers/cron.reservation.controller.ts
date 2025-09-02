@@ -5,7 +5,7 @@ import { CronReservationService } from '../services/cron-reservation.service';
 
 @ApiTags('v2 예약 ')
 @Public()
-@Controller('v2/reservations')
+@Controller('v1/reservations')
 export class CronReservationController {
     constructor(private readonly cronReservationService: CronReservationService) {}
 

@@ -1,55 +1,27 @@
-import {
-    Injectable,
-    NotFoundException,
-    BadRequestException,
-    ForbiddenException,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
 import { DomainResourceService } from '@src/domain/resource/resource.service';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
-import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { DomainEmployeeNotificationService } from '@src/domain/employee-notification/employee-notification.service';
-import { DomainReservationParticipantService } from '@src/domain/reservation-participant/reservation-participant.service';
 import { DomainReservationVehicleService } from '@src/domain/reservation-vehicle/reservation-vehicle.service';
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
 import { DomainFileService } from '@src/domain/file/file.service';
-import { NotificationService } from '@src/application/notification/services/notification.service';
-import { SchedulerRegistry } from '@nestjs/schedule';
 import { DataSource, QueryRunner } from 'typeorm';
-import { Employee, Reservation, ReservationParticipant, ReservationVehicle } from '@libs/entities';
+import { Employee, Reservation } from '@libs/entities';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-type.enum';
-import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { DateUtil } from '@libs/utils/date.util';
-import {
-    CalendarResponseDto,
-    ReservationWithRelationsResponseDto,
-    GroupedReservationResponseDto,
-    GroupedReservationWithResourceResponseDto,
-} from '@src/application/reservation/core/dtos/reservation-response.dto';
-import { ReservationQueryDto } from '@src/application/reservation/core/dtos/reservaion-query.dto';
-import { ResponseNotificationDto } from '@src/application/notification/dtos/response-notification.dto';
-import { ResourceResponseDto } from '@resource/dtos.index';
-import { In, Raw, FindOptionsWhere, Between, MoreThan, LessThan, MoreThanOrEqual, LessThanOrEqual, Not } from 'typeorm';
-import { CronJob } from 'cron';
-import { Role } from '@libs/enums/role-type.enum';
-import { CreateReservationDto } from '@src/application/reservation/core/dtos/create-reservation.dto';
-import { CreateReservationDto as ContextCreateReservationDto } from '../dtos/create-reservation.dto';
-import {
-    CreateReservationResponseDto,
-    ReservationResponseDto,
-} from '@src/application/reservation/core/dtos/reservation-response.dto';
-import {
-    UpdateReservationDto,
-    ReturnVehicleDto,
-    UpdateReservationStatusDto,
-    UpdateReservationTimeDto,
-} from '@src/application/reservation/core/dtos/update-reservation.dto';
+import { In, Raw, FindOptionsWhere, Between, MoreThan, LessThan, LessThanOrEqual, Not } from 'typeorm';
+
+import { CreateReservationDto } from '../dtos/create-reservation.dto';
+import { ReturnVehicleDto, UpdateReservationStatusDto } from '../dtos/update-reservation.dto';
+import { ReservationWithRelationsResponseDto } from '@src/business.dto.index';
+// import { ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
+import { ReservationResponseDto } from '@src/business.dto.index';
 
 @Injectable()
 export class ReservationContextService {
@@ -57,83 +29,239 @@ export class ReservationContextService {
         private readonly domainReservationService: DomainReservationService,
         private readonly domainResourceService: DomainResourceService,
         private readonly domainNotificationService: DomainNotificationService,
-        private readonly domainEmployeeService: DomainEmployeeService,
         private readonly domainEmployeeNotificationService: DomainEmployeeNotificationService,
-        private readonly domainReservationParticipantService: DomainReservationParticipantService,
         private readonly domainReservationVehicleService: DomainReservationVehicleService,
         private readonly domainVehicleInfoService: DomainVehicleInfoService,
         private readonly domainFileService: DomainFileService,
-        private readonly notificationService: NotificationService,
-        private readonly schedulerRegistry: SchedulerRegistry,
         private readonly dataSource: DataSource,
     ) {}
 
-    async 예약을_조회한다(reservationId: string): Promise<Reservation> {
-        return await this.domainReservationService.findOne({
-            where: { reservationId },
-            withDeleted: true,
-        });
-    }
+    // 기존
 
-    // ==================== 예약 생성 ====================
-    async 자원예약이_가능한지_확인한다(resourceId: string, startDate: Date, endDate: Date): Promise<boolean> {
-        const conflicts = await this.domainReservationService.findAll({
-            where: {
-                resourceId,
-                status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
-                startDate: LessThan(endDate),
-                endDate: MoreThan(startDate),
-                // ...(reservationId && { reservationId: Not(reservationId) }),
-            },
-        });
-        return conflicts.length === 0;
-    }
+    async 예약목록을_조회한다(
+        startDate?: string,
+        endDate?: string,
+        resourceType?: ResourceType,
+        resourceId?: string,
+        status?: string[],
+    ): Promise<ReservationWithRelationsResponseDto[]> {
+        if (startDate && endDate && startDate > endDate) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
+        } else if ((startDate && !endDate) || (!startDate && endDate)) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_REQUIRED);
+        }
+        if (status && status.filter((s) => ReservationStatus[s]).length === 0) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
+        }
+        const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+        let where: FindOptionsWhere<Reservation> = {};
 
-    async 자원예약을_생성한다(
-        reservationData: ContextCreateReservationDto,
-        queryRunner?: QueryRunner,
-    ): Promise<Reservation> {
-        const reservationEntity = {
-            title: reservationData.title,
-            description: reservationData.description,
-            resourceId: reservationData.resourceId,
-            startDate: reservationData.startDate,
-            endDate: reservationData.endDate,
-            status: reservationData.status,
-        };
-
-        // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
-        const savedReservation = await this.domainReservationService.save(reservationEntity, {
-            queryRunner: queryRunner,
-        });
-
-        // TODO : 자원 유형별로 예약정보가 필요할 경우 스위치 문으로 정리
-        // 차량 예약 정보 생성
-        if (reservationData.resourceType === ResourceType.VEHICLE) {
-            // 차량 리소스 정보 조회
-            const resource = await this.domainResourceService.findOne({
-                where: { resourceId: reservationData.resourceId },
-            });
-            const vehicleInfo = await this.domainVehicleInfoService.findByResourceId(reservationData.resourceId);
-            if (!vehicleInfo) {
-                throw new NotFoundException('차량 정보를 찾을 수 없습니다.');
-            }
-
-            const reservationVehicleEntity = {
-                reservationId: savedReservation.reservationId!,
-                vehicleInfoId: vehicleInfo.vehicleInfoId,
-                startOdometer: vehicleInfo.totalMileage,
-                isReturned: false,
-                returnedAt: null,
-                location: resource.location,
+        if (status && status.length > 0) {
+            where.status = In(status);
+        }
+        if (resourceType) {
+            where.resource = {
+                type: resourceType as ResourceType,
             };
-
-            await this.domainReservationVehicleService.save(reservationVehicleEntity, {
-                queryRunner,
-            });
+        }
+        if (resourceId) {
+            where.resource = {
+                resourceId,
+            };
+        }
+        if (startDate && endDate) {
+            // 예약 기간이 검색 범위와 겹치는 경우를 찾음
+            // (예약 시작일 <= 검색 종료일) AND (예약 종료일 >= 검색 시작일)
+            where = {
+                ...where,
+                startDate: LessThan(DateUtil.date(regex.test(endDate) ? endDate : endDate + ' 23:59:59').toDate()),
+                endDate: MoreThan(DateUtil.date(regex.test(startDate) ? startDate : startDate + ' 00:00:00').toDate()),
+            };
         }
 
-        return savedReservation;
+        const reservations = await this.domainReservationService.findAll({
+            where,
+            relations: ['resource', 'participants', 'participants.employee'],
+            withDeleted: true,
+        });
+
+        const reservationResponseDtos = reservations.map(
+            (reservation) => new ReservationWithRelationsResponseDto(reservation),
+        );
+        return reservationResponseDtos;
+    }
+
+    async 확인필요_예약목록을_조회한다(
+        query: PaginationQueryDto,
+    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+        const { page, limit } = query;
+        // 숙소 - 예약 승인 대기
+        // 차량 - 예약 확정, 반납 완료
+        const where: FindOptionsWhere<Reservation>[] = [
+            {
+                status: ReservationStatus.PENDING,
+                resource: {
+                    type: ResourceType.ACCOMMODATION,
+                },
+            },
+        ];
+
+        const options: IRepositoryOptions<Reservation> = {
+            where,
+            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
+            withDeleted: true,
+        };
+
+        const reservations = await this.domainReservationService.findAll(options);
+        const reservationResponseDtos = reservations.map(
+            (reservation) => new ReservationWithRelationsResponseDto(reservation),
+        );
+
+        return {
+            items: reservationResponseDtos,
+            meta: {
+                total: reservations.length,
+                page: 1,
+                limit: reservations.length,
+                hasNext: false,
+            },
+        };
+    }
+
+    // ==================== 예약 상세 조회 ====================
+    async 예약_상세를_조회한다(user: Employee, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId },
+            relations: [
+                'resource',
+                'resource.vehicleInfo',
+                'resource.meetingRoomInfo',
+                'resource.accommodationInfo',
+                'participants',
+                'participants.employee',
+                'reservationVehicles',
+            ],
+            withDeleted: true,
+        });
+        console.log(reservation);
+        if (!reservation) {
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+
+        const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
+        reservationResponseDto.isMine = reservationResponseDto.reservers.some(
+            (reserver) => reserver.employeeId === user.employeeId,
+        );
+
+        reservationResponseDto.returnable =
+            (reservationResponseDto.resource as any).type === ResourceType.VEHICLE
+                ? reservationResponseDto.isMine &&
+                  reservationResponseDto.reservationVehicles.some(
+                      (reservationVehicle) => !reservationVehicle.isReturned,
+                  ) &&
+                  reservationResponseDto.startDate <= DateUtil.now().format()
+                : null;
+
+        reservationResponseDto.modifiable =
+            [ReservationStatus.PENDING, ReservationStatus.CONFIRMED].includes(reservation.status) &&
+            reservationResponseDto.isMine &&
+            reservationResponseDto.endDate > DateUtil.now().format();
+
+        const notifications = await this.domainNotificationService.findAll({
+            where: {
+                notificationData: Raw(
+                    (alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservation.reservationId}'`,
+                ),
+                employees: {
+                    employeeId: user.employeeId,
+                    isRead: false,
+                },
+            },
+            relations: ['employees'],
+        });
+
+        if (notifications.length > 0) {
+            const employeeNotifications = notifications
+                .map((notification) => notification.employees.map((employee) => employee.employeeNotificationId).flat())
+                .flat();
+            const updatedEmployeeNotifications = await Promise.all(
+                employeeNotifications.map((employeeNotificationId) =>
+                    this.domainEmployeeNotificationService.update(employeeNotificationId, {
+                        isRead: true,
+                    }),
+                ),
+            );
+        }
+
+        return reservationResponseDto;
+    }
+
+    async 예약상태를_변경한다(
+        reservationId: string,
+        updateDto: UpdateReservationStatusDto,
+    ): Promise<ReservationResponseDto> {
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId },
+            // relations: ['resource', 'resource.resourceManagers'],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+
+        if (reservation.status === ReservationStatus.CLOSED) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_UPDATE_STATUS(reservation.status));
+        }
+
+        const updatedReservation = await this.domainReservationService.update(reservationId, updateDto, {
+            relations: ['resource', 'resource.resourceManagers', 'participants', 'participants.employee'],
+            withDeleted: true,
+        });
+
+        const notiTarget = [
+            ...updatedReservation.resource.resourceManagers.map((manager) => manager.employeeId),
+            ...updatedReservation.participants.map((reserver) => reserver.employeeId),
+        ];
+
+        // if (updatedReservation.resource.notifyReservationChange && updateDto.status !== ReservationStatus.CLOSED) {
+        //     try {
+        //         let notificationType: NotificationType;
+        //         switch (updateDto.status) {
+        //             case ReservationStatus.CONFIRMED:
+        //                 notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
+        //                 break;
+        //             case ReservationStatus.CANCELLED:
+        //                 notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
+        //                 break;
+        //             case ReservationStatus.REJECTED:
+        //                 notificationType = NotificationType.RESERVATION_STATUS_REJECTED;
+        //                 break;
+        //         }
+
+        //         await this.notificationService.createNotification(
+        //             notificationType,
+        //             {
+        //                 reservationId: updatedReservation.reservationId,
+        //                 reservationTitle: updatedReservation.title,
+        //                 reservationDate: DateUtil.toAlarmRangeString(
+        //                     DateUtil.format(updatedReservation.startDate),
+        //                     DateUtil.format(updatedReservation.endDate),
+        //                 ),
+        //                 resourceId: updatedReservation.resource.resourceId,
+        //                 resourceName: updatedReservation.resource.name,
+        //                 resourceType: updatedReservation.resource.type,
+        //             },
+        //             notiTarget,
+        //         );
+        //     } catch (error) {
+        //         console.log(error);
+        //         console.log('Notification creation failed in updateStatus');
+        //     }
+        // }
+
+        const responseDto = new ReservationResponseDto();
+        Object.assign(responseDto, updatedReservation);
+        return responseDto;
     }
 
     // ==================== 차량 반납 ====================
@@ -240,15 +368,15 @@ export class ReservationContextService {
             );
 
             const notiTarget = [user.employeeId];
-            await this.notificationService.createNotification(
-                NotificationType.RESOURCE_VEHICLE_RETURNED,
-                {
-                    resourceId: reservation.resource.resourceId,
-                    resourceName: reservation.resource.name,
-                    resourceType: reservation.resource.type,
-                },
-                notiTarget,
-            );
+            // await this.notificationService.createNotification(
+            //     NotificationType.RESOURCE_VEHICLE_RETURNED,
+            //     {
+            //         resourceId: reservation.resource.resourceId,
+            //         resourceName: reservation.resource.name,
+            //         resourceType: reservation.resource.type,
+            //     },
+            //     notiTarget,
+            // );
 
             await queryRunner.commitTransaction();
             return true;
@@ -261,133 +389,8 @@ export class ReservationContextService {
         }
     }
 
-    // ==================== 예약 접근 권한 확인 ====================
-    async 예약_접근권한을_확인한다(reservationId: string, employeeId: string): Promise<boolean> {
-        const reservation = await this.domainReservationService.findOne({
-            where: { reservationId, participants: { employeeId, type: ParticipantsType.RESERVER } },
-            relations: ['participants'],
-        });
-        if (!reservation) {
-            throw new UnauthorizedException(ERROR_MESSAGE.BUSINESS.COMMON.UNAUTHORIZED);
-        }
-        return true;
-    }
-
-    // ==================== 충돌 예약 조회 ====================
-    async 충돌_예약을_조회한다(
-        resourceId: string,
-        startDate: Date,
-        endDate: Date,
-        reservationId?: string,
-    ): Promise<Reservation[]> {
-        return await this.domainReservationService.findAll({
-            where: {
-                resourceId,
-                ...(reservationId && { reservationId: Not(reservationId) }),
-                startDate: LessThan(endDate),
-                endDate: MoreThan(startDate),
-                status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
-            },
-        });
-    }
-
-    // ==================== 예약 연장 가능 여부 확인 ====================
-    async 예약_연장가능여부를_확인한다(employeeId: string, reservationId: string): Promise<boolean> {
-        // 1. 예약자 검증 - 해당 예약의 예약자가 맞는지 확인
-        await this.예약_접근권한을_확인한다(reservationId, employeeId);
-
-        // 2. 예약 정보 조회 및 검증
-        const reservation = await this.domainReservationService.findOne({
-            where: { reservationId },
-            relations: ['resource'],
-            withDeleted: true,
-        });
-
-        if (!reservation) {
-            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
-        }
-
-        // 3. 예약 타이밍 검증 (예약 종료 15분 전부터 연장 가능)
-        const currentTime = DateUtil.now().toDate();
-        const extendableStartTime = DateUtil.date(reservation.endDate).addMinutes(-15).toDate();
-
-        console.log('reservation', reservation);
-        console.log('currentTime', currentTime);
-        console.log('extendableStartTime', extendableStartTime);
-
-        // 현재 시간이 연장 가능 시간 범위에 있는지 확인
-        if (currentTime < extendableStartTime || currentTime > reservation.endDate) {
-            console.log('isAvailable', false);
-            return false;
-        }
-
-        // 4. 연장 시간(30분)에 다른 예약과 충돌하는지 확인
-        const extendedEndTime = DateUtil.date(reservation.endDate).addMinutes(30).toDate();
-        const conflictReservations = await this.충돌_예약을_조회한다(
-            reservation.resourceId,
-            reservation.endDate,
-            extendedEndTime,
-            reservationId,
-        );
-
-        const isConflict = conflictReservations.length > 0;
-        console.log('isConflict', isConflict);
-
-        return !isConflict;
-    }
-
-    // ==================== 예약 연장 ====================
-    async 예약을_연장한다(
-        employeeId: string,
-        reservationId: string,
-        extendDto: UpdateReservationTimeDto,
-    ): Promise<ReservationResponseDto> {
-        // 1. 예약자 검증 - 해당 예약의 예약자가 맞는지 확인
-        await this.예약_접근권한을_확인한다(reservationId, employeeId);
-
-        // 2. 예약 시간 업데이트 (기존 예약 수정 로직 활용)
-        const updatedReservation = await this.domainReservationService.update(
-            reservationId,
-            {
-                endDate: DateUtil.date(extendDto.endDate).toDate(),
-            },
-            {
-                relations: ['resource', 'participants', 'participants.employee'],
-                withDeleted: true,
-            },
-        );
-
-        // 4. 알림 처리 (예약 시간 변경 알림)
-        if (updatedReservation.resource.notifyReservationChange) {
-            try {
-                const notiTarget = updatedReservation.participants.map((participant) => participant.employeeId);
-
-                await this.notificationService.createNotification(
-                    NotificationType.RESERVATION_TIME_CHANGED,
-                    {
-                        reservationId: updatedReservation.reservationId,
-                        reservationTitle: updatedReservation.title,
-                        reservationDate: DateUtil.toAlarmRangeString(
-                            DateUtil.format(updatedReservation.startDate),
-                            DateUtil.format(updatedReservation.endDate),
-                        ),
-                        resourceId: updatedReservation.resource.resourceId,
-                        resourceName: updatedReservation.resource.name,
-                        resourceType: updatedReservation.resource.type,
-                    },
-                    notiTarget,
-                );
-            } catch (error) {
-                console.log(error);
-                console.log('Notification creation failed in extendReservation');
-            }
-        }
-
-        return new ReservationResponseDto(updatedReservation);
-    }
-
     // ==================== 크론 작업 처리 ====================
-    async 크론_작업을_처리한다(): Promise<void> {
+    async 예약을_종료한다(): Promise<void> {
         const now = DateUtil.now().format();
         const notClosedReservations = await this.domainReservationService.findAll({
             where: {
@@ -493,22 +496,54 @@ export class ReservationContextService {
         });
     }
 
-    /**
-     * 특정 시간 슬롯에서 예약 충돌을 확인한다
-     */
-    async 시간슬롯_예약충돌을_확인한다(
-        resourceId: string,
-        slotStartTime: Date,
-        slotEndTime: Date,
-        excludeReservationId?: string,
-    ): Promise<boolean> {
-        const conflictReservations = await this.충돌_예약을_조회한다(
-            resourceId,
-            slotStartTime,
-            slotEndTime,
-            excludeReservationId,
-        );
-        return conflictReservations.length > 0;
+    // 신규
+    // ==================== 예약 생성 ====================
+    async 자원예약이_가능한지_확인한다(resourceId: string, startDate: Date, endDate: Date): Promise<boolean> {
+        return await this.domainReservationService.checkReservationConflicts(resourceId, startDate, endDate);
+    }
+
+    async 자원예약을_생성한다(reservationData: CreateReservationDto, queryRunner?: QueryRunner): Promise<Reservation> {
+        const reservationEntity = {
+            title: reservationData.title,
+            description: reservationData.description,
+            resourceId: reservationData.resourceId,
+            startDate: reservationData.startDate,
+            endDate: reservationData.endDate,
+            status: reservationData.status,
+        };
+
+        // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
+        const savedReservation = await this.domainReservationService.save(reservationEntity, {
+            queryRunner: queryRunner,
+        });
+
+        // TODO : 자원 유형별로 예약정보가 필요할 경우 스위치 문으로 정리
+        // 차량 예약 정보 생성
+        if (reservationData.resourceType === ResourceType.VEHICLE) {
+            // 차량 리소스 정보 조회
+            const resource = await this.domainResourceService.findOne({
+                where: { resourceId: reservationData.resourceId },
+            });
+            const vehicleInfo = await this.domainVehicleInfoService.findByResourceId(reservationData.resourceId);
+            if (!vehicleInfo) {
+                throw new NotFoundException('차량 정보를 찾을 수 없습니다.');
+            }
+
+            const reservationVehicleEntity = {
+                reservationId: savedReservation.reservationId!,
+                vehicleInfoId: vehicleInfo.vehicleInfoId,
+                startOdometer: vehicleInfo.totalMileage,
+                isReturned: false,
+                returnedAt: null,
+                location: resource.location,
+            };
+
+            await this.domainReservationVehicleService.save(reservationVehicleEntity, {
+                queryRunner,
+            });
+        }
+
+        return savedReservation;
     }
 
     /**

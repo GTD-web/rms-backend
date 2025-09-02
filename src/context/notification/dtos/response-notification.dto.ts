@@ -5,21 +5,11 @@ import { IsString, IsOptional, ValidateNested, IsBoolean, IsEnum } from 'class-v
 
 // 공통 DTO들을 create-notification.dto.ts에서 가져와서 response용 alias로 사용
 import {
-    NotificationConsumableDto,
-    NotificationVehicleInfoDto,
     NotificationResourceDto,
     NotificationReservationDto,
     NotificationScheduleDto,
     NotificationProjectDto,
 } from './create-notification.dto';
-
-// Response용 alias 정의 (호환성 유지)
-export { NotificationConsumableDto as ConsumableResponseDto };
-export { NotificationVehicleInfoDto as VehicleInfoResponseDto };
-export { NotificationResourceDto as ResourceResponseDto };
-export { NotificationReservationDto as ReservationResponseDto };
-export { NotificationScheduleDto as ScheduleResponseDto };
-export { NotificationProjectDto as ProjectResponseDto };
 
 export class NotificationDataDto {
     @ApiPropertyOptional({

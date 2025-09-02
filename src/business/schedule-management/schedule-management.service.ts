@@ -368,141 +368,6 @@ export class ScheduleManagementService {
     // ============================================================================
 
     /**
-     * 단일 일정을 예약과 함께 하나의 트랜잭션으로 생성
-     */
-    private async 일정생성_예약생성_트랜잭션을_실행한다(
-        user: Employee,
-        data: {
-            title: string;
-            description?: string;
-            location?: string;
-            scheduleType: ScheduleType;
-            notifyBeforeStart?: boolean;
-            notifyMinutesBeforeStart?: number[];
-            participants: { employeeId: string }[];
-            dateRange: { startDate: string; endDate: string };
-            resourceSelection?: {
-                resourceId: string;
-                resourceType: ResourceType;
-            };
-            projectSelection?: {
-                projectId: string;
-            };
-        },
-    ): Promise<{ success: boolean; schedule?: Schedule; reason?: string }> {
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-
-        try {
-            let reservationId: string | null = null;
-
-            // 1) 자원 예약 생성 (있는 경우)
-            if (data.resourceSelection) {
-                // 예약 가능 여부 확인
-                const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(
-                    data.resourceSelection.resourceId,
-                    new Date(data.dateRange.startDate),
-                    new Date(data.dateRange.endDate),
-                );
-
-                if (!isAvailable) {
-                    await queryRunner.rollbackTransaction();
-                    return {
-                        success: false,
-                        reason: '선택한 시간대에 자원이 이미 예약되어 있습니다.',
-                    };
-                }
-
-                // 예약 생성 (QueryRunner 전달)
-                const reservationData = {
-                    title: data.title,
-                    description: data.description || '',
-                    resourceId: data.resourceSelection.resourceId,
-                    resourceType: data.resourceSelection.resourceType,
-                    status:
-                        data.resourceSelection.resourceType === ResourceType.ACCOMMODATION
-                            ? ReservationStatus.PENDING
-                            : ReservationStatus.CONFIRMED,
-                    startDate: new Date(data.dateRange.startDate),
-                    endDate: new Date(data.dateRange.endDate),
-                };
-
-                const createdReservation = await this.reservationContextService.자원예약을_생성한다(
-                    reservationData,
-                    queryRunner, // 🔥 QueryRunner 전달
-                );
-                reservationId = createdReservation.reservationId;
-            }
-
-            // 2) 일정 생성 (QueryRunner 전달)
-            const scheduleData = {
-                title: data.title,
-                description: data.location
-                    ? `${data.description || ''}\n장소: ${data.location}`.trim()
-                    : data.description,
-                startDate: new Date(data.dateRange.startDate),
-                endDate: new Date(data.dateRange.endDate),
-                scheduleType: data.scheduleType,
-                notifyBeforeStart: data.notifyBeforeStart || false,
-                notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
-            };
-
-            const createdSchedule = await this.scheduleMutationService.일정을_생성한다(
-                scheduleData,
-                queryRunner, // 🔥 QueryRunner 전달
-            );
-
-            // 3) 참가자 생성
-            await this.scheduleMutationService.일정_참가자를_추가한다(
-                createdSchedule.scheduleId!,
-                user.employeeId,
-                'RESERVER',
-                queryRunner,
-            );
-
-            for (const participant of data.participants) {
-                if (participant.employeeId !== user.employeeId) {
-                    await this.scheduleMutationService.일정_참가자를_추가한다(
-                        createdSchedule.scheduleId!,
-                        participant.employeeId,
-                        'PARTICIPANT',
-                        queryRunner,
-                    );
-                }
-            }
-
-            // 4) 일정관계정보 생성
-            const relationData = {
-                scheduleId: createdSchedule.scheduleId!,
-                projectId: data.projectSelection?.projectId || null,
-                reservationId: reservationId,
-            };
-
-            await this.scheduleMutationService.일정관계정보를_생성한다(relationData, queryRunner);
-
-            // 트랜잭션 커밋
-            await queryRunner.commitTransaction();
-
-            return {
-                success: true,
-                schedule: createdSchedule,
-            };
-        } catch (error) {
-            // 트랜잭션 롤백
-            await queryRunner.rollbackTransaction();
-
-            return {
-                success: false,
-                reason: `일정 생성 실패: ${error.message}`,
-            };
-        } finally {
-            // 쿼리러너 해제
-            await queryRunner.release();
-        }
-    }
-
-    /**
      * 일정 생성 (표준 파이프라인 적용, 레거시 로직 완전 보존)
      */
     async createSchedule(
@@ -571,7 +436,20 @@ export class ScheduleManagementService {
 
         for (const dateRange of datesSelection) {
             // 각 날짜별로 통합 트랜잭션 실행
-            const result = await this.일정생성_예약생성_트랜잭션을_실행한다(user, {
+            // const result = await this.scheduleMutationService.일정생성_예약생성_트랜잭션을_실행한다(user, {
+            //     title,
+            //     description,
+            //     location,
+            //     scheduleType,
+            //     notifyBeforeStart,
+            //     notifyMinutesBeforeStart: notificationMinutes || [],
+            //     participants,
+            //     dateRange,
+            //     resourceSelection,
+            //     projectSelection,
+            // });
+
+            const data = {
                 title,
                 description,
                 location,
@@ -582,7 +460,118 @@ export class ScheduleManagementService {
                 dateRange,
                 resourceSelection,
                 projectSelection,
-            });
+            };
+
+            const result = {
+                success: true,
+                schedule: null,
+                reason: null,
+            };
+
+            const queryRunner = this.dataSource.createQueryRunner();
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+
+            try {
+                let reservationId: string | null = null;
+
+                // 1) 자원 예약 생성 (있는 경우)
+                if (data.resourceSelection) {
+                    // 예약 가능 여부 확인
+                    const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(
+                        data.resourceSelection.resourceId,
+                        new Date(data.dateRange.startDate),
+                        new Date(data.dateRange.endDate),
+                    );
+
+                    if (!isAvailable) {
+                        await queryRunner.rollbackTransaction();
+                        result.success = false;
+                        result.reason = '선택한 시간대에 자원이 이미 예약되어 있습니다.';
+                    }
+
+                    // 예약 생성 (QueryRunner 전달)
+                    const reservationData = {
+                        title: data.title,
+                        description: data.description || '',
+                        resourceId: data.resourceSelection.resourceId,
+                        resourceType: data.resourceSelection.resourceType,
+                        status:
+                            data.resourceSelection.resourceType === ResourceType.ACCOMMODATION
+                                ? ReservationStatus.PENDING
+                                : ReservationStatus.CONFIRMED,
+                        startDate: new Date(data.dateRange.startDate),
+                        endDate: new Date(data.dateRange.endDate),
+                    };
+
+                    const createdReservation = await this.reservationContextService.자원예약을_생성한다(
+                        reservationData,
+                        queryRunner, // 🔥 QueryRunner 전달
+                    );
+                    reservationId = createdReservation.reservationId;
+                }
+
+                // 2) 일정 생성 (QueryRunner 전달)
+                const scheduleData = {
+                    title: data.title,
+                    description: data.location
+                        ? `${data.description || ''}\n장소: ${data.location}`.trim()
+                        : data.description,
+                    startDate: new Date(data.dateRange.startDate),
+                    endDate: new Date(data.dateRange.endDate),
+                    scheduleType: data.scheduleType,
+                    notifyBeforeStart: data.notifyBeforeStart || false,
+                    notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
+                };
+
+                const createdSchedule = await this.scheduleMutationService.일정을_생성한다(
+                    scheduleData,
+                    queryRunner, // 🔥 QueryRunner 전달
+                );
+
+                // 3) 참가자 생성
+                await this.scheduleMutationService.일정_참가자를_추가한다(
+                    createdSchedule.scheduleId!,
+                    user.employeeId,
+                    'RESERVER',
+                    queryRunner,
+                );
+
+                for (const participant of data.participants) {
+                    if (participant.employeeId !== user.employeeId) {
+                        await this.scheduleMutationService.일정_참가자를_추가한다(
+                            createdSchedule.scheduleId!,
+                            participant.employeeId,
+                            'PARTICIPANT',
+                            queryRunner,
+                        );
+                    }
+                }
+
+                // 4) 일정관계정보 생성
+                const relationData = {
+                    scheduleId: createdSchedule.scheduleId!,
+                    projectId: data.projectSelection?.projectId || null,
+                    reservationId: reservationId,
+                };
+
+                await this.scheduleMutationService.일정관계정보를_생성한다(relationData, queryRunner);
+
+                // 트랜잭션 커밋
+                await queryRunner.commitTransaction();
+
+                result.success = true;
+                result.schedule = createdSchedule;
+            } catch (error) {
+                // 트랜잭션 롤백
+                await queryRunner.rollbackTransaction();
+
+                result.success = false;
+                result.reason = `일정 생성 실패: ${error.message}`;
+            } finally {
+                // 쿼리러너 해제
+                await queryRunner.release();
+            }
 
             if (result.success) {
                 createdSchedules.push(result.schedule!);

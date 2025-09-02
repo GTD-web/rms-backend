@@ -3,8 +3,8 @@ import { EmployeeNotification } from './employee-notification.entity';
 import { ReservationParticipant } from './reservation-participant.entity';
 import { ResourceManager } from './resource-manager.entity';
 import { Role } from '@libs/enums/role-type.enum';
-import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
-import { ReservationSnapshot } from './reservation-snapshot.entity';
+import { PushSubscriptionDto } from '@src/business.dto.index';
+
 @Entity('employees')
 export class Employee {
     @PrimaryColumn('uuid', {

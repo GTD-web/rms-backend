@@ -27,9 +27,9 @@ import {
 import { CheckAvailabilityQueryDto } from '@src/business/resource-management/dtos/resource/check-availability.dto';
 import { ResourceAvailabilityDto } from '@src/business/resource-management/dtos/resource/available-time-response.dto';
 import { UpdateVehicleInfoDto } from '@src/business/resource-management/dtos/vehicle/update-vehicle-info.dto';
-import { UpdateMeetingRoomInfoDto } from '@src/business/resource-management/dtos/meeting-room/dtos/update-meeting-room-info.dto';
-import { UpdateAccommodationInfoDto } from '@src/business/resource-management/dtos/accommodation/dtos/update-accommodation-info.dto';
-import { UpdateEquipmentInfoDto } from '@src/business/resource-management/dtos/equipment/dtos/update-equipment-info.dto';
+import { UpdateMeetingRoomInfoDto } from '@src/business/resource-management/dtos/meeting-room/update-meeting-room-info.dto';
+import { UpdateAccommodationInfoDto } from '@src/business/resource-management/dtos/accommodation/update-accommodation-info.dto';
+import { UpdateEquipmentInfoDto } from '@src/business/resource-management/dtos/equipment/update-equipment-info.dto';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 
 @Injectable()

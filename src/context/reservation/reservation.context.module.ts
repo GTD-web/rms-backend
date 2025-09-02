@@ -12,14 +12,9 @@ import { DomainEmployeeNotificationModule } from '@src/domain/employee-notificat
 import { DomainReservationVehicleModule } from '@src/domain/reservation-vehicle/reservation-vehicle.module';
 import { DomainVehicleInfoModule } from '@src/domain/vehicle-info/vehicle-info.module';
 import { DomainFileModule } from '@src/domain/file/file.module';
-import { NotificationModule } from '@src/application/notification/notification.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Context Services
-import { LegacyReservationContextService } from './services/legacy-reservation.context.service';
-import { ReservationManagementService } from './services/reservation-management.service';
-import { ReservationValidationService } from './services/reservation-validation.service';
-import { ReservationConflictService } from './services/reservation-conflict.service';
 import { ReservationContextService } from './services/reservation.context.service';
 
 /**
@@ -48,24 +43,17 @@ import { ReservationContextService } from './services/reservation.context.servic
         DomainReservationVehicleModule,
         DomainVehicleInfoModule,
         DomainFileModule,
-        NotificationModule,
+        // NotificationModule,
         ScheduleModule.forRoot(),
     ],
     controllers: [],
     providers: [
         // Context Services
-        LegacyReservationContextService,
-        ReservationManagementService,
-        ReservationValidationService,
-        ReservationConflictService,
+
         ReservationContextService,
     ],
     exports: [
         // Context Services
-        LegacyReservationContextService,
-        ReservationManagementService,
-        ReservationValidationService,
-        ReservationConflictService,
         ReservationContextService,
     ],
 })

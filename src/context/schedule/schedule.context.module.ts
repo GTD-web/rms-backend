@@ -13,6 +13,7 @@ import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
 import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
 import { DomainResourceModule } from '@src/domain/resource/resource.module';
 import { DomainResourceGroupModule } from '@src/domain/resource-group/resource-group.module';
+import { ReservationContextModule } from '../reservation/reservation.context.module';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { DomainResourceGroupModule } from '@src/domain/resource-group/resource-g
         DomainReservationModule,
         DomainResourceModule,
         DomainResourceGroupModule,
+        ReservationContextModule,
     ],
     providers: [
         ScheduleQueryContextService,

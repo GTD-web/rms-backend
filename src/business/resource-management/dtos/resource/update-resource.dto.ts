@@ -14,10 +14,10 @@ import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { CreateResourceManagerDto, ResourceLocation, ResourceLocationURL } from './create-resource.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
-import { UpdateAccommodationInfoDto } from '../accommodation/dtos/update-accommodation-info.dto';
+import { UpdateAccommodationInfoDto } from '../accommodation/update-accommodation-info.dto';
 import { UpdateVehicleInfoDto } from '../vehicle/update-vehicle-info.dto';
-import { UpdateMeetingRoomInfoDto } from '../meeting-room/dtos/update-meeting-room-info.dto';
-import { UpdateEquipmentInfoDto } from '../equipment/dtos/update-equipment-info.dto';
+import { UpdateMeetingRoomInfoDto } from '../meeting-room/update-meeting-room-info.dto';
+import { UpdateEquipmentInfoDto } from '../equipment/update-equipment-info.dto';
 
 export class UpdateResourceGroupDto {
     @ApiProperty({ required: false })

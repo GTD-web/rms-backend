@@ -24,7 +24,7 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
-import { FileResponseDto } from '@resource/application/file/dtos/file-response.dto';
+import { FileResponseDto } from '@resource/business.dto.index';
 import { MimeType } from '@libs/enums/mime-type.enum';
 import { CreateFileDataDto } from '../dtos/create-filedata.dto';
 

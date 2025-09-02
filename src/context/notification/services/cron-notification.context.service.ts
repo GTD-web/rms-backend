@@ -3,7 +3,7 @@ import { DomainNotificationService } from '@src/domain/notification/notification
 import { FCMAdapter } from '../adapter/fcm-push.adapter';
 import { LessThanOrEqual } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
-import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
+import { PushSubscriptionDto } from '@src/business.dto.index';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { Schedule } from '@libs/entities/schedule.entity';
 

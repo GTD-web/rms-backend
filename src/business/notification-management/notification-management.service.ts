@@ -9,9 +9,9 @@ import { ScheduleQueryContextService } from '@src/context/schedule/services/sche
 import {
     PaginationQueryDto,
     NotificationListResponseDto,
-    ContextPushSubscriptionDto as PushSubscriptionDto,
-    ContextNotificationTypeResponseDto as NotificationTypeResponseDto,
-    ContextCreateNotificationDataDto as CreateNotificationDataDto,
+    PushSubscriptionDto,
+    NotificationTypeResponseDto,
+    CreateNotificationDataDto,
 } from '@src/business.dto.index';
 import { DateUtil } from '@libs/utils/date.util';
 

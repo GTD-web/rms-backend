@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Employee } from '@libs/entities';
 import { ResourceContextService } from '@src/context/resource/services/resource.context.service';
-import { LegacyReservationContextService } from '@src/context/reservation/services/legacy-reservation.context.service';
 import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
@@ -9,12 +8,13 @@ import { NotificationType } from '@libs/enums/notification-type.enum';
 import { DateUtil } from '@libs/utils/date.util';
 import { LessThan, MoreThan, Raw } from 'typeorm';
 import { TaskListResponseDto, TaskResponseDto } from './dtos/task-response.dto';
+import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
 
 @Injectable()
 export class TaskManagementService {
     constructor(
         private readonly resourceContextService: ResourceContextService,
-        private readonly reservationContextService: LegacyReservationContextService,
+        private readonly reservationContextService: ReservationContextService,
         private readonly notificationContextService: NotificationContextService,
     ) {}
 

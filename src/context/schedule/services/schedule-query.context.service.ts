@@ -194,7 +194,7 @@ export class ScheduleQueryContextService {
 
         // 1. 모든 일정들을 한 번에 조회
         const schedules = await this.domainScheduleService.findByScheduleIds(scheduleIds);
-        console.log(schedules);
+
         const scheduleMap = new Map(schedules.map((schedule) => [schedule.scheduleId, schedule]));
 
         // 2. 모든 일정관계정보를 한 번에 조회

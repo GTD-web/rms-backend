@@ -7,10 +7,7 @@ import { FileContextService } from '@src/context/file/services/file.context.serv
 // DTOs
 import { UpdateVehicleInfoDto } from '../dtos/vehicle/update-vehicle-info.dto';
 import { VehicleInfoResponseDto } from '../dtos/vehicle/vehicle-response.dto';
-import {
-    ReturnVehicleDetailResponseDto,
-    ReturnVehicleResponseDto,
-} from '@src/application/reservation/core/dtos/return-vehicle-response.dto';
+import { ReturnVehicleDetailResponseDto, ReturnVehicleResponseDto } from '@src/business.dto.index';
 
 @Injectable()
 export class VehicleInfoService {
