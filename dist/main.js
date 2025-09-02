@@ -14439,6 +14439,7 @@ __decorate([
         description: '리소스 그룹 ID',
         example: 'ca33f67a-a9c2-4a29-b266-3d82f9aa7fe4',
     }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ResourceQueryDto.prototype, "resourceGroupId", void 0);
@@ -23704,7 +23705,7 @@ __decorate([
 
 ### 🎯 시나리오 2: 시간 범위 방식 (정확한 시간 지정)
 특정 시간 범위에서 자원 가용성을 확인합니다.
-- **필수**: resourceType, startDate, endDate, startTime, endTime
+- **필수**: resourceType, startDate, endDate, startTime, endTime, timeUnit
 - **선택**: resourceGroupId
 
 **예시**: \`?resourceType=EQUIPMENT&resourceGroupId=xxx&startDate=2024-01-15&endDate=2024-01-15&startTime=09:00:00&endTime=17:00:00\`
@@ -24846,6 +24847,7 @@ __decorate([
         description: '리소스 그룹 ID',
         example: 'ca33f67a-a9c2-4a29-b266-3d82f9aa7fe4',
     }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ResourceQueryDto.prototype, "resourceGroupId", void 0);
@@ -26258,6 +26260,7 @@ let ResourceService = class ResourceService {
             const reservations = await this.reservationContextService.자원의_날짜범위_예약을_조회한다(resource.resourceId, dateRangeStart, dateRangeEnd, reservationId);
             if (isTimeSlotRequest) {
                 const availabilityDto = await this.calculateTimeSlotAvailability(resource, startDate, endDate, am, pm, timeUnit, reservations);
+                console.log(availabilityDto);
                 result.push(availabilityDto);
             }
             else if (isAccommodation || !isSameDay) {
@@ -36256,7 +36259,6 @@ let ResourceContextService = class ResourceContextService {
         }
         return await this.domainResourceService.findAll({
             where: whereCondition,
-            relations: ['resourceGroup'],
             order: { order: 'ASC' },
         });
     }
