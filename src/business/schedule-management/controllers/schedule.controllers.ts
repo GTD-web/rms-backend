@@ -21,6 +21,8 @@ import { ScheduleExtendRequestDto } from '../dtos/schedule-extend-request.dto';
 import { ScheduleExtendResponseDto } from '../dtos/schedule-extend-response.dto';
 import { ScheduleUpdateRequestDto } from '../dtos/schedule-update-request.dto';
 import { ScheduleUpdateResponseDto } from '../dtos/schedule-update-response.dto';
+import { MyScheduleHistoryQueryDto } from '../dtos/my-schedule-history-query.dto';
+import { MyScheduleHistoryResponseDto } from '../dtos/my-schedule-history-response.dto';
 
 @ApiTags('v2 일정')
 @Controller('v2/schedule')
@@ -78,6 +80,30 @@ export class ScheduleController {
     @Get('my')
     async findMySchedules(@User() user: Employee, @Query() query: MyScheduleQueryDto): Promise<MyScheduleResponseDto> {
         return this.scheduleManagementService.findMySchedules(user, query);
+    }
+
+    /**
+     * 내 일정 내역 조회
+     * 조회 조건
+     * 1. 현재시간을 기준으로 오늘 날짜 이후의 일정만 조회한다.
+     * 2. 필터 - 역할 기준 ( 예약자, 참석자 ) / 카테고리 ( 전체, 일정, 프로젝트, 자원 별 )
+     * 3. 제목과 자원명으로 검색할 수 있다.
+     * 4. 일정 목록은 검색 및 페이지네이션이 적용된다.
+     */
+    @ApiOperation({
+        summary: '내 일정 내역 조회',
+        description: '로그인한 사용자의 일정 목록을 조회합니다. 목록은 검색과 페이지네이션이 적용됩니다.',
+    })
+    @ApiOkResponse({
+        description: '내 일정 내역 조회 성공',
+        type: MyScheduleHistoryResponseDto,
+    })
+    @Get('my/history')
+    async findMyScheduleHistory(
+        @User() user: Employee,
+        @Query() query: MyScheduleHistoryQueryDto,
+    ): Promise<MyScheduleHistoryResponseDto> {
+        return this.scheduleManagementService.findMyScheduleHistory(user, query);
     }
 
     /**

@@ -17078,7 +17078,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -17098,6 +17098,8 @@ const schedule_create_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-c
 const schedule_create_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-create-response.dto */ "./src/business/schedule-management/dtos/schedule-create-response.dto.ts");
 const schedule_extend_response_dto_1 = __webpack_require__(/*! ../dtos/schedule-extend-response.dto */ "./src/business/schedule-management/dtos/schedule-extend-response.dto.ts");
 const schedule_update_request_dto_1 = __webpack_require__(/*! ../dtos/schedule-update-request.dto */ "./src/business/schedule-management/dtos/schedule-update-request.dto.ts");
+const my_schedule_history_query_dto_1 = __webpack_require__(/*! ../dtos/my-schedule-history-query.dto */ "./src/business/schedule-management/dtos/my-schedule-history-query.dto.ts");
+const my_schedule_history_response_dto_1 = __webpack_require__(/*! ../dtos/my-schedule-history-response.dto */ "./src/business/schedule-management/dtos/my-schedule-history-response.dto.ts");
 let ScheduleController = class ScheduleController {
     constructor(scheduleManagementService) {
         this.scheduleManagementService = scheduleManagementService;
@@ -17110,6 +17112,9 @@ let ScheduleController = class ScheduleController {
     }
     async findMySchedules(user, query) {
         return this.scheduleManagementService.findMySchedules(user, query);
+    }
+    async findMyScheduleHistory(user, query) {
+        return this.scheduleManagementService.findMyScheduleHistory(user, query);
     }
     async findResourceSchedules(user, query) {
         return this.scheduleManagementService.findResourceSchedules(user, query);
@@ -17178,6 +17183,22 @@ __decorate([
 ], ScheduleController.prototype, "findMySchedules", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
+        summary: '내 일정 내역 조회',
+        description: '로그인한 사용자의 일정 목록을 조회합니다. 목록은 검색과 페이지네이션이 적용됩니다.',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '내 일정 내역 조회 성공',
+        type: my_schedule_history_response_dto_1.MyScheduleHistoryResponseDto,
+    }),
+    (0, common_1.Get)('my/history'),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_j = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _j : Object, typeof (_k = typeof my_schedule_history_query_dto_1.MyScheduleHistoryQueryDto !== "undefined" && my_schedule_history_query_dto_1.MyScheduleHistoryQueryDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+], ScheduleController.prototype, "findMyScheduleHistory", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
         summary: '자원별 일정 조회',
         description: '자원 유형별로 일정을 조회합니다. 숙소는 월별, 그 외는 일별로 조회하며, 자원그룹별로 그룹핑됩니다.',
     }),
@@ -17189,8 +17210,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _j : Object, typeof (_k = typeof resource_schedule_query_dto_1.ResourceScheduleQueryDto !== "undefined" && resource_schedule_query_dto_1.ResourceScheduleQueryDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:paramtypes", [typeof (_m = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _m : Object, typeof (_o = typeof resource_schedule_query_dto_1.ResourceScheduleQueryDto !== "undefined" && resource_schedule_query_dto_1.ResourceScheduleQueryDto) === "function" ? _o : Object]),
+    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], ScheduleController.prototype, "findResourceSchedules", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -17205,8 +17226,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_m = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _m : Object, typeof (_o = typeof schedule_detail_query_dto_1.ScheduleDetailQueryDto !== "undefined" && schedule_detail_query_dto_1.ScheduleDetailQueryDto) === "function" ? _o : Object]),
-    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
+    __metadata("design:paramtypes", [typeof (_q = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _q : Object, typeof (_r = typeof schedule_detail_query_dto_1.ScheduleDetailQueryDto !== "undefined" && schedule_detail_query_dto_1.ScheduleDetailQueryDto) === "function" ? _r : Object]),
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
 ], ScheduleController.prototype, "findScheduleDetail", null);
 __decorate([
     (0, common_1.Post)(),
@@ -17221,8 +17242,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_q = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _q : Object, typeof (_r = typeof schedule_create_request_dto_1.ScheduleCreateRequestDto !== "undefined" && schedule_create_request_dto_1.ScheduleCreateRequestDto) === "function" ? _r : Object]),
-    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
+    __metadata("design:paramtypes", [typeof (_t = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _t : Object, typeof (_u = typeof schedule_create_request_dto_1.ScheduleCreateRequestDto !== "undefined" && schedule_create_request_dto_1.ScheduleCreateRequestDto) === "function" ? _u : Object]),
+    __metadata("design:returntype", typeof (_v = typeof Promise !== "undefined" && Promise) === "function" ? _v : Object)
 ], ScheduleController.prototype, "createSchedule", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -17237,8 +17258,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('scheduleId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_t = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _t : Object, String]),
-    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
+    __metadata("design:paramtypes", [typeof (_w = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _w : Object, String]),
+    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
 ], ScheduleController.prototype, "cancelSchedule", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -17253,8 +17274,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('scheduleId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_v = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _v : Object, String]),
-    __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
+    __metadata("design:paramtypes", [typeof (_y = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _y : Object, String]),
+    __metadata("design:returntype", typeof (_z = typeof Promise !== "undefined" && Promise) === "function" ? _z : Object)
 ], ScheduleController.prototype, "completeSchedule", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -17269,8 +17290,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('scheduleId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_x = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _x : Object, String]),
-    __metadata("design:returntype", typeof (_y = typeof Promise !== "undefined" && Promise) === "function" ? _y : Object)
+    __metadata("design:paramtypes", [typeof (_0 = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _0 : Object, String]),
+    __metadata("design:returntype", typeof (_1 = typeof Promise !== "undefined" && Promise) === "function" ? _1 : Object)
 ], ScheduleController.prototype, "checkScheduleExtendable", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -17285,8 +17306,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('scheduleId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_z = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _z : Object, String]),
-    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
+    __metadata("design:paramtypes", [typeof (_2 = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _2 : Object, String]),
+    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
 ], ScheduleController.prototype, "extendSchedule30Min", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -17302,8 +17323,8 @@ __decorate([
     __param(1, (0, common_1.Param)('scheduleId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_1 = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _1 : Object, String, typeof (_2 = typeof schedule_update_request_dto_1.ScheduleUpdateRequestDto !== "undefined" && schedule_update_request_dto_1.ScheduleUpdateRequestDto) === "function" ? _2 : Object]),
-    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
+    __metadata("design:paramtypes", [typeof (_4 = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _4 : Object, String, typeof (_5 = typeof schedule_update_request_dto_1.ScheduleUpdateRequestDto !== "undefined" && schedule_update_request_dto_1.ScheduleUpdateRequestDto) === "function" ? _5 : Object]),
+    __metadata("design:returntype", typeof (_6 = typeof Promise !== "undefined" && Promise) === "function" ? _6 : Object)
 ], ScheduleController.prototype, "updateSchedule", null);
 exports.ScheduleController = ScheduleController = __decorate([
     (0, swagger_1.ApiTags)('v2 일정'),
@@ -17311,6 +17332,230 @@ exports.ScheduleController = ScheduleController = __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [typeof (_a = typeof schedule_management_service_1.ScheduleManagementService !== "undefined" && schedule_management_service_1.ScheduleManagementService) === "function" ? _a : Object])
 ], ScheduleController);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/my-schedule-history-query.dto.ts":
+/*!********************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/my-schedule-history-query.dto.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MyScheduleHistoryQueryDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+class MyScheduleHistoryQueryDto {
+    constructor() {
+        this.page = 1;
+        this.limit = 20;
+    }
+}
+exports.MyScheduleHistoryQueryDto = MyScheduleHistoryQueryDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '검색 키워드 (제목 또는 자원명)',
+        required: false,
+        example: '회의실',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_transformer_1.Transform)(({ value }) => value?.trim()),
+    __metadata("design:type", String)
+], MyScheduleHistoryQueryDto.prototype, "keyword", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '페이지 번호',
+        required: false,
+        example: 1,
+        default: 1,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => parseInt(value) || 1),
+    __metadata("design:type", Number)
+], MyScheduleHistoryQueryDto.prototype, "page", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '페이지당 항목 수',
+        required: false,
+        example: 20,
+        default: 20,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => parseInt(value) || 20),
+    __metadata("design:type", Number)
+], MyScheduleHistoryQueryDto.prototype, "limit", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/schedule-management/dtos/my-schedule-history-response.dto.ts":
+/*!***********************************************************************************!*\
+  !*** ./src/business/schedule-management/dtos/my-schedule-history-response.dto.ts ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MyScheduleHistoryResponseDto = exports.MyScheduleHistoryItemDto = exports.MyScheduleParticipantDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const my_schedule_response_dto_1 = __webpack_require__(/*! ./my-schedule-response.dto */ "./src/business/schedule-management/dtos/my-schedule-response.dto.ts");
+class MyScheduleParticipantDto {
+}
+exports.MyScheduleParticipantDto = MyScheduleParticipantDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], MyScheduleParticipantDto.prototype, "employeeId", void 0);
+class MyScheduleHistoryItemDto {
+}
+exports.MyScheduleHistoryItemDto = MyScheduleHistoryItemDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], MyScheduleHistoryItemDto.prototype, "scheduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 제목',
+        example: '주간 프로젝트 회의',
+    }),
+    __metadata("design:type", String)
+], MyScheduleHistoryItemDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 설명',
+        required: false,
+        example: '주간 진행사항 점검 및 이슈 논의',
+    }),
+    __metadata("design:type", String)
+], MyScheduleHistoryItemDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '시작 날짜 및 시간',
+        example: '2024-01-15T09:00:00Z',
+    }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], MyScheduleHistoryItemDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '종료 날짜 및 시간',
+        example: '2024-01-15T10:00:00Z',
+    }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], MyScheduleHistoryItemDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 유형',
+        example: '프로젝트',
+        enum: ['일정', '프로젝트', '자원'],
+    }),
+    __metadata("design:type", String)
+], MyScheduleHistoryItemDto.prototype, "scheduleType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '시작 전 알림 시점 (분 단위)',
+        type: [Number],
+        required: false,
+        example: [10, 30],
+    }),
+    __metadata("design:type", Array)
+], MyScheduleHistoryItemDto.prototype, "notifyMinutesBeforeStart", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참석자 정보',
+        type: [MyScheduleParticipantDto],
+    }),
+    __metadata("design:type", Array)
+], MyScheduleHistoryItemDto.prototype, "participants", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '관련 프로젝트 정보',
+        type: my_schedule_response_dto_1.MyScheduleProjectDto,
+        required: false,
+    }),
+    __metadata("design:type", typeof (_c = typeof my_schedule_response_dto_1.MyScheduleProjectDto !== "undefined" && my_schedule_response_dto_1.MyScheduleProjectDto) === "function" ? _c : Object)
+], MyScheduleHistoryItemDto.prototype, "project", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '관련 자원 정보',
+        type: my_schedule_response_dto_1.MyScheduleResourceDto,
+        required: false,
+    }),
+    __metadata("design:type", typeof (_d = typeof my_schedule_response_dto_1.MyScheduleResourceDto !== "undefined" && my_schedule_response_dto_1.MyScheduleResourceDto) === "function" ? _d : Object)
+], MyScheduleHistoryItemDto.prototype, "resource", void 0);
+class MyScheduleHistoryResponseDto {
+}
+exports.MyScheduleHistoryResponseDto = MyScheduleHistoryResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '현재 페이지',
+        example: 1,
+    }),
+    __metadata("design:type", Number)
+], MyScheduleHistoryResponseDto.prototype, "currentPage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '페이지당 항목 수',
+        example: 20,
+    }),
+    __metadata("design:type", Number)
+], MyScheduleHistoryResponseDto.prototype, "pageSize", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '총 페이지 수',
+        example: 3,
+    }),
+    __metadata("design:type", Number)
+], MyScheduleHistoryResponseDto.prototype, "totalPages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '다음 페이지 존재 여부',
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], MyScheduleHistoryResponseDto.prototype, "hasNext", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '이전 페이지 존재 여부',
+        example: false,
+    }),
+    __metadata("design:type", Boolean)
+], MyScheduleHistoryResponseDto.prototype, "hasPrevious", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 목록',
+        type: [MyScheduleHistoryItemDto],
+    }),
+    __metadata("design:type", Array)
+], MyScheduleHistoryResponseDto.prototype, "schedules", void 0);
 
 
 /***/ }),
@@ -19702,6 +19947,53 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             statistics,
             totalCount,
             filteredCount,
+            currentPage: page,
+            pageSize: limit,
+            totalPages,
+            hasNext,
+            hasPrevious,
+            schedules: scheduleCalendarItems,
+        };
+    }
+    async findMyScheduleHistory(user, query) {
+        this.logger.log(`내 일정 내역 조회 요청 - 사용자: ${user.employeeId}`);
+        const page = query.page || 1;
+        const limit = query.limit || 20;
+        const { scheduleIds, filteredCount, totalPages, hasNext, hasPrevious } = await this.scheduleQueryContextService.내_일정_내역을_조회한다(user.employeeId, query);
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
+            withProject: true,
+            withReservation: true,
+            withResource: true,
+            withParticipants: true,
+        });
+        const scheduleCalendarItems = scheduleDataList.map(({ schedule, project, reservation, resource, participants }) => {
+            return {
+                scheduleId: schedule.scheduleId,
+                title: schedule.title,
+                description: schedule.description,
+                startDate: schedule.startDate,
+                endDate: schedule.endDate,
+                scheduleType: this.scheduleQueryContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
+                notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
+                participants: participants?.map((participant) => ({
+                    employeeId: participant.employeeId,
+                })),
+                project: project
+                    ? {
+                        projectId: project.projectId,
+                        projectName: project.projectName,
+                    }
+                    : undefined,
+                resource: reservation
+                    ? {
+                        resourceId: reservation.reservationId,
+                        resourceName: resource.name,
+                        resourceType: resource.type,
+                    }
+                    : undefined,
+            };
+        });
+        return {
             currentPage: page,
             pageSize: limit,
             totalPages,
@@ -28205,6 +28497,18 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             scheduleIds: paginationResult.paginatedIds,
             statistics,
             totalCount,
+            filteredCount: paginationResult.filteredCount,
+            totalPages: paginationResult.totalPages,
+            hasNext: paginationResult.hasNext,
+            hasPrevious: paginationResult.hasPrevious,
+        };
+    }
+    async 내_일정_내역을_조회한다(employeeId, query) {
+        const scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, reservation_type_enum_1.ParticipantsType.RESERVER);
+        const filteredScheduleIds = await this.키워드로_일정ID들을_조회한다(scheduleIds, query.keyword);
+        const paginationResult = this.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, query.page, query.limit);
+        return {
+            scheduleIds: paginationResult.paginatedIds,
             filteredCount: paginationResult.filteredCount,
             totalPages: paginationResult.totalPages,
             hasNext: paginationResult.hasNext,

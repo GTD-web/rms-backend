@@ -59,6 +59,8 @@ import { Reservation, Schedule } from '@libs/entities';
 import { ScheduleType } from '@libs/enums/schedule-type.enum';
 import { EmployeeContextService } from '@src/context/employee/employee.context.service';
 import { ScheduleNotificationContextService } from '@src/context/notification/services/schedule-notification.context.service';
+import { MyScheduleHistoryQueryDto } from './dtos/my-schedule-history-query.dto';
+import { MyScheduleHistoryResponseDto } from './dtos/my-schedule-history-response.dto';
 
 @Injectable()
 export class ScheduleManagementService {
@@ -192,6 +194,68 @@ export class ScheduleManagementService {
             statistics,
             totalCount,
             filteredCount,
+            currentPage: page,
+            pageSize: limit,
+            totalPages,
+            hasNext,
+            hasPrevious,
+            schedules: scheduleCalendarItems,
+        };
+    }
+
+    /**
+     * 내 일정 내역 조회 (표준 파이프라인 적용)
+     */
+    async findMyScheduleHistory(
+        user: Employee,
+        query: MyScheduleHistoryQueryDto,
+    ): Promise<MyScheduleHistoryResponseDto> {
+        this.logger.log(`내 일정 내역 조회 요청 - 사용자: ${user.employeeId}`);
+
+        const page = query.page || 1;
+        const limit = query.limit || 20;
+
+        const { scheduleIds, filteredCount, totalPages, hasNext, hasPrevious } =
+            await this.scheduleQueryContextService.내_일정_내역을_조회한다(user.employeeId, query);
+        // 3. 벌크 데이터 조회 (한 번의 호출로 모든 관련 데이터 조회)
+
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
+            withProject: true,
+            withReservation: true,
+            withResource: true,
+            withParticipants: true,
+        });
+
+        const scheduleCalendarItems = scheduleDataList.map(
+            ({ schedule, project, reservation, resource, participants }) => {
+                return {
+                    scheduleId: schedule.scheduleId,
+                    title: schedule.title,
+                    description: schedule.description,
+                    startDate: schedule.startDate,
+                    endDate: schedule.endDate,
+                    scheduleType: this.scheduleQueryContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
+                    notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
+                    participants: participants?.map((participant) => ({
+                        employeeId: participant.employeeId,
+                    })),
+                    project: project
+                        ? {
+                              projectId: project.projectId,
+                              projectName: project.projectName, // TODO: 실제 프로젝트 이름 조회
+                          }
+                        : undefined,
+                    resource: reservation
+                        ? {
+                              resourceId: reservation.reservationId,
+                              resourceName: resource.name,
+                              resourceType: resource.type,
+                          }
+                        : undefined,
+                };
+            },
+        );
+        return {
             currentPage: page,
             pageSize: limit,
             totalPages,

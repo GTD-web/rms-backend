@@ -696,43 +696,39 @@ export class ScheduleQueryContextService {
         };
     }
 
-    // async 일정을_조회한다(scheduleId: string): Promise<Schedule> {
-    //     return await this.domainScheduleService.findOne({
-    //         where: { scheduleId },
-    //     });
-    // }
+    async 내_일정_내역을_조회한다(
+        employeeId: string,
+        query: {
+            role?: ParticipantsType;
+            category?: 'SCHEDULE' | 'PROJECT' | 'RESOURCE' | 'ALL';
+            keyword?: string;
+            page?: number;
+            limit?: number;
+        },
+    ): Promise<{
+        scheduleIds: string[];
+        filteredCount: number;
+        totalPages: number;
+        hasNext: boolean;
+        hasPrevious: boolean;
+    }> {
+        // 1. 기본 일정 ID 조회 (역할 조건 포함)
+        const scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, ParticipantsType.RESERVER);
 
-    // async 일정들을_조회한다(scheduleIds: string[]): Promise<Schedule[]> {
-    //     return await this.domainScheduleService.findByScheduleIds(scheduleIds);
-    // }
+        // 4. 키워드 검색 적용
+        const filteredScheduleIds = await this.키워드로_일정ID들을_조회한다(scheduleIds, query.keyword);
 
-    // async 월별_일정을_조회한다(date: string): Promise<Schedule[]> {
-    //     try {
-    //         this.logger.log(`월별 일정 조회 요청: ${date}`);
-    //         const startDateOfMonth = new Date(`${date}-01`);
-    //         const endDateOfMonth = new Date(`${date}-01`);
-    //         endDateOfMonth.setMonth(endDateOfMonth.getMonth() + 1);
-    //         endDateOfMonth.setDate(0);
-    //         endDateOfMonth.setHours(23, 59, 59);
+        // 5. 페이지네이션 적용
+        const paginationResult = this.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, query.page, query.limit);
 
-    //         return await this.domainScheduleService.findByDateRange(startDateOfMonth, endDateOfMonth);
-    //     } catch (error) {
-    //         this.logger.error(`월별 일정 조회 실패: ${error.message}`, error.stack);
-    //         throw new BadRequestException('월별 일정 조회 중 오류가 발생했습니다.');
-    //     }
-    // }
-
-    // async 직원의_다가올_일정을_조회한다(employeeId: string): Promise<Schedule[]> {
-    //     return await this.domainScheduleService.findByEmployeeIdFromNow(employeeId);
-    // }
-
-    // async 일정관계정보들을_조회한다(scheduleIds: string[]): Promise<ScheduleRelation[]> {
-    //     return await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
-    // }
-
-    // async 직원의_일정을_조회한다(employeeId: string, scheduleIds: string[]): Promise<ScheduleParticipant[]> {
-    //     return await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(employeeId, scheduleIds);
-    // }
+        return {
+            scheduleIds: paginationResult.paginatedIds,
+            filteredCount: paginationResult.filteredCount,
+            totalPages: paginationResult.totalPages,
+            hasNext: paginationResult.hasNext,
+            hasPrevious: paginationResult.hasPrevious,
+        };
+    }
 
     async 일정들의_예약자정보를_조회한다(
         scheduleIds: string[],
