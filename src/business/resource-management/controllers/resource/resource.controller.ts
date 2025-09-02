@@ -56,7 +56,7 @@ export class ResourceController {
 
 ### 🎯 시나리오 2: 시간 범위 방식 (정확한 시간 지정)
 특정 시간 범위에서 자원 가용성을 확인합니다.
-- **필수**: resourceType, startDate, endDate, startTime, endTime
+- **필수**: resourceType, startDate, endDate, startTime, endTime, timeUnit
 - **선택**: resourceGroupId
 
 **예시**: \`?resourceType=EQUIPMENT&resourceGroupId=xxx&startDate=2024-01-15&endDate=2024-01-15&startTime=09:00:00&endTime=17:00:00\`

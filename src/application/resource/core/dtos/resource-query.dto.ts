@@ -17,6 +17,7 @@ export class ResourceQueryDto extends PaginationQueryDto {
         description: '리소스 그룹 ID',
         example: 'ca33f67a-a9c2-4a29-b266-3d82f9aa7fe4',
     })
+    @IsOptional()
     @IsString()
     resourceGroupId: string;
 

@@ -537,7 +537,6 @@ export class ResourceContextService {
 
         return await this.domainResourceService.findAll({
             where: whereCondition,
-            relations: ['resourceGroup'],
             order: { order: 'ASC' },
         });
     }
