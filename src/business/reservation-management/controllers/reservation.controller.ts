@@ -102,132 +102,132 @@ export class ReservationController {
     // ==================== 사용자 메서드들 ====================
 
     // 내 모든 예약
-    @Get('me')
-    @ApiOperation({ summary: '내 예약 리스트 조회, 자원 타입별 ' })
-    @ApiOkResponse({
-        description: '내 예약 리스트 조회',
-        type: [GroupedReservationResponseDto],
-    })
-    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
-    @ApiQuery({ name: 'startDate', required: false, example: '2025-01 / 2025-01-01' })
-    @ApiQuery({ name: 'endDate', required: false, example: '2025-12 / 2025-12-31' })
-    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
-    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
-    async findMyReservationList(
-        @User() user: Employee,
-        @Query('resourceType') resourceType?: ResourceType,
-        @Query('startDate') startDate?: string,
-        @Query('endDate') endDate?: string,
-        @Query() query?: PaginationQueryDto,
-    ): Promise<PaginationData<GroupedReservationResponseDto>> {
-        const { page, limit } = query;
-        return this.reservationService.findMyReservationList(
-            user.employeeId,
-            page,
-            limit,
-            resourceType,
-            startDate,
-            endDate,
-        );
-    }
+    // @Get('me')
+    // @ApiOperation({ summary: '내 예약 리스트 조회, 자원 타입별 ' })
+    // @ApiOkResponse({
+    //     description: '내 예약 리스트 조회',
+    //     type: [GroupedReservationResponseDto],
+    // })
+    // @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    // @ApiQuery({ name: 'startDate', required: false, example: '2025-01 / 2025-01-01' })
+    // @ApiQuery({ name: 'endDate', required: false, example: '2025-12 / 2025-12-31' })
+    // @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    // @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
+    // async findMyReservationList(
+    //     @User() user: Employee,
+    //     @Query('resourceType') resourceType?: ResourceType,
+    //     @Query('startDate') startDate?: string,
+    //     @Query('endDate') endDate?: string,
+    //     @Query() query?: PaginationQueryDto,
+    // ): Promise<PaginationData<GroupedReservationResponseDto>> {
+    //     const { page, limit } = query;
+    //     return this.reservationService.findMyReservationList(
+    //         user.employeeId,
+    //         page,
+    //         limit,
+    //         resourceType,
+    //         startDate,
+    //         endDate,
+    //     );
+    // }
 
-    // 햄버거 메뉴 -> 자원목록 -> 자원상세 -> 내예약으로 들어간 후 나오는 리스트
-    @Get('resource/:resourceId')
-    @ApiOperation({ summary: '자원별 예약 리스트 조회' })
-    @ApiOkResponse({
-        description: '자원별 예약 리스트 조회',
-        type: GroupedReservationWithResourceResponseDto,
-    })
-    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
-    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
-    @ApiQuery({ name: 'month', type: String, example: '2025-04' })
-    @ApiQuery({ name: 'isMine', type: Boolean, required: false, example: true })
-    async findResourceReservationList(
-        @User() user: Employee,
-        @Param('resourceId') resourceId: string,
-        @Query() query?: PaginationQueryDto,
-        @Query('month') month?: string,
-        @Query('isMine') isMine?: boolean,
-    ): Promise<GroupedReservationWithResourceResponseDto> {
-        const { page, limit } = query;
-        return this.reservationService.findResourceReservationList(
-            user.employeeId,
-            resourceId,
-            page,
-            limit,
-            month,
-            isMine,
-        );
-    }
+    // // 햄버거 메뉴 -> 자원목록 -> 자원상세 -> 내예약으로 들어간 후 나오는 리스트
+    // @Get('resource/:resourceId')
+    // @ApiOperation({ summary: '자원별 예약 리스트 조회' })
+    // @ApiOkResponse({
+    //     description: '자원별 예약 리스트 조회',
+    //     type: GroupedReservationWithResourceResponseDto,
+    // })
+    // @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    // @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
+    // @ApiQuery({ name: 'month', type: String, example: '2025-04' })
+    // @ApiQuery({ name: 'isMine', type: Boolean, required: false, example: true })
+    // async findResourceReservationList(
+    //     @User() user: Employee,
+    //     @Param('resourceId') resourceId: string,
+    //     @Query() query?: PaginationQueryDto,
+    //     @Query('month') month?: string,
+    //     @Query('isMine') isMine?: boolean,
+    // ): Promise<GroupedReservationWithResourceResponseDto> {
+    //     const { page, limit } = query;
+    //     return this.reservationService.findResourceReservationList(
+    //         user.employeeId,
+    //         resourceId,
+    //         page,
+    //         limit,
+    //         month,
+    //         isMine,
+    //     );
+    // }
 
-    @Get('my-using')
-    @ApiOperation({ summary: '내 이용중인 예약 리스트 조회' })
-    @ApiOkResponse({
-        description: '내 이용중인 예약 리스트 조회',
-        type: [ReservationWithRelationsResponseDto],
-    })
-    async findMyUsingReservationList(
-        @User() user: Employee,
-    ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
-        return this.reservationService.findMyUsingReservationList(user.employeeId);
-    }
+    // @Get('my-using')
+    // @ApiOperation({ summary: '내 이용중인 예약 리스트 조회' })
+    // @ApiOkResponse({
+    //     description: '내 이용중인 예약 리스트 조회',
+    //     type: [ReservationWithRelationsResponseDto],
+    // })
+    // async findMyUsingReservationList(
+    //     @User() user: Employee,
+    // ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
+    //     return this.reservationService.findMyUsingReservationList(user.employeeId);
+    // }
 
-    @Get('my-upcoming')
-    @ApiOperation({ summary: '내 예약 리스트 조회' })
-    @ApiOkResponse({
-        description: '내 예약 리스트 조회',
-        type: [GroupedReservationResponseDto],
-    })
-    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
-    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
-    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
-    async findMyUpcomingReservationList(
-        @User() user: Employee,
-        @Query('resourceType') resourceType?: ResourceType,
-        @Query() query?: PaginationQueryDto,
-    ): Promise<PaginationData<GroupedReservationResponseDto>> {
-        return this.reservationService.findMyUpcomingReservationList(user.employeeId, query, resourceType);
-    }
+    // @Get('my-upcoming')
+    // @ApiOperation({ summary: '내 예약 리스트 조회' })
+    // @ApiOkResponse({
+    //     description: '내 예약 리스트 조회',
+    //     type: [GroupedReservationResponseDto],
+    // })
+    // @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    // @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    // @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
+    // async findMyUpcomingReservationList(
+    //     @User() user: Employee,
+    //     @Query('resourceType') resourceType?: ResourceType,
+    //     @Query() query?: PaginationQueryDto,
+    // ): Promise<PaginationData<GroupedReservationResponseDto>> {
+    //     return this.reservationService.findMyUpcomingReservationList(user.employeeId, query, resourceType);
+    // }
 
-    @Get('my-upcoming-schedules')
-    @ApiOperation({ summary: '내 일정 리스트 조회 (예약자/참석자 모두 포함)' })
-    @ApiOkResponse({
-        description: '내 일정 리스트 조회 (예약자/참석자 모두 포함)',
-        type: [GroupedReservationResponseDto],
-    })
-    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
-    @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
-    @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
-    async findMyUpcomingSchedules(
-        @User() user: Employee,
-        @Query('resourceType') resourceType?: ResourceType,
-        @Query() query?: PaginationQueryDto,
-    ): Promise<PaginationData<GroupedReservationResponseDto>> {
-        return this.reservationService.findMyUpcomingSchedules(user.employeeId, query, resourceType);
-    }
+    // @Get('my-upcoming-schedules')
+    // @ApiOperation({ summary: '내 일정 리스트 조회 (예약자/참석자 모두 포함)' })
+    // @ApiOkResponse({
+    //     description: '내 일정 리스트 조회 (예약자/참석자 모두 포함)',
+    //     type: [GroupedReservationResponseDto],
+    // })
+    // @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    // @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+    // @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
+    // async findMyUpcomingSchedules(
+    //     @User() user: Employee,
+    //     @Query('resourceType') resourceType?: ResourceType,
+    //     @Query() query?: PaginationQueryDto,
+    // ): Promise<PaginationData<GroupedReservationResponseDto>> {
+    //     return this.reservationService.findMyUpcomingSchedules(user.employeeId, query, resourceType);
+    // }
 
-    @Get('calendar')
-    @ApiOperation({ summary: '캘린더 조회' })
-    @ApiOkResponse({
-        description: '캘린더 조회 성공',
-        type: CalendarResponseDto,
-    })
-    @ApiQuery({ name: 'startDate', example: '2025-01-01' })
-    @ApiQuery({ name: 'endDate', example: '2025-12-31' })
-    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
-    @ApiQuery({ name: 'isMine', type: Boolean, required: false, example: true })
-    @ApiQuery({ name: 'isMySchedules', type: Boolean, required: false, example: true })
-    async findCalendar(
-        @User() user: Employee,
-        @Query('startDate') startDate: string,
-        @Query('endDate') endDate: string,
-        @Query('resourceType') resourceType?: ResourceType,
-        @Query('isMine') isMine?: boolean,
-        @Query('isMySchedules') isMySchedules?: boolean,
-    ): Promise<CalendarResponseDto> {
-        const query = { startDate, endDate, resourceType, isMine, isMySchedules };
-        return this.reservationService.findCalendar(user, query);
-    }
+    // @Get('calendar')
+    // @ApiOperation({ summary: '캘린더 조회' })
+    // @ApiOkResponse({
+    //     description: '캘린더 조회 성공',
+    //     type: CalendarResponseDto,
+    // })
+    // @ApiQuery({ name: 'startDate', example: '2025-01-01' })
+    // @ApiQuery({ name: 'endDate', example: '2025-12-31' })
+    // @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
+    // @ApiQuery({ name: 'isMine', type: Boolean, required: false, example: true })
+    // @ApiQuery({ name: 'isMySchedules', type: Boolean, required: false, example: true })
+    // async findCalendar(
+    //     @User() user: Employee,
+    //     @Query('startDate') startDate: string,
+    //     @Query('endDate') endDate: string,
+    //     @Query('resourceType') resourceType?: ResourceType,
+    //     @Query('isMine') isMine?: boolean,
+    //     @Query('isMySchedules') isMySchedules?: boolean,
+    // ): Promise<CalendarResponseDto> {
+    //     const query = { startDate, endDate, resourceType, isMine, isMySchedules };
+    //     return this.reservationService.findCalendar(user, query);
+    // }
 
     @Get(':reservationId')
     @ApiOperation({ summary: '예약 상세 조회 #사용자/예약상세페이지' })
@@ -270,18 +270,18 @@ export class ReservationController {
         return this.reservationService.updateStatus(reservationId, updateDto);
     }
 
-    @Patch(':reservationId/status/cancel')
-    @ApiOperation({ summary: '예약 취소 #사용자/예약상세페이지' })
-    @ApiOkResponse({
-        description: '예약 상태 수정 성공',
-        type: ReservationResponseDto,
-    })
-    async updateStatusCancel(
-        @User() user: Employee,
-        @Param('reservationId') reservationId: string,
-    ): Promise<ReservationResponseDto> {
-        return this.reservationService.updateStatusCancel(user, reservationId);
-    }
+    // @Patch(':reservationId/status/cancel')
+    // @ApiOperation({ summary: '예약 취소 #사용자/예약상세페이지' })
+    // @ApiOkResponse({
+    //     description: '예약 상태 수정 성공',
+    //     type: ReservationResponseDto,
+    // })
+    // async updateStatusCancel(
+    //     @User() user: Employee,
+    //     @Param('reservationId') reservationId: string,
+    // ): Promise<ReservationResponseDto> {
+    //     return this.reservationService.updateStatusCancel(user, reservationId);
+    // }
 
     @Patch(':reservationId/return-vehicle')
     @ApiOperation({ summary: '차량 반납 #사용자/자원예약/차량반납' })

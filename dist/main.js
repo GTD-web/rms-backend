@@ -22216,7 +22216,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -22243,35 +22243,11 @@ let ReservationController = class ReservationController {
     async findCheckReservationList(query) {
         return this.reservationService.findCheckReservationList(query);
     }
-    async findMyReservationList(user, resourceType, startDate, endDate, query) {
-        const { page, limit } = query;
-        return this.reservationService.findMyReservationList(user.employeeId, page, limit, resourceType, startDate, endDate);
-    }
-    async findResourceReservationList(user, resourceId, query, month, isMine) {
-        const { page, limit } = query;
-        return this.reservationService.findResourceReservationList(user.employeeId, resourceId, page, limit, month, isMine);
-    }
-    async findMyUsingReservationList(user) {
-        return this.reservationService.findMyUsingReservationList(user.employeeId);
-    }
-    async findMyUpcomingReservationList(user, resourceType, query) {
-        return this.reservationService.findMyUpcomingReservationList(user.employeeId, query, resourceType);
-    }
-    async findMyUpcomingSchedules(user, resourceType, query) {
-        return this.reservationService.findMyUpcomingSchedules(user.employeeId, query, resourceType);
-    }
-    async findCalendar(user, startDate, endDate, resourceType, isMine, isMySchedules) {
-        const query = { startDate, endDate, resourceType, isMine, isMySchedules };
-        return this.reservationService.findCalendar(user, query);
-    }
     async findOne(user, reservationId) {
         return this.reservationService.findOne(user, reservationId);
     }
     async updateStatus(reservationId, updateDto) {
         return this.reservationService.updateStatus(reservationId, updateDto);
-    }
-    async updateStatusCancel(user, reservationId) {
-        return this.reservationService.updateStatusCancel(user, reservationId);
     }
     async returnVehicle(user, reservationId, returnDto) {
         return this.reservationService.returnVehicle(user, reservationId, returnDto);
@@ -22331,115 +22307,6 @@ __decorate([
     __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], ReservationController.prototype, "findCheckReservationList", null);
 __decorate([
-    (0, common_1.Get)('me'),
-    (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회, 자원 타입별 ' }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '내 예약 리스트 조회',
-        type: [reservation_response_dto_1.GroupedReservationResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    (0, swagger_1.ApiQuery)({ name: 'startDate', required: false, example: '2025-01 / 2025-01-01' }),
-    (0, swagger_1.ApiQuery)({ name: 'endDate', required: false, example: '2025-12 / 2025-12-31' }),
-    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
-    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Query)('resourceType')),
-    __param(2, (0, common_1.Query)('startDate')),
-    __param(3, (0, common_1.Query)('endDate')),
-    __param(4, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _f : Object, typeof (_g = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _g : Object, String, String, typeof (_h = typeof pagination_query_dto_1.PaginationQueryDto !== "undefined" && pagination_query_dto_1.PaginationQueryDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
-], ReservationController.prototype, "findMyReservationList", null);
-__decorate([
-    (0, common_1.Get)('resource/:resourceId'),
-    (0, swagger_1.ApiOperation)({ summary: '자원별 예약 리스트 조회' }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '자원별 예약 리스트 조회',
-        type: reservation_response_dto_1.GroupedReservationWithResourceResponseDto,
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
-    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
-    (0, swagger_1.ApiQuery)({ name: 'month', type: String, example: '2025-04' }),
-    (0, swagger_1.ApiQuery)({ name: 'isMine', type: Boolean, required: false, example: true }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('resourceId')),
-    __param(2, (0, common_1.Query)()),
-    __param(3, (0, common_1.Query)('month')),
-    __param(4, (0, common_1.Query)('isMine')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _k : Object, String, typeof (_l = typeof pagination_query_dto_1.PaginationQueryDto !== "undefined" && pagination_query_dto_1.PaginationQueryDto) === "function" ? _l : Object, String, Boolean]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
-], ReservationController.prototype, "findResourceReservationList", null);
-__decorate([
-    (0, common_1.Get)('my-using'),
-    (0, swagger_1.ApiOperation)({ summary: '내 이용중인 예약 리스트 조회' }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '내 이용중인 예약 리스트 조회',
-        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_o = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _o : Object]),
-    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
-], ReservationController.prototype, "findMyUsingReservationList", null);
-__decorate([
-    (0, common_1.Get)('my-upcoming'),
-    (0, swagger_1.ApiOperation)({ summary: '내 예약 리스트 조회' }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '내 예약 리스트 조회',
-        type: [reservation_response_dto_1.GroupedReservationResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
-    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Query)('resourceType')),
-    __param(2, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_q = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _q : Object, typeof (_r = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _r : Object, typeof (_s = typeof pagination_query_dto_1.PaginationQueryDto !== "undefined" && pagination_query_dto_1.PaginationQueryDto) === "function" ? _s : Object]),
-    __metadata("design:returntype", typeof (_t = typeof Promise !== "undefined" && Promise) === "function" ? _t : Object)
-], ReservationController.prototype, "findMyUpcomingReservationList", null);
-__decorate([
-    (0, common_1.Get)('my-upcoming-schedules'),
-    (0, swagger_1.ApiOperation)({ summary: '내 일정 리스트 조회 (예약자/참석자 모두 포함)' }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '내 일정 리스트 조회 (예약자/참석자 모두 포함)',
-        type: [reservation_response_dto_1.GroupedReservationResponseDto],
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    (0, swagger_1.ApiQuery)({ name: 'page', type: Number, required: false, example: 1 }),
-    (0, swagger_1.ApiQuery)({ name: 'limit', type: Number, required: false, example: 10 }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Query)('resourceType')),
-    __param(2, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_u = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _u : Object, typeof (_v = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _v : Object, typeof (_w = typeof pagination_query_dto_1.PaginationQueryDto !== "undefined" && pagination_query_dto_1.PaginationQueryDto) === "function" ? _w : Object]),
-    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
-], ReservationController.prototype, "findMyUpcomingSchedules", null);
-__decorate([
-    (0, common_1.Get)('calendar'),
-    (0, swagger_1.ApiOperation)({ summary: '캘린더 조회' }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '캘린더 조회 성공',
-        type: reservation_response_dto_1.CalendarResponseDto,
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'startDate', example: '2025-01-01' }),
-    (0, swagger_1.ApiQuery)({ name: 'endDate', example: '2025-12-31' }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    (0, swagger_1.ApiQuery)({ name: 'isMine', type: Boolean, required: false, example: true }),
-    (0, swagger_1.ApiQuery)({ name: 'isMySchedules', type: Boolean, required: false, example: true }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Query)('startDate')),
-    __param(2, (0, common_1.Query)('endDate')),
-    __param(3, (0, common_1.Query)('resourceType')),
-    __param(4, (0, common_1.Query)('isMine')),
-    __param(5, (0, common_1.Query)('isMySchedules')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_y = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _y : Object, String, String, typeof (_z = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _z : Object, Boolean, Boolean]),
-    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
-], ReservationController.prototype, "findCalendar", null);
-__decorate([
     (0, common_1.Get)(':reservationId'),
     (0, swagger_1.ApiOperation)({ summary: '예약 상세 조회 #사용자/예약상세페이지' }),
     (0, swagger_1.ApiOkResponse)({
@@ -22449,8 +22316,8 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Param)('reservationId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_1 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _1 : Object, String]),
-    __metadata("design:returntype", typeof (_2 = typeof Promise !== "undefined" && Promise) === "function" ? _2 : Object)
+    __metadata("design:paramtypes", [typeof (_f = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _f : Object, String]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], ReservationController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/status'),
@@ -22463,22 +22330,9 @@ __decorate([
     __param(0, (0, common_1.Param)('reservationId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_3 = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _3 : Object]),
-    __metadata("design:returntype", typeof (_4 = typeof Promise !== "undefined" && Promise) === "function" ? _4 : Object)
+    __metadata("design:paramtypes", [String, typeof (_h = typeof dtos_index_1.UpdateReservationStatusDto !== "undefined" && dtos_index_1.UpdateReservationStatusDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], ReservationController.prototype, "updateStatus", null);
-__decorate([
-    (0, common_1.Patch)(':reservationId/status/cancel'),
-    (0, swagger_1.ApiOperation)({ summary: '예약 취소 #사용자/예약상세페이지' }),
-    (0, swagger_1.ApiOkResponse)({
-        description: '예약 상태 수정 성공',
-        type: reservation_response_dto_1.ReservationResponseDto,
-    }),
-    __param(0, (0, user_decorator_1.User)()),
-    __param(1, (0, common_1.Param)('reservationId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_5 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _5 : Object, String]),
-    __metadata("design:returntype", typeof (_6 = typeof Promise !== "undefined" && Promise) === "function" ? _6 : Object)
-], ReservationController.prototype, "updateStatusCancel", null);
 __decorate([
     (0, common_1.Patch)(':reservationId/return-vehicle'),
     (0, swagger_1.ApiOperation)({ summary: '차량 반납 #사용자/자원예약/차량반납' }),
@@ -22490,8 +22344,8 @@ __decorate([
     __param(1, (0, common_1.Param)('reservationId')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_7 = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _7 : Object, String, typeof (_8 = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _8 : Object]),
-    __metadata("design:returntype", typeof (_9 = typeof Promise !== "undefined" && Promise) === "function" ? _9 : Object)
+    __metadata("design:paramtypes", [typeof (_k = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _k : Object, String, typeof (_l = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], ReservationController.prototype, "returnVehicle", null);
 exports.ReservationController = ReservationController = __decorate([
     (0, swagger_1.ApiTags)('v2 예약 '),
@@ -32745,7 +32599,6 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
     async 시스템_관리자들에게_알림을_발송한다() {
     }
     async 소모품교체_알림을_조회한다(resourceId, consumableName) {
-        console.log(resourceId, consumableName);
         const notifications = await this.domainNotificationService.findAll({
             where: {
                 notificationType: notification_type_enum_1.NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,

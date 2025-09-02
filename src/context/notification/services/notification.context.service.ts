@@ -155,7 +155,6 @@ export class NotificationContextService {
      * 소모품 교체 알림을 조회한다
      */
     async 소모품교체_알림을_조회한다(resourceId: string, consumableName: string): Promise<any[]> {
-        console.log(resourceId, consumableName);
         const notifications = await this.domainNotificationService.findAll({
             where: {
                 notificationType: NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
