@@ -275,10 +275,15 @@ export class NotificationContextService {
             select: { subscriptions: true, isPushNotificationEnabled: true },
         });
 
-        if (!employees || employees.length === 0 || !employees.some((employee) => employee.isPushNotificationEnabled)) {
+        if (!employees || employees.length === 0) {
             return [];
         }
-        return employees.flatMap((employee) => employee.subscriptions.map((subscription) => subscription.fcm.token));
+        return employees
+            .filter(
+                (employee) =>
+                    employee.isPushNotificationEnabled && employee.subscriptions && employee.subscriptions.length > 0,
+            )
+            .flatMap((employee) => employee.subscriptions.map((subscription) => subscription.fcm.token));
 
         // const tokens = await this.employeeMicroserviceAdapter.getFcmTokens(authorization, [employeeId]);
         // if (tokens.length === 0) {

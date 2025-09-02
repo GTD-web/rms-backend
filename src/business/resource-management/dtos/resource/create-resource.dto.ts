@@ -89,8 +89,8 @@ export class CreateResourceDto {
     @IsOptional()
     locationURLs?: ResourceLocationURL;
 
-    @ApiProperty({ type: [String] })
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') })
+    @ApiProperty({ type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지 파일 ID') })
     @IsOptional()
     images?: string[];
 

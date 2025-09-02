@@ -36,4 +36,38 @@ export class DomainFileReservationVehicleService extends BaseService<FileReserva
             relations: ['reservationVehicle', 'file'],
         });
     }
+
+    /**
+     * 차량예약 ID로 모든 파일 연결을 삭제한다
+     */
+    async deleteByReservationVehicleId(reservationVehicleId: string, options?: any): Promise<void> {
+        const existingConnections = await this.fileReservationVehicleRepository.findAll({
+            where: { reservationVehicleId },
+        });
+
+        if (existingConnections.length > 0) {
+            for (const connection of existingConnections) {
+                await this.fileReservationVehicleRepository.delete(connection.fileReservationVehicleId, options);
+            }
+        }
+    }
+
+    /**
+     * 여러 파일-차량예약 연결을 일괄 저장한다
+     */
+    async saveMultiple(
+        connections: Array<{
+            reservationVehicleId: string;
+            fileId: string;
+            type: string;
+        }>,
+        options?: any,
+    ): Promise<FileReservationVehicle[]> {
+        const results = [];
+        for (const connection of connections) {
+            const entity = await this.fileReservationVehicleRepository.save(connection, options);
+            results.push(entity);
+        }
+        return results;
+    }
 }

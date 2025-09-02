@@ -45,19 +45,19 @@ export class CreateVehicleInfoDto {
     @Length(0, 100, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('보험사 전화 번호', 0, 100) })
     insuranceNumber?: string;
 
-    @ApiProperty({ required: false, type: [String], description: '주차위치 이미지 배열' })
+    @ApiProperty({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] })
     @IsOptional()
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차위치 이미지') })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차위치 이미지 파일 ID') })
     parkingLocationImages?: string[];
 
-    @ApiProperty({ required: false, type: [String], description: '계기판 이미지 배열' })
+    @ApiProperty({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] })
     @IsOptional()
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('계기판 이미지') })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('계기판 이미지 파일 ID') })
     odometerImages?: string[];
 
-    @ApiProperty({ required: false, type: [String], description: '실내 이미지 배열' })
+    @ApiProperty({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] })
     @IsOptional()
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지 파일 ID') })
     indoorImages?: string[];
 }
 
@@ -111,9 +111,9 @@ export class CreateMaintenanceDto {
     @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') })
     cost?: number;
 
-    @ApiProperty({ required: false, type: [String], description: '이미지 배열' })
+    @ApiProperty({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] })
     @IsOptional()
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지 파일 ID   ') })
     images?: string[];
 
     // @ApiProperty({ required: false, description: '정비 담당자' })

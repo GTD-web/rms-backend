@@ -36,4 +36,38 @@ export class DomainFileVehicleInfoService extends BaseService<FileVehicleInfo> {
             relations: ['vehicleInfo', 'file'],
         });
     }
+
+    /**
+     * 차량정보 ID로 모든 파일 연결을 삭제한다
+     */
+    async deleteByVehicleInfoId(vehicleInfoId: string, options?: any): Promise<void> {
+        const existingConnections = await this.fileVehicleInfoRepository.findAll({
+            where: { vehicleInfoId },
+        });
+
+        if (existingConnections.length > 0) {
+            for (const connection of existingConnections) {
+                await this.fileVehicleInfoRepository.delete(connection.fileVehicleInfoId, options);
+            }
+        }
+    }
+
+    /**
+     * 여러 파일-차량정보 연결을 일괄 저장한다
+     */
+    async saveMultiple(
+        connections: Array<{
+            vehicleInfoId: string;
+            fileId: string;
+            type: string;
+        }>,
+        options?: any,
+    ): Promise<FileVehicleInfo[]> {
+        const results = [];
+        for (const connection of connections) {
+            const entity = await this.fileVehicleInfoRepository.save(connection, options);
+            results.push(entity);
+        }
+        return results;
+    }
 }

@@ -107,7 +107,7 @@ export class FileController {
 
     @Post('data')
     @ApiOperation({ summary: '파일 데이터 생성' })
-    @ApiOkResponse({ status: 200, description: '파일 데이터 생성 성공' })
+    @ApiOkResponse({ status: 200, description: '파일 데이터 생성 성공', type: FileResponseDto })
     async createFileData(@Body() createFileDataDto: CreateFileDataDto) {
         return this.fileContextService.파일_데이터를_생성한다(createFileDataDto);
     }

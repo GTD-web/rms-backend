@@ -36,9 +36,9 @@ export class UpdateMaintenanceDto {
     @Max(999999999, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('비용') })
     cost?: number;
 
-    @ApiProperty({ required: false, type: [String] })
+    @ApiProperty({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] })
     @IsOptional()
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지 파일 ID') })
     images?: string[];
 
     @ApiProperty({
@@ -112,18 +112,18 @@ export class UpdateVehicleInfoDto {
     @IsOptional()
     leftMileage?: number;
 
-    @ApiProperty({ required: false })
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') })
+    @ApiProperty({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지 파일 ID') })
     @IsOptional()
     parkingLocationImages?: string[];
 
-    @ApiProperty({ required: false })
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') })
+    @ApiProperty({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지 파일 ID') })
     @IsOptional()
     odometerImages?: string[];
 
-    @ApiProperty({ required: false })
-    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') })
+    @ApiProperty({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] })
+    @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지 파일 ID') })
     @IsOptional()
     indoorImages?: string[];
 }

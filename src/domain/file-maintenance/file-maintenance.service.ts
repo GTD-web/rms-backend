@@ -29,4 +29,31 @@ export class DomainFileMaintenanceService extends BaseService<FileMaintenance> {
             relations: ['maintenance', 'file'],
         });
     }
+
+    async deleteByMaintenanceId(maintenanceId: string, options?: any): Promise<void> {
+        const existingConnections = await this.fileMaintenanceRepository.findAll({
+            where: { maintenanceId },
+        });
+
+        if (existingConnections.length > 0) {
+            for (const connection of existingConnections) {
+                await this.fileMaintenanceRepository.delete(connection.fileMaintenanceId, options);
+            }
+        }
+    }
+
+    async saveMultiple(
+        connections: Array<{
+            maintenanceId: string;
+            fileId: string;
+        }>,
+        options?: any,
+    ): Promise<FileMaintenance[]> {
+        const results = [];
+        for (const connection of connections) {
+            const entity = await this.fileMaintenanceRepository.save(connection, options);
+            results.push(entity);
+        }
+        return results;
+    }
 }

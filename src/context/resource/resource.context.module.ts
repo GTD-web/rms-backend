@@ -13,6 +13,7 @@ import { DomainConsumableModule } from '@src/domain/consumable/consumable.module
 import { DomainMaintenanceModule } from '@src/domain/maintenance/maintenance.module';
 import { DomainReservationVehicleModule } from '@src/domain/reservation-vehicle/reservation-vehicle.module';
 import { DomainEmployeeModule } from '@src/domain/employee/employee.module';
+import { FileContextModule } from '../file/file.context.module';
 
 // Context Services
 import { ResourceContextService } from './services/resource.context.service';
@@ -53,6 +54,8 @@ import { MaintenanceContextService } from './services/maintenance.context.servic
         DomainMaintenanceModule,
         DomainReservationVehicleModule,
         DomainEmployeeModule,
+        // Context Layer Modules
+        FileContextModule,
 
         // Application Layer Modules
     ],

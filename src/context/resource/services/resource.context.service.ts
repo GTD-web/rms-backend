@@ -13,6 +13,7 @@ import { DomainMeetingRoomInfoService } from '@src/domain/meeting-room-info/meet
 import { DomainAccommodationInfoService } from '@src/domain/accommodation-info/accommodation-info.service';
 import { DomainEquipmentInfoService } from '@src/domain/equipment-info/equipment-info.service';
 import { DomainFileService } from '@src/domain/file/file.service';
+import { FileContextService } from '../../file/services/file.context.service';
 
 // DTOs
 import {
@@ -43,6 +44,7 @@ export class ResourceContextService {
         private readonly domainAccommodationInfoService: DomainAccommodationInfoService,
         private readonly domainEquipmentInfoService: DomainEquipmentInfoService,
         private readonly domainFileService: DomainFileService,
+        private readonly fileContextService: FileContextService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -95,15 +97,25 @@ export class ResourceContextService {
             });
             const resourceOrder = resources.length;
 
+            // 파일 ID 배열 준비 (기본값 빈 배열)
             if (!resource.images) resource.images = [];
-            resource.images = resource.images.map((image) => this.domainFileService.getFileUrl(image));
 
             const savedResource = await this.domainResourceService.save(
                 { ...resource, order: resourceOrder } as Resource,
                 { queryRunner },
             );
 
-            await this.domainFileService.updateTemporaryFiles(resource.images, false, { queryRunner });
+            // 파일들을 임시에서 영구로 변경
+            if (resource.images.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(resource.images, queryRunner);
+            }
+
+            // 리소스에 파일들을 연결
+            await this.fileContextService.리소스에_파일들을_연결한다(
+                savedResource.resourceId!,
+                resource.images,
+                queryRunner,
+            );
 
             switch (group.type) {
                 case ResourceType.VEHICLE:
@@ -225,16 +237,23 @@ export class ResourceContextService {
 
         try {
             if (updateResourceInfoDto.resource) {
-                if (updateResourceInfoDto.resource.images && updateResourceInfoDto.resource.images.length > 0) {
-                    updateResourceInfoDto.resource.images = updateResourceInfoDto.resource.images.map((image) =>
-                        this.domainFileService.getFileUrl(image),
-                    );
-                    await this.domainFileService.updateTemporaryFiles(updateResourceInfoDto.resource.images, false, {
-                        queryRunner,
-                    });
-                }
+                // 리소스 정보 업데이트 (이미지 제외)
+                const { images, ...resourceData } = updateResourceInfoDto.resource;
+                await this.domainResourceService.update(resourceId, resourceData, { queryRunner });
 
-                await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
+                // 이미지가 변경된 경우 파일 연결 처리
+                if (images !== undefined) {
+                    // 파일 ID 배열 준비 (기본값 빈 배열)
+                    const fileIds = images || [];
+
+                    // 파일들을 임시에서 영구로 변경
+                    if (fileIds.length > 0) {
+                        await this.fileContextService.파일들을_영구로_변경한다(fileIds, queryRunner);
+                    }
+
+                    // 리소스에 파일들을 연결 (기존 연결 삭제 후 새로 생성)
+                    await this.fileContextService.리소스에_파일들을_연결한다(resourceId, fileIds, queryRunner);
+                }
             }
 
             if (updateResourceInfoDto.typeInfo) {

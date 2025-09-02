@@ -6,6 +6,7 @@ import { DomainEmployeeNotificationService } from '@src/domain/employee-notifica
 import { DomainReservationVehicleService } from '@src/domain/reservation-vehicle/reservation-vehicle.service';
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
 import { DomainFileService } from '@src/domain/file/file.service';
+import { FileContextService } from '../../file/services/file.context.service';
 import { DataSource, QueryRunner } from 'typeorm';
 import { Employee, Reservation } from '@libs/entities';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
@@ -33,6 +34,7 @@ export class ReservationContextService {
         private readonly domainReservationVehicleService: DomainReservationVehicleService,
         private readonly domainVehicleInfoService: DomainVehicleInfoService,
         private readonly domainFileService: DomainFileService,
+        private readonly fileContextService: FileContextService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -336,35 +338,53 @@ export class ReservationContextService {
                 { queryRunner },
             );
 
+            // 파일 ID 배열 준비 (기본값 빈 배열)
             if (!returnDto.parkingLocationImages) returnDto.parkingLocationImages = [];
             if (!returnDto.odometerImages) returnDto.odometerImages = [];
             if (!returnDto.indoorImages) returnDto.indoorImages = [];
-            returnDto.parkingLocationImages = returnDto.parkingLocationImages.map((image) =>
-                this.domainFileService.getFileUrl(image),
-            );
-            returnDto.odometerImages = returnDto.odometerImages.map((image) =>
-                this.domainFileService.getFileUrl(image),
-            );
-            returnDto.indoorImages = returnDto.indoorImages.map((image) => this.domainFileService.getFileUrl(image));
 
-            const images = [...returnDto.parkingLocationImages, ...returnDto.odometerImages, ...returnDto.indoorImages];
+            // 모든 파일 ID들을 수집
+            const allFileIds = [
+                ...returnDto.parkingLocationImages,
+                ...returnDto.odometerImages,
+                ...returnDto.indoorImages,
+            ];
 
-            if (images.length > 0) {
-                await this.domainFileService.updateTemporaryFiles(images, false, {
-                    queryRunner,
-                });
+            // 파일들을 임시에서 영구로 변경
+            if (allFileIds.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(allFileIds, queryRunner);
             }
 
+            // 차량예약에 파일들을 연결
+            await this.fileContextService.차량예약에_파일들을_연결한다(
+                reservationVehicle.reservationVehicleId,
+                {
+                    parkingLocationImages: returnDto.parkingLocationImages,
+                    odometerImages: returnDto.odometerImages,
+                    indoorImages: returnDto.indoorImages,
+                },
+                queryRunner,
+            );
+
+            // 차량 정보 업데이트 (이미지 필드는 제거)
             await this.domainVehicleInfoService.update(
                 vehicleInfoId,
                 {
                     totalMileage: returnDto.totalMileage,
                     leftMileage: returnDto.leftMileage,
+                },
+                { queryRunner },
+            );
+
+            // 차량정보에 파일들을 연결 (덮어쓰기)
+            await this.fileContextService.차량정보에_파일들을_연결한다(
+                vehicleInfoId,
+                {
                     parkingLocationImages: returnDto.parkingLocationImages,
                     odometerImages: returnDto.odometerImages,
                     indoorImages: returnDto.indoorImages,
                 },
-                { queryRunner },
+                queryRunner,
             );
 
             const notiTarget = [user.employeeId];

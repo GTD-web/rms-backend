@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { DomainFileService } from '@src/domain/file/file.service';
 import { DomainFileReservationVehicleService } from '@src/domain/file-reservation-vehicle/file-reservation-vehicle.service';
 import { DomainFileVehicleInfoService } from '@src/domain/file-vehicle-info/file-vehicle-info.service';
+import { DomainFileMaintenanceService } from '@src/domain/file-maintenance/file-maintenance.service';
 import { In, LessThan, Like } from 'typeorm';
 import { File } from '@libs/entities/file.entity';
 import { ReservationVehicleFileResponseDto } from '../dtos';
@@ -22,6 +23,7 @@ export class FileContextService {
         private readonly domainFileReservationVehicleService: DomainFileReservationVehicleService,
         private readonly domainFileVehicleInfoService: DomainFileVehicleInfoService,
         private readonly domainFileResourceService: DomainFileResourceService,
+        private readonly domainFileMaintenanceService: DomainFileMaintenanceService,
         private readonly s3Service: S3Service,
     ) {}
 
@@ -189,5 +191,214 @@ export class FileContextService {
                       })
                     : [],
         };
+    }
+
+    /**
+     * 차량예약에 파일들을 연결한다 (히스토리성 - 기존 데이터 유지)
+     */
+    async 차량예약에_파일들을_연결한다(
+        reservationVehicleId: string,
+        files: {
+            parkingLocationImages?: string[];
+            odometerImages?: string[];
+            indoorImages?: string[];
+        },
+        queryRunner?: any,
+    ): Promise<void> {
+        const options = queryRunner ? { queryRunner } : {};
+
+        // 기존 연결 삭제하지 않음 (히스토리성 데이터)
+        // 새로운 연결만 생성
+        const connections = [];
+
+        if (files.parkingLocationImages?.length > 0) {
+            connections.push(
+                ...files.parkingLocationImages.map((fileId) => ({
+                    reservationVehicleId,
+                    fileId,
+                    type: 'PARKING_LOCATION',
+                })),
+            );
+        }
+
+        if (files.odometerImages?.length > 0) {
+            connections.push(
+                ...files.odometerImages.map((fileId) => ({
+                    reservationVehicleId,
+                    fileId,
+                    type: 'ODOMETER',
+                })),
+            );
+        }
+
+        if (files.indoorImages?.length > 0) {
+            connections.push(
+                ...files.indoorImages.map((fileId) => ({
+                    reservationVehicleId,
+                    fileId,
+                    type: 'INDOOR',
+                })),
+            );
+        }
+
+        // 중간테이블에 데이터 저장
+        if (connections.length > 0) {
+            await this.domainFileReservationVehicleService.saveMultiple(connections, options);
+        }
+    }
+
+    /**
+     * 파일들을 임시에서 영구로 변경한다
+     */
+    async 파일들을_영구로_변경한다(fileIds: string[], queryRunner?: any): Promise<void> {
+        if (fileIds.length === 0) return;
+
+        const options = queryRunner ? { queryRunner } : {};
+
+        for (const fileId of fileIds) {
+            await this.domainFileService.update(fileId, { isTemporary: false }, options);
+        }
+    }
+
+    /**
+     * 리소스에 파일들을 연결한다
+     */
+    async 리소스에_파일들을_연결한다(resourceId: string, fileIds: string[], queryRunner?: any): Promise<void> {
+        if (fileIds.length === 0) return;
+
+        const options = queryRunner ? { queryRunner } : {};
+
+        // 기존 연결된 파일들 조회 후 임시 상태로 변경
+        const existingConnections = await this.domainFileResourceService.findAll({
+            where: { resourceId },
+        });
+
+        if (existingConnections.length > 0) {
+            const existingFileIds = existingConnections.map((conn) => conn.fileId);
+            // 기존 파일들을 임시 상태로 변경
+            for (const fileId of existingFileIds) {
+                await this.domainFileService.update(fileId, { isTemporary: true }, options);
+            }
+        }
+
+        // 기존 연결 삭제
+        await this.domainFileResourceService.deleteByResourceId(resourceId, options);
+
+        // 새로운 연결 생성
+        const connections = fileIds.map((fileId) => ({
+            resourceId,
+            fileId,
+        }));
+
+        // 중간테이블에 데이터 저장
+        await this.domainFileResourceService.saveMultiple(connections, options);
+    }
+
+    /**
+     * 차량정보에 파일들을 연결한다 (덮어쓰기)
+     */
+    async 차량정보에_파일들을_연결한다(
+        vehicleInfoId: string,
+        files: {
+            parkingLocationImages?: string[];
+            odometerImages?: string[];
+            indoorImages?: string[];
+        },
+        queryRunner?: any,
+    ): Promise<void> {
+        const options = queryRunner ? { queryRunner } : {};
+
+        // 기존 연결된 파일들 조회 후 임시 상태로 변경
+        const existingConnections = await this.domainFileVehicleInfoService.findByVehicleInfoId(vehicleInfoId);
+
+        if (existingConnections.length > 0) {
+            const existingFileIds = existingConnections.map((conn) => conn.fileId);
+            // 기존 파일들을 임시 상태로 변경
+            for (const fileId of existingFileIds) {
+                await this.domainFileService.update(fileId, { isTemporary: true }, options);
+            }
+        }
+
+        // 기존 연결 삭제 (덮어쓰기)
+        await this.domainFileVehicleInfoService.deleteByVehicleInfoId(vehicleInfoId, options);
+
+        // 새로운 연결 생성
+        const connections = [];
+
+        if (files.parkingLocationImages?.length > 0) {
+            connections.push(
+                ...files.parkingLocationImages.map((fileId) => ({
+                    vehicleInfoId,
+                    fileId,
+                    type: 'PARKING_LOCATION',
+                })),
+            );
+        }
+
+        if (files.odometerImages?.length > 0) {
+            connections.push(
+                ...files.odometerImages.map((fileId) => ({
+                    vehicleInfoId,
+                    fileId,
+                    type: 'ODOMETER',
+                })),
+            );
+        }
+
+        if (files.indoorImages?.length > 0) {
+            connections.push(
+                ...files.indoorImages.map((fileId) => ({
+                    vehicleInfoId,
+                    fileId,
+                    type: 'INDOOR',
+                })),
+            );
+        }
+
+        // 중간테이블에 데이터 저장
+        if (connections.length > 0) {
+            await this.domainFileVehicleInfoService.saveMultiple(connections, options);
+        }
+    }
+
+    /**
+     * 정비에 파일들을 연결한다 (덮어쓰기)
+     */
+    async 정비에_파일들을_연결한다(maintenanceId: string, fileIds: string[], queryRunner?: any): Promise<void> {
+        const options = queryRunner ? { queryRunner } : {};
+
+        // 기존 연결된 파일들 조회 후 임시 상태로 변경
+        const existingConnections = await this.domainFileMaintenanceService.findByMaintenanceId(maintenanceId);
+
+        if (existingConnections.length > 0) {
+            const existingFileIds = existingConnections.map((conn) => conn.fileId);
+            // 기존 파일들을 임시 상태로 변경
+            for (const fileId of existingFileIds) {
+                await this.domainFileService.update(fileId, { isTemporary: true }, options);
+            }
+        }
+
+        // 기존 연결 삭제 (덮어쓰기)
+        await this.domainFileMaintenanceService.deleteByMaintenanceId(maintenanceId, options);
+
+        // 새로운 연결 생성
+        const connections = fileIds.map((fileId) => ({
+            maintenanceId,
+            fileId,
+        }));
+
+        if (connections.length > 0) {
+            await this.domainFileMaintenanceService.saveMultiple(connections, options);
+        }
+    }
+
+    /**
+     * 정비 파일을 조회한다
+     */
+    async 정비_파일을_조회한다(maintenanceId: string): Promise<{ filePath: string }[]> {
+        const fileMaintenances = await this.domainFileMaintenanceService.findByMaintenanceId(maintenanceId);
+        return fileMaintenances.map((fm) => ({
+            filePath: fm.file.filePath,
+        }));
     }
 }

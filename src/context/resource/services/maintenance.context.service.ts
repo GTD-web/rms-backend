@@ -12,6 +12,9 @@ import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { DomainFileService } from '@src/domain/file/file.service';
 
+// Context Services
+import { FileContextService } from '../../file/services/file.context.service';
+
 // DTOs
 import { CreateMaintenanceDto } from '@src/business/resource-management/dtos/vehicle/create-vehicle-info.dto';
 import { UpdateMaintenanceDto } from '@src/business/resource-management/dtos/vehicle/update-vehicle-info.dto';
@@ -27,6 +30,7 @@ export class MaintenanceContextService {
         private readonly domainVehicleInfoService: DomainVehicleInfoService,
         private readonly domainEmployeeService: DomainEmployeeService,
         private readonly domainFileService: DomainFileService,
+        private readonly fileContextService: FileContextService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -47,13 +51,24 @@ export class MaintenanceContextService {
         await queryRunner.startTransaction();
 
         try {
+            // 파일 ID 배열 준비 (기본값 빈 배열)
             if (!createMaintenanceDto.images) createMaintenanceDto.images = [];
-            createMaintenanceDto.images = createMaintenanceDto.images.map((image) =>
-                this.domainFileService.getFileUrl(image),
-            );
 
-            const maintenance = await this.domainMaintenanceService.save(createMaintenanceDto, { queryRunner });
-            await this.domainFileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
+            // 이미지 파일들을 임시에서 영구로 변경
+            if (createMaintenanceDto.images.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(createMaintenanceDto.images, queryRunner);
+            }
+
+            // 정비 이력 저장 (이미지 필드 제외)
+            const { images, ...maintenanceData } = createMaintenanceDto;
+            const maintenance = await this.domainMaintenanceService.save(maintenanceData, { queryRunner });
+
+            // 정비에 파일들을 연결
+            await this.fileContextService.정비에_파일들을_연결한다(
+                maintenance.maintenanceId!,
+                createMaintenanceDto.images,
+                queryRunner,
+            );
 
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.domainConsumableService.findOne({
@@ -98,13 +113,16 @@ export class MaintenanceContextService {
             //     systemAdmins.map((admin) => admin.employeeId),
             // );
 
+            // 정비 이력 이미지 조회
+            const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenance.maintenanceId!);
+
             return {
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,
                 date: maintenance.date,
                 mileage: maintenance.mileage,
                 cost: maintenance.cost,
-                images: maintenance.images,
+                images: maintenanceFiles.map((file) => file.filePath),
             };
         } catch (error) {
             await queryRunner.rollbackTransaction();
@@ -120,16 +138,23 @@ export class MaintenanceContextService {
             order: { date: 'DESC' },
         });
 
-        return maintenances.map((maintenance) => ({
-            maintenanceId: maintenance.maintenanceId,
-            consumableId: maintenance.consumableId,
-            resourceName: maintenance.consumable?.vehicleInfo?.resource?.name,
-            consumableName: maintenance.consumable?.name,
-            date: maintenance.date,
-            mileage: maintenance.mileage,
-            cost: maintenance.cost,
-            images: maintenance.images,
-        }));
+        return await Promise.all(
+            maintenances.map(async (maintenance) => {
+                // 정비 이력 이미지 조회
+                const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenance.maintenanceId);
+
+                return {
+                    maintenanceId: maintenance.maintenanceId,
+                    consumableId: maintenance.consumableId,
+                    resourceName: maintenance.consumable?.vehicleInfo?.resource?.name,
+                    consumableName: maintenance.consumable?.name,
+                    date: maintenance.date,
+                    mileage: maintenance.mileage,
+                    cost: maintenance.cost,
+                    images: maintenanceFiles.map((file) => file.filePath),
+                };
+            }),
+        );
     }
 
     async 차량별_정비이력을_조회한다(
@@ -162,20 +187,28 @@ export class MaintenanceContextService {
         options.order = { createdAt: 'DESC' };
         const maintenances = await this.domainMaintenanceService.findAll(options);
 
-        return {
-            items: maintenances.map((maintenance, index, array) => ({
-                maintenanceId: maintenance.maintenanceId,
-                consumableId: maintenance.consumableId,
-                date: maintenance.date,
-                mileage: maintenance.mileage,
-                cost: maintenance.cost,
-                images: maintenance.images,
-                consumableName: maintenance.consumable.name,
-                resourceName: vehicleInfo.resource.name,
-                previousMileage: index !== array.length - 1 ? array[index + 1].mileage : 0,
-                isLatest: index === 0,
-            })),
+        const items = await Promise.all(
+            maintenances.map(async (maintenance, index, array) => {
+                // 정비 이력 이미지 조회
+                const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenance.maintenanceId);
 
+                return {
+                    maintenanceId: maintenance.maintenanceId,
+                    consumableId: maintenance.consumableId,
+                    date: maintenance.date,
+                    mileage: maintenance.mileage,
+                    cost: maintenance.cost,
+                    images: maintenanceFiles.map((file) => file.filePath),
+                    consumableName: maintenance.consumable.name,
+                    resourceName: vehicleInfo.resource.name,
+                    previousMileage: index !== array.length - 1 ? array[index + 1].mileage : 0,
+                    isLatest: index === 0,
+                };
+            }),
+        );
+
+        return {
+            items,
             meta: {
                 total: count,
                 page,
@@ -195,6 +228,9 @@ export class MaintenanceContextService {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.NOT_FOUND);
         }
 
+        // 정비 이력 이미지 조회
+        const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenanceId);
+
         return {
             maintenanceId: maintenance.maintenanceId,
             consumableId: maintenance.consumableId,
@@ -203,7 +239,7 @@ export class MaintenanceContextService {
             date: maintenance.date,
             mileage: maintenance.mileage,
             cost: maintenance.cost,
-            images: maintenance.images,
+            images: maintenanceFiles.map((file) => file.filePath),
         };
     }
 
@@ -234,12 +270,43 @@ export class MaintenanceContextService {
             }
         }
 
-        await this.domainMaintenanceService.update(maintenanceId, updateMaintenanceDto);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            // 파일 관련 처리
+            if (updateMaintenanceDto.images !== undefined) {
+                const fileIds = updateMaintenanceDto.images || [];
+
+                // 파일들을 임시에서 영구로 변경
+                if (fileIds.length > 0) {
+                    await this.fileContextService.파일들을_영구로_변경한다(fileIds, queryRunner);
+                }
+
+                // 정비에 파일들을 연결 (덮어쓰기)
+                await this.fileContextService.정비에_파일들을_연결한다(maintenanceId, fileIds, queryRunner);
+            }
+
+            // 정비 이력 업데이트 (이미지 필드 제외)
+            const { images, ...maintenanceData } = updateMaintenanceDto;
+            await this.domainMaintenanceService.update(maintenanceId, maintenanceData, { queryRunner });
+
+            await queryRunner.commitTransaction();
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        } finally {
+            await queryRunner.release();
+        }
 
         const updatedMaintenance = await this.domainMaintenanceService.findOne({
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
         });
+
+        // 정비 이력 이미지 조회
+        const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenanceId);
 
         return {
             maintenanceId: updatedMaintenance.maintenanceId,
@@ -249,7 +316,7 @@ export class MaintenanceContextService {
             date: updatedMaintenance.date,
             mileage: updatedMaintenance.mileage,
             cost: updatedMaintenance.cost,
-            images: updatedMaintenance.images,
+            images: maintenanceFiles.map((file) => file.filePath),
         };
     }
 

@@ -13,6 +13,7 @@ import { DomainReservationVehicleModule } from '@src/domain/reservation-vehicle/
 import { DomainVehicleInfoModule } from '@src/domain/vehicle-info/vehicle-info.module';
 import { DomainFileModule } from '@src/domain/file/file.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { FileContextModule } from '../file/file.context.module';
 
 // Context Services
 import { ReservationContextService } from './services/reservation.context.service';
@@ -43,6 +44,8 @@ import { ReservationContextService } from './services/reservation.context.servic
         DomainReservationVehicleModule,
         DomainVehicleInfoModule,
         DomainFileModule,
+        // Context Layer Modules
+        FileContextModule,
         // NotificationModule,
         ScheduleModule.forRoot(),
     ],

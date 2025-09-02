@@ -8747,21 +8747,39 @@ __decorate([
     __metadata("design:type", Number)
 ], ReturnVehicleDto.prototype, "totalMileage", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') }),
-    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주차 위치 이미지', '문자열') }),
+    (0, swagger_1.ApiProperty)({
+        type: [String],
+        example: ['123e4567-e89b-12d3-a456-426614174000'],
+    }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지 파일 ID') }),
+    (0, class_validator_1.IsString)({
+        each: true,
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주차 위치 이미지 파일 ID', '문자열'),
+    }),
     __metadata("design:type", Array)
 ], ReturnVehicleDto.prototype, "parkingLocationImages", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') }),
-    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지', '문자열') }),
+    (0, swagger_1.ApiProperty)({
+        type: [String],
+        example: ['123e4567-e89b-12d3-a456-426614174000'],
+    }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지 파일 ID') }),
+    (0, class_validator_1.IsString)({
+        each: true,
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지 파일 ID', '문자열'),
+    }),
     __metadata("design:type", Array)
 ], ReturnVehicleDto.prototype, "odometerImages", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('차량 실내 이미지') }),
-    (0, class_validator_1.IsString)({ each: true, message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('차량 실내 이미지', '문자열') }),
+    (0, swagger_1.ApiProperty)({
+        type: [String],
+        example: ['123e4567-e89b-12d3-a456-426614174000'],
+    }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('차량 실내 이미지 파일 ID') }),
+    (0, class_validator_1.IsString)({
+        each: true,
+        message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('차량 실내 이미지 파일 ID', '문자열'),
+    }),
     __metadata("design:type", Array)
 ], ReturnVehicleDto.prototype, "indoorImages", void 0);
 
@@ -10206,8 +10224,8 @@ __decorate([
     __metadata("design:type", ResourceLocationURL)
 ], CreateResourceDto.prototype, "locationURLs", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: [String] }),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
+    (0, swagger_1.ApiProperty)({ type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지 파일 ID') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], CreateResourceDto.prototype, "images", void 0);
@@ -10936,21 +10954,21 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVehicleInfoDto.prototype, "insuranceNumber", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '주차위치 이미지 배열' }),
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차위치 이미지') }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차위치 이미지 파일 ID') }),
     __metadata("design:type", Array)
 ], CreateVehicleInfoDto.prototype, "parkingLocationImages", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '계기판 이미지 배열' }),
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('계기판 이미지') }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('계기판 이미지 파일 ID') }),
     __metadata("design:type", Array)
 ], CreateVehicleInfoDto.prototype, "odometerImages", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '실내 이미지 배열' }),
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지 파일 ID') }),
     __metadata("design:type", Array)
 ], CreateVehicleInfoDto.prototype, "indoorImages", void 0);
 class CreateConsumableDto {
@@ -11015,9 +11033,9 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateMaintenanceDto.prototype, "cost", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, type: [String], description: '이미지 배열' }),
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지 파일 ID   ') }),
     __metadata("design:type", Array)
 ], CreateMaintenanceDto.prototype, "images", void 0);
 __decorate([
@@ -11153,9 +11171,9 @@ __decorate([
     __metadata("design:type", Number)
 ], UpdateMaintenanceDto.prototype, "cost", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false, type: [String] }),
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지') }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('이미지 파일 ID') }),
     __metadata("design:type", Array)
 ], UpdateMaintenanceDto.prototype, "images", void 0);
 __decorate([
@@ -11243,20 +11261,20 @@ __decorate([
     __metadata("design:type", Number)
 ], UpdateVehicleInfoDto.prototype, "leftMileage", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지') }),
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지 파일 ID') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateVehicleInfoDto.prototype, "parkingLocationImages", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지') }),
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지 파일 ID') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateVehicleInfoDto.prototype, "odometerImages", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ required: false }),
-    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지') }),
+    (0, swagger_1.ApiProperty)({ required: false, type: [String], example: ['123e4567-e89b-12d3-a456-426614174000'] }),
+    (0, class_validator_1.IsArray)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_ARRAY('실내 이미지 파일 ID') }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateVehicleInfoDto.prototype, "indoorImages", void 0);
@@ -17073,7 +17091,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('data'),
     (0, swagger_1.ApiOperation)({ summary: '파일 데이터 생성' }),
-    (0, swagger_1.ApiOkResponse)({ status: 200, description: '파일 데이터 생성 성공' }),
+    (0, swagger_1.ApiOkResponse)({ status: 200, description: '파일 데이터 생성 성공', type: business_dto_index_1.FileResponseDto }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [typeof (_e = typeof create_filedata_dto_1.CreateFileDataDto !== "undefined" && create_filedata_dto_1.CreateFileDataDto) === "function" ? _e : Object]),
@@ -17303,24 +17321,26 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 const file_reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/file-reservation-vehicle/file-reservation-vehicle.service */ "./src/domain/file-reservation-vehicle/file-reservation-vehicle.service.ts");
 const file_vehicle_info_service_1 = __webpack_require__(/*! @src/domain/file-vehicle-info/file-vehicle-info.service */ "./src/domain/file-vehicle-info/file-vehicle-info.service.ts");
+const file_maintenance_service_1 = __webpack_require__(/*! @src/domain/file-maintenance/file-maintenance.service */ "./src/domain/file-maintenance/file-maintenance.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const s3_service_1 = __webpack_require__(/*! ../adapter/s3.service */ "./src/context/file/adapter/s3.service.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const file_resource_service_1 = __webpack_require__(/*! @src/domain/file-resource/file-resource.service */ "./src/domain/file-resource/file-resource.service.ts");
 let FileContextService = class FileContextService {
-    constructor(domainFileService, domainFileReservationVehicleService, domainFileVehicleInfoService, domainFileResourceService, s3Service) {
+    constructor(domainFileService, domainFileReservationVehicleService, domainFileVehicleInfoService, domainFileResourceService, domainFileMaintenanceService, s3Service) {
         this.domainFileService = domainFileService;
         this.domainFileReservationVehicleService = domainFileReservationVehicleService;
         this.domainFileVehicleInfoService = domainFileVehicleInfoService;
         this.domainFileResourceService = domainFileResourceService;
+        this.domainFileMaintenanceService = domainFileMaintenanceService;
         this.s3Service = s3Service;
     }
     async 차량예약_파일을_조회한다(reservationVehicleId) {
@@ -17456,11 +17476,127 @@ let FileContextService = class FileContextService {
                 : [],
         };
     }
+    async 차량예약에_파일들을_연결한다(reservationVehicleId, files, queryRunner) {
+        const options = queryRunner ? { queryRunner } : {};
+        const connections = [];
+        if (files.parkingLocationImages?.length > 0) {
+            connections.push(...files.parkingLocationImages.map((fileId) => ({
+                reservationVehicleId,
+                fileId,
+                type: 'PARKING_LOCATION',
+            })));
+        }
+        if (files.odometerImages?.length > 0) {
+            connections.push(...files.odometerImages.map((fileId) => ({
+                reservationVehicleId,
+                fileId,
+                type: 'ODOMETER',
+            })));
+        }
+        if (files.indoorImages?.length > 0) {
+            connections.push(...files.indoorImages.map((fileId) => ({
+                reservationVehicleId,
+                fileId,
+                type: 'INDOOR',
+            })));
+        }
+        if (connections.length > 0) {
+            await this.domainFileReservationVehicleService.saveMultiple(connections, options);
+        }
+    }
+    async 파일들을_영구로_변경한다(fileIds, queryRunner) {
+        if (fileIds.length === 0)
+            return;
+        const options = queryRunner ? { queryRunner } : {};
+        for (const fileId of fileIds) {
+            await this.domainFileService.update(fileId, { isTemporary: false }, options);
+        }
+    }
+    async 리소스에_파일들을_연결한다(resourceId, fileIds, queryRunner) {
+        if (fileIds.length === 0)
+            return;
+        const options = queryRunner ? { queryRunner } : {};
+        const existingConnections = await this.domainFileResourceService.findAll({
+            where: { resourceId },
+        });
+        if (existingConnections.length > 0) {
+            const existingFileIds = existingConnections.map((conn) => conn.fileId);
+            for (const fileId of existingFileIds) {
+                await this.domainFileService.update(fileId, { isTemporary: true }, options);
+            }
+        }
+        await this.domainFileResourceService.deleteByResourceId(resourceId, options);
+        const connections = fileIds.map((fileId) => ({
+            resourceId,
+            fileId,
+        }));
+        await this.domainFileResourceService.saveMultiple(connections, options);
+    }
+    async 차량정보에_파일들을_연결한다(vehicleInfoId, files, queryRunner) {
+        const options = queryRunner ? { queryRunner } : {};
+        const existingConnections = await this.domainFileVehicleInfoService.findByVehicleInfoId(vehicleInfoId);
+        if (existingConnections.length > 0) {
+            const existingFileIds = existingConnections.map((conn) => conn.fileId);
+            for (const fileId of existingFileIds) {
+                await this.domainFileService.update(fileId, { isTemporary: true }, options);
+            }
+        }
+        await this.domainFileVehicleInfoService.deleteByVehicleInfoId(vehicleInfoId, options);
+        const connections = [];
+        if (files.parkingLocationImages?.length > 0) {
+            connections.push(...files.parkingLocationImages.map((fileId) => ({
+                vehicleInfoId,
+                fileId,
+                type: 'PARKING_LOCATION',
+            })));
+        }
+        if (files.odometerImages?.length > 0) {
+            connections.push(...files.odometerImages.map((fileId) => ({
+                vehicleInfoId,
+                fileId,
+                type: 'ODOMETER',
+            })));
+        }
+        if (files.indoorImages?.length > 0) {
+            connections.push(...files.indoorImages.map((fileId) => ({
+                vehicleInfoId,
+                fileId,
+                type: 'INDOOR',
+            })));
+        }
+        if (connections.length > 0) {
+            await this.domainFileVehicleInfoService.saveMultiple(connections, options);
+        }
+    }
+    async 정비에_파일들을_연결한다(maintenanceId, fileIds, queryRunner) {
+        const options = queryRunner ? { queryRunner } : {};
+        const existingConnections = await this.domainFileMaintenanceService.findByMaintenanceId(maintenanceId);
+        if (existingConnections.length > 0) {
+            const existingFileIds = existingConnections.map((conn) => conn.fileId);
+            for (const fileId of existingFileIds) {
+                await this.domainFileService.update(fileId, { isTemporary: true }, options);
+            }
+        }
+        await this.domainFileMaintenanceService.deleteByMaintenanceId(maintenanceId, options);
+        const connections = fileIds.map((fileId) => ({
+            maintenanceId,
+            fileId,
+        }));
+        if (connections.length > 0) {
+            await this.domainFileMaintenanceService.saveMultiple(connections, options);
+        }
+    }
+    async 정비_파일을_조회한다(maintenanceId) {
+        const fileMaintenances = await this.domainFileMaintenanceService.findByMaintenanceId(maintenanceId);
+        return fileMaintenances.map((fm) => ({
+            filePath: fm.file.filePath,
+        }));
+    }
 };
 exports.FileContextService = FileContextService;
 exports.FileContextService = FileContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object, typeof (_b = typeof file_reservation_vehicle_service_1.DomainFileReservationVehicleService !== "undefined" && file_reservation_vehicle_service_1.DomainFileReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof file_vehicle_info_service_1.DomainFileVehicleInfoService !== "undefined" && file_vehicle_info_service_1.DomainFileVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof file_resource_service_1.DomainFileResourceService !== "undefined" && file_resource_service_1.DomainFileResourceService) === "function" ? _d : Object, typeof (_e = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _e : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _a : Object, typeof (_b = typeof file_reservation_vehicle_service_1.DomainFileReservationVehicleService !== "undefined" && file_reservation_vehicle_service_1.DomainFileReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof file_vehicle_info_service_1.DomainFileVehicleInfoService !== "undefined" && file_vehicle_info_service_1.DomainFileVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof file_resource_service_1.DomainFileResourceService !== "undefined" && file_resource_service_1.DomainFileResourceService) === "function" ? _d : Object, typeof (_e = typeof file_maintenance_service_1.DomainFileMaintenanceService !== "undefined" && file_maintenance_service_1.DomainFileMaintenanceService) === "function" ? _e : Object, typeof (_f = typeof s3_service_1.S3Service !== "undefined" && s3_service_1.S3Service) === "function" ? _f : Object])
 ], FileContextService);
 
 
@@ -18617,10 +18753,12 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             where: { employeeId: (0, typeorm_1.In)(employeeIds) },
             select: { subscriptions: true, isPushNotificationEnabled: true },
         });
-        if (!employees || employees.length === 0 || !employees.some((employee) => employee.isPushNotificationEnabled)) {
+        if (!employees || employees.length === 0) {
             return [];
         }
-        return employees.flatMap((employee) => employee.subscriptions.map((subscription) => subscription.fcm.token));
+        return employees
+            .filter((employee) => employee.isPushNotificationEnabled && employee.subscriptions && employee.subscriptions.length > 0)
+            .flatMap((employee) => employee.subscriptions.map((subscription) => subscription.fcm.token));
     }
     async 알림_내용을_생성한다(notificationType, notificationData) {
         const createNotificationDto = {
@@ -18980,6 +19118,7 @@ const reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/reserva
 const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
 const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
 const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
+const file_context_module_1 = __webpack_require__(/*! ../file/file.context.module */ "./src/context/file/file.context.module.ts");
 const reservation_context_service_1 = __webpack_require__(/*! ./services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
 let ReservationContextModule = class ReservationContextModule {
 };
@@ -18997,6 +19136,7 @@ exports.ReservationContextModule = ReservationContextModule = __decorate([
             reservation_vehicle_module_1.DomainReservationVehicleModule,
             vehicle_info_module_1.DomainVehicleInfoModule,
             file_module_1.DomainFileModule,
+            file_context_module_1.FileContextModule,
             schedule_1.ScheduleModule.forRoot(),
         ],
         controllers: [],
@@ -19028,7 +19168,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -19039,6 +19179,7 @@ const employee_notification_service_1 = __webpack_require__(/*! @src/domain/empl
 const reservation_vehicle_service_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.service */ "./src/domain/reservation-vehicle/reservation-vehicle.service.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const file_context_service_1 = __webpack_require__(/*! ../../file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
@@ -19048,7 +19189,7 @@ const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const business_dto_index_1 = __webpack_require__(/*! @src/business.dto.index */ "./src/business.dto.index.ts");
 const business_dto_index_2 = __webpack_require__(/*! @src/business.dto.index */ "./src/business.dto.index.ts");
 let ReservationContextService = class ReservationContextService {
-    constructor(domainReservationService, domainResourceService, domainNotificationService, domainEmployeeNotificationService, domainReservationVehicleService, domainVehicleInfoService, domainFileService, dataSource) {
+    constructor(domainReservationService, domainResourceService, domainNotificationService, domainEmployeeNotificationService, domainReservationVehicleService, domainVehicleInfoService, domainFileService, fileContextService, dataSource) {
         this.domainReservationService = domainReservationService;
         this.domainResourceService = domainResourceService;
         this.domainNotificationService = domainNotificationService;
@@ -19056,6 +19197,7 @@ let ReservationContextService = class ReservationContextService {
         this.domainReservationVehicleService = domainReservationVehicleService;
         this.domainVehicleInfoService = domainVehicleInfoService;
         this.domainFileService = domainFileService;
+        this.fileContextService = fileContextService;
         this.dataSource = dataSource;
     }
     async 예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status) {
@@ -19249,22 +19391,28 @@ let ReservationContextService = class ReservationContextService {
                 returnDto.odometerImages = [];
             if (!returnDto.indoorImages)
                 returnDto.indoorImages = [];
-            returnDto.parkingLocationImages = returnDto.parkingLocationImages.map((image) => this.domainFileService.getFileUrl(image));
-            returnDto.odometerImages = returnDto.odometerImages.map((image) => this.domainFileService.getFileUrl(image));
-            returnDto.indoorImages = returnDto.indoorImages.map((image) => this.domainFileService.getFileUrl(image));
-            const images = [...returnDto.parkingLocationImages, ...returnDto.odometerImages, ...returnDto.indoorImages];
-            if (images.length > 0) {
-                await this.domainFileService.updateTemporaryFiles(images, false, {
-                    queryRunner,
-                });
+            const allFileIds = [
+                ...returnDto.parkingLocationImages,
+                ...returnDto.odometerImages,
+                ...returnDto.indoorImages,
+            ];
+            if (allFileIds.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(allFileIds, queryRunner);
             }
-            await this.domainVehicleInfoService.update(vehicleInfoId, {
-                totalMileage: returnDto.totalMileage,
-                leftMileage: returnDto.leftMileage,
+            await this.fileContextService.차량예약에_파일들을_연결한다(reservationVehicle.reservationVehicleId, {
                 parkingLocationImages: returnDto.parkingLocationImages,
                 odometerImages: returnDto.odometerImages,
                 indoorImages: returnDto.indoorImages,
+            }, queryRunner);
+            await this.domainVehicleInfoService.update(vehicleInfoId, {
+                totalMileage: returnDto.totalMileage,
+                leftMileage: returnDto.leftMileage,
             }, { queryRunner });
+            await this.fileContextService.차량정보에_파일들을_연결한다(vehicleInfoId, {
+                parkingLocationImages: returnDto.parkingLocationImages,
+                odometerImages: returnDto.odometerImages,
+                indoorImages: returnDto.indoorImages,
+            }, queryRunner);
             const notiTarget = [user.employeeId];
             await queryRunner.commitTransaction();
             return true;
@@ -19425,7 +19573,7 @@ let ReservationContextService = class ReservationContextService {
 exports.ReservationContextService = ReservationContextService;
 exports.ReservationContextService = ReservationContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object, typeof (_d = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _d : Object, typeof (_e = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _e : Object, typeof (_f = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _f : Object, typeof (_g = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _g : Object, typeof (_h = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _h : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object, typeof (_d = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _d : Object, typeof (_e = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _e : Object, typeof (_f = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _f : Object, typeof (_g = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _g : Object, typeof (_h = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _h : Object, typeof (_j = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _j : Object])
 ], ReservationContextService);
 
 
@@ -19459,6 +19607,7 @@ const consumable_module_1 = __webpack_require__(/*! @src/domain/consumable/consu
 const maintenance_module_1 = __webpack_require__(/*! @src/domain/maintenance/maintenance.module */ "./src/domain/maintenance/maintenance.module.ts");
 const reservation_vehicle_module_1 = __webpack_require__(/*! @src/domain/reservation-vehicle/reservation-vehicle.module */ "./src/domain/reservation-vehicle/reservation-vehicle.module.ts");
 const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+const file_context_module_1 = __webpack_require__(/*! ../file/file.context.module */ "./src/context/file/file.context.module.ts");
 const resource_context_service_1 = __webpack_require__(/*! ./services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
 const resource_group_context_service_1 = __webpack_require__(/*! ./services/resource-group.context.service */ "./src/context/resource/services/resource-group.context.service.ts");
 const vehicle_info_context_service_1 = __webpack_require__(/*! ./services/vehicle-info.context.service */ "./src/context/resource/services/vehicle-info.context.service.ts");
@@ -19485,6 +19634,7 @@ exports.ResourceContextModule = ResourceContextModule = __decorate([
             maintenance_module_1.DomainMaintenanceModule,
             reservation_vehicle_module_1.DomainReservationVehicleModule,
             employee_module_1.DomainEmployeeModule,
+            file_context_module_1.FileContextModule,
         ],
         providers: [
             resource_context_service_1.ResourceContextService,
@@ -19747,7 +19897,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -19759,13 +19909,15 @@ const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/cons
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const file_context_service_1 = __webpack_require__(/*! ../../file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
 let MaintenanceContextService = class MaintenanceContextService {
-    constructor(domainMaintenanceService, domainConsumableService, domainVehicleInfoService, domainEmployeeService, domainFileService, dataSource) {
+    constructor(domainMaintenanceService, domainConsumableService, domainVehicleInfoService, domainEmployeeService, domainFileService, fileContextService, dataSource) {
         this.domainMaintenanceService = domainMaintenanceService;
         this.domainConsumableService = domainConsumableService;
         this.domainVehicleInfoService = domainVehicleInfoService;
         this.domainEmployeeService = domainEmployeeService;
         this.domainFileService = domainFileService;
+        this.fileContextService = fileContextService;
         this.dataSource = dataSource;
     }
     async 정비이력을_저장한다(createMaintenanceDto) {
@@ -19784,9 +19936,12 @@ let MaintenanceContextService = class MaintenanceContextService {
         try {
             if (!createMaintenanceDto.images)
                 createMaintenanceDto.images = [];
-            createMaintenanceDto.images = createMaintenanceDto.images.map((image) => this.domainFileService.getFileUrl(image));
-            const maintenance = await this.domainMaintenanceService.save(createMaintenanceDto, { queryRunner });
-            await this.domainFileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
+            if (createMaintenanceDto.images.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(createMaintenanceDto.images, queryRunner);
+            }
+            const { images, ...maintenanceData } = createMaintenanceDto;
+            const maintenance = await this.domainMaintenanceService.save(maintenanceData, { queryRunner });
+            await this.fileContextService.정비에_파일들을_연결한다(maintenance.maintenanceId, createMaintenanceDto.images, queryRunner);
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.domainConsumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
@@ -19809,13 +19964,14 @@ let MaintenanceContextService = class MaintenanceContextService {
                 relations: ['vehicleInfo', 'vehicleInfo.resource'],
                 withDeleted: true,
             });
+            const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenance.maintenanceId);
             return {
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,
                 date: maintenance.date,
                 mileage: maintenance.mileage,
                 cost: maintenance.cost,
-                images: maintenance.images,
+                images: maintenanceFiles.map((file) => file.filePath),
             };
         }
         catch (error) {
@@ -19831,15 +19987,18 @@ let MaintenanceContextService = class MaintenanceContextService {
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
             order: { date: 'DESC' },
         });
-        return maintenances.map((maintenance) => ({
-            maintenanceId: maintenance.maintenanceId,
-            consumableId: maintenance.consumableId,
-            resourceName: maintenance.consumable?.vehicleInfo?.resource?.name,
-            consumableName: maintenance.consumable?.name,
-            date: maintenance.date,
-            mileage: maintenance.mileage,
-            cost: maintenance.cost,
-            images: maintenance.images,
+        return await Promise.all(maintenances.map(async (maintenance) => {
+            const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenance.maintenanceId);
+            return {
+                maintenanceId: maintenance.maintenanceId,
+                consumableId: maintenance.consumableId,
+                resourceName: maintenance.consumable?.vehicleInfo?.resource?.name,
+                consumableName: maintenance.consumable?.name,
+                date: maintenance.date,
+                mileage: maintenance.mileage,
+                cost: maintenance.cost,
+                images: maintenanceFiles.map((file) => file.filePath),
+            };
         }));
     }
     async 차량별_정비이력을_조회한다(vehicleInfoId, page = 1, limit = 10) {
@@ -19862,19 +20021,23 @@ let MaintenanceContextService = class MaintenanceContextService {
         options.relations = ['consumable'];
         options.order = { createdAt: 'DESC' };
         const maintenances = await this.domainMaintenanceService.findAll(options);
-        return {
-            items: maintenances.map((maintenance, index, array) => ({
+        const items = await Promise.all(maintenances.map(async (maintenance, index, array) => {
+            const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenance.maintenanceId);
+            return {
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,
                 date: maintenance.date,
                 mileage: maintenance.mileage,
                 cost: maintenance.cost,
-                images: maintenance.images,
+                images: maintenanceFiles.map((file) => file.filePath),
                 consumableName: maintenance.consumable.name,
                 resourceName: vehicleInfo.resource.name,
                 previousMileage: index !== array.length - 1 ? array[index + 1].mileage : 0,
                 isLatest: index === 0,
-            })),
+            };
+        }));
+        return {
+            items,
             meta: {
                 total: count,
                 page,
@@ -19891,6 +20054,7 @@ let MaintenanceContextService = class MaintenanceContextService {
         if (!maintenance) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.NOT_FOUND);
         }
+        const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenanceId);
         return {
             maintenanceId: maintenance.maintenanceId,
             consumableId: maintenance.consumableId,
@@ -19899,7 +20063,7 @@ let MaintenanceContextService = class MaintenanceContextService {
             date: maintenance.date,
             mileage: maintenance.mileage,
             cost: maintenance.cost,
-            images: maintenance.images,
+            images: maintenanceFiles.map((file) => file.filePath),
         };
     }
     async 정비이력을_수정한다(maintenanceId, updateMaintenanceDto) {
@@ -19921,11 +20085,33 @@ let MaintenanceContextService = class MaintenanceContextService {
                 throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.INVALID_DATE);
             }
         }
-        await this.domainMaintenanceService.update(maintenanceId, updateMaintenanceDto);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            if (updateMaintenanceDto.images !== undefined) {
+                const fileIds = updateMaintenanceDto.images || [];
+                if (fileIds.length > 0) {
+                    await this.fileContextService.파일들을_영구로_변경한다(fileIds, queryRunner);
+                }
+                await this.fileContextService.정비에_파일들을_연결한다(maintenanceId, fileIds, queryRunner);
+            }
+            const { images, ...maintenanceData } = updateMaintenanceDto;
+            await this.domainMaintenanceService.update(maintenanceId, maintenanceData, { queryRunner });
+            await queryRunner.commitTransaction();
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
         const updatedMaintenance = await this.domainMaintenanceService.findOne({
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
         });
+        const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenanceId);
         return {
             maintenanceId: updatedMaintenance.maintenanceId,
             consumableId: updatedMaintenance.consumableId,
@@ -19934,7 +20120,7 @@ let MaintenanceContextService = class MaintenanceContextService {
             date: updatedMaintenance.date,
             mileage: updatedMaintenance.mileage,
             cost: updatedMaintenance.cost,
-            images: updatedMaintenance.images,
+            images: maintenanceFiles.map((file) => file.filePath),
         };
     }
     async 정비이력을_삭제한다(maintenanceId) {
@@ -19950,7 +20136,7 @@ let MaintenanceContextService = class MaintenanceContextService {
 exports.MaintenanceContextService = MaintenanceContextService;
 exports.MaintenanceContextService = MaintenanceContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _e : Object, typeof (_f = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
 ], MaintenanceContextService);
 
 
@@ -20168,7 +20354,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -20183,10 +20369,11 @@ const meeting_room_info_service_1 = __webpack_require__(/*! @src/domain/meeting-
 const accommodation_info_service_1 = __webpack_require__(/*! @src/domain/accommodation-info/accommodation-info.service */ "./src/domain/accommodation-info/accommodation-info.service.ts");
 const equipment_info_service_1 = __webpack_require__(/*! @src/domain/equipment-info/equipment-info.service */ "./src/domain/equipment-info/equipment-info.service.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const file_context_service_1 = __webpack_require__(/*! ../../file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
 const resource_response_dto_1 = __webpack_require__(/*! @src/business/resource-management/dtos/resource/resource-response.dto */ "./src/business/resource-management/dtos/resource/resource-response.dto.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 let ResourceContextService = class ResourceContextService {
-    constructor(domainResourceService, domainResourceGroupService, domainResourceManagerService, domainVehicleInfoService, domainMeetingRoomInfoService, domainAccommodationInfoService, domainEquipmentInfoService, domainFileService, dataSource) {
+    constructor(domainResourceService, domainResourceGroupService, domainResourceManagerService, domainVehicleInfoService, domainMeetingRoomInfoService, domainAccommodationInfoService, domainEquipmentInfoService, domainFileService, fileContextService, dataSource) {
         this.domainResourceService = domainResourceService;
         this.domainResourceGroupService = domainResourceGroupService;
         this.domainResourceManagerService = domainResourceManagerService;
@@ -20195,6 +20382,7 @@ let ResourceContextService = class ResourceContextService {
         this.domainAccommodationInfoService = domainAccommodationInfoService;
         this.domainEquipmentInfoService = domainEquipmentInfoService;
         this.domainFileService = domainFileService;
+        this.fileContextService = fileContextService;
         this.dataSource = dataSource;
     }
     async 자원_목록을_조회한다(type) {
@@ -20241,9 +20429,11 @@ let ResourceContextService = class ResourceContextService {
             const resourceOrder = resources.length;
             if (!resource.images)
                 resource.images = [];
-            resource.images = resource.images.map((image) => this.domainFileService.getFileUrl(image));
             const savedResource = await this.domainResourceService.save({ ...resource, order: resourceOrder }, { queryRunner });
-            await this.domainFileService.updateTemporaryFiles(resource.images, false, { queryRunner });
+            if (resource.images.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(resource.images, queryRunner);
+            }
+            await this.fileContextService.리소스에_파일들을_연결한다(savedResource.resourceId, resource.images, queryRunner);
             switch (group.type) {
                 case resource_type_enum_1.ResourceType.VEHICLE:
                     await this.domainVehicleInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
@@ -20333,13 +20523,15 @@ let ResourceContextService = class ResourceContextService {
         await queryRunner.startTransaction();
         try {
             if (updateResourceInfoDto.resource) {
-                if (updateResourceInfoDto.resource.images && updateResourceInfoDto.resource.images.length > 0) {
-                    updateResourceInfoDto.resource.images = updateResourceInfoDto.resource.images.map((image) => this.domainFileService.getFileUrl(image));
-                    await this.domainFileService.updateTemporaryFiles(updateResourceInfoDto.resource.images, false, {
-                        queryRunner,
-                    });
+                const { images, ...resourceData } = updateResourceInfoDto.resource;
+                await this.domainResourceService.update(resourceId, resourceData, { queryRunner });
+                if (images !== undefined) {
+                    const fileIds = images || [];
+                    if (fileIds.length > 0) {
+                        await this.fileContextService.파일들을_영구로_변경한다(fileIds, queryRunner);
+                    }
+                    await this.fileContextService.리소스에_파일들을_연결한다(resourceId, fileIds, queryRunner);
                 }
-                await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
             }
             if (updateResourceInfoDto.typeInfo) {
                 switch (resource.type) {
@@ -20610,7 +20802,7 @@ let ResourceContextService = class ResourceContextService {
 exports.ResourceContextService = ResourceContextService;
 exports.ResourceContextService = ResourceContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _g : Object, typeof (_h = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _h : Object, typeof (_j = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _j : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _g : Object, typeof (_h = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _h : Object, typeof (_j = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _j : Object, typeof (_k = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _k : Object])
 ], ResourceContextService);
 
 
@@ -20632,7 +20824,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VehicleInfoContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -20644,13 +20836,15 @@ const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ 
 const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
 const consumable_entity_1 = __webpack_require__(/*! @libs/entities/consumable.entity */ "./libs/entities/consumable.entity.ts");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const file_context_service_1 = __webpack_require__(/*! ../../file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
 let VehicleInfoContextService = class VehicleInfoContextService {
-    constructor(domainVehicleInfoService, domainReservationVehicleService, domainFileService, domainConsumableService, domainEmployeeService, dataSource) {
+    constructor(domainVehicleInfoService, domainReservationVehicleService, domainFileService, domainConsumableService, domainEmployeeService, fileContextService, dataSource) {
         this.domainVehicleInfoService = domainVehicleInfoService;
         this.domainReservationVehicleService = domainReservationVehicleService;
         this.domainFileService = domainFileService;
         this.domainConsumableService = domainConsumableService;
         this.domainEmployeeService = domainEmployeeService;
+        this.fileContextService = fileContextService;
         this.dataSource = dataSource;
     }
     async 차량정보를_조회한다(vehicleInfoId) {
@@ -20660,6 +20854,7 @@ let VehicleInfoContextService = class VehicleInfoContextService {
         if (!vehicleInfo) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
+        const vehicleFiles = await this.fileContextService.차량정보_파일을_조회한다(vehicleInfoId);
         return {
             vehicleInfoId: vehicleInfo.vehicleInfoId,
             resourceId: vehicleInfo.resourceId,
@@ -20667,9 +20862,9 @@ let VehicleInfoContextService = class VehicleInfoContextService {
             leftMileage: Number(vehicleInfo.leftMileage),
             insuranceName: vehicleInfo.insuranceName,
             insuranceNumber: vehicleInfo.insuranceNumber,
-            parkingLocationImages: vehicleInfo.parkingLocationImages,
-            odometerImages: vehicleInfo.odometerImages,
-            indoorImages: vehicleInfo.indoorImages,
+            parkingLocationImages: vehicleFiles.parkingLocationImages.map((file) => file.filePath),
+            odometerImages: vehicleFiles.odometerImages.map((file) => file.filePath),
+            indoorImages: vehicleFiles.indoorImages.map((file) => file.filePath),
         };
     }
     async 차량정보를_수정한다(vehicleInfoId, updateVehicleInfoDto) {
@@ -20683,22 +20878,19 @@ let VehicleInfoContextService = class VehicleInfoContextService {
                 updateVehicleInfoDto.odometerImages = [];
             if (!updateVehicleInfoDto.indoorImages)
                 updateVehicleInfoDto.indoorImages = [];
-            updateVehicleInfoDto.parkingLocationImages = updateVehicleInfoDto.parkingLocationImages.map((image) => this.domainFileService.getFileUrl(image));
-            updateVehicleInfoDto.odometerImages = updateVehicleInfoDto.odometerImages.map((image) => this.domainFileService.getFileUrl(image));
-            updateVehicleInfoDto.indoorImages = updateVehicleInfoDto.indoorImages.map((image) => this.domainFileService.getFileUrl(image));
-            const vehicleInfo = await this.domainVehicleInfoService.update(vehicleInfoId, updateVehicleInfoDto, {
+            const { parkingLocationImages, odometerImages, indoorImages, ...vehicleData } = updateVehicleInfoDto;
+            const vehicleInfo = await this.domainVehicleInfoService.update(vehicleInfoId, vehicleData, {
                 queryRunner,
             });
-            const images = [
-                ...updateVehicleInfoDto.parkingLocationImages,
-                ...updateVehicleInfoDto.odometerImages,
-                ...updateVehicleInfoDto.indoorImages,
-            ];
-            if (images.length > 0) {
-                await this.domainFileService.updateTemporaryFiles(images, false, {
-                    queryRunner,
-                });
+            const allFileIds = [...parkingLocationImages, ...odometerImages, ...indoorImages];
+            if (allFileIds.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(allFileIds, queryRunner);
             }
+            await this.fileContextService.차량정보에_파일들을_연결한다(vehicleInfoId, {
+                parkingLocationImages,
+                odometerImages,
+                indoorImages,
+            }, queryRunner);
             const hasConsumables = await this.domainConsumableService.count({
                 where: {
                     vehicleInfoId: vehicleInfoId,
@@ -20725,6 +20917,7 @@ let VehicleInfoContextService = class VehicleInfoContextService {
                 });
             }
             await queryRunner.commitTransaction();
+            const vehicleFiles = await this.fileContextService.차량정보_파일을_조회한다(vehicleInfoId);
             return {
                 vehicleInfoId: vehicleInfo.vehicleInfoId,
                 resourceId: vehicleInfo.resourceId,
@@ -20732,9 +20925,9 @@ let VehicleInfoContextService = class VehicleInfoContextService {
                 leftMileage: Number(vehicleInfo.leftMileage),
                 insuranceName: vehicleInfo.insuranceName,
                 insuranceNumber: vehicleInfo.insuranceNumber,
-                parkingLocationImages: vehicleInfo.parkingLocationImages,
-                odometerImages: vehicleInfo.odometerImages,
-                indoorImages: vehicleInfo.indoorImages,
+                parkingLocationImages: vehicleFiles.parkingLocationImages.map((file) => file.filePath),
+                odometerImages: vehicleFiles.odometerImages.map((file) => file.filePath),
+                indoorImages: vehicleFiles.indoorImages.map((file) => file.filePath),
             };
         }
         catch (error) {
@@ -20756,9 +20949,13 @@ let VehicleInfoContextService = class VehicleInfoContextService {
             where: { employeeId: (0, typeorm_1.In)(reservationVehicles.map((reservationVehicle) => reservationVehicle.returnedBy)) },
         });
         const employeeMap = new Map(employees.map((employee) => [employee.employeeId, employee]));
-        reservationVehicles.forEach((reservationVehicle) => {
+        for (const reservationVehicle of reservationVehicles) {
             reservationVehicle.returnedBy = employeeMap.get(reservationVehicle.returnedBy)?.name;
-        });
+            const returnFiles = await this.fileContextService.차량예약_파일을_조회한다(reservationVehicle.reservationVehicleId);
+            reservationVehicle.parkingLocationImages = returnFiles.parkingLocationImages.map((file) => file.filePath);
+            reservationVehicle.odometerImages = returnFiles.odometerImages.map((file) => file.filePath);
+            reservationVehicle.indoorImages = returnFiles.indoorImages.map((file) => file.filePath);
+        }
         return reservationVehicles;
     }
     async 반납_상세정보를_조회한다(reservationVehicleId) {
@@ -20767,6 +20964,10 @@ let VehicleInfoContextService = class VehicleInfoContextService {
             where: { employeeId: reservationVehicle.returnedBy },
         });
         reservationVehicle.returnedBy = employee.name;
+        const returnFiles = await this.fileContextService.차량예약_파일을_조회한다(reservationVehicleId);
+        reservationVehicle.parkingLocationImages = returnFiles.parkingLocationImages.map((file) => file.filePath);
+        reservationVehicle.odometerImages = returnFiles.odometerImages.map((file) => file.filePath);
+        reservationVehicle.indoorImages = returnFiles.indoorImages.map((file) => file.filePath);
         return reservationVehicle;
     }
     async 차량정보만_조회한다(resourceId) {
@@ -20779,7 +20980,7 @@ let VehicleInfoContextService = class VehicleInfoContextService {
 exports.VehicleInfoContextService = VehicleInfoContextService;
 exports.VehicleInfoContextService = VehicleInfoContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _c : Object, typeof (_d = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _d : Object, typeof (_e = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _b : Object, typeof (_c = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _c : Object, typeof (_d = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _d : Object, typeof (_e = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _e : Object, typeof (_f = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
 ], VehicleInfoContextService);
 
 
@@ -23816,6 +24017,24 @@ let DomainFileMaintenanceService = class DomainFileMaintenanceService extends ba
             relations: ['maintenance', 'file'],
         });
     }
+    async deleteByMaintenanceId(maintenanceId, options) {
+        const existingConnections = await this.fileMaintenanceRepository.findAll({
+            where: { maintenanceId },
+        });
+        if (existingConnections.length > 0) {
+            for (const connection of existingConnections) {
+                await this.fileMaintenanceRepository.delete(connection.fileMaintenanceId, options);
+            }
+        }
+    }
+    async saveMultiple(connections, options) {
+        const results = [];
+        for (const connection of connections) {
+            const entity = await this.fileMaintenanceRepository.save(connection, options);
+            results.push(entity);
+        }
+        return results;
+    }
 };
 exports.DomainFileMaintenanceService = DomainFileMaintenanceService;
 exports.DomainFileMaintenanceService = DomainFileMaintenanceService = __decorate([
@@ -23953,6 +24172,24 @@ let DomainFileReservationVehicleService = class DomainFileReservationVehicleServ
             relations: ['reservationVehicle', 'file'],
         });
     }
+    async deleteByReservationVehicleId(reservationVehicleId, options) {
+        const existingConnections = await this.fileReservationVehicleRepository.findAll({
+            where: { reservationVehicleId },
+        });
+        if (existingConnections.length > 0) {
+            for (const connection of existingConnections) {
+                await this.fileReservationVehicleRepository.delete(connection.fileReservationVehicleId, options);
+            }
+        }
+    }
+    async saveMultiple(connections, options) {
+        const results = [];
+        for (const connection of connections) {
+            const entity = await this.fileReservationVehicleRepository.save(connection, options);
+            results.push(entity);
+        }
+        return results;
+    }
 };
 exports.DomainFileReservationVehicleService = DomainFileReservationVehicleService;
 exports.DomainFileReservationVehicleService = DomainFileReservationVehicleService = __decorate([
@@ -24083,6 +24320,24 @@ let DomainFileResourceService = class DomainFileResourceService extends base_ser
             where: { fileId },
             relations: ['resource', 'file'],
         });
+    }
+    async deleteByResourceId(resourceId, options) {
+        const existingConnections = await this.fileResourceRepository.findAll({
+            where: { resourceId },
+        });
+        if (existingConnections.length > 0) {
+            for (const connection of existingConnections) {
+                await this.fileResourceRepository.delete(connection.fileResourceId, options);
+            }
+        }
+    }
+    async saveMultiple(connections, options) {
+        const results = [];
+        for (const connection of connections) {
+            const entity = await this.fileResourceRepository.save(connection, options);
+            results.push(entity);
+        }
+        return results;
     }
 };
 exports.DomainFileResourceService = DomainFileResourceService;
@@ -24220,6 +24475,24 @@ let DomainFileVehicleInfoService = class DomainFileVehicleInfoService extends ba
             where: { type },
             relations: ['vehicleInfo', 'file'],
         });
+    }
+    async deleteByVehicleInfoId(vehicleInfoId, options) {
+        const existingConnections = await this.fileVehicleInfoRepository.findAll({
+            where: { vehicleInfoId },
+        });
+        if (existingConnections.length > 0) {
+            for (const connection of existingConnections) {
+                await this.fileVehicleInfoRepository.delete(connection.fileVehicleInfoId, options);
+            }
+        }
+    }
+    async saveMultiple(connections, options) {
+        const results = [];
+        for (const connection of connections) {
+            const entity = await this.fileVehicleInfoRepository.save(connection, options);
+            results.push(entity);
+        }
+        return results;
     }
 };
 exports.DomainFileVehicleInfoService = DomainFileVehicleInfoService;
