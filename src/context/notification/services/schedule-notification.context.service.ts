@@ -29,25 +29,25 @@ export class ScheduleNotificationContextService {
                 endDate: DateUtil.format(data.schedule.endDate, 'YYYY-MM-DD HH:mm'),
             },
             reservation: {
-                reservationId: data.reservation.reservationId,
+                reservationId: data.reservation?.reservationId,
             },
             resource: {
-                resourceId: data.resource.resourceId,
-                resourceName: data.resource.name,
-                resourceType: data.resource.type,
+                resourceId: data.resource?.resourceId,
+                resourceName: data.resource?.name,
+                resourceType: data.resource?.type,
             },
         };
 
         if (
-            data.reservation.status === ReservationStatus.PENDING &&
-            data.resource.type === ResourceType.ACCOMMODATION
+            data.reservation?.status === ReservationStatus.PENDING &&
+            data.resource?.type === ResourceType.ACCOMMODATION
         ) {
             await this.notificationContextService.알림_전송_프로세스를_진행한다(
                 NotificationType.RESERVATION_STATUS_PENDING,
                 notificationData,
                 adminEmployeeIds,
             );
-        } else if (data.reservation.status === ReservationStatus.CONFIRMED) {
+        } else if (data.reservation?.status === ReservationStatus.CONFIRMED) {
             await this.notificationContextService.알림_전송_프로세스를_진행한다(
                 NotificationType.RESERVATION_STATUS_CONFIRMED,
                 notificationData,
@@ -68,12 +68,12 @@ export class ScheduleNotificationContextService {
                 endDate: DateUtil.format(data.schedule.endDate, 'YYYY-MM-DD HH:mm'),
             },
             reservation: {
-                reservationId: data.reservation.reservationId,
+                reservationId: data.reservation?.reservationId,
             },
             resource: {
-                resourceId: data.resource.resourceId,
-                resourceName: data.resource.name,
-                resourceType: data.resource.type,
+                resourceId: data.resource?.resourceId,
+                resourceName: data.resource?.name,
+                resourceType: data.resource?.type,
             },
         };
 

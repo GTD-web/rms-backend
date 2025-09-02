@@ -23709,19 +23709,19 @@ let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = 
                 endDate: date_util_1.DateUtil.format(data.schedule.endDate, 'YYYY-MM-DD HH:mm'),
             },
             reservation: {
-                reservationId: data.reservation.reservationId,
+                reservationId: data.reservation?.reservationId,
             },
             resource: {
-                resourceId: data.resource.resourceId,
-                resourceName: data.resource.name,
-                resourceType: data.resource.type,
+                resourceId: data.resource?.resourceId,
+                resourceName: data.resource?.name,
+                resourceType: data.resource?.type,
             },
         };
-        if (data.reservation.status === reservation_type_enum_1.ReservationStatus.PENDING &&
-            data.resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+        if (data.reservation?.status === reservation_type_enum_1.ReservationStatus.PENDING &&
+            data.resource?.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
             await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING, notificationData, adminEmployeeIds);
         }
-        else if (data.reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+        else if (data.reservation?.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
             await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, notificationData, targetEmployeeIds);
         }
     }
@@ -23734,12 +23734,12 @@ let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = 
                 endDate: date_util_1.DateUtil.format(data.schedule.endDate, 'YYYY-MM-DD HH:mm'),
             },
             reservation: {
-                reservationId: data.reservation.reservationId,
+                reservationId: data.reservation?.reservationId,
             },
             resource: {
-                resourceId: data.resource.resourceId,
-                resourceName: data.resource.name,
-                resourceType: data.resource.type,
+                resourceId: data.resource?.resourceId,
+                resourceName: data.resource?.name,
+                resourceType: data.resource?.type,
             },
         };
         await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CANCELLED, notificationData, targetEmployeeIds);
