@@ -34662,13 +34662,14 @@ let ResourceContextService = class ResourceContextService {
                 resourceId: resourceId,
                 reservations: {
                     reservationId: reservationId ? (0, typeorm_1.Not)(reservationId) : undefined,
-                    status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                    status: (0, typeorm_1.Not)((0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CANCELLED, reservation_type_enum_1.ReservationStatus.REJECTED])),
                     startDate: (0, typeorm_1.LessThan)(endDateObj),
                     endDate: (0, typeorm_1.MoreThan)(startDateObj),
                 },
             },
             relations: ['reservations'],
         });
+        console.log('resource', resource);
         return !!resource;
     }
 };

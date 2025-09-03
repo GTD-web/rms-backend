@@ -710,14 +710,14 @@ export class ResourceContextService {
                 resourceId: resourceId,
                 reservations: {
                     reservationId: reservationId ? Not(reservationId) : undefined,
-                    status: ReservationStatus.CONFIRMED,
+                    status: Not(In([ReservationStatus.CANCELLED, ReservationStatus.REJECTED])),
                     startDate: LessThan(endDateObj),
                     endDate: MoreThan(startDateObj),
                 },
             },
             relations: ['reservations'],
         });
-
+        console.log('resource', resource);
         return !!resource;
     }
 }
