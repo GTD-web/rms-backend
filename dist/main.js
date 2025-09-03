@@ -3126,9 +3126,10 @@ var ReservationStatus;
     ReservationStatus["PENDING"] = "PENDING";
     ReservationStatus["CONFIRMED"] = "CONFIRMED";
     ReservationStatus["USING"] = "USING";
+    ReservationStatus["CLOSING"] = "CLOSING";
+    ReservationStatus["CLOSED"] = "CLOSED";
     ReservationStatus["CANCELLED"] = "CANCELLED";
     ReservationStatus["REJECTED"] = "REJECTED";
-    ReservationStatus["CLOSED"] = "CLOSED";
 })(ReservationStatus || (exports.ReservationStatus = ReservationStatus = {}));
 var ParticipantsType;
 (function (ParticipantsType) {
@@ -28947,10 +28948,10 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             withResource: true,
             withParticipants: true,
         });
-        const employeeIds = updateScenarios.isInfoUpdate
+        const employeeIds = updateScenarios.isInfoUpdate && updateResult.participantChanges
             ? Array.from(new Set([
-                ...updateResult.participantChanges?.previousParticipants.map((participant) => participant.employeeId),
-                ...updateResult.participantChanges?.newParticipants.map((participant) => participant.employeeId),
+                ...updateResult.participantChanges.previousParticipants.map((participant) => participant.employeeId),
+                ...updateResult.participantChanges.newParticipants.map((participant) => participant.employeeId),
             ]))
             : participants.map((participant) => participant.employeeId);
         await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(updateScenarios, {

@@ -885,16 +885,19 @@ export class ScheduleManagementService {
                 withParticipants: true,
             },
         );
-        const employeeIds = updateScenarios.isInfoUpdate
-            ? Array.from(
-                  new Set([
-                      ...updateResult.participantChanges?.previousParticipants.map(
-                          (participant) => participant.employeeId,
-                      ),
-                      ...updateResult.participantChanges?.newParticipants.map((participant) => participant.employeeId),
-                  ]),
-              )
-            : participants.map((participant) => participant.employeeId);
+        const employeeIds =
+            updateScenarios.isInfoUpdate && updateResult.participantChanges
+                ? Array.from(
+                      new Set([
+                          ...updateResult.participantChanges.previousParticipants.map(
+                              (participant) => participant.employeeId,
+                          ),
+                          ...updateResult.participantChanges.newParticipants.map(
+                              (participant) => participant.employeeId,
+                          ),
+                      ]),
+                  )
+                : participants.map((participant) => participant.employeeId);
 
         await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(
             updateScenarios,
