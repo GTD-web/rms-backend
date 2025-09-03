@@ -141,7 +141,9 @@ export class ScheduleQueryContextService {
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
             reservation.status =
-                reservation.startDate < new Date() && reservation.endDate > new Date()
+                reservation.startDate < new Date() &&
+                reservation.endDate > new Date() &&
+                reservation.status === ReservationStatus.CONFIRMED
                     ? ReservationStatus.USING
                     : reservation.status;
             resource = option?.withResource

@@ -35692,7 +35692,9 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
             reservation.status =
-                reservation.startDate < new Date() && reservation.endDate > new Date()
+                reservation.startDate < new Date() &&
+                    reservation.endDate > new Date() &&
+                    reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED
                     ? reservation_type_enum_1.ReservationStatus.USING
                     : reservation.status;
             resource = option?.withResource
