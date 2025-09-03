@@ -123,7 +123,7 @@ export class SchedulePolicyService {
             }
 
             // 확정된 예약만 완료 가능
-            if (reservation.status !== ReservationStatus.CONFIRMED) {
+            if (reservation.status !== ReservationStatus.USING) {
                 return {
                     isAllowed: false,
                     reason: '확정된 예약만 완료할 수 있습니다.',

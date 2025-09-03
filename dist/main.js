@@ -17963,7 +17963,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SaveMaintenanceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -17977,8 +17977,9 @@ const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee
 const notification_service_1 = __webpack_require__(/*! @src/application/notification/services/notification.service */ "./src/application/notification/services/notification.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const file_maintenance_service_1 = __webpack_require__(/*! @src/domain/file-maintenance/file-maintenance.service */ "./src/domain/file-maintenance/file-maintenance.service.ts");
 let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
-    constructor(maintenanceService, consumableService, vehicleInfoService, employeeService, notificationService, dataSource, fileService) {
+    constructor(maintenanceService, consumableService, vehicleInfoService, employeeService, notificationService, dataSource, fileService, fileMaintenanceService) {
         this.maintenanceService = maintenanceService;
         this.consumableService = consumableService;
         this.vehicleInfoService = vehicleInfoService;
@@ -17986,6 +17987,7 @@ let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
         this.notificationService = notificationService;
         this.dataSource = dataSource;
         this.fileService = fileService;
+        this.fileMaintenanceService = fileMaintenanceService;
     }
     async execute(user, createMaintenanceDto) {
         const existingMaintenance = await this.maintenanceService.findOne({
@@ -18006,6 +18008,17 @@ let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
             createMaintenanceDto.images = createMaintenanceDto.images.map((image) => this.fileService.getFileUrl(image));
             const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
             await this.fileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
+            if (createMaintenanceDto.images.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(createMaintenanceDto.images);
+                const fileIds = files.map((file) => file.fileId);
+                if (fileIds.length > 0) {
+                    const fileMaintenanceConnections = fileIds.map((fileId) => ({
+                        maintenanceId: maintenance.maintenanceId,
+                        fileId,
+                    }));
+                    await this.fileMaintenanceService.saveMultiple(fileMaintenanceConnections, { queryRunner });
+                }
+            }
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
@@ -18048,7 +18061,7 @@ let SaveMaintenanceUsecase = class SaveMaintenanceUsecase {
 exports.SaveMaintenanceUsecase = SaveMaintenanceUsecase;
 exports.SaveMaintenanceUsecase = SaveMaintenanceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object, typeof (_g = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _g : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof notification_service_1.NotificationService !== "undefined" && notification_service_1.NotificationService) === "function" ? _e : Object, typeof (_f = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _f : Object, typeof (_g = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _g : Object, typeof (_h = typeof file_maintenance_service_1.DomainFileMaintenanceService !== "undefined" && file_maintenance_service_1.DomainFileMaintenanceService) === "function" ? _h : Object])
 ], SaveMaintenanceUsecase);
 
 
@@ -18070,7 +18083,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateMaintenanceUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -18079,12 +18092,14 @@ const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */
 const maintenance_service_1 = __webpack_require__(/*! @src/domain/maintenance/maintenance.service */ "./src/domain/maintenance/maintenance.service.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const file_maintenance_service_1 = __webpack_require__(/*! @src/domain/file-maintenance/file-maintenance.service */ "./src/domain/file-maintenance/file-maintenance.service.ts");
 let UpdateMaintenanceUsecase = class UpdateMaintenanceUsecase {
-    constructor(maintenanceService, vehicleInfoService, dataSource, fileService) {
+    constructor(maintenanceService, vehicleInfoService, dataSource, fileService, fileMaintenanceService) {
         this.maintenanceService = maintenanceService;
         this.vehicleInfoService = vehicleInfoService;
         this.dataSource = dataSource;
         this.fileService = fileService;
+        this.fileMaintenanceService = fileMaintenanceService;
     }
     async execute(user, maintenanceId, updateMaintenanceDto) {
         if (updateMaintenanceDto.date) {
@@ -18108,6 +18123,18 @@ let UpdateMaintenanceUsecase = class UpdateMaintenanceUsecase {
             updateMaintenanceDto.images = updateMaintenanceDto.images.map((image) => this.fileService.getFileUrl(image));
             const maintenance = await this.maintenanceService.update(maintenanceId, updateMaintenanceDto);
             await this.fileService.updateTemporaryFiles(updateMaintenanceDto.images, false, { queryRunner });
+            await this.fileMaintenanceService.deleteByMaintenanceId(maintenanceId, { queryRunner });
+            if (updateMaintenanceDto.images.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(updateMaintenanceDto.images);
+                const fileIds = files.map((file) => file.fileId);
+                if (fileIds.length > 0) {
+                    const fileMaintenanceConnections = fileIds.map((fileId) => ({
+                        maintenanceId,
+                        fileId,
+                    }));
+                    await this.fileMaintenanceService.saveMultiple(fileMaintenanceConnections, { queryRunner });
+                }
+            }
             if (updateMaintenanceDto.mileage) {
                 const savedMaintenance = await this.maintenanceService.findOne({
                     where: { maintenanceId: maintenance.maintenanceId },
@@ -18140,7 +18167,7 @@ let UpdateMaintenanceUsecase = class UpdateMaintenanceUsecase {
 exports.UpdateMaintenanceUsecase = UpdateMaintenanceUsecase;
 exports.UpdateMaintenanceUsecase = UpdateMaintenanceUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object, typeof (_d = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _d : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_service_1.DomainMaintenanceService !== "undefined" && maintenance_service_1.DomainMaintenanceService) === "function" ? _a : Object, typeof (_b = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _b : Object, typeof (_c = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _c : Object, typeof (_d = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _d : Object, typeof (_e = typeof file_maintenance_service_1.DomainFileMaintenanceService !== "undefined" && file_maintenance_service_1.DomainFileMaintenanceService) === "function" ? _e : Object])
 ], UpdateMaintenanceUsecase);
 
 
@@ -18380,9 +18407,12 @@ const vehicle_info_1 = __webpack_require__(/*! ./usecases/vehicle-info */ "./src
 const consumable_1 = __webpack_require__(/*! ./usecases/consumable */ "./src/application/resource/vehicle/usecases/consumable/index.ts");
 const maintenance_1 = __webpack_require__(/*! ./usecases/maintenance */ "./src/application/resource/vehicle/usecases/maintenance/index.ts");
 const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
+const file_vehicle_info_module_1 = __webpack_require__(/*! @src/domain/file-vehicle-info/file-vehicle-info.module */ "./src/domain/file-vehicle-info/file-vehicle-info.module.ts");
+const file_maintenance_module_1 = __webpack_require__(/*! @src/domain/file-maintenance/file-maintenance.module */ "./src/domain/file-maintenance/file-maintenance.module.ts");
 const resource_context_module_1 = __webpack_require__(/*! @src/context/resource/resource.context.module */ "./src/context/resource/resource.context.module.ts");
 const file_context_module_1 = __webpack_require__(/*! @src/context/file/file.context.module */ "./src/context/file/file.context.module.ts");
 const admin_reservation_vehicle_controller_1 = __webpack_require__(/*! ./controllers/admin.reservation-vehicle.controller */ "./src/application/resource/vehicle/controllers/admin.reservation-vehicle.controller.ts");
+const file_resource_module_1 = __webpack_require__(/*! @src/domain/file-resource/file-resource.module */ "./src/domain/file-resource/file-resource.module.ts");
 let VehicleResourceModule = class VehicleResourceModule {
 };
 exports.VehicleResourceModule = VehicleResourceModule;
@@ -18396,8 +18426,11 @@ exports.VehicleResourceModule = VehicleResourceModule = __decorate([
             employee_module_1.DomainEmployeeModule,
             notification_module_1.NotificationModule,
             file_module_1.DomainFileModule,
+            file_vehicle_info_module_1.DomainFileVehicleInfoModule,
+            file_maintenance_module_1.DomainFileMaintenanceModule,
             resource_context_module_1.ResourceContextModule,
             file_context_module_1.FileContextModule,
+            file_resource_module_1.DomainFileResourceModule,
         ],
         controllers: [
             admin_vehicle_info_controller_1.AdminVehicleInfoController,
@@ -35291,7 +35324,7 @@ let SchedulePolicyService = class SchedulePolicyService {
                     reasonCode: 'RESERVATION_ALREADY_COMPLETED',
                 };
             }
-            if (reservation.status !== reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+            if (reservation.status !== reservation_type_enum_1.ReservationStatus.USING) {
                 return {
                     isAllowed: false,
                     reason: '확정된 예약만 완료할 수 있습니다.',

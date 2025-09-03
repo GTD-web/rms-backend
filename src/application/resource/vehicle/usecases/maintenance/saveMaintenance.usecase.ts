@@ -11,6 +11,7 @@ import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { NotificationService } from '@src/application/notification/services/notification.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { DomainFileService } from '@src/domain/file/file.service';
+import { DomainFileMaintenanceService } from '@src/domain/file-maintenance/file-maintenance.service';
 
 @Injectable()
 export class SaveMaintenanceUsecase {
@@ -22,6 +23,7 @@ export class SaveMaintenanceUsecase {
         private readonly notificationService: NotificationService,
         private readonly dataSource: DataSource,
         private readonly fileService: DomainFileService,
+        private readonly fileMaintenanceService: DomainFileMaintenanceService,
     ) {}
 
     async execute(user: Employee, createMaintenanceDto: CreateMaintenanceDto): Promise<Maintenance> {
@@ -45,6 +47,21 @@ export class SaveMaintenanceUsecase {
             );
             const maintenance = await this.maintenanceService.save(createMaintenanceDto, { queryRunner });
             await this.fileService.updateTemporaryFiles(createMaintenanceDto.images, false, { queryRunner });
+
+            // 파일 경로로 파일 ID 찾아서 중간테이블에 연결
+            if (createMaintenanceDto.images.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(createMaintenanceDto.images);
+                const fileIds = files.map((file) => file.fileId);
+
+                if (fileIds.length > 0) {
+                    const fileMaintenanceConnections = fileIds.map((fileId) => ({
+                        maintenanceId: maintenance.maintenanceId,
+                        fileId,
+                    }));
+
+                    await this.fileMaintenanceService.saveMultiple(fileMaintenanceConnections, { queryRunner });
+                }
+            }
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.consumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
