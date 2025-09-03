@@ -888,10 +888,10 @@ export class ScheduleManagementService {
         const employeeIds = updateScenarios.isInfoUpdate
             ? Array.from(
                   new Set([
-                      ...updateResult.participantChanges.previousParticipants.map(
+                      ...updateResult.participantChanges?.previousParticipants.map(
                           (participant) => participant.employeeId,
                       ),
-                      ...updateResult.participantChanges.newParticipants.map((participant) => participant.employeeId),
+                      ...updateResult.participantChanges?.newParticipants.map((participant) => participant.employeeId),
                   ]),
               )
             : participants.map((participant) => participant.employeeId);

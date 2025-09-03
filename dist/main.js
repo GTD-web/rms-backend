@@ -28949,8 +28949,8 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         });
         const employeeIds = updateScenarios.isInfoUpdate
             ? Array.from(new Set([
-                ...updateResult.participantChanges.previousParticipants.map((participant) => participant.employeeId),
-                ...updateResult.participantChanges.newParticipants.map((participant) => participant.employeeId),
+                ...updateResult.participantChanges?.previousParticipants.map((participant) => participant.employeeId),
+                ...updateResult.participantChanges?.newParticipants.map((participant) => participant.employeeId),
             ]))
             : participants.map((participant) => participant.employeeId);
         await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(updateScenarios, {
