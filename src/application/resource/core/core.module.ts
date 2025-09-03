@@ -21,6 +21,7 @@ import { DomainResourceModule } from '@src/domain/resource/resource.module';
 import { DomainVehicleInfoModule } from '@src/domain/vehicle-info/vehicle-info.module';
 import { DomainEquipmentInfoModule } from '@src/domain/equipment-info/equipment-info.module';
 import { DomainFileModule } from '@src/domain/file/file.module';
+import { DomainFileResourceModule } from '@src/domain/file-resource/file-resource.module';
 import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
 import { DomainConsumableModule } from '@src/domain/consumable/consumable.module';
 import { DomainMaintenanceModule } from '@src/domain/maintenance/maintenance.module';
@@ -34,6 +35,7 @@ import { ResourceGroupService } from './services/resource-group.service';
 
 import * as ResourceUsecase from './usecases/resource';
 import * as ResourceGroupUsecase from './usecases/resource-group';
+import { DomainFileVehicleInfoModule } from '@src/domain/file-vehicle-info/file-vehicle-info.module';
 
 @Module({
     imports: [
@@ -60,6 +62,8 @@ import * as ResourceGroupUsecase from './usecases/resource-group';
         DomainAccommodationInfoModule,
         DomainEquipmentInfoModule,
         DomainFileModule,
+        DomainFileResourceModule,
+        DomainFileVehicleInfoModule,
         DomainReservationModule,
     ],
     controllers: [

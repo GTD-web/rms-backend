@@ -13453,6 +13453,7 @@ const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.
 const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.module */ "./src/domain/vehicle-info/vehicle-info.module.ts");
 const equipment_info_module_1 = __webpack_require__(/*! @src/domain/equipment-info/equipment-info.module */ "./src/domain/equipment-info/equipment-info.module.ts");
 const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
+const file_resource_module_1 = __webpack_require__(/*! @src/domain/file-resource/file-resource.module */ "./src/domain/file-resource/file-resource.module.ts");
 const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/reservation.module */ "./src/domain/reservation/reservation.module.ts");
 const consumable_module_1 = __webpack_require__(/*! @src/domain/consumable/consumable.module */ "./src/domain/consumable/consumable.module.ts");
 const maintenance_module_1 = __webpack_require__(/*! @src/domain/maintenance/maintenance.module */ "./src/domain/maintenance/maintenance.module.ts");
@@ -13464,6 +13465,7 @@ const resource_service_1 = __webpack_require__(/*! ./services/resource.service *
 const resource_group_service_1 = __webpack_require__(/*! ./services/resource-group.service */ "./src/application/resource/core/services/resource-group.service.ts");
 const ResourceUsecase = __webpack_require__(/*! ./usecases/resource */ "./src/application/resource/core/usecases/resource/index.ts");
 const ResourceGroupUsecase = __webpack_require__(/*! ./usecases/resource-group */ "./src/application/resource/core/usecases/resource-group/index.ts");
+const file_vehicle_info_module_1 = __webpack_require__(/*! @src/domain/file-vehicle-info/file-vehicle-info.module */ "./src/domain/file-vehicle-info/file-vehicle-info.module.ts");
 let ResourceCoreModule = class ResourceCoreModule {
 };
 exports.ResourceCoreModule = ResourceCoreModule;
@@ -13493,6 +13495,8 @@ exports.ResourceCoreModule = ResourceCoreModule = __decorate([
             accommodation_info_module_1.DomainAccommodationInfoModule,
             equipment_info_module_1.DomainEquipmentInfoModule,
             file_module_1.DomainFileModule,
+            file_resource_module_1.DomainFileResourceModule,
+            file_vehicle_info_module_1.DomainFileVehicleInfoModule,
             reservation_module_1.DomainReservationModule,
         ],
         controllers: [
@@ -14972,7 +14976,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateResourceWithInfosUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -14986,9 +14990,10 @@ const meeting_room_info_service_1 = __webpack_require__(/*! @src/domain/meeting-
 const accommodation_info_service_1 = __webpack_require__(/*! @src/domain/accommodation-info/accommodation-info.service */ "./src/domain/accommodation-info/accommodation-info.service.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const file_resource_service_1 = __webpack_require__(/*! @src/domain/file-resource/file-resource.service */ "./src/domain/file-resource/file-resource.service.ts");
 const equipment_info_service_1 = __webpack_require__(/*! @src/domain/equipment-info/equipment-info.service */ "./src/domain/equipment-info/equipment-info.service.ts");
 let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
-    constructor(resourceService, resourceGroupService, resourceManagerService, vehicleInfoService, meetingRoomInfoService, accommodationInfoService, equipmentInfoService, fileService, dataSource) {
+    constructor(resourceService, resourceGroupService, resourceManagerService, vehicleInfoService, meetingRoomInfoService, accommodationInfoService, equipmentInfoService, fileService, fileResourceService, dataSource) {
         this.resourceService = resourceService;
         this.resourceGroupService = resourceGroupService;
         this.resourceManagerService = resourceManagerService;
@@ -14997,6 +15002,7 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
         this.accommodationInfoService = accommodationInfoService;
         this.equipmentInfoService = equipmentInfoService;
         this.fileService = fileService;
+        this.fileResourceService = fileResourceService;
         this.dataSource = dataSource;
     }
     async execute(createResourceInfo) {
@@ -15030,6 +15036,17 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
                 queryRunner,
             });
             await this.fileService.updateTemporaryFiles(resource.images, false, { queryRunner });
+            if (resource.images.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(resource.images);
+                const fileIds = files.map((file) => file.fileId);
+                if (fileIds.length > 0) {
+                    const fileResourceConnections = fileIds.map((fileId) => ({
+                        resourceId: savedResource.resourceId,
+                        fileId,
+                    }));
+                    await this.fileResourceService.saveMultiple(fileResourceConnections, { queryRunner });
+                }
+            }
             switch (group.type) {
                 case resource_type_enum_1.ResourceType.VEHICLE:
                     await this.vehicleInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
@@ -15079,7 +15096,7 @@ let CreateResourceWithInfosUsecase = class CreateResourceWithInfosUsecase {
 exports.CreateResourceWithInfosUsecase = CreateResourceWithInfosUsecase;
 exports.CreateResourceWithInfosUsecase = CreateResourceWithInfosUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _g : Object, typeof (_h = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _h : Object, typeof (_j = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _j : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _g : Object, typeof (_h = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _h : Object, typeof (_j = typeof file_resource_service_1.DomainFileResourceService !== "undefined" && file_resource_service_1.DomainFileResourceService) === "function" ? _j : Object, typeof (_k = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _k : Object])
 ], CreateResourceWithInfosUsecase);
 
 

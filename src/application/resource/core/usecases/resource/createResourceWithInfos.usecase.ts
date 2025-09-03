@@ -11,6 +11,7 @@ import { DomainMeetingRoomInfoService } from '@src/domain/meeting-room-info/meet
 import { DomainAccommodationInfoService } from '@src/domain/accommodation-info/accommodation-info.service';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DomainFileService } from '@src/domain/file/file.service';
+import { DomainFileResourceService } from '@src/domain/file-resource/file-resource.service';
 import { CreateResourceResponseDto } from '../../dtos/resource-response.dto';
 import { DomainEquipmentInfoService } from '@src/domain/equipment-info/equipment-info.service';
 
@@ -25,6 +26,7 @@ export class CreateResourceWithInfosUsecase {
         private readonly accommodationInfoService: DomainAccommodationInfoService,
         private readonly equipmentInfoService: DomainEquipmentInfoService,
         private readonly fileService: DomainFileService,
+        private readonly fileResourceService: DomainFileResourceService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -66,6 +68,21 @@ export class CreateResourceWithInfosUsecase {
             });
 
             await this.fileService.updateTemporaryFiles(resource.images, false, { queryRunner });
+
+            // 파일 경로로 파일 ID 찾아서 중간테이블에 연결
+            if (resource.images.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(resource.images);
+                const fileIds = files.map((file) => file.fileId);
+
+                if (fileIds.length > 0) {
+                    const fileResourceConnections = fileIds.map((fileId) => ({
+                        resourceId: savedResource.resourceId,
+                        fileId,
+                    }));
+
+                    await this.fileResourceService.saveMultiple(fileResourceConnections, { queryRunner });
+                }
+            }
 
             switch (group.type) {
                 case ResourceType.VEHICLE:
