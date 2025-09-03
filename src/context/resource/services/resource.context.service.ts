@@ -272,7 +272,7 @@ export class ResourceContextService {
         const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resourceId);
 
         // 리소스 객체에 파일 정보 추가
-        (resource as any).imageFiles = resourceFiles.images;
+        resource.images = resourceFiles.images.map((file) => file.filePath);
 
         return new ResourceResponseDto(resource);
     }
@@ -288,7 +288,7 @@ export class ResourceContextService {
         const resourcesWithFiles = await Promise.all(
             resources.map(async (resource) => {
                 const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
-                (resource as any).imageFiles = resourceFiles.images;
+                resource.images = resourceFiles.images.map((file) => file.filePath);
                 return resource;
             }),
         );
@@ -344,7 +344,7 @@ export class ResourceContextService {
                     await this.fileContextService.리소스에_파일들을_연결한다(resourceId, fileIds, queryRunner);
                 }
             }
-
+            console.log('updateResourceInfoDto.resource', updateResourceInfoDto.resource);
             // 리소스의 images 컬럼에 filePath 배열 저장
             await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
 

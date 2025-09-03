@@ -34304,7 +34304,7 @@ let ResourceContextService = class ResourceContextService {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resourceId);
-        resource.imageFiles = resourceFiles.images;
+        resource.images = resourceFiles.images.map((file) => file.filePath);
         return new resource_response_dto_1.ResourceResponseDto(resource);
     }
     async 그룹별_자원_목록을_조회한다(resourceGroupId) {
@@ -34315,7 +34315,7 @@ let ResourceContextService = class ResourceContextService {
         });
         const resourcesWithFiles = await Promise.all(resources.map(async (resource) => {
             const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
-            resource.imageFiles = resourceFiles.images;
+            resource.images = resourceFiles.images.map((file) => file.filePath);
             return resource;
         }));
         return resourcesWithFiles.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
@@ -34352,6 +34352,7 @@ let ResourceContextService = class ResourceContextService {
                     await this.fileContextService.리소스에_파일들을_연결한다(resourceId, fileIds, queryRunner);
                 }
             }
+            console.log('updateResourceInfoDto.resource', updateResourceInfoDto.resource);
             await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
             if (updateResourceInfoDto.typeInfo) {
                 switch (resource.type) {
