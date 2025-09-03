@@ -228,26 +228,26 @@ export class UserReservationController {
         return this.reservationService.returnVehicle(user, reservationId, returnDto);
     }
 
-    @Get(':reservationId/check/extendable')
-    @ApiOperation({ summary: '예약 시간 연장 가능 여부 조회' })
-    @ApiDataResponse({
-        description: '예약 시간 연장 가능 여부 조회 성공',
-    })
-    async checkExtendable(@User() user: Employee, @Param('reservationId') reservationId: string): Promise<boolean> {
-        return this.reservationService.checkAvailablityToExtendReservation(user.employeeId, reservationId);
-    }
+    // @Get(':reservationId/check/extendable')
+    // @ApiOperation({ summary: '예약 시간 연장 가능 여부 조회' })
+    // @ApiDataResponse({
+    //     description: '예약 시간 연장 가능 여부 조회 성공',
+    // })
+    // async checkExtendable(@User() user: Employee, @Param('reservationId') reservationId: string): Promise<boolean> {
+    //     return this.reservationService.checkAvailablityToExtendReservation(user.employeeId, reservationId);
+    // }
 
-    @Patch(':reservationId/extend')
-    @ApiOperation({ summary: '예약 시간 연장' })
-    @ApiDataResponse({
-        description: '예약 시간 연장 성공',
-        type: ReservationResponseDto,
-    })
-    async extendReservation(
-        @User() user: Employee,
-        @Param('reservationId') reservationId: string,
-        @Body() extendDto: UpdateReservationTimeDto,
-    ): Promise<ReservationResponseDto> {
-        return this.reservationService.extendReservation(user.employeeId, reservationId, extendDto);
-    }
+    // @Patch(':reservationId/extend')
+    // @ApiOperation({ summary: '예약 시간 연장' })
+    // @ApiDataResponse({
+    //     description: '예약 시간 연장 성공',
+    //     type: ReservationResponseDto,
+    // })
+    // async extendReservation(
+    //     @User() user: Employee,
+    //     @Param('reservationId') reservationId: string,
+    //     @Body() extendDto: UpdateReservationTimeDto,
+    // ): Promise<ReservationResponseDto> {
+    //     return this.reservationService.extendReservation(user.employeeId, reservationId, extendDto);
+    // }
 }

@@ -26,10 +26,6 @@ import { ReturnVehicleUsecase } from '../usecases/return-vehicle.usecase';
 import { CheckReservationAccessUsecase } from '../usecases/check-reservation-access.usecase';
 import { FindCalendarUsecase } from '../usecases/find-calendar.usecase';
 import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
-import { ReservationManagementService } from '@src/context/reservation/services/reservation-management.service';
-import { ReservationConflictService } from '@src/context/reservation/services/reservation-conflict.service';
-import { ReservationValidationService } from '@src/context/reservation/services/reservation-validation.service';
-import { DateUtil } from '@libs/utils/date.util';
 
 @Injectable()
 export class ReservationService {
@@ -46,9 +42,6 @@ export class ReservationService {
         private readonly returnVehicleUsecase: ReturnVehicleUsecase,
         private readonly checkReservationAccessUsecase: CheckReservationAccessUsecase,
         private readonly findCalendarUsecase: FindCalendarUsecase,
-        private readonly reservationConflictService: ReservationConflictService,
-        private readonly reservationValidationService: ReservationValidationService,
-        private readonly reservationManagementService: ReservationManagementService,
     ) {}
 
     async onModuleInit() {
@@ -147,41 +140,5 @@ export class ReservationService {
 
     async checkReservationAccess(reservationId: string, employeeId: string): Promise<void> {
         await this.checkReservationAccessUsecase.execute(reservationId, employeeId);
-    }
-
-    async checkAvailablityToExtendReservation(employeeId: string, reservationId: string): Promise<boolean> {
-        await this.reservationValidationService.validateReserverId(employeeId, reservationId);
-
-        const reservation = await this.reservationValidationService.validateReservationId(reservationId);
-        console.log('reservation', reservation);
-        const isAvailable = await this.reservationValidationService.validateReservationTiming(
-            DateUtil.date(reservation.endDate).addMinutes(-15).toDate(),
-            reservation.endDate,
-        );
-        console.log('isAvailable', isAvailable);
-        if (!isAvailable) {
-            return false;
-        }
-        const isConflict = await this.reservationConflictService.isReservationTimeConflict(
-            reservation.resourceId,
-            DateUtil.date(reservation.endDate).toDate(),
-            DateUtil.date(reservation.endDate).addMinutes(30).toDate(),
-            reservationId,
-        );
-        console.log('isConflict', isConflict);
-        return !isConflict;
-    }
-
-    async extendReservation(
-        employeeId: string,
-        reservationId: string,
-        extendDto: UpdateReservationTimeDto,
-    ): Promise<ReservationResponseDto> {
-        await this.reservationValidationService.validateReserverId(employeeId, reservationId);
-        const updatedReservation = await this.reservationManagementService.updateReservationTime(
-            reservationId,
-            extendDto,
-        );
-        return new ReservationResponseDto(updatedReservation);
     }
 }

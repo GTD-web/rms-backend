@@ -21,6 +21,6 @@ export class GetSubscriptionsUsecase {
         ) {
             return [];
         }
-        return employee.subscriptions;
+        return employee.subscriptions as PushSubscriptionDto[];
     }
 }

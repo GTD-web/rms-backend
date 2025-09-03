@@ -54,7 +54,7 @@ import { ReservationContextModule } from '@src/context/reservation/reservation.c
         DomainEmployeeModule,
         DomainResourceModule,
         DomainVehicleInfoModule,
-        // NotificationModule,
+        NotificationModule,
         DomainEmployeeNotificationModule,
         DomainNotificationModule,
         DomainFileModule,
