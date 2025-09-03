@@ -16169,7 +16169,7 @@ let TaskController = class TaskController {
 };
 exports.TaskController = TaskController;
 __decorate([
-    (0, common_1.Get)('user'),
+    (0, common_1.Get)(''),
     (0, swagger_1.ApiOperation)({ summary: '태스크 목록 조회' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -20403,7 +20403,12 @@ let ResourceContextService = class ResourceContextService {
             where: { type: type },
             relations: relations,
         });
-        return resources.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
+        const resourcesWithFiles = await Promise.all(resources.map(async (resource) => {
+            const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
+            resource.imageFiles = resourceFiles.images;
+            return resource;
+        }));
+        return resourcesWithFiles.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
     }
     async 자원과_상세정보를_생성한다(createResourceInfo) {
         const { resource, typeInfo, managers } = createResourceInfo;
@@ -20498,6 +20503,8 @@ let ResourceContextService = class ResourceContextService {
         if (!resource) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
+        const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resourceId);
+        resource.images = resourceFiles.images.map((file) => file.filePath);
         return new resource_response_dto_1.ResourceResponseDto(resource);
     }
     async 그룹별_자원_목록을_조회한다(resourceGroupId) {
@@ -20506,7 +20513,12 @@ let ResourceContextService = class ResourceContextService {
             relations: ['vehicleInfo', 'meetingRoomInfo', 'accommodationInfo', 'equipmentInfo'],
             order: { order: 'ASC' },
         });
-        return resources.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
+        const resourcesWithFiles = await Promise.all(resources.map(async (resource) => {
+            const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
+            resource.images = resourceFiles.images.map((file) => file.filePath);
+            return resource;
+        }));
+        return resourcesWithFiles.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
     }
     async 자원을_수정한다(resourceId, updateResourceInfoDto) {
         const resource = await this.domainResourceService.findOne({
@@ -20964,10 +20976,6 @@ let VehicleInfoContextService = class VehicleInfoContextService {
             where: { employeeId: reservationVehicle.returnedBy },
         });
         reservationVehicle.returnedBy = employee.name;
-        const returnFiles = await this.fileContextService.차량예약_파일을_조회한다(reservationVehicleId);
-        reservationVehicle.parkingLocationImages = returnFiles.parkingLocationImages.map((file) => file.filePath);
-        reservationVehicle.odometerImages = returnFiles.odometerImages.map((file) => file.filePath);
-        reservationVehicle.indoorImages = returnFiles.indoorImages.map((file) => file.filePath);
         return reservationVehicle;
     }
     async 차량정보만_조회한다(resourceId) {

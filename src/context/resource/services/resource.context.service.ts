@@ -65,7 +65,16 @@ export class ResourceContextService {
             relations: relations,
         });
 
-        return resources.map((resource) => new ResourceResponseDto(resource));
+        // 각 자원에 대해 파일 정보 추가
+        const resourcesWithFiles = await Promise.all(
+            resources.map(async (resource) => {
+                const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
+                (resource as any).imageFiles = resourceFiles.images;
+                return resource;
+            }),
+        );
+
+        return resourcesWithFiles.map((resource) => new ResourceResponseDto(resource));
     }
 
     async 자원과_상세정보를_생성한다(createResourceInfo: CreateResourceInfoDto): Promise<CreateResourceResponseDto> {
@@ -203,6 +212,12 @@ export class ResourceContextService {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
 
+        // 자원과 연결된 파일 정보 조회
+        const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resourceId);
+
+        // 리소스 객체에 파일 정보 추가
+        resource.images = resourceFiles.images.map((file) => file.filePath);
+
         return new ResourceResponseDto(resource);
     }
 
@@ -213,7 +228,16 @@ export class ResourceContextService {
             order: { order: 'ASC' },
         });
 
-        return resources.map((resource) => new ResourceResponseDto(resource));
+        // 각 자원에 대해 파일 정보 추가
+        const resourcesWithFiles = await Promise.all(
+            resources.map(async (resource) => {
+                const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
+                resource.images = resourceFiles.images.map((file) => file.filePath);
+                return resource;
+            }),
+        );
+
+        return resourcesWithFiles.map((resource) => new ResourceResponseDto(resource));
     }
 
     async 자원을_수정한다(

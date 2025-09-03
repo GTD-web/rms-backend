@@ -18,7 +18,7 @@ import { TaskListResponseDto, TaskResponseDto } from '../dtos/task-response.dto'
 export class TaskController {
     constructor(private readonly taskManagementService: TaskManagementService) {}
 
-    @Get('user')
+    @Get('')
     @ApiOperation({ summary: '태스크 목록 조회' })
     @ApiDataResponse({
         status: 200,

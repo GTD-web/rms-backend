@@ -186,14 +186,6 @@ export class VehicleInfoContextService {
         });
         reservationVehicle.returnedBy = employee.name;
 
-        // 반납 이미지 조회
-        const returnFiles = await this.fileContextService.차량예약_파일을_조회한다(reservationVehicleId);
-        (reservationVehicle as any).parkingLocationImages = returnFiles.parkingLocationImages.map(
-            (file) => file.filePath,
-        );
-        (reservationVehicle as any).odometerImages = returnFiles.odometerImages.map((file) => file.filePath);
-        (reservationVehicle as any).indoorImages = returnFiles.indoorImages.map((file) => file.filePath);
-
         return reservationVehicle;
     }
 
