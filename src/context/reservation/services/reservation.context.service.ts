@@ -366,12 +366,41 @@ export class ReservationContextService {
                 queryRunner,
             );
 
-            // 차량 정보 업데이트 (이미지 필드는 제거)
+            // 파일 ID들을 filePath로 변환
+            let parkingLocationFilePaths: string[] = [];
+            let odometerFilePaths: string[] = [];
+            let indoorFilePaths: string[] = [];
+
+            if (returnDto.parkingLocationImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: In(returnDto.parkingLocationImages) },
+                });
+                parkingLocationFilePaths = files.map((file) => file.filePath);
+            }
+
+            if (returnDto.odometerImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: In(returnDto.odometerImages) },
+                });
+                odometerFilePaths = files.map((file) => file.filePath);
+            }
+
+            if (returnDto.indoorImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: In(returnDto.indoorImages) },
+                });
+                indoorFilePaths = files.map((file) => file.filePath);
+            }
+
+            // 차량 정보 업데이트 (filePath 포함)
             await this.domainVehicleInfoService.update(
                 vehicleInfoId,
                 {
                     totalMileage: returnDto.totalMileage,
                     leftMileage: returnDto.leftMileage,
+                    parkingLocationImages: parkingLocationFilePaths,
+                    odometerImages: odometerFilePaths,
+                    indoorImages: indoorFilePaths,
                 },
                 { queryRunner },
             );

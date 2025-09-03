@@ -21,6 +21,9 @@ export class Schedule {
     @Column({ nullable: true })
     description: string;
 
+    @Column({ nullable: true })
+    location: string;
+
     @Column({ type: 'timestamp with time zone' })
     startDate: Date;
 

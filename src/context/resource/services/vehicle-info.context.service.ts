@@ -37,9 +37,6 @@ export class VehicleInfoContextService {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
 
-        // 차량정보 파일 조회
-        const vehicleFiles = await this.fileContextService.차량정보_파일을_조회한다(vehicleInfoId);
-
         return {
             vehicleInfoId: vehicleInfo.vehicleInfoId,
             resourceId: vehicleInfo.resourceId,
@@ -47,9 +44,9 @@ export class VehicleInfoContextService {
             leftMileage: Number(vehicleInfo.leftMileage),
             insuranceName: vehicleInfo.insuranceName,
             insuranceNumber: vehicleInfo.insuranceNumber,
-            parkingLocationImages: vehicleFiles.parkingLocationImages.map((file) => file.filePath),
-            odometerImages: vehicleFiles.odometerImages.map((file) => file.filePath),
-            indoorImages: vehicleFiles.indoorImages.map((file) => file.filePath),
+            parkingLocationImages: vehicleInfo.parkingLocationImages || [],
+            odometerImages: vehicleInfo.odometerImages || [],
+            indoorImages: vehicleInfo.indoorImages || [],
         };
     }
 
@@ -69,9 +66,46 @@ export class VehicleInfoContextService {
 
             // 차량정보 업데이트 (이미지 필드 제외)
             const { parkingLocationImages, odometerImages, indoorImages, ...vehicleData } = updateVehicleInfoDto;
-            const vehicleInfo = await this.domainVehicleInfoService.update(vehicleInfoId, vehicleData, {
-                queryRunner,
-            });
+
+            // 파일 ID들을 filePath로 변환
+            let parkingLocationFilePaths: string[] = [];
+            let odometerFilePaths: string[] = [];
+            let indoorFilePaths: string[] = [];
+
+            if (parkingLocationImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: In(parkingLocationImages) },
+                });
+                parkingLocationFilePaths = files.map((file) => file.filePath);
+            }
+
+            if (odometerImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: In(odometerImages) },
+                });
+                odometerFilePaths = files.map((file) => file.filePath);
+            }
+
+            if (indoorImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: In(indoorImages) },
+                });
+                indoorFilePaths = files.map((file) => file.filePath);
+            }
+
+            // 차량정보 업데이트 (filePath 포함)
+            const vehicleInfo = await this.domainVehicleInfoService.update(
+                vehicleInfoId,
+                {
+                    ...vehicleData,
+                    parkingLocationImages: parkingLocationFilePaths,
+                    odometerImages: odometerFilePaths,
+                    indoorImages: indoorFilePaths,
+                },
+                {
+                    queryRunner,
+                },
+            );
 
             // 모든 파일 ID들을 수집
             const allFileIds = [...parkingLocationImages, ...odometerImages, ...indoorImages];
@@ -126,19 +160,21 @@ export class VehicleInfoContextService {
 
             await queryRunner.commitTransaction();
 
-            // 업데이트된 파일 정보 조회
-            const vehicleFiles = await this.fileContextService.차량정보_파일을_조회한다(vehicleInfoId);
+            // 업데이트된 차량정보 조회
+            const updatedVehicleInfo = await this.domainVehicleInfoService.findOne({
+                where: { vehicleInfoId },
+            });
 
             return {
-                vehicleInfoId: vehicleInfo.vehicleInfoId,
-                resourceId: vehicleInfo.resourceId,
-                totalMileage: Number(vehicleInfo.totalMileage),
-                leftMileage: Number(vehicleInfo.leftMileage),
-                insuranceName: vehicleInfo.insuranceName,
-                insuranceNumber: vehicleInfo.insuranceNumber,
-                parkingLocationImages: vehicleFiles.parkingLocationImages.map((file) => file.filePath),
-                odometerImages: vehicleFiles.odometerImages.map((file) => file.filePath),
-                indoorImages: vehicleFiles.indoorImages.map((file) => file.filePath),
+                vehicleInfoId: updatedVehicleInfo.vehicleInfoId,
+                resourceId: updatedVehicleInfo.resourceId,
+                totalMileage: Number(updatedVehicleInfo.totalMileage),
+                leftMileage: Number(updatedVehicleInfo.leftMileage),
+                insuranceName: updatedVehicleInfo.insuranceName,
+                insuranceNumber: updatedVehicleInfo.insuranceNumber,
+                parkingLocationImages: updatedVehicleInfo.parkingLocationImages || [],
+                odometerImages: updatedVehicleInfo.odometerImages || [],
+                indoorImages: updatedVehicleInfo.indoorImages || [],
             };
         } catch (error) {
             await queryRunner.rollbackTransaction();

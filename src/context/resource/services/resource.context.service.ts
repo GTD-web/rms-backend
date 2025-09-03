@@ -108,30 +108,86 @@ export class ResourceContextService {
 
             // 파일 ID 배열 준비 (기본값 빈 배열)
             if (!resource.images) resource.images = [];
+            const fileIds = resource.images; // 원본 파일 ID 배열 보존
+
+            // 파일 ID들을 filePath로 변환
+            let filePaths: string[] = [];
+            if (fileIds.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: In(fileIds) },
+                });
+                filePaths = files.map((file) => file.filePath);
+            }
 
             const savedResource = await this.domainResourceService.save(
-                { ...resource, order: resourceOrder } as Resource,
+                { ...resource, images: filePaths, order: resourceOrder } as Resource,
                 { queryRunner },
             );
 
             // 파일들을 임시에서 영구로 변경
-            if (resource.images.length > 0) {
-                await this.fileContextService.파일들을_영구로_변경한다(resource.images, queryRunner);
+            if (fileIds.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(fileIds, queryRunner);
             }
 
             // 리소스에 파일들을 연결
-            await this.fileContextService.리소스에_파일들을_연결한다(
-                savedResource.resourceId!,
-                resource.images,
-                queryRunner,
-            );
+            await this.fileContextService.리소스에_파일들을_연결한다(savedResource.resourceId!, fileIds, queryRunner);
 
             switch (group.type) {
                 case ResourceType.VEHICLE:
-                    await this.domainVehicleInfoService.save(
-                        { ...typeInfo, resourceId: savedResource.resourceId },
+                    // 차량정보의 파일 ID들을 filePath로 변환
+                    const vehicleTypeInfo = typeInfo as any;
+                    const vehicleFilePaths = {
+                        parkingLocationImages: [] as string[],
+                        odometerImages: [] as string[],
+                        indoorImages: [] as string[],
+                    };
+
+                    if (vehicleTypeInfo.parkingLocationImages?.length > 0) {
+                        const files = await this.domainFileService.findAll({
+                            where: { fileId: In(vehicleTypeInfo.parkingLocationImages) },
+                        });
+                        vehicleFilePaths.parkingLocationImages = files.map((file) => file.filePath);
+                    }
+
+                    if (vehicleTypeInfo.odometerImages?.length > 0) {
+                        const files = await this.domainFileService.findAll({
+                            where: { fileId: In(vehicleTypeInfo.odometerImages) },
+                        });
+                        vehicleFilePaths.odometerImages = files.map((file) => file.filePath);
+                    }
+
+                    if (vehicleTypeInfo.indoorImages?.length > 0) {
+                        const files = await this.domainFileService.findAll({
+                            where: { fileId: In(vehicleTypeInfo.indoorImages) },
+                        });
+                        vehicleFilePaths.indoorImages = files.map((file) => file.filePath);
+                    }
+
+                    const savedVehicleInfo = await this.domainVehicleInfoService.save(
+                        {
+                            ...typeInfo,
+                            ...vehicleFilePaths,
+                            resourceId: savedResource.resourceId,
+                        },
                         { queryRunner },
                     );
+
+                    // 차량정보에 파일들을 연결 (중간테이블)
+                    if (
+                        vehicleTypeInfo.parkingLocationImages?.length > 0 ||
+                        vehicleTypeInfo.odometerImages?.length > 0 ||
+                        vehicleTypeInfo.indoorImages?.length > 0
+                    ) {
+                        await this.fileContextService.차량정보에_파일들을_연결한다(
+                            savedVehicleInfo.vehicleInfoId,
+                            {
+                                parkingLocationImages: vehicleTypeInfo.parkingLocationImages || [],
+                                odometerImages: vehicleTypeInfo.odometerImages || [],
+                                indoorImages: vehicleTypeInfo.indoorImages || [],
+                            },
+                            queryRunner,
+                        );
+                    }
                     break;
                 case ResourceType.MEETING_ROOM:
                     await this.domainMeetingRoomInfoService.save(
@@ -216,7 +272,7 @@ export class ResourceContextService {
         const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resourceId);
 
         // 리소스 객체에 파일 정보 추가
-        resource.images = resourceFiles.images.map((file) => file.filePath);
+        (resource as any).imageFiles = resourceFiles.images;
 
         return new ResourceResponseDto(resource);
     }
@@ -232,7 +288,7 @@ export class ResourceContextService {
         const resourcesWithFiles = await Promise.all(
             resources.map(async (resource) => {
                 const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
-                resource.images = resourceFiles.images.map((file) => file.filePath);
+                (resource as any).imageFiles = resourceFiles.images;
                 return resource;
             }),
         );
@@ -262,13 +318,22 @@ export class ResourceContextService {
         try {
             if (updateResourceInfoDto.resource) {
                 // 리소스 정보 업데이트 (이미지 제외)
-                const { images, ...resourceData } = updateResourceInfoDto.resource;
-                await this.domainResourceService.update(resourceId, resourceData, { queryRunner });
+                const { images } = updateResourceInfoDto.resource;
 
                 // 이미지가 변경된 경우 파일 연결 처리
                 if (images !== undefined) {
                     // 파일 ID 배열 준비 (기본값 빈 배열)
                     const fileIds = images || [];
+
+                    // 파일 ID들을 filePath로 변환
+                    let filePaths: string[] = [];
+                    if (fileIds.length > 0) {
+                        const files = await this.domainFileService.findAll({
+                            where: { fileId: In(fileIds) },
+                        });
+                        filePaths = files.map((file) => file.filePath);
+                        updateResourceInfoDto.resource.images = filePaths;
+                    }
 
                     // 파일들을 임시에서 영구로 변경
                     if (fileIds.length > 0) {
@@ -279,6 +344,9 @@ export class ResourceContextService {
                     await this.fileContextService.리소스에_파일들을_연결한다(resourceId, fileIds, queryRunner);
                 }
             }
+
+            // 리소스의 images 컬럼에 filePath 배열 저장
+            await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
 
             if (updateResourceInfoDto.typeInfo) {
                 switch (resource.type) {
@@ -348,6 +416,7 @@ export class ResourceContextService {
 
             return this.자원_상세정보를_조회한다(resourceId);
         } catch (err) {
+            console.error(err);
             await queryRunner.rollbackTransaction();
             throw new InternalServerErrorException(ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_UPDATE);
         } finally {

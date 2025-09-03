@@ -97,6 +97,7 @@ exports.typeOrmConfig = void 0;
 const entities_1 = __webpack_require__(/*! ../entities */ "./libs/entities/index.ts");
 const path_1 = __webpack_require__(/*! path */ "path");
 const typeOrmConfig = (configService) => {
+    console.log('configService.get(NODE_ENV)', configService.get('database.database'));
     return {
         type: 'postgres',
         host: configService.get('database.host'),
@@ -2286,6 +2287,10 @@ __decorate([
     __metadata("design:type", String)
 ], Schedule.prototype, "description", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Schedule.prototype, "location", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'timestamp with time zone' }),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], Schedule.prototype, "startDate", void 0);
@@ -3120,6 +3125,7 @@ var ReservationStatus;
 (function (ReservationStatus) {
     ReservationStatus["PENDING"] = "PENDING";
     ReservationStatus["CONFIRMED"] = "CONFIRMED";
+    ReservationStatus["USING"] = "USING";
     ReservationStatus["CANCELLED"] = "CANCELLED";
     ReservationStatus["REJECTED"] = "REJECTED";
     ReservationStatus["CLOSED"] = "CLOSED";
@@ -33118,9 +33124,33 @@ let ReservationContextService = class ReservationContextService {
                 odometerImages: returnDto.odometerImages,
                 indoorImages: returnDto.indoorImages,
             }, queryRunner);
+            let parkingLocationFilePaths = [];
+            let odometerFilePaths = [];
+            let indoorFilePaths = [];
+            if (returnDto.parkingLocationImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_2.In)(returnDto.parkingLocationImages) },
+                });
+                parkingLocationFilePaths = files.map((file) => file.filePath);
+            }
+            if (returnDto.odometerImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_2.In)(returnDto.odometerImages) },
+                });
+                odometerFilePaths = files.map((file) => file.filePath);
+            }
+            if (returnDto.indoorImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_2.In)(returnDto.indoorImages) },
+                });
+                indoorFilePaths = files.map((file) => file.filePath);
+            }
             await this.domainVehicleInfoService.update(vehicleInfoId, {
                 totalMileage: returnDto.totalMileage,
                 leftMileage: returnDto.leftMileage,
+                parkingLocationImages: parkingLocationFilePaths,
+                odometerImages: odometerFilePaths,
+                indoorImages: indoorFilePaths,
             }, { queryRunner });
             await this.fileContextService.차량정보에_파일들을_연결한다(vehicleInfoId, {
                 parkingLocationImages: returnDto.parkingLocationImages,
@@ -33650,12 +33680,20 @@ let MaintenanceContextService = class MaintenanceContextService {
         try {
             if (!createMaintenanceDto.images)
                 createMaintenanceDto.images = [];
-            if (createMaintenanceDto.images.length > 0) {
-                await this.fileContextService.파일들을_영구로_변경한다(createMaintenanceDto.images, queryRunner);
+            const fileIds = createMaintenanceDto.images;
+            let filePaths = [];
+            if (fileIds.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_1.In)(fileIds) },
+                });
+                filePaths = files.map((file) => file.filePath);
+            }
+            if (fileIds.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(fileIds, queryRunner);
             }
             const { images, ...maintenanceData } = createMaintenanceDto;
-            const maintenance = await this.domainMaintenanceService.save(maintenanceData, { queryRunner });
-            await this.fileContextService.정비에_파일들을_연결한다(maintenance.maintenanceId, createMaintenanceDto.images, queryRunner);
+            const maintenance = await this.domainMaintenanceService.save({ ...maintenanceData, images: filePaths }, { queryRunner });
+            await this.fileContextService.정비에_파일들을_연결한다(maintenance.maintenanceId, fileIds, queryRunner);
             if (createMaintenanceDto.mileage) {
                 const consumable = await this.domainConsumableService.findOne({
                     where: { consumableId: maintenance.consumableId },
@@ -33678,14 +33716,13 @@ let MaintenanceContextService = class MaintenanceContextService {
                 relations: ['vehicleInfo', 'vehicleInfo.resource'],
                 withDeleted: true,
             });
-            const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenance.maintenanceId);
             return {
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,
                 date: maintenance.date,
                 mileage: maintenance.mileage,
                 cost: maintenance.cost,
-                images: maintenanceFiles.map((file) => file.filePath),
+                images: maintenance.images || [],
             };
         }
         catch (error) {
@@ -33701,8 +33738,7 @@ let MaintenanceContextService = class MaintenanceContextService {
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
             order: { date: 'DESC' },
         });
-        return await Promise.all(maintenances.map(async (maintenance) => {
-            const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenance.maintenanceId);
+        return maintenances.map((maintenance) => {
             return {
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,
@@ -33711,9 +33747,9 @@ let MaintenanceContextService = class MaintenanceContextService {
                 date: maintenance.date,
                 mileage: maintenance.mileage,
                 cost: maintenance.cost,
-                images: maintenanceFiles.map((file) => file.filePath),
+                images: maintenance.images || [],
             };
-        }));
+        });
     }
     async 차량별_정비이력을_조회한다(vehicleInfoId, page = 1, limit = 10) {
         const vehicleInfo = await this.domainVehicleInfoService.findOne({
@@ -33735,21 +33771,20 @@ let MaintenanceContextService = class MaintenanceContextService {
         options.relations = ['consumable'];
         options.order = { createdAt: 'DESC' };
         const maintenances = await this.domainMaintenanceService.findAll(options);
-        const items = await Promise.all(maintenances.map(async (maintenance, index, array) => {
-            const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenance.maintenanceId);
+        const items = maintenances.map((maintenance, index, array) => {
             return {
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,
                 date: maintenance.date,
                 mileage: maintenance.mileage,
                 cost: maintenance.cost,
-                images: maintenanceFiles.map((file) => file.filePath),
+                images: maintenance.images || [],
                 consumableName: maintenance.consumable.name,
                 resourceName: vehicleInfo.resource.name,
                 previousMileage: index !== array.length - 1 ? array[index + 1].mileage : 0,
                 isLatest: index === 0,
             };
-        }));
+        });
         return {
             items,
             meta: {
@@ -33768,7 +33803,6 @@ let MaintenanceContextService = class MaintenanceContextService {
         if (!maintenance) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.NOT_FOUND);
         }
-        const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenanceId);
         return {
             maintenanceId: maintenance.maintenanceId,
             consumableId: maintenance.consumableId,
@@ -33777,7 +33811,7 @@ let MaintenanceContextService = class MaintenanceContextService {
             date: maintenance.date,
             mileage: maintenance.mileage,
             cost: maintenance.cost,
-            images: maintenanceFiles.map((file) => file.filePath),
+            images: maintenance.images || [],
         };
     }
     async 정비이력을_수정한다(maintenanceId, updateMaintenanceDto) {
@@ -33803,15 +33837,23 @@ let MaintenanceContextService = class MaintenanceContextService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            let filePaths = [];
             if (updateMaintenanceDto.images !== undefined) {
                 const fileIds = updateMaintenanceDto.images || [];
+                if (fileIds.length > 0) {
+                    const files = await this.domainFileService.findAll({
+                        where: { fileId: (0, typeorm_1.In)(fileIds) },
+                    });
+                    filePaths = files.map((file) => file.filePath);
+                }
                 if (fileIds.length > 0) {
                     await this.fileContextService.파일들을_영구로_변경한다(fileIds, queryRunner);
                 }
                 await this.fileContextService.정비에_파일들을_연결한다(maintenanceId, fileIds, queryRunner);
             }
             const { images, ...maintenanceData } = updateMaintenanceDto;
-            await this.domainMaintenanceService.update(maintenanceId, maintenanceData, { queryRunner });
+            const updateData = updateMaintenanceDto.images !== undefined ? { ...maintenanceData, images: filePaths } : maintenanceData;
+            await this.domainMaintenanceService.update(maintenanceId, updateData, { queryRunner });
             await queryRunner.commitTransaction();
         }
         catch (error) {
@@ -33825,7 +33867,6 @@ let MaintenanceContextService = class MaintenanceContextService {
             where: { maintenanceId },
             relations: ['consumable', 'consumable.vehicleInfo', 'consumable.vehicleInfo.resource'],
         });
-        const maintenanceFiles = await this.fileContextService.정비_파일을_조회한다(maintenanceId);
         return {
             maintenanceId: updatedMaintenance.maintenanceId,
             consumableId: updatedMaintenance.consumableId,
@@ -33834,7 +33875,7 @@ let MaintenanceContextService = class MaintenanceContextService {
             date: updatedMaintenance.date,
             mileage: updatedMaintenance.mileage,
             cost: updatedMaintenance.cost,
-            images: maintenanceFiles.map((file) => file.filePath),
+            images: updatedMaintenance.images || [],
         };
     }
     async 정비이력을_삭제한다(maintenanceId) {
@@ -34148,14 +34189,59 @@ let ResourceContextService = class ResourceContextService {
             const resourceOrder = resources.length;
             if (!resource.images)
                 resource.images = [];
-            const savedResource = await this.domainResourceService.save({ ...resource, order: resourceOrder }, { queryRunner });
-            if (resource.images.length > 0) {
-                await this.fileContextService.파일들을_영구로_변경한다(resource.images, queryRunner);
+            const fileIds = resource.images;
+            let filePaths = [];
+            if (fileIds.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_1.In)(fileIds) },
+                });
+                filePaths = files.map((file) => file.filePath);
             }
-            await this.fileContextService.리소스에_파일들을_연결한다(savedResource.resourceId, resource.images, queryRunner);
+            const savedResource = await this.domainResourceService.save({ ...resource, images: filePaths, order: resourceOrder }, { queryRunner });
+            if (fileIds.length > 0) {
+                await this.fileContextService.파일들을_영구로_변경한다(fileIds, queryRunner);
+            }
+            await this.fileContextService.리소스에_파일들을_연결한다(savedResource.resourceId, fileIds, queryRunner);
             switch (group.type) {
                 case resource_type_enum_1.ResourceType.VEHICLE:
-                    await this.domainVehicleInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
+                    const vehicleTypeInfo = typeInfo;
+                    const vehicleFilePaths = {
+                        parkingLocationImages: [],
+                        odometerImages: [],
+                        indoorImages: [],
+                    };
+                    if (vehicleTypeInfo.parkingLocationImages?.length > 0) {
+                        const files = await this.domainFileService.findAll({
+                            where: { fileId: (0, typeorm_1.In)(vehicleTypeInfo.parkingLocationImages) },
+                        });
+                        vehicleFilePaths.parkingLocationImages = files.map((file) => file.filePath);
+                    }
+                    if (vehicleTypeInfo.odometerImages?.length > 0) {
+                        const files = await this.domainFileService.findAll({
+                            where: { fileId: (0, typeorm_1.In)(vehicleTypeInfo.odometerImages) },
+                        });
+                        vehicleFilePaths.odometerImages = files.map((file) => file.filePath);
+                    }
+                    if (vehicleTypeInfo.indoorImages?.length > 0) {
+                        const files = await this.domainFileService.findAll({
+                            where: { fileId: (0, typeorm_1.In)(vehicleTypeInfo.indoorImages) },
+                        });
+                        vehicleFilePaths.indoorImages = files.map((file) => file.filePath);
+                    }
+                    const savedVehicleInfo = await this.domainVehicleInfoService.save({
+                        ...typeInfo,
+                        ...vehicleFilePaths,
+                        resourceId: savedResource.resourceId,
+                    }, { queryRunner });
+                    if (vehicleTypeInfo.parkingLocationImages?.length > 0 ||
+                        vehicleTypeInfo.odometerImages?.length > 0 ||
+                        vehicleTypeInfo.indoorImages?.length > 0) {
+                        await this.fileContextService.차량정보에_파일들을_연결한다(savedVehicleInfo.vehicleInfoId, {
+                            parkingLocationImages: vehicleTypeInfo.parkingLocationImages || [],
+                            odometerImages: vehicleTypeInfo.odometerImages || [],
+                            indoorImages: vehicleTypeInfo.indoorImages || [],
+                        }, queryRunner);
+                    }
                     break;
                 case resource_type_enum_1.ResourceType.MEETING_ROOM:
                     await this.domainMeetingRoomInfoService.save({ ...typeInfo, resourceId: savedResource.resourceId }, { queryRunner });
@@ -34218,7 +34304,7 @@ let ResourceContextService = class ResourceContextService {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
         const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resourceId);
-        resource.images = resourceFiles.images.map((file) => file.filePath);
+        resource.imageFiles = resourceFiles.images;
         return new resource_response_dto_1.ResourceResponseDto(resource);
     }
     async 그룹별_자원_목록을_조회한다(resourceGroupId) {
@@ -34229,7 +34315,7 @@ let ResourceContextService = class ResourceContextService {
         });
         const resourcesWithFiles = await Promise.all(resources.map(async (resource) => {
             const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
-            resource.images = resourceFiles.images.map((file) => file.filePath);
+            resource.imageFiles = resourceFiles.images;
             return resource;
         }));
         return resourcesWithFiles.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
@@ -34249,16 +34335,24 @@ let ResourceContextService = class ResourceContextService {
         await queryRunner.startTransaction();
         try {
             if (updateResourceInfoDto.resource) {
-                const { images, ...resourceData } = updateResourceInfoDto.resource;
-                await this.domainResourceService.update(resourceId, resourceData, { queryRunner });
+                const { images } = updateResourceInfoDto.resource;
                 if (images !== undefined) {
                     const fileIds = images || [];
+                    let filePaths = [];
+                    if (fileIds.length > 0) {
+                        const files = await this.domainFileService.findAll({
+                            where: { fileId: (0, typeorm_1.In)(fileIds) },
+                        });
+                        filePaths = files.map((file) => file.filePath);
+                        updateResourceInfoDto.resource.images = filePaths;
+                    }
                     if (fileIds.length > 0) {
                         await this.fileContextService.파일들을_영구로_변경한다(fileIds, queryRunner);
                     }
                     await this.fileContextService.리소스에_파일들을_연결한다(resourceId, fileIds, queryRunner);
                 }
             }
+            await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
             if (updateResourceInfoDto.typeInfo) {
                 switch (resource.type) {
                     case resource_type_enum_1.ResourceType.VEHICLE:
@@ -34304,6 +34398,7 @@ let ResourceContextService = class ResourceContextService {
             return this.자원_상세정보를_조회한다(resourceId);
         }
         catch (err) {
+            console.error(err);
             await queryRunner.rollbackTransaction();
             throw new common_1.InternalServerErrorException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.FAILED_UPDATE);
         }
@@ -34580,7 +34675,6 @@ let VehicleInfoContextService = class VehicleInfoContextService {
         if (!vehicleInfo) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
         }
-        const vehicleFiles = await this.fileContextService.차량정보_파일을_조회한다(vehicleInfoId);
         return {
             vehicleInfoId: vehicleInfo.vehicleInfoId,
             resourceId: vehicleInfo.resourceId,
@@ -34588,9 +34682,9 @@ let VehicleInfoContextService = class VehicleInfoContextService {
             leftMileage: Number(vehicleInfo.leftMileage),
             insuranceName: vehicleInfo.insuranceName,
             insuranceNumber: vehicleInfo.insuranceNumber,
-            parkingLocationImages: vehicleFiles.parkingLocationImages.map((file) => file.filePath),
-            odometerImages: vehicleFiles.odometerImages.map((file) => file.filePath),
-            indoorImages: vehicleFiles.indoorImages.map((file) => file.filePath),
+            parkingLocationImages: vehicleInfo.parkingLocationImages || [],
+            odometerImages: vehicleInfo.odometerImages || [],
+            indoorImages: vehicleInfo.indoorImages || [],
         };
     }
     async 차량정보를_수정한다(vehicleInfoId, updateVehicleInfoDto) {
@@ -34605,7 +34699,33 @@ let VehicleInfoContextService = class VehicleInfoContextService {
             if (!updateVehicleInfoDto.indoorImages)
                 updateVehicleInfoDto.indoorImages = [];
             const { parkingLocationImages, odometerImages, indoorImages, ...vehicleData } = updateVehicleInfoDto;
-            const vehicleInfo = await this.domainVehicleInfoService.update(vehicleInfoId, vehicleData, {
+            let parkingLocationFilePaths = [];
+            let odometerFilePaths = [];
+            let indoorFilePaths = [];
+            if (parkingLocationImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_1.In)(parkingLocationImages) },
+                });
+                parkingLocationFilePaths = files.map((file) => file.filePath);
+            }
+            if (odometerImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_1.In)(odometerImages) },
+                });
+                odometerFilePaths = files.map((file) => file.filePath);
+            }
+            if (indoorImages.length > 0) {
+                const files = await this.domainFileService.findAll({
+                    where: { fileId: (0, typeorm_1.In)(indoorImages) },
+                });
+                indoorFilePaths = files.map((file) => file.filePath);
+            }
+            const vehicleInfo = await this.domainVehicleInfoService.update(vehicleInfoId, {
+                ...vehicleData,
+                parkingLocationImages: parkingLocationFilePaths,
+                odometerImages: odometerFilePaths,
+                indoorImages: indoorFilePaths,
+            }, {
                 queryRunner,
             });
             const allFileIds = [...parkingLocationImages, ...odometerImages, ...indoorImages];
@@ -34643,17 +34763,19 @@ let VehicleInfoContextService = class VehicleInfoContextService {
                 });
             }
             await queryRunner.commitTransaction();
-            const vehicleFiles = await this.fileContextService.차량정보_파일을_조회한다(vehicleInfoId);
+            const updatedVehicleInfo = await this.domainVehicleInfoService.findOne({
+                where: { vehicleInfoId },
+            });
             return {
-                vehicleInfoId: vehicleInfo.vehicleInfoId,
-                resourceId: vehicleInfo.resourceId,
-                totalMileage: Number(vehicleInfo.totalMileage),
-                leftMileage: Number(vehicleInfo.leftMileage),
-                insuranceName: vehicleInfo.insuranceName,
-                insuranceNumber: vehicleInfo.insuranceNumber,
-                parkingLocationImages: vehicleFiles.parkingLocationImages.map((file) => file.filePath),
-                odometerImages: vehicleFiles.odometerImages.map((file) => file.filePath),
-                indoorImages: vehicleFiles.indoorImages.map((file) => file.filePath),
+                vehicleInfoId: updatedVehicleInfo.vehicleInfoId,
+                resourceId: updatedVehicleInfo.resourceId,
+                totalMileage: Number(updatedVehicleInfo.totalMileage),
+                leftMileage: Number(updatedVehicleInfo.leftMileage),
+                insuranceName: updatedVehicleInfo.insuranceName,
+                insuranceNumber: updatedVehicleInfo.insuranceNumber,
+                parkingLocationImages: updatedVehicleInfo.parkingLocationImages || [],
+                odometerImages: updatedVehicleInfo.odometerImages || [],
+                indoorImages: updatedVehicleInfo.indoorImages || [],
             };
         }
         catch (error) {
@@ -35518,6 +35640,10 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
+            reservation.status =
+                reservation.startDate < new Date() && reservation.endDate > new Date()
+                    ? reservation_type_enum_1.ReservationStatus.USING
+                    : reservation.status;
             resource = option?.withResource
                 ? reservation
                     ? await this.domainResourceService.findByResourceId(reservation.resourceId)
@@ -35570,6 +35696,12 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 .map((relation) => relation.reservationId);
             if (reservationIds.length > 0) {
                 const reservations = await Promise.all(reservationIds.map((id) => this.domainReservationService.findByReservationId(id)));
+                reservations.forEach((reservation) => {
+                    reservation.status =
+                        reservation.startDate < new Date() && reservation.endDate > new Date()
+                            ? reservation_type_enum_1.ReservationStatus.USING
+                            : reservation.status;
+                });
                 reservationMap = new Map(reservations.filter(Boolean).map((reservation) => [reservation.reservationId, reservation]));
                 if (option?.withResource) {
                     const resourceIds = reservations.filter(Boolean).map((reservation) => reservation.resourceId);

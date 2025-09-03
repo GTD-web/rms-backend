@@ -32,6 +32,7 @@ export class CreateSchedulesAndParticipants1748247203492 implements MigrationInt
                 "scheduleId" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "title" character varying NOT NULL,
                 "description" text,
+                "location" character varying,
                 "startDate" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "endDate" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "notifyBeforeStart" boolean NOT NULL DEFAULT false,

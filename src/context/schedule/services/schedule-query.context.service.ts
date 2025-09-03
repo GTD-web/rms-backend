@@ -8,7 +8,7 @@ import { Schedule } from '@libs/entities/schedule.entity';
 import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
 import { ScheduleRelation } from '@libs/entities/schedule-relations.entity';
 import { Employee } from '@libs/entities/employee.entity';
-import { ParticipantsType } from '@libs/enums/reservation-type.enum';
+import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 // import { DomainProjectService } from '@src/domain/project/project.service';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
@@ -140,6 +140,10 @@ export class ScheduleQueryContextService {
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
+            reservation.status =
+                reservation.startDate < new Date() && reservation.endDate > new Date()
+                    ? ReservationStatus.USING
+                    : reservation.status;
             resource = option?.withResource
                 ? reservation
                     ? await this.domainResourceService.findByResourceId(reservation.resourceId)
@@ -229,6 +233,12 @@ export class ScheduleQueryContextService {
                 const reservations = await Promise.all(
                     reservationIds.map((id) => this.domainReservationService.findByReservationId(id)),
                 );
+                reservations.forEach((reservation) => {
+                    reservation.status =
+                        reservation.startDate < new Date() && reservation.endDate > new Date()
+                            ? ReservationStatus.USING
+                            : reservation.status;
+                });
                 reservationMap = new Map(
                     reservations.filter(Boolean).map((reservation) => [reservation.reservationId, reservation]),
                 );
