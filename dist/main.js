@@ -5036,132 +5036,6 @@ exports.UserUserController = UserUserController = __decorate([
 
 /***/ }),
 
-/***/ "./src/application/employee/controllers/webhook.controller.ts":
-/*!********************************************************************!*\
-  !*** ./src/application/employee/controllers/webhook.controller.ts ***!
-  \********************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EmployeeWebhookController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const employee_service_1 = __webpack_require__(/*! ../employee.service */ "./src/application/employee/employee.service.ts");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
-const throttler_decorator_1 = __webpack_require__(/*! @nestjs/throttler/dist/throttler.decorator */ "@nestjs/throttler/dist/throttler.decorator");
-const mms_employee_response_dto_1 = __webpack_require__(/*! @resource/application/employee/dtos/mms-employee-response.dto */ "./src/application/employee/dtos/mms-employee-response.dto.ts");
-const response_interceptor_1 = __webpack_require__(/*! @libs/interceptors/response.interceptor */ "./libs/interceptors/response.interceptor.ts");
-const error_interceptor_1 = __webpack_require__(/*! @libs/interceptors/error.interceptor */ "./libs/interceptors/error.interceptor.ts");
-let EmployeeWebhookController = class EmployeeWebhookController {
-    constructor(employeeService) {
-        this.employeeService = employeeService;
-    }
-    async syncEmployees() {
-        return await this.employeeService.syncEmployees();
-    }
-    async webhookCreate(body) {
-        console.log('created employee', body);
-        await this.employeeService.syncEmployees(body.employee_number);
-    }
-    async webhookUpdate(body) {
-        console.log('updated employee', body);
-        await this.employeeService.syncEmployees(body.employee_number);
-    }
-    async webhookPositionChanged(body) {
-        console.log('position changed', body);
-        await this.employeeService.syncEmployees(body.employee_number);
-    }
-    async webhookDepartmentChanged(body) {
-        console.log('department changed', body);
-        await this.employeeService.syncEmployees(body.employee_number);
-    }
-    async webhookDelete(body) {
-        console.log('deleted employee', body);
-    }
-};
-exports.EmployeeWebhookController = EmployeeWebhookController;
-__decorate([
-    (0, common_1.Get)('sync'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], EmployeeWebhookController.prototype, "syncEmployees", null);
-__decorate([
-    (0, common_1.Post)('webhook/create'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, public_decorator_1.Public)(),
-    (0, throttler_decorator_1.Throttle)(5, 60),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _b : Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeWebhookController.prototype, "webhookCreate", null);
-__decorate([
-    (0, common_1.Post)('webhook/update'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, public_decorator_1.Public)(),
-    (0, throttler_decorator_1.Throttle)(5, 60),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeWebhookController.prototype, "webhookUpdate", null);
-__decorate([
-    (0, common_1.Post)('webhook/position_changed'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, public_decorator_1.Public)(),
-    (0, throttler_decorator_1.Throttle)(5, 60),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _d : Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeWebhookController.prototype, "webhookPositionChanged", null);
-__decorate([
-    (0, common_1.Post)('webhook/department_changed'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, public_decorator_1.Public)(),
-    (0, throttler_decorator_1.Throttle)(5, 60),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _e : Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeWebhookController.prototype, "webhookDepartmentChanged", null);
-__decorate([
-    (0, common_1.Post)('webhook/delete'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, public_decorator_1.Public)(),
-    (0, throttler_decorator_1.Throttle)(5, 60),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof mms_employee_response_dto_1.MMSEmployeeResponseDto !== "undefined" && mms_employee_response_dto_1.MMSEmployeeResponseDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", Promise)
-], EmployeeWebhookController.prototype, "webhookDelete", null);
-exports.EmployeeWebhookController = EmployeeWebhookController = __decorate([
-    (0, swagger_1.ApiTags)('5. 직원 '),
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Controller)('v1/employees'),
-    (0, common_1.UseInterceptors)(response_interceptor_1.ResponseInterceptor, error_interceptor_1.ErrorInterceptor),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
-], EmployeeWebhookController);
-
-
-/***/ }),
-
 /***/ "./src/application/employee/dtos/change-password.dto.ts":
 /*!**************************************************************!*\
   !*** ./src/application/employee/dtos/change-password.dto.ts ***!
@@ -5692,7 +5566,6 @@ exports.EmployeeModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const webhook_controller_1 = __webpack_require__(/*! ./controllers/webhook.controller */ "./src/application/employee/controllers/webhook.controller.ts");
 const employee_service_1 = __webpack_require__(/*! ./employee.service */ "./src/application/employee/employee.service.ts");
 const admin_resource_manager_controller_1 = __webpack_require__(/*! ./controllers/admin.resource-manager.controller */ "./src/application/employee/controllers/admin.resource-manager.controller.ts");
 const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
@@ -5707,7 +5580,6 @@ exports.EmployeeModule = EmployeeModule = __decorate([
     (0, common_1.Module)({
         imports: [employee_module_1.DomainEmployeeModule, typeorm_1.TypeOrmModule.forFeature([entities_1.Employee])],
         controllers: [
-            webhook_controller_1.EmployeeWebhookController,
             admin_resource_manager_controller_1.AdminResourceManagerController,
             admin_user_controller_1.AdminUserController,
             employee_controller_1.UserEmployeeController,
@@ -20544,6 +20416,62 @@ exports.UserController = UserController = __decorate([
 
 /***/ }),
 
+/***/ "./src/business/employee-management/controllers/webhook.controller.ts":
+/*!****************************************************************************!*\
+  !*** ./src/business/employee-management/controllers/webhook.controller.ts ***!
+  \****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeWebhookController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const employee_management_service_1 = __webpack_require__(/*! ../employee-management.service */ "./src/business/employee-management/employee-management.service.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const response_interceptor_1 = __webpack_require__(/*! @libs/interceptors/response.interceptor */ "./libs/interceptors/response.interceptor.ts");
+const error_interceptor_1 = __webpack_require__(/*! @libs/interceptors/error.interceptor */ "./libs/interceptors/error.interceptor.ts");
+let EmployeeWebhookController = class EmployeeWebhookController {
+    constructor(employeeManagementService) {
+        this.employeeManagementService = employeeManagementService;
+    }
+    async syncEmployees(req) {
+        const authorization = req.headers['authorization'];
+        return await this.employeeManagementService.syncEmployees(authorization);
+    }
+};
+exports.EmployeeWebhookController = EmployeeWebhookController;
+__decorate([
+    (0, common_1.Get)('sync'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof Request !== "undefined" && Request) === "function" ? _b : Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeWebhookController.prototype, "syncEmployees", null);
+exports.EmployeeWebhookController = EmployeeWebhookController = __decorate([
+    (0, swagger_1.ApiTags)('v2 직원'),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Controller)('v1/employees'),
+    (0, common_1.UseInterceptors)(response_interceptor_1.ResponseInterceptor, error_interceptor_1.ErrorInterceptor),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_management_service_1.EmployeeManagementService !== "undefined" && employee_management_service_1.EmployeeManagementService) === "function" ? _a : Object])
+], EmployeeWebhookController);
+
+
+/***/ }),
+
 /***/ "./src/business/employee-management/dtos/change-password.dto.ts":
 /*!**********************************************************************!*\
   !*** ./src/business/employee-management/dtos/change-password.dto.ts ***!
@@ -21077,13 +21005,14 @@ const employee_controller_1 = __webpack_require__(/*! ./controllers/employee.con
 const user_controller_1 = __webpack_require__(/*! ./controllers/user.controller */ "./src/business/employee-management/controllers/user.controller.ts");
 const employee_management_service_1 = __webpack_require__(/*! ./employee-management.service */ "./src/business/employee-management/employee-management.service.ts");
 const employee_context_module_1 = __webpack_require__(/*! @src/context/employee/employee.context.module */ "./src/context/employee/employee.context.module.ts");
+const webhook_controller_1 = __webpack_require__(/*! ./controllers/webhook.controller */ "./src/business/employee-management/controllers/webhook.controller.ts");
 let EmployeeManagementModule = class EmployeeManagementModule {
 };
 exports.EmployeeManagementModule = EmployeeManagementModule;
 exports.EmployeeManagementModule = EmployeeManagementModule = __decorate([
     (0, common_1.Module)({
         imports: [employee_context_module_1.EmployeeContextModule],
-        controllers: [resource_manager_controller_1.ResourceManagerController, employee_controller_1.EmployeeController, user_controller_1.UserController],
+        controllers: [resource_manager_controller_1.ResourceManagerController, employee_controller_1.EmployeeController, user_controller_1.UserController, webhook_controller_1.EmployeeWebhookController],
         providers: [employee_management_service_1.EmployeeManagementService],
         exports: [employee_management_service_1.EmployeeManagementService],
     })
@@ -21116,6 +21045,9 @@ const employee_context_service_1 = __webpack_require__(/*! @src/context/employee
 let EmployeeManagementService = class EmployeeManagementService {
     constructor(employeeContextService) {
         this.employeeContextService = employeeContextService;
+    }
+    async syncEmployees(authorization) {
+        await this.employeeContextService.직원_정보를_동기화한다(authorization);
     }
     async findResourceManagers() {
         return this.employeeContextService.자원관리자_목록을_조회한다();
@@ -30402,20 +30334,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const mms_employee_response_dto_1 = __webpack_require__(/*! @src/business/employee-management/dtos/mms-employee-response.dto */ "./src/business/employee-management/dtos/mms-employee-response.dto.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
 const axios_1 = __webpack_require__(/*! axios */ "axios");
+const employee_microservice_adapter_1 = __webpack_require__(/*! @src/domain/employee/adapters/employee-microservice.adapter */ "./src/domain/employee/adapters/employee-microservice.adapter.ts");
 let EmployeeContextService = class EmployeeContextService {
-    constructor(domainEmployeeService) {
+    constructor(domainEmployeeService, employeeMicroserviceAdapter) {
         this.domainEmployeeService = domainEmployeeService;
+        this.employeeMicroserviceAdapter = employeeMicroserviceAdapter;
     }
     async 시스템관리자_목록을_조회한다() {
         const systemAdmins = await this.domainEmployeeService.findAll({
@@ -30557,16 +30490,47 @@ let EmployeeContextService = class EmployeeContextService {
         await this.domainEmployeeService.update(employee.employeeId, employee);
         return this.직원_상세정보를_조회한다(employeeId);
     }
-    async 외부_직원정보를_조회한다(employeeNumber) {
-        let url = `${process.env.METADATA_MANAGER_URL}/api/employees?detailed=true`;
-        if (employeeNumber) {
-            url += `&employeeNumber=${employeeNumber}`;
+    async 직원_정보를_동기화한다(authorization) {
+        const { employees, total } = await this.employeeMicroserviceAdapter.getAllEmployees(authorization);
+        for (const employee of employees) {
+            const existingEmployee = await this.domainEmployeeService.findByEmployeeNumber(employee.employeeNumber);
+            if (employee.status === '퇴사') {
+                if (existingEmployee) {
+                    await this.domainEmployeeService.update(existingEmployee.employeeId, {
+                        department: employee.status,
+                        position: employee.status,
+                    });
+                }
+                continue;
+            }
+            try {
+                if (existingEmployee) {
+                    existingEmployee.name = employee.name;
+                    existingEmployee.employeeNumber = employee.employeeNumber;
+                    existingEmployee.department = employee.department.departmentName;
+                    existingEmployee.position = employee.rank.rankName;
+                    existingEmployee.mobile = employee.phoneNumber;
+                    await this.domainEmployeeService.save(existingEmployee);
+                }
+                else {
+                    console.log('create employee', employee);
+                    const employeeData = {
+                        employeeNumber: employee.employeeNumber,
+                        name: employee.name,
+                        email: employee.email,
+                        department: employee.department.departmentName,
+                        position: employee.rank.rankName,
+                        mobile: employee.phoneNumber,
+                    };
+                    const newEmployee = await this.domainEmployeeService.create(employeeData);
+                    await this.domainEmployeeService.save(newEmployee);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
         }
-        const result = await axios_1.default.get(url);
-        if (employeeNumber) {
-            return [new mms_employee_response_dto_1.MMSEmployeeResponseDto(result.data)];
-        }
-        return result.data.map((employee) => new mms_employee_response_dto_1.MMSEmployeeResponseDto(employee));
+        return this.직원_목록을_조회한다();
     }
     부서별로_그룹핑한다(employees) {
         const departments = new Map();
@@ -30585,7 +30549,7 @@ let EmployeeContextService = class EmployeeContextService {
 exports.EmployeeContextService = EmployeeContextService;
 exports.EmployeeContextService = EmployeeContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object, typeof (_b = typeof employee_microservice_adapter_1.EmployeeMicroserviceAdapter !== "undefined" && employee_microservice_adapter_1.EmployeeMicroserviceAdapter) === "function" ? _b : Object])
 ], EmployeeContextService);
 
 
@@ -40820,16 +40784,6 @@ module.exports = require("@nestjs/schedule");
 /***/ ((module) => {
 
 module.exports = require("@nestjs/swagger");
-
-/***/ }),
-
-/***/ "@nestjs/throttler/dist/throttler.decorator":
-/*!*************************************************************!*\
-  !*** external "@nestjs/throttler/dist/throttler.decorator" ***!
-  \*************************************************************/
-/***/ ((module) => {
-
-module.exports = require("@nestjs/throttler/dist/throttler.decorator");
 
 /***/ }),
 

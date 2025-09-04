@@ -12,10 +12,14 @@ import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import * as bcrypt from 'bcrypt';
 import axios from 'axios';
 import { Employee } from '@libs/entities/employee.entity';
+import { EmployeeMicroserviceAdapter } from '@src/domain/employee/adapters/employee-microservice.adapter';
 
 @Injectable()
 export class EmployeeContextService {
-    constructor(private readonly domainEmployeeService: DomainEmployeeService) {}
+    constructor(
+        private readonly domainEmployeeService: DomainEmployeeService,
+        private readonly employeeMicroserviceAdapter: EmployeeMicroserviceAdapter,
+    ) {}
 
     async 시스템관리자_목록을_조회한다(): Promise<Employee[]> {
         const systemAdmins = await this.domainEmployeeService.findAll({
@@ -210,19 +214,47 @@ export class EmployeeContextService {
     /**
      * 외부 시스템에서 직원 정보를 조회한다
      */
-    async 외부_직원정보를_조회한다(employeeNumber?: string): Promise<MMSEmployeeResponseDto[]> {
-        let url = `${process.env.METADATA_MANAGER_URL}/api/employees?detailed=true`;
-        if (employeeNumber) {
-            url += `&employeeNumber=${employeeNumber}`;
+    async 직원_정보를_동기화한다(authorization: string): Promise<EmplyeesByDepartmentResponseDto[]> {
+        const { employees, total } = await this.employeeMicroserviceAdapter.getAllEmployees(authorization);
+        for (const employee of employees) {
+            const existingEmployee = await this.domainEmployeeService.findByEmployeeNumber(employee.employeeNumber);
+
+            if (employee.status === '퇴사') {
+                if (existingEmployee) {
+                    await this.domainEmployeeService.update(existingEmployee.employeeId, {
+                        department: employee.status,
+                        position: employee.status,
+                    });
+                }
+                continue;
+            }
+
+            try {
+                if (existingEmployee) {
+                    existingEmployee.name = employee.name;
+                    existingEmployee.employeeNumber = employee.employeeNumber;
+                    existingEmployee.department = employee.department.departmentName;
+                    existingEmployee.position = employee.rank.rankName;
+                    existingEmployee.mobile = employee.phoneNumber;
+                    await this.domainEmployeeService.save(existingEmployee);
+                } else {
+                    console.log('create employee', employee);
+                    const employeeData = {
+                        employeeNumber: employee.employeeNumber,
+                        name: employee.name,
+                        email: employee.email,
+                        department: employee.department.departmentName,
+                        position: employee.rank.rankName,
+                        mobile: employee.phoneNumber,
+                    };
+                    const newEmployee = await this.domainEmployeeService.create(employeeData);
+                    await this.domainEmployeeService.save(newEmployee);
+                }
+            } catch (error) {
+                console.log(error);
+            }
         }
-
-        const result = await axios.get(url);
-
-        if (employeeNumber) {
-            return [new MMSEmployeeResponseDto(result.data)];
-        }
-
-        return result.data.map((employee) => new MMSEmployeeResponseDto(employee));
+        return this.직원_목록을_조회한다();
     }
 
     /**

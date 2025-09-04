@@ -10,6 +10,10 @@ import { UpdateNotificationSettingsDto } from './dtos/notification-settings.dto'
 export class EmployeeManagementService {
     constructor(private readonly employeeContextService: EmployeeContextService) {}
 
+    async syncEmployees(authorization: string): Promise<void> {
+        await this.employeeContextService.직원_정보를_동기화한다(authorization);
+    }
+
     async findResourceManagers(): Promise<EmplyeesByDepartmentResponseDto[]> {
         return this.employeeContextService.자원관리자_목록을_조회한다();
     }

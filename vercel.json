@@ -46,7 +46,6 @@
             "path": "/api/v1/files/cron-job/delete-temporary-file",
             "schedule": "0 0 * * *"
         },
-
         {
             "path": "/api/v1/employees/sync",
             "schedule": "0 0 * * *"

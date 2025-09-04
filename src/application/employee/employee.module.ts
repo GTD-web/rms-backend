@@ -24,7 +24,7 @@ import { UserUserController } from './controllers/user.controller';
 @Module({
     imports: [DomainEmployeeModule, TypeOrmModule.forFeature([Employee])],
     controllers: [
-        EmployeeWebhookController,
+        // EmployeeWebhookController,
         AdminResourceManagerController,
         AdminUserController,
         UserEmployeeController,
