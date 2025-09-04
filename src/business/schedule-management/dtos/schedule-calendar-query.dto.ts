@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEnum, IsArray } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ScheduleCategoryType } from './my-schedule-query.dto';
 
@@ -36,4 +36,21 @@ export class ScheduleCalendarQueryDto {
     })
     @IsBoolean()
     mySchedule?: boolean;
+
+    @ApiProperty({
+        description: '특정 직원들의 일정만 조회 (직원 ID 배열)',
+        example: ['emp-001', 'emp-002', 'emp-003'],
+        required: false,
+        type: [String],
+    })
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        return value ? [value] : [];
+    })
+    @IsArray()
+    @IsString({ each: true })
+    employeeIds?: string[];
 }

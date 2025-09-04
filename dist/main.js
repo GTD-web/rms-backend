@@ -26938,6 +26938,24 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], ScheduleCalendarQueryDto.prototype, "mySchedule", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '특정 직원들의 일정만 조회 (직원 ID 배열)',
+        example: ['emp-001', 'emp-002', 'emp-003'],
+        required: false,
+        type: [String],
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        return value ? [value] : [];
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], ScheduleCalendarQueryDto.prototype, "employeeIds", void 0);
 
 
 /***/ }),
@@ -28493,7 +28511,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         return this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();
     }
     async findCalendar(user, query) {
-        this.logger.log(`캘린더 조회 요청 - 사용자: ${user.employeeId}, 날짜: ${query.date}`);
+        this.logger.log(`캘린더 조회 요청 - 사용자: ${user.employeeId}, 날짜: ${query.date}, 직원필터: ${query.employeeIds?.join(',') || '없음'}`);
         const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(query.date, query.category, query.mySchedule ? user.employeeId : undefined);
         if (scheduleIds.length === 0) {
             return { schedules: [] };
@@ -28503,7 +28521,16 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             withResource: true,
             withParticipants: true,
         });
-        const scheduleCalendarItems = scheduleDataList.map(({ schedule, reservation, resource, participants }) => {
+        let filteredScheduleDataList = scheduleDataList;
+        if (query.employeeIds && query.employeeIds.length > 0) {
+            filteredScheduleDataList = scheduleDataList.filter(({ participants }) => {
+                if (!participants || participants.length === 0)
+                    return false;
+                return participants.some((participant) => participant.employee?.employeeId &&
+                    query.employeeIds.includes(participant.employee.employeeId));
+            });
+        }
+        const scheduleCalendarItems = filteredScheduleDataList.map(({ schedule, reservation, resource, participants }) => {
             const reserver = participants?.find((p) => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
             return {
                 scheduleId: schedule.scheduleId,
@@ -34669,7 +34696,6 @@ let ResourceContextService = class ResourceContextService {
             },
             relations: ['reservations'],
         });
-        console.log('resource', resource);
         return !!resource;
     }
 };
@@ -37343,33 +37369,6 @@ let EmployeeMicroserviceAdapter = EmployeeMicroserviceAdapter_1 = class Employee
             throw error;
         }
     }
-    async getEmployees(authorization, requestDto) {
-        try {
-            this.logger.log(`직원 목록 조회 요청:`, requestDto);
-            const params = new URLSearchParams();
-            if (requestDto.employeeId) {
-                params.append('employeeIds', requestDto.employeeId);
-            }
-            if (requestDto.employeeNumber) {
-                params.append('employeeNumbers', requestDto.employeeNumber);
-            }
-            if (requestDto.withDetail !== undefined) {
-                params.append('withDetail', requestDto.withDetail.toString());
-            }
-            params.append('includeTerminated', 'false');
-            const url = `${this.employeeServiceUrl}/api/organization/employees?${params.toString()}`;
-            const response = await (0, rxjs_1.firstValueFrom)(this.httpService.get(url, { headers: this.getHeaders(authorization) }).pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
-                this.logger.error(`직원 목록 조회 실패: ${error.message}`, error.stack);
-                throw new common_1.BadRequestException('직원 목록 조회 중 오류가 발생했습니다.');
-            })));
-            this.logger.log(`직원 목록 조회 성공: 총 ${response.total}명`);
-            return response;
-        }
-        catch (error) {
-            this.logger.error(`직원 목록 조회 중 예외 발생: ${error.message}`, error.stack);
-            throw error;
-        }
-    }
     async getEmployeesByIds(authorization, employeeIds, withDetail = false) {
         try {
             this.logger.log(`직원 ID 목록으로 조회 요청: ${employeeIds.length}개, withDetail=${withDetail}`);
@@ -39475,7 +39474,7 @@ let DomainReservationService = class DomainReservationService extends base_servi
         const conflicts = await this.reservationRepository.findAll({
             where: {
                 resourceId,
-                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+                status: (0, typeorm_1.Not)((0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.CANCELLED, reservation_type_enum_1.ReservationStatus.REJECTED])),
                 startDate: (0, typeorm_1.LessThan)(endDate),
                 endDate: (0, typeorm_1.MoreThan)(startDate),
                 ...(reservationId && { reservationId: (0, typeorm_1.Not)(reservationId) }),

@@ -134,54 +134,54 @@ export class EmployeeMicroserviceAdapter {
         }
     }
 
-    /**
-     * 직원 목록 조회
-     * @param authorization 요청에서 전달받은 Authorization 헤더
-     * @param requestDto 조회 조건
-     * @returns 직원 목록
-     */
-    async getEmployees(authorization: string, requestDto: EmployeeRequestDto): Promise<EmployeesResponseDto> {
-        try {
-            this.logger.log(`직원 목록 조회 요청:`, requestDto);
+    // /**
+    //  * 직원 목록 조회
+    //  * @param authorization 요청에서 전달받은 Authorization 헤더
+    //  * @param requestDto 조회 조건
+    //  * @returns 직원 목록
+    //  */
+    // async getEmployees(authorization: string, requestDto: EmployeeRequestDto): Promise<EmployeesResponseDto> {
+    //     try {
+    //         this.logger.log(`직원 목록 조회 요청:`, requestDto);
 
-            const params = new URLSearchParams();
+    //         const params = new URLSearchParams();
 
-            // 단일 ID를 배열 형태로 변환
-            if (requestDto.employeeId) {
-                params.append('employeeIds', requestDto.employeeId);
-            }
+    //         // 단일 ID를 배열 형태로 변환
+    //         if (requestDto.employeeId) {
+    //             params.append('employeeIds', requestDto.employeeId);
+    //         }
 
-            // 단일 사번을 배열 형태로 변환
-            if (requestDto.employeeNumber) {
-                params.append('employeeNumbers', requestDto.employeeNumber);
-            }
+    //         // 단일 사번을 배열 형태로 변환
+    //         if (requestDto.employeeNumber) {
+    //             params.append('employeeNumbers', requestDto.employeeNumber);
+    //         }
 
-            if (requestDto.withDetail !== undefined) {
-                params.append('withDetail', requestDto.withDetail.toString());
-            }
+    //         if (requestDto.withDetail !== undefined) {
+    //             params.append('withDetail', requestDto.withDetail.toString());
+    //         }
 
-            // 기본적으로 퇴사자는 제외
-            params.append('includeTerminated', 'false');
+    //         // 기본적으로 퇴사자는 제외
+    //         params.append('includeTerminated', 'false');
 
-            const url = `${this.employeeServiceUrl}/api/organization/employees?${params.toString()}`;
+    //         const url = `${this.employeeServiceUrl}/api/organization/employees?${params.toString()}`;
 
-            const response = await firstValueFrom(
-                this.httpService.get<EmployeesResponseDto>(url, { headers: this.getHeaders(authorization) }).pipe(
-                    map((res) => res.data),
-                    catchError((error: AxiosError) => {
-                        this.logger.error(`직원 목록 조회 실패: ${error.message}`, error.stack);
-                        throw new BadRequestException('직원 목록 조회 중 오류가 발생했습니다.');
-                    }),
-                ),
-            );
+    //         const response = await firstValueFrom(
+    //             this.httpService.get<EmployeesResponseDto>(url, { headers: this.getHeaders(authorization) }).pipe(
+    //                 map((res) => res.data),
+    //                 catchError((error: AxiosError) => {
+    //                     this.logger.error(`직원 목록 조회 실패: ${error.message}`, error.stack);
+    //                     throw new BadRequestException('직원 목록 조회 중 오류가 발생했습니다.');
+    //                 }),
+    //             ),
+    //         );
 
-            this.logger.log(`직원 목록 조회 성공: 총 ${response.total}명`);
-            return response;
-        } catch (error) {
-            this.logger.error(`직원 목록 조회 중 예외 발생: ${error.message}`, error.stack);
-            throw error;
-        }
-    }
+    //         this.logger.log(`직원 목록 조회 성공: 총 ${response.total}명`);
+    //         return response;
+    //     } catch (error) {
+    //         this.logger.error(`직원 목록 조회 중 예외 발생: ${error.message}`, error.stack);
+    //         throw error;
+    //     }
+    // }
 
     /**
      * 여러 직원 ID로 직원 정보 일괄 조회

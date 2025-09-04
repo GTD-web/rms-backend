@@ -717,7 +717,7 @@ export class ResourceContextService {
             },
             relations: ['reservations'],
         });
-        console.log('resource', resource);
+
         return !!resource;
     }
 }

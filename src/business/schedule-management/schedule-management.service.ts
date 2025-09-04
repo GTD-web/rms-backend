@@ -96,7 +96,9 @@ export class ScheduleManagementService {
      * 캘린더 조회 (표준 파이프라인 적용)
      */
     async findCalendar(user: Employee, query: ScheduleCalendarQueryDto): Promise<ScheduleCalendarResponseDto> {
-        this.logger.log(`캘린더 조회 요청 - 사용자: ${user.employeeId}, 날짜: ${query.date}`);
+        this.logger.log(
+            `캘린더 조회 요청 - 사용자: ${user.employeeId}, 날짜: ${query.date}, 직원필터: ${query.employeeIds?.join(',') || '없음'}`,
+        );
 
         // 1. 권한: 조회는 별도 권한 체크 없음 (모든 직원이 캘린더 조회 가능)
 
@@ -118,29 +120,46 @@ export class ScheduleManagementService {
             withParticipants: true, // 예약자 정보 필요
         });
 
-        const scheduleCalendarItems = scheduleDataList.map(({ schedule, reservation, resource, participants }) => {
-            // 예약자 찾기 (RESERVER 타입의 참가자)
-            const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
+        // employeeIds 필터링 적용 (해당 직원이 참여하는 일정만)
+        let filteredScheduleDataList = scheduleDataList;
+        if (query.employeeIds && query.employeeIds.length > 0) {
+            filteredScheduleDataList = scheduleDataList.filter(({ participants }) => {
+                if (!participants || participants.length === 0) return false;
 
-            return {
-                scheduleId: schedule.scheduleId,
-                scheduleTitle: schedule.title,
-                startDate: schedule.startDate,
-                endDate: schedule.endDate,
-                reserverName: reserver?.employee?.name || '',
-                project: undefined, // TODO: 프로젝트 구현 후 추가
-                reservation:
-                    reservation && resource
-                        ? {
-                              reservationId: reservation.reservationId,
-                              resourceName: resource.name,
-                              resourceType: resource.type,
-                          }
-                        : undefined,
-                // TODO : 알림관련 기능 리팩토링 후 작업
-                hasUnreadNotification: false,
-            };
-        });
+                // 해당 일정에 지정된 직원 중 하나라도 참여하는지 확인
+                return participants.some(
+                    (participant) =>
+                        participant.employee?.employeeId &&
+                        query.employeeIds!.includes(participant.employee.employeeId),
+                );
+            });
+        }
+
+        const scheduleCalendarItems = filteredScheduleDataList.map(
+            ({ schedule, reservation, resource, participants }) => {
+                // 예약자 찾기 (RESERVER 타입의 참가자)
+                const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
+
+                return {
+                    scheduleId: schedule.scheduleId,
+                    scheduleTitle: schedule.title,
+                    startDate: schedule.startDate,
+                    endDate: schedule.endDate,
+                    reserverName: reserver?.employee?.name || '',
+                    project: undefined, // TODO: 프로젝트 구현 후 추가
+                    reservation:
+                        reservation && resource
+                            ? {
+                                  reservationId: reservation.reservationId,
+                                  resourceName: resource.name,
+                                  resourceType: resource.type,
+                              }
+                            : undefined,
+                    // TODO : 알림관련 기능 리팩토링 후 작업
+                    hasUnreadNotification: false,
+                };
+            },
+        );
 
         return {
             schedules: scheduleCalendarItems,

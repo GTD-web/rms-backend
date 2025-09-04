@@ -53,7 +53,7 @@ export class DomainReservationService extends BaseService<Reservation> {
         const conflicts = await this.reservationRepository.findAll({
             where: {
                 resourceId,
-                status: In([ReservationStatus.PENDING, ReservationStatus.CONFIRMED, ReservationStatus.CLOSED]),
+                status: Not(In([ReservationStatus.CANCELLED, ReservationStatus.REJECTED])),
                 startDate: LessThan(endDate),
                 endDate: MoreThan(startDate),
                 ...(reservationId && { reservationId: Not(reservationId) }),
