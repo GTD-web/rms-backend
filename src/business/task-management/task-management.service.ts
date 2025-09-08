@@ -25,7 +25,7 @@ export class TaskManagementService {
         let delayedReturnTasks = [];
         let consumableReplaceTasks = [];
 
-        if (type === '차량반납지연') {
+        if (type === '차량반납지연' || type === '전체') {
             // 반납 지연된 예약 조회
             const delayedReturnReservations = await this.reservationContextService.지연반납_예약을_조회한다(
                 user.employeeId,
@@ -40,7 +40,8 @@ export class TaskManagementService {
                 startDate: reservation.startDate,
                 endDate: reservation.endDate,
             }));
-        } else if (type === '소모품교체') {
+        }
+        if (type === '소모품교체' || type === '전체') {
             const isResourceAdmin = user.roles.includes(Role.RESOURCE_ADMIN);
             const isSystemAdmin = user.roles.includes(Role.SYSTEM_ADMIN);
 
@@ -63,7 +64,7 @@ export class TaskManagementService {
             }));
         }
 
-        const items = type === '차량반납지연' ? delayedReturnTasks : consumableReplaceTasks;
+        const items = [...delayedReturnTasks, ...consumableReplaceTasks];
 
         return {
             totalCount: items.length,

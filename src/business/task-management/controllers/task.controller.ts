@@ -30,7 +30,7 @@ export class TaskController {
         type: String,
         required: false,
         description: '태스크 타입',
-        enum: ['차량반납지연', '소모품교체'],
+        enum: ['전체', '차량반납지연', '소모품교체'],
     })
     async getUserTasks(@User() user: Employee, @Query('type') type?: string): Promise<TaskListResponseDto> {
         return this.taskManagementService.getTaskList(user, type);
@@ -48,7 +48,7 @@ export class TaskController {
         type: String,
         required: false,
         description: '태스크 타입',
-        enum: ['차량반납지연', '소모품교체'],
+        enum: ['전체', '차량반납지연', '소모품교체'],
     })
     async getAdminTasks(@Query('type') type?: string): Promise<TaskResponseDto[]> {
         return this.taskManagementService.getAdminTaskList(type);

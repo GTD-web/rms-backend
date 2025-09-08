@@ -29911,7 +29911,7 @@ __decorate([
         type: String,
         required: false,
         description: '태스크 타입',
-        enum: ['차량반납지연', '소모품교체'],
+        enum: ['전체', '차량반납지연', '소모품교체'],
     }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Query)('type')),
@@ -29932,7 +29932,7 @@ __decorate([
         type: String,
         required: false,
         description: '태스크 타입',
-        enum: ['차량반납지연', '소모품교체'],
+        enum: ['전체', '차량반납지연', '소모품교체'],
     }),
     __param(0, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
@@ -30167,7 +30167,7 @@ let TaskManagementService = class TaskManagementService {
     async getTaskList(user, type) {
         let delayedReturnTasks = [];
         let consumableReplaceTasks = [];
-        if (type === '차량반납지연') {
+        if (type === '차량반납지연' || type === '전체') {
             const delayedReturnReservations = await this.reservationContextService.지연반납_예약을_조회한다(user.employeeId);
             delayedReturnTasks = delayedReturnReservations.map((reservation) => ({
                 type: '반납지연',
@@ -30179,7 +30179,7 @@ let TaskManagementService = class TaskManagementService {
                 endDate: reservation.endDate,
             }));
         }
-        else if (type === '소모품교체') {
+        if (type === '소모품교체' || type === '전체') {
             const isResourceAdmin = user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN);
             const isSystemAdmin = user.roles.includes(role_type_enum_1.Role.SYSTEM_ADMIN);
             let needReplaceConsumable = [];
@@ -30198,7 +30198,7 @@ let TaskManagementService = class TaskManagementService {
                 endDate: null,
             }));
         }
-        const items = type === '차량반납지연' ? delayedReturnTasks : consumableReplaceTasks;
+        const items = [...delayedReturnTasks, ...consumableReplaceTasks];
         return {
             totalCount: items.length,
             items,
