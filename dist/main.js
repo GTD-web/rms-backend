@@ -2316,6 +2316,10 @@ __decorate([
     __metadata("design:type", typeof (_c = typeof schedule_type_enum_1.ScheduleType !== "undefined" && schedule_type_enum_1.ScheduleType) === "function" ? _c : Object)
 ], Schedule.prototype, "scheduleType", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true, comment: '일정 담당 부서' }),
+    __metadata("design:type", String)
+], Schedule.prototype, "scheduleDepartment", void 0);
+__decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
         enum: schedule_type_enum_1.ScheduleStatus,
@@ -28419,6 +28423,7 @@ const schedule_detail_response_dto_1 = __webpack_require__(/*! ./dtos/schedule-d
 const resource_schedule_response_dto_1 = __webpack_require__(/*! ./dtos/resource-schedule-response.dto */ "./src/business/schedule-management/dtos/resource-schedule-response.dto.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const employee_context_service_1 = __webpack_require__(/*! @src/context/employee/employee.context.service */ "./src/context/employee/employee.context.service.ts");
 const schedule_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/schedule-notification.context.service */ "./src/context/notification/services/schedule-notification.context.service.ts");
 let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleManagementService {
@@ -28723,6 +28728,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     scheduleType: data.scheduleType,
                     notifyBeforeStart: data.notifyBeforeStart || false,
                     notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
+                    scheduleDepartment: data.scheduleType === schedule_type_enum_1.ScheduleType.DEPARTMENT ? user.department : null,
                 };
                 const createdSchedule = await this.scheduleMutationService.일정을_생성한다(scheduleData, queryRunner);
                 await this.scheduleMutationService.일정_참가자를_추가한다(createdSchedule.scheduleId, user.employeeId, 'RESERVER', queryRunner);

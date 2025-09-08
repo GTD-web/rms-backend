@@ -541,6 +541,7 @@ export class ScheduleManagementService {
                     scheduleType: data.scheduleType,
                     notifyBeforeStart: data.notifyBeforeStart || false,
                     notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
+                    scheduleDepartment: data.scheduleType === ScheduleType.DEPARTMENT ? user.department : null,
                 };
 
                 const createdSchedule = await this.scheduleMutationService.일정을_생성한다(

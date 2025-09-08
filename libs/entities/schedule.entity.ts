@@ -44,6 +44,9 @@ export class Schedule {
     })
     scheduleType: ScheduleType;
 
+    @Column({ nullable: true, comment: '일정 담당 부서' })
+    scheduleDepartment: string;
+
     @Column({
         type: 'enum',
         enum: ScheduleStatus,
