@@ -8,6 +8,7 @@ export interface CreateScheduleDto {
     notifyBeforeStart?: boolean;
     notifyMinutesBeforeStart?: number[];
     scheduleType: ScheduleType;
+    scheduleDepartment?: string;
 }
 
 export interface CreateScheduleParticipantDto {

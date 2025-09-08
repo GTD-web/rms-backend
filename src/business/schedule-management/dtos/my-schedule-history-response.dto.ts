@@ -49,6 +49,13 @@ export class MyScheduleHistoryItemDto {
     scheduleType: string;
 
     @ApiProperty({
+        description: '일정 담당 부서',
+        example: '영업팀',
+        required: false,
+    })
+    scheduleDepartment?: string;
+
+    @ApiProperty({
         description: '시작 전 알림 시점 (분 단위)',
         type: [Number],
         required: false,

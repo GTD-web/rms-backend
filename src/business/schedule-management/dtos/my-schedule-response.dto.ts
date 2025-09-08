@@ -76,6 +76,13 @@ export class MyScheduleItemDto {
     scheduleType: string;
 
     @ApiProperty({
+        description: '일정 담당 부서',
+        example: '영업팀',
+        required: false,
+    })
+    scheduleDepartment?: string;
+
+    @ApiProperty({
         description: '관련 프로젝트 정보',
         type: MyScheduleProjectDto,
         required: false,

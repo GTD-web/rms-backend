@@ -262,6 +262,13 @@ export class ScheduleDetailResponseDto {
     scheduleType: ScheduleType;
 
     @ApiProperty({
+        description: '일정 담당 부서',
+        example: '영업팀',
+        required: false,
+    })
+    scheduleDepartment?: string;
+
+    @ApiProperty({
         description: '일정 상태',
         enum: ScheduleStatus,
         example: ScheduleStatus.PROCESSING,

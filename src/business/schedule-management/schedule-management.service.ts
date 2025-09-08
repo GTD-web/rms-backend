@@ -193,6 +193,7 @@ export class ScheduleManagementService {
                 startDate: schedule.startDate,
                 endDate: schedule.endDate,
                 scheduleType: this.scheduleQueryContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
+                scheduleDepartment: schedule.scheduleDepartment,
                 project: project
                     ? {
                           projectId: project.projectId,
@@ -254,6 +255,7 @@ export class ScheduleManagementService {
                     startDate: schedule.startDate,
                     endDate: schedule.endDate,
                     scheduleType: this.scheduleQueryContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
+                    scheduleDepartment: schedule.scheduleDepartment,
                     notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
                     participants: participants?.map((participant) => ({
                         employeeId: participant.employeeId,
@@ -371,6 +373,7 @@ export class ScheduleManagementService {
             startDate: schedule.startDate,
             endDate: schedule.endDate,
             scheduleType: schedule.scheduleType,
+            scheduleDepartment: schedule.scheduleDepartment,
             status: schedule.status,
             notifyBeforeStart: schedule.notifyBeforeStart,
             notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,

@@ -26033,6 +26033,14 @@ __decorate([
 ], MyScheduleHistoryItemDto.prototype, "scheduleType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        description: '일정 담당 부서',
+        example: '영업팀',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], MyScheduleHistoryItemDto.prototype, "scheduleDepartment", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         description: '시작 전 알림 시점 (분 단위)',
         type: [Number],
         required: false,
@@ -26317,6 +26325,14 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], MyScheduleItemDto.prototype, "scheduleType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 담당 부서',
+        example: '영업팀',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], MyScheduleItemDto.prototype, "scheduleDepartment", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '관련 프로젝트 정보',
@@ -27854,6 +27870,14 @@ __decorate([
 ], ScheduleDetailResponseDto.prototype, "scheduleType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        description: '일정 담당 부서',
+        example: '영업팀',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailResponseDto.prototype, "scheduleDepartment", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         description: '일정 상태',
         enum: schedule_type_enum_1.ScheduleStatus,
         example: schedule_type_enum_1.ScheduleStatus.PROCESSING,
@@ -28508,6 +28532,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 startDate: schedule.startDate,
                 endDate: schedule.endDate,
                 scheduleType: this.scheduleQueryContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
+                scheduleDepartment: schedule.scheduleDepartment,
                 project: project
                     ? {
                         projectId: project.projectId,
@@ -28554,6 +28579,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 startDate: schedule.startDate,
                 endDate: schedule.endDate,
                 scheduleType: this.scheduleQueryContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
+                scheduleDepartment: schedule.scheduleDepartment,
                 notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
                 participants: participants?.map((participant) => ({
                     employeeId: participant.employeeId,
@@ -28630,6 +28656,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             startDate: schedule.startDate,
             endDate: schedule.endDate,
             scheduleType: schedule.scheduleType,
+            scheduleDepartment: schedule.scheduleDepartment,
             status: schedule.status,
             notifyBeforeStart: schedule.notifyBeforeStart,
             notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
