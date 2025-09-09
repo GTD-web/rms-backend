@@ -34712,7 +34712,7 @@ let ResourceContextService = class ResourceContextService {
             calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
         }
         else {
-            const operatingStartTime = new Date(new Date(`${targetDate} ${operatingHours.startTime}`).toISOString() + ' +09:00');
+            const operatingStartTime = new Date(`${targetDate}T${operatingHours.startTime}+09:00`);
             console.log('operatingStartTime', new Date(`${targetDate} ${operatingHours.startTime}`).toISOString(), operatingStartTime);
             console.log(roundedStartTime > new Date(operatingStartTime));
             console.log(roundedStartTime.toTimeString().slice(0, 8), operatingStartTime.toTimeString().slice(0, 8));
