@@ -34701,15 +34701,18 @@ let ResourceContextService = class ResourceContextService {
         const now = new Date();
         const currentMinutes = now.getMinutes();
         const roundedStartTime = new Date(now);
+        console.log('1', currentMinutes, roundedStartTime);
         if (currentMinutes < 30) {
             roundedStartTime.setMinutes(0, 0, 0);
         }
         else {
             roundedStartTime.setMinutes(30, 0, 0);
         }
+        console.log('2', currentMinutes, roundedStartTime);
         let calculatedStartTime;
         if (resourceType === resource_type_enum_1.ResourceType.VEHICLE) {
             calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
+            console.log('VEHICLE', calculatedStartTime);
         }
         else {
             const operatingStartTime = new Date(`${targetDate} ${operatingHours.startTime}`);
@@ -34717,6 +34720,7 @@ let ResourceContextService = class ResourceContextService {
                 roundedStartTime > operatingStartTime
                     ? roundedStartTime.toTimeString().slice(0, 8)
                     : operatingHours.startTime;
+            console.log('else', calculatedStartTime);
         }
         return {
             startTime: calculatedStartTime,

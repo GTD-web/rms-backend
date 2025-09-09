@@ -671,23 +671,27 @@ export class ResourceContextService {
         const now = new Date();
         const currentMinutes = now.getMinutes();
         const roundedStartTime = new Date(now);
+        console.log('1', currentMinutes, roundedStartTime);
 
         if (currentMinutes < 30) {
             roundedStartTime.setMinutes(0, 0, 0);
         } else {
             roundedStartTime.setMinutes(30, 0, 0);
         }
+        console.log('2', currentMinutes, roundedStartTime);
 
         // 차량은 24시간, 다른 자원은 운영 시간 고려
         let calculatedStartTime: string;
         if (resourceType === ResourceType.VEHICLE) {
             calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
+            console.log('VEHICLE', calculatedStartTime);
         } else {
             const operatingStartTime = new Date(`${targetDate} ${operatingHours.startTime}`);
             calculatedStartTime =
                 roundedStartTime > operatingStartTime
                     ? roundedStartTime.toTimeString().slice(0, 8)
                     : operatingHours.startTime;
+            console.log('else', calculatedStartTime);
         }
 
         return {
