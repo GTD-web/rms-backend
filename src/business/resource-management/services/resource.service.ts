@@ -255,8 +255,10 @@ export class ResourceService {
 
         const startDateTime = new Date(`${dateStr} ${actualStartTime}`);
         const endDateTime = new Date(`${dateStr} ${actualEndTime}`);
-        console.log('startDateTime', new Date(`${dateStr} ${actualStartTime}`));
+        console.log('startDateTime', startDateTime, endDateTime);
         const slotStart = new Date(startDateTime);
+        console.log('slotStart', slotStart);
+
         while (slotStart < endDateTime) {
             const slotEnd = new Date(slotStart);
             slotEnd.setMinutes(slotEnd.getMinutes() + timeUnit);
