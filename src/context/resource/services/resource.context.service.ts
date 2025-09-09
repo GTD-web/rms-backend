@@ -684,7 +684,9 @@ export class ResourceContextService {
         if (resourceType === ResourceType.VEHICLE) {
             calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
         } else {
-            const operatingStartTime = new Date(new Date(`${targetDate} ${operatingHours.startTime}`).toISOString());
+            const operatingStartTime = new Date(
+                new Date(`${targetDate} ${operatingHours.startTime}`).toISOString() + ' +09:00',
+            );
             console.log(
                 'operatingStartTime',
                 new Date(`${targetDate} ${operatingHours.startTime}`).toISOString(),
