@@ -25484,6 +25484,7 @@ let ResourceService = class ResourceService {
                 endTime: new Date(`${endDate}T${endTime}+09:00`).toTimeString().slice(0, 8),
             }
             : this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, startDate, isToday);
+        console.log(timeRange);
         const availableSlots = this.calculateAvailableTimeSlots(startDate, timeRange.startTime, timeRange.endTime, timeUnit, am, pm, reservations);
         availabilityDto.availableTimeSlots = availableSlots;
         return availabilityDto;
