@@ -25437,7 +25437,6 @@ let ResourceService = class ResourceService {
             const reservations = await this.reservationContextService.자원의_날짜범위_예약을_조회한다(resource.resourceId, dateRangeStart, dateRangeEnd, reservationId);
             if (isTimeSlotRequest) {
                 const availabilityDto = await this.calculateTimeSlotAvailability(resource, startDate, endDate, am, pm, timeUnit, reservations);
-                console.log(availabilityDto);
                 result.push(availabilityDto);
             }
             else if (isAccommodation || !isSameDay) {
@@ -28727,9 +28726,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 if (data.resourceSelection) {
                     const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(data.resourceSelection.resourceId, new Date(data.dateRange.startDate), new Date(data.dateRange.endDate));
                     if (!isAvailable) {
-                        await queryRunner.rollbackTransaction();
-                        result.success = false;
-                        result.reason = '선택한 시간대에 자원이 이미 예약되어 있습니다.';
+                        throw new common_1.BadRequestException('선택한 시간대에 자원이 이미 예약되어 있습니다.');
                     }
                     const reservationData = {
                         title: data.title,

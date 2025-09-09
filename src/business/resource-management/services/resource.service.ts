@@ -130,7 +130,6 @@ export class ResourceService {
                     timeUnit!,
                     reservations,
                 );
-                console.log(availabilityDto);
                 result.push(availabilityDto);
             } else if (isAccommodation || !isSameDay) {
                 // 날짜 단위 방식: 전체 날짜/시간 범위에서 충돌 여부만 확인
@@ -251,7 +250,6 @@ export class ResourceService {
         const endDateTime = new Date(`${dateStr} ${actualEndTime}`);
 
         const slotStart = new Date(startDateTime);
-
         while (slotStart < endDateTime) {
             const slotEnd = new Date(slotStart);
             slotEnd.setMinutes(slotEnd.getMinutes() + timeUnit);

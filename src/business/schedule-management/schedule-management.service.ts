@@ -507,9 +507,7 @@ export class ScheduleManagementService {
                     );
 
                     if (!isAvailable) {
-                        await queryRunner.rollbackTransaction();
-                        result.success = false;
-                        result.reason = '선택한 시간대에 자원이 이미 예약되어 있습니다.';
+                        throw new BadRequestException('선택한 시간대에 자원이 이미 예약되어 있습니다.');
                     }
 
                     // 예약 생성 (QueryRunner 전달)
