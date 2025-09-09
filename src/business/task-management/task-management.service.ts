@@ -40,7 +40,6 @@ export class TaskManagementService {
                     withResource: true, // 리소스 정보도 함께 조회
                 },
             );
-
             // 메모리에서 지연반납 조건 체크
             const now = new Date();
             const potentialDelayedReservations = scheduleRelations
