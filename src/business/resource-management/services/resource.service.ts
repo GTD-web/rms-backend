@@ -206,18 +206,16 @@ export class ResourceService {
 
         const isToday = startDate === new Date().toISOString().slice(0, 10);
 
-        const timeRange =
-            startTime && endTime
-                ? {
-                      startTime: new Date(`${startDate}T${startTime}+09:00`).toTimeString().slice(0, 8),
-                      endTime: new Date(`${endDate}T${endTime}+09:00`).toTimeString().slice(0, 8),
-                  }
-                : this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, startDate, isToday);
-        console.log(timeRange);
+        const timeRange = this.resourceContextService.현재시간_기준_가용시간대를_계산한다(
+            resource.type,
+            startDate,
+            isToday,
+        );
+        console.log('timeRange', timeRange);
         const availableSlots = this.calculateAvailableTimeSlots(
             startDate,
-            timeRange.startTime,
-            timeRange.endTime,
+            startTime ? startTime : timeRange.startTime,
+            endTime ? endTime : timeRange.endTime,
             timeUnit!,
             am,
             pm,
@@ -257,7 +255,6 @@ export class ResourceService {
         const endDateTime = new Date(`${dateStr} ${actualEndTime}`);
         console.log('startDateTime', startDateTime, endDateTime);
         const slotStart = new Date(startDateTime);
-        console.log('slotStart', slotStart);
 
         while (slotStart < endDateTime) {
             const slotEnd = new Date(slotStart);

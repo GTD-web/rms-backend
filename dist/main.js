@@ -25478,14 +25478,9 @@ let ResourceService = class ResourceService {
         availabilityDto.resourceId = resource.resourceId;
         availabilityDto.resourceName = resource.name;
         const isToday = startDate === new Date().toISOString().slice(0, 10);
-        const timeRange = startTime && endTime
-            ? {
-                startTime: new Date(`${startDate}T${startTime}+09:00`).toTimeString().slice(0, 8),
-                endTime: new Date(`${endDate}T${endTime}+09:00`).toTimeString().slice(0, 8),
-            }
-            : this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, startDate, isToday);
-        console.log(timeRange);
-        const availableSlots = this.calculateAvailableTimeSlots(startDate, timeRange.startTime, timeRange.endTime, timeUnit, am, pm, reservations);
+        const timeRange = this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, startDate, isToday);
+        console.log('timeRange', timeRange);
+        const availableSlots = this.calculateAvailableTimeSlots(startDate, startTime ? startTime : timeRange.startTime, endTime ? endTime : timeRange.endTime, timeUnit, am, pm, reservations);
         availabilityDto.availableTimeSlots = availableSlots;
         return availabilityDto;
     }
@@ -25504,7 +25499,6 @@ let ResourceService = class ResourceService {
         const endDateTime = new Date(`${dateStr} ${actualEndTime}`);
         console.log('startDateTime', startDateTime, endDateTime);
         const slotStart = new Date(startDateTime);
-        console.log('slotStart', slotStart);
         while (slotStart < endDateTime) {
             const slotEnd = new Date(slotStart);
             slotEnd.setMinutes(slotEnd.getMinutes() + timeUnit);
@@ -34702,9 +34696,10 @@ let ResourceContextService = class ResourceContextService {
     }
     현재시간_기준_가용시간대를_계산한다(resourceType, targetDate, isToday) {
         const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
-        const now = isToday ? new Date() : new Date(`${targetDate}T${operatingHours.startTime}+09:00`);
-        const operatingEndTime = new Date(`${targetDate}T${operatingHours.endTime}+09:00`).toTimeString().slice(0, 8);
-        console.log('operatingEndTime', now, operatingEndTime);
+        if (!isToday) {
+            return operatingHours;
+        }
+        const now = new Date();
         const currentMinutes = now.getMinutes();
         const roundedStartTime = new Date(now);
         if (currentMinutes < 30) {
@@ -34713,10 +34708,11 @@ let ResourceContextService = class ResourceContextService {
         else {
             roundedStartTime.setMinutes(30, 0, 0);
         }
-        const calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
+        const operatingStartTime = operatingHours.startTime;
+        const currentStartTime = `${roundedStartTime.getHours()}:${roundedStartTime.getMinutes()}:00`;
         return {
-            startTime: calculatedStartTime,
-            endTime: operatingEndTime === '00:00:00' ? '24:00:00' : operatingEndTime,
+            startTime: currentStartTime > operatingStartTime ? currentStartTime : operatingStartTime,
+            endTime: operatingHours.endTime,
         };
     }
     async 자원의_해당시간_예약을_확인한다(resourceId, startDate, endDate, reservationId) {

@@ -664,15 +664,12 @@ export class ResourceContextService {
     ): { startTime: string; endTime: string } {
         const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
 
-        // if (!isToday) {
-        //     return operatingHours;
-        // }
+        if (!isToday) {
+            return operatingHours;
+        }
 
         // 오늘인 경우 현재 시간의 30분 단위로 올림하여 시작 시간 계산
-        const now = isToday ? new Date() : new Date(`${targetDate}T${operatingHours.startTime}+09:00`);
-        const operatingEndTime = new Date(`${targetDate}T${operatingHours.endTime}+09:00`).toTimeString().slice(0, 8);
-        console.log('operatingEndTime', now, operatingEndTime);
-
+        const now = new Date();
         const currentMinutes = now.getMinutes();
         const roundedStartTime = new Date(now);
 
@@ -681,9 +678,8 @@ export class ResourceContextService {
         } else {
             roundedStartTime.setMinutes(30, 0, 0);
         }
-        // const operatingStartTime = new Date(`${targetDate}T${operatingHours.startTime}+09:00`);
-
-        const calculatedStartTime: string = roundedStartTime.toTimeString().slice(0, 8);
+        const operatingStartTime = operatingHours.startTime;
+        const currentStartTime = `${roundedStartTime.getHours()}:${roundedStartTime.getMinutes()}:00`;
         // roundedStartTime > new Date(operatingStartTime)
         //     ?
         //     : operatingStartTime.toTimeString().slice(0, 8);
@@ -693,8 +689,8 @@ export class ResourceContextService {
 
         // }
         return {
-            startTime: calculatedStartTime,
-            endTime: operatingEndTime === '00:00:00' ? '24:00:00' : operatingEndTime,
+            startTime: currentStartTime > operatingStartTime ? currentStartTime : operatingStartTime,
+            endTime: operatingHours.endTime,
         };
     }
 
