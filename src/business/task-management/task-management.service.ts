@@ -9,6 +9,7 @@ import { DateUtil } from '@libs/utils/date.util';
 import { LessThan, MoreThan, Raw } from 'typeorm';
 import { TaskListResponseDto, TaskResponseDto } from './dtos/task-response.dto';
 import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
+import { ScheduleQueryContextService } from '@src/context/schedule/services/schedule-query.context.service';
 
 @Injectable()
 export class TaskManagementService {
@@ -16,6 +17,7 @@ export class TaskManagementService {
         private readonly resourceContextService: ResourceContextService,
         private readonly reservationContextService: ReservationContextService,
         private readonly notificationContextService: NotificationContextService,
+        private readonly scheduleQueryContextService: ScheduleQueryContextService,
     ) {}
 
     /**
@@ -27,19 +29,56 @@ export class TaskManagementService {
 
         if (type === '차량반납지연' || type === '전체') {
             // 반납 지연된 예약 조회
-            const delayedReturnReservations = await this.reservationContextService.지연반납_예약을_조회한다(
+            const scheduleIds = await this.scheduleQueryContextService.직원의_역할별_일정ID들을_조회한다(
                 user.employeeId,
+                ParticipantsType.RESERVER,
             );
-            // 반납 지연 작업 목록 변환
-            delayedReturnTasks = delayedReturnReservations.map((reservation) => ({
-                type: '반납지연',
-                title: `${reservation.resource.name} 반납 지연 중`,
-                reservationId: reservation.reservationId,
-                resourceId: reservation.resource.resourceId,
-                resourceName: reservation.resource.name,
-                startDate: reservation.startDate,
-                endDate: reservation.endDate,
-            }));
+            const scheduleRelations = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(
+                scheduleIds,
+                {
+                    withReservation: true,
+                    withResource: true, // 리소스 정보도 함께 조회
+                },
+            );
+
+            // 메모리에서 지연반납 조건 체크
+            const now = new Date();
+            const potentialDelayedReservations = scheduleRelations
+                .filter(
+                    ({ reservation }) => reservation && reservation.status === 'CONFIRMED' && reservation.endDate < now,
+                )
+                .map(({ reservation, resource }) => ({ reservation, resource }));
+
+            // 지연반납 확인을 위해 reservationVehicles 정보가 필요한 예약들만 추가 조회
+            const delayedReturnReservations = await this.reservationContextService.지연반납_예약_상세정보를_조회한다(
+                potentialDelayedReservations.map(({ reservation }) => reservation.reservationId),
+            );
+
+            // 실제 지연반납 상태인 예약들만 필터링 및 작업 목록 변환
+            delayedReturnTasks = delayedReturnReservations
+                .filter(
+                    (reservation) =>
+                        reservation.reservationVehicles &&
+                        reservation.reservationVehicles.some((vehicle) => !vehicle.isReturned),
+                )
+                .map((reservation) => {
+                    // scheduleRelations에서 이미 조회한 resource 정보 활용
+                    const scheduleData = scheduleRelations.find(
+                        ({ reservation: r }) => r?.reservationId === reservation.reservationId,
+                    );
+                    const resourceInfo = scheduleData?.resource || reservation.resource;
+
+                    return {
+                        type: '반납지연',
+                        title: `${resourceInfo.name} 반납 지연 중`,
+                        scheduleId: scheduleData?.schedule?.scheduleId,
+                        reservationId: reservation.reservationId,
+                        resourceId: resourceInfo.resourceId,
+                        resourceName: resourceInfo.name,
+                        startDate: reservation.startDate,
+                        endDate: reservation.endDate,
+                    };
+                });
         }
         if (type === '소모품교체' || type === '전체') {
             const isResourceAdmin = user.roles.includes(Role.RESOURCE_ADMIN);

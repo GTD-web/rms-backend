@@ -30048,6 +30048,14 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: 'string',
+        description: '일정 ID',
+        nullable: true,
+    }),
+    __metadata("design:type", String)
+], TaskResponseDto.prototype, "scheduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
         description: '예약 ID',
         nullable: true,
     }),
@@ -30152,12 +30160,13 @@ const task_management_service_1 = __webpack_require__(/*! ./task-management.serv
 const resource_context_module_1 = __webpack_require__(/*! @src/context/resource/resource.context.module */ "./src/context/resource/resource.context.module.ts");
 const reservation_context_module_1 = __webpack_require__(/*! @src/context/reservation/reservation.context.module */ "./src/context/reservation/reservation.context.module.ts");
 const notification_context_module_1 = __webpack_require__(/*! @src/context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
+const schedule_context_module_1 = __webpack_require__(/*! @src/context/schedule/schedule.context.module */ "./src/context/schedule/schedule.context.module.ts");
 let TaskManagementModule = class TaskManagementModule {
 };
 exports.TaskManagementModule = TaskManagementModule;
 exports.TaskManagementModule = TaskManagementModule = __decorate([
     (0, common_1.Module)({
-        imports: [resource_context_module_1.ResourceContextModule, reservation_context_module_1.ReservationContextModule, notification_context_module_1.NotificationContextModule],
+        imports: [resource_context_module_1.ResourceContextModule, reservation_context_module_1.ReservationContextModule, notification_context_module_1.NotificationContextModule, schedule_context_module_1.ScheduleContextModule],
         controllers: [task_controller_1.TaskController],
         providers: [task_management_service_1.TaskManagementService],
         exports: [task_management_service_1.TaskManagementService],
@@ -30183,34 +30192,54 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TaskManagementService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const resource_context_service_1 = __webpack_require__(/*! @src/context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
 const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
+const schedule_query_context_service_1 = __webpack_require__(/*! @src/context/schedule/services/schedule-query.context.service */ "./src/context/schedule/services/schedule-query.context.service.ts");
 let TaskManagementService = class TaskManagementService {
-    constructor(resourceContextService, reservationContextService, notificationContextService) {
+    constructor(resourceContextService, reservationContextService, notificationContextService, scheduleQueryContextService) {
         this.resourceContextService = resourceContextService;
         this.reservationContextService = reservationContextService;
         this.notificationContextService = notificationContextService;
+        this.scheduleQueryContextService = scheduleQueryContextService;
     }
     async getTaskList(user, type) {
         let delayedReturnTasks = [];
         let consumableReplaceTasks = [];
         if (type === '차량반납지연' || type === '전체') {
-            const delayedReturnReservations = await this.reservationContextService.지연반납_예약을_조회한다(user.employeeId);
-            delayedReturnTasks = delayedReturnReservations.map((reservation) => ({
-                type: '반납지연',
-                title: `${reservation.resource.name} 반납 지연 중`,
-                reservationId: reservation.reservationId,
-                resourceId: reservation.resource.resourceId,
-                resourceName: reservation.resource.name,
-                startDate: reservation.startDate,
-                endDate: reservation.endDate,
-            }));
+            const scheduleIds = await this.scheduleQueryContextService.직원의_역할별_일정ID들을_조회한다(user.employeeId, reservation_type_enum_1.ParticipantsType.RESERVER);
+            const scheduleRelations = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
+                withReservation: true,
+                withResource: true,
+            });
+            const now = new Date();
+            const potentialDelayedReservations = scheduleRelations
+                .filter(({ reservation }) => reservation && reservation.status === 'CONFIRMED' && reservation.endDate < now)
+                .map(({ reservation, resource }) => ({ reservation, resource }));
+            const delayedReturnReservations = await this.reservationContextService.지연반납_예약_상세정보를_조회한다(potentialDelayedReservations.map(({ reservation }) => reservation.reservationId));
+            delayedReturnTasks = delayedReturnReservations
+                .filter((reservation) => reservation.reservationVehicles &&
+                reservation.reservationVehicles.some((vehicle) => !vehicle.isReturned))
+                .map((reservation) => {
+                const scheduleData = scheduleRelations.find(({ reservation: r }) => r?.reservationId === reservation.reservationId);
+                const resourceInfo = scheduleData?.resource || reservation.resource;
+                return {
+                    type: '반납지연',
+                    title: `${resourceInfo.name} 반납 지연 중`,
+                    scheduleId: scheduleData?.schedule?.scheduleId,
+                    reservationId: reservation.reservationId,
+                    resourceId: resourceInfo.resourceId,
+                    resourceName: resourceInfo.name,
+                    startDate: reservation.startDate,
+                    endDate: reservation.endDate,
+                };
+            });
         }
         if (type === '소모품교체' || type === '전체') {
             const isResourceAdmin = user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN);
@@ -30313,7 +30342,7 @@ let TaskManagementService = class TaskManagementService {
 exports.TaskManagementService = TaskManagementService;
 exports.TaskManagementService = TaskManagementService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _c : Object, typeof (_d = typeof schedule_query_context_service_1.ScheduleQueryContextService !== "undefined" && schedule_query_context_service_1.ScheduleQueryContextService) === "function" ? _d : Object])
 ], TaskManagementService);
 
 
@@ -32914,7 +32943,9 @@ const vehicle_info_module_1 = __webpack_require__(/*! @src/domain/vehicle-info/v
 const file_module_1 = __webpack_require__(/*! @src/domain/file/file.module */ "./src/domain/file/file.module.ts");
 const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
 const file_context_module_1 = __webpack_require__(/*! ../file/file.context.module */ "./src/context/file/file.context.module.ts");
+const schedule_module_1 = __webpack_require__(/*! @src/domain/schedule/schedule.module */ "./src/domain/schedule/schedule.module.ts");
 const reservation_context_service_1 = __webpack_require__(/*! ./services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
+const schedule_participant_module_1 = __webpack_require__(/*! @src/domain/schedule-participant/schedule-participant.module */ "./src/domain/schedule-participant/schedule-participant.module.ts");
 let ReservationContextModule = class ReservationContextModule {
 };
 exports.ReservationContextModule = ReservationContextModule;
@@ -32931,6 +32962,8 @@ exports.ReservationContextModule = ReservationContextModule = __decorate([
             reservation_vehicle_module_1.DomainReservationVehicleModule,
             vehicle_info_module_1.DomainVehicleInfoModule,
             file_module_1.DomainFileModule,
+            schedule_module_1.DomainScheduleModule,
+            schedule_participant_module_1.DomainScheduleParticipantModule,
             file_context_module_1.FileContextModule,
             schedule_1.ScheduleModule.forRoot(),
         ],
@@ -32963,7 +32996,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -32983,8 +33016,9 @@ const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/uti
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const business_dto_index_1 = __webpack_require__(/*! @src/business.dto.index */ "./src/business.dto.index.ts");
 const business_dto_index_2 = __webpack_require__(/*! @src/business.dto.index */ "./src/business.dto.index.ts");
+const schedule_participant_service_1 = __webpack_require__(/*! @src/domain/schedule-participant/schedule-participant.service */ "./src/domain/schedule-participant/schedule-participant.service.ts");
 let ReservationContextService = class ReservationContextService {
-    constructor(domainReservationService, domainResourceService, domainNotificationService, domainEmployeeNotificationService, domainReservationVehicleService, domainVehicleInfoService, domainFileService, fileContextService, dataSource) {
+    constructor(domainReservationService, domainResourceService, domainNotificationService, domainEmployeeNotificationService, domainReservationVehicleService, domainVehicleInfoService, domainFileService, fileContextService, dataSource, domainScheduleParticipantService) {
         this.domainReservationService = domainReservationService;
         this.domainResourceService = domainResourceService;
         this.domainNotificationService = domainNotificationService;
@@ -32994,6 +33028,7 @@ let ReservationContextService = class ReservationContextService {
         this.domainFileService = domainFileService;
         this.fileContextService = fileContextService;
         this.dataSource = dataSource;
+        this.domainScheduleParticipantService = domainScheduleParticipantService;
     }
     async 예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status) {
         if (startDate && endDate && startDate > endDate) {
@@ -33280,22 +33315,31 @@ let ReservationContextService = class ReservationContextService {
             });
         }
     }
-    async 지연반납_예약을_조회한다(employeeId) {
+    async 지연반납_예약을_조회한다(reservationIds) {
         const delayedReturnReservations = await this.domainReservationService.findAll({
             where: {
-                participants: {
-                    employeeId: employeeId,
-                    type: reservation_type_enum_1.ParticipantsType.RESERVER,
-                },
+                reservationId: (0, typeorm_2.In)(reservationIds),
                 status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
                 endDate: (0, typeorm_2.LessThan)(date_util_1.DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
                 },
             },
-            relations: ['participants', 'resource', 'reservationVehicles'],
+            relations: ['resource', 'reservationVehicles'],
         });
         return delayedReturnReservations;
+    }
+    async 지연반납_예약_상세정보를_조회한다(reservationIds) {
+        if (reservationIds.length === 0) {
+            return [];
+        }
+        const reservationsWithVehicles = await this.domainReservationService.findAll({
+            where: {
+                reservationId: (0, typeorm_2.In)(reservationIds),
+            },
+            relations: ['reservationVehicles', 'resource'],
+        });
+        return reservationsWithVehicles;
     }
     async 모든_지연반납_차량을_조회한다() {
         const delayedReturnVehicles = await this.domainReservationService.findAll({
@@ -33392,7 +33436,7 @@ let ReservationContextService = class ReservationContextService {
 exports.ReservationContextService = ReservationContextService;
 exports.ReservationContextService = ReservationContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object, typeof (_d = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _d : Object, typeof (_e = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _e : Object, typeof (_f = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _f : Object, typeof (_g = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _g : Object, typeof (_h = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _h : Object, typeof (_j = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _j : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _a : Object, typeof (_b = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object, typeof (_d = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _d : Object, typeof (_e = typeof reservation_vehicle_service_1.DomainReservationVehicleService !== "undefined" && reservation_vehicle_service_1.DomainReservationVehicleService) === "function" ? _e : Object, typeof (_f = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _f : Object, typeof (_g = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _g : Object, typeof (_h = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _h : Object, typeof (_j = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _j : Object, typeof (_k = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _k : Object])
 ], ReservationContextService);
 
 
@@ -34936,6 +34980,7 @@ const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/res
 const resource_module_1 = __webpack_require__(/*! @src/domain/resource/resource.module */ "./src/domain/resource/resource.module.ts");
 const resource_group_module_1 = __webpack_require__(/*! @src/domain/resource-group/resource-group.module */ "./src/domain/resource-group/resource-group.module.ts");
 const reservation_context_module_1 = __webpack_require__(/*! ../reservation/reservation.context.module */ "./src/context/reservation/reservation.context.module.ts");
+const project_module_1 = __webpack_require__(/*! @src/domain/project/project.module */ "./src/domain/project/project.module.ts");
 let ScheduleContextModule = class ScheduleContextModule {
 };
 exports.ScheduleContextModule = ScheduleContextModule;
@@ -34949,6 +34994,7 @@ exports.ScheduleContextModule = ScheduleContextModule = __decorate([
             reservation_module_1.DomainReservationModule,
             resource_module_1.DomainResourceModule,
             resource_group_module_1.DomainResourceGroupModule,
+            project_module_1.DomainProjectModule,
             reservation_context_module_1.ReservationContextModule,
         ],
         providers: [
@@ -35645,7 +35691,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var ScheduleQueryContextService_1;
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleQueryContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -35655,6 +35701,7 @@ const schedule_relation_service_1 = __webpack_require__(/*! @src/domain/schedule
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const project_service_1 = __webpack_require__(/*! @src/domain/project/project.service */ "./src/domain/project/project.service.ts");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
@@ -35662,11 +35709,12 @@ const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource
 const resource_group_service_1 = __webpack_require__(/*! @src/domain/resource-group/resource-group.service */ "./src/domain/resource-group/resource-group.service.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ScheduleQueryContextService = ScheduleQueryContextService_1 = class ScheduleQueryContextService {
-    constructor(domainScheduleService, domainScheduleParticipantService, domainScheduleRelationService, domainEmployeeService, domainReservationService, domainResourceService, domainResourceGroupService) {
+    constructor(domainScheduleService, domainScheduleParticipantService, domainScheduleRelationService, domainEmployeeService, domainProjectService, domainReservationService, domainResourceService, domainResourceGroupService) {
         this.domainScheduleService = domainScheduleService;
         this.domainScheduleParticipantService = domainScheduleParticipantService;
         this.domainScheduleRelationService = domainScheduleRelationService;
         this.domainEmployeeService = domainEmployeeService;
+        this.domainProjectService = domainProjectService;
         this.domainReservationService = domainReservationService;
         this.domainResourceService = domainResourceService;
         this.domainResourceGroupService = domainResourceGroupService;
@@ -35712,7 +35760,10 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         let project = null, reservation = null, resource = null;
         let participants = [];
         if (option?.withProject && scheduleRelation.projectId) {
-            project = null;
+            const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet([
+                scheduleRelation.projectId,
+            ]);
+            project = projects[0] || null;
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
@@ -35765,7 +35816,11 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 .filter((relation) => relation.projectId)
                 .map((relation) => relation.projectId);
             if (projectIds.length > 0) {
-                projectMap = new Map(projectIds.map((id) => [id, { projectId: id, projectName: '프로젝트' }]));
+                const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet(projectIds);
+                projectMap = new Map(projects.map((project) => [
+                    project.id,
+                    { projectId: project.id, projectName: project.projectName },
+                ]));
             }
         }
         if (option?.withReservation) {
@@ -36392,8 +36447,8 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         };
     }
     async 프로젝트_존재여부를_확인한다(projectId) {
-        this.logger.log(`프로젝트 존재 여부 확인: ${projectId}`);
-        return true;
+        const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet([projectId]);
+        return projects.length > 0 && notFound.length === 0;
     }
     async 자원정보를_조회한다(resourceId) {
         try {
@@ -36515,7 +36570,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
 exports.ScheduleQueryContextService = ScheduleQueryContextService;
 exports.ScheduleQueryContextService = ScheduleQueryContextService = ScheduleQueryContextService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _a : Object, typeof (_b = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _b : Object, typeof (_c = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _e : Object, typeof (_f = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _f : Object, typeof (_g = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _g : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _a : Object, typeof (_b = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _b : Object, typeof (_c = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof project_service_1.DomainProjectService !== "undefined" && project_service_1.DomainProjectService) === "function" ? _e : Object, typeof (_f = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _f : Object, typeof (_g = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _g : Object, typeof (_h = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _h : Object])
 ], ScheduleQueryContextService);
 
 
@@ -39054,6 +39109,243 @@ exports.DomainNotificationService = DomainNotificationService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof notification_repository_1.DomainNotificationRepository !== "undefined" && notification_repository_1.DomainNotificationRepository) === "function" ? _a : Object])
 ], DomainNotificationService);
+
+
+/***/ }),
+
+/***/ "./src/domain/project/project.adapter.ts":
+/*!***********************************************!*\
+  !*** ./src/domain/project/project.adapter.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var ProjectMicroserviceAdapter_1;
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProjectMicroserviceAdapter = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const rxjs_1 = __webpack_require__(/*! rxjs */ "rxjs");
+let ProjectMicroserviceAdapter = ProjectMicroserviceAdapter_1 = class ProjectMicroserviceAdapter {
+    constructor(httpService, configService) {
+        this.httpService = httpService;
+        this.configService = configService;
+        this.logger = new common_1.Logger(ProjectMicroserviceAdapter_1.name);
+        this.projectServiceUrl =
+            this.configService.get('PROJECT_API_URL') || 'https://lpms-backend.vercel.app/';
+    }
+    getHeaders(authorization) {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        if (authorization) {
+            headers['Authorization'] = authorization;
+        }
+        return headers;
+    }
+    async getProjectHierarchy(flatten, authorization) {
+        try {
+            this.logger.log(`프로젝트 계층구조 조회 요청: flatten=${flatten}`);
+            const params = new URLSearchParams();
+            if (flatten !== undefined) {
+                params.append('flatten', flatten.toString());
+            }
+            const url = `${this.projectServiceUrl}/api/common/project/hierarchy?${params.toString()}`;
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService
+                .get(url, {
+                headers: this.getHeaders(authorization),
+            })
+                .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
+                this.logger.error(`프로젝트 계층구조 조회 실패: ${error.message}`, error.stack);
+                if (error.response?.status === 404) {
+                    throw new common_1.NotFoundException('프로젝트 계층구조 파일을 찾을 수 없습니다.');
+                }
+                throw new common_1.BadRequestException('프로젝트 계층구조 조회 중 오류가 발생했습니다.');
+            })));
+            this.logger.log(`프로젝트 계층구조 조회 성공`);
+            return response;
+        }
+        catch (error) {
+            this.logger.error(`프로젝트 계층구조 조회 중 예외 발생: ${error.message}`, error.stack);
+            throw error;
+        }
+    }
+    async getProjectsByIdsGet(ids, authorization) {
+        try {
+            this.logger.log(`프로젝트 ID로 조회 요청 (GET): ids=${ids}`);
+            const params = new URLSearchParams();
+            params.append('ids', ids);
+            const url = `${this.projectServiceUrl}/api/common/project/by-ids?${params.toString()}`;
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService
+                .get(url, {
+                headers: this.getHeaders(authorization),
+            })
+                .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
+                this.logger.error(`프로젝트 ID로 조회 실패 (GET): ${error.message}`, error.stack);
+                if (error.response?.status === 400) {
+                    throw new common_1.BadRequestException('잘못된 요청 (ids 파라미터 누락 또는 유효하지 않음)');
+                }
+                throw new common_1.BadRequestException('프로젝트 조회 중 오류가 발생했습니다.');
+            })));
+            this.logger.log(`프로젝트 ID로 조회 성공 (GET): ${response.projects.length}개 조회됨`);
+            return response;
+        }
+        catch (error) {
+            this.logger.error(`프로젝트 ID로 조회 중 예외 발생 (GET): ${error.message}`, error.stack);
+            throw error;
+        }
+    }
+    async getProjectsByIdsPost(requestDto, authorization) {
+        try {
+            this.logger.log(`프로젝트 ID로 조회 요청 (POST): ${requestDto.ids.length}개`);
+            const url = `${this.projectServiceUrl}/api/common/project/by-ids`;
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService
+                .post(url, requestDto, {
+                headers: this.getHeaders(authorization),
+            })
+                .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
+                this.logger.error(`프로젝트 ID로 조회 실패 (POST): ${error.message}`, error.stack);
+                if (error.response?.status === 400) {
+                    throw new common_1.BadRequestException('잘못된 요청 (ids 배열 누락 또는 유효하지 않음)');
+                }
+                throw new common_1.BadRequestException('프로젝트 조회 중 오류가 발생했습니다.');
+            })));
+            this.logger.log(`프로젝트 ID로 조회 성공 (POST): ${response.projects.length}개 조회됨`);
+            return response;
+        }
+        catch (error) {
+            this.logger.error(`프로젝트 ID로 조회 중 예외 발생 (POST): ${error.message}`, error.stack);
+            throw error;
+        }
+    }
+    async downloadProjectHierarchy(authorization) {
+        try {
+            this.logger.log('프로젝트 계층구조 파일 다운로드 요청');
+            const url = `${this.projectServiceUrl}/api/common/project/hierarchy/download`;
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService
+                .get(url, {
+                headers: this.getHeaders(authorization),
+                responseType: 'arraybuffer',
+            })
+                .pipe((0, rxjs_1.map)((res) => Buffer.from(res.data)), (0, rxjs_1.catchError)((error) => {
+                this.logger.error(`프로젝트 계층구조 파일 다운로드 실패: ${error.message}`, error.stack);
+                if (error.response?.status === 404) {
+                    throw new common_1.NotFoundException('프로젝트 계층구조 파일을 찾을 수 없습니다.');
+                }
+                throw new common_1.BadRequestException('프로젝트 계층구조 파일 다운로드 중 오류가 발생했습니다.');
+            })));
+            this.logger.log('프로젝트 계층구조 파일 다운로드 성공');
+            return response;
+        }
+        catch (error) {
+            this.logger.error(`프로젝트 계층구조 파일 다운로드 중 예외 발생: ${error.message}`, error.stack);
+            throw error;
+        }
+    }
+};
+exports.ProjectMicroserviceAdapter = ProjectMicroserviceAdapter;
+exports.ProjectMicroserviceAdapter = ProjectMicroserviceAdapter = ProjectMicroserviceAdapter_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
+], ProjectMicroserviceAdapter);
+
+
+/***/ }),
+
+/***/ "./src/domain/project/project.module.ts":
+/*!**********************************************!*\
+  !*** ./src/domain/project/project.module.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainProjectModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const project_service_1 = __webpack_require__(/*! ./project.service */ "./src/domain/project/project.service.ts");
+const project_adapter_1 = __webpack_require__(/*! ./project.adapter */ "./src/domain/project/project.adapter.ts");
+let DomainProjectModule = class DomainProjectModule {
+};
+exports.DomainProjectModule = DomainProjectModule;
+exports.DomainProjectModule = DomainProjectModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            axios_1.HttpModule.register({
+                timeout: 10000,
+                maxRedirects: 5,
+            }),
+            config_1.ConfigModule,
+        ],
+        providers: [project_service_1.DomainProjectService, project_adapter_1.ProjectMicroserviceAdapter],
+        exports: [project_service_1.DomainProjectService, project_adapter_1.ProjectMicroserviceAdapter],
+    })
+], DomainProjectModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/project/project.service.ts":
+/*!***********************************************!*\
+  !*** ./src/domain/project/project.service.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainProjectService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const project_adapter_1 = __webpack_require__(/*! ./project.adapter */ "./src/domain/project/project.adapter.ts");
+let DomainProjectService = class DomainProjectService {
+    constructor(projectMicroserviceAdapter) {
+        this.projectMicroserviceAdapter = projectMicroserviceAdapter;
+    }
+    async getProjectHierarchy(flatten, authorization) {
+        return await this.projectMicroserviceAdapter.getProjectHierarchy(flatten, authorization);
+    }
+    async getProjectsByIdsGet(projectIds, authorization) {
+        return this.projectMicroserviceAdapter.getProjectsByIdsGet(projectIds.join(','), authorization);
+    }
+    async getProjectsByIdsPost(projectIds, authorization) {
+        return await this.projectMicroserviceAdapter.getProjectsByIdsPost({ ids: projectIds }, authorization);
+    }
+    async downloadProjectHierarchy(authorization) {
+        return await this.projectMicroserviceAdapter.downloadProjectHierarchy(authorization);
+    }
+};
+exports.DomainProjectService = DomainProjectService;
+exports.DomainProjectService = DomainProjectService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof project_adapter_1.ProjectMicroserviceAdapter !== "undefined" && project_adapter_1.ProjectMicroserviceAdapter) === "function" ? _a : Object])
+], DomainProjectService);
 
 
 /***/ }),

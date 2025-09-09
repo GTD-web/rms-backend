@@ -10,7 +10,7 @@ import { ScheduleRelation } from '@libs/entities/schedule-relations.entity';
 import { Employee } from '@libs/entities/employee.entity';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
-// import { DomainProjectService } from '@src/domain/project/project.service';
+import { DomainProjectService } from '@src/domain/project/project.service';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
 import { Reservation } from '@libs/entities/reservation.entity';
 import { ResourceType } from '@libs/enums/resource-type.enum';
@@ -45,7 +45,7 @@ export class ScheduleQueryContextService {
         private readonly domainScheduleParticipantService: DomainScheduleParticipantService,
         private readonly domainScheduleRelationService: DomainScheduleRelationService,
         private readonly domainEmployeeService: DomainEmployeeService,
-        // private readonly domainProjectService: DomainProjectService,
+        private readonly domainProjectService: DomainProjectService,
         private readonly domainReservationService: DomainReservationService,
         private readonly domainResourceService: DomainResourceService,
         private readonly domainResourceGroupService: DomainResourceGroupService,
@@ -136,7 +136,10 @@ export class ScheduleQueryContextService {
         let participants = [];
 
         if (option?.withProject && scheduleRelation.projectId) {
-            project = null; // await this.domainProjectService.findByProjectId(scheduleRelation.projectId);
+            const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet([
+                scheduleRelation.projectId,
+            ]);
+            project = projects[0] || null;
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
@@ -220,9 +223,13 @@ export class ScheduleQueryContextService {
                 .map((relation) => relation.projectId);
             if (projectIds.length > 0) {
                 // TODO: 프로젝트 서비스 구현 후 추가
-                // const projects = await Promise.all(projectIds.map(id => this.domainProjectService.findByProjectId(id)));
-                // projectMap = new Map(projects.map(project => [project.projectId, project]));
-                projectMap = new Map(projectIds.map((id) => [id, { projectId: id, projectName: '프로젝트' }]));
+                const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet(projectIds);
+                projectMap = new Map(
+                    projects.map((project) => [
+                        project.id,
+                        { projectId: project.id, projectName: project.projectName },
+                    ]),
+                );
             }
         }
 
@@ -409,7 +416,6 @@ export class ScheduleQueryContextService {
                 scheduleId: true,
             },
         });
-
         let scheduleIds = participants.map((p) => p.scheduleId);
 
         // 날짜 조건이 있으면 Schedule 테이블과 조인하여 필터링
@@ -1220,12 +1226,8 @@ export class ScheduleQueryContextService {
      * 프로젝트 존재 여부 확인
      */
     async 프로젝트_존재여부를_확인한다(projectId: string): Promise<boolean> {
-        // TODO: 프로젝트 도메인 서비스 주입 후 구현
-        // return await this.domainProjectService.exists({ where: { projectId } });
-
-        // 임시로 true 반환 (실제 구현 필요)
-        this.logger.log(`프로젝트 존재 여부 확인: ${projectId}`);
-        return true;
+        const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet([projectId]);
+        return projects.length > 0 && notFound.length === 0;
     }
 
     /**

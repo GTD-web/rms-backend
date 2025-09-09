@@ -14,9 +14,11 @@ import { DomainVehicleInfoModule } from '@src/domain/vehicle-info/vehicle-info.m
 import { DomainFileModule } from '@src/domain/file/file.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { FileContextModule } from '../file/file.context.module';
+import { DomainScheduleModule } from '@src/domain/schedule/schedule.module';
 
 // Context Services
 import { ReservationContextService } from './services/reservation.context.service';
+import { DomainScheduleParticipantModule } from '@src/domain/schedule-participant/schedule-participant.module';
 
 /**
  * 예약 관리 컨텍스트 모듈
@@ -44,6 +46,8 @@ import { ReservationContextService } from './services/reservation.context.servic
         DomainReservationVehicleModule,
         DomainVehicleInfoModule,
         DomainFileModule,
+        DomainScheduleModule,
+        DomainScheduleParticipantModule,
         // Context Layer Modules
         FileContextModule,
         // NotificationModule,

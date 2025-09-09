@@ -34,6 +34,13 @@ export class TaskResponseDto {
 
     @ApiProperty({
         type: 'string',
+        description: '일정 ID',
+        nullable: true,
+    })
+    scheduleId: string | null;
+
+    @ApiProperty({
+        type: 'string',
         description: '예약 ID',
         nullable: true,
     })

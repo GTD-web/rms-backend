@@ -23,6 +23,7 @@ import { ReturnVehicleDto, UpdateReservationStatusDto } from '../dtos/update-res
 import { ReservationWithRelationsResponseDto } from '@src/business.dto.index';
 // import { ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { ReservationResponseDto } from '@src/business.dto.index';
+import { DomainScheduleParticipantService } from '@src/domain/schedule-participant/schedule-participant.service';
 
 @Injectable()
 export class ReservationContextService {
@@ -36,6 +37,7 @@ export class ReservationContextService {
         private readonly domainFileService: DomainFileService,
         private readonly fileContextService: FileContextService,
         private readonly dataSource: DataSource,
+        private readonly domainScheduleParticipantService: DomainScheduleParticipantService,
     ) {}
 
     // 기존
@@ -484,25 +486,43 @@ export class ReservationContextService {
     // ==================== 태스크 관련 메서드들 ====================
 
     /**
-     * 사용자별 지연 반납 예약을 조회한다
+     * 사용자별 지연 반납 예약을 조회한다 (기존 메서드)
      */
-    async 지연반납_예약을_조회한다(employeeId: string): Promise<any[]> {
+    async 지연반납_예약을_조회한다(reservationIds: string[]): Promise<any[]> {
         const delayedReturnReservations = await this.domainReservationService.findAll({
             where: {
-                participants: {
-                    employeeId: employeeId,
-                    type: ParticipantsType.RESERVER,
-                },
+                reservationId: In(reservationIds),
                 status: ReservationStatus.CONFIRMED,
                 endDate: LessThan(DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
                 },
             },
-            relations: ['participants', 'resource', 'reservationVehicles'],
+            relations: ['resource', 'reservationVehicles'],
         });
 
         return delayedReturnReservations;
+    }
+
+    /**
+     * 지연반납 확인을 위한 예약 상세정보만 조회한다 (최적화된 버전)
+     * @param reservationIds 확인할 예약 ID 목록
+     * @returns reservationVehicles 정보를 포함한 예약 목록
+     */
+    async 지연반납_예약_상세정보를_조회한다(reservationIds: string[]): Promise<any[]> {
+        if (reservationIds.length === 0) {
+            return [];
+        }
+
+        // 이미 기본 조건은 메모리에서 체크했으므로, reservationVehicles 정보만 추가로 조회
+        const reservationsWithVehicles = await this.domainReservationService.findAll({
+            where: {
+                reservationId: In(reservationIds),
+            },
+            relations: ['reservationVehicles', 'resource'], // 필요한 관계 정보만 조회
+        });
+
+        return reservationsWithVehicles;
     }
 
     /**
