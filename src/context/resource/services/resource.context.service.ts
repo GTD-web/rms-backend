@@ -670,6 +670,9 @@ export class ResourceContextService {
 
         // 오늘인 경우 현재 시간의 30분 단위로 올림하여 시작 시간 계산
         const now = isToday ? new Date() : new Date(`${targetDate}T${operatingHours.startTime}+09:00`);
+        const operatingEndTime = new Date(`${targetDate}T${operatingHours.endTime}+09:00`).toTimeString().slice(0, 8);
+        console.log('operatingEndTime', now, operatingEndTime);
+
         const currentMinutes = now.getMinutes();
         const roundedStartTime = new Date(now);
 
@@ -689,7 +692,6 @@ export class ResourceContextService {
         // } else {
 
         // }
-        const operatingEndTime = new Date(`${targetDate}T${operatingHours.endTime}+09:00`).toTimeString().slice(0, 8);
         return {
             startTime: calculatedStartTime,
             endTime: operatingEndTime === '00:00:00' ? '24:00:00' : operatingEndTime,

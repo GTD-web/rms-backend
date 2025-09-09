@@ -34703,6 +34703,8 @@ let ResourceContextService = class ResourceContextService {
     현재시간_기준_가용시간대를_계산한다(resourceType, targetDate, isToday) {
         const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
         const now = isToday ? new Date() : new Date(`${targetDate}T${operatingHours.startTime}+09:00`);
+        const operatingEndTime = new Date(`${targetDate}T${operatingHours.endTime}+09:00`).toTimeString().slice(0, 8);
+        console.log('operatingEndTime', now, operatingEndTime);
         const currentMinutes = now.getMinutes();
         const roundedStartTime = new Date(now);
         if (currentMinutes < 30) {
@@ -34712,7 +34714,6 @@ let ResourceContextService = class ResourceContextService {
             roundedStartTime.setMinutes(30, 0, 0);
         }
         const calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
-        const operatingEndTime = new Date(`${targetDate}T${operatingHours.endTime}+09:00`).toTimeString().slice(0, 8);
         return {
             startTime: calculatedStartTime,
             endTime: operatingEndTime === '00:00:00' ? '24:00:00' : operatingEndTime,
