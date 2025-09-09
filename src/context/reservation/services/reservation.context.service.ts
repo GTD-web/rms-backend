@@ -520,6 +520,7 @@ export class ReservationContextService {
                 reservationId: In(reservationIds),
             },
             relations: ['reservationVehicles', 'resource'], // 필요한 관계 정보만 조회
+            order: { endDate: 'ASC' },
         });
 
         return reservationsWithVehicles;
@@ -538,6 +539,7 @@ export class ReservationContextService {
                 },
             },
             relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
+            order: { endDate: 'ASC' },
         });
 
         return delayedReturnVehicles.map((reservation) => {

@@ -33338,6 +33338,7 @@ let ReservationContextService = class ReservationContextService {
                 reservationId: (0, typeorm_2.In)(reservationIds),
             },
             relations: ['reservationVehicles', 'resource'],
+            order: { endDate: 'ASC' },
         });
         return reservationsWithVehicles;
     }
@@ -33351,6 +33352,7 @@ let ReservationContextService = class ReservationContextService {
                 },
             },
             relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
+            order: { endDate: 'ASC' },
         });
         return delayedReturnVehicles.map((reservation) => {
             const manager = reservation.participants.find((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER);
