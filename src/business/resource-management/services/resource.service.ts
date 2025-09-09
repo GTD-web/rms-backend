@@ -201,6 +201,7 @@ export class ResourceService {
         availabilityDto.resourceName = resource.name;
 
         const isToday = startDate === new Date().toISOString().slice(0, 10);
+        console.log(isToday, new Date(), new Date().toISOString());
         const timeRange = this.resourceContextService.현재시간_기준_가용시간대를_계산한다(
             resource.type,
             startDate,
@@ -251,6 +252,7 @@ export class ResourceService {
 
         const slotStart = new Date(startDateTime);
         while (slotStart < endDateTime) {
+            console.log(slotStart);
             const slotEnd = new Date(slotStart);
             slotEnd.setMinutes(slotEnd.getMinutes() + timeUnit);
 
