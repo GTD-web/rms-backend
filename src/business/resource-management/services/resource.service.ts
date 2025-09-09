@@ -251,8 +251,8 @@ export class ResourceService {
             actualStartTime = '12:00:00';
         }
 
-        const startDateTime = new Date(`${dateStr} ${actualStartTime}`);
-        const endDateTime = new Date(`${dateStr} ${actualEndTime}`);
+        const startDateTime = new Date(`${dateStr}T${actualStartTime}+09:00`);
+        const endDateTime = new Date(`${dateStr}T${actualEndTime}+09:00`);
         console.log('startDateTime', startDateTime, endDateTime);
         const slotStart = new Date(startDateTime);
 
