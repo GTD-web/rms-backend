@@ -34670,6 +34670,7 @@ let ResourceContextService = class ResourceContextService {
             case resource_type_enum_1.ResourceType.VEHICLE:
                 return { startTime: '00:00:00', endTime: '24:00:00', is24Hour: true };
             case resource_type_enum_1.ResourceType.MEETING_ROOM:
+                return { startTime: '09:00:00', endTime: '18:00:00', is24Hour: false };
             case resource_type_enum_1.ResourceType.EQUIPMENT:
                 return { startTime: '09:00:00', endTime: '18:00:00', is24Hour: false };
             case resource_type_enum_1.ResourceType.ACCOMMODATION:
@@ -34695,6 +34696,7 @@ let ResourceContextService = class ResourceContextService {
     }
     현재시간_기준_가용시간대를_계산한다(resourceType, targetDate, isToday) {
         const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
+        console.log('operatingHours', operatingHours);
         if (!isToday) {
             return operatingHours;
         }
@@ -34716,6 +34718,7 @@ let ResourceContextService = class ResourceContextService {
         }
         else {
             const operatingStartTime = new Date(`${targetDate} ${operatingHours.startTime}`);
+            console.log('operatingStartTime', operatingStartTime);
             calculatedStartTime =
                 roundedStartTime > operatingStartTime
                     ? roundedStartTime.toTimeString().slice(0, 8)
