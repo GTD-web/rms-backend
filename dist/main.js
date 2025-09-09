@@ -25436,7 +25436,7 @@ let ResourceService = class ResourceService {
             const dateRangeEnd = endTime ? new Date(`${endDate} ${endTime}`) : new Date(`${endDate} 23:59:59`);
             const reservations = await this.reservationContextService.자원의_날짜범위_예약을_조회한다(resource.resourceId, dateRangeStart, dateRangeEnd, reservationId);
             if (isTimeSlotRequest) {
-                const availabilityDto = await this.calculateTimeSlotAvailability(resource, startDate, endDate, am, pm, timeUnit, reservations);
+                const availabilityDto = await this.calculateTimeSlotAvailability(resource, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservations);
                 result.push(availabilityDto);
             }
             else if (isAccommodation || !isSameDay) {
@@ -25473,12 +25473,17 @@ let ResourceService = class ResourceService {
             throw new common_1.BadRequestException('시간 범위와 시간대 선택을 동시에 할 수 없습니다.');
         }
     }
-    async calculateTimeSlotAvailability(resource, startDate, endDate, am, pm, timeUnit, reservations = []) {
+    async calculateTimeSlotAvailability(resource, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservations = []) {
         const availabilityDto = new available_time_response_dto_1.ResourceAvailabilityDto();
         availabilityDto.resourceId = resource.resourceId;
         availabilityDto.resourceName = resource.name;
         const isToday = startDate === new Date().toISOString().slice(0, 10);
-        const timeRange = this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, startDate, isToday);
+        const timeRange = startTime && endTime
+            ? {
+                startTime: new Date(`${startDate}T${startTime}+09:00`).toTimeString().slice(0, 8),
+                endTime: new Date(`${endDate}T${endTime}+09:00`).toTimeString().slice(0, 8),
+            }
+            : this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, startDate, isToday);
         const availableSlots = this.calculateAvailableTimeSlots(startDate, timeRange.startTime, timeRange.endTime, timeUnit, am, pm, reservations);
         availabilityDto.availableTimeSlots = availableSlots;
         return availabilityDto;
@@ -34695,10 +34700,7 @@ let ResourceContextService = class ResourceContextService {
     }
     현재시간_기준_가용시간대를_계산한다(resourceType, targetDate, isToday) {
         const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
-        if (!isToday) {
-            return operatingHours;
-        }
-        const now = new Date();
+        const now = isToday ? new Date() : new Date(`${targetDate}T${operatingHours.startTime}+09:00`);
         const currentMinutes = now.getMinutes();
         const roundedStartTime = new Date(now);
         if (currentMinutes < 30) {
@@ -34707,17 +34709,7 @@ let ResourceContextService = class ResourceContextService {
         else {
             roundedStartTime.setMinutes(30, 0, 0);
         }
-        let calculatedStartTime;
-        if (resourceType === resource_type_enum_1.ResourceType.VEHICLE) {
-            calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
-        }
-        else {
-            const operatingStartTime = new Date(`${targetDate}T${operatingHours.startTime}+09:00`);
-            calculatedStartTime =
-                roundedStartTime > new Date(operatingStartTime)
-                    ? roundedStartTime.toTimeString().slice(0, 8)
-                    : operatingStartTime.toTimeString().slice(0, 8);
-        }
+        const calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
         const operatingEndTime = new Date(`${targetDate}T${operatingHours.endTime}+09:00`).toTimeString().slice(0, 8);
         return {
             startTime: calculatedStartTime,

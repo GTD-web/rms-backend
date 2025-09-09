@@ -125,6 +125,8 @@ export class ResourceService {
                     resource,
                     startDate!,
                     endDate!,
+                    startTime,
+                    endTime,
                     am,
                     pm,
                     timeUnit!,
@@ -191,6 +193,8 @@ export class ResourceService {
         resource: any,
         startDate: string,
         endDate: string,
+        startTime?: string,
+        endTime?: string,
         am?: boolean,
         pm?: boolean,
         timeUnit?: number,
@@ -202,11 +206,13 @@ export class ResourceService {
 
         const isToday = startDate === new Date().toISOString().slice(0, 10);
 
-        const timeRange = this.resourceContextService.현재시간_기준_가용시간대를_계산한다(
-            resource.type,
-            startDate,
-            isToday,
-        );
+        const timeRange =
+            startTime && endTime
+                ? {
+                      startTime: new Date(`${startDate}T${startTime}+09:00`).toTimeString().slice(0, 8),
+                      endTime: new Date(`${endDate}T${endTime}+09:00`).toTimeString().slice(0, 8),
+                  }
+                : this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, startDate, isToday);
 
         const availableSlots = this.calculateAvailableTimeSlots(
             startDate,
