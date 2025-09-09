@@ -25499,7 +25499,6 @@ let ResourceService = class ResourceService {
         const endDateTime = new Date(`${dateStr} ${actualEndTime}`);
         const slotStart = new Date(startDateTime);
         while (slotStart < endDateTime) {
-            console.log(slotStart);
             const slotEnd = new Date(slotStart);
             slotEnd.setMinutes(slotEnd.getMinutes() + timeUnit);
             if (slotEnd > endDateTime) {
@@ -34696,35 +34695,30 @@ let ResourceContextService = class ResourceContextService {
     }
     현재시간_기준_가용시간대를_계산한다(resourceType, targetDate, isToday) {
         const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
-        console.log('operatingHours', operatingHours);
         if (!isToday) {
             return operatingHours;
         }
         const now = new Date();
         const currentMinutes = now.getMinutes();
         const roundedStartTime = new Date(now);
-        console.log('1', currentMinutes, roundedStartTime);
         if (currentMinutes < 30) {
             roundedStartTime.setMinutes(0, 0, 0);
         }
         else {
             roundedStartTime.setMinutes(30, 0, 0);
         }
-        console.log('2', currentMinutes, roundedStartTime);
         let calculatedStartTime;
         if (resourceType === resource_type_enum_1.ResourceType.VEHICLE) {
             calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
-            console.log('VEHICLE', calculatedStartTime);
         }
         else {
-            const operatingStartTime = new Date(`${targetDate} ${operatingHours.startTime}`);
-            console.log('operatingStartTime', operatingStartTime);
+            const operatingStartTime = new Date(new Date(`${targetDate} ${operatingHours.startTime}`).toISOString());
             calculatedStartTime =
-                roundedStartTime > operatingStartTime
+                roundedStartTime > new Date(operatingStartTime)
                     ? roundedStartTime.toTimeString().slice(0, 8)
-                    : operatingHours.startTime;
-            console.log('else', calculatedStartTime);
+                    : operatingStartTime.toTimeString().slice(0, 8);
         }
+        console.log('calculatedStartTime', calculatedStartTime);
         return {
             startTime: calculatedStartTime,
             endTime: operatingHours.endTime,

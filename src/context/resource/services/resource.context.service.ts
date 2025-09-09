@@ -663,7 +663,6 @@ export class ResourceContextService {
         isToday: boolean,
     ): { startTime: string; endTime: string } {
         const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
-        console.log('operatingHours', operatingHours);
 
         if (!isToday) {
             return operatingHours;
@@ -673,30 +672,26 @@ export class ResourceContextService {
         const now = new Date();
         const currentMinutes = now.getMinutes();
         const roundedStartTime = new Date(now);
-        console.log('1', currentMinutes, roundedStartTime);
 
         if (currentMinutes < 30) {
             roundedStartTime.setMinutes(0, 0, 0);
         } else {
             roundedStartTime.setMinutes(30, 0, 0);
         }
-        console.log('2', currentMinutes, roundedStartTime);
 
         // 차량은 24시간, 다른 자원은 운영 시간 고려
         let calculatedStartTime: string;
         if (resourceType === ResourceType.VEHICLE) {
             calculatedStartTime = roundedStartTime.toTimeString().slice(0, 8);
-            console.log('VEHICLE', calculatedStartTime);
         } else {
-            const operatingStartTime = new Date(`${targetDate} ${operatingHours.startTime}`);
-            console.log('operatingStartTime', operatingStartTime);
-            calculatedStartTime =
-                roundedStartTime > operatingStartTime
-                    ? roundedStartTime.toTimeString().slice(0, 8)
-                    : operatingHours.startTime;
-            console.log('else', calculatedStartTime);
-        }
+            const operatingStartTime = new Date(new Date(`${targetDate} ${operatingHours.startTime}`).toISOString());
 
+            calculatedStartTime =
+                roundedStartTime > new Date(operatingStartTime)
+                    ? roundedStartTime.toTimeString().slice(0, 8)
+                    : operatingStartTime.toTimeString().slice(0, 8);
+        }
+        console.log('calculatedStartTime', calculatedStartTime);
         return {
             startTime: calculatedStartTime,
             endTime: operatingHours.endTime,
