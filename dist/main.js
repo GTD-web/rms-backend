@@ -22923,8 +22923,8 @@ __decorate([
 
 ### 🎯 시나리오 3: 날짜 범위 방식 (숙소, 다일자)
 여러 날짜에 걸친 자원 가용성을 확인합니다.
-- **필수**: resourceType, resourceGroupId, startDate, endDate
-- **선택**: startTime, endTime (체크인/체크아웃 시간)
+- **필수**: resourceType, startDate, endDate
+- **선택**: resourceGroupId, startTime, endTime (체크인/체크아웃 시간)
 
 **예시**: \`?resourceType=ACCOMMODATION&resourceGroupId=xxx&startDate=2024-01-15&endDate=2024-01-17&startTime=15:00:00&endTime=11:00:00\`
         `,
@@ -34754,6 +34754,7 @@ let ResourceContextService = class ResourceContextService {
         }
         const operatingStartTime = operatingHours.startTime;
         const currentStartTime = `${roundedStartTime.getHours().toString().padStart(2, '0')}:${roundedStartTime.getMinutes().toString().padStart(2, '0')}:00`;
+        console.log('currentStartTime', roundedStartTime.getHours().toString().padStart(2, '0'), currentStartTime);
         return {
             startTime: currentStartTime > operatingStartTime ? currentStartTime : operatingStartTime,
             endTime: operatingHours.endTime,
