@@ -25455,8 +25455,9 @@ let ResourceService = class ResourceService {
     async findAvailableTime(query) {
         const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservationId, } = query;
         const now = new Date();
-        const queryStartDate = new Date(startDate);
-        if (queryStartDate < now) {
+        const queryStartDate = new Date(`${startDate}T00:00:00Z`);
+        console.log('queryStartDate', queryStartDate, now);
+        if (queryStartDate.getDate() < now.getDate()) {
             return [];
         }
         this.validateAvailabilityQuery(query);
@@ -34758,9 +34759,9 @@ let ResourceContextService = class ResourceContextService {
             roundedStartTime.setMinutes(30, 0, 0);
         }
         const operatingStartTime = operatingHours.startTime;
-        const currentHours = roundedStartTime.getHours() + 9;
+        const currentHours = roundedStartTime.getHours();
         const currentStartTime = `${currentHours.toString().padStart(2, '0')}:${roundedStartTime.getMinutes().toString().padStart(2, '0')}:00`;
-        console.log('currentStartTime', roundedStartTime.getHours().toString().padStart(2, '0'), currentStartTime);
+        console.log('currentStartTime', roundedStartTime, currentStartTime);
         return {
             startTime: currentStartTime > operatingStartTime ? currentStartTime : operatingStartTime,
             endTime: operatingHours.endTime,
