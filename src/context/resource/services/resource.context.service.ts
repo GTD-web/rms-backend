@@ -314,7 +314,7 @@ export class ResourceContextService {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
-
+        console.log('updateResourceInfoDto', updateResourceInfoDto);
         try {
             if (updateResourceInfoDto.resource) {
                 // 리소스 정보 업데이트 (이미지 제외)
@@ -343,10 +343,10 @@ export class ResourceContextService {
                     // 리소스에 파일들을 연결 (기존 연결 삭제 후 새로 생성)
                     await this.fileContextService.리소스에_파일들을_연결한다(resourceId, fileIds, queryRunner);
                 }
+                console.log('updateResourceInfoDto.resource', updateResourceInfoDto.resource);
+                // 리소스의 images 컬럼에 filePath 배열 저장
+                await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
             }
-            console.log('updateResourceInfoDto.resource', updateResourceInfoDto.resource);
-            // 리소스의 images 컬럼에 filePath 배열 저장
-            await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
 
             if (updateResourceInfoDto.typeInfo) {
                 switch (resource.type) {

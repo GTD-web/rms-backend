@@ -34496,6 +34496,7 @@ let ResourceContextService = class ResourceContextService {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
+        console.log('updateResourceInfoDto', updateResourceInfoDto);
         try {
             if (updateResourceInfoDto.resource) {
                 const { images } = updateResourceInfoDto.resource;
@@ -34514,9 +34515,9 @@ let ResourceContextService = class ResourceContextService {
                     }
                     await this.fileContextService.리소스에_파일들을_연결한다(resourceId, fileIds, queryRunner);
                 }
+                console.log('updateResourceInfoDto.resource', updateResourceInfoDto.resource);
+                await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
             }
-            console.log('updateResourceInfoDto.resource', updateResourceInfoDto.resource);
-            await this.domainResourceService.update(resourceId, updateResourceInfoDto.resource, { queryRunner });
             if (updateResourceInfoDto.typeInfo) {
                 switch (resource.type) {
                     case resource_type_enum_1.ResourceType.VEHICLE:
