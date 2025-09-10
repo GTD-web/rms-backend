@@ -85,6 +85,11 @@ export class ResourceService {
         } = query;
 
         // 1. 권한: 자원 조회는 모든 직원이 가능 (생략)
+        const now = new Date();
+        const queryStartDate = new Date(startDate);
+        if (queryStartDate < now) {
+            return [];
+        }
 
         // 2. 그래프 조회: 파라미터 검증 및 자원 목록 조회
         this.validateAvailabilityQuery(query);

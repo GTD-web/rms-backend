@@ -25454,6 +25454,11 @@ let ResourceService = class ResourceService {
     }
     async findAvailableTime(query) {
         const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservationId, } = query;
+        const now = new Date();
+        const queryStartDate = new Date(startDate);
+        if (queryStartDate < now) {
+            return [];
+        }
         this.validateAvailabilityQuery(query);
         const resources = await this.resourceContextService.그룹별_사용가능한_자원_목록을_조회한다(resourceGroupId, resourceType);
         if (resources.length === 0) {
