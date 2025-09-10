@@ -116,17 +116,21 @@ export class ResourceService {
         for (const resource of resources) {
             // 해당 자원의 예약 정보 조회
             const dateRangeStart = startTime
-                ? new Date(`${startDate} ${startTime}`)
-                : new Date(`${startDate} 00:00:00`);
-            const dateRangeEnd = endTime ? new Date(`${endDate} ${endTime}`) : new Date(`${endDate} 23:59:59`);
-
+                ? new Date(`${startDate}T${startTime}+09:00`)
+                : new Date(`${startDate}T00:00:00+09:00`);
+            const dateRangeEnd = endTime
+                ? new Date(`${endDate}T${endTime}+09:00`)
+                : new Date(`${endDate}T23:59:59+09:00`);
+            console.log('dateRangeStart', dateRangeStart);
+            console.log('dateRangeEnd', dateRangeEnd);
+            console.log('resource', resource.resourceId);
             const reservations = await this.reservationContextService.자원의_날짜범위_예약을_조회한다(
                 resource.resourceId,
                 dateRangeStart,
                 dateRangeEnd,
                 reservationId,
             );
-
+            console.log('reservations', reservations);
             if (isTimeSlotRequest) {
                 // 시간 슬롯 방식: 30분 단위로 가용 시간 계산
                 const availabilityDto = await this.calculateTimeSlotAvailability(
