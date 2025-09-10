@@ -40615,11 +40615,9 @@ let DomainScheduleService = class DomainScheduleService extends base_service_1.B
         });
     }
     async findByScheduleIds(scheduleIds) {
-        console.log('scheduleIds', scheduleIds.sort());
         const result = await this.scheduleRepository.findAll({
             where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
         });
-        console.log('result', result.map((schedule) => schedule.scheduleId).sort());
         return result;
     }
     async findByDateRange(startDate, endDate) {
