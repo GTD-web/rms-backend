@@ -27913,6 +27913,14 @@ __decorate([
 ], ScheduleDetailResponseDto.prototype, "scheduleDepartment", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        description: '일정 위치',
+        example: '서울시 종로구 회의실 A',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], ScheduleDetailResponseDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         description: '일정 상태',
         enum: schedule_type_enum_1.ScheduleStatus,
         example: schedule_type_enum_1.ScheduleStatus.PROCESSING,
@@ -28692,6 +28700,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             endDate: schedule.endDate,
             scheduleType: schedule.scheduleType,
             scheduleDepartment: schedule.scheduleDepartment,
+            location: schedule.location,
             status: schedule.status,
             notifyBeforeStart: schedule.notifyBeforeStart,
             notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,

@@ -374,6 +374,7 @@ export class ScheduleManagementService {
             endDate: schedule.endDate,
             scheduleType: schedule.scheduleType,
             scheduleDepartment: schedule.scheduleDepartment,
+            location: schedule.location,
             status: schedule.status,
             notifyBeforeStart: schedule.notifyBeforeStart,
             notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,

@@ -269,6 +269,13 @@ export class ScheduleDetailResponseDto {
     scheduleDepartment?: string;
 
     @ApiProperty({
+        description: '일정 위치',
+        example: '서울시 종로구 회의실 A',
+        required: false,
+    })
+    location?: string;
+
+    @ApiProperty({
         description: '일정 상태',
         enum: ScheduleStatus,
         example: ScheduleStatus.PROCESSING,
