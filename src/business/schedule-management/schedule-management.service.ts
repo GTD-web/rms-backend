@@ -238,14 +238,12 @@ export class ScheduleManagementService {
         const { scheduleIds, filteredCount, totalPages, hasNext, hasPrevious } =
             await this.scheduleQueryContextService.내_일정_내역을_조회한다(user.employeeId, query);
         // 3. 벌크 데이터 조회 (한 번의 호출로 모든 관련 데이터 조회)
-
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
             withProject: true,
             withReservation: true,
             withResource: true,
             withParticipants: true,
         });
-
         const scheduleCalendarItems = scheduleDataList.map(
             ({ schedule, project, reservation, resource, participants }) => {
                 return {

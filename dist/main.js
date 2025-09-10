@@ -35984,7 +35984,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         return [...new Set(scheduleIds)];
     }
     async 직원의_역할별_일정ID들을_조회한다(employeeId, role, fromDate) {
-        const conditions = { employeeId };
+        const conditions = { employeeId, schedule: { deletedAt: (0, typeorm_1.IsNull)() } };
         if (role)
             conditions.type = role;
         const participants = await this.domainScheduleParticipantService.findAll({
@@ -35992,8 +35992,13 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             select: {
                 scheduleId: true,
             },
+            relations: ['schedule'],
         });
-        let scheduleIds = participants.map((p) => p.scheduleId);
+        const filterWithDeletedAt = await this.domainScheduleService.findAll({
+            where: { scheduleId: (0, typeorm_1.In)(participants.map((p) => p.scheduleId)) },
+            select: { scheduleId: true },
+        });
+        let scheduleIds = filterWithDeletedAt.map((p) => p.scheduleId);
         if (fromDate && scheduleIds.length > 0) {
             const validSchedules = await this.domainScheduleService.findAll({
                 where: {
@@ -40610,9 +40615,12 @@ let DomainScheduleService = class DomainScheduleService extends base_service_1.B
         });
     }
     async findByScheduleIds(scheduleIds) {
-        return this.scheduleRepository.findAll({
+        console.log('scheduleIds', scheduleIds.sort());
+        const result = await this.scheduleRepository.findAll({
             where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
         });
+        console.log('result', result.map((schedule) => schedule.scheduleId).sort());
+        return result;
     }
     async findByDateRange(startDate, endDate) {
         return this.scheduleRepository.findAll({

@@ -20,9 +20,12 @@ export class DomainScheduleService extends BaseService<Schedule> {
     }
 
     async findByScheduleIds(scheduleIds: string[]): Promise<Schedule[]> {
-        return this.scheduleRepository.findAll({
+        console.log('scheduleIds', scheduleIds.sort());
+        const result = await this.scheduleRepository.findAll({
             where: { scheduleId: In(scheduleIds) },
         });
+        console.log('result', result.map((schedule) => schedule.scheduleId).sort());
+        return result;
     }
 
     async findByDateRange(startDate: Date, endDate: Date): Promise<Schedule[]> {

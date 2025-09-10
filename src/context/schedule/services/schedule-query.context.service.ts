@@ -203,9 +203,7 @@ export class ScheduleQueryContextService {
 
         // 1. 모든 일정들을 한 번에 조회
         const schedules = await this.domainScheduleService.findByScheduleIds(scheduleIds);
-
         const scheduleMap = new Map(schedules.map((schedule) => [schedule.scheduleId, schedule]));
-
         // 2. 모든 일정관계정보를 한 번에 조회
         const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
         const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
@@ -407,7 +405,7 @@ export class ScheduleQueryContextService {
         role?: ParticipantsType,
         fromDate?: Date,
     ): Promise<string[]> {
-        const conditions: any = { employeeId };
+        const conditions: any = { employeeId, schedule: { deletedAt: IsNull() } };
         if (role) conditions.type = role;
 
         const participants = await this.domainScheduleParticipantService.findAll({
@@ -415,8 +413,13 @@ export class ScheduleQueryContextService {
             select: {
                 scheduleId: true,
             },
+            relations: ['schedule'],
         });
-        let scheduleIds = participants.map((p) => p.scheduleId);
+        const filterWithDeletedAt = await this.domainScheduleService.findAll({
+            where: { scheduleId: In(participants.map((p) => p.scheduleId)) },
+            select: { scheduleId: true },
+        });
+        let scheduleIds = filterWithDeletedAt.map((p) => p.scheduleId);
 
         // 날짜 조건이 있으면 Schedule 테이블과 조인하여 필터링
         if (fromDate && scheduleIds.length > 0) {
@@ -732,13 +735,10 @@ export class ScheduleQueryContextService {
     }> {
         // 1. 기본 일정 ID 조회 (역할 조건 포함)
         const scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, ParticipantsType.RESERVER);
-
         // 4. 키워드 검색 적용
         const filteredScheduleIds = await this.키워드로_일정ID들을_조회한다(scheduleIds, query.keyword);
-
         // 5. 페이지네이션 적용
         const paginationResult = this.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, query.page, query.limit);
-
         return {
             scheduleIds: paginationResult.paginatedIds,
             filteredCount: paginationResult.filteredCount,
