@@ -87,8 +87,10 @@ export class ResourceService {
         // 1. 권한: 자원 조회는 모든 직원이 가능 (생략)
         const now = new Date();
         const queryStartDate = new Date(`${startDate}T00:00:00Z`);
-        console.log('queryStartDate', queryStartDate, now);
-        if (queryStartDate.getDate() < now.getDate()) {
+        console.log('queryStartDate', queryStartDate, queryStartDate.getUTCDate());
+        console.log('now', now, now.getUTCDate());
+
+        if (queryStartDate.getUTCDate() < now.getUTCDate()) {
             return [];
         }
 

@@ -25456,8 +25456,9 @@ let ResourceService = class ResourceService {
         const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservationId, } = query;
         const now = new Date();
         const queryStartDate = new Date(`${startDate}T00:00:00Z`);
-        console.log('queryStartDate', queryStartDate, now);
-        if (queryStartDate.getDate() < now.getDate()) {
+        console.log('queryStartDate', queryStartDate, queryStartDate.getUTCDate());
+        console.log('now', now, now.getUTCDate());
+        if (queryStartDate.getUTCDate() < now.getUTCDate()) {
             return [];
         }
         this.validateAvailabilityQuery(query);
@@ -34759,7 +34760,7 @@ let ResourceContextService = class ResourceContextService {
             roundedStartTime.setMinutes(30, 0, 0);
         }
         const operatingStartTime = operatingHours.startTime;
-        const currentHours = roundedStartTime.getHours();
+        const currentHours = roundedStartTime.getUTCHours() + 9;
         const currentStartTime = `${currentHours.toString().padStart(2, '0')}:${roundedStartTime.getMinutes().toString().padStart(2, '0')}:00`;
         console.log('currentStartTime', roundedStartTime, currentStartTime);
         return {

@@ -679,7 +679,7 @@ export class ResourceContextService {
             roundedStartTime.setMinutes(30, 0, 0);
         }
         const operatingStartTime = operatingHours.startTime;
-        const currentHours = roundedStartTime.getHours(); // +9 ;
+        const currentHours = roundedStartTime.getUTCHours() + 9;
         const currentStartTime = `${currentHours.toString().padStart(2, '0')}:${roundedStartTime.getMinutes().toString().padStart(2, '0')}:00`;
         // if (currentStartTime > operatingStartTime) {
         //     operatingStartTime = `${roundedStartTime.getHours().toString().padStart(2, '0')}:${roundedStartTime.getMinutes().toString().padStart(2, '0')}:00`;
