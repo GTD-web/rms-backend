@@ -34753,7 +34753,7 @@ let ResourceContextService = class ResourceContextService {
             roundedStartTime.setMinutes(30, 0, 0);
         }
         const operatingStartTime = operatingHours.startTime;
-        const currentStartTime = `${roundedStartTime.getHours()}:${roundedStartTime.getMinutes()}:00`;
+        const currentStartTime = `${roundedStartTime.getHours().toString().padStart(2, '0')}:${roundedStartTime.getMinutes().toString().padStart(2, '0')}:00`;
         return {
             startTime: currentStartTime > operatingStartTime ? currentStartTime : operatingStartTime,
             endTime: operatingHours.endTime,
