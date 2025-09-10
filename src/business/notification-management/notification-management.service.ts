@@ -46,6 +46,9 @@ export class NotificationManagementService {
         //     await new Promise((resolve) => setTimeout(resolve, 1000 * 60));
         // }
     }
+    async 구독_목록을_조회한다(employeeIds: string[]): Promise<string[]> {
+        return await this.notificationContextService.구독_목록을_조회한다(employeeIds);
+    }
 
     // ==================== 알림 구독 관리 ====================
 

@@ -20237,8 +20237,6 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
 const employees_by_department_response_dto_1 = __webpack_require__(/*! ../dtos/employees-by-department-response.dto */ "./src/business/employee-management/dtos/employees-by-department-response.dto.ts");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const employee_management_service_1 = __webpack_require__(/*! ../employee-management.service */ "./src/business/employee-management/employee-management.service.ts");
 let EmployeeController = class EmployeeController {
     constructor(employeeManagementService) {
@@ -20251,7 +20249,6 @@ let EmployeeController = class EmployeeController {
 exports.EmployeeController = EmployeeController;
 __decorate([
     (0, common_1.Get)('department'),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     (0, swagger_1.ApiOperation)({ summary: '부서별 직원 목록 조회 #사용자/참석자설정/모달' }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
@@ -21087,6 +21084,9 @@ let EmployeeManagementService = class EmployeeManagementService {
     async syncEmployees(authorization) {
         await this.employeeContextService.직원_정보를_동기화한다(authorization);
     }
+    async syncSubscription() {
+        await this.employeeContextService.구독정보를_동기화한다();
+    }
     async findResourceManagers() {
         return this.employeeContextService.자원관리자_목록을_조회한다();
     }
@@ -21227,6 +21227,9 @@ let NotificationController = class NotificationController {
     async markAllAsRead(employeeId) {
         await this.notificationManagementService.모든_알림을_읽음_처리한다(employeeId);
     }
+    async findSubscription(employeeIds) {
+        return await this.notificationManagementService.구독_목록을_조회한다(employeeIds);
+    }
 };
 exports.NotificationController = NotificationController;
 __decorate([
@@ -21333,6 +21336,25 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAllAsRead", null);
+__decorate([
+    (0, common_1.Get)('subscriptions'),
+    (0, swagger_1.ApiOperation)({ summary: '구독 정보 조회' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '구독 정보 조회 성공',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'employeeIds',
+        type: String,
+        isArray: true,
+        required: false,
+        description: '직원 ID 목록',
+    }),
+    __param(0, (0, common_1.Query)('employeeIds')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "findSubscription", null);
 exports.NotificationController = NotificationController = __decorate([
     (0, swagger_1.ApiTags)('v2 알림 '),
     (0, common_1.Controller)('v2/notifications'),
@@ -21507,6 +21529,9 @@ let NotificationManagementService = class NotificationManagementService {
         this.scheduleContextService = scheduleContextService;
     }
     async onModuleInit() {
+    }
+    async 구독_목록을_조회한다(employeeIds) {
+        return await this.notificationContextService.구독_목록을_조회한다(employeeIds);
     }
     async 웹푸시를_구독한다(employeeId, subscription) {
         await this.notificationContextService.PUSH_알림을_구독한다(employeeId, subscription);
@@ -30643,6 +30668,24 @@ let EmployeeContextService = class EmployeeContextService {
         }
         return this.직원_목록을_조회한다();
     }
+    async 구독정보를_동기화한다() {
+        const employees = await this.domainEmployeeService.findAll({
+            where: {
+                subscriptions: (0, typeorm_1.Not)((0, typeorm_1.IsNull)()),
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+            },
+        });
+        let count = 1;
+        for (const employee of employees) {
+            const response = await this.employeeMicroserviceAdapter.subscribeFcm('', employee.employeeNumber, {
+                fcmToken: employee.subscriptions[0].fcm?.token,
+            });
+            if (response.success) {
+                console.log('구독 정보 동기화 성공', count, employee.name, employee.employeeNumber);
+                count++;
+            }
+        }
+    }
     부서별로_그룹핑한다(employees) {
         const departments = new Map();
         employees.forEach((employee) => {
@@ -32624,14 +32667,16 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
     async 구독_목록을_조회한다(employeeIds) {
         const employees = await this.domainEmployeeService.findAll({
             where: { employeeId: (0, typeorm_1.In)(employeeIds) },
-            select: { subscriptions: true, isPushNotificationEnabled: true },
+            select: { subscriptions: true, isPushNotificationEnabled: true, employeeNumber: true },
         });
         if (!employees || employees.length === 0) {
             return [];
         }
-        return employees
-            .filter((employee) => employee.isPushNotificationEnabled && employee.subscriptions && employee.subscriptions.length > 0)
-            .flatMap((employee) => employee.subscriptions.map((subscription) => subscription.fcm.token));
+        const { byEmployee, allTokens, totalEmployees, totalTokens } = await this.employeeMicroserviceAdapter.getFcmTokens('', employees.map((employee) => employee.employeeNumber));
+        if (totalTokens === 0) {
+            return [];
+        }
+        return allTokens.map((token) => token.fcmToken);
     }
     async 알림_내용을_생성한다(notificationType, notificationData) {
         const createNotificationDto = {
@@ -37556,12 +37601,16 @@ let EmployeeMicroserviceAdapter = EmployeeMicroserviceAdapter_1 = class Employee
             throw error;
         }
     }
-    async subscribeFcm(authorization, employeeId, fcmSubscribeDto) {
+    async subscribeFcm(authorization, employeeNumber, fcmSubscribeDto) {
         try {
-            this.logger.log(`FCM 토큰 구독 요청: employeeId=${employeeId}`);
+            this.logger.log(`FCM 토큰 구독 요청: employeeNumber=${employeeNumber}`);
             const url = `${this.employeeServiceUrl}/api/fcm/subscribe`;
             const response = await (0, rxjs_1.firstValueFrom)(this.httpService
-                .post(url, fcmSubscribeDto, {
+                .post(url, {
+                employeeNumber: employeeNumber,
+                fcmToken: fcmSubscribeDto.fcmToken,
+                deviceType: 'ANDROID',
+            }, {
                 headers: this.getHeaders(authorization),
             })
                 .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
@@ -37574,7 +37623,7 @@ let EmployeeMicroserviceAdapter = EmployeeMicroserviceAdapter_1 = class Employee
                 }
                 throw new common_1.BadRequestException('FCM 토큰 구독 중 오류가 발생했습니다.');
             })));
-            this.logger.log(`FCM 토큰 구독 성공: employeeId=${employeeId}`);
+            this.logger.log(`FCM 토큰 구독 성공: employeeNumber=${employeeNumber}`);
             return response;
         }
         catch (error) {
@@ -37601,17 +37650,17 @@ let EmployeeMicroserviceAdapter = EmployeeMicroserviceAdapter_1 = class Employee
             throw error;
         }
     }
-    async getFcmTokens(authorization, employeeIds) {
+    async getFcmTokens(authorization, employeeNumbers) {
         try {
-            this.logger.log(`FCM 토큰 일괄 조회 요청: employeeIds=${employeeIds}`);
+            this.logger.log(`FCM 토큰 일괄 조회 요청: employeeNumbers=${employeeNumbers}`);
             const params = new URLSearchParams();
-            params.append('employeeIds', employeeIds.join(','));
+            params.append('employeeNumbers', employeeNumbers.join(','));
             const url = `${this.employeeServiceUrl}/api/fcm/tokens?${params.toString()}`;
             const response = await (0, rxjs_1.firstValueFrom)(this.httpService.get(url, { headers: this.getHeaders(authorization) }).pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
                 this.logger.error(`FCM 토큰 일괄 조회 실패: ${error.message}`, error.stack);
                 throw new common_1.BadRequestException('FCM 토큰 일괄 조회 중 오류가 발생했습니다.');
             })));
-            this.logger.log(`FCM 토큰 일괄 조회 성공: ${response.length}개 조회됨`);
+            this.logger.log(`FCM 토큰 일괄 조회 성공: ${response.totalTokens}개 조회됨`);
             return response;
         }
         catch (error) {

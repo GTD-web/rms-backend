@@ -14,6 +14,10 @@ export class EmployeeManagementService {
         await this.employeeContextService.직원_정보를_동기화한다(authorization);
     }
 
+    async syncSubscription(): Promise<void> {
+        await this.employeeContextService.구독정보를_동기화한다();
+    }
+
     async findResourceManagers(): Promise<EmplyeesByDepartmentResponseDto[]> {
         return this.employeeContextService.자원관리자_목록을_조회한다();
     }

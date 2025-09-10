@@ -272,24 +272,30 @@ export class NotificationContextService {
     async 구독_목록을_조회한다(employeeIds: string[]): Promise<string[]> {
         const employees = await this.domainEmployeeService.findAll({
             where: { employeeId: In(employeeIds) },
-            select: { subscriptions: true, isPushNotificationEnabled: true },
+            select: { subscriptions: true, isPushNotificationEnabled: true, employeeNumber: true },
         });
-
         if (!employees || employees.length === 0) {
             return [];
         }
-        return employees
-            .filter(
-                (employee) =>
-                    employee.isPushNotificationEnabled && employee.subscriptions && employee.subscriptions.length > 0,
-            )
-            .flatMap((employee) => employee.subscriptions.map((subscription) => subscription.fcm.token));
 
-        // const tokens = await this.employeeMicroserviceAdapter.getFcmTokens(authorization, [employeeId]);
-        // if (tokens.length === 0) {
-        //     return [];
-        // }
-        // return tokens.map((token) => token.fcmToken);
+        // deprecated
+        // const tokens = employees
+        //     .filter(
+        //         (employee) =>
+        //             employee.isPushNotificationEnabled && employee.subscriptions && employee.subscriptions.length > 0,
+        //     )
+        //     .flatMap((employee) => employee.subscriptions.map((subscription) => subscription.fcm.token));
+
+        const { byEmployee, allTokens, totalEmployees, totalTokens } =
+            await this.employeeMicroserviceAdapter.getFcmTokens(
+                '',
+                employees.map((employee) => employee.employeeNumber),
+            );
+        if (totalTokens === 0) {
+            return [];
+        }
+
+        return allTokens.map((token) => token.fcmToken);
     }
 
     /**

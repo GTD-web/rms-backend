@@ -144,25 +144,20 @@ export class NotificationController {
         await this.notificationManagementService.모든_알림을_읽음_처리한다(employeeId);
     }
 
-    // @Get('subscription')
-    // @ApiOperation({ summary: '구독 정보 조회' })
-    // @ApiOkResponse({
-    //     status: 200,
-    //     description: '구독 정보 조회 성공',
-    // })
-    // @ApiQuery({
-    //     name: 'token',
-    //     type: String,
-    //     required: false,
-    //     description: '구독 토큰',
-    // })
-    // @ApiQuery({
-    //     name: 'employeeId',
-    //     type: String,
-    //     required: false,
-    //     description: '직원 ID',
-    // })
-    // async findSubscription(@Query('token') token?: string, @Query('employeeId') employeeId?: string) {
-    //     return await this.notificationContextService.구독_정보를_조회한다(token, employeeId);
-    // }
+    @Get('subscriptions')
+    @ApiOperation({ summary: '구독 정보 조회' })
+    @ApiOkResponse({
+        status: 200,
+        description: '구독 정보 조회 성공',
+    })
+    @ApiQuery({
+        name: 'employeeIds',
+        type: String,
+        isArray: true,
+        required: false,
+        description: '직원 ID 목록',
+    })
+    async findSubscription(@Query('employeeIds') employeeIds?: string[]) {
+        return await this.notificationManagementService.구독_목록을_조회한다(employeeIds);
+    }
 }

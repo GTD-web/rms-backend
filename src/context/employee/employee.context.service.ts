@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { Role } from '@libs/enums/role-type.enum';
-import { In, Not, Raw } from 'typeorm';
+import { In, IsNull, Not, Raw } from 'typeorm';
 import { EmployeeResponseDto } from '@src/business/employee-management/dtos/employee-response.dto';
 import { EmplyeesByDepartmentResponseDto } from '@src/business/employee-management/dtos/employees-by-department-response.dto';
 import { UserResponseDto } from '@src/business/employee-management/dtos/user-response.dto';
@@ -255,6 +255,25 @@ export class EmployeeContextService {
             }
         }
         return this.직원_목록을_조회한다();
+    }
+
+    async 구독정보를_동기화한다(): Promise<void> {
+        const employees = await this.domainEmployeeService.findAll({
+            where: {
+                subscriptions: Not(IsNull()),
+                department: Not(In(['퇴사', '관리자'])),
+            },
+        });
+        let count = 1;
+        for (const employee of employees) {
+            const response = await this.employeeMicroserviceAdapter.subscribeFcm('', employee.employeeNumber, {
+                fcmToken: employee.subscriptions[0].fcm?.token,
+            });
+            if (response.success) {
+                console.log('구독 정보 동기화 성공', count, employee.name, employee.employeeNumber);
+                count++;
+            }
+        }
     }
 
     /**

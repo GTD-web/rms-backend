@@ -10,7 +10,7 @@ import {
     FcmSubscribeRequestDto,
     FcmSubscribeResponseDto,
 } from '../dtos';
-import { FcmTokenResponseDto } from '../dtos/fcm-token-response.dto';
+import { EmployeeTokensDto, FcmTokenResponseDto } from '../dtos/fcm-token-response.dto';
 
 @Injectable()
 export class EmployeeMicroserviceAdapter {
@@ -357,19 +357,27 @@ export class EmployeeMicroserviceAdapter {
      */
     async subscribeFcm(
         authorization: string,
-        employeeId: string,
+        employeeNumber: string,
         fcmSubscribeDto: FcmSubscribeRequestDto,
     ): Promise<FcmSubscribeResponseDto> {
         try {
-            this.logger.log(`FCM 토큰 구독 요청: employeeId=${employeeId}`);
+            this.logger.log(`FCM 토큰 구독 요청: employeeNumber=${employeeNumber}`);
 
             const url = `${this.employeeServiceUrl}/api/fcm/subscribe`;
 
             const response = await firstValueFrom(
                 this.httpService
-                    .post<FcmSubscribeResponseDto>(url, fcmSubscribeDto, {
-                        headers: this.getHeaders(authorization),
-                    })
+                    .post<FcmSubscribeResponseDto>(
+                        url,
+                        {
+                            employeeNumber: employeeNumber,
+                            fcmToken: fcmSubscribeDto.fcmToken,
+                            deviceType: 'ANDROID',
+                        },
+                        {
+                            headers: this.getHeaders(authorization),
+                        },
+                    )
                     .pipe(
                         map((res) => res.data),
                         catchError((error: AxiosError) => {
@@ -388,7 +396,7 @@ export class EmployeeMicroserviceAdapter {
                     ),
             );
 
-            this.logger.log(`FCM 토큰 구독 성공: employeeId=${employeeId}`);
+            this.logger.log(`FCM 토큰 구독 성공: employeeNumber=${employeeNumber}`);
             return response;
         } catch (error) {
             this.logger.error(`FCM 토큰 구독 중 예외 발생: ${error.message}`, error.stack);
@@ -401,14 +409,14 @@ export class EmployeeMicroserviceAdapter {
      * @param authorization 요청에서 전달받은 Authorization 헤더
      * @returns FCM 토큰 정보
      */
-    async getFcmToken(authorization: string): Promise<FcmTokenResponseDto> {
+    async getFcmToken(authorization: string): Promise<EmployeeTokensDto> {
         try {
             this.logger.log('본인의 FCM 토큰 조회 요청');
 
             const url = `${this.employeeServiceUrl}/api/fcm/token`;
 
             const response = await firstValueFrom(
-                this.httpService.get<FcmTokenResponseDto>(url, { headers: this.getHeaders(authorization) }).pipe(
+                this.httpService.get<EmployeeTokensDto>(url, { headers: this.getHeaders(authorization) }).pipe(
                     map((res) => res.data),
                     catchError((error: AxiosError) => {
                         this.logger.error(`FCM 토큰 조회 실패: ${error.message}`, error.stack);
@@ -433,20 +441,20 @@ export class EmployeeMicroserviceAdapter {
     /**
      * 여러 직원의 FCM 토큰 일괄 조회
      * @param authorization 요청에서 전달받은 Authorization 헤더
-     * @param employeeIds 쉼표로 구분된 직원 ID 목록
+     * @param employeeNumbers 쉼표로 구분된 직원 사번 목록
      * @returns FCM 토큰 목록
      */
-    async getFcmTokens(authorization: string, employeeIds: string[]): Promise<FcmTokenResponseDto[]> {
+    async getFcmTokens(authorization: string, employeeNumbers: string[]): Promise<FcmTokenResponseDto> {
         try {
-            this.logger.log(`FCM 토큰 일괄 조회 요청: employeeIds=${employeeIds}`);
+            this.logger.log(`FCM 토큰 일괄 조회 요청: employeeNumbers=${employeeNumbers}`);
 
             const params = new URLSearchParams();
-            params.append('employeeIds', employeeIds.join(','));
+            params.append('employeeNumbers', employeeNumbers.join(','));
 
             const url = `${this.employeeServiceUrl}/api/fcm/tokens?${params.toString()}`;
 
             const response = await firstValueFrom(
-                this.httpService.get<FcmTokenResponseDto[]>(url, { headers: this.getHeaders(authorization) }).pipe(
+                this.httpService.get<FcmTokenResponseDto>(url, { headers: this.getHeaders(authorization) }).pipe(
                     map((res) => res.data),
                     catchError((error: AxiosError) => {
                         this.logger.error(`FCM 토큰 일괄 조회 실패: ${error.message}`, error.stack);
@@ -455,7 +463,7 @@ export class EmployeeMicroserviceAdapter {
                 ),
             );
 
-            this.logger.log(`FCM 토큰 일괄 조회 성공: ${response.length}개 조회됨`);
+            this.logger.log(`FCM 토큰 일괄 조회 성공: ${response.totalTokens}개 조회됨`);
             return response;
         } catch (error) {
             this.logger.error(`FCM 토큰 일괄 조회 중 예외 발생: ${error.message}`, error.stack);

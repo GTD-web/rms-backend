@@ -15,7 +15,6 @@ export class EmployeeController {
     constructor(private readonly employeeManagementService: EmployeeManagementService) {}
 
     @Get('department')
-    @Roles(Role.USER)
     @ApiOperation({ summary: '부서별 직원 목록 조회 #사용자/참석자설정/모달' })
     @ApiDataResponse({
         status: 200,
@@ -25,4 +24,11 @@ export class EmployeeController {
     async findAllEmplyeesByDepartment(): Promise<EmplyeesByDepartmentResponseDto[]> {
         return this.employeeManagementService.findEmployeeList();
     }
+
+    // 마이그레이션 용 - 2025-09-10
+    // @Get('sync-subscription')
+    // @ApiOperation({ summary: '구독 정보 동기화' })
+    // async syncSubscription(): Promise<void> {
+    //     return this.employeeManagementService.syncSubscription();
+    // }
 }
