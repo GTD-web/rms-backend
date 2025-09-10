@@ -18150,20 +18150,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateVehicleInfoUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
+const file_vehicle_info_service_1 = __webpack_require__(/*! @src/domain/file-vehicle-info/file-vehicle-info.service */ "./src/domain/file-vehicle-info/file-vehicle-info.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
-    constructor(vehicleInfoService, consumableService, fileService, dataSource) {
+    constructor(vehicleInfoService, consumableService, fileService, fileVehicleInfoService, dataSource) {
         this.vehicleInfoService = vehicleInfoService;
         this.consumableService = consumableService;
         this.fileService = fileService;
+        this.fileVehicleInfoService = fileVehicleInfoService;
         this.dataSource = dataSource;
     }
     async execute(vehicleInfoId, updateVehicleInfoDto) {
@@ -18192,6 +18194,38 @@ let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
                 await this.fileService.updateTemporaryFiles(images, false, {
                     queryRunner,
                 });
+            }
+            await this.fileVehicleInfoService.deleteByVehicleInfoId(vehicleInfoId, { queryRunner });
+            const vehicleInfoConnections = [];
+            if (updateVehicleInfoDto.parkingLocationImages.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(updateVehicleInfoDto.parkingLocationImages);
+                const fileIds = files.map((file) => file.fileId);
+                vehicleInfoConnections.push(...fileIds.map((fileId) => ({
+                    vehicleInfoId,
+                    fileId,
+                    type: 'PARKING_LOCATION',
+                })));
+            }
+            if (updateVehicleInfoDto.odometerImages.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(updateVehicleInfoDto.odometerImages);
+                const fileIds = files.map((file) => file.fileId);
+                vehicleInfoConnections.push(...fileIds.map((fileId) => ({
+                    vehicleInfoId,
+                    fileId,
+                    type: 'ODOMETER',
+                })));
+            }
+            if (updateVehicleInfoDto.indoorImages.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(updateVehicleInfoDto.indoorImages);
+                const fileIds = files.map((file) => file.fileId);
+                vehicleInfoConnections.push(...fileIds.map((fileId) => ({
+                    vehicleInfoId,
+                    fileId,
+                    type: 'INDOOR',
+                })));
+            }
+            if (vehicleInfoConnections.length > 0) {
+                await this.fileVehicleInfoService.saveMultiple(vehicleInfoConnections, { queryRunner });
             }
             const hasConsumables = await this.consumableService.count({
                 where: {
@@ -18243,7 +18277,7 @@ let UpdateVehicleInfoUsecase = class UpdateVehicleInfoUsecase {
 exports.UpdateVehicleInfoUsecase = UpdateVehicleInfoUsecase;
 exports.UpdateVehicleInfoUsecase = UpdateVehicleInfoUsecase = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _a : Object, typeof (_b = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _b : Object, typeof (_c = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _c : Object, typeof (_d = typeof file_vehicle_info_service_1.DomainFileVehicleInfoService !== "undefined" && file_vehicle_info_service_1.DomainFileVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _e : Object])
 ], UpdateVehicleInfoUsecase);
 
 
@@ -35985,8 +36019,8 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         }
         const statistics = [];
         if (!category || category === 'ALL') {
-            const totalScheduleCount = await this.domainScheduleService.count({
-                where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
+            const totalScheduleCount = await this.domainScheduleRelationService.count({
+                where: { scheduleId: (0, typeorm_1.In)(scheduleIds), projectId: (0, typeorm_1.IsNull)(), reservationId: (0, typeorm_1.IsNull)() },
             });
             const projectCount = await this.domainScheduleRelationService.count({
                 where: {

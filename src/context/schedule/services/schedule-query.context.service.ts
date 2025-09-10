@@ -491,8 +491,8 @@ export class ScheduleQueryContextService {
             // 전체 카테고리 통계
 
             // 일정 총 개수
-            const totalScheduleCount = await this.domainScheduleService.count({
-                where: { scheduleId: In(scheduleIds) },
+            const totalScheduleCount = await this.domainScheduleRelationService.count({
+                where: { scheduleId: In(scheduleIds), projectId: IsNull(), reservationId: IsNull() },
             });
 
             // 프로젝트 관련 일정 개수

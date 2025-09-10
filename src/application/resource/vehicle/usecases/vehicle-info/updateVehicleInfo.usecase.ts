@@ -3,6 +3,7 @@ import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.
 import { UpdateVehicleInfoDto } from '../../dtos/update-vehicle-info.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { DomainFileService } from '@src/domain/file/file.service';
+import { DomainFileVehicleInfoService } from '@src/domain/file-vehicle-info/file-vehicle-info.service';
 import { DataSource, Not } from 'typeorm';
 import { DomainConsumableService } from '@src/domain/consumable/consumable.service';
 import { Consumable } from '@libs/entities';
@@ -13,6 +14,7 @@ export class UpdateVehicleInfoUsecase {
         private readonly vehicleInfoService: DomainVehicleInfoService,
         private readonly consumableService: DomainConsumableService,
         private readonly fileService: DomainFileService,
+        private readonly fileVehicleInfoService: DomainFileVehicleInfoService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -49,6 +51,52 @@ export class UpdateVehicleInfoUsecase {
                 await this.fileService.updateTemporaryFiles(images, false, {
                     queryRunner,
                 });
+            }
+
+            // 기존 파일 연결 삭제
+            await this.fileVehicleInfoService.deleteByVehicleInfoId(vehicleInfoId, { queryRunner });
+
+            // 파일 경로로 파일 ID 찾아서 중간테이블에 연결
+            const vehicleInfoConnections = [];
+
+            if (updateVehicleInfoDto.parkingLocationImages.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(updateVehicleInfoDto.parkingLocationImages);
+                const fileIds = files.map((file) => file.fileId);
+                vehicleInfoConnections.push(
+                    ...fileIds.map((fileId) => ({
+                        vehicleInfoId,
+                        fileId,
+                        type: 'PARKING_LOCATION',
+                    })),
+                );
+            }
+
+            if (updateVehicleInfoDto.odometerImages.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(updateVehicleInfoDto.odometerImages);
+                const fileIds = files.map((file) => file.fileId);
+                vehicleInfoConnections.push(
+                    ...fileIds.map((fileId) => ({
+                        vehicleInfoId,
+                        fileId,
+                        type: 'ODOMETER',
+                    })),
+                );
+            }
+
+            if (updateVehicleInfoDto.indoorImages.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(updateVehicleInfoDto.indoorImages);
+                const fileIds = files.map((file) => file.fileId);
+                vehicleInfoConnections.push(
+                    ...fileIds.map((fileId) => ({
+                        vehicleInfoId,
+                        fileId,
+                        type: 'INDOOR',
+                    })),
+                );
+            }
+
+            if (vehicleInfoConnections.length > 0) {
+                await this.fileVehicleInfoService.saveMultiple(vehicleInfoConnections, { queryRunner });
             }
 
             // 소모품 복사
