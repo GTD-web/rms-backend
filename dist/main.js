@@ -25519,9 +25519,9 @@ let ResourceService = class ResourceService {
         availabilityDto.resourceId = resource.resourceId;
         availabilityDto.resourceName = resource.name;
         const isToday = startDate === new Date().toISOString().slice(0, 10);
-        const timeRange = this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, startDate, isToday);
+        const timeRange = this.resourceContextService.현재시간_기준_가용시간대를_계산한다(resource.type, isToday, startTime, endTime);
         console.log('timeRange', timeRange);
-        const availableSlots = this.calculateAvailableTimeSlots(startDate, startTime ? startTime : timeRange.startTime, endTime ? endTime : timeRange.endTime, timeUnit, am, pm, reservations);
+        const availableSlots = this.calculateAvailableTimeSlots(startDate, timeRange.startTime, timeRange.endTime, timeUnit, am, pm, reservations);
         availabilityDto.availableTimeSlots = availableSlots;
         return availabilityDto;
     }
@@ -34745,9 +34745,12 @@ let ResourceContextService = class ResourceContextService {
             order: { order: 'ASC' },
         });
     }
-    현재시간_기준_가용시간대를_계산한다(resourceType, targetDate, isToday) {
+    현재시간_기준_가용시간대를_계산한다(resourceType, isToday, startTime, endTime) {
         const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
         if (!isToday) {
+            if (startTime && endTime) {
+                return { startTime: startTime, endTime: endTime };
+            }
             return operatingHours;
         }
         const now = new Date();
@@ -34759,13 +34762,13 @@ let ResourceContextService = class ResourceContextService {
         else {
             roundedStartTime.setMinutes(30, 0, 0);
         }
-        const operatingStartTime = operatingHours.startTime;
+        const operatingStartTime = startTime ? startTime : operatingHours.startTime;
         const currentHours = roundedStartTime.getUTCHours() + 9;
         const currentStartTime = `${currentHours.toString().padStart(2, '0')}:${roundedStartTime.getMinutes().toString().padStart(2, '0')}:00`;
         console.log('currentStartTime', roundedStartTime, currentStartTime);
         return {
             startTime: currentStartTime > operatingStartTime ? currentStartTime : operatingStartTime,
-            endTime: operatingHours.endTime,
+            endTime: endTime ? endTime : operatingHours.endTime,
         };
     }
     async 자원의_해당시간_예약을_확인한다(resourceId, startDate, endDate, reservationId) {

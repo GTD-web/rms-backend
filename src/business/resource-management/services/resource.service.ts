@@ -216,14 +216,15 @@ export class ResourceService {
 
         const timeRange = this.resourceContextService.현재시간_기준_가용시간대를_계산한다(
             resource.type,
-            startDate,
             isToday,
+            startTime,
+            endTime,
         );
         console.log('timeRange', timeRange);
         const availableSlots = this.calculateAvailableTimeSlots(
             startDate,
-            startTime ? startTime : timeRange.startTime,
-            endTime ? endTime : timeRange.endTime,
+            timeRange.startTime,
+            timeRange.endTime,
             timeUnit!,
             am,
             pm,

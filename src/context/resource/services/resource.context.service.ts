@@ -659,12 +659,16 @@ export class ResourceContextService {
      */
     현재시간_기준_가용시간대를_계산한다(
         resourceType: ResourceType,
-        targetDate: string,
         isToday: boolean,
+        startTime?: string,
+        endTime?: string,
     ): { startTime: string; endTime: string } {
         const operatingHours = this.자원_타입별_운영시간_규칙을_가져온다(resourceType);
 
         if (!isToday) {
+            if (startTime && endTime) {
+                return { startTime: startTime, endTime: endTime };
+            }
             return operatingHours;
         }
 
@@ -678,7 +682,7 @@ export class ResourceContextService {
         } else {
             roundedStartTime.setMinutes(30, 0, 0);
         }
-        const operatingStartTime = operatingHours.startTime;
+        const operatingStartTime = startTime ? startTime : operatingHours.startTime;
         const currentHours = roundedStartTime.getUTCHours() + 9;
         const currentStartTime = `${currentHours.toString().padStart(2, '0')}:${roundedStartTime.getMinutes().toString().padStart(2, '0')}:00`;
         // if (currentStartTime > operatingStartTime) {
@@ -695,7 +699,7 @@ export class ResourceContextService {
         // }
         return {
             startTime: currentStartTime > operatingStartTime ? currentStartTime : operatingStartTime,
-            endTime: operatingHours.endTime,
+            endTime: endTime ? endTime : operatingHours.endTime,
         };
     }
 
