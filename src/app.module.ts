@@ -26,6 +26,7 @@ import { EmployeeManagementModule } from './business/employee-management/employe
 import { TaskManagementModule } from './business/task-management/task-management.module';
 import { NotificationManagementModule } from './business/notification-management/notification-management.module';
 import { StatisticsModule } from './business/statistics/statistics.module';
+import { AuthManagementModule } from './business/auth-management/auth-management.module';
 
 @Module({
     imports: [
@@ -59,9 +60,8 @@ import { StatisticsModule } from './business/statistics/statistics.module';
         TaskManagementModule,
         NotificationManagementModule,
         StatisticsModule,
+        AuthManagementModule,
     ],
-    providers: [
-        // ApiDocService, DbDocService
-    ],
+    providers: [],
 })
 export class AppModule {}

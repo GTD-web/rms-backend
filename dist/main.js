@@ -3617,6 +3617,56 @@ exports.BaseService = BaseService = __decorate([
 
 /***/ }),
 
+/***/ "./libs/strategies/jwt.strategy.ts":
+/*!*****************************************!*\
+  !*** ./libs/strategies/jwt.strategy.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JwtStrategy = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport");
+const passport_jwt_1 = __webpack_require__(/*! passport-jwt */ "passport-jwt");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
+    constructor(employeeService, configService) {
+        super({
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
+            secretOrKey: configService.get('jwt.secret'),
+        });
+        this.employeeService = employeeService;
+    }
+    async validate(payload) {
+        const employee = await this.employeeService.findByEmployeeNumber(payload.employeeNumber);
+        if (!employee || employee.employeeNumber !== payload.employeeNumber) {
+            throw new common_1.UnauthorizedException();
+        }
+        return employee;
+    }
+};
+exports.JwtStrategy = JwtStrategy;
+exports.JwtStrategy = JwtStrategy = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
+], JwtStrategy);
+
+
+/***/ }),
+
 /***/ "./libs/swagger/swagger.ts":
 /*!*********************************!*\
   !*** ./libs/swagger/swagger.ts ***!
@@ -3855,6 +3905,7 @@ const employee_management_module_1 = __webpack_require__(/*! ./business/employee
 const task_management_module_1 = __webpack_require__(/*! ./business/task-management/task-management.module */ "./src/business/task-management/task-management.module.ts");
 const notification_management_module_1 = __webpack_require__(/*! ./business/notification-management/notification-management.module */ "./src/business/notification-management/notification-management.module.ts");
 const statistics_module_1 = __webpack_require__(/*! ./business/statistics/statistics.module */ "./src/business/statistics/statistics.module.ts");
+const auth_management_module_1 = __webpack_require__(/*! ./business/auth-management/auth-management.module */ "./src/business/auth-management/auth-management.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -3885,6 +3936,7 @@ exports.AppModule = AppModule = __decorate([
             task_management_module_1.TaskManagementModule,
             notification_management_module_1.NotificationManagementModule,
             statistics_module_1.StatisticsModule,
+            auth_management_module_1.AuthManagementModule,
         ],
         providers: [],
     })
@@ -20214,6 +20266,39 @@ Object.defineProperty(exports, "NotificationListResponseDto", ({ enumerable: tru
 
 /***/ }),
 
+/***/ "./src/business/auth-management/auth-management.module.ts":
+/*!****************************************************************!*\
+  !*** ./src/business/auth-management/auth-management.module.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthManagementModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport");
+const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+const jwt_strategy_1 = __webpack_require__(/*! ../../../libs/strategies/jwt.strategy */ "./libs/strategies/jwt.strategy.ts");
+let AuthManagementModule = class AuthManagementModule {
+};
+exports.AuthManagementModule = AuthManagementModule;
+exports.AuthManagementModule = AuthManagementModule = __decorate([
+    (0, common_1.Module)({
+        imports: [passport_1.PassportModule.register({ defaultStrategy: 'jwt' }), employee_module_1.DomainEmployeeModule],
+        providers: [jwt_strategy_1.JwtStrategy],
+        exports: [jwt_strategy_1.JwtStrategy, passport_1.PassportModule],
+    })
+], AuthManagementModule);
+
+
+/***/ }),
+
 /***/ "./src/business/employee-management/controllers/employee.controller.ts":
 /*!*****************************************************************************!*\
   !*** ./src/business/employee-management/controllers/employee.controller.ts ***!
@@ -28555,6 +28640,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
             withReservation: true,
             withResource: true,
+            withProject: true,
             withParticipants: true,
         });
         let filteredScheduleDataList = scheduleDataList;
@@ -28566,15 +28652,23 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     query.employeeIds.includes(participant.employee.employeeId));
             });
         }
-        const scheduleCalendarItems = filteredScheduleDataList.map(({ schedule, reservation, resource, participants }) => {
+        const calendarScheduleIds = filteredScheduleDataList.map(({ schedule }) => schedule.scheduleId);
+        const unreadNotificationMap = await this.scheduleNotificationContextService.여러_스케줄의_읽지않은_알림을_확인한다(calendarScheduleIds, user.employeeId);
+        const scheduleCalendarItems = filteredScheduleDataList.map(({ schedule, reservation, resource, participants, project }) => {
             const reserver = participants?.find((p) => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
+            const hasUnreadNotification = unreadNotificationMap.get(schedule.scheduleId) || false;
             return {
                 scheduleId: schedule.scheduleId,
                 scheduleTitle: schedule.title,
                 startDate: schedule.startDate,
                 endDate: schedule.endDate,
                 reserverName: reserver?.employee?.name || '',
-                project: undefined,
+                project: project
+                    ? {
+                        projectId: project.projectId,
+                        projectName: project.projectName,
+                    }
+                    : undefined,
                 reservation: reservation && resource
                     ? {
                         reservationId: reservation.reservationId,
@@ -28582,7 +28676,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                         resourceType: resource.type,
                     }
                     : undefined,
-                hasUnreadNotification: false,
+                hasUnreadNotification,
             };
         });
         return {
@@ -28647,6 +28741,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             withParticipants: true,
         });
         const scheduleCalendarItems = scheduleDataList.map(({ schedule, project, reservation, resource, participants }) => {
+            participants = participants.filter((participant) => participant.type !== reservation_type_enum_1.ParticipantsType.RESERVER);
             return {
                 scheduleId: schedule.scheduleId,
                 title: schedule.title,
@@ -32852,7 +32947,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var ScheduleNotificationContextService_1;
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleNotificationContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -32861,9 +32956,11 @@ const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notificatio
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
 let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = class ScheduleNotificationContextService {
-    constructor(notificationContextService) {
+    constructor(notificationContextService, employeeNotificationService) {
         this.notificationContextService = notificationContextService;
+        this.employeeNotificationService = employeeNotificationService;
         this.logger = new common_1.Logger(ScheduleNotificationContextService_1.name);
     }
     async 일정_생성_알림을_전송한다(data, targetEmployeeIds, adminEmployeeIds) {
@@ -32934,11 +33031,72 @@ let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = 
             await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_PARTICIPANT_CHANGED, notificationData, targetEmployeeIds);
         }
     }
+    async 스케줄별_읽지않은_알림을_확인한다(scheduleId, employeeId) {
+        try {
+            const employeeNotifications = await this.employeeNotificationService.findByEmployeeId(employeeId);
+            const hasUnreadScheduleNotification = employeeNotifications.some((empNotification) => {
+                if (empNotification.isRead) {
+                    return false;
+                }
+                const notificationData = empNotification.notification?.notificationData;
+                if (!notificationData) {
+                    return false;
+                }
+                if (notificationData.schedule?.scheduleId === scheduleId) {
+                    return true;
+                }
+                if (notificationData.scheduleId === scheduleId) {
+                    return true;
+                }
+                return false;
+            });
+            return hasUnreadScheduleNotification;
+        }
+        catch (error) {
+            this.logger.error(`스케줄별 읽지않은 알림 확인 중 오류 발생: ${error.message}`, error.stack);
+            return false;
+        }
+    }
+    async 여러_스케줄의_읽지않은_알림을_확인한다(scheduleIds, employeeId) {
+        const resultMap = new Map();
+        scheduleIds.forEach((scheduleId) => {
+            resultMap.set(scheduleId, false);
+        });
+        try {
+            if (scheduleIds.length === 0) {
+                return resultMap;
+            }
+            const employeeNotifications = await this.employeeNotificationService.findByEmployeeId(employeeId);
+            employeeNotifications
+                .filter((empNotification) => !empNotification.isRead)
+                .forEach((empNotification) => {
+                const notificationData = empNotification.notification?.notificationData;
+                if (!notificationData) {
+                    return;
+                }
+                let scheduleId;
+                if (notificationData.schedule?.scheduleId) {
+                    scheduleId = notificationData.schedule.scheduleId;
+                }
+                else if (notificationData.scheduleId) {
+                    scheduleId = notificationData.scheduleId;
+                }
+                if (scheduleId && resultMap.has(scheduleId)) {
+                    resultMap.set(scheduleId, true);
+                }
+            });
+            return resultMap;
+        }
+        catch (error) {
+            this.logger.error(`여러 스케줄별 읽지않은 알림 확인 중 오류 발생: ${error.message}`, error.stack);
+            return resultMap;
+        }
+    }
 };
 exports.ScheduleNotificationContextService = ScheduleNotificationContextService;
 exports.ScheduleNotificationContextService = ScheduleNotificationContextService = ScheduleNotificationContextService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _a : Object, typeof (_b = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _b : Object])
 ], ScheduleNotificationContextService);
 
 

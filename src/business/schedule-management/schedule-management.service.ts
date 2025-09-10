@@ -117,6 +117,7 @@ export class ScheduleManagementService {
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
             withReservation: true,
             withResource: true,
+            withProject: true,
             withParticipants: true, // 예약자 정보 필요
         });
 
@@ -135,10 +136,21 @@ export class ScheduleManagementService {
             });
         }
 
+        // 모든 스케줄 ID를 수집하여 한 번에 알림 상태 확인 (성능 최적화)
+        const calendarScheduleIds = filteredScheduleDataList.map(({ schedule }) => schedule.scheduleId);
+        const unreadNotificationMap =
+            await this.scheduleNotificationContextService.여러_스케줄의_읽지않은_알림을_확인한다(
+                calendarScheduleIds,
+                user.employeeId,
+            );
+
         const scheduleCalendarItems = filteredScheduleDataList.map(
-            ({ schedule, reservation, resource, participants }) => {
+            ({ schedule, reservation, resource, participants, project }) => {
                 // 예약자 찾기 (RESERVER 타입의 참가자)
                 const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
+
+                // Map에서 해당 스케줄의 알림 상태를 빠르게 조회
+                const hasUnreadNotification = unreadNotificationMap.get(schedule.scheduleId) || false;
 
                 return {
                     scheduleId: schedule.scheduleId,
@@ -146,7 +158,12 @@ export class ScheduleManagementService {
                     startDate: schedule.startDate,
                     endDate: schedule.endDate,
                     reserverName: reserver?.employee?.name || '',
-                    project: undefined, // TODO: 프로젝트 구현 후 추가
+                    project: project
+                        ? {
+                              projectId: project.projectId,
+                              projectName: project.projectName,
+                          }
+                        : undefined,
                     reservation:
                         reservation && resource
                             ? {
@@ -155,8 +172,7 @@ export class ScheduleManagementService {
                                   resourceType: resource.type,
                               }
                             : undefined,
-                    // TODO : 알림관련 기능 리팩토링 후 작업
-                    hasUnreadNotification: false,
+                    hasUnreadNotification,
                 };
             },
         );
@@ -197,7 +213,7 @@ export class ScheduleManagementService {
                 project: project
                     ? {
                           projectId: project.projectId,
-                          projectName: project.projectName, // TODO: 실제 프로젝트 이름 조회
+                          projectName: project.projectName,
                       }
                     : undefined,
                 resource: reservation
@@ -246,6 +262,7 @@ export class ScheduleManagementService {
         });
         const scheduleCalendarItems = scheduleDataList.map(
             ({ schedule, project, reservation, resource, participants }) => {
+                participants = participants.filter((participant) => participant.type !== ParticipantsType.RESERVER);
                 return {
                     scheduleId: schedule.scheduleId,
                     title: schedule.title,
@@ -261,7 +278,7 @@ export class ScheduleManagementService {
                     project: project
                         ? {
                               projectId: project.projectId,
-                              projectName: project.projectName, // TODO: 실제 프로젝트 이름 조회
+                              projectName: project.projectName,
                           }
                         : undefined,
                     resource: reservation

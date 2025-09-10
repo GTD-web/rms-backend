@@ -10,11 +10,15 @@ import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ScheduleUpdateResult } from '@src/context/schedule/services/schedule-state-transition.service';
 import { UpdateScenarios } from '@src/context/schedule/services/schedule-policy.service';
+import { DomainEmployeeNotificationService } from '@src/domain/employee-notification/employee-notification.service';
 
 @Injectable()
 export class ScheduleNotificationContextService {
     private readonly logger = new Logger(ScheduleNotificationContextService.name);
-    constructor(private readonly notificationContextService: NotificationContextService) {}
+    constructor(
+        private readonly notificationContextService: NotificationContextService,
+        private readonly employeeNotificationService: DomainEmployeeNotificationService,
+    ) {}
 
     async 일정_생성_알림을_전송한다(
         data: { schedule: Schedule; reservation: Reservation; resource: Resource },
@@ -117,6 +121,107 @@ export class ScheduleNotificationContextService {
                 notificationData,
                 targetEmployeeIds,
             );
+        }
+    }
+
+    /**
+     * 특정 스케줄에 대한 읽지 않은 알림이 있는지 확인
+     * @param scheduleId 스케줄 ID
+     * @param employeeId 직원 ID
+     * @returns 읽지 않은 알림이 있으면 true, 없으면 false
+     */
+    async 스케줄별_읽지않은_알림을_확인한다(scheduleId: string, employeeId: string): Promise<boolean> {
+        try {
+            // 해당 직원의 모든 알림을 조회
+            const employeeNotifications = await this.employeeNotificationService.findByEmployeeId(employeeId);
+
+            // 읽지 않은 알림 중에서 해당 스케줄과 관련된 것이 있는지 확인
+            const hasUnreadScheduleNotification = employeeNotifications.some((empNotification) => {
+                // 읽지 않은 알림인지 확인
+                if (empNotification.isRead) {
+                    return false;
+                }
+
+                const notificationData = empNotification.notification?.notificationData;
+                if (!notificationData) {
+                    return false;
+                }
+
+                // 새로운 nested 구조에서 스케줄 ID 확인
+                if (notificationData.schedule?.scheduleId === scheduleId) {
+                    return true;
+                }
+
+                // 기존 flat 구조에서 스케줄 ID 확인 (하위 호환성)
+                if (notificationData.scheduleId === scheduleId) {
+                    return true;
+                }
+
+                return false;
+            });
+
+            return hasUnreadScheduleNotification;
+        } catch (error) {
+            this.logger.error(`스케줄별 읽지않은 알림 확인 중 오류 발생: ${error.message}`, error.stack);
+            return false; // 오류 발생 시 false 반환
+        }
+    }
+
+    /**
+     * 여러 스케줄에 대한 읽지 않은 알림을 한 번에 확인 (성능 최적화)
+     * @param scheduleIds 스케줄 ID 배열
+     * @param employeeId 직원 ID
+     * @returns 스케줄 ID를 키로, 읽지 않은 알림 여부를 값으로 하는 Map
+     */
+    async 여러_스케줄의_읽지않은_알림을_확인한다(
+        scheduleIds: string[],
+        employeeId: string,
+    ): Promise<Map<string, boolean>> {
+        const resultMap = new Map<string, boolean>();
+
+        // 모든 스케줄 ID를 false로 초기화
+        scheduleIds.forEach((scheduleId) => {
+            resultMap.set(scheduleId, false);
+        });
+
+        try {
+            if (scheduleIds.length === 0) {
+                return resultMap;
+            }
+
+            // 해당 직원의 모든 읽지 않은 알림을 한 번에 조회
+            const employeeNotifications = await this.employeeNotificationService.findByEmployeeId(employeeId);
+
+            // 읽지 않은 알림만 필터링하고 스케줄 ID별로 확인
+            employeeNotifications
+                .filter((empNotification) => !empNotification.isRead)
+                .forEach((empNotification) => {
+                    const notificationData = empNotification.notification?.notificationData;
+                    if (!notificationData) {
+                        return;
+                    }
+
+                    let scheduleId: string | undefined;
+
+                    // 새로운 nested 구조에서 스케줄 ID 확인
+                    if (notificationData.schedule?.scheduleId) {
+                        scheduleId = notificationData.schedule.scheduleId;
+                    }
+                    // 기존 flat 구조에서 스케줄 ID 확인 (하위 호환성)
+                    else if (notificationData.scheduleId) {
+                        scheduleId = notificationData.scheduleId;
+                    }
+
+                    // 요청된 스케줄 ID 중에 해당하는 것이 있으면 true로 설정
+                    if (scheduleId && resultMap.has(scheduleId)) {
+                        resultMap.set(scheduleId, true);
+                    }
+                });
+
+            return resultMap;
+        } catch (error) {
+            this.logger.error(`여러 스케줄별 읽지않은 알림 확인 중 오류 발생: ${error.message}`, error.stack);
+            return resultMap; // 오류 발생 시 모든 값이 false인 Map 반환
         }
     }
 }
