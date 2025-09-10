@@ -23539,7 +23539,7 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateAccommodationInfoDto.prototype, "accommodationInfoId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: create_resource_dto_1.ResourceLocationURL }),
+    (0, swagger_1.ApiProperty)({ type: create_resource_dto_1.ResourceLocationURL, required: false }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", typeof (_a = typeof create_resource_dto_1.ResourceLocationURL !== "undefined" && create_resource_dto_1.ResourceLocationURL) === "function" ? _a : Object)
 ], UpdateAccommodationInfoDto.prototype, "locationURLs", void 0);

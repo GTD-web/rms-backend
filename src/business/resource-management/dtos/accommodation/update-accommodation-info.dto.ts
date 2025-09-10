@@ -9,7 +9,7 @@ export class UpdateAccommodationInfoDto {
     })
     accommodationInfoId: string;
 
-    @ApiProperty({ type: ResourceLocationURL })
+    @ApiProperty({ type: ResourceLocationURL, required: false })
     @IsOptional()
     locationURLs?: ResourceLocationURL;
 }
