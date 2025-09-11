@@ -614,28 +614,131 @@ export class ScheduleQueryContextService {
             return baseScheduleIds;
         }
 
-        const searchKeyword = `%${keyword.trim()}%`;
+        const searchKeyword = keyword.trim();
+        const likePattern = `%${searchKeyword}%`;
 
+        // 3가지 검색을 병렬로 수행
+        const [scheduleResults, resourceResults, projectResults] = await Promise.all([
+            this.스케줄명으로_검색(baseScheduleIds, likePattern),
+            this.자원명으로_검색(baseScheduleIds, searchKeyword),
+            this.프로젝트명으로_검색(baseScheduleIds, searchKeyword),
+        ]);
+
+        // 3가지 검색 결과를 합치고 중복 제거
+        const allResultIds = [...scheduleResults, ...resourceResults, ...projectResults];
+        const uniqueIds = [...new Set(allResultIds)];
+
+        // baseScheduleIds 순서 유지하며 필터링
+        return baseScheduleIds.filter((id) => uniqueIds.includes(id));
+    }
+
+    /**
+     * 스케줄 제목/설명으로 검색
+     */
+    private async 스케줄명으로_검색(baseScheduleIds: string[], likePattern: string): Promise<string[]> {
         const matchingSchedules = await this.domainScheduleService.findAll({
             where: [
                 {
                     scheduleId: In(baseScheduleIds),
-                    title: Like(searchKeyword),
+                    title: Like(likePattern),
                 },
                 {
                     scheduleId: In(baseScheduleIds),
-                    description: Like(searchKeyword),
+                    description: Like(likePattern),
                 },
             ],
             select: {
                 scheduleId: true,
             },
-            order: {
-                startDate: 'ASC',
-            },
         });
 
         return matchingSchedules.map((s) => s.scheduleId);
+    }
+
+    /**
+     * 자원명으로 검색
+     */
+    private async 자원명으로_검색(baseScheduleIds: string[], keyword: string): Promise<string[]> {
+        try {
+            // 1. 스케줄과 연결된 예약 정보 조회
+            const scheduleRelations = await this.domainScheduleRelationService.findAll({
+                where: {
+                    scheduleId: In(baseScheduleIds),
+                    reservationId: Not(IsNull()),
+                },
+                select: {
+                    scheduleId: true,
+                    reservationId: true,
+                },
+            });
+
+            if (scheduleRelations.length === 0) return [];
+
+            const reservationIds = scheduleRelations.map((r) => r.reservationId);
+
+            // 2. 예약과 연결된 자원 정보 조회 (자원명 포함)
+            const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
+
+            // 3. 자원명에 키워드가 포함된 예약들 필터링
+            const matchingReservations = reservations.filter(
+                (reservation) =>
+                    reservation.resource?.name &&
+                    reservation.resource.name.toLowerCase().includes(keyword.toLowerCase()),
+            );
+
+            // 4. 매칭된 예약과 연결된 스케줄 ID들 반환
+            const matchingReservationIds = matchingReservations.map((r) => r.reservationId);
+            const matchingScheduleIds = scheduleRelations
+                .filter((rel) => matchingReservationIds.includes(rel.reservationId))
+                .map((rel) => rel.scheduleId);
+
+            return matchingScheduleIds;
+        } catch (error) {
+            this.logger.error(`자원명 검색 중 오류 발생: ${error.message}`, error.stack);
+            return [];
+        }
+    }
+
+    /**
+     * 프로젝트명으로 검색
+     */
+    private async 프로젝트명으로_검색(baseScheduleIds: string[], keyword: string): Promise<string[]> {
+        try {
+            // 1. 스케줄과 연결된 프로젝트 정보 조회
+            const scheduleRelations = await this.domainScheduleRelationService.findAll({
+                where: {
+                    scheduleId: In(baseScheduleIds),
+                    projectId: Not(IsNull()),
+                },
+                select: {
+                    scheduleId: true,
+                    projectId: true,
+                },
+            });
+
+            if (scheduleRelations.length === 0) return [];
+
+            const projectIds = [...new Set(scheduleRelations.map((r) => r.projectId))];
+
+            // 2. 프로젝트 어댑터를 통해 프로젝트 정보 조회
+            const projectResponse = await this.domainProjectService.getProjectsByIdsGet(projectIds);
+
+            // 3. 프로젝트명에 키워드가 포함된 프로젝트들 필터링
+            const matchingProjects = projectResponse.projects.filter(
+                (project) => project.projectName && project.projectName.toLowerCase().includes(keyword.toLowerCase()),
+            );
+
+            // 4. 매칭된 프로젝트와 연결된 스케줄 ID들 반환
+            const matchingProjectIds = matchingProjects.map((p) => p.id);
+            const matchingScheduleIds = scheduleRelations
+                .filter((rel) => matchingProjectIds.includes(rel.projectId))
+                .map((rel) => rel.scheduleId);
+
+            return matchingScheduleIds;
+        } catch (error) {
+            this.logger.error(`프로젝트명 검색 중 오류 발생: ${error.message}`, error.stack);
+            return [];
+        }
     }
 
     /**

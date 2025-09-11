@@ -36373,26 +36373,91 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         if (!keyword || keyword.trim() === '' || baseScheduleIds.length === 0) {
             return baseScheduleIds;
         }
-        const searchKeyword = `%${keyword.trim()}%`;
+        const searchKeyword = keyword.trim();
+        const likePattern = `%${searchKeyword}%`;
+        const [scheduleResults, resourceResults, projectResults] = await Promise.all([
+            this.스케줄명으로_검색(baseScheduleIds, likePattern),
+            this.자원명으로_검색(baseScheduleIds, searchKeyword),
+            this.프로젝트명으로_검색(baseScheduleIds, searchKeyword),
+        ]);
+        const allResultIds = [...scheduleResults, ...resourceResults, ...projectResults];
+        const uniqueIds = [...new Set(allResultIds)];
+        return baseScheduleIds.filter((id) => uniqueIds.includes(id));
+    }
+    async 스케줄명으로_검색(baseScheduleIds, likePattern) {
         const matchingSchedules = await this.domainScheduleService.findAll({
             where: [
                 {
                     scheduleId: (0, typeorm_1.In)(baseScheduleIds),
-                    title: (0, typeorm_1.Like)(searchKeyword),
+                    title: (0, typeorm_1.Like)(likePattern),
                 },
                 {
                     scheduleId: (0, typeorm_1.In)(baseScheduleIds),
-                    description: (0, typeorm_1.Like)(searchKeyword),
+                    description: (0, typeorm_1.Like)(likePattern),
                 },
             ],
             select: {
                 scheduleId: true,
             },
-            order: {
-                startDate: 'ASC',
-            },
         });
         return matchingSchedules.map((s) => s.scheduleId);
+    }
+    async 자원명으로_검색(baseScheduleIds, keyword) {
+        try {
+            const scheduleRelations = await this.domainScheduleRelationService.findAll({
+                where: {
+                    scheduleId: (0, typeorm_1.In)(baseScheduleIds),
+                    reservationId: (0, typeorm_1.Not)((0, typeorm_1.IsNull)()),
+                },
+                select: {
+                    scheduleId: true,
+                    reservationId: true,
+                },
+            });
+            if (scheduleRelations.length === 0)
+                return [];
+            const reservationIds = scheduleRelations.map((r) => r.reservationId);
+            const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
+            const matchingReservations = reservations.filter((reservation) => reservation.resource?.name &&
+                reservation.resource.name.toLowerCase().includes(keyword.toLowerCase()));
+            const matchingReservationIds = matchingReservations.map((r) => r.reservationId);
+            const matchingScheduleIds = scheduleRelations
+                .filter((rel) => matchingReservationIds.includes(rel.reservationId))
+                .map((rel) => rel.scheduleId);
+            return matchingScheduleIds;
+        }
+        catch (error) {
+            this.logger.error(`자원명 검색 중 오류 발생: ${error.message}`, error.stack);
+            return [];
+        }
+    }
+    async 프로젝트명으로_검색(baseScheduleIds, keyword) {
+        try {
+            const scheduleRelations = await this.domainScheduleRelationService.findAll({
+                where: {
+                    scheduleId: (0, typeorm_1.In)(baseScheduleIds),
+                    projectId: (0, typeorm_1.Not)((0, typeorm_1.IsNull)()),
+                },
+                select: {
+                    scheduleId: true,
+                    projectId: true,
+                },
+            });
+            if (scheduleRelations.length === 0)
+                return [];
+            const projectIds = [...new Set(scheduleRelations.map((r) => r.projectId))];
+            const projectResponse = await this.domainProjectService.getProjectsByIdsGet(projectIds);
+            const matchingProjects = projectResponse.projects.filter((project) => project.projectName && project.projectName.toLowerCase().includes(keyword.toLowerCase()));
+            const matchingProjectIds = matchingProjects.map((p) => p.id);
+            const matchingScheduleIds = scheduleRelations
+                .filter((rel) => matchingProjectIds.includes(rel.projectId))
+                .map((rel) => rel.scheduleId);
+            return matchingScheduleIds;
+        }
+        catch (error) {
+            this.logger.error(`프로젝트명 검색 중 오류 발생: ${error.message}`, error.stack);
+            return [];
+        }
     }
     페이지네이션_일정ID들을_계산한다(scheduleIds, page = 1, limit = 20) {
         const totalCount = scheduleIds.length;
