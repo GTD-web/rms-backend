@@ -499,12 +499,12 @@ export class SchedulePolicyService {
         }
 
         // 2. 하나의 시나리오만 실행되어야 함
-        const activeScenarios = [scenarios.isDateUpdate, scenarios.isInfoUpdate, scenarios.isResourceUpdate].filter(
-            Boolean,
-        );
-        if (activeScenarios.length > 1) {
-            throw new BadRequestException('한 번에 하나의 수정 유형만 가능합니다.');
-        }
+        // const activeScenarios = [scenarios.isDateUpdate, scenarios.isInfoUpdate, scenarios.isResourceUpdate].filter(
+        //     Boolean,
+        // );
+        // if (activeScenarios.length > 1) {
+        //     throw new BadRequestException('한 번에 하나의 수정 유형만 가능합니다.');
+        // }
 
         // 3. 필수 값 검증
         if (scenarios.isDateUpdate) {

@@ -35875,10 +35875,6 @@ let SchedulePolicyService = class SchedulePolicyService {
         if (!scenarios.isDateUpdate && !scenarios.isInfoUpdate && !scenarios.isResourceUpdate) {
             throw new common_1.BadRequestException('수정할 항목이 없습니다.');
         }
-        const activeScenarios = [scenarios.isDateUpdate, scenarios.isInfoUpdate, scenarios.isResourceUpdate].filter(Boolean);
-        if (activeScenarios.length > 1) {
-            throw new common_1.BadRequestException('한 번에 하나의 수정 유형만 가능합니다.');
-        }
         if (scenarios.isDateUpdate) {
             if (!updateDto.date?.startDate || !updateDto.date?.endDate) {
                 throw new common_1.BadRequestException('날짜 수정 시 시작일과 종료일이 모두 필요합니다.');
