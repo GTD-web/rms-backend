@@ -202,12 +202,15 @@ export class ScheduleQueryContextService {
         }
 
         // 1. 모든 일정들을 한 번에 조회
+        console.time('schedules');
         const schedules = await this.domainScheduleService.findByScheduleIds(scheduleIds);
         const scheduleMap = new Map(schedules.map((schedule) => [schedule.scheduleId, schedule]));
+        console.timeEnd('schedules');
         // 2. 모든 일정관계정보를 한 번에 조회
+        console.time('scheduleRelations');
         const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
         const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
-
+        console.timeEnd('scheduleRelations');
         // 3. 옵션에 따른 관련 데이터 벌크 조회
         let projectMap = new Map();
         let reservationMap = new Map();
@@ -215,6 +218,7 @@ export class ScheduleQueryContextService {
         let participantsMap = new Map<string, ScheduleParticipantsWithEmployee[]>();
 
         // 프로젝트 정보 조회 (현재는 구현되지 않음)
+        console.time('withProject');
         if (option?.withProject) {
             const projectIds = scheduleRelations
                 .filter((relation) => relation.projectId)
@@ -230,13 +234,15 @@ export class ScheduleQueryContextService {
                 );
             }
         }
-
+        console.timeEnd('withProject');
         // 예약 정보 조회
+        console.time('withReservation');
         if (option?.withReservation) {
             const reservationIds = scheduleRelations
                 .filter((relation) => relation.reservationId)
                 .map((relation) => relation.reservationId);
             if (reservationIds.length > 0) {
+                console.time('reservations');
                 const reservations = await Promise.all(
                     reservationIds.map((id) => this.domainReservationService.findByReservationId(id)),
                 );
@@ -249,24 +255,27 @@ export class ScheduleQueryContextService {
                 reservationMap = new Map(
                     reservations.filter(Boolean).map((reservation) => [reservation.reservationId, reservation]),
                 );
-
+                console.timeEnd('reservations');
                 // 자원 정보 조회
                 if (option?.withResource) {
                     const resourceIds = reservations.filter(Boolean).map((reservation) => reservation.resourceId);
                     if (resourceIds.length > 0) {
+                        console.time('resources');
                         const resources = await Promise.all(
                             resourceIds.map((id) => this.domainResourceService.findByResourceId(id)),
                         );
                         resourceMap = new Map(
                             resources.filter(Boolean).map((resource) => [resource.resourceId, resource]),
                         );
+                        console.timeEnd('resources');
                     }
                 }
             }
         }
-
+        console.timeEnd('withReservation');
         // 참가자 정보 조회
         if (option?.withParticipants) {
+            console.time('withParticipants');
             const allParticipantsArrays = await Promise.all(
                 scheduleIds.map((scheduleId) => this.domainScheduleParticipantService.findByScheduleId(scheduleId)),
             );
@@ -295,13 +304,13 @@ export class ScheduleQueryContextService {
                 },
                 {} as Record<string, ScheduleParticipantsWithEmployee[]>,
             );
-
+            console.timeEnd('withParticipants');
             participantsMap = new Map(Object.entries(participantGroups));
         }
 
         // 4. 결과 배열 구성
         const results = [];
-
+        console.time('results');
         for (const scheduleId of scheduleIds) {
             const schedule = scheduleMap.get(scheduleId);
             if (!schedule) {
@@ -337,7 +346,7 @@ export class ScheduleQueryContextService {
                 participants,
             });
         }
-
+        console.timeEnd('results');
         return results;
     }
 

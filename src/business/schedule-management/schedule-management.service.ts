@@ -113,6 +113,7 @@ export class ScheduleManagementService {
             return { schedules: [] };
         }
 
+        console.time('scheduleDataList');
         // 3. 벌크 데이터 조회 (한 번의 호출로 모든 관련 데이터 조회)
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
             withReservation: true,
@@ -120,9 +121,10 @@ export class ScheduleManagementService {
             withProject: true,
             withParticipants: true, // 예약자 정보 필요
         });
-
+        console.timeEnd('scheduleDataList');
         // employeeIds 필터링 적용 (해당 직원이 참여하는 일정만)
         let filteredScheduleDataList = scheduleDataList;
+        console.time('filteredScheduleDataList');
         if (query.employeeIds && query.employeeIds.length > 0) {
             filteredScheduleDataList = scheduleDataList.filter(({ participants }) => {
                 if (!participants || participants.length === 0) return false;
@@ -135,15 +137,17 @@ export class ScheduleManagementService {
                 );
             });
         }
-
+        console.timeEnd('filteredScheduleDataList');
         // 모든 스케줄 ID를 수집하여 한 번에 알림 상태 확인 (성능 최적화)
         const calendarScheduleIds = filteredScheduleDataList.map(({ schedule }) => schedule.scheduleId);
+        console.time('unreadNotificationMap');
         const unreadNotificationMap =
             await this.scheduleNotificationContextService.여러_스케줄의_읽지않은_알림을_확인한다(
                 calendarScheduleIds,
                 user.employeeId,
             );
-
+        console.timeEnd('unreadNotificationMap');
+        console.time('scheduleCalendarItems');
         const scheduleCalendarItems = filteredScheduleDataList.map(
             ({ schedule, reservation, resource, participants, project }) => {
                 // 예약자 찾기 (RESERVER 타입의 참가자)
@@ -176,7 +180,7 @@ export class ScheduleManagementService {
                 };
             },
         );
-
+        console.timeEnd('scheduleCalendarItems');
         return {
             schedules: scheduleCalendarItems,
         };
