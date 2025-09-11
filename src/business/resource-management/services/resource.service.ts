@@ -84,13 +84,16 @@ export class ResourceService {
             reservationId,
         } = query;
 
-        // 1. 권한: 자원 조회는 모든 직원이 가능 (생략)
+        // 과거 날짜 조회 방지 (UTC 기준으로 yyyy-mm-dd 비교)
         const now = new Date();
         const queryStartDate = new Date(`${startDate}T00:00:00Z`);
-        console.log('queryStartDate', queryStartDate, queryStartDate.getUTCDate());
-        console.log('now', now, now.getUTCDate());
+        const todayString = now.toISOString().slice(0, 10); // UTC 기준 yyyy-mm-dd
+        const queryDateString = queryStartDate.toISOString().slice(0, 10); // UTC 기준 yyyy-mm-dd
 
-        if (queryStartDate.getUTCDate() < now.getUTCDate()) {
+        console.log('조회 시작날짜 (UTC):', queryDateString);
+        console.log('오늘 날짜 (UTC):', todayString);
+
+        if (queryDateString < todayString) {
             return [];
         }
 

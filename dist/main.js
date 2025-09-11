@@ -25566,9 +25566,11 @@ let ResourceService = class ResourceService {
         const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservationId, } = query;
         const now = new Date();
         const queryStartDate = new Date(`${startDate}T00:00:00Z`);
-        console.log('queryStartDate', queryStartDate, queryStartDate.getUTCDate());
-        console.log('now', now, now.getUTCDate());
-        if (queryStartDate.getUTCDate() < now.getUTCDate()) {
+        const todayString = now.toISOString().slice(0, 10);
+        const queryDateString = queryStartDate.toISOString().slice(0, 10);
+        console.log('조회 시작날짜 (UTC):', queryDateString);
+        console.log('오늘 날짜 (UTC):', todayString);
+        if (queryDateString < todayString) {
             return [];
         }
         this.validateAvailabilityQuery(query);
