@@ -37312,9 +37312,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
         }
         try {
             const completedAt = new Date();
-            console.log('completedAt', completedAt);
             const newEndTime = new Date(completedAt);
-            console.log('newEndTime', newEndTime);
             const minutes = newEndTime.getMinutes();
             if (minutes === 0) {
                 newEndTime.setSeconds(0, 0);
@@ -37325,10 +37323,8 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             else {
                 newEndTime.setHours(newEndTime.getHours() + 1, 0, 0, 0);
             }
-            console.log('newEndTime', newEndTime);
             const shouldUpdateEndTime = newEndTime < schedule.endDate;
             const actualEndTime = shouldUpdateEndTime ? newEndTime : schedule.endDate;
-            console.log('actualEndTime', actualEndTime);
             if (reservation && shouldUpdateEndTime) {
                 await this.domainReservationService.update(reservation.reservationId, {
                     status: reservation_type_enum_1.ReservationStatus.CLOSED,
@@ -37346,6 +37342,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             }
             await this.domainScheduleService.update(schedule.scheduleId, {
                 status: schedule_type_enum_1.ScheduleStatus.COMPLETED,
+                ...(shouldUpdateEndTime && { endDate: actualEndTime }),
             }, { queryRunner });
             if (shouldManageTransaction) {
                 await queryRunner.commitTransaction();

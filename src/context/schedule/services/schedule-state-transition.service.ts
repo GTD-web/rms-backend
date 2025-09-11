@@ -118,10 +118,8 @@ export class ScheduleStateTransitionService {
 
         try {
             const completedAt = new Date();
-            console.log('completedAt', completedAt);
             // 현재 시간을 30분 단위로 올림하여 새로운 종료시간 계산
             const newEndTime = new Date(completedAt);
-            console.log('newEndTime', newEndTime);
             const minutes = newEndTime.getMinutes();
 
             if (minutes === 0) {
@@ -134,11 +132,9 @@ export class ScheduleStateTransitionService {
                 // 31~59분이면 다음 시간 0분으로 설정
                 newEndTime.setHours(newEndTime.getHours() + 1, 0, 0, 0);
             }
-            console.log('newEndTime', newEndTime);
             // 기존 종료시간보다 이른 경우에만 종료시간 수정
             const shouldUpdateEndTime = newEndTime < schedule.endDate;
             const actualEndTime = shouldUpdateEndTime ? newEndTime : schedule.endDate;
-            console.log('actualEndTime', actualEndTime);
             if (reservation && shouldUpdateEndTime) {
                 // 예약의 종료시간도 함께 수정
                 await this.domainReservationService.update(
@@ -179,9 +175,9 @@ export class ScheduleStateTransitionService {
                 schedule.scheduleId,
                 {
                     status: ScheduleStatus.COMPLETED,
+                    ...(shouldUpdateEndTime && { endDate: actualEndTime }),
                     // description: updatedDescription,
                     // completionReason: completionNotes,
-                    // ...(shouldUpdateEndTime && { endDate: actualEndTime }),
                 },
                 { queryRunner },
             );
