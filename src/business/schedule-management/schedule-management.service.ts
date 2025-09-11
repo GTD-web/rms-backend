@@ -1,4 +1,10 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+    Injectable,
+    Logger,
+    BadRequestException,
+    NotFoundException,
+    InternalServerErrorException,
+} from '@nestjs/common';
 import { Employee } from '@libs/entities/employee.entity';
 
 // 기존 DTO들 import
@@ -728,6 +734,10 @@ export class ScheduleManagementService {
             reservation,
             resource,
         );
+
+        if (!completeResult) {
+            throw new InternalServerErrorException('일정 완료 프로세스 실패');
+        }
 
         // 6. 응답 DTO 변환
         return completeResult;

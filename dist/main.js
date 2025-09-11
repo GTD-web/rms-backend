@@ -29593,6 +29593,9 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         const policyResult = await this.schedulePolicyService.일정_완료가_가능한지_확인한다(schedule, reservation);
         this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
         const completeResult = await this.scheduleStateTransitionService.일정을_완료한다(schedule, reservation, resource);
+        if (!completeResult) {
+            throw new common_1.InternalServerErrorException('일정 완료 프로세스 실패');
+        }
         return completeResult;
     }
     async checkScheduleExtendable(user, scheduleId) {
@@ -37718,7 +37721,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             }
             const shouldUpdateEndTime = newEndTime < schedule.endDate;
             const actualEndTime = shouldUpdateEndTime ? newEndTime : schedule.endDate;
-            const status = resource?.type === resource_type_enum_1.ResourceType.VEHICLE ? reservation.status : reservation_type_enum_1.ReservationStatus.CLOSED;
+            const status = resource?.type === resource_type_enum_1.ResourceType.VEHICLE ? reservation_type_enum_1.ReservationStatus.CONFIRMED : reservation_type_enum_1.ReservationStatus.CLOSED;
             if (reservation && shouldUpdateEndTime) {
                 await this.domainReservationService.update(reservation.reservationId, {
                     status: status,
@@ -37747,6 +37750,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             return true;
         }
         catch (error) {
+            console.error(error);
             if (shouldManageTransaction) {
                 await queryRunner.rollbackTransaction();
             }
