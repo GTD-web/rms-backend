@@ -5,6 +5,7 @@ import { ResourceContextModule } from '@src/context/resource/resource.context.mo
 import { ReservationContextModule } from '@src/context/reservation/reservation.context.module';
 import { FileContextModule } from '@src/context/file/file.context.module';
 import { NotificationContextModule } from '@src/context/notification/notification.context.module';
+import { EmployeeContextModule } from '@src/context/employee/employee.context.module';
 
 // Controllers
 import { ResourceController } from './controllers/resource/resource.controller';
@@ -22,7 +23,13 @@ import { ConsumableService } from './services/consumable.service';
 import { MaintenanceService } from './services/maintenance.service';
 
 @Module({
-    imports: [ResourceContextModule, ReservationContextModule, FileContextModule, NotificationContextModule],
+    imports: [
+        ResourceContextModule,
+        ReservationContextModule,
+        FileContextModule,
+        NotificationContextModule,
+        EmployeeContextModule,
+    ],
     controllers: [
         ResourceController,
         ResourceGroupController,

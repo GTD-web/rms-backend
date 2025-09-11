@@ -222,47 +222,6 @@ export class ReservationContextService {
             withDeleted: true,
         });
 
-        const notiTarget = [
-            ...updatedReservation.resource.resourceManagers.map((manager) => manager.employeeId),
-            ...updatedReservation.participants.map((reserver) => reserver.employeeId),
-        ];
-
-        // if (updatedReservation.resource.notifyReservationChange && updateDto.status !== ReservationStatus.CLOSED) {
-        //     try {
-        //         let notificationType: NotificationType;
-        //         switch (updateDto.status) {
-        //             case ReservationStatus.CONFIRMED:
-        //                 notificationType = NotificationType.RESERVATION_STATUS_CONFIRMED;
-        //                 break;
-        //             case ReservationStatus.CANCELLED:
-        //                 notificationType = NotificationType.RESERVATION_STATUS_CANCELLED;
-        //                 break;
-        //             case ReservationStatus.REJECTED:
-        //                 notificationType = NotificationType.RESERVATION_STATUS_REJECTED;
-        //                 break;
-        //         }
-
-        //         await this.notificationService.createNotification(
-        //             notificationType,
-        //             {
-        //                 reservationId: updatedReservation.reservationId,
-        //                 reservationTitle: updatedReservation.title,
-        //                 reservationDate: DateUtil.toAlarmRangeString(
-        //                     DateUtil.format(updatedReservation.startDate),
-        //                     DateUtil.format(updatedReservation.endDate),
-        //                 ),
-        //                 resourceId: updatedReservation.resource.resourceId,
-        //                 resourceName: updatedReservation.resource.name,
-        //                 resourceType: updatedReservation.resource.type,
-        //             },
-        //             notiTarget,
-        //         );
-        //     } catch (error) {
-        //         console.log(error);
-        //         console.log('Notification creation failed in updateStatus');
-        //     }
-        // }
-
         const responseDto = new ReservationResponseDto();
         Object.assign(responseDto, updatedReservation);
         return responseDto;
@@ -419,17 +378,6 @@ export class ReservationContextService {
                 },
                 queryRunner,
             );
-
-            const notiTarget = [user.employeeId];
-            // await this.notificationService.createNotification(
-            //     NotificationType.RESOURCE_VEHICLE_RETURNED,
-            //     {
-            //         resourceId: reservation.resource.resourceId,
-            //         resourceName: reservation.resource.name,
-            //         resourceType: reservation.resource.type,
-            //     },
-            //     notiTarget,
-            // );
 
             await queryRunner.commitTransaction();
             return true;

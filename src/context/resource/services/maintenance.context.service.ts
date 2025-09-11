@@ -98,30 +98,6 @@ export class MaintenanceContextService {
 
             await queryRunner.commitTransaction();
 
-            // 시스템 관리자들에게 알림 발송
-            const systemAdmins = await this.domainEmployeeService.findAll({
-                where: {
-                    roles: Raw(() => `'${Role.SYSTEM_ADMIN}' = ANY("roles")`),
-                },
-            });
-
-            const consumable = await this.domainConsumableService.findOne({
-                where: { consumableId: maintenance.consumableId },
-                relations: ['vehicleInfo', 'vehicleInfo.resource'],
-                withDeleted: true,
-            });
-
-            // await this.notificationService.createNotification(
-            //     NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
-            //     {
-            //         resourceId: consumable.vehicleInfo.resource.resourceId,
-            //         resourceType: consumable.vehicleInfo.resource.type,
-            //         consumableName: consumable.name,
-            //         resourceName: consumable.vehicleInfo.resource.name,
-            //     },
-            //     systemAdmins.map((admin) => admin.employeeId),
-            // );
-
             return {
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,

@@ -9,17 +9,33 @@ import { NotificationContextService } from '@src/context/notification/services/n
 import { CreateMaintenanceDto } from '../dtos/vehicle/create-vehicle-info.dto';
 import { UpdateMaintenanceDto } from '../dtos/vehicle/update-vehicle-info.dto';
 import { MaintenanceResponseDto } from '../dtos/vehicle/vehicle-response.dto';
+import { EmployeeContextService } from '@src/context/employee/employee.context.service';
+import { ResourceContextService } from '@src/context/resource/services/resource.context.service';
+import { ResourceNotificationContextService } from '@src/context/notification/services/resource-notification.context.service';
 
 @Injectable()
 export class MaintenanceService {
     constructor(
         private readonly maintenanceContextService: MaintenanceContextService,
-        private readonly notificationContextService: NotificationContextService,
+        private readonly employeeContextService: EmployeeContextService,
+        private readonly resourceContextService: ResourceContextService,
+        private readonly resourceNotificationContextService: ResourceNotificationContextService,
     ) {}
 
     async save(createMaintenanceDto: CreateMaintenanceDto): Promise<MaintenanceResponseDto> {
         const maintenance = await this.maintenanceContextService.정비이력을_저장한다(createMaintenanceDto);
-        // await this.notificationContextService.시스템_관리자들에게_알림을_발송한다();
+
+        // 시스템 관리자들에게 알림 발송
+        const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
+
+        const consumable = await this.resourceContextService.소모품의_자원을_조회한다(
+            createMaintenanceDto.consumableId,
+        );
+
+        await this.resourceNotificationContextService.정비완료_알림을_전송한다(
+            { resource: consumable.vehicleInfo.resource, consumable: consumable },
+            systemAdmins.map((admin) => admin.employeeId),
+        );
         return maintenance;
     }
 

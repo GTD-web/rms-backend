@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { DateUtil } from '@libs/utils/date.util';
 import { DomainScheduleService } from '@src/domain/schedule/schedule.service';
 import { ScheduleStatus } from '@libs/enums/schedule-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
@@ -7,6 +6,7 @@ import { DomainReservationService } from '@src/domain/reservation/reservation.se
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { In, Not } from 'typeorm';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { DateUtil } from '@libs/utils/date.util';
 
 @Injectable()
 export class SchedulePostProcessingService {
@@ -20,7 +20,6 @@ export class SchedulePostProcessingService {
     }
 
     async 일정관련_배치_작업을_처리한다(): Promise<void> {
-        const now = DateUtil.now().format();
         // PENDING = 'PENDING', // 대기
         // PROCESSING = 'PROCESSING', // 진행중
         // COMPLETED = 'COMPLETED', // 완료
@@ -42,17 +41,21 @@ export class SchedulePostProcessingService {
             await this.domainScheduleService.update(schedule.scheduleId, { status: ScheduleStatus.COMPLETED });
         }
 
-        // const notClosedReservations = await this.domainReservationService.findAll({
-        //     where: {
-        //         status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
-        //         resource: {
-        //             type: Not(ResourceType.VEHICLE),
-        //         },
-        //         endDate: MoreThanOrEqual(DateUtil.date(now).toDate()),
-        //     },
-        // });
-        // for (const reservation of notClosedReservations) {
-        //     await this.domainReservationService.update(reservation.reservationId, { status: ReservationStatus.CLOSED });
-        // }
+        // 대기 -> 거절 (숙소예약이면서 승인이 되지 않은 채로 시작일이 지났을 때)
+        const now = DateUtil.now().toDate();
+        const pendingAccommodationReservations = await this.domainReservationService.findAll({
+            where: {
+                status: In([ReservationStatus.PENDING]),
+                resource: {
+                    type: ResourceType.ACCOMMODATION,
+                },
+                startDate: LessThanOrEqual(now),
+            },
+        });
+        for (const reservation of pendingAccommodationReservations) {
+            await this.domainReservationService.update(reservation.reservationId, {
+                status: ReservationStatus.REJECTED,
+            });
+        }
     }
 }

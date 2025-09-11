@@ -10,6 +10,8 @@ import { DomainReservationService } from '../../../domain/reservation/reservatio
 import { DomainScheduleRelationService } from '../../../domain/schedule-relation/schedule-relation.service';
 import { DomainScheduleParticipantService } from '../../../domain/schedule-participant/schedule-participant.service';
 import { DateUtil } from '@libs/utils/date.util';
+import { Resource } from '@libs/entities/resource.entity';
+import { ResourceType } from '@libs/enums/resource-type.enum';
 
 export interface ScheduleCancelResult {
     schedule: Schedule;
@@ -106,7 +108,7 @@ export class ScheduleStateTransitionService {
     async 일정을_완료한다(
         schedule: Schedule,
         reservation: Reservation | undefined,
-        completionNotes?: string,
+        resource: Resource | undefined,
         queryRunner?: QueryRunner,
     ): Promise<boolean> {
         const shouldManageTransaction = !queryRunner;
@@ -135,12 +137,13 @@ export class ScheduleStateTransitionService {
             // 기존 종료시간보다 이른 경우에만 종료시간 수정
             const shouldUpdateEndTime = newEndTime < schedule.endDate;
             const actualEndTime = shouldUpdateEndTime ? newEndTime : schedule.endDate;
+            const status = resource?.type === ResourceType.VEHICLE ? reservation.status : ReservationStatus.CLOSED;
             if (reservation && shouldUpdateEndTime) {
                 // 예약의 종료시간도 함께 수정
                 await this.domainReservationService.update(
                     reservation.reservationId,
                     {
-                        status: ReservationStatus.CLOSED,
+                        status: status,
                         endDate: actualEndTime,
                     },
                     { queryRunner },
@@ -152,7 +155,7 @@ export class ScheduleStateTransitionService {
             } else if (reservation) {
                 await this.domainReservationService.update(
                     reservation.reservationId,
-                    { status: ReservationStatus.CLOSED },
+                    { status: status },
                     { queryRunner },
                 );
 
@@ -161,23 +164,11 @@ export class ScheduleStateTransitionService {
                 });
             }
 
-            // // 날짜 포맷팅 헬퍼 함수 (YYYY-MM-DD HH:mm 형식)
-            // const formatDateTime = (date: Date) => {
-            //     return date.toISOString().slice(0, 16).replace('T', ' ');
-            // };
-
-            // const completionInfo = `[${formatDateTime(completedAt)}] 일정이 완료되었습니다.${completionNotes ? ` 완료 메모: ${completionNotes}` : ''}${shouldUpdateEndTime ? `\n원래 종료시간: ${formatDateTime(schedule.endDate)}, 수정된 종료시간: ${formatDateTime(actualEndTime)}` : ''}`;
-            // const updatedDescription = schedule.description
-            //     ? `${schedule.description}\n\n${completionInfo}`
-            //     : completionInfo;
-
             await this.domainScheduleService.update(
                 schedule.scheduleId,
                 {
                     status: ScheduleStatus.COMPLETED,
                     ...(shouldUpdateEndTime && { endDate: actualEndTime }),
-                    // description: updatedDescription,
-                    // completionReason: completionNotes,
                 },
                 { queryRunner },
             );

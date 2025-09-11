@@ -23073,16 +23073,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
+const reservation_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/reservation-notification.context.service */ "./src/context/notification/services/reservation-notification.context.service.ts");
+const schedule_query_context_service_1 = __webpack_require__(/*! @src/context/schedule/services/schedule-query.context.service */ "./src/context/schedule/services/schedule-query.context.service.ts");
 let ReservationService = class ReservationService {
-    constructor(reservationContextService, notificationContextService) {
+    constructor(reservationContextService, notificationContextService, scheduleQueryContextService, reservationNotificationContextService) {
         this.reservationContextService = reservationContextService;
         this.notificationContextService = notificationContextService;
+        this.scheduleQueryContextService = scheduleQueryContextService;
+        this.reservationNotificationContextService = reservationNotificationContextService;
     }
     async findReservationList(startDate, endDate, resourceType, resourceId, status) {
         return this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status);
@@ -23096,16 +23100,24 @@ let ReservationService = class ReservationService {
         return { ...reservation, notifications };
     }
     async updateStatus(reservationId, updateDto) {
-        return this.reservationContextService.예약상태를_변경한다(reservationId, updateDto);
+        const updatedReservation = await this.reservationContextService.예약상태를_변경한다(reservationId, updateDto);
+        return updatedReservation;
     }
     async returnVehicle(user, reservationId, returnDto) {
-        return this.reservationContextService.차량을_반납한다(user, reservationId, returnDto);
+        const result = await this.reservationContextService.차량을_반납한다(user, reservationId, returnDto);
+        const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
+        const { resource } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
+            withReservation: true,
+            withResource: true,
+        });
+        await this.reservationNotificationContextService.차량반납_알림을_전송한다({ resource }, [user.employeeId]);
+        return result;
     }
 };
 exports.ReservationService = ReservationService;
 exports.ReservationService = ReservationService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _a : Object, typeof (_b = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _a : Object, typeof (_b = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _b : Object, typeof (_c = typeof schedule_query_context_service_1.ScheduleQueryContextService !== "undefined" && schedule_query_context_service_1.ScheduleQueryContextService) === "function" ? _c : Object, typeof (_d = typeof reservation_notification_context_service_1.ReservationNotificationContextService !== "undefined" && reservation_notification_context_service_1.ReservationNotificationContextService) === "function" ? _d : Object])
 ], ReservationService);
 
 
@@ -24226,6 +24238,14 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], ResourceAvailabilityDto.prototype, "availableTimeSlots", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        required: false,
+        description: '자원 그룹 이름',
+        example: '회의실 그룹',
+    }),
+    __metadata("design:type", String)
+], ResourceAvailabilityDto.prototype, "resourceGroupName", void 0);
 
 
 /***/ }),
@@ -25652,6 +25672,7 @@ const resource_context_module_1 = __webpack_require__(/*! @src/context/resource/
 const reservation_context_module_1 = __webpack_require__(/*! @src/context/reservation/reservation.context.module */ "./src/context/reservation/reservation.context.module.ts");
 const file_context_module_1 = __webpack_require__(/*! @src/context/file/file.context.module */ "./src/context/file/file.context.module.ts");
 const notification_context_module_1 = __webpack_require__(/*! @src/context/notification/notification.context.module */ "./src/context/notification/notification.context.module.ts");
+const employee_context_module_1 = __webpack_require__(/*! @src/context/employee/employee.context.module */ "./src/context/employee/employee.context.module.ts");
 const resource_controller_1 = __webpack_require__(/*! ./controllers/resource/resource.controller */ "./src/business/resource-management/controllers/resource/resource.controller.ts");
 const resource_group_controller_1 = __webpack_require__(/*! ./controllers/resource/resource-group.controller */ "./src/business/resource-management/controllers/resource/resource-group.controller.ts");
 const vehicle_info_controller_1 = __webpack_require__(/*! ./controllers/vehicle/vehicle-info.controller */ "./src/business/resource-management/controllers/vehicle/vehicle-info.controller.ts");
@@ -25668,7 +25689,13 @@ let ResourceManagementModule = class ResourceManagementModule {
 exports.ResourceManagementModule = ResourceManagementModule;
 exports.ResourceManagementModule = ResourceManagementModule = __decorate([
     (0, common_1.Module)({
-        imports: [resource_context_module_1.ResourceContextModule, reservation_context_module_1.ReservationContextModule, file_context_module_1.FileContextModule, notification_context_module_1.NotificationContextModule],
+        imports: [
+            resource_context_module_1.ResourceContextModule,
+            reservation_context_module_1.ReservationContextModule,
+            file_context_module_1.FileContextModule,
+            notification_context_module_1.NotificationContextModule,
+            employee_context_module_1.EmployeeContextModule,
+        ],
         controllers: [
             resource_controller_1.ResourceController,
             resource_group_controller_1.ResourceGroupController,
@@ -25751,19 +25778,26 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaintenanceService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const maintenance_context_service_1 = __webpack_require__(/*! @src/context/resource/services/maintenance.context.service */ "./src/context/resource/services/maintenance.context.service.ts");
-const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+const employee_context_service_1 = __webpack_require__(/*! @src/context/employee/employee.context.service */ "./src/context/employee/employee.context.service.ts");
+const resource_context_service_1 = __webpack_require__(/*! @src/context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
+const resource_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/resource-notification.context.service */ "./src/context/notification/services/resource-notification.context.service.ts");
 let MaintenanceService = class MaintenanceService {
-    constructor(maintenanceContextService, notificationContextService) {
+    constructor(maintenanceContextService, employeeContextService, resourceContextService, resourceNotificationContextService) {
         this.maintenanceContextService = maintenanceContextService;
-        this.notificationContextService = notificationContextService;
+        this.employeeContextService = employeeContextService;
+        this.resourceContextService = resourceContextService;
+        this.resourceNotificationContextService = resourceNotificationContextService;
     }
     async save(createMaintenanceDto) {
         const maintenance = await this.maintenanceContextService.정비이력을_저장한다(createMaintenanceDto);
+        const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
+        const consumable = await this.resourceContextService.소모품의_자원을_조회한다(createMaintenanceDto.consumableId);
+        await this.resourceNotificationContextService.정비완료_알림을_전송한다({ resource: consumable.vehicleInfo.resource, consumable: consumable }, systemAdmins.map((admin) => admin.employeeId));
         return maintenance;
     }
     async findAllByVehicleInfoId(vehicleInfoId, page, limit) {
@@ -25782,7 +25816,7 @@ let MaintenanceService = class MaintenanceService {
 exports.MaintenanceService = MaintenanceService;
 exports.MaintenanceService = MaintenanceService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_context_service_1.MaintenanceContextService !== "undefined" && maintenance_context_service_1.MaintenanceContextService) === "function" ? _a : Object, typeof (_b = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof maintenance_context_service_1.MaintenanceContextService !== "undefined" && maintenance_context_service_1.MaintenanceContextService) === "function" ? _a : Object, typeof (_b = typeof employee_context_service_1.EmployeeContextService !== "undefined" && employee_context_service_1.EmployeeContextService) === "function" ? _b : Object, typeof (_c = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _c : Object, typeof (_d = typeof resource_notification_context_service_1.ResourceNotificationContextService !== "undefined" && resource_notification_context_service_1.ResourceNotificationContextService) === "function" ? _d : Object])
 ], MaintenanceService);
 
 
@@ -25934,6 +25968,7 @@ let ResourceService = class ResourceService {
             console.log('reservations', reservations);
             if (isTimeSlotRequest) {
                 const availabilityDto = await this.calculateTimeSlotAvailability(resource, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservations);
+                availabilityDto.resourceGroupName = resource.resourceGroup.title;
                 result.push(availabilityDto);
             }
             else if (isAccommodation || !isSameDay) {
@@ -25942,6 +25977,7 @@ let ResourceService = class ResourceService {
                     const availabilityDto = new available_time_response_dto_1.ResourceAvailabilityDto();
                     availabilityDto.resourceId = resource.resourceId;
                     availabilityDto.resourceName = resource.name;
+                    availabilityDto.resourceGroupName = resource.resourceGroup.title;
                     if (resource.location) {
                         const location = resource.location;
                         availabilityDto.resourceLocation =
@@ -29024,14 +29060,14 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                         projectId: project.projectId,
                         projectName: project.projectName,
                     }
-                    : undefined,
+                    : null,
                 reservation: reservation && resource
                     ? {
                         reservationId: reservation.reservationId,
                         resourceName: resource.name,
                         resourceType: resource.type,
                     }
-                    : undefined,
+                    : null,
                 hasUnreadNotification: notificationInfo.hasUnreadNotification,
                 notificationId: notificationInfo.notificationId,
             };
@@ -29351,22 +29387,19 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         const policyResult = await this.schedulePolicyService.일정_취소가_가능한지_확인한다(schedule, reservation);
         this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
         const cancelResult = await this.scheduleStateTransitionService.일정을_취소한다(schedule, reservation);
-        await this.scheduleNotificationContextService.일정_취소_알림을_전송한다({ schedule, reservation, resource }, [
-            user.employeeId,
-            ...participants.map((participant) => participant.employeeId),
-        ]);
         return cancelResult;
     }
     async completeSchedule(user, scheduleId, completeDto) {
         this.logger.log(`일정 완료 요청 - 사용자: ${user.employeeId}, 일정: ${scheduleId}`);
         const authResult = await this.scheduleAuthorizationService.일정_권한을_확인한다(user, scheduleId, schedule_authorization_service_2.ScheduleAction.COMPLETE);
         this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
-        const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
+        const { schedule, reservation, resource } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
+            withResource: true,
         });
         const policyResult = await this.schedulePolicyService.일정_완료가_가능한지_확인한다(schedule, reservation);
         this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
-        const completeResult = await this.scheduleStateTransitionService.일정을_완료한다(schedule, reservation);
+        const completeResult = await this.scheduleStateTransitionService.일정을_완료한다(schedule, reservation, resource);
         return completeResult;
     }
     async checkScheduleExtendable(user, scheduleId) {
@@ -29461,7 +29494,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 }
                 : undefined,
         });
-        const { resource, participants } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
+        const { schedule: newSchedule, resource, participants, } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
             withResource: true,
             withParticipants: true,
@@ -29473,7 +29506,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             ]))
             : participants.map((participant) => participant.employeeId);
         await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(updateScenarios, {
-            schedule,
+            schedule: newSchedule,
             reservation,
             resource,
         }, employeeIds);
@@ -32839,6 +32872,8 @@ const reservation_module_1 = __webpack_require__(/*! @src/domain/reservation/res
 const fcm_push_adapter_1 = __webpack_require__(/*! ./adapter/fcm-push.adapter */ "./src/context/notification/adapter/fcm-push.adapter.ts");
 const cron_notification_context_service_1 = __webpack_require__(/*! ./services/cron-notification.context.service */ "./src/context/notification/services/cron-notification.context.service.ts");
 const schedule_notification_context_service_1 = __webpack_require__(/*! ./services/schedule-notification.context.service */ "./src/context/notification/services/schedule-notification.context.service.ts");
+const reservation_notification_context_service_1 = __webpack_require__(/*! ./services/reservation-notification.context.service */ "./src/context/notification/services/reservation-notification.context.service.ts");
+const resource_notification_context_service_1 = __webpack_require__(/*! ./services/resource-notification.context.service */ "./src/context/notification/services/resource-notification.context.service.ts");
 let NotificationContextModule = class NotificationContextModule {
 };
 exports.NotificationContextModule = NotificationContextModule;
@@ -32859,9 +32894,17 @@ exports.NotificationContextModule = NotificationContextModule = __decorate([
             notification_context_service_1.NotificationContextService,
             cron_notification_context_service_1.CronNotificationContextService,
             schedule_notification_context_service_1.ScheduleNotificationContextService,
+            reservation_notification_context_service_1.ReservationNotificationContextService,
+            resource_notification_context_service_1.ResourceNotificationContextService,
             fcm_push_adapter_1.FCMAdapter,
         ],
-        exports: [notification_context_service_1.NotificationContextService, cron_notification_context_service_1.CronNotificationContextService, schedule_notification_context_service_1.ScheduleNotificationContextService],
+        exports: [
+            notification_context_service_1.NotificationContextService,
+            cron_notification_context_service_1.CronNotificationContextService,
+            schedule_notification_context_service_1.ScheduleNotificationContextService,
+            reservation_notification_context_service_1.ReservationNotificationContextService,
+            resource_notification_context_service_1.ResourceNotificationContextService,
+        ],
     })
 ], NotificationContextModule);
 
@@ -33283,6 +33326,110 @@ exports.NotificationContextService = NotificationContextService = NotificationCo
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof employee_microservice_adapter_1.EmployeeMicroserviceAdapter !== "undefined" && employee_microservice_adapter_1.EmployeeMicroserviceAdapter) === "function" ? _a : Object, typeof (_b = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object, typeof (_d = typeof notification_type_service_1.DomainNotificationTypeService !== "undefined" && notification_type_service_1.DomainNotificationTypeService) === "function" ? _d : Object, typeof (_e = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _e : Object, typeof (_f = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
 ], NotificationContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/services/reservation-notification.context.service.ts":
+/*!***************************************************************************************!*\
+  !*** ./src/context/notification/services/reservation-notification.context.service.ts ***!
+  \***************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var ReservationNotificationContextService_1;
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationNotificationContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const notification_context_service_1 = __webpack_require__(/*! ./notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
+let ReservationNotificationContextService = ReservationNotificationContextService_1 = class ReservationNotificationContextService {
+    constructor(notificationContextService, employeeNotificationService) {
+        this.notificationContextService = notificationContextService;
+        this.employeeNotificationService = employeeNotificationService;
+        this.logger = new common_1.Logger(ReservationNotificationContextService_1.name);
+    }
+    async 차량반납_알림을_전송한다(data, targetEmployeeIds) {
+        const notificationData = {
+            resource: {
+                resourceId: data.resource?.resourceId,
+                resourceName: data.resource?.name,
+                resourceType: data.resource?.type,
+            },
+        };
+        await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESOURCE_VEHICLE_RETURNED, notificationData, targetEmployeeIds);
+    }
+};
+exports.ReservationNotificationContextService = ReservationNotificationContextService;
+exports.ReservationNotificationContextService = ReservationNotificationContextService = ReservationNotificationContextService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _a : Object, typeof (_b = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _b : Object])
+], ReservationNotificationContextService);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/services/resource-notification.context.service.ts":
+/*!************************************************************************************!*\
+  !*** ./src/context/notification/services/resource-notification.context.service.ts ***!
+  \************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var ResourceNotificationContextService_1;
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceNotificationContextService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const notification_context_service_1 = __webpack_require__(/*! ./notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+let ResourceNotificationContextService = ResourceNotificationContextService_1 = class ResourceNotificationContextService {
+    constructor(notificationContextService) {
+        this.notificationContextService = notificationContextService;
+        this.logger = new common_1.Logger(ResourceNotificationContextService_1.name);
+    }
+    async 정비완료_알림을_전송한다(data, targetEmployeeIds) {
+        const notificationData = {
+            resource: {
+                resourceId: data.resource?.resourceId,
+                resourceName: data.resource?.name,
+                resourceType: data.resource?.type,
+                vehicleInfo: {
+                    consumable: {
+                        consumableName: data.consumable?.name,
+                        consumableId: data.consumable?.consumableId,
+                    },
+                },
+            },
+        };
+        await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESOURCE_MAINTENANCE_COMPLETED, notificationData, targetEmployeeIds);
+    }
+};
+exports.ResourceNotificationContextService = ResourceNotificationContextService;
+exports.ResourceNotificationContextService = ResourceNotificationContextService = ResourceNotificationContextService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _a : Object])
+], ResourceNotificationContextService);
 
 
 /***/ }),
@@ -33778,10 +33925,6 @@ let ReservationContextService = class ReservationContextService {
             relations: ['resource', 'resource.resourceManagers', 'participants', 'participants.employee'],
             withDeleted: true,
         });
-        const notiTarget = [
-            ...updatedReservation.resource.resourceManagers.map((manager) => manager.employeeId),
-            ...updatedReservation.participants.map((reserver) => reserver.employeeId),
-        ];
         const responseDto = new business_dto_index_2.ReservationResponseDto();
         Object.assign(responseDto, updatedReservation);
         return responseDto;
@@ -33885,7 +34028,6 @@ let ReservationContextService = class ReservationContextService {
                 odometerImages: returnDto.odometerImages,
                 indoorImages: returnDto.indoorImages,
             }, queryRunner);
-            const notiTarget = [user.employeeId];
             await queryRunner.commitTransaction();
             return true;
         }
@@ -34386,7 +34528,6 @@ exports.MaintenanceContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const maintenance_service_1 = __webpack_require__(/*! @src/domain/maintenance/maintenance.service */ "./src/domain/maintenance/maintenance.service.ts");
 const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
 const vehicle_info_service_1 = __webpack_require__(/*! @src/domain/vehicle-info/vehicle-info.service */ "./src/domain/vehicle-info/vehicle-info.service.ts");
@@ -34445,16 +34586,6 @@ let MaintenanceContextService = class MaintenanceContextService {
                 }
             }
             await queryRunner.commitTransaction();
-            const systemAdmins = await this.domainEmployeeService.findAll({
-                where: {
-                    roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.SYSTEM_ADMIN}' = ANY("roles")`),
-                },
-            });
-            const consumable = await this.domainConsumableService.findOne({
-                where: { consumableId: maintenance.consumableId },
-                relations: ['vehicleInfo', 'vehicleInfo.resource'],
-                withDeleted: true,
-            });
             return {
                 maintenanceId: maintenance.maintenanceId,
                 consumableId: maintenance.consumableId,
@@ -34848,7 +34979,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -34866,8 +34997,9 @@ const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ 
 const file_context_service_1 = __webpack_require__(/*! ../../file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
 const resource_response_dto_1 = __webpack_require__(/*! @src/business/resource-management/dtos/resource/resource-response.dto */ "./src/business/resource-management/dtos/resource/resource-response.dto.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
 let ResourceContextService = class ResourceContextService {
-    constructor(domainResourceService, domainResourceGroupService, domainResourceManagerService, domainVehicleInfoService, domainMeetingRoomInfoService, domainAccommodationInfoService, domainEquipmentInfoService, domainFileService, fileContextService, dataSource) {
+    constructor(domainResourceService, domainResourceGroupService, domainResourceManagerService, domainVehicleInfoService, domainMeetingRoomInfoService, domainAccommodationInfoService, domainEquipmentInfoService, domainConsumableService, domainFileService, fileContextService, dataSource) {
         this.domainResourceService = domainResourceService;
         this.domainResourceGroupService = domainResourceGroupService;
         this.domainResourceManagerService = domainResourceManagerService;
@@ -34875,6 +35007,7 @@ let ResourceContextService = class ResourceContextService {
         this.domainMeetingRoomInfoService = domainMeetingRoomInfoService;
         this.domainAccommodationInfoService = domainAccommodationInfoService;
         this.domainEquipmentInfoService = domainEquipmentInfoService;
+        this.domainConsumableService = domainConsumableService;
         this.domainFileService = domainFileService;
         this.fileContextService = fileContextService;
         this.dataSource = dataSource;
@@ -34903,6 +35036,15 @@ let ResourceContextService = class ResourceContextService {
             return resource;
         }));
         return resourcesWithFiles.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
+    }
+    async 소모품의_자원을_조회한다(consumableId) {
+        const consumable = await this.domainConsumableService.findOne({
+            where: {
+                consumableId: consumableId,
+            },
+            relations: ['vehicleInfo', 'vehicleInfo.resource'],
+        });
+        return consumable;
     }
     async 자원과_상세정보를_생성한다(createResourceInfo) {
         const { resource, typeInfo, managers } = createResourceInfo;
@@ -35311,6 +35453,7 @@ let ResourceContextService = class ResourceContextService {
         }
         return await this.domainResourceService.findAll({
             where: whereCondition,
+            relations: ['resourceGroup'],
             order: { order: 'ASC' },
         });
     }
@@ -35361,7 +35504,7 @@ let ResourceContextService = class ResourceContextService {
 exports.ResourceContextService = ResourceContextService;
 exports.ResourceContextService = ResourceContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _g : Object, typeof (_h = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _h : Object, typeof (_j = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _j : Object, typeof (_k = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _k : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _g : Object, typeof (_h = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _h : Object, typeof (_j = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _j : Object, typeof (_k = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _k : Object, typeof (_l = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _l : Object])
 ], ResourceContextService);
 
 
@@ -36259,10 +36402,14 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SchedulePostProcessingService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const schedule_service_1 = __webpack_require__(/*! @src/domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let SchedulePostProcessingService = SchedulePostProcessingService_1 = class SchedulePostProcessingService {
     constructor(domainScheduleService, domainReservationService) {
         this.domainScheduleService = domainScheduleService;
@@ -36270,7 +36417,6 @@ let SchedulePostProcessingService = SchedulePostProcessingService_1 = class Sche
         this.logger = new common_1.Logger(SchedulePostProcessingService_1.name);
     }
     async 일정관련_배치_작업을_처리한다() {
-        const now = date_util_1.DateUtil.now().format();
         const pendingToChangeProcessing = await this.domainScheduleService.findByPendingToChangeProcessing();
         for (const schedule of pendingToChangeProcessing) {
             await this.domainScheduleService.update(schedule.scheduleId, { status: schedule_type_enum_1.ScheduleStatus.PROCESSING });
@@ -36278,6 +36424,21 @@ let SchedulePostProcessingService = SchedulePostProcessingService_1 = class Sche
         const processingToChangeCompleted = await this.domainScheduleService.findByProcessingToChangeCompleted();
         for (const schedule of processingToChangeCompleted) {
             await this.domainScheduleService.update(schedule.scheduleId, { status: schedule_type_enum_1.ScheduleStatus.COMPLETED });
+        }
+        const now = date_util_1.DateUtil.now().toDate();
+        const pendingAccommodationReservations = await this.domainReservationService.findAll({
+            where: {
+                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.PENDING]),
+                resource: {
+                    type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                },
+                startDate: (0, typeorm_2.LessThanOrEqual)(now),
+            },
+        });
+        for (const reservation of pendingAccommodationReservations) {
+            await this.domainReservationService.update(reservation.reservationId, {
+                status: reservation_type_enum_1.ReservationStatus.REJECTED,
+            });
         }
     }
 };
@@ -36546,6 +36707,11 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             }
         }
         return [...new Set(scheduleIds)];
+    }
+    async 예약의_일정ID들을_조회한다(reservationId) {
+        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds([reservationId]);
+        const scheduleIds = scheduleRelations.map((r) => r.scheduleId);
+        return scheduleIds;
     }
     async 직원의_역할별_일정ID들을_조회한다(employeeId, role, fromDate) {
         const conditions = {
@@ -37299,6 +37465,7 @@ const reservation_service_1 = __webpack_require__(/*! ../../../domain/reservatio
 const schedule_relation_service_1 = __webpack_require__(/*! ../../../domain/schedule-relation/schedule-relation.service */ "./src/domain/schedule-relation/schedule-relation.service.ts");
 const schedule_participant_service_1 = __webpack_require__(/*! ../../../domain/schedule-participant/schedule-participant.service */ "./src/domain/schedule-participant/schedule-participant.service.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 let ScheduleStateTransitionService = class ScheduleStateTransitionService {
     constructor(dataSource, domainScheduleService, domainReservationService, domainScheduleRelationService, domainScheduleParticipantService) {
         this.dataSource = dataSource;
@@ -37336,7 +37503,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             }
         }
     }
-    async 일정을_완료한다(schedule, reservation, completionNotes, queryRunner) {
+    async 일정을_완료한다(schedule, reservation, resource, queryRunner) {
         const shouldManageTransaction = !queryRunner;
         if (shouldManageTransaction) {
             queryRunner = this.dataSource.createQueryRunner();
@@ -37358,9 +37525,10 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             }
             const shouldUpdateEndTime = newEndTime < schedule.endDate;
             const actualEndTime = shouldUpdateEndTime ? newEndTime : schedule.endDate;
+            const status = resource?.type === resource_type_enum_1.ResourceType.VEHICLE ? reservation.status : reservation_type_enum_1.ReservationStatus.CLOSED;
             if (reservation && shouldUpdateEndTime) {
                 await this.domainReservationService.update(reservation.reservationId, {
-                    status: reservation_type_enum_1.ReservationStatus.CLOSED,
+                    status: status,
                     endDate: actualEndTime,
                 }, { queryRunner });
                 reservation = await this.domainReservationService.findOne({
@@ -37368,7 +37536,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
                 });
             }
             else if (reservation) {
-                await this.domainReservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.CLOSED }, { queryRunner });
+                await this.domainReservationService.update(reservation.reservationId, { status: status }, { queryRunner });
                 reservation = await this.domainReservationService.findOne({
                     where: { reservationId: reservation.reservationId },
                 });

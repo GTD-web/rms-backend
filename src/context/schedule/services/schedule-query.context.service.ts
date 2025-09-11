@@ -385,6 +385,12 @@ export class ScheduleQueryContextService {
         return [...new Set(scheduleIds)]; // 중복 제거
     }
 
+    async 예약의_일정ID들을_조회한다(reservationId: string): Promise<string[]> {
+        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds([reservationId]);
+        const scheduleIds = scheduleRelations.map((r) => r.scheduleId);
+        return scheduleIds;
+    }
+
     async 직원의_역할별_일정ID들을_조회한다(
         employeeId: string,
         role?: ParticipantsType,

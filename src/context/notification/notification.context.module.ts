@@ -13,6 +13,8 @@ import { DomainReservationModule } from '@src/domain/reservation/reservation.mod
 import { FCMAdapter } from './adapter/fcm-push.adapter';
 import { CronNotificationContextService } from './services/cron-notification.context.service';
 import { ScheduleNotificationContextService } from './services/schedule-notification.context.service';
+import { ReservationNotificationContextService } from './services/reservation-notification.context.service';
+import { ResourceNotificationContextService } from './services/resource-notification.context.service';
 
 /**
  * 알림 컨텍스트 모듈
@@ -44,8 +46,16 @@ import { ScheduleNotificationContextService } from './services/schedule-notifica
         NotificationContextService,
         CronNotificationContextService,
         ScheduleNotificationContextService,
+        ReservationNotificationContextService,
+        ResourceNotificationContextService,
         FCMAdapter,
     ],
-    exports: [NotificationContextService, CronNotificationContextService, ScheduleNotificationContextService],
+    exports: [
+        NotificationContextService,
+        CronNotificationContextService,
+        ScheduleNotificationContextService,
+        ReservationNotificationContextService,
+        ResourceNotificationContextService,
+    ],
 })
 export class NotificationContextModule {}

@@ -163,7 +163,7 @@ export class ScheduleManagementService {
                               projectId: project.projectId,
                               projectName: project.projectName,
                           }
-                        : undefined,
+                        : null,
                     reservation:
                         reservation && resource
                             ? {
@@ -171,7 +171,7 @@ export class ScheduleManagementService {
                                   resourceName: resource.name,
                                   resourceType: resource.type,
                               }
-                            : undefined,
+                            : null,
                     hasUnreadNotification: notificationInfo.hasUnreadNotification,
                     notificationId: notificationInfo.notificationId,
                 };
@@ -681,11 +681,11 @@ export class ScheduleManagementService {
         // 4. 실행/전이: 상태 변경/생성/삭제 (트랜잭션)
         const cancelResult = await this.scheduleStateTransitionService.일정을_취소한다(schedule, reservation);
 
-        // 5. 후처리: 알림/감사/도메인이벤트
-        await this.scheduleNotificationContextService.일정_취소_알림을_전송한다({ schedule, reservation, resource }, [
-            user.employeeId,
-            ...participants.map((participant) => participant.employeeId),
-        ]);
+        // 5. 후처리: 알림/감사/도메인이벤트 - 알림 삭제 시 알림 보내기 안하도록 기획 변경 2025-09-11
+        // await this.scheduleNotificationContextService.일정_취소_알림을_전송한다({ schedule, reservation, resource }, [
+        //     user.employeeId,
+        //     ...participants.map((participant) => participant.employeeId),
+        // ]);
 
         // 6. 응답 DTO 변환
         return cancelResult;
@@ -710,10 +710,11 @@ export class ScheduleManagementService {
         this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
 
         // 2. 그래프 조회: 컨텍스트에서 벌크 로딩 (N+1 금지)
-        const { schedule, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+        const { schedule, reservation, resource } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
             scheduleId,
             {
                 withReservation: true,
+                withResource: true,
             },
         );
 
@@ -725,7 +726,7 @@ export class ScheduleManagementService {
         const completeResult = await this.scheduleStateTransitionService.일정을_완료한다(
             schedule,
             reservation,
-            // completeDto.completionNotes,
+            resource,
         );
 
         // 6. 응답 DTO 변환
@@ -807,7 +808,30 @@ export class ScheduleManagementService {
         );
 
         // 5. 후처리: 알림/감사/도메인이벤트
-        // await this.schedulePostProcessingService.일정_연장_후처리(user, extendResult);
+        // const {
+        //     schedule: newSchedule,
+        //     resource,
+        //     participants,
+        // } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
+        //     withReservation: true,
+        //     withResource: true,
+        //     withParticipants: true,
+        // });
+        // const employeeIds = participants.map((participant) => participant.employeeId);
+
+        // await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(
+        //     {
+        //         isDateUpdate: true,
+        //         isInfoUpdate: false,
+        //         isResourceUpdate: false,
+        //     },
+        //     {
+        //         schedule: newSchedule,
+        //         reservation,
+        //         resource,
+        //     },
+        //     employeeIds,
+        // );
 
         // 6. 응답 DTO 변환
         return {
@@ -915,14 +939,15 @@ export class ScheduleManagementService {
         );
 
         // 5. 후처리: 시나리오별 후처리
-        const { resource, participants } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
-            scheduleId,
-            {
-                withReservation: true,
-                withResource: true,
-                withParticipants: true,
-            },
-        );
+        const {
+            schedule: newSchedule,
+            resource,
+            participants,
+        } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
+            withReservation: true,
+            withResource: true,
+            withParticipants: true,
+        });
         const employeeIds =
             updateScenarios.isInfoUpdate && updateResult.participantChanges
                 ? Array.from(
@@ -940,7 +965,7 @@ export class ScheduleManagementService {
         await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(
             updateScenarios,
             {
-                schedule,
+                schedule: newSchedule,
                 reservation,
                 resource,
             },

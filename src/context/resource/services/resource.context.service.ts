@@ -3,6 +3,7 @@ import { DataSource, In, IsNull, LessThan, MoreThan, Not } from 'typeorm';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { Resource } from '@libs/entities/resource.entity';
+import { Consumable } from '@libs/entities/consumable.entity';
 
 // Domain Services
 import { DomainResourceService } from '@src/domain/resource/resource.service';
@@ -32,6 +33,7 @@ import { UpdateMeetingRoomInfoDto } from '@src/business/resource-management/dtos
 import { UpdateAccommodationInfoDto } from '@src/business/resource-management/dtos/accommodation/update-accommodation-info.dto';
 import { UpdateEquipmentInfoDto } from '@src/business/resource-management/dtos/equipment/update-equipment-info.dto';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { DomainConsumableService } from '@src/domain/consumable/consumable.service';
 
 @Injectable()
 export class ResourceContextService {
@@ -43,6 +45,7 @@ export class ResourceContextService {
         private readonly domainMeetingRoomInfoService: DomainMeetingRoomInfoService,
         private readonly domainAccommodationInfoService: DomainAccommodationInfoService,
         private readonly domainEquipmentInfoService: DomainEquipmentInfoService,
+        private readonly domainConsumableService: DomainConsumableService,
         private readonly domainFileService: DomainFileService,
         private readonly fileContextService: FileContextService,
         private readonly dataSource: DataSource,
@@ -75,6 +78,16 @@ export class ResourceContextService {
         );
 
         return resourcesWithFiles.map((resource) => new ResourceResponseDto(resource));
+    }
+
+    async 소모품의_자원을_조회한다(consumableId: string): Promise<Consumable> {
+        const consumable = await this.domainConsumableService.findOne({
+            where: {
+                consumableId: consumableId,
+            },
+            relations: ['vehicleInfo', 'vehicleInfo.resource'],
+        });
+        return consumable;
     }
 
     async 자원과_상세정보를_생성한다(createResourceInfo: CreateResourceInfoDto): Promise<CreateResourceResponseDto> {
@@ -650,6 +663,7 @@ export class ResourceContextService {
 
         return await this.domainResourceService.findAll({
             where: whereCondition,
+            relations: ['resourceGroup'],
             order: { order: 'ASC' },
         });
     }

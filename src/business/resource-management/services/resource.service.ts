@@ -147,6 +147,7 @@ export class ResourceService {
                     timeUnit!,
                     reservations,
                 );
+                availabilityDto.resourceGroupName = resource.resourceGroup.title;
                 result.push(availabilityDto);
             } else if (isAccommodation || !isSameDay) {
                 // 날짜 단위 방식: 전체 날짜/시간 범위에서 충돌 여부만 확인
@@ -156,7 +157,7 @@ export class ResourceService {
                     const availabilityDto = new ResourceAvailabilityDto();
                     availabilityDto.resourceId = resource.resourceId;
                     availabilityDto.resourceName = resource.name;
-
+                    availabilityDto.resourceGroupName = resource.resourceGroup.title;
                     if (resource.location) {
                         const location = resource.location as any;
                         availabilityDto.resourceLocation =

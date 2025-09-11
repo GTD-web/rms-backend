@@ -47,4 +47,11 @@ export class ResourceAvailabilityDto {
         type: [TimeSlotDto],
     })
     availableTimeSlots?: TimeSlotDto[];
+
+    @ApiProperty({
+        required: false,
+        description: '자원 그룹 이름',
+        example: '회의실 그룹',
+    })
+    resourceGroupName?: string;
 }
