@@ -80,6 +80,13 @@ export class ScheduleCalendarItemDto {
         required: false,
     })
     hasUnreadNotification?: boolean;
+
+    @ApiProperty({
+        description: '안읽은 알림 ID',
+        example: 'uuid-string',
+        required: false,
+    })
+    notificationId?: string;
 }
 
 export class ScheduleCalendarResponseDto {

@@ -27188,6 +27188,14 @@ __decorate([
     }),
     __metadata("design:type", Boolean)
 ], ScheduleCalendarItemDto.prototype, "hasUnreadNotification", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '안읽은 알림 ID',
+        example: 'uuid-string',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], ScheduleCalendarItemDto.prototype, "notificationId", void 0);
 class ScheduleCalendarResponseDto {
 }
 exports.ScheduleCalendarResponseDto = ScheduleCalendarResponseDto;
@@ -28671,7 +28679,9 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         console.time('scheduleCalendarItems');
         const scheduleCalendarItems = filteredScheduleDataList.map(({ schedule, reservation, resource, participants, project }) => {
             const reserver = participants?.find((p) => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
-            const hasUnreadNotification = unreadNotificationMap.get(schedule.scheduleId) || false;
+            const notificationInfo = unreadNotificationMap.get(schedule.scheduleId) || {
+                hasUnreadNotification: false,
+            };
             return {
                 scheduleId: schedule.scheduleId,
                 scheduleTitle: schedule.title,
@@ -28691,7 +28701,8 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                         resourceType: resource.type,
                     }
                     : undefined,
-                hasUnreadNotification,
+                hasUnreadNotification: notificationInfo.hasUnreadNotification,
+                notificationId: notificationInfo.notificationId,
             };
         });
         console.timeEnd('scheduleCalendarItems');
@@ -33076,7 +33087,7 @@ let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = 
     async 여러_스케줄의_읽지않은_알림을_확인한다(scheduleIds, employeeId) {
         const resultMap = new Map();
         scheduleIds.forEach((scheduleId) => {
-            resultMap.set(scheduleId, false);
+            resultMap.set(scheduleId, { hasUnreadNotification: false });
         });
         try {
             if (scheduleIds.length === 0) {
@@ -33101,7 +33112,10 @@ let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = 
                     scheduleId = notificationData.scheduleId;
                 }
                 if (scheduleId && resultMap.has(scheduleId)) {
-                    resultMap.set(scheduleId, true);
+                    resultMap.set(scheduleId, {
+                        hasUnreadNotification: true,
+                        notificationId: empNotification.notification?.notificationId,
+                    });
                 }
             });
             console.timeEnd('employeeNotifications.filter');
@@ -36108,31 +36122,28 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 .map((relation) => relation.reservationId);
             if (reservationIds.length > 0) {
                 console.time('reservations');
-                const reservations = await Promise.all(reservationIds.map((id) => this.domainReservationService.findByReservationId(id)));
+                const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
                 reservations.forEach((reservation) => {
                     reservation.status =
                         reservation.startDate < new Date() && reservation.endDate > new Date()
                             ? reservation_type_enum_1.ReservationStatus.USING
                             : reservation.status;
                 });
-                reservationMap = new Map(reservations.filter(Boolean).map((reservation) => [reservation.reservationId, reservation]));
+                reservationMap = new Map(reservations.map((reservation) => [reservation.reservationId, reservation]));
                 console.timeEnd('reservations');
                 if (option?.withResource) {
-                    const resourceIds = reservations.filter(Boolean).map((reservation) => reservation.resourceId);
-                    if (resourceIds.length > 0) {
-                        console.time('resources');
-                        const resources = await Promise.all(resourceIds.map((id) => this.domainResourceService.findByResourceId(id)));
-                        resourceMap = new Map(resources.filter(Boolean).map((resource) => [resource.resourceId, resource]));
-                        console.timeEnd('resources');
-                    }
+                    console.time('resources');
+                    resourceMap = new Map(reservations
+                        .filter((reservation) => reservation.resource)
+                        .map((reservation) => [reservation.resource.resourceId, reservation.resource]));
+                    console.timeEnd('resources');
                 }
             }
         }
         console.timeEnd('withReservation');
         if (option?.withParticipants) {
             console.time('withParticipants');
-            const allParticipantsArrays = await Promise.all(scheduleIds.map((scheduleId) => this.domainScheduleParticipantService.findByScheduleId(scheduleId)));
-            const allParticipants = allParticipantsArrays.flat();
+            const allParticipants = await this.domainScheduleParticipantService.findAllByScheduleIds(scheduleIds);
             const employeeIds = [
                 ...new Set(allParticipants.map((participant) => participant.employeeId)),
             ];

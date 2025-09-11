@@ -171,17 +171,17 @@ export class ScheduleNotificationContextService {
      * 여러 스케줄에 대한 읽지 않은 알림을 한 번에 확인 (성능 최적화)
      * @param scheduleIds 스케줄 ID 배열
      * @param employeeId 직원 ID
-     * @returns 스케줄 ID를 키로, 읽지 않은 알림 여부를 값으로 하는 Map
+     * @returns 스케줄 ID를 키로, 읽지 않은 알림 정보를 값으로 하는 Map
      */
     async 여러_스케줄의_읽지않은_알림을_확인한다(
         scheduleIds: string[],
         employeeId: string,
-    ): Promise<Map<string, boolean>> {
-        const resultMap = new Map<string, boolean>();
+    ): Promise<Map<string, { hasUnreadNotification: boolean; notificationId?: string }>> {
+        const resultMap = new Map<string, { hasUnreadNotification: boolean; notificationId?: string }>();
 
         // 모든 스케줄 ID를 false로 초기화
         scheduleIds.forEach((scheduleId) => {
-            resultMap.set(scheduleId, false);
+            resultMap.set(scheduleId, { hasUnreadNotification: false });
         });
 
         try {
@@ -213,9 +213,12 @@ export class ScheduleNotificationContextService {
                         scheduleId = notificationData.scheduleId;
                     }
 
-                    // 요청된 스케줄 ID 중에 해당하는 것이 있으면 true로 설정
+                    // 요청된 스케줄 ID 중에 해당하는 것이 있으면 알림 정보 설정
                     if (scheduleId && resultMap.has(scheduleId)) {
-                        resultMap.set(scheduleId, true);
+                        resultMap.set(scheduleId, {
+                            hasUnreadNotification: true,
+                            notificationId: empNotification.notification?.notificationId,
+                        });
                     }
                 });
             console.timeEnd('employeeNotifications.filter');

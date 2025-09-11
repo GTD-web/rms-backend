@@ -154,7 +154,9 @@ export class ScheduleManagementService {
                 const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
 
                 // Map에서 해당 스케줄의 알림 상태를 빠르게 조회
-                const hasUnreadNotification = unreadNotificationMap.get(schedule.scheduleId) || false;
+                const notificationInfo = unreadNotificationMap.get(schedule.scheduleId) || {
+                    hasUnreadNotification: false,
+                };
 
                 return {
                     scheduleId: schedule.scheduleId,
@@ -176,7 +178,8 @@ export class ScheduleManagementService {
                                   resourceType: resource.type,
                               }
                             : undefined,
-                    hasUnreadNotification,
+                    hasUnreadNotification: notificationInfo.hasUnreadNotification,
+                    notificationId: notificationInfo.notificationId,
                 };
             },
         );

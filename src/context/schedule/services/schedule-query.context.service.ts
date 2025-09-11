@@ -235,7 +235,7 @@ export class ScheduleQueryContextService {
             }
         }
         console.timeEnd('withProject');
-        // 예약 정보 조회
+        // 예약 정보 조회 (벌크 최적화)
         console.time('withReservation');
         if (option?.withReservation) {
             const reservationIds = scheduleRelations
@@ -243,43 +243,35 @@ export class ScheduleQueryContextService {
                 .map((relation) => relation.reservationId);
             if (reservationIds.length > 0) {
                 console.time('reservations');
-                const reservations = await Promise.all(
-                    reservationIds.map((id) => this.domainReservationService.findByReservationId(id)),
-                );
+                // 벌크 조회로 성능 최적화: 예약과 자원 정보를 한 번에 조회
+                const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
                 reservations.forEach((reservation) => {
                     reservation.status =
                         reservation.startDate < new Date() && reservation.endDate > new Date()
                             ? ReservationStatus.USING
                             : reservation.status;
                 });
-                reservationMap = new Map(
-                    reservations.filter(Boolean).map((reservation) => [reservation.reservationId, reservation]),
-                );
+                reservationMap = new Map(reservations.map((reservation) => [reservation.reservationId, reservation]));
                 console.timeEnd('reservations');
-                // 자원 정보 조회
+
+                // 자원 정보는 예약 조회 시 이미 relations로 가져옴 (추가 조회 불필요)
                 if (option?.withResource) {
-                    const resourceIds = reservations.filter(Boolean).map((reservation) => reservation.resourceId);
-                    if (resourceIds.length > 0) {
-                        console.time('resources');
-                        const resources = await Promise.all(
-                            resourceIds.map((id) => this.domainResourceService.findByResourceId(id)),
-                        );
-                        resourceMap = new Map(
-                            resources.filter(Boolean).map((resource) => [resource.resourceId, resource]),
-                        );
-                        console.timeEnd('resources');
-                    }
+                    console.time('resources');
+                    resourceMap = new Map(
+                        reservations
+                            .filter((reservation) => reservation.resource)
+                            .map((reservation) => [reservation.resource.resourceId, reservation.resource]),
+                    );
+                    console.timeEnd('resources');
                 }
             }
         }
         console.timeEnd('withReservation');
-        // 참가자 정보 조회
+        // 참가자 정보 조회 (벌크 최적화)
         if (option?.withParticipants) {
             console.time('withParticipants');
-            const allParticipantsArrays = await Promise.all(
-                scheduleIds.map((scheduleId) => this.domainScheduleParticipantService.findByScheduleId(scheduleId)),
-            );
-            const allParticipants = allParticipantsArrays.flat();
+            // 벌크 조회로 성능 최적화: 모든 일정의 참가자를 한 번에 조회
+            const allParticipants = await this.domainScheduleParticipantService.findAllByScheduleIds(scheduleIds);
 
             const employeeIds = [
                 ...new Set(allParticipants.map((participant: any) => participant.employeeId as string)),
