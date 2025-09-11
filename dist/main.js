@@ -36244,18 +36244,33 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 reservationId: true,
             },
         });
+        const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
         switch (category) {
             case 'SCHEDULE':
                 const relationScheduleIds = new Set(scheduleRelations.map((r) => r.scheduleId));
-                const pureScheduleIds = baseScheduleIds.filter((id) => !relationScheduleIds.has(id));
-                const pureRelationIds = scheduleRelations
-                    .filter((r) => !r.projectId && !r.reservationId)
-                    .map((r) => r.scheduleId);
-                return [...pureScheduleIds, ...pureRelationIds];
+                const result = [];
+                for (const scheduleId of baseScheduleIds) {
+                    if (!relationScheduleIds.has(scheduleId)) {
+                        result.push(scheduleId);
+                    }
+                    else {
+                        const relation = relationMap.get(scheduleId);
+                        if (relation && !relation.projectId && !relation.reservationId) {
+                            result.push(scheduleId);
+                        }
+                    }
+                }
+                return result;
             case 'PROJECT':
-                return scheduleRelations.filter((r) => r.projectId).map((r) => r.scheduleId);
+                return baseScheduleIds.filter((scheduleId) => {
+                    const relation = relationMap.get(scheduleId);
+                    return relation?.projectId;
+                });
             case 'RESOURCE':
-                return scheduleRelations.filter((r) => r.reservationId).map((r) => r.scheduleId);
+                return baseScheduleIds.filter((scheduleId) => {
+                    const relation = relationMap.get(scheduleId);
+                    return relation?.reservationId;
+                });
             default:
                 return baseScheduleIds;
         }
@@ -36372,6 +36387,9 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             ],
             select: {
                 scheduleId: true,
+            },
+            order: {
+                startDate: 'ASC',
             },
         });
         return matchingSchedules.map((s) => s.scheduleId);

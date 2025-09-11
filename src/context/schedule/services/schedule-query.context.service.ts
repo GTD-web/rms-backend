@@ -433,22 +433,43 @@ export class ScheduleQueryContextService {
                 reservationId: true,
             },
         });
+        // baseScheduleIds 순서 유지를 위한 Map 생성 (성능 최적화)
+        const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
 
         switch (category) {
             case 'SCHEDULE':
-                // 관계정보가 없거나 순수 일정인 것들
+                // 관계정보가 없거나 순수 일정인 것들 (순서 유지)
                 const relationScheduleIds = new Set(scheduleRelations.map((r) => r.scheduleId));
-                const pureScheduleIds = baseScheduleIds.filter((id) => !relationScheduleIds.has(id));
-                const pureRelationIds = scheduleRelations
-                    .filter((r) => !r.projectId && !r.reservationId)
-                    .map((r) => r.scheduleId);
-                return [...pureScheduleIds, ...pureRelationIds];
+                const result: string[] = [];
+
+                // baseScheduleIds 순서대로 처리
+                for (const scheduleId of baseScheduleIds) {
+                    if (!relationScheduleIds.has(scheduleId)) {
+                        // 관계정보가 없는 순수 일정
+                        result.push(scheduleId);
+                    } else {
+                        // 관계정보는 있지만 프로젝트/자원과 연결되지 않은 일정
+                        const relation = relationMap.get(scheduleId);
+                        if (relation && !relation.projectId && !relation.reservationId) {
+                            result.push(scheduleId);
+                        }
+                    }
+                }
+                return result;
 
             case 'PROJECT':
-                return scheduleRelations.filter((r) => r.projectId).map((r) => r.scheduleId);
+                // baseScheduleIds 순서 유지하면서 프로젝트 관련 일정만 반환
+                return baseScheduleIds.filter((scheduleId) => {
+                    const relation = relationMap.get(scheduleId);
+                    return relation?.projectId;
+                });
 
             case 'RESOURCE':
-                return scheduleRelations.filter((r) => r.reservationId).map((r) => r.scheduleId);
+                // baseScheduleIds 순서 유지하면서 자원 관련 일정만 반환
+                return baseScheduleIds.filter((scheduleId) => {
+                    const relation = relationMap.get(scheduleId);
+                    return relation?.reservationId;
+                });
 
             default:
                 return baseScheduleIds;
@@ -608,6 +629,9 @@ export class ScheduleQueryContextService {
             ],
             select: {
                 scheduleId: true,
+            },
+            order: {
+                startDate: 'ASC',
             },
         });
 
