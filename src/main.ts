@@ -10,7 +10,7 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { RolesGuard } from '@libs/guards/role.guard';
 import { ValidationPipe } from '@nestjs/common';
-import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
+// RequestInterceptor는 AppModule에서 APP_INTERCEPTOR로 등록됨
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     const isProduction = process.env.NODE_ENV === 'production';
@@ -35,8 +35,7 @@ async function bootstrap() {
     });
     app.setGlobalPrefix('api');
     app.useGlobalGuards(new JwtAuthGuard(app.get(Reflector)), new RolesGuard(app.get(Reflector)));
-    // 전역 인터셉터 등록
-    app.useGlobalInterceptors(new RequestInterceptor());
+    // 전역 인터셉터는 AppModule에서 APP_INTERCEPTOR로 등록됨
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
     const uploadPath = join(process.cwd(), 'public');

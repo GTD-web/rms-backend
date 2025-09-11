@@ -1153,7 +1153,7 @@ exports.File = File = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleRelation = exports.ScheduleParticipant = exports.Schedule = exports.FileVehicleInfo = exports.FileResource = exports.FileReservationVehicle = exports.FileMaintenance = exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.NotificationTypeEntity = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
+exports.RequestLog = exports.ScheduleRelation = exports.ScheduleParticipant = exports.Schedule = exports.FileVehicleInfo = exports.FileResource = exports.FileReservationVehicle = exports.FileMaintenance = exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.NotificationTypeEntity = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
 const employee_entity_1 = __webpack_require__(/*! ./employee.entity */ "./libs/entities/employee.entity.ts");
 Object.defineProperty(exports, "Employee", ({ enumerable: true, get: function () { return employee_entity_1.Employee; } }));
 const resource_entity_1 = __webpack_require__(/*! ./resource.entity */ "./libs/entities/resource.entity.ts");
@@ -1209,6 +1209,8 @@ const schedule_entity_1 = __webpack_require__(/*! ./schedule.entity */ "./libs/e
 Object.defineProperty(exports, "Schedule", ({ enumerable: true, get: function () { return schedule_entity_1.Schedule; } }));
 const schedule_relations_entity_1 = __webpack_require__(/*! ./schedule-relations.entity */ "./libs/entities/schedule-relations.entity.ts");
 Object.defineProperty(exports, "ScheduleRelation", ({ enumerable: true, get: function () { return schedule_relations_entity_1.ScheduleRelation; } }));
+const request_log_entity_1 = __webpack_require__(/*! ./request-log.entity */ "./libs/entities/request-log.entity.ts");
+Object.defineProperty(exports, "RequestLog", ({ enumerable: true, get: function () { return request_log_entity_1.RequestLog; } }));
 exports.Entities = [
     employee_entity_1.Employee,
     resource_entity_1.Resource,
@@ -1239,6 +1241,7 @@ exports.Entities = [
     schedule_entity_1.Schedule,
     schedule_relations_entity_1.ScheduleRelation,
     schedule_participant_entity_1.ScheduleParticipant,
+    request_log_entity_1.RequestLog,
 ];
 exports.EntitiesMap = {
     Employee: employee_entity_1.Employee,
@@ -1270,6 +1273,7 @@ exports.EntitiesMap = {
     Schedule: schedule_entity_1.Schedule,
     ScheduleParticipant: schedule_participant_entity_1.ScheduleParticipant,
     ScheduleRelation: schedule_relations_entity_1.ScheduleRelation,
+    RequestLog: request_log_entity_1.RequestLog,
 };
 
 
@@ -1527,6 +1531,185 @@ __decorate([
 exports.Notification = Notification = __decorate([
     (0, typeorm_1.Entity)('notifications')
 ], Notification);
+
+
+/***/ }),
+
+/***/ "./libs/entities/request-log.entity.ts":
+/*!*********************************************!*\
+  !*** ./libs/entities/request-log.entity.ts ***!
+  \*********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RequestLog = exports.Environment = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+var Environment;
+(function (Environment) {
+    Environment["LOCAL"] = "LOCAL";
+    Environment["DEV"] = "DEV";
+    Environment["PROD"] = "PROD";
+})(Environment || (exports.Environment = Environment = {}));
+let RequestLog = class RequestLog {
+};
+exports.RequestLog = RequestLog;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], RequestLog.prototype, "requestLogId", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({
+        type: 'timestamptz',
+        comment: '요청 시간',
+    }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], RequestLog.prototype, "requestTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'varchar',
+        length: 10,
+        comment: 'HTTP 메소드 (GET, POST, PUT, DELETE 등)',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "method", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'varchar',
+        length: 500,
+        comment: '요청 엔드포인트 URL',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "endpoint", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'text',
+        nullable: true,
+        comment: '요청 바디 (JSON 문자열)',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "requestBody", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'text',
+        nullable: true,
+        comment: '요청 파라미터 (JSON 문자열)',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "requestParams", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'text',
+        nullable: true,
+        comment: '요청 헤더 (JSON 문자열)',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "requestHeaders", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'text',
+        nullable: true,
+        comment: '응답 바디 (JSON 문자열)',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "responseBody", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'int',
+        comment: 'HTTP 상태 코드',
+    }),
+    __metadata("design:type", Number)
+], RequestLog.prototype, "statusCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'text',
+        nullable: true,
+        comment: '오류 메시지',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "errorMessage", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'text',
+        nullable: true,
+        comment: '오류 스택 트레이스',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "errorStack", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: Environment,
+        comment: '환경 (LOCAL, DEV, PROD)',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "environment", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'varchar',
+        length: 100,
+        nullable: true,
+        comment: '요청자 이름',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "employeeName", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'varchar',
+        length: 50,
+        nullable: true,
+        comment: '요청자 직원 ID',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "employeeId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'varchar',
+        length: 500,
+        nullable: true,
+        comment: 'User-Agent 정보',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "userAgent", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'varchar',
+        length: 45,
+        nullable: true,
+        comment: '클라이언트 IP 주소',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "ipAddress", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'int',
+        nullable: true,
+        comment: '요청 처리 시간 (밀리초)',
+    }),
+    __metadata("design:type", Number)
+], RequestLog.prototype, "duration", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'varchar',
+        length: 100,
+        nullable: true,
+        comment: '요청 고유 ID (트레이싱용)',
+    }),
+    __metadata("design:type", String)
+], RequestLog.prototype, "traceId", void 0);
+exports.RequestLog = RequestLog = __decorate([
+    (0, typeorm_1.Entity)({ name: 'request_logs' })
+], RequestLog);
 
 
 /***/ }),
@@ -3371,34 +3554,151 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var RequestInterceptor_1;
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RequestInterceptor = void 0;
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const operators_1 = __webpack_require__(/*! rxjs/operators */ "rxjs/operators");
-let RequestInterceptor = class RequestInterceptor {
+const request_log_service_1 = __webpack_require__(/*! @src/domain/request-log/request-log.service */ "./src/domain/request-log/request-log.service.ts");
+const request_log_entity_1 = __webpack_require__(/*! @libs/entities/request-log.entity */ "./libs/entities/request-log.entity.ts");
+const rxjs_1 = __webpack_require__(/*! rxjs */ "rxjs");
+let RequestInterceptor = RequestInterceptor_1 = class RequestInterceptor {
+    constructor(requestLogService) {
+        this.requestLogService = requestLogService;
+        this.logger = new common_1.Logger(RequestInterceptor_1.name);
+    }
     intercept(context, next) {
         const request = context.switchToHttp().getRequest();
-        const { method, url, body, query, params } = request;
+        const response = context.switchToHttp().getResponse();
+        const { method, url, body, query, params, headers, user, ip } = request;
         const now = Date.now();
-        console.log(`[Request] ${date_util_1.DateUtil.now().toISOString()} ${method} ${url}`);
-        if (Object.keys(body).length > 0) {
+        const traceId = this.generateTraceId();
+        const shouldLog = ['POST', 'PATCH', 'PUT', 'DELETE'].includes(method);
+        console.log(`[Request] ${date_util_1.DateUtil.now().toISOString()} ${method} ${url} ${shouldLog ? `[TRACE:${traceId}]` : ''}`);
+        if (Object.keys(body || {}).length > 0) {
             console.log('Body:', body);
         }
-        if (Object.keys(query).length > 0) {
+        if (Object.keys(query || {}).length > 0) {
             console.log('Query:', query);
         }
-        if (Object.keys(params).length > 0) {
+        if (Object.keys(params || {}).length > 0) {
             console.log('Params:', params);
         }
-        return next.handle().pipe((0, operators_1.tap)(() => {
-            console.log(`[Response Time] ${Date.now() - now}ms`);
+        return next.handle().pipe((0, operators_1.tap)((responseData) => {
+            const duration = Date.now() - now;
+            console.log(`[Response Time] ${duration}ms`);
+            if (shouldLog) {
+                this.saveRequestLog({
+                    method,
+                    url,
+                    body,
+                    query,
+                    params,
+                    headers,
+                    user,
+                    ip,
+                    responseData,
+                    statusCode: response.statusCode,
+                    duration,
+                    traceId,
+                    isError: false,
+                });
+            }
+        }), (0, operators_1.catchError)((error) => {
+            const duration = Date.now() - now;
+            console.error(`[Error] ${method} ${url} - ${duration}ms`, error.message);
+            if (shouldLog) {
+                this.saveRequestLog({
+                    method,
+                    url,
+                    body,
+                    query,
+                    params,
+                    headers,
+                    user,
+                    ip,
+                    responseData: null,
+                    statusCode: error.status || 500,
+                    duration,
+                    traceId,
+                    isError: true,
+                    errorMessage: error.message,
+                    errorStack: error.stack,
+                });
+            }
+            return (0, rxjs_1.throwError)(() => error);
         }));
+    }
+    async saveRequestLog(logData) {
+        try {
+            const { method, url, body, query, params, headers, user, ip, responseData, statusCode, duration, traceId, isError, errorMessage, errorStack, } = logData;
+            const environment = this.getEnvironment();
+            const employeeName = user?.name || null;
+            const employeeId = user?.employeeId || null;
+            const sanitizedHeaders = this.sanitizeHeaders(headers);
+            const requestBody = body ? JSON.stringify(body) : null;
+            const requestParams = { ...query, ...params };
+            const requestParamsStr = Object.keys(requestParams).length > 0 ? JSON.stringify(requestParams) : null;
+            const requestHeadersStr = JSON.stringify(sanitizedHeaders);
+            const responseBodyStr = responseData ? JSON.stringify(responseData) : null;
+            await this.requestLogService.createRequestLog({
+                method,
+                endpoint: url,
+                requestBody: requestBody,
+                requestParams: requestParamsStr,
+                requestHeaders: requestHeadersStr,
+                responseBody: responseBodyStr,
+                statusCode,
+                errorMessage: isError ? errorMessage : null,
+                errorStack: isError ? errorStack : null,
+                environment,
+                employeeName,
+                employeeId,
+                userAgent: headers['user-agent'] || null,
+                ipAddress: ip || headers['x-forwarded-for'] || headers['x-real-ip'] || null,
+                duration,
+                traceId,
+            });
+        }
+        catch (error) {
+            this.logger.error(`요청 로그 저장 실패: ${error.message}`, error.stack);
+        }
+    }
+    getEnvironment() {
+        const nodeEnv = process.env.NODE_ENV;
+        if (nodeEnv === 'production') {
+            return request_log_entity_1.Environment.PROD;
+        }
+        else if (nodeEnv === 'development') {
+            return request_log_entity_1.Environment.DEV;
+        }
+        else {
+            return request_log_entity_1.Environment.LOCAL;
+        }
+    }
+    sanitizeHeaders(headers) {
+        const sensitiveHeaders = ['authorization', 'cookie', 'x-api-key', 'x-auth-token'];
+        const sanitized = { ...headers };
+        sensitiveHeaders.forEach((header) => {
+            if (sanitized[header]) {
+                sanitized[header] = '[REDACTED]';
+            }
+        });
+        return sanitized;
+    }
+    generateTraceId() {
+        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
 };
 exports.RequestInterceptor = RequestInterceptor;
-exports.RequestInterceptor = RequestInterceptor = __decorate([
-    (0, common_1.Injectable)()
+exports.RequestInterceptor = RequestInterceptor = RequestInterceptor_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof request_log_service_1.DomainRequestLogService !== "undefined" && request_log_service_1.DomainRequestLogService) === "function" ? _a : Object])
 ], RequestInterceptor);
 
 
@@ -3891,6 +4191,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
+const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const event_emitter_1 = __webpack_require__(/*! @nestjs/event-emitter */ "@nestjs/event-emitter");
 const typeorm_config_1 = __webpack_require__(/*! @libs/configs/typeorm.config */ "./libs/configs/typeorm.config.ts");
 const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs/configs/env.config.ts");
@@ -3906,6 +4207,8 @@ const task_management_module_1 = __webpack_require__(/*! ./business/task-managem
 const notification_management_module_1 = __webpack_require__(/*! ./business/notification-management/notification-management.module */ "./src/business/notification-management/notification-management.module.ts");
 const statistics_module_1 = __webpack_require__(/*! ./business/statistics/statistics.module */ "./src/business/statistics/statistics.module.ts");
 const auth_management_module_1 = __webpack_require__(/*! ./business/auth-management/auth-management.module */ "./src/business/auth-management/auth-management.module.ts");
+const request_log_module_1 = __webpack_require__(/*! ./domain/request-log/request-log.module */ "./src/domain/request-log/request-log.module.ts");
+const request_interceptor_1 = __webpack_require__(/*! @libs/interceptors/request.interceptor */ "./libs/interceptors/request.interceptor.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -3937,8 +4240,14 @@ exports.AppModule = AppModule = __decorate([
             notification_management_module_1.NotificationManagementModule,
             statistics_module_1.StatisticsModule,
             auth_management_module_1.AuthManagementModule,
+            request_log_module_1.DomainRequestLogModule,
         ],
-        providers: [],
+        providers: [
+            {
+                provide: core_1.APP_INTERCEPTOR,
+                useClass: request_interceptor_1.RequestInterceptor,
+            },
+        ],
     })
 ], AppModule);
 
@@ -37003,7 +37312,9 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
         }
         try {
             const completedAt = new Date();
+            console.log('completedAt', completedAt);
             const newEndTime = new Date(completedAt);
+            console.log('newEndTime', newEndTime);
             const minutes = newEndTime.getMinutes();
             if (minutes === 0) {
                 newEndTime.setSeconds(0, 0);
@@ -37014,8 +37325,10 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             else {
                 newEndTime.setHours(newEndTime.getHours() + 1, 0, 0, 0);
             }
+            console.log('newEndTime', newEndTime);
             const shouldUpdateEndTime = newEndTime < schedule.endDate;
             const actualEndTime = shouldUpdateEndTime ? newEndTime : schedule.endDate;
+            console.log('actualEndTime', actualEndTime);
             if (reservation && shouldUpdateEndTime) {
                 await this.domainReservationService.update(reservation.reservationId, {
                     status: reservation_type_enum_1.ReservationStatus.CLOSED,
@@ -39707,6 +40020,122 @@ exports.DomainProjectService = DomainProjectService = __decorate([
 
 /***/ }),
 
+/***/ "./src/domain/request-log/request-log.module.ts":
+/*!******************************************************!*\
+  !*** ./src/domain/request-log/request-log.module.ts ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainRequestLogModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const request_log_entity_1 = __webpack_require__(/*! @libs/entities/request-log.entity */ "./libs/entities/request-log.entity.ts");
+const request_log_repository_1 = __webpack_require__(/*! ./request-log.repository */ "./src/domain/request-log/request-log.repository.ts");
+const request_log_service_1 = __webpack_require__(/*! ./request-log.service */ "./src/domain/request-log/request-log.service.ts");
+let DomainRequestLogModule = class DomainRequestLogModule {
+};
+exports.DomainRequestLogModule = DomainRequestLogModule;
+exports.DomainRequestLogModule = DomainRequestLogModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([request_log_entity_1.RequestLog])],
+        providers: [request_log_repository_1.DomainRequestLogRepository, request_log_service_1.DomainRequestLogService],
+        exports: [request_log_service_1.DomainRequestLogService],
+    })
+], DomainRequestLogModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/request-log/request-log.repository.ts":
+/*!**********************************************************!*\
+  !*** ./src/domain/request-log/request-log.repository.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainRequestLogRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+const request_log_entity_1 = __webpack_require__(/*! @libs/entities/request-log.entity */ "./libs/entities/request-log.entity.ts");
+let DomainRequestLogRepository = class DomainRequestLogRepository extends base_repository_1.BaseRepository {
+    constructor(repository) {
+        super(repository);
+    }
+};
+exports.DomainRequestLogRepository = DomainRequestLogRepository;
+exports.DomainRequestLogRepository = DomainRequestLogRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(request_log_entity_1.RequestLog)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainRequestLogRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/request-log/request-log.service.ts":
+/*!*******************************************************!*\
+  !*** ./src/domain/request-log/request-log.service.ts ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainRequestLogService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const request_log_repository_1 = __webpack_require__(/*! ./request-log.repository */ "./src/domain/request-log/request-log.repository.ts");
+let DomainRequestLogService = class DomainRequestLogService extends base_service_1.BaseService {
+    constructor(requestLogRepository) {
+        super(requestLogRepository);
+        this.requestLogRepository = requestLogRepository;
+    }
+    async createRequestLog(data) {
+        return await this.requestLogRepository.save(data);
+    }
+};
+exports.DomainRequestLogService = DomainRequestLogService;
+exports.DomainRequestLogService = DomainRequestLogService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof request_log_repository_1.DomainRequestLogRepository !== "undefined" && request_log_repository_1.DomainRequestLogRepository) === "function" ? _a : Object])
+], DomainRequestLogService);
+
+
+/***/ }),
+
 /***/ "./src/domain/reservation-participant/reservation-participant.module.ts":
 /*!******************************************************************************!*\
   !*** ./src/domain/reservation-participant/reservation-participant.module.ts ***!
@@ -41697,7 +42126,6 @@ const core_2 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const path_1 = __webpack_require__(/*! path */ "path");
 const role_guard_1 = __webpack_require__(/*! @libs/guards/role.guard */ "./libs/guards/role.guard.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const request_interceptor_1 = __webpack_require__(/*! @libs/interceptors/request.interceptor */ "./libs/interceptors/request.interceptor.ts");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const isProduction = process.env.NODE_ENV === 'production';
@@ -41723,7 +42151,6 @@ async function bootstrap() {
     });
     app.setGlobalPrefix('api');
     app.useGlobalGuards(new jwt_auth_guard_1.JwtAuthGuard(app.get(core_2.Reflector)), new role_guard_1.RolesGuard(app.get(core_2.Reflector)));
-    app.useGlobalInterceptors(new request_interceptor_1.RequestInterceptor());
     app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
     const uploadPath = (0, path_1.join)(process.cwd(), 'public');
     app.useStaticAssets(uploadPath, {

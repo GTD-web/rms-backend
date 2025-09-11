@@ -29,6 +29,7 @@ import { FileVehicleInfo } from './file-vehicle-info.entity';
 import { ScheduleParticipant } from './schedule-participant.entity';
 import { Schedule } from './schedule.entity';
 import { ScheduleRelation } from './schedule-relations.entity';
+import { RequestLog } from './request-log.entity';
 
 export const Entities = [
     Employee,
@@ -60,6 +61,7 @@ export const Entities = [
     Schedule,
     ScheduleRelation,
     ScheduleParticipant,
+    RequestLog,
 ];
 
 export const EntitiesMap = {
@@ -92,6 +94,7 @@ export const EntitiesMap = {
     Schedule,
     ScheduleParticipant,
     ScheduleRelation,
+    RequestLog,
 };
 
 export {
@@ -124,4 +127,5 @@ export {
     Schedule,
     ScheduleParticipant,
     ScheduleRelation,
+    RequestLog,
 };

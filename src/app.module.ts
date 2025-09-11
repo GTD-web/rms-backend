@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 // 프로젝트 내부 라이브러리
@@ -27,6 +27,8 @@ import { TaskManagementModule } from './business/task-management/task-management
 import { NotificationManagementModule } from './business/notification-management/notification-management.module';
 import { StatisticsModule } from './business/statistics/statistics.module';
 import { AuthManagementModule } from './business/auth-management/auth-management.module';
+import { DomainRequestLogModule } from './domain/request-log/request-log.module';
+import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
 
 @Module({
     imports: [
@@ -61,7 +63,13 @@ import { AuthManagementModule } from './business/auth-management/auth-management
         NotificationManagementModule,
         StatisticsModule,
         AuthManagementModule,
+        DomainRequestLogModule,
     ],
-    providers: [],
+    providers: [
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: RequestInterceptor,
+        },
+    ],
 })
 export class AppModule {}
