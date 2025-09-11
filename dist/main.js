@@ -25609,6 +25609,10 @@ __decorate([
     __metadata("design:type", Array)
 ], VehicleInfoResponseDto.prototype, "indoorImages", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Object)
+], VehicleInfoResponseDto.prototype, "parkingCoordinates", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: [business_dto_index_1.FileResponseDto], required: false }),
     __metadata("design:type", Array)
 ], VehicleInfoResponseDto.prototype, "parkingLocationFiles", void 0);
@@ -35416,6 +35420,7 @@ let VehicleInfoContextService = class VehicleInfoContextService {
             leftMileage: Number(vehicleInfo.leftMileage),
             insuranceName: vehicleInfo.insuranceName,
             insuranceNumber: vehicleInfo.insuranceNumber,
+            parkingCoordinates: vehicleInfo.parkingCoordinates,
             parkingLocationImages: vehicleInfo.parkingLocationImages || [],
             odometerImages: vehicleInfo.odometerImages || [],
             indoorImages: vehicleInfo.indoorImages || [],
@@ -35507,6 +35512,7 @@ let VehicleInfoContextService = class VehicleInfoContextService {
                 leftMileage: Number(updatedVehicleInfo.leftMileage),
                 insuranceName: updatedVehicleInfo.insuranceName,
                 insuranceNumber: updatedVehicleInfo.insuranceNumber,
+                parkingCoordinates: updatedVehicleInfo.parkingCoordinates,
                 parkingLocationImages: updatedVehicleInfo.parkingLocationImages || [],
                 odometerImages: updatedVehicleInfo.odometerImages || [],
                 indoorImages: updatedVehicleInfo.indoorImages || [],

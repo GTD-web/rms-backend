@@ -62,6 +62,11 @@ export class ConsumableResponseDto {
     maintenances?: MaintenanceResponseDto[];
 }
 
+export interface ParkingCoordinates {
+    lat: number;
+    lng: number;
+}
+
 export class VehicleInfoResponseDto {
     @ApiProperty()
     vehicleInfoId: string;
@@ -89,6 +94,9 @@ export class VehicleInfoResponseDto {
 
     @ApiProperty()
     indoorImages: string[];
+
+    @ApiProperty()
+    parkingCoordinates: ParkingCoordinates;
 
     @ApiProperty({ type: [FileResponseDto], required: false })
     parkingLocationFiles?: FileResponseDto[];
