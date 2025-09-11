@@ -28653,16 +28653,13 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         if (scheduleIds.length === 0) {
             return { schedules: [] };
         }
-        console.time('scheduleDataList');
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
             withReservation: true,
             withResource: true,
             withProject: true,
             withParticipants: true,
         });
-        console.timeEnd('scheduleDataList');
         let filteredScheduleDataList = scheduleDataList;
-        console.time('filteredScheduleDataList');
         if (query.employeeIds && query.employeeIds.length > 0) {
             filteredScheduleDataList = scheduleDataList.filter(({ participants }) => {
                 if (!participants || participants.length === 0)
@@ -28671,12 +28668,8 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     query.employeeIds.includes(participant.employee.employeeId));
             });
         }
-        console.timeEnd('filteredScheduleDataList');
         const calendarScheduleIds = filteredScheduleDataList.map(({ schedule }) => schedule.scheduleId);
-        console.time('unreadNotificationMap');
         const unreadNotificationMap = await this.scheduleNotificationContextService.여러_스케줄의_읽지않은_알림을_확인한다(calendarScheduleIds, user.employeeId);
-        console.timeEnd('unreadNotificationMap');
-        console.time('scheduleCalendarItems');
         const scheduleCalendarItems = filteredScheduleDataList.map(({ schedule, reservation, resource, participants, project }) => {
             const reserver = participants?.find((p) => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
             const notificationInfo = unreadNotificationMap.get(schedule.scheduleId) || {
@@ -28705,7 +28698,6 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 notificationId: notificationInfo.notificationId,
             };
         });
-        console.timeEnd('scheduleCalendarItems');
         return {
             schedules: scheduleCalendarItems,
         };
@@ -36089,19 +36081,14 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         if (scheduleIds.length === 0) {
             return [];
         }
-        console.time('schedules');
         const schedules = await this.domainScheduleService.findByScheduleIds(scheduleIds);
         const scheduleMap = new Map(schedules.map((schedule) => [schedule.scheduleId, schedule]));
-        console.timeEnd('schedules');
-        console.time('scheduleRelations');
         const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
         const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
-        console.timeEnd('scheduleRelations');
         let projectMap = new Map();
         let reservationMap = new Map();
         let resourceMap = new Map();
         let participantsMap = new Map();
-        console.time('withProject');
         if (option?.withProject) {
             const projectIds = scheduleRelations
                 .filter((relation) => relation.projectId)
@@ -36114,14 +36101,11 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 ]));
             }
         }
-        console.timeEnd('withProject');
-        console.time('withReservation');
         if (option?.withReservation) {
             const reservationIds = scheduleRelations
                 .filter((relation) => relation.reservationId)
                 .map((relation) => relation.reservationId);
             if (reservationIds.length > 0) {
-                console.time('reservations');
                 const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
                 reservations.forEach((reservation) => {
                     reservation.status =
@@ -36130,19 +36114,14 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                             : reservation.status;
                 });
                 reservationMap = new Map(reservations.map((reservation) => [reservation.reservationId, reservation]));
-                console.timeEnd('reservations');
                 if (option?.withResource) {
-                    console.time('resources');
                     resourceMap = new Map(reservations
                         .filter((reservation) => reservation.resource)
                         .map((reservation) => [reservation.resource.resourceId, reservation.resource]));
-                    console.timeEnd('resources');
                 }
             }
         }
-        console.timeEnd('withReservation');
         if (option?.withParticipants) {
-            console.time('withParticipants');
             const allParticipants = await this.domainScheduleParticipantService.findAllByScheduleIds(scheduleIds);
             const employeeIds = [
                 ...new Set(allParticipants.map((participant) => participant.employeeId)),
@@ -36162,11 +36141,9 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 });
                 return groups;
             }, {});
-            console.timeEnd('withParticipants');
             participantsMap = new Map(Object.entries(participantGroups));
         }
         const results = [];
-        console.time('results');
         for (const scheduleId of scheduleIds) {
             const schedule = scheduleMap.get(scheduleId);
             if (!schedule) {
@@ -36197,7 +36174,6 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 participants,
             });
         }
-        console.timeEnd('results');
         return results;
     }
     async 캘린더용_일정을_조회한다(date, category, employeeId) {
@@ -36234,7 +36210,13 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         return [...new Set(scheduleIds)];
     }
     async 직원의_역할별_일정ID들을_조회한다(employeeId, role, fromDate) {
-        const conditions = { employeeId, schedule: { deletedAt: (0, typeorm_1.IsNull)() } };
+        const conditions = {
+            employeeId,
+            schedule: {
+                deletedAt: (0, typeorm_1.IsNull)(),
+                ...(fromDate && { startDate: (0, typeorm_1.MoreThanOrEqual)(fromDate) }),
+            },
+        };
         if (role)
             conditions.type = role;
         const participants = await this.domainScheduleParticipantService.findAll({
@@ -36243,25 +36225,13 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 scheduleId: true,
             },
             relations: ['schedule'],
-        });
-        const filterWithDeletedAt = await this.domainScheduleService.findAll({
-            where: { scheduleId: (0, typeorm_1.In)(participants.map((p) => p.scheduleId)) },
-            select: { scheduleId: true },
-        });
-        let scheduleIds = filterWithDeletedAt.map((p) => p.scheduleId);
-        if (fromDate && scheduleIds.length > 0) {
-            const validSchedules = await this.domainScheduleService.findAll({
-                where: {
-                    scheduleId: (0, typeorm_1.In)(scheduleIds),
-                    startDate: (0, typeorm_1.MoreThanOrEqual)(fromDate),
+            order: {
+                schedule: {
+                    startDate: 'ASC',
                 },
-                select: {
-                    scheduleId: true,
-                },
-            });
-            scheduleIds = validSchedules.map((s) => s.scheduleId);
-        }
-        return scheduleIds;
+            },
+        });
+        return participants.map((p) => p.scheduleId);
     }
     async 카테고리별_일정ID들을_조회한다(baseScheduleIds, category) {
         if (baseScheduleIds.length === 0)

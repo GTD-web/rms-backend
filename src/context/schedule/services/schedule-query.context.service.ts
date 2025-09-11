@@ -202,15 +202,11 @@ export class ScheduleQueryContextService {
         }
 
         // 1. 모든 일정들을 한 번에 조회
-        console.time('schedules');
         const schedules = await this.domainScheduleService.findByScheduleIds(scheduleIds);
         const scheduleMap = new Map(schedules.map((schedule) => [schedule.scheduleId, schedule]));
-        console.timeEnd('schedules');
         // 2. 모든 일정관계정보를 한 번에 조회
-        console.time('scheduleRelations');
         const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
         const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
-        console.timeEnd('scheduleRelations');
         // 3. 옵션에 따른 관련 데이터 벌크 조회
         let projectMap = new Map();
         let reservationMap = new Map();
@@ -218,7 +214,6 @@ export class ScheduleQueryContextService {
         let participantsMap = new Map<string, ScheduleParticipantsWithEmployee[]>();
 
         // 프로젝트 정보 조회 (현재는 구현되지 않음)
-        console.time('withProject');
         if (option?.withProject) {
             const projectIds = scheduleRelations
                 .filter((relation) => relation.projectId)
@@ -234,15 +229,12 @@ export class ScheduleQueryContextService {
                 );
             }
         }
-        console.timeEnd('withProject');
         // 예약 정보 조회 (벌크 최적화)
-        console.time('withReservation');
         if (option?.withReservation) {
             const reservationIds = scheduleRelations
                 .filter((relation) => relation.reservationId)
                 .map((relation) => relation.reservationId);
             if (reservationIds.length > 0) {
-                console.time('reservations');
                 // 벌크 조회로 성능 최적화: 예약과 자원 정보를 한 번에 조회
                 const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
                 reservations.forEach((reservation) => {
@@ -252,24 +244,19 @@ export class ScheduleQueryContextService {
                             : reservation.status;
                 });
                 reservationMap = new Map(reservations.map((reservation) => [reservation.reservationId, reservation]));
-                console.timeEnd('reservations');
 
                 // 자원 정보는 예약 조회 시 이미 relations로 가져옴 (추가 조회 불필요)
                 if (option?.withResource) {
-                    console.time('resources');
                     resourceMap = new Map(
                         reservations
                             .filter((reservation) => reservation.resource)
                             .map((reservation) => [reservation.resource.resourceId, reservation.resource]),
                     );
-                    console.timeEnd('resources');
                 }
             }
         }
-        console.timeEnd('withReservation');
         // 참가자 정보 조회 (벌크 최적화)
         if (option?.withParticipants) {
-            console.time('withParticipants');
             // 벌크 조회로 성능 최적화: 모든 일정의 참가자를 한 번에 조회
             const allParticipants = await this.domainScheduleParticipantService.findAllByScheduleIds(scheduleIds);
 
@@ -296,13 +283,11 @@ export class ScheduleQueryContextService {
                 },
                 {} as Record<string, ScheduleParticipantsWithEmployee[]>,
             );
-            console.timeEnd('withParticipants');
             participantsMap = new Map(Object.entries(participantGroups));
         }
 
         // 4. 결과 배열 구성
         const results = [];
-        console.time('results');
         for (const scheduleId of scheduleIds) {
             const schedule = scheduleMap.get(scheduleId);
             if (!schedule) {
@@ -338,7 +323,6 @@ export class ScheduleQueryContextService {
                 participants,
             });
         }
-        console.timeEnd('results');
         return results;
     }
 
@@ -406,7 +390,14 @@ export class ScheduleQueryContextService {
         role?: ParticipantsType,
         fromDate?: Date,
     ): Promise<string[]> {
-        const conditions: any = { employeeId, schedule: { deletedAt: IsNull() } };
+        // 모든 조건을 하나의 쿼리로 통합 (성능 최적화)
+        const conditions: any = {
+            employeeId,
+            schedule: {
+                deletedAt: IsNull(),
+                ...(fromDate && { startDate: MoreThanOrEqual(fromDate) }),
+            },
+        };
         if (role) conditions.type = role;
 
         const participants = await this.domainScheduleParticipantService.findAll({
@@ -415,28 +406,14 @@ export class ScheduleQueryContextService {
                 scheduleId: true,
             },
             relations: ['schedule'],
-        });
-        const filterWithDeletedAt = await this.domainScheduleService.findAll({
-            where: { scheduleId: In(participants.map((p) => p.scheduleId)) },
-            select: { scheduleId: true },
-        });
-        let scheduleIds = filterWithDeletedAt.map((p) => p.scheduleId);
-
-        // 날짜 조건이 있으면 Schedule 테이블과 조인하여 필터링
-        if (fromDate && scheduleIds.length > 0) {
-            const validSchedules = await this.domainScheduleService.findAll({
-                where: {
-                    scheduleId: In(scheduleIds),
-                    startDate: MoreThanOrEqual(fromDate),
+            order: {
+                schedule: {
+                    startDate: 'ASC',
                 },
-                select: {
-                    scheduleId: true,
-                },
-            });
-            scheduleIds = validSchedules.map((s) => s.scheduleId);
-        }
+            },
+        });
 
-        return scheduleIds;
+        return participants.map((p) => p.scheduleId);
     }
 
     /**
