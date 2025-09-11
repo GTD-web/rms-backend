@@ -137,9 +137,8 @@ export class ScheduleStateTransitionService {
             // 기존 종료시간보다 이른 경우에만 종료시간 수정
             const shouldUpdateEndTime = newEndTime < schedule.endDate;
             const actualEndTime = shouldUpdateEndTime ? newEndTime : schedule.endDate;
-            // TODO : 추후 ReservationStatus 에대한 DB enum 값 정의 변경 시 CLOSING으로 수정 필요 - 2025.09.11 김규현
             const status =
-                resource?.type === ResourceType.VEHICLE ? ReservationStatus.CONFIRMED : ReservationStatus.CLOSED;
+                resource?.type === ResourceType.VEHICLE ? ReservationStatus.CLOSING : ReservationStatus.CLOSED;
             if (reservation && shouldUpdateEndTime) {
                 // 예약의 종료시간도 함께 수정
                 await this.domainReservationService.update(

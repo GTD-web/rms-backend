@@ -40,22 +40,5 @@ export class SchedulePostProcessingService {
         for (const schedule of processingToChangeCompleted) {
             await this.domainScheduleService.update(schedule.scheduleId, { status: ScheduleStatus.COMPLETED });
         }
-
-        // 대기 -> 거절 (숙소예약이면서 승인이 되지 않은 채로 시작일이 지났을 때)
-        const now = DateUtil.now().toDate();
-        const pendingAccommodationReservations = await this.domainReservationService.findAll({
-            where: {
-                status: In([ReservationStatus.PENDING]),
-                resource: {
-                    type: ResourceType.ACCOMMODATION,
-                },
-                startDate: LessThanOrEqual(now),
-            },
-        });
-        for (const reservation of pendingAccommodationReservations) {
-            await this.domainReservationService.update(reservation.reservationId, {
-                status: ReservationStatus.REJECTED,
-            });
-        }
     }
 }

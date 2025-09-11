@@ -143,12 +143,14 @@ export class ScheduleQueryContextService {
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
-            reservation.status =
-                reservation.startDate < new Date() &&
-                reservation.endDate > new Date() &&
-                reservation.status === ReservationStatus.CONFIRMED
-                    ? ReservationStatus.USING
-                    : reservation.status;
+
+            // 상태값 변경 확인 후 제거 필요 - 2025.09.11 김규현
+            // reservation.status =
+            //     reservation.startDate < new Date() &&
+            //     reservation.endDate > new Date() &&
+            //     reservation.status === ReservationStatus.CONFIRMED
+            //         ? ReservationStatus.USING
+            //         : reservation.status;
             resource = option?.withResource
                 ? reservation
                     ? await this.domainResourceService.findByResourceId(reservation.resourceId)

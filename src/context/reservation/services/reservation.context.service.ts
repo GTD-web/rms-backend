@@ -7,7 +7,7 @@ import { DomainReservationVehicleService } from '@src/domain/reservation-vehicle
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
 import { DomainFileService } from '@src/domain/file/file.service';
 import { FileContextService } from '../../file/services/file.context.service';
-import { DataSource, QueryRunner } from 'typeorm';
+import { DataSource, MoreThanOrEqual, QueryRunner } from 'typeorm';
 import { Employee, Reservation } from '@libs/entities';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
@@ -392,14 +392,59 @@ export class ReservationContextService {
 
     // ==================== 크론 작업 처리 ====================
     async 예약을_종료한다(): Promise<void> {
-        const now = DateUtil.now().format();
+        const now = DateUtil.now().toDate();
+
+        // 대기 -> 거절 (숙소예약이면서 승인이 되지 않은 채로 시작일이 지났을 때)
+        const pendingAccommodationReservations = await this.domainReservationService.findAll({
+            where: {
+                status: In([ReservationStatus.PENDING]),
+                resource: {
+                    type: ResourceType.ACCOMMODATION,
+                },
+                startDate: LessThanOrEqual(now),
+            },
+        });
+        for (const reservation of pendingAccommodationReservations) {
+            await this.domainReservationService.update(reservation.reservationId, {
+                status: ReservationStatus.REJECTED,
+            });
+        }
+
+        // 확정 -> 사용중
+        const confirmedToChangeUsing = await this.domainReservationService.findAll({
+            where: {
+                status: ReservationStatus.CONFIRMED,
+                startDate: LessThanOrEqual(now),
+            },
+        });
+        for (const reservation of confirmedToChangeUsing) {
+            await this.domainReservationService.update(reservation.reservationId, { status: ReservationStatus.USING });
+        }
+
+        // 사용중 -> 마무리중 (차량예약이면서 종료시간이 되었을 때)
+        const usingToChangeClosing = await this.domainReservationService.findAll({
+            where: {
+                status: ReservationStatus.USING,
+                resource: {
+                    type: ResourceType.VEHICLE,
+                },
+                endDate: LessThanOrEqual(now),
+            },
+        });
+        for (const reservation of usingToChangeClosing) {
+            await this.domainReservationService.update(reservation.reservationId, {
+                status: ReservationStatus.CLOSING,
+            });
+        }
+
+        // 사용중 -> 종료 (차량이 아니면서 종료시간이 되었을 때)
         const notClosedReservations = await this.domainReservationService.findAll({
             where: {
-                status: In([ReservationStatus.CONFIRMED, ReservationStatus.PENDING]),
+                status: ReservationStatus.USING,
                 resource: {
                     type: Not(ResourceType.VEHICLE),
                 },
-                endDate: LessThanOrEqual(DateUtil.date(now).toDate()),
+                endDate: LessThanOrEqual(now),
             },
         });
         for (const reservation of notClosedReservations) {

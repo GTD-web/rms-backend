@@ -34237,14 +34237,51 @@ let ReservationContextService = class ReservationContextService {
         }
     }
     async 예약을_종료한다() {
-        const now = date_util_1.DateUtil.now().format();
+        const now = date_util_1.DateUtil.now().toDate();
+        const pendingAccommodationReservations = await this.domainReservationService.findAll({
+            where: {
+                status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING]),
+                resource: {
+                    type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                },
+                startDate: (0, typeorm_2.LessThanOrEqual)(now),
+            },
+        });
+        for (const reservation of pendingAccommodationReservations) {
+            await this.domainReservationService.update(reservation.reservationId, {
+                status: reservation_type_enum_1.ReservationStatus.REJECTED,
+            });
+        }
+        const confirmedToChangeUsing = await this.domainReservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                startDate: (0, typeorm_2.LessThanOrEqual)(now),
+            },
+        });
+        for (const reservation of confirmedToChangeUsing) {
+            await this.domainReservationService.update(reservation.reservationId, { status: reservation_type_enum_1.ReservationStatus.USING });
+        }
+        const usingToChangeClosing = await this.domainReservationService.findAll({
+            where: {
+                status: reservation_type_enum_1.ReservationStatus.USING,
+                resource: {
+                    type: resource_type_enum_1.ResourceType.VEHICLE,
+                },
+                endDate: (0, typeorm_2.LessThanOrEqual)(now),
+            },
+        });
+        for (const reservation of usingToChangeClosing) {
+            await this.domainReservationService.update(reservation.reservationId, {
+                status: reservation_type_enum_1.ReservationStatus.CLOSING,
+            });
+        }
         const notClosedReservations = await this.domainReservationService.findAll({
             where: {
-                status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING]),
+                status: reservation_type_enum_1.ReservationStatus.USING,
                 resource: {
                     type: (0, typeorm_2.Not)(resource_type_enum_1.ResourceType.VEHICLE),
                 },
-                endDate: (0, typeorm_2.LessThanOrEqual)(date_util_1.DateUtil.date(now).toDate()),
+                endDate: (0, typeorm_2.LessThanOrEqual)(now),
             },
         });
         for (const reservation of notClosedReservations) {
@@ -36600,12 +36637,7 @@ exports.SchedulePostProcessingService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const schedule_service_1 = __webpack_require__(/*! @src/domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const reservation_service_1 = __webpack_require__(/*! @src/domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
-const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
-const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
-const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let SchedulePostProcessingService = SchedulePostProcessingService_1 = class SchedulePostProcessingService {
     constructor(domainScheduleService, domainReservationService) {
         this.domainScheduleService = domainScheduleService;
@@ -36620,21 +36652,6 @@ let SchedulePostProcessingService = SchedulePostProcessingService_1 = class Sche
         const processingToChangeCompleted = await this.domainScheduleService.findByProcessingToChangeCompleted();
         for (const schedule of processingToChangeCompleted) {
             await this.domainScheduleService.update(schedule.scheduleId, { status: schedule_type_enum_1.ScheduleStatus.COMPLETED });
-        }
-        const now = date_util_1.DateUtil.now().toDate();
-        const pendingAccommodationReservations = await this.domainReservationService.findAll({
-            where: {
-                status: (0, typeorm_1.In)([reservation_type_enum_1.ReservationStatus.PENDING]),
-                resource: {
-                    type: resource_type_enum_1.ResourceType.ACCOMMODATION,
-                },
-                startDate: (0, typeorm_2.LessThanOrEqual)(now),
-            },
-        });
-        for (const reservation of pendingAccommodationReservations) {
-            await this.domainReservationService.update(reservation.reservationId, {
-                status: reservation_type_enum_1.ReservationStatus.REJECTED,
-            });
         }
     }
 };
@@ -36740,12 +36757,6 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
-            reservation.status =
-                reservation.startDate < new Date() &&
-                    reservation.endDate > new Date() &&
-                    reservation.status === reservation_type_enum_1.ReservationStatus.CONFIRMED
-                    ? reservation_type_enum_1.ReservationStatus.USING
-                    : reservation.status;
             resource = option?.withResource
                 ? reservation
                     ? await this.domainResourceService.findByResourceId(reservation.resourceId)
@@ -37721,7 +37732,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             }
             const shouldUpdateEndTime = newEndTime < schedule.endDate;
             const actualEndTime = shouldUpdateEndTime ? newEndTime : schedule.endDate;
-            const status = resource?.type === resource_type_enum_1.ResourceType.VEHICLE ? reservation_type_enum_1.ReservationStatus.CONFIRMED : reservation_type_enum_1.ReservationStatus.CLOSED;
+            const status = resource?.type === resource_type_enum_1.ResourceType.VEHICLE ? reservation_type_enum_1.ReservationStatus.CLOSING : reservation_type_enum_1.ReservationStatus.CLOSED;
             if (reservation && shouldUpdateEndTime) {
                 await this.domainReservationService.update(reservation.reservationId, {
                     status: status,
