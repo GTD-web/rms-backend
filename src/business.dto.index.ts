@@ -96,6 +96,8 @@ export * from './business/resource-management/dtos/resource/resource-query.dto';
 export * from './business/resource-management/dtos/resource/resource-response.dto';
 export * from './business/resource-management/dtos/resource/time-slot.dto';
 export * from './business/resource-management/dtos/resource/update-resource.dto';
+export * from './business/resource-management/dtos/resource/resource-month-availability-query.dto';
+export * from './business/resource-management/dtos/resource/resource-month-availability-response.dto';
 // Note: available-time-response.dto exports ResourceAvailabilityDto (TimeSlotDto already exported above)
 export { ResourceAvailabilityDto } from './business/resource-management/dtos/resource/available-time-response.dto';
 

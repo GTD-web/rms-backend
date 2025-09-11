@@ -9,6 +9,8 @@ import { ResourceService } from '../../services/resource.service';
 import { ResourceAvailabilityDto } from '../../dtos/resource/available-time-response.dto';
 import { ResourceQueryDto } from '../../dtos/resource/resource-query.dto';
 import { CheckAvailabilityQueryDto } from '../../dtos/resource/check-availability.dto';
+import { ResourceMonthAvailabilityQueryDto } from '../../dtos/resource/resource-month-availability-query.dto';
+import { ResourceMonthAvailabilityResponseDto } from '../../dtos/resource/resource-month-availability-response.dto';
 
 @ApiTags('v2 자원')
 @Controller('v2/resources')
@@ -90,6 +92,19 @@ export class ResourceController {
             query.endDate,
             query.reservationId,
         );
+    }
+
+    // 해당월에 대한 예약시간 가용성 확인
+    @Get('check-availability/month')
+    @ApiOperation({ summary: '해당월의 각 날짜별 예약 가용성 확인' })
+    @ApiOkResponse({
+        description: '해당월의 각 날짜별 예약 가용성 확인 결과',
+        type: ResourceMonthAvailabilityResponseDto,
+    })
+    async checkAvailabilityMonth(
+        @Query() query: ResourceMonthAvailabilityQueryDto,
+    ): Promise<ResourceMonthAvailabilityResponseDto> {
+        return this.resourceService.checkAvailabilityMonth(query);
     }
 
     @Get(':resourceId')

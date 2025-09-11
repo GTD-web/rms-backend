@@ -20550,6 +20550,8 @@ __exportStar(__webpack_require__(/*! ./business/resource-management/dtos/resourc
 __exportStar(__webpack_require__(/*! ./business/resource-management/dtos/resource/resource-response.dto */ "./src/business/resource-management/dtos/resource/resource-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/resource-management/dtos/resource/time-slot.dto */ "./src/business/resource-management/dtos/resource/time-slot.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/resource-management/dtos/resource/update-resource.dto */ "./src/business/resource-management/dtos/resource/update-resource.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/resource-management/dtos/resource/resource-month-availability-query.dto */ "./src/business/resource-management/dtos/resource/resource-month-availability-query.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/resource-management/dtos/resource/resource-month-availability-response.dto */ "./src/business/resource-management/dtos/resource/resource-month-availability-response.dto.ts"), exports);
 var available_time_response_dto_1 = __webpack_require__(/*! ./business/resource-management/dtos/resource/available-time-response.dto */ "./src/business/resource-management/dtos/resource/available-time-response.dto.ts");
 Object.defineProperty(exports, "ResourceAvailabilityDto", ({ enumerable: true, get: function () { return available_time_response_dto_1.ResourceAvailabilityDto; } }));
 __exportStar(__webpack_require__(/*! ./business/resource-management/dtos/vehicle/create-vehicle-info.dto */ "./src/business/resource-management/dtos/vehicle/create-vehicle-info.dto.ts"), exports);
@@ -23278,7 +23280,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -23291,6 +23293,8 @@ const resource_service_1 = __webpack_require__(/*! ../../services/resource.servi
 const available_time_response_dto_1 = __webpack_require__(/*! ../../dtos/resource/available-time-response.dto */ "./src/business/resource-management/dtos/resource/available-time-response.dto.ts");
 const resource_query_dto_1 = __webpack_require__(/*! ../../dtos/resource/resource-query.dto */ "./src/business/resource-management/dtos/resource/resource-query.dto.ts");
 const check_availability_dto_1 = __webpack_require__(/*! ../../dtos/resource/check-availability.dto */ "./src/business/resource-management/dtos/resource/check-availability.dto.ts");
+const resource_month_availability_query_dto_1 = __webpack_require__(/*! ../../dtos/resource/resource-month-availability-query.dto */ "./src/business/resource-management/dtos/resource/resource-month-availability-query.dto.ts");
+const resource_month_availability_response_dto_1 = __webpack_require__(/*! ../../dtos/resource/resource-month-availability-response.dto */ "./src/business/resource-management/dtos/resource/resource-month-availability-response.dto.ts");
 let ResourceController = class ResourceController {
     constructor(resourceService) {
         this.resourceService = resourceService;
@@ -23306,6 +23310,9 @@ let ResourceController = class ResourceController {
     }
     async checkAvailability(query) {
         return this.resourceService.checkAvailability(query.resourceId, query.startDate, query.endDate, query.reservationId);
+    }
+    async checkAvailabilityMonth(query) {
+        return this.resourceService.checkAvailabilityMonth(query);
     }
     async findOne(resourceId) {
         return this.resourceService.findResourceDetailForAdmin(resourceId);
@@ -23407,6 +23414,18 @@ __decorate([
     __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], ResourceController.prototype, "checkAvailability", null);
 __decorate([
+    (0, common_1.Get)('check-availability/month'),
+    (0, swagger_1.ApiOperation)({ summary: '해당월의 각 날짜별 예약 가용성 확인' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: '해당월의 각 날짜별 예약 가용성 확인 결과',
+        type: resource_month_availability_response_dto_1.ResourceMonthAvailabilityResponseDto,
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_k = typeof resource_month_availability_query_dto_1.ResourceMonthAvailabilityQueryDto !== "undefined" && resource_month_availability_query_dto_1.ResourceMonthAvailabilityQueryDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+], ResourceController.prototype, "checkAvailabilityMonth", null);
+__decorate([
     (0, common_1.Get)(':resourceId'),
     (0, swagger_1.ApiOperation)({ summary: '자원 상세 조회 #관리자/자원관리/상세' }),
     (0, swagger_1.ApiOkResponse)({
@@ -23417,7 +23436,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], ResourceController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)('resource-group/:resourceGroupId'),
@@ -23430,7 +23449,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceGroupId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], ResourceController.prototype, "findResourcesByResourceGroupId", null);
 __decorate([
     (0, common_1.Patch)('order'),
@@ -23441,8 +23460,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_m = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [typeof (_p = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _p : Object]),
+    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
 ], ResourceController.prototype, "reorder", null);
 __decorate([
     (0, common_1.Patch)(':resourceId'),
@@ -23455,8 +23474,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_p = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _p : Object]),
-    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
+    __metadata("design:paramtypes", [String, typeof (_r = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _r : Object]),
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
 ], ResourceController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':resourceId/availability'),
@@ -23469,8 +23488,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_r = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _r : Object]),
-    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
+    __metadata("design:paramtypes", [String, typeof (_t = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _t : Object]),
+    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
 ], ResourceController.prototype, "updateAvailability", null);
 __decorate([
     (0, common_1.Delete)(':resourceId'),
@@ -23482,7 +23501,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_t = typeof Promise !== "undefined" && Promise) === "function" ? _t : Object)
+    __metadata("design:returntype", typeof (_v = typeof Promise !== "undefined" && Promise) === "function" ? _v : Object)
 ], ResourceController.prototype, "remove", null);
 exports.ResourceController = ResourceController = __decorate([
     (0, swagger_1.ApiTags)('v2 자원'),
@@ -24476,6 +24495,139 @@ __decorate([
     (0, class_transformer_1.Type)(() => CreateResourceManagerDto),
     __metadata("design:type", Array)
 ], CreateResourceInfoDto.prototype, "managers", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/dtos/resource/resource-month-availability-query.dto.ts":
+/*!*************************************************************************************************!*\
+  !*** ./src/business/resource-management/dtos/resource/resource-month-availability-query.dto.ts ***!
+  \*************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceMonthAvailabilityQueryDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+class ResourceMonthAvailabilityQueryDto {
+}
+exports.ResourceMonthAvailabilityQueryDto = ResourceMonthAvailabilityQueryDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 ID',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceMonthAvailabilityQueryDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '연도',
+        example: 2024,
+    }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], ResourceMonthAvailabilityQueryDto.prototype, "year", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '월',
+        example: 1,
+        minimum: 1,
+        maximum: 12,
+    }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(12),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], ResourceMonthAvailabilityQueryDto.prototype, "month", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '시작시간',
+        example: '09:00',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceMonthAvailabilityQueryDto.prototype, "startTime", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '종료시간',
+        example: '18:00',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResourceMonthAvailabilityQueryDto.prototype, "endTime", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/resource-management/dtos/resource/resource-month-availability-response.dto.ts":
+/*!****************************************************************************************************!*\
+  !*** ./src/business/resource-management/dtos/resource/resource-month-availability-response.dto.ts ***!
+  \****************************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ResourceMonthAvailabilityResponseDto = exports.DailyAvailabilityDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class DailyAvailabilityDto {
+}
+exports.DailyAvailabilityDto = DailyAvailabilityDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '날짜 (YYYY-MM-DD 형식)',
+        example: '2024-01-01',
+    }),
+    __metadata("design:type", String)
+], DailyAvailabilityDto.prototype, "date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일',
+        example: 1,
+        minimum: 1,
+        maximum: 31,
+    }),
+    __metadata("design:type", Number)
+], DailyAvailabilityDto.prototype, "day", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 가능 여부',
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], DailyAvailabilityDto.prototype, "available", void 0);
+class ResourceMonthAvailabilityResponseDto {
+}
+exports.ResourceMonthAvailabilityResponseDto = ResourceMonthAvailabilityResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '각 날짜별 예약 가능 여부',
+        type: [DailyAvailabilityDto],
+    }),
+    __metadata("design:type", Array)
+], ResourceMonthAvailabilityResponseDto.prototype, "dailyAvailability", void 0);
 
 
 /***/ }),
@@ -25933,6 +26085,35 @@ let ResourceService = class ResourceService {
     }
     async findResourcesByTypeAndDateWithReservations(user, type, startDate, endDate, isMine) {
         return [];
+    }
+    async checkAvailabilityMonth(query) {
+        const { resourceId, year, month, startTime, endTime } = query;
+        const lastDay = new Date(year, month, 0).getDate();
+        const dailyAvailability = [];
+        for (let day = 1; day <= lastDay; day++) {
+            const dateString = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            const startDateTime = startTime ? `${dateString}T${startTime}:00+09:00` : `${dateString}T00:00:00+09:00`;
+            const endDateTime = endTime ? `${dateString}T${endTime}:00+09:00` : `${dateString}T23:59:59+09:00`;
+            try {
+                const isAvailable = await this.checkAvailability(resourceId, startDateTime, endDateTime);
+                dailyAvailability.push({
+                    date: dateString,
+                    day,
+                    available: isAvailable,
+                });
+            }
+            catch (error) {
+                console.error(`Error checking availability for ${dateString}:`, error);
+                dailyAvailability.push({
+                    date: dateString,
+                    day,
+                    available: false,
+                });
+            }
+        }
+        return {
+            dailyAvailability,
+        };
     }
     async findAvailableTime(query) {
         const { resourceType, resourceGroupId, startDate, endDate, startTime, endTime, am, pm, timeUnit, reservationId, } = query;

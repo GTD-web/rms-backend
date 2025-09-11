@@ -17,6 +17,11 @@ import { ResourceQueryDto } from '../dtos/resource/resource-query.dto';
 import { CreateResourceInfoDto } from '../dtos/resource/create-resource.dto';
 import { UpdateResourceInfoDto, UpdateResourceOrdersDto } from '../dtos/resource/update-resource.dto';
 import { CheckAvailabilityQueryDto } from '../dtos/resource/check-availability.dto';
+import { ResourceMonthAvailabilityQueryDto } from '../dtos/resource/resource-month-availability-query.dto';
+import {
+    ResourceMonthAvailabilityResponseDto,
+    DailyAvailabilityDto,
+} from '../dtos/resource/resource-month-availability-response.dto';
 @Injectable()
 export class ResourceService {
     constructor(
@@ -65,6 +70,50 @@ export class ResourceService {
     ): Promise<ResourceGroupWithResourcesAndReservationsResponseDto[]> {
         // TODO: 컨텍스트 서비스에 해당 메서드 추가 필요
         return [];
+    }
+
+    async checkAvailabilityMonth(
+        query: ResourceMonthAvailabilityQueryDto,
+    ): Promise<ResourceMonthAvailabilityResponseDto> {
+        const { resourceId, year, month, startTime, endTime } = query;
+
+        // 해당 월의 마지막 날 계산
+        const lastDay = new Date(year, month, 0).getDate();
+
+        const dailyAvailability: DailyAvailabilityDto[] = [];
+
+        // 해당 월의 모든 날짜에 대해 예약 가능 여부 확인
+        for (let day = 1; day <= lastDay; day++) {
+            // 날짜 포맷팅 (YYYY-MM-DD)
+            const dateString = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+            // 시작/종료 시간이 있는 경우 datetime 생성, 없으면 하루 전체
+            const startDateTime = startTime ? `${dateString}T${startTime}:00+09:00` : `${dateString}T00:00:00+09:00`;
+            const endDateTime = endTime ? `${dateString}T${endTime}:00+09:00` : `${dateString}T23:59:59+09:00`;
+
+            try {
+                // 해당 날짜/시간에 예약 가능한지 확인
+                const isAvailable = await this.checkAvailability(resourceId, startDateTime, endDateTime);
+
+                dailyAvailability.push({
+                    date: dateString,
+                    day,
+                    available: isAvailable,
+                });
+            } catch (error) {
+                // 에러 발생 시 예약 불가능으로 처리
+                console.error(`Error checking availability for ${dateString}:`, error);
+                dailyAvailability.push({
+                    date: dateString,
+                    day,
+                    available: false,
+                });
+            }
+        }
+
+        return {
+            dailyAvailability,
+        };
     }
 
     /**
