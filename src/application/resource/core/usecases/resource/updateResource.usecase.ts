@@ -6,6 +6,7 @@ import { DataSource } from 'typeorm';
 import { DomainResourceService } from '@src/domain/resource/resource.service';
 import { DomainResourceManagerService } from '@src/domain/resource-manager/resource-manager.service';
 import { DomainFileService } from '@src/domain/file/file.service';
+import { DomainFileResourceService } from '@src/domain/file-resource/file-resource.service';
 
 @Injectable()
 export class UpdateResourceUsecase {
@@ -14,6 +15,7 @@ export class UpdateResourceUsecase {
         private readonly resourceManagerService: DomainResourceManagerService,
         private readonly dataSource: DataSource,
         private readonly fileService: DomainFileService,
+        private readonly fileResourceService: DomainFileResourceService,
     ) {}
 
     async execute(resourceId: string, updateRequest: UpdateResourceInfoDto): Promise<ResourceResponseDto> {
@@ -34,11 +36,32 @@ export class UpdateResourceUsecase {
 
         try {
             if (updateRequest.resource) {
-                if (updateRequest.resource.images && updateRequest.resource.images.length > 0) {
-                    updateRequest.resource.images = updateRequest.resource.images.map((image) =>
-                        this.fileService.getFileUrl(image),
-                    );
-                    await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, { queryRunner });
+                // 파일 관련 처리
+                if (updateRequest.resource.images !== undefined) {
+                    // 기존 파일 연결 삭제
+                    await this.fileResourceService.deleteByResourceId(resourceId, { queryRunner });
+
+                    if (updateRequest.resource.images && updateRequest.resource.images.length > 0) {
+                        updateRequest.resource.images = updateRequest.resource.images.map((image) =>
+                            this.fileService.getFileUrl(image),
+                        );
+                        await this.fileService.updateTemporaryFiles(updateRequest.resource.images, false, {
+                            queryRunner,
+                        });
+
+                        // 파일 경로로 파일 ID 찾아서 중간테이블에 연결
+                        const files = await this.fileService.findAllFilesByFilePath(updateRequest.resource.images);
+                        const fileIds = files.map((file) => file.fileId);
+
+                        if (fileIds.length > 0) {
+                            const fileResourceConnections = fileIds.map((fileId) => ({
+                                resourceId,
+                                fileId,
+                            }));
+
+                            await this.fileResourceService.saveMultiple(fileResourceConnections, { queryRunner });
+                        }
+                    }
                 }
 
                 await this.resourceService.update(resourceId, updateRequest.resource, { queryRunner });
@@ -100,6 +123,13 @@ export class UpdateResourceUsecase {
         if (!resource) {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESOURCE.NOT_FOUND);
         }
+
+        // 자원과 연결된 파일 정보 조회
+        const resourceFiles = await this.fileResourceService.findByResourceId(resourceId);
+        const files = resourceFiles.map((connection) => connection.file);
+
+        // 리소스 객체에 파일 정보 추가
+        (resource as any).imageFiles = files;
 
         return new ResourceResponseDto(resource);
     }

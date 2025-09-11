@@ -6,7 +6,7 @@ import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ReturnVehicleDto } from '../dtos/update-reservation.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { Employee } from '@libs/entities';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { DateUtil } from '@libs/utils/date.util';
@@ -14,6 +14,8 @@ import { NotificationService } from '@src/application/notification/services/noti
 import { DomainResourceService } from '@src/domain/resource/resource.service';
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
 import { DomainFileService } from '@src/domain/file/file.service';
+import { DomainFileReservationVehicleService } from '@src/domain/file-reservation-vehicle/file-reservation-vehicle.service';
+import { DomainFileVehicleInfoService } from '@src/domain/file-vehicle-info/file-vehicle-info.service';
 
 @Injectable()
 export class ReturnVehicleUsecase {
@@ -24,6 +26,8 @@ export class ReturnVehicleUsecase {
         private readonly vehicleInfoService: DomainVehicleInfoService,
         private readonly notificationService: NotificationService,
         private readonly fileService: DomainFileService,
+        private readonly fileReservationVehicleService: DomainFileReservationVehicleService,
+        private readonly fileVehicleInfoService: DomainFileVehicleInfoService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -111,6 +115,102 @@ export class ReturnVehicleUsecase {
                 await this.fileService.updateTemporaryFiles(images, false, {
                     queryRunner,
                 });
+            }
+
+            // 파일 경로로 파일 ID 찾기
+            let parkingLocationFileIds: string[] = [];
+            let odometerFileIds: string[] = [];
+            let indoorFileIds: string[] = [];
+
+            if (returnDto.parkingLocationImages.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(returnDto.parkingLocationImages);
+                parkingLocationFileIds = files.map((file) => file.fileId);
+            }
+
+            if (returnDto.odometerImages.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(returnDto.odometerImages);
+                odometerFileIds = files.map((file) => file.fileId);
+            }
+
+            if (returnDto.indoorImages.length > 0) {
+                const files = await this.fileService.findAllFilesByFilePath(returnDto.indoorImages);
+                indoorFileIds = files.map((file) => file.fileId);
+            }
+
+            // 차량예약에 파일들을 연결 (히스토리성 - 기존 데이터 유지하고 새로 추가)
+            const reservationVehicleConnections = [];
+
+            if (parkingLocationFileIds.length > 0) {
+                reservationVehicleConnections.push(
+                    ...parkingLocationFileIds.map((fileId) => ({
+                        reservationVehicleId: reservationVehicle.reservationVehicleId,
+                        fileId,
+                        type: 'PARKING_LOCATION',
+                    })),
+                );
+            }
+
+            if (odometerFileIds.length > 0) {
+                reservationVehicleConnections.push(
+                    ...odometerFileIds.map((fileId) => ({
+                        reservationVehicleId: reservationVehicle.reservationVehicleId,
+                        fileId,
+                        type: 'ODOMETER',
+                    })),
+                );
+            }
+
+            if (indoorFileIds.length > 0) {
+                reservationVehicleConnections.push(
+                    ...indoorFileIds.map((fileId) => ({
+                        reservationVehicleId: reservationVehicle.reservationVehicleId,
+                        fileId,
+                        type: 'INDOOR',
+                    })),
+                );
+            }
+
+            if (reservationVehicleConnections.length > 0) {
+                await this.fileReservationVehicleService.saveMultiple(reservationVehicleConnections, { queryRunner });
+            }
+
+            // 차량정보에 파일들을 연결 (기존 데이터 삭제 후 새로 생성)
+            await this.fileVehicleInfoService.deleteByVehicleInfoId(vehicleInfoId, { queryRunner });
+
+            const vehicleInfoConnections = [];
+
+            if (parkingLocationFileIds.length > 0) {
+                vehicleInfoConnections.push(
+                    ...parkingLocationFileIds.map((fileId) => ({
+                        vehicleInfoId,
+                        fileId,
+                        type: 'PARKING_LOCATION',
+                    })),
+                );
+            }
+
+            if (odometerFileIds.length > 0) {
+                vehicleInfoConnections.push(
+                    ...odometerFileIds.map((fileId) => ({
+                        vehicleInfoId,
+                        fileId,
+                        type: 'ODOMETER',
+                    })),
+                );
+            }
+
+            if (indoorFileIds.length > 0) {
+                vehicleInfoConnections.push(
+                    ...indoorFileIds.map((fileId) => ({
+                        vehicleInfoId,
+                        fileId,
+                        type: 'INDOOR',
+                    })),
+                );
+            }
+
+            if (vehicleInfoConnections.length > 0) {
+                await this.fileVehicleInfoService.saveMultiple(vehicleInfoConnections, { queryRunner });
             }
 
             await this.vehicleInfoService.update(

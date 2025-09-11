@@ -35,6 +35,8 @@ import { DomainNotificationRepository } from '@src/domain/notification/notificat
 import { DomainNotificationModule } from '@src/domain/notification/notification.module';
 import { DomainEmployeeNotificationModule } from '@src/domain/employee-notification/employee-notification.module';
 import { DomainFileModule } from '@src/domain/file/file.module';
+import { DomainFileReservationVehicleModule } from '@src/domain/file-reservation-vehicle/file-reservation-vehicle.module';
+import { DomainFileVehicleInfoModule } from '@src/domain/file-vehicle-info/file-vehicle-info.module';
 import { ReservationContextModule } from '@src/context/reservation/reservation.context.module';
 
 @Module({
@@ -58,6 +60,8 @@ import { ReservationContextModule } from '@src/context/reservation/reservation.c
         DomainEmployeeNotificationModule,
         DomainNotificationModule,
         DomainFileModule,
+        DomainFileReservationVehicleModule,
+        DomainFileVehicleInfoModule,
         ScheduleModule.forRoot(),
         // ReservationContextModule,
     ],
