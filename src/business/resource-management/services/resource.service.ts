@@ -77,6 +77,12 @@ export class ResourceService {
     ): Promise<ResourceMonthAvailabilityResponseDto> {
         const { resourceId, year, month, startTime, endTime } = query;
 
+        // 현재 날짜 정보 (UTC 기준)
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1; // getMonth()는 0부터 시작
+        const currentDay = today.getDate();
+
         // 해당 월의 마지막 날 계산
         const lastDay = new Date(year, month, 0).getDate();
 
@@ -86,6 +92,16 @@ export class ResourceService {
         for (let day = 1; day <= lastDay; day++) {
             // 날짜 포맷팅 (YYYY-MM-DD)
             const dateString = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+            // 오늘 이전 날짜는 검증하지 않고 예약 불가능으로 처리
+            if (year === currentYear && month === currentMonth && day < currentDay) {
+                dailyAvailability.push({
+                    date: dateString,
+                    day,
+                    available: false,
+                });
+                continue;
+            }
 
             // 시작/종료 시간이 있는 경우 datetime 생성, 없으면 하루 전체
             const startDateTime = startTime ? `${dateString}T${startTime}:00+09:00` : `${dateString}T00:00:00+09:00`;

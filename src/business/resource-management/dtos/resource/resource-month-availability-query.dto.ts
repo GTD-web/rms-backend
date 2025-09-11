@@ -30,14 +30,14 @@ export class ResourceMonthAvailabilityQueryDto {
     @Type(() => Number)
     month: number;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: '시작시간',
         example: '09:00',
     })
     @IsString()
     startTime: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: '종료시간',
         example: '18:00',
     })

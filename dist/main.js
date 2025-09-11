@@ -24554,7 +24554,7 @@ __decorate([
     __metadata("design:type", Number)
 ], ResourceMonthAvailabilityQueryDto.prototype, "month", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({
+    (0, swagger_1.ApiProperty)({
         description: '시작시간',
         example: '09:00',
     }),
@@ -24562,7 +24562,7 @@ __decorate([
     __metadata("design:type", String)
 ], ResourceMonthAvailabilityQueryDto.prototype, "startTime", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({
+    (0, swagger_1.ApiProperty)({
         description: '종료시간',
         example: '18:00',
     }),
@@ -26088,10 +26088,22 @@ let ResourceService = class ResourceService {
     }
     async checkAvailabilityMonth(query) {
         const { resourceId, year, month, startTime, endTime } = query;
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1;
+        const currentDay = today.getDate();
         const lastDay = new Date(year, month, 0).getDate();
         const dailyAvailability = [];
         for (let day = 1; day <= lastDay; day++) {
             const dateString = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            if (year === currentYear && month === currentMonth && day < currentDay) {
+                dailyAvailability.push({
+                    date: dateString,
+                    day,
+                    available: false,
+                });
+                continue;
+            }
             const startDateTime = startTime ? `${dateString}T${startTime}:00+09:00` : `${dateString}T00:00:00+09:00`;
             const endDateTime = endTime ? `${dateString}T${endTime}:00+09:00` : `${dateString}T23:59:59+09:00`;
             try {
