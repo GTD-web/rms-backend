@@ -328,6 +328,7 @@ export class ReservationContextService {
                     returnedAt: DateUtil.now().toDate(),
                     location: returnDto.location,
                     returnedBy: user.employeeId,
+                    ...(returnDto.parkingCoordinates && { parkingCoordinates: returnDto.parkingCoordinates }),
                 },
                 { queryRunner },
             );
@@ -394,7 +395,7 @@ export class ReservationContextService {
                 indoorFilePaths = files.map((file) => file.filePath);
             }
 
-            // 차량 정보 업데이트 (filePath 포함)
+            // 차량 정보 업데이트 (filePath 및 좌표 포함)
             await this.domainVehicleInfoService.update(
                 vehicleInfoId,
                 {
@@ -403,6 +404,7 @@ export class ReservationContextService {
                     parkingLocationImages: parkingLocationFilePaths,
                     odometerImages: odometerFilePaths,
                     indoorImages: indoorFilePaths,
+                    ...(returnDto.parkingCoordinates && { parkingCoordinates: returnDto.parkingCoordinates }),
                 },
                 { queryRunner },
             );

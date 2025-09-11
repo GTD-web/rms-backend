@@ -164,6 +164,14 @@ export class ReturnVehicleDto {
     @ApiProperty()
     location: ResourceLocation;
 
+    @ApiProperty({
+        description: '주차위치 좌표',
+        example: { lat: 37.5665, lng: 126.978 },
+        required: false,
+    })
+    @IsOptional()
+    parkingCoordinates?: { lat: number; lng: number };
+
     @ApiProperty({ minimum: 0, maximum: 999999999 })
     @IsInt({ message: ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') })
     @Min(0, { message: ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') })

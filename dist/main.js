@@ -1970,6 +1970,14 @@ __decorate([
     __metadata("design:type", Object)
 ], ReservationVehicle.prototype, "location", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        type: 'jsonb',
+        nullable: true,
+        comment: '주차위치 좌표 (위도, 경도)',
+    }),
+    __metadata("design:type", Object)
+], ReservationVehicle.prototype, "parkingCoordinates", void 0);
+__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], ReservationVehicle.prototype, "returnedBy", void 0);
@@ -2595,6 +2603,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'jsonb', nullable: true, comment: '주차위치 이미지 배열' }),
     __metadata("design:type", Array)
 ], VehicleInfo.prototype, "parkingLocationImages", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'jsonb',
+        nullable: true,
+        comment: '주차위치 좌표 (위도, 경도)',
+    }),
+    __metadata("design:type", Object)
+], VehicleInfo.prototype, "parkingCoordinates", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'jsonb', nullable: true, comment: '계기판 이미지 배열' }),
     __metadata("design:type", Array)
@@ -22893,6 +22909,15 @@ __decorate([
     __metadata("design:type", typeof (_b = typeof resource_entity_1.ResourceLocation !== "undefined" && resource_entity_1.ResourceLocation) === "function" ? _b : Object)
 ], ReturnVehicleDto.prototype, "location", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '주차위치 좌표',
+        example: { lat: 37.5665, lng: 126.978 },
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], ReturnVehicleDto.prototype, "parkingCoordinates", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ minimum: 0, maximum: 999999999 }),
     (0, class_validator_1.IsInt)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_INT('남은 주행거리') }),
     (0, class_validator_1.Min)(0, { message: error_message_1.ERROR_MESSAGE.VALIDATION.INVALID_MILEAGE('남은 주행거리') }),
@@ -33799,6 +33824,7 @@ let ReservationContextService = class ReservationContextService {
                 returnedAt: date_util_1.DateUtil.now().toDate(),
                 location: returnDto.location,
                 returnedBy: user.employeeId,
+                ...(returnDto.parkingCoordinates && { parkingCoordinates: returnDto.parkingCoordinates }),
             }, { queryRunner });
             const vehicleInfoId = reservation.resource.vehicleInfo.vehicleInfoId;
             await this.domainResourceService.update(reservation.resource.resourceId, { location: returnDto.location }, { queryRunner });
@@ -33848,6 +33874,7 @@ let ReservationContextService = class ReservationContextService {
                 parkingLocationImages: parkingLocationFilePaths,
                 odometerImages: odometerFilePaths,
                 indoorImages: indoorFilePaths,
+                ...(returnDto.parkingCoordinates && { parkingCoordinates: returnDto.parkingCoordinates }),
             }, { queryRunner });
             await this.fileContextService.차량정보에_파일들을_연결한다(vehicleInfoId, {
                 parkingLocationImages: returnDto.parkingLocationImages,

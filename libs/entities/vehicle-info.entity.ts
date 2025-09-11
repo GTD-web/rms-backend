@@ -28,6 +28,13 @@ export class VehicleInfo {
     @Column({ type: 'jsonb', nullable: true, comment: '주차위치 이미지 배열' })
     parkingLocationImages: string[];
 
+    @Column({
+        type: 'jsonb',
+        nullable: true,
+        comment: '주차위치 좌표 (위도, 경도)',
+    })
+    parkingCoordinates: { lat: number; lng: number };
+
     @Column({ type: 'jsonb', nullable: true, comment: '계기판 이미지 배열' })
     odometerImages: string[];
 

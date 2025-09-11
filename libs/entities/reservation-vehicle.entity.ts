@@ -44,6 +44,13 @@ export class ReservationVehicle {
     @Column({ type: 'jsonb', nullable: true })
     location: any;
 
+    @Column({
+        type: 'jsonb',
+        nullable: true,
+        comment: '주차위치 좌표 (위도, 경도)',
+    })
+    parkingCoordinates: { lat: number; lng: number };
+
     @Column({ nullable: true })
     returnedBy: string;
 }
