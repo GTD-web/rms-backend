@@ -140,8 +140,6 @@ export class ReservationContextService {
                 'resource.vehicleInfo',
                 'resource.meetingRoomInfo',
                 'resource.accommodationInfo',
-                'participants',
-                'participants.employee',
                 'reservationVehicles',
             ],
             withDeleted: true,
@@ -152,23 +150,7 @@ export class ReservationContextService {
         }
 
         const reservationResponseDto = new ReservationWithRelationsResponseDto(reservation);
-        reservationResponseDto.isMine = reservationResponseDto.reservers.some(
-            (reserver) => reserver.employeeId === user.employeeId,
-        );
-
-        reservationResponseDto.returnable =
-            (reservationResponseDto.resource as any).type === ResourceType.VEHICLE
-                ? reservationResponseDto.isMine &&
-                  reservationResponseDto.reservationVehicles.some(
-                      (reservationVehicle) => !reservationVehicle.isReturned,
-                  ) &&
-                  reservationResponseDto.startDate <= DateUtil.now().format()
-                : null;
-
-        reservationResponseDto.modifiable =
-            [ReservationStatus.PENDING, ReservationStatus.CONFIRMED].includes(reservation.status) &&
-            reservationResponseDto.isMine &&
-            reservationResponseDto.endDate > DateUtil.now().format();
+        // isMine, returnable, modifiable 로직은 비즈니스 서비스에서 처리
 
         const notifications = await this.domainNotificationService.findAll({
             where: {
@@ -518,7 +500,7 @@ export class ReservationContextService {
                 reservationId: In(reservationIds),
             },
             relations: ['reservationVehicles', 'resource'], // 필요한 관계 정보만 조회
-            order: { endDate: 'ASC' },
+            order: { endDate: 'DESC' },
         });
 
         return reservationsWithVehicles;
@@ -536,14 +518,11 @@ export class ReservationContextService {
                     isReturned: false,
                 },
             },
-            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
-            order: { endDate: 'ASC' },
+            relations: ['resource', 'reservationVehicles'],
+            order: { endDate: 'DESC' },
         });
 
         return delayedReturnVehicles.map((reservation) => {
-            const manager = reservation.participants.find(
-                (participant) => participant.type === ParticipantsType.RESERVER,
-            );
             return {
                 type: '차량반납지연',
                 title: `${reservation.resource.name} 반납 지연 중`,
@@ -552,15 +531,7 @@ export class ReservationContextService {
                 resourceName: reservation.resource.name,
                 startDate: reservation.startDate,
                 endDate: reservation.endDate,
-                manager: manager
-                    ? {
-                          employeeId: manager.employee.employeeId,
-                          name: manager.employee.name,
-                          employeeNumber: manager.employee.employeeNumber,
-                          department: manager.employee.department,
-                          position: manager.employee.position,
-                      }
-                    : null,
+                manager: null, // manager 정보는 비즈니스 서비스에서 처리
             };
         });
     }

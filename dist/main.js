@@ -23172,7 +23172,9 @@ var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
 const reservation_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/reservation-notification.context.service */ "./src/context/notification/services/reservation-notification.context.service.ts");
@@ -23308,9 +23310,68 @@ let ReservationService = class ReservationService {
         };
     }
     async findOne(user, reservationId) {
-        const reservation = await this.reservationContextService.예약_상세를_조회한다(user, reservationId);
-        const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
-        return { ...reservation, notifications };
+        const basicReservation = await this.reservationContextService.예약_상세를_조회한다(user, reservationId);
+        const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
+        if (scheduleIds.length === 0) {
+            const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
+            return { ...basicReservation, notifications };
+        }
+        const scheduleData = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
+            withParticipants: true,
+        });
+        if (scheduleData && scheduleData.participants) {
+            const allParticipants = scheduleData.participants.map(participant => ({
+                participantId: participant.participantId,
+                reservationId: reservationId,
+                employeeId: participant.employeeId,
+                type: participant.type,
+                employee: participant.employee ? {
+                    employeeId: participant.employee.employeeId,
+                    name: participant.employee.name,
+                    employeeNumber: participant.employee.employeeNumber,
+                    department: participant.employee.department,
+                    position: participant.employee.position,
+                } : undefined,
+                reservation: basicReservation,
+            }));
+            const reservers = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
+            const participants = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
+            const reservationWithParticipants = {
+                ...basicReservation,
+                reservers,
+                participants,
+            };
+            const isMine = reservers.some((reserver) => reserver.employeeId === user.employeeId);
+            const returnable = reservationWithParticipants.resource.type === resource_type_enum_1.ResourceType.VEHICLE
+                ? isMine &&
+                    reservationWithParticipants.reservationVehicles?.some((reservationVehicle) => !reservationVehicle.isReturned) &&
+                    reservationWithParticipants.startDate <= date_util_1.DateUtil.now().format()
+                : null;
+            const modifiable = [reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED].includes(basicReservation.status) &&
+                isMine &&
+                reservationWithParticipants.endDate > date_util_1.DateUtil.now().format();
+            const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
+            return {
+                ...reservationWithParticipants,
+                isMine,
+                returnable,
+                modifiable,
+                notifications
+            };
+        }
+        else {
+            const isMine = false;
+            const returnable = null;
+            const modifiable = false;
+            const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
+            return {
+                ...basicReservation,
+                isMine,
+                returnable,
+                modifiable,
+                notifications
+            };
+        }
     }
     async updateStatus(reservationId, updateDto) {
         const updatedReservation = await this.reservationContextService.예약상태를_변경한다(reservationId, updateDto);
@@ -31245,7 +31306,36 @@ let TaskManagementService = class TaskManagementService {
     }
     async getAdminTaskList(type) {
         if (type === '차량반납지연') {
-            return this.reservationContextService.모든_지연반납_차량을_조회한다();
+            const basicDelayedVehicles = await this.reservationContextService.모든_지연반납_차량을_조회한다();
+            const enhancedTasks = await Promise.all(basicDelayedVehicles.map(async (task) => {
+                const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(task.reservationId);
+                if (task.reservationId === '66b6b9f8-7e34-4389-afd6-f0553f4002d0') {
+                    console.log(scheduleIds);
+                }
+                let manager = null;
+                if (scheduleIds.length > 0) {
+                    const scheduleData = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
+                        withParticipants: true,
+                    });
+                    if (scheduleData && scheduleData.participants) {
+                        const reserver = scheduleData.participants.find((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER);
+                        if (reserver && reserver.employee) {
+                            manager = {
+                                employeeId: reserver.employee.employeeId,
+                                name: reserver.employee.name,
+                                employeeNumber: reserver.employee.employeeNumber,
+                                department: reserver.employee.department,
+                                position: reserver.employee.position,
+                            };
+                        }
+                    }
+                }
+                return {
+                    ...task,
+                    manager,
+                };
+            }));
+            return enhancedTasks;
         }
         else if (type === '소모품교체') {
             return this.교체필요한_모든_소모품을_조회한다();
@@ -34286,8 +34376,6 @@ let ReservationContextService = class ReservationContextService {
                 'resource.vehicleInfo',
                 'resource.meetingRoomInfo',
                 'resource.accommodationInfo',
-                'participants',
-                'participants.employee',
                 'reservationVehicles',
             ],
             withDeleted: true,
@@ -34297,17 +34385,6 @@ let ReservationContextService = class ReservationContextService {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
         }
         const reservationResponseDto = new business_dto_index_1.ReservationWithRelationsResponseDto(reservation);
-        reservationResponseDto.isMine = reservationResponseDto.reservers.some((reserver) => reserver.employeeId === user.employeeId);
-        reservationResponseDto.returnable =
-            reservationResponseDto.resource.type === resource_type_enum_1.ResourceType.VEHICLE
-                ? reservationResponseDto.isMine &&
-                    reservationResponseDto.reservationVehicles.some((reservationVehicle) => !reservationVehicle.isReturned) &&
-                    reservationResponseDto.startDate <= date_util_1.DateUtil.now().format()
-                : null;
-        reservationResponseDto.modifiable =
-            [reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED].includes(reservation.status) &&
-                reservationResponseDto.isMine &&
-                reservationResponseDto.endDate > date_util_1.DateUtil.now().format();
         const notifications = await this.domainNotificationService.findAll({
             where: {
                 notificationData: (0, typeorm_2.Raw)((alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservation.reservationId}'`),
@@ -34557,7 +34634,7 @@ let ReservationContextService = class ReservationContextService {
                 reservationId: (0, typeorm_2.In)(reservationIds),
             },
             relations: ['reservationVehicles', 'resource'],
-            order: { endDate: 'ASC' },
+            order: { endDate: 'DESC' },
         });
         return reservationsWithVehicles;
     }
@@ -34570,11 +34647,10 @@ let ReservationContextService = class ReservationContextService {
                     isReturned: false,
                 },
             },
-            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
-            order: { endDate: 'ASC' },
+            relations: ['resource', 'reservationVehicles'],
+            order: { endDate: 'DESC' },
         });
         return delayedReturnVehicles.map((reservation) => {
-            const manager = reservation.participants.find((participant) => participant.type === reservation_type_enum_1.ParticipantsType.RESERVER);
             return {
                 type: '차량반납지연',
                 title: `${reservation.resource.name} 반납 지연 중`,
@@ -34583,15 +34659,7 @@ let ReservationContextService = class ReservationContextService {
                 resourceName: reservation.resource.name,
                 startDate: reservation.startDate,
                 endDate: reservation.endDate,
-                manager: manager
-                    ? {
-                        employeeId: manager.employee.employeeId,
-                        name: manager.employee.name,
-                        employeeNumber: manager.employee.employeeNumber,
-                        department: manager.employee.department,
-                        position: manager.employee.position,
-                    }
-                    : null,
+                manager: null,
             };
         });
     }

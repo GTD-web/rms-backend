@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Employee } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { ParticipantsType } from '@libs/enums/reservation-type.enum';
+import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
+import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { ReturnVehicleDto, UpdateReservationStatusDto } from '../dtos/update-reservation.dto';
@@ -203,9 +204,94 @@ export class ReservationService {
     }
 
     async findOne(user: Employee, reservationId: string): Promise<ReservationWithRelationsResponseDto> {
-        const reservation = await this.reservationContextService.예약_상세를_조회한다(user, reservationId);
-        const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
-        return { ...reservation, notifications };
+        // 1. 기본 예약 상세 조회 (schedule participants 제외)
+        const basicReservation = await this.reservationContextService.예약_상세를_조회한다(user, reservationId);
+        
+        // 2. schedule ID 조회
+        const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
+        
+        if (scheduleIds.length === 0) {
+            // schedule relation이 없는 경우 기존 방식으로 처리
+            const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
+            return { ...basicReservation, notifications };
+        }
+
+        // 3. schedule과 participants 정보 조회
+        const scheduleData = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
+            withParticipants: true,
+        });
+
+        if (scheduleData && scheduleData.participants) {
+            // 4. schedule participants를 reservation participants 형태로 변환
+            const allParticipants = scheduleData.participants.map(participant => ({
+                participantId: participant.participantId,
+                reservationId: reservationId,
+                employeeId: participant.employeeId,
+                type: participant.type,
+                employee: participant.employee ? {
+                    employeeId: participant.employee.employeeId,
+                    name: participant.employee.name,
+                    employeeNumber: participant.employee.employeeNumber,
+                    department: participant.employee.department,
+                    position: participant.employee.position,
+                } : undefined,
+                reservation: basicReservation,
+            }));
+
+            // 5. reservers와 participants로 분리
+            const reservers = allParticipants.filter(p => p.type === ParticipantsType.RESERVER);
+            const participants = allParticipants.filter(p => p.type === ParticipantsType.PARTICIPANT);
+
+            // 6. reservation 객체에 participants 추가
+            const reservationWithParticipants = {
+                ...basicReservation,
+                reservers,
+                participants,
+            };
+
+            // 7. isMine, returnable, modifiable 로직 추가
+            const isMine = reservers.some(
+                (reserver) => reserver.employeeId === user.employeeId,
+            );
+
+            const returnable = 
+                (reservationWithParticipants.resource as any).type === ResourceType.VEHICLE
+                    ? isMine &&
+                      reservationWithParticipants.reservationVehicles?.some(
+                          (reservationVehicle) => !reservationVehicle.isReturned,
+                      ) &&
+                      reservationWithParticipants.startDate <= DateUtil.now().format()
+                    : null;
+
+            const modifiable =
+                [ReservationStatus.PENDING, ReservationStatus.CONFIRMED].includes(basicReservation.status) &&
+                isMine &&
+                reservationWithParticipants.endDate > DateUtil.now().format();
+
+            // 8. notifications 추가
+            const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
+            return { 
+                ...reservationWithParticipants, 
+                isMine,
+                returnable,
+                modifiable,
+                notifications 
+            };
+        } else {
+            // schedule participants가 없는 경우 기본 로직으로 처리
+            const isMine = false; // participants 정보가 없으므로 false
+            const returnable = null; // participants 정보가 없으므로 null
+            const modifiable = false; // participants 정보가 없으므로 false
+            
+            const notifications = await this.notificationContextService.차량반납_알림을_조회한다(reservationId);
+            return { 
+                ...basicReservation, 
+                isMine,
+                returnable,
+                modifiable,
+                notifications 
+            };
+        }
     }
 
     async updateStatus(reservationId: string, updateDto: UpdateReservationStatusDto): Promise<ReservationResponseDto> {
