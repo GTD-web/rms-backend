@@ -29669,6 +29669,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
         const createdSchedules = [];
         const failedSchedules = [];
+        const now = new Date();
         for (const dateRange of datesSelection) {
             const data = {
                 title,
@@ -29692,21 +29693,28 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             await queryRunner.startTransaction();
             try {
                 let reservationId = null;
+                const startDate = new Date(data.dateRange.startDate);
+                const endDate = new Date(data.dateRange.endDate);
                 if (data.resourceSelection) {
-                    const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(data.resourceSelection.resourceId, new Date(data.dateRange.startDate), new Date(data.dateRange.endDate));
+                    const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(data.resourceSelection.resourceId, startDate, endDate);
                     if (!isAvailable) {
                         throw new common_1.BadRequestException('선택한 시간대에 자원이 이미 예약되어 있습니다.');
+                    }
+                    let status = reservation_type_enum_1.ReservationStatus.CONFIRMED;
+                    if (startDate < now) {
+                        status = reservation_type_enum_1.ReservationStatus.USING;
+                    }
+                    if (data.resourceSelection.resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+                        status = reservation_type_enum_1.ReservationStatus.PENDING;
                     }
                     const reservationData = {
                         title: data.title,
                         description: data.description || '',
                         resourceId: data.resourceSelection.resourceId,
                         resourceType: data.resourceSelection.resourceType,
-                        status: data.resourceSelection.resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION
-                            ? reservation_type_enum_1.ReservationStatus.PENDING
-                            : reservation_type_enum_1.ReservationStatus.CONFIRMED,
-                        startDate: new Date(data.dateRange.startDate),
-                        endDate: new Date(data.dateRange.endDate),
+                        status: status,
+                        startDate: startDate,
+                        endDate: endDate,
                     };
                     const createdReservation = await this.reservationContextService.자원예약을_생성한다(reservationData, queryRunner);
                     reservationId = createdReservation.reservationId;
@@ -29716,8 +29724,8 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     description: data.location
                         ? `${data.description || ''}\n장소: ${data.location}`.trim()
                         : data.description,
-                    startDate: new Date(data.dateRange.startDate),
-                    endDate: new Date(data.dateRange.endDate),
+                    startDate: startDate,
+                    endDate: endDate,
                     scheduleType: data.scheduleType,
                     notifyBeforeStart: data.notifyBeforeStart || false,
                     notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],

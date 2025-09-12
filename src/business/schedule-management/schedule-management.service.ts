@@ -478,7 +478,7 @@ export class ScheduleManagementService {
         // 자원예약일 경우 각 날짜별로 예약 가능 여부 확인 후 실패/성공 분리
         const createdSchedules = [];
         const failedSchedules = [];
-
+        const now = new Date();
         for (const dateRange of datesSelection) {
             // 각 날짜별로 통합 트랜잭션 실행
             // const result = await this.scheduleMutationService.일정생성_예약생성_트랜잭션을_실행한다(user, {
@@ -519,14 +519,16 @@ export class ScheduleManagementService {
 
             try {
                 let reservationId: string | null = null;
-
+                const startDate = new Date(data.dateRange.startDate);
+                const endDate = new Date(data.dateRange.endDate);
                 // 1) 자원 예약 생성 (있는 경우)
                 if (data.resourceSelection) {
+                    
                     // 예약 가능 여부 확인
                     const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(
                         data.resourceSelection.resourceId,
-                        new Date(data.dateRange.startDate),
-                        new Date(data.dateRange.endDate),
+                        startDate,
+                        endDate,
                     );
 
                     if (!isAvailable) {
@@ -534,17 +536,21 @@ export class ScheduleManagementService {
                     }
 
                     // 예약 생성 (QueryRunner 전달)
+                    let status = ReservationStatus.CONFIRMED;
+                    if (startDate < now) {
+                        status = ReservationStatus.USING;
+                    }
+                    if (data.resourceSelection.resourceType === ResourceType.ACCOMMODATION) {
+                        status = ReservationStatus.PENDING;
+                    }
                     const reservationData = {
                         title: data.title,
                         description: data.description || '',
                         resourceId: data.resourceSelection.resourceId,
                         resourceType: data.resourceSelection.resourceType,
-                        status:
-                            data.resourceSelection.resourceType === ResourceType.ACCOMMODATION
-                                ? ReservationStatus.PENDING
-                                : ReservationStatus.CONFIRMED,
-                        startDate: new Date(data.dateRange.startDate),
-                        endDate: new Date(data.dateRange.endDate),
+                        status: status,
+                        startDate: startDate,
+                        endDate: endDate,
                     };
 
                     const createdReservation = await this.reservationContextService.자원예약을_생성한다(
@@ -560,8 +566,8 @@ export class ScheduleManagementService {
                     description: data.location
                         ? `${data.description || ''}\n장소: ${data.location}`.trim()
                         : data.description,
-                    startDate: new Date(data.dateRange.startDate),
-                    endDate: new Date(data.dateRange.endDate),
+                    startDate: startDate    ,
+                    endDate: endDate,
                     scheduleType: data.scheduleType,
                     notifyBeforeStart: data.notifyBeforeStart || false,
                     notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
