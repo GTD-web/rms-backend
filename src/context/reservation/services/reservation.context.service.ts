@@ -390,7 +390,7 @@ export class ReservationContextService {
     }
 
     // ==================== 크론 작업 처리 ====================
-    async 예약을_종료한다(): Promise<void> {
+    async 예약관련_배치_작업을_처리한다(): Promise<void> {
         const now = DateUtil.now().toDate();
 
         // 대기 -> 거절 (숙소예약이면서 승인이 되지 않은 채로 시작일이 지났을 때)

@@ -23137,7 +23137,7 @@ let CronReservationService = class CronReservationService {
     }
     async closeReservation() {
         await this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();
-        return this.reservationContextService.예약을_종료한다();
+        return this.reservationContextService.예약관련_배치_작업을_처리한다();
     }
     async handleStartOdometer() {
         return this.reservationContextService.시작주행거리를_처리한다();
@@ -29909,6 +29909,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 }
                 : undefined,
         });
+        await this.reservationContextService.예약관련_배치_작업을_처리한다();
         const { schedule: newSchedule, resource, participants, } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
             withResource: true,
@@ -34455,7 +34456,7 @@ let ReservationContextService = class ReservationContextService {
             await queryRunner.release();
         }
     }
-    async 예약을_종료한다() {
+    async 예약관련_배치_작업을_처리한다() {
         const now = date_util_1.DateUtil.now().toDate();
         const pendingAccommodationReservations = await this.domainReservationService.findAll({
             where: {
