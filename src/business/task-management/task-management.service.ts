@@ -44,7 +44,7 @@ export class TaskManagementService {
             const now = new Date();
             const potentialDelayedReservations = scheduleRelations
                 .filter(
-                    ({ reservation }) => reservation && reservation.status === 'CONFIRMED' && reservation.endDate < now,
+                    ({ reservation }) => reservation && reservation.status === ReservationStatus.CLOSING && reservation.endDate < now,
                 )
                 .map(({ reservation, resource }) => ({ reservation, resource }));
 

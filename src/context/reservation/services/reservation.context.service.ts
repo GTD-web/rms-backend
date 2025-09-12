@@ -85,7 +85,7 @@ export class ReservationContextService {
 
         const reservations = await this.domainReservationService.findAll({
             where,
-            relations: ['resource', 'participants', 'participants.employee'],
+            relations: ['resource'],
             withDeleted: true,
         });
 
@@ -100,7 +100,6 @@ export class ReservationContextService {
     ): Promise<PaginationData<ReservationWithRelationsResponseDto>> {
         const { page, limit } = query;
         // 숙소 - 예약 승인 대기
-        // 차량 - 예약 확정, 반납 완료
         const where: FindOptionsWhere<Reservation>[] = [
             {
                 status: ReservationStatus.PENDING,
@@ -112,7 +111,7 @@ export class ReservationContextService {
 
         const options: IRepositoryOptions<Reservation> = {
             where,
-            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
+            relations: ['resource'],
             withDeleted: true,
         };
 
@@ -527,7 +526,7 @@ export class ReservationContextService {
     async 모든_지연반납_차량을_조회한다(): Promise<any[]> {
         const delayedReturnVehicles = await this.domainReservationService.findAll({
             where: {
-                status: ReservationStatus.CONFIRMED,
+                status: ReservationStatus.CLOSING,
                 endDate: LessThan(DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,

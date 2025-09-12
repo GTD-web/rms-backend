@@ -23172,6 +23172,7 @@ var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
 const reservation_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/reservation-notification.context.service */ "./src/context/notification/services/reservation-notification.context.service.ts");
@@ -23184,10 +23185,127 @@ let ReservationService = class ReservationService {
         this.reservationNotificationContextService = reservationNotificationContextService;
     }
     async findReservationList(startDate, endDate, resourceType, resourceId, status) {
-        return this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status);
+        const basicReservations = await this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status);
+        if (basicReservations.length === 0) {
+            return basicReservations;
+        }
+        const reservationIds = basicReservations.map(item => item.reservationId);
+        const scheduleIdMap = new Map();
+        const scheduleIdPromises = reservationIds.map(async (reservationId) => {
+            const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
+            if (scheduleIds.length > 0) {
+                scheduleIdMap.set(reservationId, scheduleIds[0]);
+            }
+        });
+        await Promise.all(scheduleIdPromises);
+        if (scheduleIdMap.size === 0) {
+            return basicReservations;
+        }
+        const scheduleIds = Array.from(scheduleIdMap.values());
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
+            withParticipants: true,
+        });
+        const participantsByScheduleId = new Map();
+        scheduleDataList.forEach(scheduleData => {
+            if (scheduleData.participants) {
+                participantsByScheduleId.set(scheduleData.schedule.scheduleId, scheduleData.participants);
+            }
+        });
+        const enhancedItems = basicReservations.map(reservation => {
+            const scheduleId = scheduleIdMap.get(reservation.reservationId);
+            if (scheduleId && participantsByScheduleId.has(scheduleId)) {
+                const scheduleParticipants = participantsByScheduleId.get(scheduleId) || [];
+                const allParticipants = scheduleParticipants.map(participant => ({
+                    participantId: participant.participantId,
+                    reservationId: reservation.reservationId,
+                    employeeId: participant.employeeId,
+                    type: participant.type,
+                    employee: participant.employee ? {
+                        employeeId: participant.employee.employeeId,
+                        name: participant.employee.name,
+                        employeeNumber: participant.employee.employeeNumber,
+                        department: participant.employee.department,
+                        position: participant.employee.position,
+                    } : undefined,
+                    reservation: reservation,
+                }));
+                const reservers = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
+                const participants = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
+                const reservationWithParticipants = {
+                    ...reservation,
+                    reservers,
+                    participants,
+                };
+                return reservationWithParticipants;
+            }
+            else {
+                return reservation;
+            }
+        });
+        return enhancedItems;
     }
     async findCheckReservationList(query) {
-        return this.reservationContextService.확인필요_예약목록을_조회한다(query);
+        const basicReservations = await this.reservationContextService.확인필요_예약목록을_조회한다(query);
+        if (basicReservations.items.length === 0) {
+            return basicReservations;
+        }
+        const reservationIds = basicReservations.items.map(item => item.reservationId);
+        const scheduleIdMap = new Map();
+        const scheduleIdPromises = reservationIds.map(async (reservationId) => {
+            const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
+            if (scheduleIds.length > 0) {
+                scheduleIdMap.set(reservationId, scheduleIds[0]);
+            }
+        });
+        await Promise.all(scheduleIdPromises);
+        if (scheduleIdMap.size === 0) {
+            return basicReservations;
+        }
+        const scheduleIds = Array.from(scheduleIdMap.values());
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
+            withParticipants: true,
+        });
+        const participantsByScheduleId = new Map();
+        scheduleDataList.forEach(scheduleData => {
+            if (scheduleData.participants) {
+                participantsByScheduleId.set(scheduleData.schedule.scheduleId, scheduleData.participants);
+            }
+        });
+        const enhancedItems = basicReservations.items.map(reservation => {
+            const scheduleId = scheduleIdMap.get(reservation.reservationId);
+            if (scheduleId && participantsByScheduleId.has(scheduleId)) {
+                const scheduleParticipants = participantsByScheduleId.get(scheduleId) || [];
+                const allParticipants = scheduleParticipants.map(participant => ({
+                    participantId: participant.participantId,
+                    reservationId: reservation.reservationId,
+                    employeeId: participant.employeeId,
+                    type: participant.type,
+                    employee: participant.employee ? {
+                        employeeId: participant.employee.employeeId,
+                        name: participant.employee.name,
+                        employeeNumber: participant.employee.employeeNumber,
+                        department: participant.employee.department,
+                        position: participant.employee.position,
+                    } : undefined,
+                    reservation: reservation,
+                }));
+                const reservers = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
+                const participants = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
+                const reservationWithParticipants = {
+                    ...reservation,
+                    reservers,
+                    participants,
+                };
+                return reservationWithParticipants;
+            }
+            else {
+                return reservation;
+            }
+        });
+        return {
+            items: enhancedItems,
+            meta: basicReservations.meta,
+        };
     }
     async findOne(user, reservationId) {
         const reservation = await this.reservationContextService.예약_상세를_조회한다(user, reservationId);
@@ -31068,7 +31186,7 @@ let TaskManagementService = class TaskManagementService {
             });
             const now = new Date();
             const potentialDelayedReservations = scheduleRelations
-                .filter(({ reservation }) => reservation && reservation.status === 'CONFIRMED' && reservation.endDate < now)
+                .filter(({ reservation }) => reservation && reservation.status === reservation_type_enum_1.ReservationStatus.CLOSING && reservation.endDate < now)
                 .map(({ reservation, resource }) => ({ reservation, resource }));
             const delayedReturnReservations = await this.reservationContextService.지연반납_예약_상세정보를_조회한다(potentialDelayedReservations.map(({ reservation }) => reservation.reservationId));
             delayedReturnTasks = delayedReturnReservations
@@ -34116,7 +34234,7 @@ let ReservationContextService = class ReservationContextService {
         }
         const reservations = await this.domainReservationService.findAll({
             where,
-            relations: ['resource', 'participants', 'participants.employee'],
+            relations: ['resource'],
             withDeleted: true,
         });
         const reservationResponseDtos = reservations.map((reservation) => new business_dto_index_1.ReservationWithRelationsResponseDto(reservation));
@@ -34134,7 +34252,7 @@ let ReservationContextService = class ReservationContextService {
         ];
         const options = {
             where,
-            relations: ['resource', 'reservationVehicles', 'participants', 'participants.employee'],
+            relations: ['resource'],
             withDeleted: true,
         };
         const reservations = await this.domainReservationService.findAll(options);
@@ -34431,7 +34549,7 @@ let ReservationContextService = class ReservationContextService {
     async 모든_지연반납_차량을_조회한다() {
         const delayedReturnVehicles = await this.domainReservationService.findAll({
             where: {
-                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                status: reservation_type_enum_1.ReservationStatus.CLOSING,
                 endDate: (0, typeorm_2.LessThan)(date_util_1.DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
