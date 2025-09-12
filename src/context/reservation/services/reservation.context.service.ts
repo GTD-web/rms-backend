@@ -390,12 +390,13 @@ export class ReservationContextService {
     }
 
     // ==================== 크론 작업 처리 ====================
-    async 예약관련_배치_작업을_처리한다(): Promise<void> {
+    async 예약관련_배치_작업을_처리한다(reservationIds?: string[]): Promise<void> {
         const now = DateUtil.now().toDate();
 
         // 대기 -> 거절 (숙소예약이면서 승인이 되지 않은 채로 시작일이 지났을 때)
         const pendingAccommodationReservations = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: In(reservationIds) }),
                 status: In([ReservationStatus.PENDING]),
                 resource: {
                     type: ResourceType.ACCOMMODATION,
@@ -412,6 +413,7 @@ export class ReservationContextService {
         // 확정 -> 사용중
         const confirmedToChangeUsing = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: In(reservationIds) }),
                 status: ReservationStatus.CONFIRMED,
                 startDate: LessThanOrEqual(now),
             },
@@ -423,6 +425,7 @@ export class ReservationContextService {
         // 사용중 -> 마무리중 (차량예약이면서 종료시간이 되었을 때)
         const usingToChangeClosing = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: In(reservationIds) }),
                 status: ReservationStatus.USING,
                 resource: {
                     type: ResourceType.VEHICLE,
@@ -439,6 +442,7 @@ export class ReservationContextService {
         // 사용중 -> 종료 (차량이 아니면서 종료시간이 되었을 때)
         const notClosedReservations = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: In(reservationIds) }),
                 status: ReservationStatus.USING,
                 resource: {
                     type: Not(ResourceType.VEHICLE),

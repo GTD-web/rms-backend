@@ -29909,7 +29909,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 }
                 : undefined,
         });
-        await this.reservationContextService.예약관련_배치_작업을_처리한다();
+        await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
         const { schedule: newSchedule, resource, participants, } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
             withResource: true,
@@ -34456,10 +34456,11 @@ let ReservationContextService = class ReservationContextService {
             await queryRunner.release();
         }
     }
-    async 예약관련_배치_작업을_처리한다() {
+    async 예약관련_배치_작업을_처리한다(reservationIds) {
         const now = date_util_1.DateUtil.now().toDate();
         const pendingAccommodationReservations = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
                 status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING]),
                 resource: {
                     type: resource_type_enum_1.ResourceType.ACCOMMODATION,
@@ -34474,6 +34475,7 @@ let ReservationContextService = class ReservationContextService {
         }
         const confirmedToChangeUsing = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
                 status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
                 startDate: (0, typeorm_2.LessThanOrEqual)(now),
             },
@@ -34483,6 +34485,7 @@ let ReservationContextService = class ReservationContextService {
         }
         const usingToChangeClosing = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
                 status: reservation_type_enum_1.ReservationStatus.USING,
                 resource: {
                     type: resource_type_enum_1.ResourceType.VEHICLE,
@@ -34497,6 +34500,7 @@ let ReservationContextService = class ReservationContextService {
         }
         const notClosedReservations = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
                 status: reservation_type_enum_1.ReservationStatus.USING,
                 resource: {
                     type: (0, typeorm_2.Not)(resource_type_enum_1.ResourceType.VEHICLE),

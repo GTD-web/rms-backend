@@ -955,7 +955,7 @@ export class ScheduleManagementService {
         );
 
         // 5. 후처리: 시나리오별 후처리
-        await this.reservationContextService.예약관련_배치_작업을_처리한다();
+        await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
         const {
             schedule: newSchedule,
             resource,
