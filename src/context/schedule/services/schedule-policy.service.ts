@@ -299,7 +299,7 @@ export class SchedulePolicyService {
         }
 
         // 2. 예약 상태 확인 (활성 상태인지)
-        if (schedule.status !== ScheduleStatus.PROCESSING && reservation.status !== ReservationStatus.CONFIRMED) {
+        if (schedule.status !== ScheduleStatus.PROCESSING && reservation.status !== ReservationStatus.USING) {
             return {
                 isAllowed: false,
                 reason: '활성 상태인 예약만 연장할 수 있습니다.',

@@ -29537,6 +29537,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             withResource: true,
             withParticipants: true,
         });
+        console.log(scheduleDataList.length);
         const scheduleCalendarItems = scheduleDataList.map(({ schedule, project, reservation, resource, participants }) => {
             participants = participants.filter((participant) => participant.type !== reservation_type_enum_1.ParticipantsType.RESERVER);
             return {
@@ -29909,7 +29910,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 }
                 : undefined,
         });
-        await this.reservationContextService.예약관련_배치_작업을_처리한다();
+        await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
         const { schedule: newSchedule, resource, participants, } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
             withResource: true,
@@ -31194,8 +31195,9 @@ let TaskManagementService = class TaskManagementService {
                 withResource: true,
             });
             const now = new Date();
+            console.log(scheduleRelations);
             const potentialDelayedReservations = scheduleRelations
-                .filter(({ reservation }) => reservation && reservation.status === reservation_type_enum_1.ReservationStatus.CLOSING && reservation.endDate < now)
+                .filter(({ reservation }) => reservation && reservation.status === reservation_type_enum_1.ReservationStatus.CLOSING)
                 .map(({ reservation, resource }) => ({ reservation, resource }));
             const delayedReturnReservations = await this.reservationContextService.지연반납_예약_상세정보를_조회한다(potentialDelayedReservations.map(({ reservation }) => reservation.reservationId));
             delayedReturnTasks = delayedReturnReservations
@@ -33904,7 +33906,7 @@ let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = 
             data.resource?.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
             await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING, notificationData, adminEmployeeIds);
         }
-        else if (data.reservation?.status === reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+        else if (data.reservation?.status === reservation_type_enum_1.ReservationStatus.CONFIRMED || data.reservation?.status === reservation_type_enum_1.ReservationStatus.USING) {
             await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, notificationData, targetEmployeeIds);
         }
     }
@@ -34357,7 +34359,7 @@ let ReservationContextService = class ReservationContextService {
         if (reservation.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_RESOURCE_TYPE);
         }
-        if (reservation.status !== reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+        if (reservation.status !== reservation_type_enum_1.ReservationStatus.CLOSING) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.CANNOT_RETURN_STATUS(reservation.status));
         }
         if (reservation.resource.vehicleInfo.totalMileage > returnDto.totalMileage) {
@@ -34456,10 +34458,11 @@ let ReservationContextService = class ReservationContextService {
             await queryRunner.release();
         }
     }
-    async 예약관련_배치_작업을_처리한다() {
+    async 예약관련_배치_작업을_처리한다(reservationIds) {
         const now = date_util_1.DateUtil.now().toDate();
         const pendingAccommodationReservations = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
                 status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING]),
                 resource: {
                     type: resource_type_enum_1.ResourceType.ACCOMMODATION,
@@ -34474,6 +34477,7 @@ let ReservationContextService = class ReservationContextService {
         }
         const confirmedToChangeUsing = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
                 status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
                 startDate: (0, typeorm_2.LessThanOrEqual)(now),
             },
@@ -34483,6 +34487,7 @@ let ReservationContextService = class ReservationContextService {
         }
         const usingToChangeClosing = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
                 status: reservation_type_enum_1.ReservationStatus.USING,
                 resource: {
                     type: resource_type_enum_1.ResourceType.VEHICLE,
@@ -34497,6 +34502,7 @@ let ReservationContextService = class ReservationContextService {
         }
         const notClosedReservations = await this.domainReservationService.findAll({
             where: {
+                ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
                 status: reservation_type_enum_1.ReservationStatus.USING,
                 resource: {
                     type: (0, typeorm_2.Not)(resource_type_enum_1.ResourceType.VEHICLE),
@@ -34512,7 +34518,7 @@ let ReservationContextService = class ReservationContextService {
         const now = date_util_1.DateUtil.now().format();
         const vehicleReservations = await this.domainReservationService.findAll({
             where: {
-                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.USING]),
                 resource: {
                     type: resource_type_enum_1.ResourceType.VEHICLE,
                 },
@@ -34532,7 +34538,7 @@ let ReservationContextService = class ReservationContextService {
         const delayedReturnReservations = await this.domainReservationService.findAll({
             where: {
                 reservationId: (0, typeorm_2.In)(reservationIds),
-                status: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+                status: reservation_type_enum_1.ReservationStatus.CLOSING,
                 endDate: (0, typeorm_2.LessThan)(date_util_1.DateUtil.now().toDate()),
                 reservationVehicles: {
                     isReturned: false,
@@ -34633,7 +34639,7 @@ let ReservationContextService = class ReservationContextService {
                 ...(excludeReservationId && { reservationId: (0, typeorm_2.Not)(excludeReservationId) }),
                 startDate: (0, typeorm_2.LessThan)(endDate),
                 endDate: (0, typeorm_2.MoreThan)(startDate),
-                status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING, reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.CLOSED]),
+                status: (0, typeorm_2.Not)((0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.CANCELLED, reservation_type_enum_1.ReservationStatus.REJECTED])),
             },
             order: { startDate: 'ASC' },
         });
@@ -36704,7 +36710,7 @@ let SchedulePolicyService = class SchedulePolicyService {
                 reasonCode: 'NO_RESOURCE_RESERVATION',
             };
         }
-        if (schedule.status !== schedule_type_enum_1.ScheduleStatus.PROCESSING && reservation.status !== reservation_type_enum_1.ReservationStatus.CONFIRMED) {
+        if (schedule.status !== schedule_type_enum_1.ScheduleStatus.PROCESSING && reservation.status !== reservation_type_enum_1.ReservationStatus.USING) {
             return {
                 isAllowed: false,
                 reason: '활성 상태인 예약만 연장할 수 있습니다.',
@@ -37033,12 +37039,6 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 .map((relation) => relation.reservationId);
             if (reservationIds.length > 0) {
                 const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
-                reservations.forEach((reservation) => {
-                    reservation.status =
-                        reservation.startDate < new Date() && reservation.endDate > new Date()
-                            ? reservation_type_enum_1.ReservationStatus.USING
-                            : reservation.status;
-                });
                 reservationMap = new Map(reservations.map((reservation) => [reservation.reservationId, reservation]));
                 if (option?.withResource) {
                     resourceMap = new Map(reservations

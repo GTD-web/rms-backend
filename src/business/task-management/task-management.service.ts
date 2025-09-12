@@ -42,9 +42,10 @@ export class TaskManagementService {
             );
             // 메모리에서 지연반납 조건 체크
             const now = new Date();
+            console.log(scheduleRelations);
             const potentialDelayedReservations = scheduleRelations
                 .filter(
-                    ({ reservation }) => reservation && reservation.status === ReservationStatus.CLOSING && reservation.endDate < now,
+                    ({ reservation }) => reservation && reservation.status === ReservationStatus.CLOSING,
                 )
                 .map(({ reservation, resource }) => ({ reservation, resource }));
 
