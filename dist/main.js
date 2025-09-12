@@ -37140,7 +37140,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         const scheduleIds = scheduleRelations.map((r) => r.scheduleId);
         return scheduleIds;
     }
-    async 직원의_역할별_일정ID들을_조회한다(employeeId, role, fromDate) {
+    async 직원의_역할별_일정ID들을_조회한다(employeeId, role, fromDate, order) {
         const conditions = {
             employeeId,
             schedule: {
@@ -37158,7 +37158,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             relations: ['schedule'],
             order: {
                 schedule: {
-                    startDate: 'ASC',
+                    startDate: order || 'ASC',
                 },
             },
         });

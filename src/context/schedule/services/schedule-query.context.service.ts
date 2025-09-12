@@ -412,6 +412,7 @@ export class ScheduleQueryContextService {
         employeeId: string,
         role?: ParticipantsType,
         fromDate?: Date,
+        order?: 'ASC' | 'DESC',
     ): Promise<string[]> {
         // 모든 조건을 하나의 쿼리로 통합 (성능 최적화)
         const conditions: any = {
@@ -431,7 +432,7 @@ export class ScheduleQueryContextService {
             relations: ['schedule'],
             order: {
                 schedule: {
-                    startDate: 'ASC',
+                    startDate: order || 'ASC',
                 },
             },
         });
@@ -861,7 +862,7 @@ export class ScheduleQueryContextService {
         hasNext: boolean;
         hasPrevious: boolean;
     }> {
-        // 1. 기본 일정 ID 조회 (역할 조건 포함)
+        // 1. 기본 일정 ID 조회 (역할 조건 포함) TODO : 순서 변경이 있을 수 도 있음 (undefind, "DESC" 추가)
         const scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, ParticipantsType.RESERVER);
         // 4. 키워드 검색 적용
         const filteredScheduleIds = await this.키워드로_일정ID들을_조회한다(scheduleIds, query.keyword);
