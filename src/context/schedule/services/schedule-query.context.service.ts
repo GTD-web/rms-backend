@@ -402,8 +402,10 @@ export class ScheduleQueryContextService {
         return [...new Set(scheduleIds)]; // 중복 제거
     }
 
-    async 예약의_일정ID들을_조회한다(reservationId: string): Promise<string[]> {
-        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds([reservationId]);
+    async 예약의_일정ID들을_조회한다(reservationId: string | string[]): Promise<string[]> {
+        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds(
+            Array.isArray(reservationId) ? reservationId : [reservationId],
+        );
         const scheduleIds = scheduleRelations.map((r) => r.scheduleId);
         return scheduleIds;
     }
@@ -692,14 +694,15 @@ export class ScheduleQueryContextService {
         const likePattern = `%${searchKeyword}%`;
 
         // 3가지 검색을 병렬로 수행
-        const [scheduleResults, resourceResults, projectResults] = await Promise.all([
+        const [scheduleResults, resourceResults, projectResults, reserverResults] = await Promise.all([
             this.스케줄명으로_검색(baseScheduleIds, likePattern),
             this.자원명으로_검색(baseScheduleIds, searchKeyword),
             this.프로젝트명으로_검색(baseScheduleIds, searchKeyword),
+            this.예약자명으로_검색(baseScheduleIds, searchKeyword),
         ]);
 
         // 3가지 검색 결과를 합치고 중복 제거
-        const allResultIds = [...scheduleResults, ...resourceResults, ...projectResults];
+        const allResultIds = [...scheduleResults, ...resourceResults, ...projectResults, ...reserverResults];
         const uniqueIds = [...new Set(allResultIds)];
 
         // baseScheduleIds 순서 유지하며 필터링
@@ -813,6 +816,32 @@ export class ScheduleQueryContextService {
             this.logger.error(`프로젝트명 검색 중 오류 발생: ${error.message}`, error.stack);
             return [];
         }
+    }
+
+    private async 예약자명으로_검색(baseScheduleIds: string[], keyword: string): Promise<string[]> {
+        const employeeIds = await this.domainEmployeeService.findAll({
+            where: {
+                name: Like(keyword),
+            },
+            select: {
+                employeeId: true,
+            },
+        });
+        const scheduleRelations = await this.domainScheduleParticipantService.findAll({
+            where: {
+                scheduleId: In(baseScheduleIds),
+                type: ParticipantsType.RESERVER,
+                employeeId: In(employeeIds.map((e) => e.employeeId)),
+            },
+            select: {
+                scheduleId: true,
+                employeeId: true,
+            },
+        });
+
+        if (scheduleRelations.length === 0) return [];
+
+        return scheduleRelations.map((r) => r.scheduleId);
     }
 
     /**

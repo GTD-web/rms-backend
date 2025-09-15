@@ -8,7 +8,7 @@ import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.
 import { DomainFileService } from '@src/domain/file/file.service';
 import { FileContextService } from '../../file/services/file.context.service';
 import { DataSource, MoreThanOrEqual, QueryRunner } from 'typeorm';
-import { Employee, Reservation } from '@libs/entities';
+import { Employee, Reservation, ReservationVehicle } from '@libs/entities';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
@@ -46,9 +46,9 @@ export class ReservationContextService {
         startDate?: string,
         endDate?: string,
         resourceType?: ResourceType,
-        resourceId?: string,
         status?: string[],
-    ): Promise<ReservationWithRelationsResponseDto[]> {
+        sortOrder?: 'ASC' | 'DESC',
+    ): Promise<Reservation[]> {
         if (startDate && endDate && startDate > endDate) {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         } else if ((startDate && !endDate) || (!startDate && endDate)) {
@@ -68,11 +68,7 @@ export class ReservationContextService {
                 type: resourceType as ResourceType,
             };
         }
-        if (resourceId) {
-            where.resource = {
-                resourceId,
-            };
-        }
+
         if (startDate && endDate) {
             // 예약 기간이 검색 범위와 겹치는 경우를 찾음
             // (예약 시작일 <= 검색 종료일) AND (예약 종료일 >= 검색 시작일)
@@ -87,12 +83,12 @@ export class ReservationContextService {
             where,
             relations: ['resource'],
             withDeleted: true,
+            order: {
+                startDate: sortOrder,
+            },
         });
 
-        const reservationResponseDtos = reservations.map(
-            (reservation) => new ReservationWithRelationsResponseDto(reservation),
-        );
-        return reservationResponseDtos;
+        return reservations;
     }
 
     async 확인필요_예약목록을_조회한다(
@@ -627,6 +623,13 @@ export class ReservationContextService {
                 (slotEndTime > reservationStart && slotEndTime <= reservationEnd) ||
                 (slotStartTime < reservationStart && slotEndTime > reservationEnd)
             );
+        });
+    }
+
+    async 예약_차량_목록을_조회한다(reservationIds: string[]): Promise<ReservationVehicle[]> {
+        return await this.domainReservationVehicleService.findAll({
+            where: { reservationId: In(reservationIds) },
+            relations: ['vehicleInfo'],
         });
     }
 }

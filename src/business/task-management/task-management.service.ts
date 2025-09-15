@@ -44,9 +44,7 @@ export class TaskManagementService {
             const now = new Date();
             console.log(scheduleRelations);
             const potentialDelayedReservations = scheduleRelations
-                .filter(
-                    ({ reservation }) => reservation && reservation.status === ReservationStatus.CLOSING,
-                )
+                .filter(({ reservation }) => reservation && reservation.status === ReservationStatus.CLOSING)
                 .map(({ reservation, resource }) => ({ reservation, resource }));
 
             // 지연반납 확인을 위해 reservationVehicles 정보가 필요한 예약들만 추가 조회
@@ -118,30 +116,32 @@ export class TaskManagementService {
         if (type === '차량반납지연') {
             // 1. 기본 지연반납 차량 목록 조회
             const basicDelayedVehicles = await this.reservationContextService.모든_지연반납_차량을_조회한다();
-            
+
             // 2. 각 예약에 대해 schedule participants 정보를 조회하여 manager 정보를 가져옴
             const enhancedTasks = await Promise.all(
                 basicDelayedVehicles.map(async (task) => {
                     // schedule ID 조회
-                    const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(task.reservationId);
-                    if (task.reservationId === '66b6b9f8-7e34-4389-afd6-f0553f4002d0') {
-                        console.log(scheduleIds)
+                    const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(
+                        task.reservationId,
+                    );
 
-                    }
                     let manager = null;
                     if (scheduleIds.length > 0) {
                         // schedule과 participants 정보 조회
-                        const scheduleData = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
-                            withParticipants: true,
-                        });
-                        
+                        const scheduleData = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+                            scheduleIds[0],
+                            {
+                                withParticipants: true,
+                            },
+                        );
+
                         if (scheduleData && scheduleData.participants) {
                             // 예약자(manager) 찾기
-                            
+
                             const reserver = scheduleData.participants.find(
                                 (participant) => participant.type === ParticipantsType.RESERVER,
                             );
-                            
+
                             if (reserver && reserver.employee) {
                                 manager = {
                                     employeeId: reserver.employee.employeeId,
@@ -158,7 +158,7 @@ export class TaskManagementService {
                         ...task,
                         manager,
                     };
-                })
+                }),
             );
 
             return enhancedTasks;

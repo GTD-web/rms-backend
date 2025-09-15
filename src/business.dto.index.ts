@@ -11,6 +11,7 @@ export { PaginationData, PaginationMetaDto } from '../libs/dtos/pagination-respo
 // ============================================================================
 export * from './business/reservation-management/dtos/create-reservation.dto';
 export * from './business/reservation-management/dtos/reservaion-query.dto';
+export * from './business/reservation-management/dtos/reservation-list-query.dto';
 export * from './business/reservation-management/dtos/reservation-response.dto';
 export * from './business/reservation-management/dtos/return-vehicle-response.dto';
 export * from './business/reservation-management/dtos/update-reservation.dto';

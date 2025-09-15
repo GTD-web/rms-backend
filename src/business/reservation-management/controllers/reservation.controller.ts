@@ -14,6 +14,7 @@ import { ReturnVehicleDto } from '../dtos/update-reservation.dto';
 import { ReservationService } from '../services/reservation.service';
 import { UpdateReservationStatusDto } from '../dtos/update-reservation.dto';
 import { DateUtil } from '@libs/utils/date.util';
+import { ReservationListQueryDto } from '../dtos/reservation-list-query.dto';
 
 @ApiTags('v2 예약 ')
 @Controller('v2/reservations')
@@ -30,37 +31,8 @@ export class ReservationController {
         description: '예약 리스트 조회 성공',
         type: [ReservationWithRelationsResponseDto],
     })
-    @ApiQuery({
-        name: 'startDate',
-        type: String,
-        required: false,
-        example: DateUtil.now().addDays(-20).format('YYYY-MM-DD'),
-    })
-    @ApiQuery({
-        name: 'endDate',
-        type: String,
-        required: false,
-        example: DateUtil.now().addDays(30).format('YYYY-MM-DD'),
-    })
-    @ApiQuery({ name: 'resourceType', enum: ResourceType, required: false, example: ResourceType.MEETING_ROOM })
-    @ApiQuery({ name: 'resourceId', type: String, required: false, example: '78117aaf-a203-43a3-bb38-51ec91ca935a' })
-    @ApiQuery({
-        name: 'status',
-        enum: ReservationStatus,
-        description: `Available values : ${Object.values(ReservationStatus).join(', ')}`,
-        isArray: true,
-        required: false,
-        example: [ReservationStatus.CONFIRMED],
-    })
-    async findReservationList(
-        @Query('startDate') startDate?: string,
-        @Query('endDate') endDate?: string,
-        @Query('resourceType') resourceType?: ResourceType,
-        @Query('resourceId') resourceId?: string,
-        @Query('status', new ParseArrayPipe({ optional: true, separator: ',' }))
-        status?: string[],
-    ): Promise<ReservationWithRelationsResponseDto[]> {
-        return this.reservationService.findReservationList(startDate, endDate, resourceType, resourceId, status);
+    async findReservationList(@Query() query: ReservationListQueryDto): Promise<ReservationWithRelationsResponseDto[]> {
+        return this.reservationService.findReservationList(query);
     }
 
     @Get('check')

@@ -20598,6 +20598,7 @@ Object.defineProperty(exports, "PaginationData", ({ enumerable: true, get: funct
 Object.defineProperty(exports, "PaginationMetaDto", ({ enumerable: true, get: function () { return pagination_response_dto_1.PaginationMetaDto; } }));
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/create-reservation.dto */ "./src/business/reservation-management/dtos/create-reservation.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservaion-query.dto */ "./src/business/reservation-management/dtos/reservaion-query.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservation-list-query.dto */ "./src/business/reservation-management/dtos/reservation-list-query.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservation-response.dto */ "./src/business/reservation-management/dtos/reservation-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/return-vehicle-response.dto */ "./src/business/reservation-management/dtos/return-vehicle-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/update-reservation.dto */ "./src/business/reservation-management/dtos/update-reservation.dto.ts"), exports);
@@ -22199,20 +22200,18 @@ const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
-const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
-const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/business/reservation-management/dtos/reservation-response.dto.ts");
 const pagination_query_dto_1 = __webpack_require__(/*! @libs/dtos/pagination-query.dto */ "./libs/dtos/pagination-query.dto.ts");
 const update_reservation_dto_1 = __webpack_require__(/*! ../dtos/update-reservation.dto */ "./src/business/reservation-management/dtos/update-reservation.dto.ts");
 const reservation_service_1 = __webpack_require__(/*! ../services/reservation.service */ "./src/business/reservation-management/services/reservation.service.ts");
 const update_reservation_dto_2 = __webpack_require__(/*! ../dtos/update-reservation.dto */ "./src/business/reservation-management/dtos/update-reservation.dto.ts");
-const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const reservation_list_query_dto_1 = __webpack_require__(/*! ../dtos/reservation-list-query.dto */ "./src/business/reservation-management/dtos/reservation-list-query.dto.ts");
 let ReservationController = class ReservationController {
     constructor(reservationService) {
         this.reservationService = reservationService;
     }
-    async findReservationList(startDate, endDate, resourceType, resourceId, status) {
-        return this.reservationService.findReservationList(startDate, endDate, resourceType, resourceId, status);
+    async findReservationList(query) {
+        return this.reservationService.findReservationList(query);
     }
     async findCheckReservationList(query) {
         return this.reservationService.findCheckReservationList(query);
@@ -22237,35 +22236,9 @@ __decorate([
         description: '예약 리스트 조회 성공',
         type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
     }),
-    (0, swagger_1.ApiQuery)({
-        name: 'startDate',
-        type: String,
-        required: false,
-        example: date_util_1.DateUtil.now().addDays(-20).format('YYYY-MM-DD'),
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'endDate',
-        type: String,
-        required: false,
-        example: date_util_1.DateUtil.now().addDays(30).format('YYYY-MM-DD'),
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceType', enum: resource_type_enum_1.ResourceType, required: false, example: resource_type_enum_1.ResourceType.MEETING_ROOM }),
-    (0, swagger_1.ApiQuery)({ name: 'resourceId', type: String, required: false, example: '78117aaf-a203-43a3-bb38-51ec91ca935a' }),
-    (0, swagger_1.ApiQuery)({
-        name: 'status',
-        enum: reservation_type_enum_1.ReservationStatus,
-        description: `Available values : ${Object.values(reservation_type_enum_1.ReservationStatus).join(', ')}`,
-        isArray: true,
-        required: false,
-        example: [reservation_type_enum_1.ReservationStatus.CONFIRMED],
-    }),
-    __param(0, (0, common_1.Query)('startDate')),
-    __param(1, (0, common_1.Query)('endDate')),
-    __param(2, (0, common_1.Query)('resourceType')),
-    __param(3, (0, common_1.Query)('resourceId')),
-    __param(4, (0, common_1.Query)('status', new common_1.ParseArrayPipe({ optional: true, separator: ',' }))),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, typeof (_b = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _b : Object, String, Array]),
+    __metadata("design:paramtypes", [typeof (_b = typeof reservation_list_query_dto_1.ReservationListQueryDto !== "undefined" && reservation_list_query_dto_1.ReservationListQueryDto) === "function" ? _b : Object]),
     __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
 ], ReservationController.prototype, "findReservationList", null);
 __decorate([
@@ -22489,6 +22462,143 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], ReservationQueryDto.prototype, "isMySchedules", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/reservation-management/dtos/reservation-list-query.dto.ts":
+/*!********************************************************************************!*\
+  !*** ./src/business/reservation-management/dtos/reservation-list-query.dto.ts ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationListQueryDto = exports.ReservationSortOrder = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+var ReservationSortOrder;
+(function (ReservationSortOrder) {
+    ReservationSortOrder["DESC"] = "DESC";
+    ReservationSortOrder["ASC"] = "ASC";
+})(ReservationSortOrder || (exports.ReservationSortOrder = ReservationSortOrder = {}));
+class ReservationListQueryDto {
+    constructor() {
+        this.page = 1;
+        this.limit = 20;
+        this.sortOrder = ReservationSortOrder.DESC;
+    }
+}
+exports.ReservationListQueryDto = ReservationListQueryDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '검색 키워드 (자원명, 예약자명, 설명 등)',
+        example: '회의실',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_transformer_1.Transform)(({ value }) => value?.trim()),
+    __metadata("design:type", String)
+], ReservationListQueryDto.prototype, "keyword", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '페이지 번호',
+        example: 1,
+        default: 1,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => parseInt(value) || 1),
+    __metadata("design:type", Number)
+], ReservationListQueryDto.prototype, "page", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '페이지당 항목 수',
+        example: 20,
+        default: 20,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => parseInt(value) || 20),
+    __metadata("design:type", Number)
+], ReservationListQueryDto.prototype, "limit", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '시작일 (YYYY-MM-DD)',
+        example: date_util_1.DateUtil.now().addDays(-20).format('YYYY-MM-DD'),
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], ReservationListQueryDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '종료일 (YYYY-MM-DD)',
+        example: date_util_1.DateUtil.now().addDays(30).format('YYYY-MM-DD'),
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], ReservationListQueryDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '자원 타입',
+        enum: resource_type_enum_1.ResourceType,
+        example: resource_type_enum_1.ResourceType.MEETING_ROOM,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(resource_type_enum_1.ResourceType),
+    __metadata("design:type", typeof (_a = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _a : Object)
+], ReservationListQueryDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '예약 상태 (다중 선택 가능)',
+        enum: reservation_type_enum_1.ReservationStatus,
+        example: [reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING],
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus, { each: true }),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (typeof value === 'string') {
+            return value.split(',').map((item) => item.trim());
+        }
+        return value;
+    }),
+    __metadata("design:type", Array)
+], ReservationListQueryDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '정렬 순서',
+        enum: ReservationSortOrder,
+        example: ReservationSortOrder.DESC,
+        default: ReservationSortOrder.DESC,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(ReservationSortOrder),
+    __metadata("design:type", String)
+], ReservationListQueryDto.prototype, "sortOrder", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '특정 자원 ID (deprecated - resourceType 사용 권장)',
+        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ReservationListQueryDto.prototype, "resourceId", void 0);
 
 
 /***/ }),
@@ -23179,6 +23289,7 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/business/reservation-management/dtos/reservation-response.dto.ts");
 const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
 const reservation_notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/reservation-notification.context.service */ "./src/context/notification/services/reservation-notification.context.service.ts");
@@ -23190,72 +23301,57 @@ let ReservationService = class ReservationService {
         this.scheduleQueryContextService = scheduleQueryContextService;
         this.reservationNotificationContextService = reservationNotificationContextService;
     }
-    async findReservationList(startDate, endDate, resourceType, resourceId, status) {
-        const basicReservations = await this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status);
+    async findReservationList(query) {
+        const { startDate, endDate, resourceType, status, keyword, sortOrder, page, limit } = query;
+        const basicReservations = await this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, status?.map((s) => s.toString()), sortOrder);
         if (basicReservations.length === 0) {
-            return basicReservations;
+            return [];
         }
-        const reservationIds = basicReservations.map(item => item.reservationId);
-        const scheduleIdMap = new Map();
-        const scheduleIdPromises = reservationIds.map(async (reservationId) => {
-            const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
-            if (scheduleIds.length > 0) {
-                scheduleIdMap.set(reservationId, scheduleIds[0]);
-            }
-        });
-        await Promise.all(scheduleIdPromises);
-        if (scheduleIdMap.size === 0) {
-            return basicReservations;
-        }
-        const scheduleIds = Array.from(scheduleIdMap.values());
-        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
+        const reservationIds = basicReservations.map((item) => item.reservationId);
+        const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationIds);
+        const filteredScheduleIds = await this.scheduleQueryContextService.키워드로_일정ID들을_조회한다(scheduleIds, keyword);
+        const paginationResult = this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(paginationResult.paginatedIds, {
+            withReservation: true,
             withParticipants: true,
         });
         const participantsByScheduleId = new Map();
-        scheduleDataList.forEach(scheduleData => {
+        scheduleDataList.forEach((scheduleData) => {
             if (scheduleData.participants) {
-                participantsByScheduleId.set(scheduleData.schedule.scheduleId, scheduleData.participants);
-            }
-        });
-        const enhancedItems = basicReservations.map(reservation => {
-            const scheduleId = scheduleIdMap.get(reservation.reservationId);
-            if (scheduleId && participantsByScheduleId.has(scheduleId)) {
-                const scheduleParticipants = participantsByScheduleId.get(scheduleId) || [];
-                const allParticipants = scheduleParticipants.map(participant => ({
-                    participantId: participant.participantId,
-                    reservationId: reservation.reservationId,
-                    employeeId: participant.employeeId,
-                    type: participant.type,
-                    employee: participant.employee ? {
-                        employeeId: participant.employee.employeeId,
+                participantsByScheduleId.set(scheduleData.schedule.scheduleId, scheduleData.participants.map((participant) => ({
+                    ...participant,
+                    employee: {
+                        employeeId: participant.employeeId,
                         name: participant.employee.name,
                         employeeNumber: participant.employee.employeeNumber,
                         department: participant.employee.department,
                         position: participant.employee.position,
-                    } : undefined,
-                    reservation: reservation,
-                }));
-                const reservers = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
-                const participants = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
-                const reservationWithParticipants = {
-                    ...reservation,
-                    reservers,
-                    participants,
-                };
-                return reservationWithParticipants;
-            }
-            else {
-                return reservation;
+                    },
+                })));
             }
         });
-        return enhancedItems;
+        const reservationsByScheduleId = scheduleDataList.map((scheduleData) => scheduleData.reservation.reservationId);
+        const reservationVehiclesByScheduleId = await this.reservationContextService.예약_차량_목록을_조회한다(reservationsByScheduleId);
+        const reservationVehiclesByScheduleIdMap = new Map();
+        reservationVehiclesByScheduleId.forEach((reservationVehicle) => {
+            reservationVehiclesByScheduleIdMap.set(reservationVehicle.reservationId, [reservationVehicle]);
+        });
+        const reservationResponseDtos = scheduleDataList.map(({ schedule, reservation }) => {
+            reservation.participants = participantsByScheduleId.get(schedule.scheduleId);
+            console.log(reservationVehiclesByScheduleIdMap.get(reservation.reservationId));
+            reservation.reservationVehicles = reservationVehiclesByScheduleIdMap.get(reservation.reservationId) || [];
+            return new reservation_response_dto_1.ReservationWithRelationsResponseDto({
+                ...reservation,
+            });
+        });
+        return reservationResponseDtos;
     }
     async findCheckReservationList(query) {
         const basicReservations = await this.reservationContextService.확인필요_예약목록을_조회한다(query);
         if (basicReservations.items.length === 0) {
             return basicReservations;
         }
-        const reservationIds = basicReservations.items.map(item => item.reservationId);
+        const reservationIds = basicReservations.items.map((item) => item.reservationId);
         const scheduleIdMap = new Map();
         const scheduleIdPromises = reservationIds.map(async (reservationId) => {
             const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
@@ -23272,31 +23368,33 @@ let ReservationService = class ReservationService {
             withParticipants: true,
         });
         const participantsByScheduleId = new Map();
-        scheduleDataList.forEach(scheduleData => {
+        scheduleDataList.forEach((scheduleData) => {
             if (scheduleData.participants) {
                 participantsByScheduleId.set(scheduleData.schedule.scheduleId, scheduleData.participants);
             }
         });
-        const enhancedItems = basicReservations.items.map(reservation => {
+        const enhancedItems = basicReservations.items.map((reservation) => {
             const scheduleId = scheduleIdMap.get(reservation.reservationId);
             if (scheduleId && participantsByScheduleId.has(scheduleId)) {
                 const scheduleParticipants = participantsByScheduleId.get(scheduleId) || [];
-                const allParticipants = scheduleParticipants.map(participant => ({
+                const allParticipants = scheduleParticipants.map((participant) => ({
                     participantId: participant.participantId,
                     reservationId: reservation.reservationId,
                     employeeId: participant.employeeId,
                     type: participant.type,
-                    employee: participant.employee ? {
-                        employeeId: participant.employee.employeeId,
-                        name: participant.employee.name,
-                        employeeNumber: participant.employee.employeeNumber,
-                        department: participant.employee.department,
-                        position: participant.employee.position,
-                    } : undefined,
+                    employee: participant.employee
+                        ? {
+                            employeeId: participant.employee.employeeId,
+                            name: participant.employee.name,
+                            employeeNumber: participant.employee.employeeNumber,
+                            department: participant.employee.department,
+                            position: participant.employee.position,
+                        }
+                        : undefined,
                     reservation: reservation,
                 }));
-                const reservers = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
-                const participants = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
+                const reservers = allParticipants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
+                const participants = allParticipants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
                 const reservationWithParticipants = {
                     ...reservation,
                     reservers,
@@ -23324,22 +23422,24 @@ let ReservationService = class ReservationService {
             withParticipants: true,
         });
         if (scheduleData && scheduleData.participants) {
-            const allParticipants = scheduleData.participants.map(participant => ({
+            const allParticipants = scheduleData.participants.map((participant) => ({
                 participantId: participant.participantId,
                 reservationId: reservationId,
                 employeeId: participant.employeeId,
                 type: participant.type,
-                employee: participant.employee ? {
-                    employeeId: participant.employee.employeeId,
-                    name: participant.employee.name,
-                    employeeNumber: participant.employee.employeeNumber,
-                    department: participant.employee.department,
-                    position: participant.employee.position,
-                } : undefined,
+                employee: participant.employee
+                    ? {
+                        employeeId: participant.employee.employeeId,
+                        name: participant.employee.name,
+                        employeeNumber: participant.employee.employeeNumber,
+                        department: participant.employee.department,
+                        position: participant.employee.position,
+                    }
+                    : undefined,
                 reservation: basicReservation,
             }));
-            const reservers = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
-            const participants = allParticipants.filter(p => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
+            const reservers = allParticipants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
+            const participants = allParticipants.filter((p) => p.type === reservation_type_enum_1.ParticipantsType.PARTICIPANT);
             const reservationWithParticipants = {
                 ...basicReservation,
                 reservers,
@@ -23360,7 +23460,7 @@ let ReservationService = class ReservationService {
                 isMine,
                 returnable,
                 modifiable,
-                notifications
+                notifications,
             };
         }
         else {
@@ -23373,7 +23473,7 @@ let ReservationService = class ReservationService {
                 isMine,
                 returnable,
                 modifiable,
-                notifications
+                notifications,
             };
         }
     }
@@ -31685,9 +31785,6 @@ let TaskManagementService = class TaskManagementService {
             const basicDelayedVehicles = await this.reservationContextService.모든_지연반납_차량을_조회한다();
             const enhancedTasks = await Promise.all(basicDelayedVehicles.map(async (task) => {
                 const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(task.reservationId);
-                if (task.reservationId === '66b6b9f8-7e34-4389-afd6-f0553f4002d0') {
-                    console.log(scheduleIds);
-                }
                 let manager = null;
                 if (scheduleIds.length > 0) {
                     const scheduleData = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
@@ -34687,7 +34784,7 @@ let ReservationContextService = class ReservationContextService {
         this.dataSource = dataSource;
         this.domainScheduleParticipantService = domainScheduleParticipantService;
     }
-    async 예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status) {
+    async 예약목록을_조회한다(startDate, endDate, resourceType, status, sortOrder) {
         if (startDate && endDate && startDate > endDate) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         }
@@ -34707,11 +34804,6 @@ let ReservationContextService = class ReservationContextService {
                 type: resourceType,
             };
         }
-        if (resourceId) {
-            where.resource = {
-                resourceId,
-            };
-        }
         if (startDate && endDate) {
             where = {
                 ...where,
@@ -34723,9 +34815,11 @@ let ReservationContextService = class ReservationContextService {
             where,
             relations: ['resource'],
             withDeleted: true,
+            order: {
+                startDate: sortOrder,
+            },
         });
-        const reservationResponseDtos = reservations.map((reservation) => new business_dto_index_1.ReservationWithRelationsResponseDto(reservation));
-        return reservationResponseDtos;
+        return reservations;
     }
     async 확인필요_예약목록을_조회한다(query) {
         const { page, limit } = query;
@@ -35108,6 +35202,12 @@ let ReservationContextService = class ReservationContextService {
             return ((slotStartTime >= reservationStart && slotStartTime < reservationEnd) ||
                 (slotEndTime > reservationStart && slotEndTime <= reservationEnd) ||
                 (slotStartTime < reservationStart && slotEndTime > reservationEnd));
+        });
+    }
+    async 예약_차량_목록을_조회한다(reservationIds) {
+        return await this.domainReservationVehicleService.findAll({
+            where: { reservationId: (0, typeorm_2.In)(reservationIds) },
+            relations: ['vehicleInfo'],
         });
     }
 };
@@ -37597,7 +37697,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         return [...new Set(scheduleIds)];
     }
     async 예약의_일정ID들을_조회한다(reservationId) {
-        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds([reservationId]);
+        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds(Array.isArray(reservationId) ? reservationId : [reservationId]);
         const scheduleIds = scheduleRelations.map((r) => r.scheduleId);
         return scheduleIds;
     }
@@ -37812,12 +37912,13 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         }
         const searchKeyword = keyword.trim();
         const likePattern = `%${searchKeyword}%`;
-        const [scheduleResults, resourceResults, projectResults] = await Promise.all([
+        const [scheduleResults, resourceResults, projectResults, reserverResults] = await Promise.all([
             this.스케줄명으로_검색(baseScheduleIds, likePattern),
             this.자원명으로_검색(baseScheduleIds, searchKeyword),
             this.프로젝트명으로_검색(baseScheduleIds, searchKeyword),
+            this.예약자명으로_검색(baseScheduleIds, searchKeyword),
         ]);
-        const allResultIds = [...scheduleResults, ...resourceResults, ...projectResults];
+        const allResultIds = [...scheduleResults, ...resourceResults, ...projectResults, ...reserverResults];
         const uniqueIds = [...new Set(allResultIds)];
         return baseScheduleIds.filter((id) => uniqueIds.includes(id));
     }
@@ -37895,6 +37996,30 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             this.logger.error(`프로젝트명 검색 중 오류 발생: ${error.message}`, error.stack);
             return [];
         }
+    }
+    async 예약자명으로_검색(baseScheduleIds, keyword) {
+        const employeeIds = await this.domainEmployeeService.findAll({
+            where: {
+                name: (0, typeorm_1.Like)(keyword),
+            },
+            select: {
+                employeeId: true,
+            },
+        });
+        const scheduleRelations = await this.domainScheduleParticipantService.findAll({
+            where: {
+                scheduleId: (0, typeorm_1.In)(baseScheduleIds),
+                type: reservation_type_enum_1.ParticipantsType.RESERVER,
+                employeeId: (0, typeorm_1.In)(employeeIds.map((e) => e.employeeId)),
+            },
+            select: {
+                scheduleId: true,
+                employeeId: true,
+            },
+        });
+        if (scheduleRelations.length === 0)
+            return [];
+        return scheduleRelations.map((r) => r.scheduleId);
     }
     페이지네이션_일정ID들을_계산한다(scheduleIds, page = 1, limit = 20) {
         const totalCount = scheduleIds.length;
