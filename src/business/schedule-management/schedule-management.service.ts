@@ -267,7 +267,7 @@ export class ScheduleManagementService {
             withResource: true,
             withParticipants: true,
         });
-        console.log(scheduleDataList.length);
+
         const scheduleCalendarItems = scheduleDataList.map(
             ({ schedule, project, reservation, resource, participants }) => {
                 participants = participants.filter((participant) => participant.type !== ParticipantsType.RESERVER);
@@ -280,6 +280,8 @@ export class ScheduleManagementService {
                     scheduleType: this.scheduleQueryContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
                     scheduleDepartment: schedule.scheduleDepartment,
                     notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
+                    createdAt: schedule.createdAt,
+                    updatedAt: schedule.updatedAt,
                     participants: participants?.map((participant) => ({
                         employeeId: participant.employeeId,
                     })),
@@ -524,7 +526,6 @@ export class ScheduleManagementService {
                 const endDate = new Date(data.dateRange.endDate);
                 // 1) 자원 예약 생성 (있는 경우)
                 if (data.resourceSelection) {
-                    
                     // 예약 가능 여부 확인
                     const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(
                         data.resourceSelection.resourceId,
@@ -561,13 +562,14 @@ export class ScheduleManagementService {
                     reservationId = createdReservation.reservationId;
                 }
 
+                console.log(user);
                 // 2) 일정 생성 (QueryRunner 전달)
                 const scheduleData = {
                     title: data.title,
                     description: data.location
                         ? `${data.description || ''}\n장소: ${data.location}`.trim()
                         : data.description,
-                    startDate: startDate    ,
+                    startDate: startDate,
                     endDate: endDate,
                     scheduleType: data.scheduleType,
                     notifyBeforeStart: data.notifyBeforeStart || false,

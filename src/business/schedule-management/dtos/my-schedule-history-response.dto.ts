@@ -64,6 +64,18 @@ export class MyScheduleHistoryItemDto {
     notifyMinutesBeforeStart?: number[];
 
     @ApiProperty({
+        description: '생성 일시',
+        example: '2024-01-15T09:00:00Z',
+    })
+    createdAt: Date;
+
+    @ApiProperty({
+        description: '수정 일시',
+        example: '2024-01-15T09:00:00Z',
+    })
+    updatedAt: Date;
+
+    @ApiProperty({
         description: '참석자 정보',
         type: [MyScheduleParticipantDto],
     })

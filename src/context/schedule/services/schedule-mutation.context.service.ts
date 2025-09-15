@@ -46,6 +46,7 @@ export class ScheduleMutationContextService {
             notifyMinutesBeforeStart: scheduleData.notifyMinutesBeforeStart || [],
             scheduleType: scheduleData.scheduleType,
             status: scheduleData.startDate < new Date() ? ScheduleStatus.PROCESSING : ScheduleStatus.PENDING, // 기본 상태 설정
+            scheduleDepartment: scheduleData.scheduleDepartment,
         };
 
         // 도메인 서비스를 사용하여 트랜잭션 내에서 생성

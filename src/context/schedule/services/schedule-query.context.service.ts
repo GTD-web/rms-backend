@@ -57,7 +57,7 @@ export class ScheduleQueryContextService {
     //         where: {
     //             scheduleId: In([
     //                 '6359b055-dbaf-4b82-ab12-47f673c7dccb', 'e270e05d-c75f-47de-a720-acf6a5273d11', '981ec9bd-e678-4804-9387-66d473092d24', 'e3a4739c-fdab-4c5c-b909-f50975617164', '63f8a234-8782-4faa-85d4-ba7077ee835b', '493a5008-55a0-4f72-98ae-75fc50cf4355', '036bbd29-0bf0-486d-a655-4c7d71b83df7', '6bd0a2ed-9883-499b-98cd-adca5758a10c', 'b6a72fc2-3014-4e04-b3e8-35a8fbbaae29', '75d7200a-fcfa-4917-b1d0-9f000789b1f9', '8d6dfb2f-7f43-42c1-bde7-42809a59adfb', 'e3ebd2e8-d34c-493b-a22c-ef8cb5dd55de', 'f854c700-9d25-4631-a3dc-4c144009c114', 'bfd6a727-8406-4135-a111-053d3fbc20a7', 'bca46ea3-dd40-4b95-b80d-989c23478a4c', 'e9ee893d-42af-4913-8978-6ae43dadc74d', '4792271d-8fb5-4a4c-8829-0d6df2e471ed', '50363491-659e-4433-a984-53950fd761d3', 'c65dd5a6-7999-4aff-98bf-d5a01535ddd6', '3acd7afb-fef4-4bb1-9dae-b7204aa59632', '3288635d-5802-46b4-bf66-ed79761ced92', 'ab776f9c-64fb-451a-844f-1c37594b49b7']),
-                 
+
     //         }
     //     });
     //     const reservationIds = data.map((relation) => relation.reservationId);
@@ -230,13 +230,12 @@ export class ScheduleQueryContextService {
         let resourceMap = new Map();
         let participantsMap = new Map<string, ScheduleParticipantsWithEmployee[]>();
 
-        // 프로젝트 정보 조회 (현재는 구현되지 않음)
+        // 프로젝트 정보 조회
         if (option?.withProject) {
             const projectIds = scheduleRelations
                 .filter((relation) => relation.projectId)
                 .map((relation) => relation.projectId);
             if (projectIds.length > 0) {
-                // TODO: 프로젝트 서비스 구현 후 추가
                 const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet(projectIds);
                 projectMap = new Map(
                     projects.map((project) => [
@@ -254,12 +253,6 @@ export class ScheduleQueryContextService {
             if (reservationIds.length > 0) {
                 // 벌크 조회로 성능 최적화: 예약과 자원 정보를 한 번에 조회
                 const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
-                // reservations.forEach((reservation) => {
-                //     reservation.status =
-                //         reservation.startDate < new Date() && reservation.endDate > new Date()
-                //             ? ReservationStatus.USING
-                //             : reservation.status;
-                // });
                 reservationMap = new Map(reservations.map((reservation) => [reservation.reservationId, reservation]));
 
                 // 자원 정보는 예약 조회 시 이미 relations로 가져옴 (추가 조회 불필요)
@@ -438,6 +431,32 @@ export class ScheduleQueryContextService {
         });
 
         return participants.map((p) => p.scheduleId);
+    }
+
+    async 직원의_역할별_일정ID들을_조회한다_내역(employeeId: string, role?: ParticipantsType): Promise<string[]> {
+        // 모든 조건을 하나의 쿼리로 통합 (성능 최적화)
+        const conditions: any = {
+            employeeId,
+            schedule: {
+                deletedAt: IsNull(),
+            },
+        };
+        if (role) conditions.type = role;
+
+        const participants = await this.domainScheduleParticipantService.findAll({
+            where: conditions,
+            select: {
+                scheduleId: true,
+            },
+            relations: ['schedule'],
+            order: {
+                schedule: {
+                    updatedAt: 'DESC',
+                },
+            },
+        });
+
+        return participants.filter((p) => p.schedule).map((p) => p.scheduleId);
     }
 
     /**
@@ -863,7 +882,7 @@ export class ScheduleQueryContextService {
         hasPrevious: boolean;
     }> {
         // 1. 기본 일정 ID 조회 (역할 조건 포함) TODO : 순서 변경이 있을 수 도 있음 (undefind, "DESC" 추가)
-        const scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, ParticipantsType.RESERVER);
+        const scheduleIds = await this.직원의_역할별_일정ID들을_조회한다_내역(employeeId, ParticipantsType.RESERVER);
         // 4. 키워드 검색 적용
         const filteredScheduleIds = await this.키워드로_일정ID들을_조회한다(scheduleIds, query.keyword);
         // 5. 페이지네이션 적용

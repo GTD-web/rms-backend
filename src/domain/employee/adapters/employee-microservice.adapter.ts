@@ -286,8 +286,8 @@ export class EmployeeMicroserviceAdapter {
      */
     async getAllEmployees(
         authorization: string,
-        withDetail: boolean = false,
-        includeTerminated: boolean = false,
+        withDetail: boolean = true,
+        includeTerminated: boolean = true,
     ): Promise<EmployeesResponseDto> {
         try {
             this.logger.log(

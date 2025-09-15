@@ -21,7 +21,9 @@ export class DomainScheduleService extends BaseService<Schedule> {
 
     async findByScheduleIds(scheduleIds: string[]): Promise<Schedule[]> {
         const result = await this.scheduleRepository.findAll({
-            where: { scheduleId: In(scheduleIds) },
+            where: {
+                scheduleId: In(scheduleIds),
+            },
         });
         return result;
     }

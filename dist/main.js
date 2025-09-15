@@ -809,6 +809,10 @@ __decorate([
     __metadata("design:type", Array)
 ], Employee.prototype, "roles", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true, comment: '직원 상태 (재직중, 퇴사)' }),
+    __metadata("design:type", String)
+], Employee.prototype, "status", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => reservation_participant_entity_1.ReservationParticipant, (participant) => participant.employee),
     __metadata("design:type", Array)
 ], Employee.prototype, "participants", void 0);
@@ -26968,7 +26972,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MyScheduleHistoryResponseDto = exports.MyScheduleHistoryItemDto = exports.MyScheduleParticipantDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -27049,6 +27053,20 @@ __decorate([
 ], MyScheduleHistoryItemDto.prototype, "notifyMinutesBeforeStart", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        description: '생성 일시',
+        example: '2024-01-15T09:00:00Z',
+    }),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], MyScheduleHistoryItemDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '수정 일시',
+        example: '2024-01-15T09:00:00Z',
+    }),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], MyScheduleHistoryItemDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         description: '참석자 정보',
         type: [MyScheduleParticipantDto],
     }),
@@ -27060,7 +27078,7 @@ __decorate([
         type: my_schedule_response_dto_1.MyScheduleProjectDto,
         required: false,
     }),
-    __metadata("design:type", typeof (_c = typeof my_schedule_response_dto_1.MyScheduleProjectDto !== "undefined" && my_schedule_response_dto_1.MyScheduleProjectDto) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_e = typeof my_schedule_response_dto_1.MyScheduleProjectDto !== "undefined" && my_schedule_response_dto_1.MyScheduleProjectDto) === "function" ? _e : Object)
 ], MyScheduleHistoryItemDto.prototype, "project", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
@@ -27068,7 +27086,7 @@ __decorate([
         type: my_schedule_response_dto_1.MyScheduleResourceDto,
         required: false,
     }),
-    __metadata("design:type", typeof (_d = typeof my_schedule_response_dto_1.MyScheduleResourceDto !== "undefined" && my_schedule_response_dto_1.MyScheduleResourceDto) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_f = typeof my_schedule_response_dto_1.MyScheduleResourceDto !== "undefined" && my_schedule_response_dto_1.MyScheduleResourceDto) === "function" ? _f : Object)
 ], MyScheduleHistoryItemDto.prototype, "resource", void 0);
 class MyScheduleHistoryResponseDto {
 }
@@ -29598,7 +29616,6 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             withResource: true,
             withParticipants: true,
         });
-        console.log(scheduleDataList.length);
         const scheduleCalendarItems = scheduleDataList.map(({ schedule, project, reservation, resource, participants }) => {
             participants = participants.filter((participant) => participant.type !== reservation_type_enum_1.ParticipantsType.RESERVER);
             return {
@@ -29610,6 +29627,8 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 scheduleType: this.scheduleQueryContextService.일정타입_라벨을_가져온다(schedule.scheduleType),
                 scheduleDepartment: schedule.scheduleDepartment,
                 notifyMinutesBeforeStart: schedule.notifyMinutesBeforeStart,
+                createdAt: schedule.createdAt,
+                updatedAt: schedule.updatedAt,
                 participants: participants?.map((participant) => ({
                     employeeId: participant.employeeId,
                 })),
@@ -29781,6 +29800,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     const createdReservation = await this.reservationContextService.자원예약을_생성한다(reservationData, queryRunner);
                     reservationId = createdReservation.reservationId;
                 }
+                console.log(user);
                 const scheduleData = {
                     title: data.title,
                     description: data.location
@@ -31491,7 +31511,8 @@ let EmployeeContextService = class EmployeeContextService {
         const resourceManagers = await this.domainEmployeeService.findAll({
             where: {
                 roles: (0, typeorm_1.Raw)(() => `'${role_type_enum_1.Role.RESOURCE_ADMIN}' = ANY("roles")`),
-                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['관리자'])),
+                status: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사'])),
             },
             select: {
                 employeeId: true,
@@ -31499,6 +31520,7 @@ let EmployeeContextService = class EmployeeContextService {
                 employeeNumber: true,
                 department: true,
                 position: true,
+                status: true,
             },
         });
         return this.부서별로_그룹핑한다(resourceManagers);
@@ -31506,7 +31528,8 @@ let EmployeeContextService = class EmployeeContextService {
     async 관리자_후보_목록을_조회한다() {
         const candidates = await this.domainEmployeeService.findAll({
             where: {
-                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['관리자'])),
+                status: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사'])),
             },
             select: {
                 employeeId: true,
@@ -31526,7 +31549,8 @@ let EmployeeContextService = class EmployeeContextService {
     async 직원_목록을_조회한다() {
         const employees = await this.domainEmployeeService.findAll({
             where: {
-                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['관리자'])),
+                status: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사'])),
             },
             select: {
                 employeeId: true,
@@ -31534,6 +31558,7 @@ let EmployeeContextService = class EmployeeContextService {
                 employeeNumber: true,
                 department: true,
                 position: true,
+                status: true,
             },
         });
         return this.부서별로_그룹핑한다(employees);
@@ -31623,11 +31648,13 @@ let EmployeeContextService = class EmployeeContextService {
         const { employees, total } = await this.employeeMicroserviceAdapter.getAllEmployees(authorization);
         for (const employee of employees) {
             const existingEmployee = await this.domainEmployeeService.findByEmployeeNumber(employee.employeeNumber);
+            console.log('update employee', employee);
             if (employee.status === '퇴사') {
                 if (existingEmployee) {
                     await this.domainEmployeeService.update(existingEmployee.employeeId, {
-                        department: employee.status,
-                        position: employee.status,
+                        department: employee.department.departmentCode,
+                        position: employee.rank.rankName,
+                        status: employee.status,
                     });
                 }
                 continue;
@@ -31636,9 +31663,10 @@ let EmployeeContextService = class EmployeeContextService {
                 if (existingEmployee) {
                     existingEmployee.name = employee.name;
                     existingEmployee.employeeNumber = employee.employeeNumber;
-                    existingEmployee.department = employee.department.departmentName;
+                    existingEmployee.department = employee.department.departmentCode;
                     existingEmployee.position = employee.rank.rankName;
                     existingEmployee.mobile = employee.phoneNumber;
+                    existingEmployee.status = employee.status;
                     await this.domainEmployeeService.save(existingEmployee);
                 }
                 else {
@@ -31647,9 +31675,10 @@ let EmployeeContextService = class EmployeeContextService {
                         employeeNumber: employee.employeeNumber,
                         name: employee.name,
                         email: employee.email,
-                        department: employee.department.departmentName,
+                        department: employee.department.departmentCode,
                         position: employee.rank.rankName,
                         mobile: employee.phoneNumber,
+                        status: employee.status,
                     };
                     const newEmployee = await this.domainEmployeeService.create(employeeData);
                     await this.domainEmployeeService.save(newEmployee);
@@ -31665,7 +31694,8 @@ let EmployeeContextService = class EmployeeContextService {
         const employees = await this.domainEmployeeService.findAll({
             where: {
                 subscriptions: (0, typeorm_1.Not)((0, typeorm_1.IsNull)()),
-                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사', '관리자'])),
+                department: (0, typeorm_1.Not)((0, typeorm_1.In)(['관리자'])),
+                status: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사'])),
             },
         });
         let count = 1;
@@ -36488,6 +36518,7 @@ let ScheduleMutationContextService = ScheduleMutationContextService_1 = class Sc
             notifyMinutesBeforeStart: scheduleData.notifyMinutesBeforeStart || [],
             scheduleType: scheduleData.scheduleType,
             status: scheduleData.startDate < new Date() ? schedule_type_enum_1.ScheduleStatus.PROCESSING : schedule_type_enum_1.ScheduleStatus.PENDING,
+            scheduleDepartment: scheduleData.scheduleDepartment,
         };
         const savedSchedule = await this.domainScheduleService.save(scheduleEntity, {
             queryRunner: queryRunner,
@@ -37232,6 +37263,29 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         });
         return participants.map((p) => p.scheduleId);
     }
+    async 직원의_역할별_일정ID들을_조회한다_내역(employeeId, role) {
+        const conditions = {
+            employeeId,
+            schedule: {
+                deletedAt: (0, typeorm_1.IsNull)(),
+            },
+        };
+        if (role)
+            conditions.type = role;
+        const participants = await this.domainScheduleParticipantService.findAll({
+            where: conditions,
+            select: {
+                scheduleId: true,
+            },
+            relations: ['schedule'],
+            order: {
+                schedule: {
+                    updatedAt: 'DESC',
+                },
+            },
+        });
+        return participants.filter((p) => p.schedule).map((p) => p.scheduleId);
+    }
     async 카테고리별_일정ID들을_조회한다(baseScheduleIds, category) {
         if (baseScheduleIds.length === 0)
             return [];
@@ -37495,7 +37549,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         };
     }
     async 내_일정_내역을_조회한다(employeeId, query) {
-        const scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, reservation_type_enum_1.ParticipantsType.RESERVER);
+        const scheduleIds = await this.직원의_역할별_일정ID들을_조회한다_내역(employeeId, reservation_type_enum_1.ParticipantsType.RESERVER);
         const filteredScheduleIds = await this.키워드로_일정ID들을_조회한다(scheduleIds, query.keyword);
         const paginationResult = this.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, query.page, query.limit);
         return {
@@ -38825,7 +38879,7 @@ let EmployeeMicroserviceAdapter = EmployeeMicroserviceAdapter_1 = class Employee
             throw error;
         }
     }
-    async getAllEmployees(authorization, withDetail = false, includeTerminated = false) {
+    async getAllEmployees(authorization, withDetail = true, includeTerminated = true) {
         try {
             this.logger.log(`전체 직원 목록 조회 요청: withDetail=${withDetail}, includeTerminated=${includeTerminated}`);
             const params = new URLSearchParams();
@@ -42042,7 +42096,9 @@ let DomainScheduleService = class DomainScheduleService extends base_service_1.B
     }
     async findByScheduleIds(scheduleIds) {
         const result = await this.scheduleRepository.findAll({
-            where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
+            where: {
+                scheduleId: (0, typeorm_1.In)(scheduleIds),
+            },
         });
         return result;
     }

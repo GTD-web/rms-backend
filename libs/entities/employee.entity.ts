@@ -48,6 +48,9 @@ export class Employee {
     @Column({ type: 'enum', enum: Role, array: true, default: [Role.USER], comment: '사용자 역할' })
     roles: Role[];
 
+    @Column({ nullable: true, comment: '직원 상태 (재직중, 퇴사)' })
+    status: string;
+
     @OneToMany(() => ReservationParticipant, (participant) => participant.employee)
     participants: ReservationParticipant[];
 

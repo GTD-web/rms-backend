@@ -37,7 +37,8 @@ export class EmployeeContextService {
         const resourceManagers = await this.domainEmployeeService.findAll({
             where: {
                 roles: Raw(() => `'${Role.RESOURCE_ADMIN}' = ANY("roles")`),
-                department: Not(In(['퇴사', '관리자'])),
+                department: Not(In(['관리자'])),
+                status: Not(In(['퇴사'])),
             },
             select: {
                 employeeId: true,
@@ -45,6 +46,7 @@ export class EmployeeContextService {
                 employeeNumber: true,
                 department: true,
                 position: true,
+                status: true,
             },
         });
 
@@ -57,7 +59,8 @@ export class EmployeeContextService {
     async 관리자_후보_목록을_조회한다(): Promise<EmplyeesByDepartmentResponseDto[]> {
         const candidates = await this.domainEmployeeService.findAll({
             where: {
-                department: Not(In(['퇴사', '관리자'])),
+                department: Not(In(['관리자'])),
+                status: Not(In(['퇴사'])),
             },
             select: {
                 employeeId: true,
@@ -83,7 +86,8 @@ export class EmployeeContextService {
     async 직원_목록을_조회한다(): Promise<EmplyeesByDepartmentResponseDto[]> {
         const employees = await this.domainEmployeeService.findAll({
             where: {
-                department: Not(In(['퇴사', '관리자'])),
+                department: Not(In(['관리자'])),
+                status: Not(In(['퇴사'])),
             },
             select: {
                 employeeId: true,
@@ -91,6 +95,7 @@ export class EmployeeContextService {
                 employeeNumber: true,
                 department: true,
                 position: true,
+                status: true,
             },
         });
 
@@ -218,12 +223,14 @@ export class EmployeeContextService {
         const { employees, total } = await this.employeeMicroserviceAdapter.getAllEmployees(authorization);
         for (const employee of employees) {
             const existingEmployee = await this.domainEmployeeService.findByEmployeeNumber(employee.employeeNumber);
+            console.log('update employee', employee);
 
             if (employee.status === '퇴사') {
                 if (existingEmployee) {
                     await this.domainEmployeeService.update(existingEmployee.employeeId, {
-                        department: employee.status,
-                        position: employee.status,
+                        department: employee.department.departmentCode,
+                        position: employee.rank.rankName,
+                        status: employee.status,
                     });
                 }
                 continue;
@@ -233,9 +240,10 @@ export class EmployeeContextService {
                 if (existingEmployee) {
                     existingEmployee.name = employee.name;
                     existingEmployee.employeeNumber = employee.employeeNumber;
-                    existingEmployee.department = employee.department.departmentName;
+                    existingEmployee.department = employee.department.departmentCode;
                     existingEmployee.position = employee.rank.rankName;
                     existingEmployee.mobile = employee.phoneNumber;
+                    existingEmployee.status = employee.status;
                     await this.domainEmployeeService.save(existingEmployee);
                 } else {
                     console.log('create employee', employee);
@@ -243,9 +251,10 @@ export class EmployeeContextService {
                         employeeNumber: employee.employeeNumber,
                         name: employee.name,
                         email: employee.email,
-                        department: employee.department.departmentName,
+                        department: employee.department.departmentCode,
                         position: employee.rank.rankName,
                         mobile: employee.phoneNumber,
+                        status: employee.status,
                     };
                     const newEmployee = await this.domainEmployeeService.create(employeeData);
                     await this.domainEmployeeService.save(newEmployee);
@@ -261,7 +270,8 @@ export class EmployeeContextService {
         const employees = await this.domainEmployeeService.findAll({
             where: {
                 subscriptions: Not(IsNull()),
-                department: Not(In(['퇴사', '관리자'])),
+                department: Not(In(['관리자'])),
+                status: Not(In(['퇴사'])),
             },
         });
         let count = 1;
