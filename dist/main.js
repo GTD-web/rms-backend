@@ -22508,7 +22508,7 @@ class ReservationListQueryDto {
 exports.ReservationListQueryDto = ReservationListQueryDto;
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: '검색 키워드 (자원명, 예약자명, 설명 등)',
+        description: '검색 키워드 (자원명, 예약자명, 예약명)',
         example: '회의실',
     }),
     (0, class_validator_1.IsOptional)(),
@@ -22529,7 +22529,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: '페이지당 항목 수',
-        example: 10,
+        example: 100,
         default: 100,
     }),
     (0, class_validator_1.IsOptional)(),
@@ -22566,7 +22566,7 @@ __decorate([
 ], ReservationListQueryDto.prototype, "resourceType", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: '예약 상태 (다중 선택 가능)',
+        description: '예약 상태',
         enum: reservation_type_enum_1.ReservationStatus,
         example: reservation_type_enum_1.ReservationStatus.CONFIRMED,
     }),
@@ -22585,15 +22585,6 @@ __decorate([
     (0, class_validator_1.IsEnum)(ReservationSortOrder),
     __metadata("design:type", String)
 ], ReservationListQueryDto.prototype, "sortOrder", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: '특정 자원 ID (deprecated - resourceType 사용 권장)',
-        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], ReservationListQueryDto.prototype, "resourceId", void 0);
 
 
 /***/ }),

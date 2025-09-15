@@ -14,7 +14,7 @@ export enum ReservationSortOrder {
 
 export class ReservationListQueryDto {
     @ApiPropertyOptional({
-        description: '검색 키워드 (자원명, 예약자명, 설명 등)',
+        description: '검색 키워드 (자원명, 예약자명, 예약명)',
         example: '회의실',
     })
     @IsOptional()
@@ -33,7 +33,7 @@ export class ReservationListQueryDto {
 
     @ApiPropertyOptional({
         description: '페이지당 항목 수',
-        example: 10,
+        example: 100,
         default: 100,
     })
     @IsOptional()
@@ -66,9 +66,8 @@ export class ReservationListQueryDto {
     resourceType?: ResourceType;
 
     @ApiPropertyOptional({
-        description: '예약 상태 (다중 선택 가능)',
+        description: '예약 상태',
         enum: ReservationStatus,
-        // isArray: true,
         example: ReservationStatus.CONFIRMED,
     })
     @IsOptional()
@@ -85,11 +84,11 @@ export class ReservationListQueryDto {
     @IsEnum(ReservationSortOrder)
     sortOrder?: ReservationSortOrder = ReservationSortOrder.DESC;
 
-    @ApiPropertyOptional({
-        description: '특정 자원 ID (deprecated - resourceType 사용 권장)',
-        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
-    })
-    @IsOptional()
-    @IsString()
-    resourceId?: string;
+    // @ApiPropertyOptional({
+    //     description: '특정 자원 ID (deprecated - resourceType 사용 권장)',
+    //     example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
+    // })
+    // @IsOptional()
+    // @IsString()
+    // resourceId?: string;
 }
