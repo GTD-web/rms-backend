@@ -944,6 +944,8 @@ export class ScheduleManagementService {
                           notifyMinutesBeforeStart: updateDto.info?.notifyMinutesBeforeStart,
                           location: updateDto.info?.location,
                           scheduleType: updateDto.info?.scheduleType,
+                          scheduleDepartment:
+                              updateDto.info?.scheduleType === ScheduleType.DEPARTMENT ? user.department : null,
                           projectId: updateDto.info?.projectId,
                           participants: updateDto.info?.participants,
                       }

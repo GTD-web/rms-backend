@@ -29210,6 +29210,16 @@ __decorate([
 ], ScheduleUpdateInfoDto.prototype, "scheduleType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        description: '일정 부서',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ScheduleUpdateInfoDto.prototype, "scheduleDepartment", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         description: '프로젝트 ID',
         example: '123e4567-e89b-12d3-a456-426614174000',
         required: false,
@@ -29266,6 +29276,7 @@ __decorate([
             notifyMinutesBeforeStart: [10, 30],
             location: '11층 or 수지구 동천동',
             scheduleType: schedule_type_enum_1.ScheduleType.PERSONAL,
+            scheduleDepartment: '123e4567-e89b-12d3-a456-426614174000',
             projectId: '123e4567-e89b-12d3-a456-426614174000',
             participants: ['123e4567-e89b-12d3-a456-426614174000'],
         },
@@ -29981,6 +29992,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     notifyMinutesBeforeStart: updateDto.info?.notifyMinutesBeforeStart,
                     location: updateDto.info?.location,
                     scheduleType: updateDto.info?.scheduleType,
+                    scheduleDepartment: updateDto.info?.scheduleType === schedule_type_enum_1.ScheduleType.DEPARTMENT ? user.department : null,
                     projectId: updateDto.info?.projectId,
                     participants: updateDto.info?.participants,
                 }

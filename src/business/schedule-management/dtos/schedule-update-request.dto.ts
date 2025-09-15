@@ -96,6 +96,15 @@ export class ScheduleUpdateInfoDto {
     scheduleType: ScheduleType;
 
     @ApiProperty({
+        description: '일정 부서',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        required: false,
+    })
+    @IsOptional()
+    @IsString()
+    scheduleDepartment?: string;
+
+    @ApiProperty({
         description: '프로젝트 ID',
         example: '123e4567-e89b-12d3-a456-426614174000',
         required: false,
@@ -149,6 +158,7 @@ export class ScheduleUpdateRequestDto {
             notifyMinutesBeforeStart: [10, 30],
             location: '11층 or 수지구 동천동',
             scheduleType: ScheduleType.PERSONAL,
+            scheduleDepartment: '123e4567-e89b-12d3-a456-426614174000',
             projectId: '123e4567-e89b-12d3-a456-426614174000',
             participants: ['123e4567-e89b-12d3-a456-426614174000'],
         },

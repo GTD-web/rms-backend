@@ -587,6 +587,7 @@ export interface InfoChanges {
     notifyMinutesBeforeStart?: number[];
     location?: string;
     scheduleType?: any;
+    scheduleDepartment?: string;
     projectId?: string;
     participants?: string[];
 }
