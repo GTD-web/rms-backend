@@ -372,7 +372,7 @@ export class EmployeeMicroserviceAdapter {
                         {
                             employeeNumber: employeeNumber,
                             fcmToken: fcmSubscribeDto.fcmToken,
-                            deviceType: 'ANDROID',
+                            deviceType: 'prod',
                         },
                         {
                             headers: this.getHeaders(authorization),

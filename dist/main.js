@@ -21592,6 +21592,7 @@ let EmployeeManagementService = class EmployeeManagementService {
     }
     async syncEmployees(authorization) {
         await this.employeeContextService.직원_정보를_동기화한다(authorization);
+        await this.syncSubscription();
     }
     async syncSubscription() {
         await this.employeeContextService.구독정보를_동기화한다();
@@ -22036,8 +22037,6 @@ let NotificationManagementService = class NotificationManagementService {
         this.notificationContextService = notificationContextService;
         this.cronNotificationContextService = cronNotificationContextService;
         this.scheduleContextService = scheduleContextService;
-    }
-    async onModuleInit() {
     }
     async 구독_목록을_조회한다(employeeIds) {
         return await this.notificationContextService.구독_목록을_조회한다(employeeIds);
@@ -38960,7 +38959,7 @@ let EmployeeMicroserviceAdapter = EmployeeMicroserviceAdapter_1 = class Employee
                 .post(url, {
                 employeeNumber: employeeNumber,
                 fcmToken: fcmSubscribeDto.fcmToken,
-                deviceType: 'ANDROID',
+                deviceType: 'prod',
             }, {
                 headers: this.getHeaders(authorization),
             })

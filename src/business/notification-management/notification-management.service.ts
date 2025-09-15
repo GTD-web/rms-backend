@@ -30,22 +30,7 @@ export class NotificationManagementService {
         private readonly cronNotificationContextService: CronNotificationContextService,
         private readonly scheduleContextService: ScheduleQueryContextService,
     ) {}
-    async onModuleInit() {
-        // 테스트 코드
-        // 00초를 찾은 순간부터 반복문 실행
-        // let isFirst = true;
-        // while (isFirst) {
-        //     const now = DateUtil.now().toDate();
-        //     const seconds = now.getSeconds();
-        //     if (seconds === 0) {
-        //         isFirst = false;
-        //     }
-        // }
-        // for (let i = 0; i < 1000; i++) {
-        //     await this.다가오는_일정의_알림을_전송한다();
-        //     await new Promise((resolve) => setTimeout(resolve, 1000 * 60));
-        // }
-    }
+
     async 구독_목록을_조회한다(employeeIds: string[]): Promise<string[]> {
         return await this.notificationContextService.구독_목록을_조회한다(employeeIds);
     }
