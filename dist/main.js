@@ -27947,7 +27947,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleCalendarResponseDto = exports.ScheduleCalendarItemDto = exports.ProjectDto = exports.ReservationDto = void 0;
+exports.ScheduleCalendarResponseDto = exports.ProjectGroupDto = exports.ResourceGroupDto = exports.EmployeeGroupDto = exports.DateGroupDto = exports.ScheduleCalendarItemDto = exports.ProjectDto = exports.ReservationDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 class ReservationDto {
 }
@@ -28053,6 +28053,191 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], ScheduleCalendarItemDto.prototype, "notificationId", void 0);
+class DateGroupDto {
+}
+exports.DateGroupDto = DateGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '날짜 (YYYY-MM-DD)',
+        example: '2024-01-15',
+    }),
+    __metadata("design:type", String)
+], DateGroupDto.prototype, "date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '요일',
+        example: '월요일',
+    }),
+    __metadata("design:type", String)
+], DateGroupDto.prototype, "dayOfWeek", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 날짜의 일정 수',
+        example: 4,
+    }),
+    __metadata("design:type", Number)
+], DateGroupDto.prototype, "count", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 날짜의 일정 목록',
+        type: [ScheduleCalendarItemDto],
+    }),
+    __metadata("design:type", Array)
+], DateGroupDto.prototype, "schedules", void 0);
+class EmployeeGroupDto {
+}
+exports.EmployeeGroupDto = EmployeeGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], EmployeeGroupDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원 이름',
+        example: '홍길동',
+    }),
+    __metadata("design:type", String)
+], EmployeeGroupDto.prototype, "employeeName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '부서명',
+        example: '개발팀',
+    }),
+    __metadata("design:type", String)
+], EmployeeGroupDto.prototype, "department", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 수',
+        example: 5,
+    }),
+    __metadata("design:type", Number)
+], EmployeeGroupDto.prototype, "count", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참가자 타입별 카운트',
+        example: {
+            reserver: 3,
+            participant: 2,
+            ccRecipient: 0,
+        },
+    }),
+    __metadata("design:type", Object)
+], EmployeeGroupDto.prototype, "types", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 직원의 일정 목록',
+        type: [ScheduleCalendarItemDto],
+    }),
+    __metadata("design:type", Array)
+], EmployeeGroupDto.prototype, "schedules", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 직원의 날짜별 그룹화된 일정',
+        type: [DateGroupDto],
+    }),
+    __metadata("design:type", Array)
+], EmployeeGroupDto.prototype, "dateGroups", void 0);
+class ResourceGroupDto {
+}
+exports.ResourceGroupDto = ResourceGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ResourceGroupDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 이름',
+        example: '회의실 A',
+    }),
+    __metadata("design:type", String)
+], ResourceGroupDto.prototype, "resourceName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원 타입',
+        example: 'MEETING_ROOM',
+    }),
+    __metadata("design:type", String)
+], ResourceGroupDto.prototype, "resourceType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '위치',
+        example: '3층',
+    }),
+    __metadata("design:type", String)
+], ResourceGroupDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 수',
+        example: 8,
+    }),
+    __metadata("design:type", Number)
+], ResourceGroupDto.prototype, "count", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 자원의 일정 목록',
+        type: [ScheduleCalendarItemDto],
+    }),
+    __metadata("design:type", Array)
+], ResourceGroupDto.prototype, "schedules", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 자원의 날짜별 그룹화된 일정',
+        type: [DateGroupDto],
+    }),
+    __metadata("design:type", Array)
+], ResourceGroupDto.prototype, "dateGroups", void 0);
+class ProjectGroupDto {
+}
+exports.ProjectGroupDto = ProjectGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ProjectGroupDto.prototype, "projectId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 이름',
+        example: 'RMS 개발 프로젝트',
+    }),
+    __metadata("design:type", String)
+], ProjectGroupDto.prototype, "projectName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 설명',
+        example: '자원 관리 시스템 개발',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], ProjectGroupDto.prototype, "projectDescription", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 수',
+        example: 12,
+    }),
+    __metadata("design:type", Number)
+], ProjectGroupDto.prototype, "count", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 프로젝트의 일정 목록',
+        type: [ScheduleCalendarItemDto],
+    }),
+    __metadata("design:type", Array)
+], ProjectGroupDto.prototype, "schedules", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '해당 프로젝트의 날짜별 그룹화된 일정',
+        type: [DateGroupDto],
+    }),
+    __metadata("design:type", Array)
+], ProjectGroupDto.prototype, "dateGroups", void 0);
 class ScheduleCalendarResponseDto {
 }
 exports.ScheduleCalendarResponseDto = ScheduleCalendarResponseDto;
@@ -28063,6 +28248,30 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], ScheduleCalendarResponseDto.prototype, "schedules", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원별 그룹화된 일정 (각 직원 내에서 날짜별로도 그룹화)',
+        type: [EmployeeGroupDto],
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ScheduleCalendarResponseDto.prototype, "employees", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '자원별 그룹화된 일정 (각 자원 내에서 날짜별로도 그룹화)',
+        type: [ResourceGroupDto],
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ScheduleCalendarResponseDto.prototype, "resources", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트별 그룹화된 일정 (각 프로젝트 내에서 날짜별로도 그룹화)',
+        type: [ProjectGroupDto],
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ScheduleCalendarResponseDto.prototype, "projects", void 0);
 
 
 /***/ }),
@@ -29566,8 +29775,142 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 notificationId: notificationInfo.notificationId,
             };
         });
+        const groupedData = this.groupScheduleData(scheduleCalendarItems, filteredScheduleDataList);
         return {
             schedules: scheduleCalendarItems,
+            employees: groupedData.employees,
+            resources: groupedData.resources,
+            projects: groupedData.projects,
+        };
+    }
+    groupScheduleData(scheduleCalendarItems, scheduleDataList) {
+        const employeeGroups = new Map();
+        const resourceGroups = new Map();
+        const projectGroups = new Map();
+        scheduleDataList.forEach(({ schedule, reservation, resource, participants, project }, index) => {
+            const scheduleItem = scheduleCalendarItems[index];
+            const dateKey = new Date(schedule.startDate).toISOString().split('T')[0];
+            if (participants && participants.length > 0) {
+                participants.forEach((participant) => {
+                    const employeeKey = participant.employeeId;
+                    if (!employeeGroups.has(employeeKey)) {
+                        employeeGroups.set(employeeKey, {
+                            employeeId: participant.employeeId,
+                            employeeName: participant.employee?.name || '알 수 없음',
+                            department: participant.employee?.department || '미정',
+                            schedules: [],
+                            count: 0,
+                            types: {
+                                reserver: 0,
+                                participant: 0,
+                                ccRecipient: 0,
+                            },
+                            dateGroups: new Map(),
+                        });
+                    }
+                    const employeeGroup = employeeGroups.get(employeeKey);
+                    employeeGroup.schedules.push({
+                        ...scheduleItem,
+                        participantType: participant.type,
+                    });
+                    employeeGroup.count++;
+                    if (!employeeGroup.dateGroups.has(dateKey)) {
+                        employeeGroup.dateGroups.set(dateKey, {
+                            date: dateKey,
+                            dayOfWeek: new Date(schedule.startDate).toLocaleDateString('ko-KR', { weekday: 'long' }),
+                            schedules: [],
+                            count: 0,
+                        });
+                    }
+                    employeeGroup.dateGroups.get(dateKey).schedules.push({
+                        ...scheduleItem,
+                        participantType: participant.type,
+                    });
+                    employeeGroup.dateGroups.get(dateKey).count++;
+                    if (participant.type === 'RESERVER')
+                        employeeGroup.types.reserver++;
+                    else if (participant.type === 'PARTICIPANT')
+                        employeeGroup.types.participant++;
+                    else if (participant.type === 'CC_RECEIPIENT')
+                        employeeGroup.types.ccRecipient++;
+                });
+            }
+            if (resource) {
+                const resourceKey = resource.resourceId;
+                if (!resourceGroups.has(resourceKey)) {
+                    resourceGroups.set(resourceKey, {
+                        resourceId: resource.resourceId,
+                        resourceName: resource.resourceName,
+                        resourceType: resource.type,
+                        location: resource.location,
+                        schedules: [],
+                        count: 0,
+                        dateGroups: new Map(),
+                    });
+                }
+                const resourceGroup = resourceGroups.get(resourceKey);
+                resourceGroup.schedules.push(scheduleItem);
+                resourceGroup.count++;
+                if (!resourceGroup.dateGroups.has(dateKey)) {
+                    resourceGroup.dateGroups.set(dateKey, {
+                        date: dateKey,
+                        dayOfWeek: new Date(schedule.startDate).toLocaleDateString('ko-KR', { weekday: 'long' }),
+                        schedules: [],
+                        count: 0,
+                    });
+                }
+                resourceGroup.dateGroups.get(dateKey).schedules.push(scheduleItem);
+                resourceGroup.dateGroups.get(dateKey).count++;
+            }
+            if (project) {
+                const projectKey = project.projectId;
+                if (!projectGroups.has(projectKey)) {
+                    projectGroups.set(projectKey, {
+                        projectId: project.projectId,
+                        projectName: project.projectName,
+                        projectDescription: project.description || '',
+                        schedules: [],
+                        count: 0,
+                        dateGroups: new Map(),
+                    });
+                }
+                const projectGroup = projectGroups.get(projectKey);
+                projectGroup.schedules.push(scheduleItem);
+                projectGroup.count++;
+                if (!projectGroup.dateGroups.has(dateKey)) {
+                    projectGroup.dateGroups.set(dateKey, {
+                        date: dateKey,
+                        dayOfWeek: new Date(schedule.startDate).toLocaleDateString('ko-KR', { weekday: 'long' }),
+                        schedules: [],
+                        count: 0,
+                    });
+                }
+                projectGroup.dateGroups.get(dateKey).schedules.push(scheduleItem);
+                projectGroup.dateGroups.get(dateKey).count++;
+            }
+        });
+        const employees = Array.from(employeeGroups.values())
+            .map((group) => ({
+            ...group,
+            dateGroups: Array.from(group.dateGroups.values()).sort((a, b) => a.date.localeCompare(b.date)),
+        }))
+            .sort((a, b) => b.count - a.count);
+        const resources = Array.from(resourceGroups.values())
+            .map((group) => ({
+            ...group,
+            dateGroups: Array.from(group.dateGroups.values()).sort((a, b) => a.date.localeCompare(b.date)),
+        }))
+            .sort((a, b) => b.count - a.count);
+        const projects = Array.from(projectGroups.values())
+            .map((group) => ({
+            ...group,
+            dateGroups: Array.from(group.dateGroups.values()).sort((a, b) => a.date.localeCompare(b.date)),
+        }))
+            .sort((a, b) => b.count - a.count);
+        return {
+            employees,
+            resources,
+            projects,
         };
     }
     async findMySchedules(user, query) {

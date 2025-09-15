@@ -89,10 +89,192 @@ export class ScheduleCalendarItemDto {
     notificationId?: string;
 }
 
+export class DateGroupDto {
+    @ApiProperty({
+        description: '날짜 (YYYY-MM-DD)',
+        example: '2024-01-15',
+    })
+    date: string;
+
+    @ApiProperty({
+        description: '요일',
+        example: '월요일',
+    })
+    dayOfWeek: string;
+
+    @ApiProperty({
+        description: '해당 날짜의 일정 수',
+        example: 4,
+    })
+    count: number;
+
+    @ApiProperty({
+        description: '해당 날짜의 일정 목록',
+        type: [ScheduleCalendarItemDto],
+    })
+    schedules: ScheduleCalendarItemDto[];
+}
+
+export class EmployeeGroupDto {
+    @ApiProperty({
+        description: '직원 ID',
+        example: 'uuid-string',
+    })
+    employeeId: string;
+
+    @ApiProperty({
+        description: '직원 이름',
+        example: '홍길동',
+    })
+    employeeName: string;
+
+    @ApiProperty({
+        description: '부서명',
+        example: '개발팀',
+    })
+    department: string;
+
+    @ApiProperty({
+        description: '일정 수',
+        example: 5,
+    })
+    count: number;
+
+    @ApiProperty({
+        description: '참가자 타입별 카운트',
+        example: {
+            reserver: 3,
+            participant: 2,
+            ccRecipient: 0,
+        },
+    })
+    types: {
+        reserver: number;
+        participant: number;
+        ccRecipient: number;
+    };
+
+    @ApiProperty({
+        description: '해당 직원의 일정 목록',
+        type: [ScheduleCalendarItemDto],
+    })
+    schedules: ScheduleCalendarItemDto[];
+
+    @ApiProperty({
+        description: '해당 직원의 날짜별 그룹화된 일정',
+        type: [DateGroupDto],
+    })
+    dateGroups: DateGroupDto[];
+}
+
+export class ResourceGroupDto {
+    @ApiProperty({
+        description: '자원 ID',
+        example: 'uuid-string',
+    })
+    resourceId: string;
+
+    @ApiProperty({
+        description: '자원 이름',
+        example: '회의실 A',
+    })
+    resourceName: string;
+
+    @ApiProperty({
+        description: '자원 타입',
+        example: 'MEETING_ROOM',
+    })
+    resourceType: string;
+
+    @ApiProperty({
+        description: '위치',
+        example: '3층',
+    })
+    location: string;
+
+    @ApiProperty({
+        description: '일정 수',
+        example: 8,
+    })
+    count: number;
+
+    @ApiProperty({
+        description: '해당 자원의 일정 목록',
+        type: [ScheduleCalendarItemDto],
+    })
+    schedules: ScheduleCalendarItemDto[];
+
+    @ApiProperty({
+        description: '해당 자원의 날짜별 그룹화된 일정',
+        type: [DateGroupDto],
+    })
+    dateGroups: DateGroupDto[];
+}
+
+export class ProjectGroupDto {
+    @ApiProperty({
+        description: '프로젝트 ID',
+        example: 'uuid-string',
+    })
+    projectId: string;
+
+    @ApiProperty({
+        description: '프로젝트 이름',
+        example: 'RMS 개발 프로젝트',
+    })
+    projectName: string;
+
+    @ApiProperty({
+        description: '프로젝트 설명',
+        example: '자원 관리 시스템 개발',
+        required: false,
+    })
+    projectDescription?: string;
+
+    @ApiProperty({
+        description: '일정 수',
+        example: 12,
+    })
+    count: number;
+
+    @ApiProperty({
+        description: '해당 프로젝트의 일정 목록',
+        type: [ScheduleCalendarItemDto],
+    })
+    schedules: ScheduleCalendarItemDto[];
+
+    @ApiProperty({
+        description: '해당 프로젝트의 날짜별 그룹화된 일정',
+        type: [DateGroupDto],
+    })
+    dateGroups: DateGroupDto[];
+}
+
 export class ScheduleCalendarResponseDto {
     @ApiProperty({
         description: '일정 목록',
         type: [ScheduleCalendarItemDto],
     })
     schedules: ScheduleCalendarItemDto[];
+
+    @ApiProperty({
+        description: '직원별 그룹화된 일정 (각 직원 내에서 날짜별로도 그룹화)',
+        type: [EmployeeGroupDto],
+        required: false,
+    })
+    employees?: EmployeeGroupDto[];
+
+    @ApiProperty({
+        description: '자원별 그룹화된 일정 (각 자원 내에서 날짜별로도 그룹화)',
+        type: [ResourceGroupDto],
+        required: false,
+    })
+    resources?: ResourceGroupDto[];
+
+    @ApiProperty({
+        description: '프로젝트별 그룹화된 일정 (각 프로젝트 내에서 날짜별로도 그룹화)',
+        type: [ProjectGroupDto],
+        required: false,
+    })
+    projects?: ProjectGroupDto[];
 }

@@ -183,8 +183,172 @@ export class ScheduleManagementService {
                 };
             },
         );
+
+        // 데이터 그룹화 및 분류
+        const groupedData = this.groupScheduleData(scheduleCalendarItems, filteredScheduleDataList);
+
         return {
             schedules: scheduleCalendarItems,
+            employees: groupedData.employees,
+            resources: groupedData.resources,
+            projects: groupedData.projects,
+        };
+    }
+
+    /**
+     * 일정 데이터를 카테고리별로 그룹화 (각 카테고리 내에서 날짜별로도 그룹화)
+     */
+    private groupScheduleData(scheduleCalendarItems: any[], scheduleDataList: any[]) {
+        const employeeGroups = new Map();
+        const resourceGroups = new Map();
+        const projectGroups = new Map();
+
+        scheduleDataList.forEach(({ schedule, reservation, resource, participants, project }, index) => {
+            const scheduleItem = scheduleCalendarItems[index];
+            const dateKey = new Date(schedule.startDate).toISOString().split('T')[0];
+
+            // 직원별 그룹화 (참가자 기준)
+            if (participants && participants.length > 0) {
+                participants.forEach((participant) => {
+                    const employeeKey = participant.employeeId;
+                    if (!employeeGroups.has(employeeKey)) {
+                        employeeGroups.set(employeeKey, {
+                            employeeId: participant.employeeId,
+                            employeeName: participant.employee?.name || '알 수 없음',
+                            department: participant.employee?.department || '미정',
+                            schedules: [],
+                            count: 0,
+                            types: {
+                                reserver: 0,
+                                participant: 0,
+                                ccRecipient: 0,
+                            },
+                            dateGroups: new Map(),
+                        });
+                    }
+                    const employeeGroup = employeeGroups.get(employeeKey);
+                    employeeGroup.schedules.push({
+                        ...scheduleItem,
+                        participantType: participant.type,
+                    });
+                    employeeGroup.count++;
+
+                    // 직원별 날짜 그룹화
+                    if (!employeeGroup.dateGroups.has(dateKey)) {
+                        employeeGroup.dateGroups.set(dateKey, {
+                            date: dateKey,
+                            dayOfWeek: new Date(schedule.startDate).toLocaleDateString('ko-KR', { weekday: 'long' }),
+                            schedules: [],
+                            count: 0,
+                        });
+                    }
+                    employeeGroup.dateGroups.get(dateKey).schedules.push({
+                        ...scheduleItem,
+                        participantType: participant.type,
+                    });
+                    employeeGroup.dateGroups.get(dateKey).count++;
+
+                    // 참가자 타입별 카운트
+                    if (participant.type === 'RESERVER') employeeGroup.types.reserver++;
+                    else if (participant.type === 'PARTICIPANT') employeeGroup.types.participant++;
+                    else if (participant.type === 'CC_RECEIPIENT') employeeGroup.types.ccRecipient++;
+                });
+            }
+
+            // 자원별 그룹화
+            if (resource) {
+                const resourceKey = resource.resourceId;
+                if (!resourceGroups.has(resourceKey)) {
+                    resourceGroups.set(resourceKey, {
+                        resourceId: resource.resourceId,
+                        resourceName: resource.resourceName,
+                        resourceType: resource.type,
+                        location: resource.location,
+                        schedules: [],
+                        count: 0,
+                        dateGroups: new Map(),
+                    });
+                }
+                const resourceGroup = resourceGroups.get(resourceKey);
+                resourceGroup.schedules.push(scheduleItem);
+                resourceGroup.count++;
+
+                // 자원별 날짜 그룹화
+                if (!resourceGroup.dateGroups.has(dateKey)) {
+                    resourceGroup.dateGroups.set(dateKey, {
+                        date: dateKey,
+                        dayOfWeek: new Date(schedule.startDate).toLocaleDateString('ko-KR', { weekday: 'long' }),
+                        schedules: [],
+                        count: 0,
+                    });
+                }
+                resourceGroup.dateGroups.get(dateKey).schedules.push(scheduleItem);
+                resourceGroup.dateGroups.get(dateKey).count++;
+            }
+
+            // 프로젝트별 그룹화
+            if (project) {
+                const projectKey = project.projectId;
+                if (!projectGroups.has(projectKey)) {
+                    projectGroups.set(projectKey, {
+                        projectId: project.projectId,
+                        projectName: project.projectName,
+                        projectDescription: project.description || '',
+                        schedules: [],
+                        count: 0,
+                        dateGroups: new Map(),
+                    });
+                }
+                const projectGroup = projectGroups.get(projectKey);
+                projectGroup.schedules.push(scheduleItem);
+                projectGroup.count++;
+
+                // 프로젝트별 날짜 그룹화
+                if (!projectGroup.dateGroups.has(dateKey)) {
+                    projectGroup.dateGroups.set(dateKey, {
+                        date: dateKey,
+                        dayOfWeek: new Date(schedule.startDate).toLocaleDateString('ko-KR', { weekday: 'long' }),
+                        schedules: [],
+                        count: 0,
+                    });
+                }
+                projectGroup.dateGroups.get(dateKey).schedules.push(scheduleItem);
+                projectGroup.dateGroups.get(dateKey).count++;
+            }
+        });
+
+        // Map을 Array로 변환하고 정렬
+        const employees = Array.from(employeeGroups.values())
+            .map((group) => ({
+                ...group,
+                dateGroups: Array.from(group.dateGroups.values()).sort((a: any, b: any) =>
+                    a.date.localeCompare(b.date),
+                ),
+            }))
+            .sort((a, b) => b.count - a.count);
+
+        const resources = Array.from(resourceGroups.values())
+            .map((group) => ({
+                ...group,
+                dateGroups: Array.from(group.dateGroups.values()).sort((a: any, b: any) =>
+                    a.date.localeCompare(b.date),
+                ),
+            }))
+            .sort((a, b) => b.count - a.count);
+
+        const projects = Array.from(projectGroups.values())
+            .map((group) => ({
+                ...group,
+                dateGroups: Array.from(group.dateGroups.values()).sort((a: any, b: any) =>
+                    a.date.localeCompare(b.date),
+                ),
+            }))
+            .sort((a, b) => b.count - a.count);
+
+        return {
+            employees,
+            resources,
+            projects,
         };
     }
 
