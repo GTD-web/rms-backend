@@ -27947,7 +27947,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleCalendarResponseDto = exports.ProjectGroupDto = exports.ResourceGroupDto = exports.EmployeeGroupDto = exports.DateGroupDto = exports.ScheduleCalendarItemDto = exports.ProjectDto = exports.ReservationDto = void 0;
+exports.ScheduleCalendarResponseDto = exports.ProjectGroupDto = exports.CalendarResourceGroupDto = exports.EmployeeGroupDto = exports.DateGroupDto = exports.ScheduleCalendarItemDto = exports.ProjectDto = exports.ReservationDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 class ReservationDto {
 }
@@ -28140,58 +28140,58 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], EmployeeGroupDto.prototype, "dateGroups", void 0);
-class ResourceGroupDto {
+class CalendarResourceGroupDto {
 }
-exports.ResourceGroupDto = ResourceGroupDto;
+exports.CalendarResourceGroupDto = CalendarResourceGroupDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '자원 ID',
         example: 'uuid-string',
     }),
     __metadata("design:type", String)
-], ResourceGroupDto.prototype, "resourceId", void 0);
+], CalendarResourceGroupDto.prototype, "resourceId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '자원 이름',
         example: '회의실 A',
     }),
     __metadata("design:type", String)
-], ResourceGroupDto.prototype, "resourceName", void 0);
+], CalendarResourceGroupDto.prototype, "resourceName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '자원 타입',
         example: 'MEETING_ROOM',
     }),
     __metadata("design:type", String)
-], ResourceGroupDto.prototype, "resourceType", void 0);
+], CalendarResourceGroupDto.prototype, "resourceType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '위치',
         example: '3층',
     }),
     __metadata("design:type", String)
-], ResourceGroupDto.prototype, "location", void 0);
+], CalendarResourceGroupDto.prototype, "location", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '일정 수',
         example: 8,
     }),
     __metadata("design:type", Number)
-], ResourceGroupDto.prototype, "count", void 0);
+], CalendarResourceGroupDto.prototype, "count", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '해당 자원의 일정 목록',
         type: [ScheduleCalendarItemDto],
     }),
     __metadata("design:type", Array)
-], ResourceGroupDto.prototype, "schedules", void 0);
+], CalendarResourceGroupDto.prototype, "schedules", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '해당 자원의 날짜별 그룹화된 일정',
         type: [DateGroupDto],
     }),
     __metadata("design:type", Array)
-], ResourceGroupDto.prototype, "dateGroups", void 0);
+], CalendarResourceGroupDto.prototype, "dateGroups", void 0);
 class ProjectGroupDto {
 }
 exports.ProjectGroupDto = ProjectGroupDto;
@@ -28259,7 +28259,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '자원별 그룹화된 일정 (각 자원 내에서 날짜별로도 그룹화)',
-        type: [ResourceGroupDto],
+        type: [CalendarResourceGroupDto],
         required: false,
     }),
     __metadata("design:type", Array)

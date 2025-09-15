@@ -167,7 +167,7 @@ export class EmployeeGroupDto {
     dateGroups: DateGroupDto[];
 }
 
-export class ResourceGroupDto {
+export class CalendarResourceGroupDto {
     @ApiProperty({
         description: '자원 ID',
         example: 'uuid-string',
@@ -266,10 +266,10 @@ export class ScheduleCalendarResponseDto {
 
     @ApiProperty({
         description: '자원별 그룹화된 일정 (각 자원 내에서 날짜별로도 그룹화)',
-        type: [ResourceGroupDto],
+        type: [CalendarResourceGroupDto],
         required: false,
     })
-    resources?: ResourceGroupDto[];
+    resources?: CalendarResourceGroupDto[];
 
     @ApiProperty({
         description: '프로젝트별 그룹화된 일정 (각 프로젝트 내에서 날짜별로도 그룹화)',
