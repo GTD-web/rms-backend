@@ -34226,7 +34226,9 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         if (!employees || employees.length === 0) {
             return [];
         }
+        console.log(employees);
         const { byEmployee, allTokens, totalEmployees, totalTokens } = await this.employeeMicroserviceAdapter.getFcmTokens('', employees.map((employee) => employee.employeeNumber));
+        console.log(allTokens);
         if (totalTokens === 0) {
             return [];
         }

@@ -277,7 +277,7 @@ export class NotificationContextService {
         if (!employees || employees.length === 0) {
             return [];
         }
-
+        console.log(employees);
         // deprecated
         // const tokens = employees
         //     .filter(
@@ -291,6 +291,7 @@ export class NotificationContextService {
                 '',
                 employees.map((employee) => employee.employeeNumber),
             );
+        console.log(allTokens);
         if (totalTokens === 0) {
             return [];
         }
