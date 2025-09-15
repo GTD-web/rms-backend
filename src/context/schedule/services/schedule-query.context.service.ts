@@ -3,7 +3,7 @@ import { DomainScheduleService } from '@src/domain/schedule/schedule.service';
 import { DomainScheduleParticipantService } from '@src/domain/schedule-participant/schedule-participant.service';
 import { DomainScheduleRelationService } from '@src/domain/schedule-relation/schedule-relation.service';
 
-import { Between, In, Like, MoreThanOrEqual, Not, IsNull } from 'typeorm';
+import { Between, In, Like, MoreThanOrEqual, Not, IsNull, LessThanOrEqual } from 'typeorm';
 import { Schedule } from '@libs/entities/schedule.entity';
 import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
 import { ScheduleRelation } from '@libs/entities/schedule-relations.entity';
@@ -339,7 +339,7 @@ export class ScheduleQueryContextService {
     async 캘린더용_일정을_조회한다(
         date: string,
         category?: ScheduleCategoryType,
-        employeeId?: string,
+        employee?: Employee,
     ): Promise<string[]> {
         // 1. 월별 일정 조회
         const startDateOfMonth = new Date(`${date}-01`);
@@ -352,12 +352,19 @@ export class ScheduleQueryContextService {
         let scheduleIds = monthlySchedules.map((schedule) => schedule.scheduleId);
 
         // 2. 내 일정만 보기 옵션 처리
-        if (employeeId) {
+        if (employee) {
             const myParticipants = await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(
-                employeeId,
+                employee.employeeId,
                 scheduleIds,
             );
-            scheduleIds = myParticipants.map((participant) => participant.scheduleId);
+            const myScheduleIds = myParticipants.map((participant) => participant.scheduleId);
+            const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(
+                employee.department,
+                startDateOfMonth,
+                endDateOfMonth,
+            );
+            const allScheduleIds = new Set([...myScheduleIds, ...belongingScheduleIds]);
+            scheduleIds = Array.from(allScheduleIds);
         }
 
         // 3. 카테고리별 필터링
@@ -401,18 +408,20 @@ export class ScheduleQueryContextService {
         return scheduleIds;
     }
 
-    async 직원의_소속_일정ID들을_조회한다(department: string, fromDate?: Date): Promise<string[]> {
+    async 직원의_소속_일정ID들을_조회한다(department: string, fromDate?: Date, endDate?: Date): Promise<string[]> {
         const conditions: any = [
             {
                 scheduleType: ScheduleType.DEPARTMENT,
                 scheduleDepartment: department,
                 deletedAt: IsNull(),
                 ...(fromDate && { startDate: MoreThanOrEqual(fromDate) }),
+                ...(endDate && { endDate: LessThanOrEqual(endDate) }),
             },
             {
                 scheduleType: ScheduleType.COMPANY,
                 deletedAt: IsNull(),
                 ...(fromDate && { startDate: MoreThanOrEqual(fromDate) }),
+                ...(endDate && { endDate: LessThanOrEqual(endDate) }),
             },
         ];
 

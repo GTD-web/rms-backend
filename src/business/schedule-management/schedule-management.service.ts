@@ -112,7 +112,7 @@ export class ScheduleManagementService {
         const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(
             query.date,
             query.category,
-            query.mySchedule ? user.employeeId : undefined,
+            query.mySchedule ? user : undefined,
         );
 
         if (scheduleIds.length === 0) {

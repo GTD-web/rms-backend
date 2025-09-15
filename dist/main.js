@@ -21590,9 +21590,10 @@ let EmployeeManagementService = class EmployeeManagementService {
     constructor(employeeContextService) {
         this.employeeContextService = employeeContextService;
     }
+    onModuleInit() {
+    }
     async syncEmployees(authorization) {
         await this.employeeContextService.직원_정보를_동기화한다(authorization);
-        await this.syncSubscription();
     }
     async syncSubscription() {
         await this.employeeContextService.구독정보를_동기화한다();
@@ -29516,7 +29517,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
     }
     async findCalendar(user, query) {
         this.logger.log(`캘린더 조회 요청 - 사용자: ${user.employeeId}, 날짜: ${query.date}, 직원필터: ${query.employeeIds?.join(',') || '없음'}`);
-        const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(query.date, query.category, query.mySchedule ? user.employeeId : undefined);
+        const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(query.date, query.category, query.mySchedule ? user : undefined);
         if (scheduleIds.length === 0) {
             return { schedules: [] };
         }
@@ -37216,7 +37217,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         }
         return results;
     }
-    async 캘린더용_일정을_조회한다(date, category, employeeId) {
+    async 캘린더용_일정을_조회한다(date, category, employee) {
         const startDateOfMonth = new Date(`${date}-01`);
         const endDateOfMonth = new Date(`${date}-01`);
         endDateOfMonth.setMonth(endDateOfMonth.getMonth() + 1);
@@ -37224,9 +37225,12 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         endDateOfMonth.setHours(23, 59, 59);
         const monthlySchedules = await this.domainScheduleService.findByDateRange(startDateOfMonth, endDateOfMonth);
         let scheduleIds = monthlySchedules.map((schedule) => schedule.scheduleId);
-        if (employeeId) {
-            const myParticipants = await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(employeeId, scheduleIds);
-            scheduleIds = myParticipants.map((participant) => participant.scheduleId);
+        if (employee) {
+            const myParticipants = await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(employee.employeeId, scheduleIds);
+            const myScheduleIds = myParticipants.map((participant) => participant.scheduleId);
+            const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, startDateOfMonth, endDateOfMonth);
+            const allScheduleIds = new Set([...myScheduleIds, ...belongingScheduleIds]);
+            scheduleIds = Array.from(allScheduleIds);
         }
         if (category && category !== 'ALL') {
             const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
@@ -37254,18 +37258,20 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         const scheduleIds = scheduleRelations.map((r) => r.scheduleId);
         return scheduleIds;
     }
-    async 직원의_소속_일정ID들을_조회한다(department, fromDate) {
+    async 직원의_소속_일정ID들을_조회한다(department, fromDate, endDate) {
         const conditions = [
             {
                 scheduleType: schedule_type_enum_1.ScheduleType.DEPARTMENT,
                 scheduleDepartment: department,
                 deletedAt: (0, typeorm_1.IsNull)(),
                 ...(fromDate && { startDate: (0, typeorm_1.MoreThanOrEqual)(fromDate) }),
+                ...(endDate && { endDate: (0, typeorm_1.LessThanOrEqual)(endDate) }),
             },
             {
                 scheduleType: schedule_type_enum_1.ScheduleType.COMPANY,
                 deletedAt: (0, typeorm_1.IsNull)(),
                 ...(fromDate && { startDate: (0, typeorm_1.MoreThanOrEqual)(fromDate) }),
+                ...(endDate && { endDate: (0, typeorm_1.LessThanOrEqual)(endDate) }),
             },
         ];
         const schedules = await this.domainScheduleService.findAll({

@@ -10,9 +10,13 @@ import { UpdateNotificationSettingsDto } from './dtos/notification-settings.dto'
 export class EmployeeManagementService {
     constructor(private readonly employeeContextService: EmployeeContextService) {}
 
+    onModuleInit() {
+        // this.syncSubscription();
+    }
+
     async syncEmployees(authorization: string): Promise<void> {
         await this.employeeContextService.직원_정보를_동기화한다(authorization);
-        await this.syncSubscription();
+        // await this.syncSubscription();
     }
 
     async syncSubscription(): Promise<void> {
