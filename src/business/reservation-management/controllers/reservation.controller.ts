@@ -15,6 +15,7 @@ import { ReservationService } from '../services/reservation.service';
 import { UpdateReservationStatusDto } from '../dtos/update-reservation.dto';
 import { DateUtil } from '@libs/utils/date.util';
 import { ReservationListQueryDto } from '../dtos/reservation-list-query.dto';
+import { ReservationListResponseDto } from '../dtos/reservation-list-response.dto';
 
 @ApiTags('v2 예약 ')
 @Controller('v2/reservations')
@@ -29,9 +30,9 @@ export class ReservationController {
     })
     @ApiOkResponse({
         description: '예약 리스트 조회 성공',
-        type: [ReservationWithRelationsResponseDto],
+        type: ReservationListResponseDto,
     })
-    async findReservationList(@Query() query: ReservationListQueryDto): Promise<ReservationWithRelationsResponseDto[]> {
+    async findReservationList(@Query() query: ReservationListQueryDto): Promise<ReservationListResponseDto> {
         return this.reservationService.findReservationList(query);
     }
 

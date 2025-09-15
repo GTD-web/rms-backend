@@ -33,12 +33,12 @@ export class ReservationListQueryDto {
 
     @ApiPropertyOptional({
         description: '페이지당 항목 수',
-        example: 20,
-        default: 20,
+        example: 10,
+        default: 100,
     })
     @IsOptional()
-    @Transform(({ value }) => parseInt(value) || 20)
-    limit?: number = 20;
+    @Transform(({ value }) => parseInt(value) || 100)
+    limit?: number = 100;
 
     @ApiPropertyOptional({
         description: '시작일 (YYYY-MM-DD)',
@@ -69,18 +69,11 @@ export class ReservationListQueryDto {
         description: '예약 상태 (다중 선택 가능)',
         enum: ReservationStatus,
         // isArray: true,
-        example: [ReservationStatus.CONFIRMED, ReservationStatus.PENDING],
+        example: ReservationStatus.CONFIRMED,
     })
     @IsOptional()
-    @IsArray()
-    @IsEnum(ReservationStatus, { each: true })
-    @Transform(({ value }) => {
-        if (typeof value === 'string') {
-            return value.split(',').map((item) => item.trim());
-        }
-        return value;
-    })
-    status?: ReservationStatus[];
+    @IsEnum(ReservationStatus)
+    status?: ReservationStatus;
 
     @ApiPropertyOptional({
         description: '정렬 순서',

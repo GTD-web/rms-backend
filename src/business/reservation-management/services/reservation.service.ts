@@ -7,6 +7,7 @@ import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { ReturnVehicleDto, UpdateReservationStatusDto } from '../dtos/update-reservation.dto';
 import { ReservationListQueryDto, ReservationSortOrder } from '../dtos/reservation-list-query.dto';
+import { ReservationListResponseDto } from '../dtos/reservation-list-response.dto';
 import {
     ReservationParticipantResponseDto,
     ReservationResponseDto,
@@ -27,7 +28,7 @@ export class ReservationService {
         private readonly reservationNotificationContextService: ReservationNotificationContextService,
     ) {}
 
-    async findReservationList(query: ReservationListQueryDto): Promise<ReservationWithRelationsResponseDto[]> {
+    async findReservationList(query: ReservationListQueryDto): Promise<ReservationListResponseDto> {
         const { startDate, endDate, resourceType, status, keyword, sortOrder, page, limit } = query;
 
         // reservation 에서 sortOrder 에 맞는 데이터를 조회한다.
@@ -38,12 +39,19 @@ export class ReservationService {
             startDate,
             endDate,
             resourceType,
-            status?.map((s) => s.toString()),
+            status,
             sortOrder,
         );
 
         if (basicReservations.length === 0) {
-            return [];
+            return {
+                reservations: [],
+                totalCount: 0,
+                filteredCount: 0,
+                totalPages: 0,
+                hasNext: false,
+                hasPrevious: false,
+            };
         }
 
         // 2. 모든 예약의 reservationId 수집
@@ -59,15 +67,12 @@ export class ReservationService {
         );
 
         // 5. 페이지네이션 적용
-        const paginationResult = this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(
-            filteredScheduleIds,
-            page,
-            limit,
-        );
+        const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } =
+            this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);
 
         // 5. schedule과 participants 정보를 벌크로 조회
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(
-            paginationResult.paginatedIds,
+            paginatedIds,
             {
                 withReservation: true,
                 withParticipants: true,
@@ -103,13 +108,19 @@ export class ReservationService {
 
         const reservationResponseDtos = scheduleDataList.map(({ schedule, reservation }) => {
             reservation.participants = participantsByScheduleId.get(schedule.scheduleId);
-            console.log(reservationVehiclesByScheduleIdMap.get(reservation.reservationId));
             reservation.reservationVehicles = reservationVehiclesByScheduleIdMap.get(reservation.reservationId) || [];
             return new ReservationWithRelationsResponseDto({
                 ...reservation,
             });
         });
-        return reservationResponseDtos;
+        return {
+            reservations: reservationResponseDtos,
+            totalCount,
+            filteredCount,
+            totalPages,
+            hasNext,
+            hasPrevious,
+        };
     }
 
     async findCheckReservationList(

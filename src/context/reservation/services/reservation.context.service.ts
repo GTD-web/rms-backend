@@ -46,7 +46,7 @@ export class ReservationContextService {
         startDate?: string,
         endDate?: string,
         resourceType?: ResourceType,
-        status?: string[],
+        status?: ReservationStatus,
         sortOrder?: 'ASC' | 'DESC',
     ): Promise<Reservation[]> {
         if (startDate && endDate && startDate > endDate) {
@@ -54,18 +54,18 @@ export class ReservationContextService {
         } else if ((startDate && !endDate) || (!startDate && endDate)) {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_REQUIRED);
         }
-        if (status && status.filter((s) => ReservationStatus[s]).length === 0) {
+        if (status && ReservationStatus[status]) {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where: FindOptionsWhere<Reservation> = {};
 
-        if (status && status.length > 0) {
-            where.status = In(status);
+        if (status) {
+            where.status = status;
         }
         if (resourceType) {
             where.resource = {
-                type: resourceType as ResourceType,
+                type: resourceType,
             };
         }
 

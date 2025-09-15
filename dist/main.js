@@ -20599,6 +20599,7 @@ Object.defineProperty(exports, "PaginationMetaDto", ({ enumerable: true, get: fu
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/create-reservation.dto */ "./src/business/reservation-management/dtos/create-reservation.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservaion-query.dto */ "./src/business/reservation-management/dtos/reservaion-query.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservation-list-query.dto */ "./src/business/reservation-management/dtos/reservation-list-query.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservation-list-response.dto */ "./src/business/reservation-management/dtos/reservation-list-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/reservation-response.dto */ "./src/business/reservation-management/dtos/reservation-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/return-vehicle-response.dto */ "./src/business/reservation-management/dtos/return-vehicle-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/reservation-management/dtos/update-reservation.dto */ "./src/business/reservation-management/dtos/update-reservation.dto.ts"), exports);
@@ -22206,6 +22207,7 @@ const update_reservation_dto_1 = __webpack_require__(/*! ../dtos/update-reservat
 const reservation_service_1 = __webpack_require__(/*! ../services/reservation.service */ "./src/business/reservation-management/services/reservation.service.ts");
 const update_reservation_dto_2 = __webpack_require__(/*! ../dtos/update-reservation.dto */ "./src/business/reservation-management/dtos/update-reservation.dto.ts");
 const reservation_list_query_dto_1 = __webpack_require__(/*! ../dtos/reservation-list-query.dto */ "./src/business/reservation-management/dtos/reservation-list-query.dto.ts");
+const reservation_list_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-list-response.dto */ "./src/business/reservation-management/dtos/reservation-list-response.dto.ts");
 let ReservationController = class ReservationController {
     constructor(reservationService) {
         this.reservationService = reservationService;
@@ -22234,7 +22236,7 @@ __decorate([
     }),
     (0, swagger_1.ApiOkResponse)({
         description: '예약 리스트 조회 성공',
-        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+        type: reservation_list_response_dto_1.ReservationListResponseDto,
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -22482,7 +22484,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationListQueryDto = exports.ReservationSortOrder = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -22499,7 +22501,7 @@ var ReservationSortOrder;
 class ReservationListQueryDto {
     constructor() {
         this.page = 1;
-        this.limit = 20;
+        this.limit = 100;
         this.sortOrder = ReservationSortOrder.DESC;
     }
 }
@@ -22527,11 +22529,11 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: '페이지당 항목 수',
-        example: 20,
-        default: 20,
+        example: 10,
+        default: 100,
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_transformer_1.Transform)(({ value }) => parseInt(value) || 20),
+    (0, class_transformer_1.Transform)(({ value }) => parseInt(value) || 100),
     __metadata("design:type", Number)
 ], ReservationListQueryDto.prototype, "limit", void 0);
 __decorate([
@@ -22566,18 +22568,11 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: '예약 상태 (다중 선택 가능)',
         enum: reservation_type_enum_1.ReservationStatus,
-        example: [reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING],
+        example: reservation_type_enum_1.ReservationStatus.CONFIRMED,
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus, { each: true }),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        if (typeof value === 'string') {
-            return value.split(',').map((item) => item.trim());
-        }
-        return value;
-    }),
-    __metadata("design:type", Array)
+    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus),
+    __metadata("design:type", typeof (_b = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _b : Object)
 ], ReservationListQueryDto.prototype, "status", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
@@ -22599,6 +22594,75 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ReservationListQueryDto.prototype, "resourceId", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/reservation-management/dtos/reservation-list-response.dto.ts":
+/*!***********************************************************************************!*\
+  !*** ./src/business/reservation-management/dtos/reservation-list-response.dto.ts ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReservationListResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const reservation_response_dto_1 = __webpack_require__(/*! ./reservation-response.dto */ "./src/business/reservation-management/dtos/reservation-response.dto.ts");
+class ReservationListResponseDto {
+}
+exports.ReservationListResponseDto = ReservationListResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '예약 목록',
+        type: [reservation_response_dto_1.ReservationWithRelationsResponseDto],
+    }),
+    __metadata("design:type", Array)
+], ReservationListResponseDto.prototype, "reservations", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '전체 예약 수',
+        example: 150,
+    }),
+    __metadata("design:type", Number)
+], ReservationListResponseDto.prototype, "totalCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '필터링된 예약 수',
+        example: 25,
+    }),
+    __metadata("design:type", Number)
+], ReservationListResponseDto.prototype, "filteredCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '전체 페이지 수',
+        example: 3,
+    }),
+    __metadata("design:type", Number)
+], ReservationListResponseDto.prototype, "totalPages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '다음 페이지 존재 여부',
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], ReservationListResponseDto.prototype, "hasNext", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '이전 페이지 존재 여부',
+        example: false,
+    }),
+    __metadata("design:type", Boolean)
+], ReservationListResponseDto.prototype, "hasPrevious", void 0);
 
 
 /***/ }),
@@ -23303,15 +23367,22 @@ let ReservationService = class ReservationService {
     }
     async findReservationList(query) {
         const { startDate, endDate, resourceType, status, keyword, sortOrder, page, limit } = query;
-        const basicReservations = await this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, status?.map((s) => s.toString()), sortOrder);
+        const basicReservations = await this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, status, sortOrder);
         if (basicReservations.length === 0) {
-            return [];
+            return {
+                reservations: [],
+                totalCount: 0,
+                filteredCount: 0,
+                totalPages: 0,
+                hasNext: false,
+                hasPrevious: false,
+            };
         }
         const reservationIds = basicReservations.map((item) => item.reservationId);
         const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationIds);
         const filteredScheduleIds = await this.scheduleQueryContextService.키워드로_일정ID들을_조회한다(scheduleIds, keyword);
-        const paginationResult = this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);
-        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(paginationResult.paginatedIds, {
+        const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } = this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(paginatedIds, {
             withReservation: true,
             withParticipants: true,
         });
@@ -23338,13 +23409,19 @@ let ReservationService = class ReservationService {
         });
         const reservationResponseDtos = scheduleDataList.map(({ schedule, reservation }) => {
             reservation.participants = participantsByScheduleId.get(schedule.scheduleId);
-            console.log(reservationVehiclesByScheduleIdMap.get(reservation.reservationId));
             reservation.reservationVehicles = reservationVehiclesByScheduleIdMap.get(reservation.reservationId) || [];
             return new reservation_response_dto_1.ReservationWithRelationsResponseDto({
                 ...reservation,
             });
         });
-        return reservationResponseDtos;
+        return {
+            reservations: reservationResponseDtos,
+            totalCount,
+            filteredCount,
+            totalPages,
+            hasNext,
+            hasPrevious,
+        };
     }
     async findCheckReservationList(query) {
         const basicReservations = await this.reservationContextService.확인필요_예약목록을_조회한다(query);
@@ -34791,13 +34868,13 @@ let ReservationContextService = class ReservationContextService {
         else if ((startDate && !endDate) || (!startDate && endDate)) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_REQUIRED);
         }
-        if (status && status.filter((s) => reservation_type_enum_1.ReservationStatus[s]).length === 0) {
+        if (status && reservation_type_enum_1.ReservationStatus[status]) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where = {};
-        if (status && status.length > 0) {
-            where.status = (0, typeorm_2.In)(status);
+        if (status) {
+            where.status = status;
         }
         if (resourceType) {
             where.resource = {
