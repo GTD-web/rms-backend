@@ -4,6 +4,32 @@ export class CreateSchedulesAndParticipants1748247203492 implements MigrationInt
     name = 'CreateSchedulesAndParticipants1748247203492';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        // uuid-ossp 확장 활성화 (uuid_generate_v4() 함수 사용을 위해)
+        await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
+
+        // 기존 schedules 관련 테이블들 삭제 (사용하지 않는 테이블들)
+        await queryRunner.query(`DROP TABLE IF EXISTS "schedules"`);
+
+        // 기존 enum 타입들도 삭제
+        await queryRunner.query(`
+            DO $$
+            BEGIN
+                IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'schedule_participants_type_enum') THEN
+                    DROP TYPE "public"."schedule_participants_type_enum";
+                END IF;
+            END
+            $$;
+        `);
+        await queryRunner.query(`
+            DO $$
+            BEGIN
+                IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'schedule_type_enum') THEN
+                    DROP TYPE "public"."schedule_type_enum";
+                END IF;
+            END
+            $$;
+        `);
+
         // enum type for schedule_participants.type
         await queryRunner.query(`
             DO $$

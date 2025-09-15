@@ -4,6 +4,9 @@ export class CreateRequestLogTable1756192500000 implements MigrationInterface {
     name = 'CreateRequestLogTable1756192500000';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        // uuid-ossp 확장 활성화 (uuid_generate_v4() 함수 사용을 위해)
+        await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
+
         // request_logs 테이블 생성
         await queryRunner.createTable(
             new Table({

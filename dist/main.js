@@ -34579,20 +34579,23 @@ let ReservationContextService = class ReservationContextService {
     }
     async 예약관련_배치_작업을_처리한다(reservationIds) {
         const now = date_util_1.DateUtil.now().toDate();
-        const pendingAccommodationReservations = await this.domainReservationService.findAll({
-            where: {
-                ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
-                status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING]),
-                resource: {
-                    type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+        const is_15_a_clock = now.getHours() === 15 && now.getMinutes() < 30;
+        if (is_15_a_clock) {
+            const pendingAccommodationReservations = await this.domainReservationService.findAll({
+                where: {
+                    ...(reservationIds && { reservationId: (0, typeorm_2.In)(reservationIds) }),
+                    status: (0, typeorm_2.In)([reservation_type_enum_1.ReservationStatus.PENDING]),
+                    resource: {
+                        type: resource_type_enum_1.ResourceType.ACCOMMODATION,
+                    },
+                    startDate: (0, typeorm_2.LessThanOrEqual)(now),
                 },
-                startDate: (0, typeorm_2.LessThanOrEqual)(now),
-            },
-        });
-        for (const reservation of pendingAccommodationReservations) {
-            await this.domainReservationService.update(reservation.reservationId, {
-                status: reservation_type_enum_1.ReservationStatus.REJECTED,
             });
+            for (const reservation of pendingAccommodationReservations) {
+                await this.domainReservationService.update(reservation.reservationId, {
+                    status: reservation_type_enum_1.ReservationStatus.REJECTED,
+                });
+            }
         }
         const confirmedToChangeUsing = await this.domainReservationService.findAll({
             where: {

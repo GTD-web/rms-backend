@@ -4,6 +4,9 @@ export class AddTesterInfoTable1748247203488 implements MigrationInterface {
     name = 'AddTesterInfoTable1748247203488';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        // uuid-ossp 확장 활성화 (uuid_generate_v4() 함수 사용을 위해)
+        await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
+
         // ResourceType enum에 TESTER 타입 추가
         await queryRunner.query(`
             ALTER TYPE "public"."resources_type_enum" ADD VALUE IF NOT EXISTS 'TESTER'

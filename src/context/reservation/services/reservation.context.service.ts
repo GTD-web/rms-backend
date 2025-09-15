@@ -376,20 +376,23 @@ export class ReservationContextService {
         const now = DateUtil.now().toDate();
 
         // 대기 -> 거절 (숙소예약이면서 승인이 되지 않은 채로 시작일이 지났을 때)
-        const pendingAccommodationReservations = await this.domainReservationService.findAll({
-            where: {
-                ...(reservationIds && { reservationId: In(reservationIds) }),
-                status: In([ReservationStatus.PENDING]),
-                resource: {
-                    type: ResourceType.ACCOMMODATION,
+        const is_15_a_clock = now.getHours() === 15 && now.getMinutes() < 30;
+        if (is_15_a_clock) {
+            const pendingAccommodationReservations = await this.domainReservationService.findAll({
+                where: {
+                    ...(reservationIds && { reservationId: In(reservationIds) }),
+                    status: In([ReservationStatus.PENDING]),
+                    resource: {
+                        type: ResourceType.ACCOMMODATION,
+                    },
+                    startDate: LessThanOrEqual(now),
                 },
-                startDate: LessThanOrEqual(now),
-            },
-        });
-        for (const reservation of pendingAccommodationReservations) {
-            await this.domainReservationService.update(reservation.reservationId, {
-                status: ReservationStatus.REJECTED,
             });
+            for (const reservation of pendingAccommodationReservations) {
+                await this.domainReservationService.update(reservation.reservationId, {
+                    status: ReservationStatus.REJECTED,
+                });
+            }
         }
 
         // 확정 -> 사용중
