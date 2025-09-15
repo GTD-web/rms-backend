@@ -198,7 +198,7 @@ export class ScheduleManagementService {
         const limit = query.limit || 20;
 
         const { scheduleIds, statistics, totalCount, filteredCount, totalPages, hasNext, hasPrevious } =
-            await this.scheduleQueryContextService.내_일정을_조회한다(user.employeeId, query);
+            await this.scheduleQueryContextService.내_일정을_조회한다(user, query);
 
         // 3. 벌크 데이터 조회 (한 번의 호출로 모든 관련 데이터 조회)
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
@@ -562,7 +562,6 @@ export class ScheduleManagementService {
                     reservationId = createdReservation.reservationId;
                 }
 
-                console.log(user);
                 // 2) 일정 생성 (QueryRunner 전달)
                 const scheduleData = {
                     title: data.title,
@@ -960,7 +959,9 @@ export class ScheduleManagementService {
         );
 
         // 5. 후처리: 시나리오별 후처리
-        await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
+        if (reservation) {
+            await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
+        }
         const {
             schedule: newSchedule,
             resource,

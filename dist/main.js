@@ -29574,7 +29574,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         this.logger.log(`내 일정 조회 요청 - 사용자: ${user.employeeId}`);
         const page = query.page || 1;
         const limit = query.limit || 20;
-        const { scheduleIds, statistics, totalCount, filteredCount, totalPages, hasNext, hasPrevious } = await this.scheduleQueryContextService.내_일정을_조회한다(user.employeeId, query);
+        const { scheduleIds, statistics, totalCount, filteredCount, totalPages, hasNext, hasPrevious } = await this.scheduleQueryContextService.내_일정을_조회한다(user, query);
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
             withProject: true,
             withReservation: true,
@@ -29811,7 +29811,6 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     const createdReservation = await this.reservationContextService.자원예약을_생성한다(reservationData, queryRunner);
                     reservationId = createdReservation.reservationId;
                 }
-                console.log(user);
                 const scheduleData = {
                     title: data.title,
                     description: data.location
@@ -30003,7 +30002,9 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 }
                 : undefined,
         });
-        await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
+        if (reservation) {
+            await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
+        }
         const { schedule: newSchedule, resource, participants, } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
             withResource: true,
@@ -37251,6 +37252,26 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         const scheduleIds = scheduleRelations.map((r) => r.scheduleId);
         return scheduleIds;
     }
+    async 직원의_소속_일정ID들을_조회한다(department, fromDate) {
+        const conditions = [
+            {
+                scheduleType: schedule_type_enum_1.ScheduleType.DEPARTMENT,
+                scheduleDepartment: department,
+                deletedAt: (0, typeorm_1.IsNull)(),
+                ...(fromDate && { startDate: (0, typeorm_1.MoreThanOrEqual)(fromDate) }),
+            },
+            {
+                scheduleType: schedule_type_enum_1.ScheduleType.COMPANY,
+                deletedAt: (0, typeorm_1.IsNull)(),
+                ...(fromDate && { startDate: (0, typeorm_1.MoreThanOrEqual)(fromDate) }),
+            },
+        ];
+        const schedules = await this.domainScheduleService.findAll({
+            where: conditions,
+        });
+        console.log(schedules);
+        return schedules.map((p) => p.scheduleId);
+    }
     async 직원의_역할별_일정ID들을_조회한다(employeeId, role, fromDate, order) {
         const conditions = {
             employeeId,
@@ -37539,10 +37560,13 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             hasPrevious: page > 1,
         };
     }
-    async 내_일정을_조회한다(employeeId, query) {
+    async 내_일정을_조회한다(employee, query) {
+        const employeeId = employee.employeeId;
         const now = new Date();
         now.setHours(0, 0, 0, 0);
         let scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, query.role, now);
+        const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, now);
+        scheduleIds = [...scheduleIds, ...belongingScheduleIds];
         if (query.category && query.category !== 'ALL') {
             scheduleIds = await this.카테고리별_일정ID들을_조회한다(scheduleIds, query.category);
         }

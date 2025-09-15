@@ -401,6 +401,28 @@ export class ScheduleQueryContextService {
         return scheduleIds;
     }
 
+    async 직원의_소속_일정ID들을_조회한다(department: string, fromDate?: Date): Promise<string[]> {
+        const conditions: any = [
+            {
+                scheduleType: ScheduleType.DEPARTMENT,
+                scheduleDepartment: department,
+                deletedAt: IsNull(),
+                ...(fromDate && { startDate: MoreThanOrEqual(fromDate) }),
+            },
+            {
+                scheduleType: ScheduleType.COMPANY,
+                deletedAt: IsNull(),
+                ...(fromDate && { startDate: MoreThanOrEqual(fromDate) }),
+            },
+        ];
+
+        const schedules = await this.domainScheduleService.findAll({
+            where: conditions,
+        });
+        console.log(schedules);
+        return schedules.map((p) => p.scheduleId);
+    }
+
     async 직원의_역할별_일정ID들을_조회한다(
         employeeId: string,
         role?: ParticipantsType,
@@ -816,7 +838,7 @@ export class ScheduleQueryContextService {
     }
 
     async 내_일정을_조회한다(
-        employeeId: string,
+        employee: Employee,
         query: {
             role?: ParticipantsType;
             category?: 'SCHEDULE' | 'PROJECT' | 'RESOURCE' | 'ALL';
@@ -833,11 +855,15 @@ export class ScheduleQueryContextService {
         hasNext: boolean;
         hasPrevious: boolean;
     }> {
+        const employeeId = employee.employeeId;
         const now = new Date();
         now.setHours(0, 0, 0, 0);
 
         // 1. 기본 일정 ID 조회 (역할 조건 포함)
         let scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, query.role, now);
+
+        const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, now);
+        scheduleIds = [...scheduleIds, ...belongingScheduleIds];
 
         // 2. 카테고리별 필터링
         if (query.category && query.category !== 'ALL') {
