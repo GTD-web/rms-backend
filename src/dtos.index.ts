@@ -98,6 +98,8 @@ export {
 } from './application/notification/dtos/create-notification.dto';
 export { PushNotificationPayload, PushNotificationDto } from './application/notification/dtos/send-notification.dto';
 export { FCMDto, WebPushDto, PushSubscriptionDto } from './application/notification/dtos/push-subscription.dto';
+export { FcmSendRequestDto } from './context/notification/dtos/fcm-send-request.dto';
+export { FcmSendResponseDto, FcmBulkSendResponseDto } from './context/notification/dtos/fcm-send-response.dto';
 
 // Statistics Module DTOs
 export {

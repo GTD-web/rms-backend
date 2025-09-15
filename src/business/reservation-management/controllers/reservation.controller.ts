@@ -20,7 +20,6 @@ import { ReservationListResponseDto } from '../dtos/reservation-list-response.dt
 @ApiTags('v2 예약 ')
 @Controller('v2/reservations')
 @ApiBearerAuth()
-@Roles(Role.USER)
 export class ReservationController {
     constructor(private readonly reservationService: ReservationService) {}
 
@@ -67,7 +66,6 @@ export class ReservationController {
         description: '예약 상태 수정 성공',
         type: ReservationResponseDto,
     })
-    @Roles(Role.SYSTEM_ADMIN)
     async updateStatus(
         @Param('reservationId') reservationId: string,
         @Body() updateDto: UpdateReservationStatusDto,

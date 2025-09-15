@@ -15,6 +15,8 @@ import { CronNotificationContextService } from './services/cron-notification.con
 import { ScheduleNotificationContextService } from './services/schedule-notification.context.service';
 import { ReservationNotificationContextService } from './services/reservation-notification.context.service';
 import { ResourceNotificationContextService } from './services/resource-notification.context.service';
+import { FCMMicroserviceAdapter } from './adapter/fcm.adapter';
+import { HttpModule } from '@nestjs/axios';
 
 /**
  * 알림 컨텍스트 모듈
@@ -35,6 +37,7 @@ import { ResourceNotificationContextService } from './services/resource-notifica
         TypeOrmModule.forFeature([Employee, Notification, EmployeeNotification, Reservation, NotificationTypeEntity]),
         ConfigModule.forFeature(FIREBASE_CONFIG),
         ScheduleModule.forRoot(),
+        HttpModule,
         DomainEmployeeModule,
         DomainEmployeeNotificationModule,
         DomainNotificationModule,
@@ -49,6 +52,7 @@ import { ResourceNotificationContextService } from './services/resource-notifica
         ReservationNotificationContextService,
         ResourceNotificationContextService,
         FCMAdapter,
+        FCMMicroserviceAdapter,
     ],
     exports: [
         NotificationContextService,
@@ -56,6 +60,8 @@ import { ResourceNotificationContextService } from './services/resource-notifica
         ScheduleNotificationContextService,
         ReservationNotificationContextService,
         ResourceNotificationContextService,
+        FCMAdapter,
+        FCMMicroserviceAdapter,
     ],
 })
 export class NotificationContextModule {}

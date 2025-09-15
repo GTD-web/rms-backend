@@ -20,6 +20,8 @@ import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { CreateNotificationDataDto, CreateNotificationDto } from '../dtos/create-notification.dto';
 import { DateUtil } from '@libs/utils/date.util';
+import { FCMMicroserviceAdapter } from '../adapter/fcm.adapter';
+import { FcmSendResponseDto } from '../dtos/fcm-send-response.dto';
 
 export interface NotificationData {
     schedule: {
@@ -57,6 +59,7 @@ export class NotificationContextService {
     constructor(
         private readonly employeeMicroserviceAdapter: EmployeeMicroserviceAdapter,
         private readonly fcmAdapter: FCMAdapter,
+        private readonly fcmMicroserviceAdapter: FCMMicroserviceAdapter,
         private readonly domainNotificationService: DomainNotificationService,
         private readonly domainNotificationTypeService: DomainNotificationTypeService,
         private readonly domainEmployeeNotificationService: DomainEmployeeNotificationService,
@@ -372,8 +375,16 @@ export class NotificationContextService {
         return notification;
     }
 
-    async 알림을_전송한다(tokens: string[], payload: PushNotificationPayload): Promise<BatchResponse> {
-        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
+    async 알림을_전송한다(tokens: string[], payload: PushNotificationPayload): Promise<any> {
+        console.log(tokens);
+        const notificationPayload = {
+            title: payload.title,
+            body: payload.body,
+            link: '/plan/user/schedule-add', // payload.link,
+            icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png', // payload.icon,
+        };
+        return await this.fcmMicroserviceAdapter.sendNotification(tokens[0], notificationPayload);
+        // return await this.fcmAdapter.sendBulkNotification(tokens, payload);
     }
 
     async 알림_전송_프로세스를_진행한다(
@@ -390,13 +401,14 @@ export class NotificationContextService {
         if (tokens.length === 0) {
             return;
         }
+        // TODO 알림 테스트
         // 실제 알림 전송
-        await this.알림을_전송한다(tokens, {
-            title: notification.title,
-            body: notification.body,
-            notificationType: notification.notificationType,
-            notificationData: notification.notificationData,
-        });
+        // await this.알림을_전송한다(tokens, {
+        //     title: notification.title,
+        //     body: notification.body,
+        //     notificationType: notification.notificationType,
+        //     notificationData: notification.notificationData,
+        // });
         // 알림 전송 후 전송상태 업데이트
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }

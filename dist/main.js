@@ -22197,8 +22197,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const role_decorator_1 = __webpack_require__(/*! @libs/decorators/role.decorator */ "./libs/decorators/role.decorator.ts");
-const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const reservation_response_dto_1 = __webpack_require__(/*! ../dtos/reservation-response.dto */ "./src/business/reservation-management/dtos/reservation-response.dto.ts");
@@ -22275,7 +22273,6 @@ __decorate([
         description: '예약 상태 수정 성공',
         type: reservation_response_dto_1.ReservationResponseDto,
     }),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.SYSTEM_ADMIN),
     __param(0, (0, common_1.Param)('reservationId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -22300,7 +22297,6 @@ exports.ReservationController = ReservationController = __decorate([
     (0, swagger_1.ApiTags)('v2 예약 '),
     (0, common_1.Controller)('v2/reservations'),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Roles)(role_type_enum_1.Role.USER),
     __metadata("design:paramtypes", [typeof (_a = typeof reservation_service_1.ReservationService !== "undefined" && reservation_service_1.ReservationService) === "function" ? _a : Object])
 ], ReservationController);
 
@@ -33198,6 +33194,132 @@ exports.FCMAdapter = FCMAdapter = __decorate([
 
 /***/ }),
 
+/***/ "./src/context/notification/adapter/fcm.adapter.ts":
+/*!*********************************************************!*\
+  !*** ./src/context/notification/adapter/fcm.adapter.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var FCMMicroserviceAdapter_1;
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FCMMicroserviceAdapter = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const rxjs_1 = __webpack_require__(/*! rxjs */ "rxjs");
+let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAdapter {
+    constructor(httpService, configService) {
+        this.httpService = httpService;
+        this.configService = configService;
+        this.logger = new common_1.Logger(FCMMicroserviceAdapter_1.name);
+        this.fcmServiceUrl = this.configService.get('FCM_API_URL') || 'https://lumir-erp.vercel.app';
+    }
+    getHeaders(authorization) {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        if (authorization) {
+            headers['Authorization'] = authorization;
+        }
+        return headers;
+    }
+    async sendNotification(token, payload, authorization) {
+        try {
+            if (!token) {
+                throw new common_1.BadRequestException('FCM token is missing');
+            }
+            this.logger.log(`FCM 단일 알림 전송 요청: token=${token.substring(0, 20)}...`);
+            const requestDto = {
+                token,
+                title: payload.title,
+                body: payload.body,
+                link: payload.link,
+                icon: payload.icon,
+            };
+            const url = `${this.fcmServiceUrl}/api/fcm/test-send`;
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService
+                .post(url, requestDto, {})
+                .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
+                this.logger.error(`FCM 단일 알림 전송 실패: ${error.message}`, error.stack);
+                if (error.response?.status === 400) {
+                    throw new common_1.BadRequestException('FCM 토큰 형식이 올바르지 않습니다.');
+                }
+                if (error.response?.status === 404) {
+                    throw new common_1.BadRequestException('FCM 서비스를 찾을 수 없습니다.');
+                }
+                throw new common_1.BadRequestException('FCM 알림 전송 중 오류가 발생했습니다.');
+            })));
+            console.log(response);
+            this.logger.log(`FCM 단일 알림 전송 성공`);
+            return response;
+        }
+        catch (error) {
+            this.logger.error(`FCM 단일 알림 전송 중 예외 발생: ${error.message}`, error.stack);
+            throw error;
+        }
+    }
+    async sendBulkNotification(tokens, payload, authorization) {
+        try {
+            if (!tokens || tokens.length === 0) {
+                throw new common_1.BadRequestException('FCM tokens are missing');
+            }
+            this.logger.log(`FCM 다중 알림 전송 요청: ${tokens.length}개 토큰`);
+            const responses = [];
+            for (const token of tokens) {
+                const requestDto = {
+                    token,
+                    title: payload.title,
+                    body: payload.body,
+                    link: payload.link,
+                    icon: payload.icon,
+                };
+                const url = `${this.fcmServiceUrl}/api/fcm/test-send`;
+                const response = await (0, rxjs_1.firstValueFrom)(this.httpService
+                    .post(url, requestDto, {
+                    headers: this.getHeaders(authorization),
+                })
+                    .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
+                    this.logger.error(`FCM 다중 알림 전송 실패: ${error.message}`, error.stack);
+                    if (error.response?.status === 400) {
+                        throw new common_1.BadRequestException('FCM 토큰 형식이 올바르지 않습니다.');
+                    }
+                    if (error.response?.status === 404) {
+                        throw new common_1.BadRequestException('FCM 서비스를 찾을 수 없습니다.');
+                    }
+                    throw new common_1.BadRequestException('FCM 다중 알림 전송 중 오류가 발생했습니다.');
+                })));
+                this.logger.log(`FCM 다중 알림 전송 성공: 성공 ${response.successCount}개, 실패 ${response.failureCount}개`);
+                console.log(response);
+                responses.push(response);
+            }
+            return responses;
+        }
+        catch (error) {
+            this.logger.error(`FCM 다중 알림 전송 중 예외 발생: ${error.message}`, error.stack);
+            throw error;
+        }
+    }
+};
+exports.FCMMicroserviceAdapter = FCMMicroserviceAdapter;
+exports.FCMMicroserviceAdapter = FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
+], FCMMicroserviceAdapter);
+
+
+/***/ }),
+
 /***/ "./src/context/notification/dtos/create-notification.dto.ts":
 /*!******************************************************************!*\
   !*** ./src/context/notification/dtos/create-notification.dto.ts ***!
@@ -33481,6 +33603,186 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], SendNotificationDto.prototype, "notificationTarget", void 0);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/dtos/fcm-send-request.dto.ts":
+/*!***************************************************************!*\
+  !*** ./src/context/notification/dtos/fcm-send-request.dto.ts ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FcmSendRequestDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class FcmSendRequestDto {
+}
+exports.FcmSendRequestDto = FcmSendRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'FCM 토큰 (단일 전송)',
+        example: 'cwqfAzkLLfdrrG0XK6RPVn:APA91bHYIqESrcbAk5uvCYwqkSQo6wU-kEb4DRTO4wAM7da2SrL4zdntAmgWxGoXA33K2X8NJW0MzVC-iyevf7PNdEajFG3a-0OnaVVsV5pjNAPUgiyztK4',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FcmSendRequestDto.prototype, "token", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'FCM 토큰 배열 (다중 전송)',
+        example: ['token1', 'token2', 'token3'],
+        required: false,
+        isArray: true,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], FcmSendRequestDto.prototype, "tokens", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '알림 제목',
+        example: '회의일정 알림',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FcmSendRequestDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '알림 내용',
+        example: '현재 브라우저로 테스트 전송합니다.',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FcmSendRequestDto.prototype, "body", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '클릭 시 이동할 링크',
+        example: '/plan/user/schedule-add',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FcmSendRequestDto.prototype, "link", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '알림 아이콘 URL',
+        example: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FcmSendRequestDto.prototype, "icon", void 0);
+
+
+/***/ }),
+
+/***/ "./src/context/notification/dtos/fcm-send-response.dto.ts":
+/*!****************************************************************!*\
+  !*** ./src/context/notification/dtos/fcm-send-response.dto.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FcmBulkSendResponseDto = exports.FcmSendResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class FcmSendResponseDto {
+}
+exports.FcmSendResponseDto = FcmSendResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '전송 성공 여부',
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], FcmSendResponseDto.prototype, "success", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '전송 메시지',
+        example: 'FCM 알림이 성공적으로 전송되었습니다.',
+    }),
+    __metadata("design:type", String)
+], FcmSendResponseDto.prototype, "message", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '메시지 ID (성공 시)',
+        example: 'projects/myproject-b5ae1/messages/0:1234567890123456%31bd1c9931bd1c99',
+    }),
+    __metadata("design:type", String)
+], FcmSendResponseDto.prototype, "messageId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '에러 코드 (실패 시)',
+        example: 'messaging/invalid-registration-token',
+    }),
+    __metadata("design:type", String)
+], FcmSendResponseDto.prototype, "errorCode", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '에러 메시지 (실패 시)',
+        example: 'The registration token is not a valid FCM registration token',
+    }),
+    __metadata("design:type", String)
+], FcmSendResponseDto.prototype, "errorMessage", void 0);
+class FcmBulkSendResponseDto {
+}
+exports.FcmBulkSendResponseDto = FcmBulkSendResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '전체 전송 성공 여부',
+        example: true,
+    }),
+    __metadata("design:type", Boolean)
+], FcmBulkSendResponseDto.prototype, "success", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '전송 메시지',
+        example: 'FCM 벌크 알림이 전송되었습니다.',
+    }),
+    __metadata("design:type", String)
+], FcmBulkSendResponseDto.prototype, "message", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '성공한 전송 수',
+        example: 5,
+    }),
+    __metadata("design:type", Number)
+], FcmBulkSendResponseDto.prototype, "successCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '실패한 전송 수',
+        example: 1,
+    }),
+    __metadata("design:type", Number)
+], FcmBulkSendResponseDto.prototype, "failureCount", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '개별 전송 결과',
+        type: [FcmSendResponseDto],
+    }),
+    __metadata("design:type", Array)
+], FcmBulkSendResponseDto.prototype, "results", void 0);
 
 
 /***/ }),
@@ -33933,6 +34235,8 @@ const cron_notification_context_service_1 = __webpack_require__(/*! ./services/c
 const schedule_notification_context_service_1 = __webpack_require__(/*! ./services/schedule-notification.context.service */ "./src/context/notification/services/schedule-notification.context.service.ts");
 const reservation_notification_context_service_1 = __webpack_require__(/*! ./services/reservation-notification.context.service */ "./src/context/notification/services/reservation-notification.context.service.ts");
 const resource_notification_context_service_1 = __webpack_require__(/*! ./services/resource-notification.context.service */ "./src/context/notification/services/resource-notification.context.service.ts");
+const fcm_adapter_1 = __webpack_require__(/*! ./adapter/fcm.adapter */ "./src/context/notification/adapter/fcm.adapter.ts");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
 let NotificationContextModule = class NotificationContextModule {
 };
 exports.NotificationContextModule = NotificationContextModule;
@@ -33942,6 +34246,7 @@ exports.NotificationContextModule = NotificationContextModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([entities_1.Employee, entities_1.Notification, entities_1.EmployeeNotification, entities_1.Reservation, entities_1.NotificationTypeEntity]),
             config_1.ConfigModule.forFeature(env_config_1.FIREBASE_CONFIG),
             schedule_1.ScheduleModule.forRoot(),
+            axios_1.HttpModule,
             employee_module_1.DomainEmployeeModule,
             employee_notification_module_1.DomainEmployeeNotificationModule,
             notification_module_1.DomainNotificationModule,
@@ -33956,6 +34261,7 @@ exports.NotificationContextModule = NotificationContextModule = __decorate([
             reservation_notification_context_service_1.ReservationNotificationContextService,
             resource_notification_context_service_1.ResourceNotificationContextService,
             fcm_push_adapter_1.FCMAdapter,
+            fcm_adapter_1.FCMMicroserviceAdapter,
         ],
         exports: [
             notification_context_service_1.NotificationContextService,
@@ -33963,6 +34269,8 @@ exports.NotificationContextModule = NotificationContextModule = __decorate([
             schedule_notification_context_service_1.ScheduleNotificationContextService,
             reservation_notification_context_service_1.ReservationNotificationContextService,
             resource_notification_context_service_1.ResourceNotificationContextService,
+            fcm_push_adapter_1.FCMAdapter,
+            fcm_adapter_1.FCMMicroserviceAdapter,
         ],
     })
 ], NotificationContextModule);
@@ -34076,7 +34384,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var NotificationContextService_1;
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -34090,10 +34398,12 @@ const employee_notification_service_1 = __webpack_require__(/*! @src/domain/empl
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
+const fcm_adapter_1 = __webpack_require__(/*! ../adapter/fcm.adapter */ "./src/context/notification/adapter/fcm.adapter.ts");
 let NotificationContextService = NotificationContextService_1 = class NotificationContextService {
-    constructor(employeeMicroserviceAdapter, fcmAdapter, domainNotificationService, domainNotificationTypeService, domainEmployeeNotificationService, domainEmployeeService, dataSource) {
+    constructor(employeeMicroserviceAdapter, fcmAdapter, fcmMicroserviceAdapter, domainNotificationService, domainNotificationTypeService, domainEmployeeNotificationService, domainEmployeeService, dataSource) {
         this.employeeMicroserviceAdapter = employeeMicroserviceAdapter;
         this.fcmAdapter = fcmAdapter;
+        this.fcmMicroserviceAdapter = fcmMicroserviceAdapter;
         this.domainNotificationService = domainNotificationService;
         this.domainNotificationTypeService = domainNotificationTypeService;
         this.domainEmployeeNotificationService = domainEmployeeNotificationService;
@@ -34285,7 +34595,14 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         return notification;
     }
     async 알림을_전송한다(tokens, payload) {
-        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
+        console.log(tokens);
+        const notificationPayload = {
+            title: payload.title,
+            body: payload.body,
+            link: '/plan/user/schedule-add',
+            icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+        };
+        return await this.fcmMicroserviceAdapter.sendNotification(tokens[0], notificationPayload);
     }
     async 알림_전송_프로세스를_진행한다(notificationType, notificationData, targetEmployeeIds) {
         const notificationContent = await this.알림_내용을_생성한다(notificationType, notificationData);
@@ -34294,12 +34611,6 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         if (tokens.length === 0) {
             return;
         }
-        await this.알림을_전송한다(tokens, {
-            title: notification.title,
-            body: notification.body,
-            notificationType: notification.notificationType,
-            notificationData: notification.notificationData,
-        });
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }
     _템플릿_변수를_치환한다(template, data) {
@@ -34385,7 +34696,7 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
 exports.NotificationContextService = NotificationContextService;
 exports.NotificationContextService = NotificationContextService = NotificationContextService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_microservice_adapter_1.EmployeeMicroserviceAdapter !== "undefined" && employee_microservice_adapter_1.EmployeeMicroserviceAdapter) === "function" ? _a : Object, typeof (_b = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _b : Object, typeof (_c = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _c : Object, typeof (_d = typeof notification_type_service_1.DomainNotificationTypeService !== "undefined" && notification_type_service_1.DomainNotificationTypeService) === "function" ? _d : Object, typeof (_e = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _e : Object, typeof (_f = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _f : Object, typeof (_g = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _g : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_microservice_adapter_1.EmployeeMicroserviceAdapter !== "undefined" && employee_microservice_adapter_1.EmployeeMicroserviceAdapter) === "function" ? _a : Object, typeof (_b = typeof fcm_push_adapter_1.FCMAdapter !== "undefined" && fcm_push_adapter_1.FCMAdapter) === "function" ? _b : Object, typeof (_c = typeof fcm_adapter_1.FCMMicroserviceAdapter !== "undefined" && fcm_adapter_1.FCMMicroserviceAdapter) === "function" ? _c : Object, typeof (_d = typeof notification_service_1.DomainNotificationService !== "undefined" && notification_service_1.DomainNotificationService) === "function" ? _d : Object, typeof (_e = typeof notification_type_service_1.DomainNotificationTypeService !== "undefined" && notification_type_service_1.DomainNotificationTypeService) === "function" ? _e : Object, typeof (_f = typeof employee_notification_service_1.DomainEmployeeNotificationService !== "undefined" && employee_notification_service_1.DomainEmployeeNotificationService) === "function" ? _f : Object, typeof (_g = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _g : Object, typeof (_h = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _h : Object])
 ], NotificationContextService);
 
 
@@ -42891,8 +43202,8 @@ exports.DomainVehicleInfoService = DomainVehicleInfoService = __decorate([
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateMeetingRoomInfoDto = exports.VehicleInfoResponseDto = exports.ConsumableResponseDto = exports.MaintenanceResponseDto = exports.UpdateVehicleInfoDto = exports.UpdateConsumableDto = exports.UpdateMaintenanceDto = exports.CreateMaintenanceDto = exports.CreateConsumableDto = exports.CreateVehicleInfoDto = exports.ResourceAvailabilityDto = exports.TimeSlotDto = exports.CheckAvailabilityResponseDto = exports.CheckAvailabilityQueryDto = exports.CreateResourceInfoDto = exports.CreateResourceDto = exports.ResourceLocationURL = exports.ResourceLocation = exports.CreateResourceManagerDto = exports.CreateResourceGroupDto = exports.UpdateResourceGroupOrdersDto = exports.NewOrderResourceGroupDto = exports.UpdateResourceOrdersDto = exports.NewOrderResourceDto = exports.UpdateResourceInfoDto = exports.UpdateResourceDto = exports.UpdateResourceGroupDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = exports.CreateResourceResponseDto = exports.ResourceQueryDto = exports.TaskResponseDto = exports.ManagerResponseDto = exports.EmplyeesByDepartmentResponseDto = exports.EmployeeResponseDto = exports.UpdateEmployeeDto = exports.CreateEmployeeDto = exports.UpdateNotificationSettingsDto = exports.CheckPasswordDto = exports.ChangePasswordDto = exports.ChangeRoleDto = exports.UserResponseDto = exports.LoginResponseDto = exports.LoginDto = void 0;
-exports.UpdateReservationDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.ReservationQueryDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.CreateReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationVehicleResponseDto = exports.ReservationParticipantResponseDto = exports.ReservationResponseDto = exports.ReturnVehicleDetailResponseDto = exports.ReturnVehicleResponseDto = exports.StatisticsResponseDto = exports.YearMonthFilterDto = exports.DateRangeFilterDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.PushSubscriptionDto = exports.WebPushDto = exports.FCMDto = exports.PushNotificationDto = exports.PushNotificationPayload = exports.SendNotificationDto = exports.CreateEmployeeNotificationDto = exports.CreateNotificationDto = exports.CreateNotificationDataDto = exports.PushNotificationSendResult = exports.ResponseNotificationDto = exports.NotificationDataDto = exports.EquipmentInfoResponseDto = exports.UpdateEquipmentInfoDto = exports.CreateEquipmentInfoDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = void 0;
-exports.FileResponseDto = exports.CreateFileDataDto = exports.ReservationSnapshotResponseDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.ReminderTimeDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.ReturnVehicleDto = void 0;
+exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = exports.CreateReservationDto = exports.ReservationQueryDto = exports.CalendarResponseDto = exports.GroupedReservationWithResourceResponseDto = exports.GroupedReservationResponseDto = exports.CreateReservationResponseDto = exports.ReservationWithRelationsResponseDto = exports.ReservationWithResourceResponseDto = exports.ReservationVehicleResponseDto = exports.ReservationParticipantResponseDto = exports.ReservationResponseDto = exports.ReturnVehicleDetailResponseDto = exports.ReturnVehicleResponseDto = exports.StatisticsResponseDto = exports.YearMonthFilterDto = exports.DateRangeFilterDto = exports.ConsumableMaintenanceStatsResponseDto = exports.ConsumableMaintenanceStatsFilterDto = exports.EmployeeReservationStatsResponseDto = exports.EmployeeReservationStatsFilterDto = exports.ResourceUsageStatsResponseDto = exports.ResourceUsageStatsFilterDto = exports.VehicleMaintenanceHistoryResponseDto = exports.VehicleMaintenanceHistoryFilterDto = exports.FcmBulkSendResponseDto = exports.FcmSendResponseDto = exports.FcmSendRequestDto = exports.PushSubscriptionDto = exports.WebPushDto = exports.FCMDto = exports.PushNotificationDto = exports.PushNotificationPayload = exports.SendNotificationDto = exports.CreateEmployeeNotificationDto = exports.CreateNotificationDto = exports.CreateNotificationDataDto = exports.PushNotificationSendResult = exports.ResponseNotificationDto = exports.NotificationDataDto = exports.EquipmentInfoResponseDto = exports.UpdateEquipmentInfoDto = exports.CreateEquipmentInfoDto = exports.AccommodationInfoResponseDto = exports.UpdateAccommodationInfoDto = exports.CreateAccommodationInfoDto = exports.MeetingRoomInfoResponseDto = exports.UpdateMeetingRoomInfoDto = void 0;
+exports.FileResponseDto = exports.CreateFileDataDto = exports.ReservationSnapshotResponseDto = exports.SelectedResourceResponseDto = exports.TimeRangeResponseDto = exports.TimeInfoResponseDto = exports.DateRangeResponseDto = exports.UpdateReservationSnapshotDto = exports.CreateReservationSnapshotDto = exports.ReminderTimeDto = exports.SelectedResourceDto = exports.TimeRangeDto = exports.TimeInfoDto = exports.DateRangeDto = exports.DroppableGroupDataDto = exports.DroppableGroupItemDto = exports.AttendeeDto = exports.ReturnVehicleDto = exports.UpdateReservationDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = void 0;
 var login_dto_1 = __webpack_require__(/*! ./application/auth/dto/login.dto */ "./src/application/auth/dto/login.dto.ts");
 Object.defineProperty(exports, "LoginDto", ({ enumerable: true, get: function () { return login_dto_1.LoginDto; } }));
 var login_response_dto_1 = __webpack_require__(/*! ./application/auth/dto/login-response.dto */ "./src/application/auth/dto/login-response.dto.ts");
@@ -42997,6 +43308,11 @@ var push_subscription_dto_1 = __webpack_require__(/*! ./application/notification
 Object.defineProperty(exports, "FCMDto", ({ enumerable: true, get: function () { return push_subscription_dto_1.FCMDto; } }));
 Object.defineProperty(exports, "WebPushDto", ({ enumerable: true, get: function () { return push_subscription_dto_1.WebPushDto; } }));
 Object.defineProperty(exports, "PushSubscriptionDto", ({ enumerable: true, get: function () { return push_subscription_dto_1.PushSubscriptionDto; } }));
+var fcm_send_request_dto_1 = __webpack_require__(/*! ./context/notification/dtos/fcm-send-request.dto */ "./src/context/notification/dtos/fcm-send-request.dto.ts");
+Object.defineProperty(exports, "FcmSendRequestDto", ({ enumerable: true, get: function () { return fcm_send_request_dto_1.FcmSendRequestDto; } }));
+var fcm_send_response_dto_1 = __webpack_require__(/*! ./context/notification/dtos/fcm-send-response.dto */ "./src/context/notification/dtos/fcm-send-response.dto.ts");
+Object.defineProperty(exports, "FcmSendResponseDto", ({ enumerable: true, get: function () { return fcm_send_response_dto_1.FcmSendResponseDto; } }));
+Object.defineProperty(exports, "FcmBulkSendResponseDto", ({ enumerable: true, get: function () { return fcm_send_response_dto_1.FcmBulkSendResponseDto; } }));
 var vehicle_maintenance_history_dto_1 = __webpack_require__(/*! ./application/statistics/dtos/vehicle-maintenance-history.dto */ "./src/application/statistics/dtos/vehicle-maintenance-history.dto.ts");
 Object.defineProperty(exports, "VehicleMaintenanceHistoryFilterDto", ({ enumerable: true, get: function () { return vehicle_maintenance_history_dto_1.VehicleMaintenanceHistoryFilterDto; } }));
 Object.defineProperty(exports, "VehicleMaintenanceHistoryResponseDto", ({ enumerable: true, get: function () { return vehicle_maintenance_history_dto_1.VehicleMaintenanceHistoryResponseDto; } }));
