@@ -403,11 +403,22 @@ export class ScheduleQueryContextService {
     }
 
     async 예약의_일정ID들을_조회한다(reservationId: string | string[]): Promise<string[]> {
-        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds(
-            Array.isArray(reservationId) ? reservationId : [reservationId],
-        );
-        const scheduleIds = scheduleRelations.map((r) => r.scheduleId);
-        return scheduleIds;
+        const reservationIds = Array.isArray(reservationId) ? reservationId : [reservationId];
+
+        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds(reservationIds);
+
+        // reservationId 순서를 유지하면서 scheduleId들을 정렬
+        const orderedScheduleIds: string[] = [];
+
+        for (const resId of reservationIds) {
+            const relatedScheduleIds = scheduleRelations
+                .filter((r) => r.reservationId === resId)
+                .map((r) => r.scheduleId);
+            orderedScheduleIds.push(...relatedScheduleIds);
+        }
+
+        // 중복 제거하면서 순서 유지
+        return [...new Set(orderedScheduleIds)];
     }
 
     async 직원의_소속_일정ID들을_조회한다(department: string, fromDate?: Date, endDate?: Date): Promise<string[]> {

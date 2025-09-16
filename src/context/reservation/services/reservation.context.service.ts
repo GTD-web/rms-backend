@@ -87,7 +87,7 @@ export class ReservationContextService {
                 startDate: sortOrder,
             },
         });
-
+        console.log(reservations.map((reservation) => reservation.startDate));
         return reservations;
     }
 

@@ -65,11 +65,9 @@ export class ReservationService {
             scheduleIds,
             keyword,
         );
-
         // 5. 페이지네이션 적용
         const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } =
             this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);
-
         // 5. schedule과 participants 정보를 벌크로 조회
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(
             paginatedIds,
@@ -114,7 +112,7 @@ export class ReservationService {
             });
         });
         return {
-            reservations: reservationResponseDtos,
+            reservations: reservationResponseDtos.sort((a, b) => b.startDate.localeCompare(a.startDate)),
             totalCount,
             filteredCount,
             totalPages,

@@ -23402,7 +23402,7 @@ let ReservationService = class ReservationService {
             });
         });
         return {
-            reservations: reservationResponseDtos,
+            reservations: reservationResponseDtos.sort((a, b) => b.startDate.localeCompare(a.startDate)),
             totalCount,
             filteredCount,
             totalPages,
@@ -35321,6 +35321,7 @@ let ReservationContextService = class ReservationContextService {
                 startDate: sortOrder,
             },
         });
+        console.log(reservations.map((reservation) => reservation.startDate));
         return reservations;
     }
     async 확인필요_예약목록을_조회한다(query) {
@@ -38199,9 +38200,16 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         return [...new Set(scheduleIds)];
     }
     async 예약의_일정ID들을_조회한다(reservationId) {
-        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds(Array.isArray(reservationId) ? reservationId : [reservationId]);
-        const scheduleIds = scheduleRelations.map((r) => r.scheduleId);
-        return scheduleIds;
+        const reservationIds = Array.isArray(reservationId) ? reservationId : [reservationId];
+        const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds(reservationIds);
+        const orderedScheduleIds = [];
+        for (const resId of reservationIds) {
+            const relatedScheduleIds = scheduleRelations
+                .filter((r) => r.reservationId === resId)
+                .map((r) => r.scheduleId);
+            orderedScheduleIds.push(...relatedScheduleIds);
+        }
+        return [...new Set(orderedScheduleIds)];
     }
     async 직원의_소속_일정ID들을_조회한다(department, fromDate, endDate) {
         const conditions = [
