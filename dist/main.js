@@ -37487,6 +37487,7 @@ let ScheduleMutationContextService = ScheduleMutationContextService_1 = class Sc
         const scheduleEntity = {
             title: scheduleData.title,
             description: scheduleData.description,
+            location: scheduleData.location,
             startDate: scheduleData.startDate,
             endDate: scheduleData.endDate,
             notifyBeforeStart: scheduleData.notifyBeforeStart || false,

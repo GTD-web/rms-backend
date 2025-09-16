@@ -3,6 +3,7 @@ import { ScheduleType } from '@libs/enums/schedule-type.enum';
 export interface CreateScheduleDto {
     title: string;
     description?: string;
+    location?: string;
     startDate: Date;
     endDate: Date;
     notifyBeforeStart?: boolean;
