@@ -22581,6 +22581,15 @@ __decorate([
     (0, class_validator_1.IsEnum)(ReservationSortOrder),
     __metadata("design:type", String)
 ], ReservationListQueryDto.prototype, "sortOrder", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '특정 자원 ID (deprecated - resourceType 사용 권장)',
+        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ReservationListQueryDto.prototype, "resourceId", void 0);
 
 
 /***/ }),
@@ -23353,8 +23362,8 @@ let ReservationService = class ReservationService {
         this.reservationNotificationContextService = reservationNotificationContextService;
     }
     async findReservationList(query) {
-        const { startDate, endDate, resourceType, status, keyword, sortOrder, page, limit } = query;
-        const basicReservations = await this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, status, sortOrder);
+        const { startDate, endDate, resourceType, resourceId, status, keyword, sortOrder, page, limit } = query;
+        const basicReservations = await this.reservationContextService.예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status, sortOrder);
         if (basicReservations.length === 0) {
             return {
                 reservations: [],
@@ -35286,7 +35295,7 @@ let ReservationContextService = class ReservationContextService {
         this.dataSource = dataSource;
         this.domainScheduleParticipantService = domainScheduleParticipantService;
     }
-    async 예약목록을_조회한다(startDate, endDate, resourceType, status, sortOrder) {
+    async 예약목록을_조회한다(startDate, endDate, resourceType, resourceId, status, sortOrder) {
         if (startDate && endDate && startDate > endDate) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_RANGE);
         }
@@ -35304,6 +35313,11 @@ let ReservationContextService = class ReservationContextService {
         if (resourceType) {
             where.resource = {
                 type: resourceType,
+            };
+        }
+        if (resourceId) {
+            where.resource = {
+                resourceId,
             };
         }
         if (startDate && endDate) {

@@ -46,6 +46,7 @@ export class ReservationContextService {
         startDate?: string,
         endDate?: string,
         resourceType?: ResourceType,
+        resourceId?: string,
         status?: ReservationStatus,
         sortOrder?: 'ASC' | 'DESC',
     ): Promise<Reservation[]> {
@@ -66,6 +67,11 @@ export class ReservationContextService {
         if (resourceType) {
             where.resource = {
                 type: resourceType,
+            };
+        }
+        if (resourceId) {
+            where.resource = {
+                resourceId,
             };
         }
 

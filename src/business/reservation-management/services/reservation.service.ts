@@ -29,7 +29,7 @@ export class ReservationService {
     ) {}
 
     async findReservationList(query: ReservationListQueryDto): Promise<ReservationListResponseDto> {
-        const { startDate, endDate, resourceType, status, keyword, sortOrder, page, limit } = query;
+        const { startDate, endDate, resourceType, resourceId, status, keyword, sortOrder, page, limit } = query;
 
         // reservation 에서 sortOrder 에 맞는 데이터를 조회한다.
         // 조건부로 startDate, endDate, resourceType, status가 있다면 사용한다.
@@ -39,6 +39,7 @@ export class ReservationService {
             startDate,
             endDate,
             resourceType,
+            resourceId,
             status,
             sortOrder,
         );
