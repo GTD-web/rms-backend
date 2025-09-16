@@ -242,8 +242,9 @@ export class NotificationContextService {
             throw new BadRequestException('Employee not found');
         }
 
-        // employee.subscriptions = [subscription as any];
-        // const updatedEmployee = await this.domainEmployeeService.save(employee);
+        // SSO 서버 오류 대비 RMS 서버에서 구독 정보 저장
+        employee.subscriptions = [subscription as any];
+        await this.domainEmployeeService.save(employee);
 
         // return updatedEmployee.subscriptions.length > 0;
         try {

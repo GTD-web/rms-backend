@@ -34607,6 +34607,8 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         if (!employee) {
             throw new common_1.BadRequestException('Employee not found');
         }
+        employee.subscriptions = [subscription];
+        await this.domainEmployeeService.save(employee);
         try {
             const fcmSubscribeDto = {
                 fcmToken: subscription.fcm?.token,
