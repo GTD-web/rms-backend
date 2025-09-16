@@ -441,7 +441,6 @@ export class ScheduleQueryContextService {
         const schedules = await this.domainScheduleService.findAll({
             where: conditions,
         });
-        console.log(schedules);
         return schedules.map((p) => p.scheduleId);
     }
 
@@ -910,9 +909,8 @@ export class ScheduleQueryContextService {
 
         // 1. 기본 일정 ID 조회 (역할 조건 포함)
         let scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, query.role, now);
-
         const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, now);
-        scheduleIds = [...scheduleIds, ...belongingScheduleIds];
+        scheduleIds = Array.from(new Set([...scheduleIds, ...belongingScheduleIds]));
 
         // 2. 카테고리별 필터링
         if (query.category && query.category !== 'ALL') {

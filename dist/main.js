@@ -38246,7 +38246,6 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         const schedules = await this.domainScheduleService.findAll({
             where: conditions,
         });
-        console.log(schedules);
         return schedules.map((p) => p.scheduleId);
     }
     async 직원의_역할별_일정ID들을_조회한다(employeeId, role, fromDate, order) {
@@ -38568,7 +38567,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         now.setHours(0, 0, 0, 0);
         let scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, query.role, now);
         const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, now);
-        scheduleIds = [...scheduleIds, ...belongingScheduleIds];
+        scheduleIds = Array.from(new Set([...scheduleIds, ...belongingScheduleIds]));
         if (query.category && query.category !== 'ALL') {
             scheduleIds = await this.카테고리별_일정ID들을_조회한다(scheduleIds, query.category);
         }
