@@ -22,6 +22,7 @@ import { CreateNotificationDataDto, CreateNotificationDto } from '../dtos/create
 import { DateUtil } from '@libs/utils/date.util';
 import { FCMMicroserviceAdapter } from '../adapter/fcm.adapter';
 import { FcmSendResponseDto } from '../dtos/fcm-send-response.dto';
+import { EmployeeTokensDto } from '@src/domain/employee/dtos/fcm-token-response.dto';
 
 export interface NotificationData {
     schedule: {
@@ -272,7 +273,7 @@ export class NotificationContextService {
         // }
     }
 
-    async 구독_목록을_조회한다(employeeIds: string[]): Promise<string[]> {
+    async 구독_목록을_조회한다(employeeIds: string[]): Promise<EmployeeTokensDto[]> {
         const employees = await this.domainEmployeeService.findAll({
             where: { employeeId: In(employeeIds) },
             select: { subscriptions: true, isPushNotificationEnabled: true, employeeNumber: true },
@@ -280,26 +281,14 @@ export class NotificationContextService {
         if (!employees || employees.length === 0) {
             return [];
         }
-        console.log(employees);
-        // deprecated
-        // const tokens = employees
-        //     .filter(
-        //         (employee) =>
-        //             employee.isPushNotificationEnabled && employee.subscriptions && employee.subscriptions.length > 0,
-        //     )
-        //     .flatMap((employee) => employee.subscriptions.map((subscription) => subscription.fcm.token));
 
         const { byEmployee, allTokens, totalEmployees, totalTokens } =
             await this.employeeMicroserviceAdapter.getFcmTokens(
                 '',
                 employees.map((employee) => employee.employeeNumber),
             );
-        console.log(allTokens);
-        if (totalTokens === 0) {
-            return [];
-        }
 
-        return allTokens.map((token) => token.fcmToken);
+        return byEmployee;
     }
 
     /**
@@ -376,15 +365,21 @@ export class NotificationContextService {
     }
 
     async 알림을_전송한다(tokens: string[], payload: PushNotificationPayload): Promise<any> {
-        console.log(tokens);
+        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
+    }
+
+    async 알림을_전송한다_new(tokens: string[], payload: PushNotificationPayload): Promise<any> {
         const notificationPayload = {
             title: payload.title,
             body: payload.body,
             link: '/plan/user/schedule-add', // payload.link,
             icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png', // payload.icon,
         };
-        return await this.fcmMicroserviceAdapter.sendNotification(tokens[0], notificationPayload);
-        // return await this.fcmAdapter.sendBulkNotification(tokens, payload);
+        const responses = [];
+        for (const token of tokens) {
+            responses.push(await this.fcmMicroserviceAdapter.sendNotification(token, notificationPayload));
+        }
+        return responses;
     }
 
     async 알림_전송_프로세스를_진행한다(
@@ -397,23 +392,59 @@ export class NotificationContextService {
         // 알림데이터(Notification) 생성
         const notification = await this.알림을_저장한다(notificationContent, targetEmployeeIds);
         // 알림 전송을 위한 구독 정보 조회
-        const tokens = await this.구독_목록을_조회한다(targetEmployeeIds);
-        if (tokens.length === 0) {
+        const employeeTokens = await this.구독_목록을_조회한다(targetEmployeeIds);
+        if (employeeTokens.length === 0) {
             return;
         }
+        const { oldTokens, newTokens } = this._토큰을_디바이스_타입별로_분류한다(employeeTokens);
+
         // TODO 알림 테스트
         // 실제 알림 전송
-        // await this.알림을_전송한다(tokens, {
-        //     title: notification.title,
-        //     body: notification.body,
-        //     notificationType: notification.notificationType,
-        //     notificationData: notification.notificationData,
-        // });
+        await this.알림을_전송한다(oldTokens, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
+
+        await this.알림을_전송한다_new(newTokens, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
         // 알림 전송 후 전송상태 업데이트
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }
 
     // ==================== Private Helper Functions ====================
+
+    /**
+     * 직원 토큰 배열에서 디바이스 타입별로 FCM 토큰을 분류한다
+     */
+    private _토큰을_디바이스_타입별로_분류한다(employeeTokens: EmployeeTokensDto[]): {
+        oldTokens: string[];
+        newTokens: string[];
+    } {
+        const oldTokens = [];
+        const newTokens = [];
+
+        for (const employeeToken of employeeTokens) {
+            // 단일 루프로 최적화: tokens 배열을 한 번만 순회
+            for (const token of employeeToken.tokens) {
+                if (token.deviceType === 'prod-old') {
+                    oldTokens.push(token.fcmToken);
+                } else if (token.deviceType === 'prod') {
+                    newTokens.push(token.fcmToken);
+                }
+            }
+            console.log('employee', employeeToken.employeeNumber);
+            console.log('oldTokens', oldTokens);
+            console.log('newTokens', newTokens);
+        }
+
+        return { oldTokens, newTokens };
+    }
 
     /**
      * 템플릿 변수를 실제 값으로 치환한다

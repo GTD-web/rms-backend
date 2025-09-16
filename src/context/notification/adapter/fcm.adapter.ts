@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { catchError, firstValueFrom, map } from 'rxjs';
+import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { AxiosError } from 'axios';
 import { FcmSendRequestDto } from '../dtos/fcm-send-request.dto';
 import { FcmSendResponseDto, FcmBulkSendResponseDto } from '../dtos/fcm-send-response.dto';
@@ -64,7 +64,6 @@ export class FCMMicroserviceAdapter {
             };
 
             const url = `${this.fcmServiceUrl}/api/fcm/test-send`;
-
             const response = await firstValueFrom(
                 this.httpService
                     .post<FcmSendResponseDto>(url, requestDto, {
@@ -75,15 +74,25 @@ export class FCMMicroserviceAdapter {
                         catchError((error: AxiosError) => {
                             this.logger.error(`FCM 단일 알림 전송 실패: ${error.message}`, error.stack);
 
+                            let errorMessage = 'FCM 알림 전송 중 오류가 발생했습니다.';
+                            let errorCode = 'UNKNOWN_ERROR';
+
                             if (error.response?.status === 400) {
-                                throw new BadRequestException('FCM 토큰 형식이 올바르지 않습니다.');
+                                errorMessage = 'FCM 토큰 형식이 올바르지 않습니다.';
+                                errorCode = 'INVALID_TOKEN';
+                            } else if (error.response?.status === 404) {
+                                errorMessage = 'FCM 서비스를 찾을 수 없습니다.';
+                                errorCode = 'SERVICE_NOT_FOUND';
                             }
 
-                            if (error.response?.status === 404) {
-                                throw new BadRequestException('FCM 서비스를 찾을 수 없습니다.');
-                            }
-
-                            throw new BadRequestException('FCM 알림 전송 중 오류가 발생했습니다.');
+                            // 예외를 던지는 대신 에러 객체를 리턴
+                            return of({
+                                success: false,
+                                message: 'failed',
+                                errorMessage,
+                                errorCode,
+                                messageId: null,
+                            });
                         }),
                     ),
             );
@@ -93,7 +102,13 @@ export class FCMMicroserviceAdapter {
             return response;
         } catch (error) {
             this.logger.error(`FCM 단일 알림 전송 중 예외 발생: ${error.message}`, error.stack);
-            throw error;
+            return {
+                success: false,
+                message: 'failed',
+                errorMessage: error.message,
+                errorCode: error.code,
+                messageId: error.messageId,
+            };
         }
     }
 
@@ -138,15 +153,27 @@ export class FCMMicroserviceAdapter {
                             catchError((error: AxiosError) => {
                                 this.logger.error(`FCM 다중 알림 전송 실패: ${error.message}`, error.stack);
 
+                                let errorMessage = 'FCM 다중 알림 전송 중 오류가 발생했습니다.';
+                                let errorCode = 'UNKNOWN_ERROR';
+
                                 if (error.response?.status === 400) {
-                                    throw new BadRequestException('FCM 토큰 형식이 올바르지 않습니다.');
+                                    errorMessage = 'FCM 토큰 형식이 올바르지 않습니다.';
+                                    errorCode = 'INVALID_TOKEN';
+                                } else if (error.response?.status === 404) {
+                                    errorMessage = 'FCM 서비스를 찾을 수 없습니다.';
+                                    errorCode = 'SERVICE_NOT_FOUND';
                                 }
 
-                                if (error.response?.status === 404) {
-                                    throw new BadRequestException('FCM 서비스를 찾을 수 없습니다.');
-                                }
-
-                                throw new BadRequestException('FCM 다중 알림 전송 중 오류가 발생했습니다.');
+                                // 예외를 던지는 대신 에러 객체를 리턴
+                                return of({
+                                    success: false,
+                                    successCount: 0,
+                                    failureCount: 1,
+                                    message: 'failed',
+                                    errorMessage,
+                                    errorCode,
+                                    messageId: null,
+                                });
                             }),
                         ),
                 );
@@ -161,7 +188,18 @@ export class FCMMicroserviceAdapter {
             return responses;
         } catch (error) {
             this.logger.error(`FCM 다중 알림 전송 중 예외 발생: ${error.message}`, error.stack);
-            throw error;
+            // 예외를 던지는 대신 에러 응답 배열을 리턴
+            return [
+                {
+                    success: false,
+                    successCount: 0,
+                    failureCount: tokens.length,
+                    message: 'failed',
+                    errorMessage: error.message || 'FCM 다중 알림 전송 중 예외가 발생했습니다.',
+                    errorCode: error.code || 'EXCEPTION_ERROR',
+                    messageId: null,
+                },
+            ];
         }
     }
 }

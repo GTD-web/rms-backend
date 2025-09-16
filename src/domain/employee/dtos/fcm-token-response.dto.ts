@@ -9,8 +9,7 @@ export class FcmTokenDto {
 
     @ApiProperty({
         description: '디바이스 타입',
-        example: 'PC',
-        enum: ['PC', 'MOBILE', 'TABLET'],
+        example: 'prod',
     })
     deviceType: string;
 

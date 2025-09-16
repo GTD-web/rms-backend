@@ -33252,13 +33252,23 @@ let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAda
                 .post(url, requestDto, {})
                 .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
                 this.logger.error(`FCM 단일 알림 전송 실패: ${error.message}`, error.stack);
+                let errorMessage = 'FCM 알림 전송 중 오류가 발생했습니다.';
+                let errorCode = 'UNKNOWN_ERROR';
                 if (error.response?.status === 400) {
-                    throw new common_1.BadRequestException('FCM 토큰 형식이 올바르지 않습니다.');
+                    errorMessage = 'FCM 토큰 형식이 올바르지 않습니다.';
+                    errorCode = 'INVALID_TOKEN';
                 }
-                if (error.response?.status === 404) {
-                    throw new common_1.BadRequestException('FCM 서비스를 찾을 수 없습니다.');
+                else if (error.response?.status === 404) {
+                    errorMessage = 'FCM 서비스를 찾을 수 없습니다.';
+                    errorCode = 'SERVICE_NOT_FOUND';
                 }
-                throw new common_1.BadRequestException('FCM 알림 전송 중 오류가 발생했습니다.');
+                return (0, rxjs_1.of)({
+                    success: false,
+                    message: 'failed',
+                    errorMessage,
+                    errorCode,
+                    messageId: null,
+                });
             })));
             console.log(response);
             this.logger.log(`FCM 단일 알림 전송 성공`);
@@ -33266,7 +33276,13 @@ let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAda
         }
         catch (error) {
             this.logger.error(`FCM 단일 알림 전송 중 예외 발생: ${error.message}`, error.stack);
-            throw error;
+            return {
+                success: false,
+                message: 'failed',
+                errorMessage: error.message,
+                errorCode: error.code,
+                messageId: error.messageId,
+            };
         }
     }
     async sendBulkNotification(tokens, payload, authorization) {
@@ -33291,13 +33307,25 @@ let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAda
                 })
                     .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
                     this.logger.error(`FCM 다중 알림 전송 실패: ${error.message}`, error.stack);
+                    let errorMessage = 'FCM 다중 알림 전송 중 오류가 발생했습니다.';
+                    let errorCode = 'UNKNOWN_ERROR';
                     if (error.response?.status === 400) {
-                        throw new common_1.BadRequestException('FCM 토큰 형식이 올바르지 않습니다.');
+                        errorMessage = 'FCM 토큰 형식이 올바르지 않습니다.';
+                        errorCode = 'INVALID_TOKEN';
                     }
-                    if (error.response?.status === 404) {
-                        throw new common_1.BadRequestException('FCM 서비스를 찾을 수 없습니다.');
+                    else if (error.response?.status === 404) {
+                        errorMessage = 'FCM 서비스를 찾을 수 없습니다.';
+                        errorCode = 'SERVICE_NOT_FOUND';
                     }
-                    throw new common_1.BadRequestException('FCM 다중 알림 전송 중 오류가 발생했습니다.');
+                    return (0, rxjs_1.of)({
+                        success: false,
+                        successCount: 0,
+                        failureCount: 1,
+                        message: 'failed',
+                        errorMessage,
+                        errorCode,
+                        messageId: null,
+                    });
                 })));
                 this.logger.log(`FCM 다중 알림 전송 성공: 성공 ${response.successCount}개, 실패 ${response.failureCount}개`);
                 console.log(response);
@@ -33307,7 +33335,17 @@ let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAda
         }
         catch (error) {
             this.logger.error(`FCM 다중 알림 전송 중 예외 발생: ${error.message}`, error.stack);
-            throw error;
+            return [
+                {
+                    success: false,
+                    successCount: 0,
+                    failureCount: tokens.length,
+                    message: 'failed',
+                    errorMessage: error.message || 'FCM 다중 알림 전송 중 예외가 발생했습니다.',
+                    errorCode: error.code || 'EXCEPTION_ERROR',
+                    messageId: null,
+                },
+            ];
         }
     }
 };
@@ -33783,6 +33821,27 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], FcmBulkSendResponseDto.prototype, "results", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '에러 코드 (실패 시)',
+        example: 'messaging/invalid-registration-token',
+    }),
+    __metadata("design:type", String)
+], FcmBulkSendResponseDto.prototype, "errorCode", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '에러 메시지 (실패 시)',
+        example: 'The registration token is not a valid FCM registration token',
+    }),
+    __metadata("design:type", String)
+], FcmBulkSendResponseDto.prototype, "errorMessage", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '메시지 ID (성공 시)',
+        example: 'projects/myproject-b5ae1/messages/0:1234567890123456%31bd1c9931bd1c99',
+    }),
+    __metadata("design:type", String)
+], FcmBulkSendResponseDto.prototype, "messageId", void 0);
 
 
 /***/ }),
@@ -34536,13 +34595,8 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         if (!employees || employees.length === 0) {
             return [];
         }
-        console.log(employees);
         const { byEmployee, allTokens, totalEmployees, totalTokens } = await this.employeeMicroserviceAdapter.getFcmTokens('', employees.map((employee) => employee.employeeNumber));
-        console.log(allTokens);
-        if (totalTokens === 0) {
-            return [];
-        }
-        return allTokens.map((token) => token.fcmToken);
+        return byEmployee;
     }
     async 알림_내용을_생성한다(notificationType, notificationData) {
         const createNotificationDto = {
@@ -34595,23 +34649,60 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         return notification;
     }
     async 알림을_전송한다(tokens, payload) {
-        console.log(tokens);
+        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
+    }
+    async 알림을_전송한다_new(tokens, payload) {
         const notificationPayload = {
             title: payload.title,
             body: payload.body,
             link: '/plan/user/schedule-add',
             icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
         };
-        return await this.fcmMicroserviceAdapter.sendNotification(tokens[0], notificationPayload);
+        const responses = [];
+        for (const token of tokens) {
+            responses.push(await this.fcmMicroserviceAdapter.sendNotification(token, notificationPayload));
+        }
+        return responses;
     }
     async 알림_전송_프로세스를_진행한다(notificationType, notificationData, targetEmployeeIds) {
         const notificationContent = await this.알림_내용을_생성한다(notificationType, notificationData);
         const notification = await this.알림을_저장한다(notificationContent, targetEmployeeIds);
-        const tokens = await this.구독_목록을_조회한다(targetEmployeeIds);
-        if (tokens.length === 0) {
+        const employeeTokens = await this.구독_목록을_조회한다(targetEmployeeIds);
+        if (employeeTokens.length === 0) {
             return;
         }
+        const { oldTokens, newTokens } = this._토큰을_디바이스_타입별로_분류한다(employeeTokens);
+        await this.알림을_전송한다(oldTokens, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
+        await this.알림을_전송한다_new(newTokens, {
+            title: notification.title,
+            body: notification.body,
+            notificationType: notification.notificationType,
+            notificationData: notification.notificationData,
+        });
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
+    }
+    _토큰을_디바이스_타입별로_분류한다(employeeTokens) {
+        const oldTokens = [];
+        const newTokens = [];
+        for (const employeeToken of employeeTokens) {
+            for (const token of employeeToken.tokens) {
+                if (token.deviceType === 'prod-old') {
+                    oldTokens.push(token.fcmToken);
+                }
+                else if (token.deviceType === 'prod') {
+                    newTokens.push(token.fcmToken);
+                }
+            }
+            console.log('employee', employeeToken.employeeNumber);
+            console.log('oldTokens', oldTokens);
+            console.log('newTokens', newTokens);
+        }
+        return { oldTokens, newTokens };
     }
     _템플릿_변수를_치환한다(template, data) {
         let result = template;
@@ -39817,7 +39908,7 @@ let EmployeeMicroserviceAdapter = EmployeeMicroserviceAdapter_1 = class Employee
                 .post(url, {
                 employeeNumber: employeeNumber,
                 fcmToken: fcmSubscribeDto.fcmToken,
-                deviceType: 'prod',
+                deviceType: 'prod-old',
             }, {
                 headers: this.getHeaders(authorization),
             })

@@ -62,4 +62,22 @@ export class FcmBulkSendResponseDto {
         type: [FcmSendResponseDto],
     })
     results?: FcmSendResponseDto[];
+
+    @ApiPropertyOptional({
+        description: '에러 코드 (실패 시)',
+        example: 'messaging/invalid-registration-token',
+    })
+    errorCode?: string;
+
+    @ApiPropertyOptional({
+        description: '에러 메시지 (실패 시)',
+        example: 'The registration token is not a valid FCM registration token',
+    })
+    errorMessage?: string;
+
+    @ApiPropertyOptional({
+        description: '메시지 ID (성공 시)',
+        example: 'projects/myproject-b5ae1/messages/0:1234567890123456%31bd1c9931bd1c99',
+    })
+    messageId?: string;
 }

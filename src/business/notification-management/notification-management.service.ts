@@ -14,6 +14,7 @@ import {
     CreateNotificationDataDto,
 } from '@src/business.dto.index';
 import { DateUtil } from '@libs/utils/date.util';
+import { EmployeeTokensDto } from '@src/domain/employee/dtos/fcm-token-response.dto';
 
 /**
  * 알림 관리 비즈니스 서비스
@@ -31,7 +32,7 @@ export class NotificationManagementService {
         private readonly scheduleContextService: ScheduleQueryContextService,
     ) {}
 
-    async 구독_목록을_조회한다(employeeIds: string[]): Promise<string[]> {
+    async 구독_목록을_조회한다(employeeIds: string[]): Promise<EmployeeTokensDto[]> {
         return await this.notificationContextService.구독_목록을_조회한다(employeeIds);
     }
 
