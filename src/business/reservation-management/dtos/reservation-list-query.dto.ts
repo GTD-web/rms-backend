@@ -66,6 +66,14 @@ export class ReservationListQueryDto {
     resourceType?: ResourceType;
 
     @ApiPropertyOptional({
+        description: '특정 자원 ID (resourceType 과 같이 사용)',
+        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
+    })
+    @IsOptional()
+    @IsString()
+    resourceId?: string;
+
+    @ApiPropertyOptional({
         description: '예약 상태',
         enum: ReservationStatus,
         example: ReservationStatus.CONFIRMED,
@@ -83,12 +91,4 @@ export class ReservationListQueryDto {
     @IsOptional()
     @IsEnum(ReservationSortOrder)
     sortOrder?: ReservationSortOrder = ReservationSortOrder.DESC;
-
-    @ApiPropertyOptional({
-        description: '특정 자원 ID (deprecated - resourceType 사용 권장)',
-        example: '78117aaf-a203-43a3-bb38-51ec91ca935a',
-    })
-    @IsOptional()
-    @IsString()
-    resourceId?: string;
 }
