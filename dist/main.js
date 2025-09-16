@@ -30345,9 +30345,8 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 }
                 const scheduleData = {
                     title: data.title,
-                    description: data.location
-                        ? `${data.description || ''}\n장소: ${data.location}`.trim()
-                        : data.description,
+                    description: data.description,
+                    location: data.location,
                     startDate: startDate,
                     endDate: endDate,
                     scheduleType: data.scheduleType,
