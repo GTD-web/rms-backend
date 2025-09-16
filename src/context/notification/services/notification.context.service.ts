@@ -275,7 +275,7 @@ export class NotificationContextService {
 
     async 구독_목록을_조회한다(employeeIds: string[]): Promise<EmployeeTokensDto[]> {
         const employees = await this.domainEmployeeService.findAll({
-            where: { employeeId: In(employeeIds) },
+            where: { employeeId: In(employeeIds), isPushNotificationEnabled: true },
             select: { subscriptions: true, isPushNotificationEnabled: true, employeeNumber: true },
         });
         if (!employees || employees.length === 0) {

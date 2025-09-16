@@ -34619,7 +34619,7 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
     }
     async 구독_목록을_조회한다(employeeIds) {
         const employees = await this.domainEmployeeService.findAll({
-            where: { employeeId: (0, typeorm_1.In)(employeeIds) },
+            where: { employeeId: (0, typeorm_1.In)(employeeIds), isPushNotificationEnabled: true },
             select: { subscriptions: true, isPushNotificationEnabled: true, employeeNumber: true },
         });
         if (!employees || employees.length === 0) {
@@ -35293,7 +35293,7 @@ let ReservationContextService = class ReservationContextService {
         else if ((startDate && !endDate) || (!startDate && endDate)) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_REQUIRED);
         }
-        if (status && reservation_type_enum_1.ReservationStatus[status]) {
+        if (status && !reservation_type_enum_1.ReservationStatus[status]) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;

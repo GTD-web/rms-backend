@@ -54,7 +54,7 @@ export class ReservationContextService {
         } else if ((startDate && !endDate) || (!startDate && endDate)) {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_REQUIRED);
         }
-        if (status && ReservationStatus[status]) {
+        if (status && !ReservationStatus[status]) {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
