@@ -181,3 +181,57 @@ export class ScheduleCreateRequestDto {
     @Type(() => ResourceSelectionDto)
     resourceSelection?: ResourceSelectionDto;
 }
+
+/**
+ * 다중 일정 생성 요청 DTO (배열)
+ */
+export class ScheduleCreateRequestListDto {
+    @ApiProperty({
+        description: '일정 생성 요청 목록',
+        type: [ScheduleCreateRequestDto],
+        example: [
+            {
+                datesSelection: [
+                    {
+                        startDate: new Date('2025-09-05T01:00:00Z').toISOString(),
+                        endDate: new Date('2025-09-05T02:00:00Z').toISOString(),
+                    },
+                ],
+                title: '첫 번째 일정',
+                description: '첫 번째 일정 설명',
+                location: '회의실 A',
+                notifyBeforeStart: true,
+                notificationMinutes: [10],
+                scheduleType: ScheduleType.DEPARTMENT,
+                participants: [
+                    {
+                        employeeId: 'uuid-string',
+                    },
+                ],
+            },
+            {
+                datesSelection: [
+                    {
+                        startDate: new Date('2025-09-06T01:00:00Z').toISOString(),
+                        endDate: new Date('2025-09-06T02:00:00Z').toISOString(),
+                    },
+                ],
+                title: '두 번째 일정',
+                description: '두 번째 일정 설명',
+                location: '회의실 B',
+                notifyBeforeStart: true,
+                notificationMinutes: [5],
+                scheduleType: ScheduleType.PERSONAL,
+                participants: [
+                    {
+                        employeeId: 'uuid-string',
+                    },
+                ],
+            },
+        ],
+    })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => ScheduleCreateRequestDto)
+    schedules: ScheduleCreateRequestDto[];
+}

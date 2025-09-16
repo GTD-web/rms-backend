@@ -26852,8 +26852,8 @@ let ScheduleController = class ScheduleController {
     async findScheduleDetail(user, query) {
         return this.scheduleManagementService.findScheduleDetail(user, query);
     }
-    async createSchedule(user, createScheduleDto) {
-        return this.scheduleManagementService.createSchedule(user, createScheduleDto);
+    async createSchedule(user, createScheduleRequestList) {
+        return this.scheduleManagementService.createSchedule(user, createScheduleRequestList);
     }
     async cancelSchedule(user, scheduleId) {
         return this.scheduleManagementService.cancelSchedule(user, scheduleId);
@@ -26963,7 +26963,11 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({
         summary: '일정 추가',
-        description: '일정을 생성합니다.',
+        description: '여러 일정을 한 번에 생성합니다.',
+    }),
+    (0, swagger_1.ApiBody)({
+        description: '일정 생성 요청 목록',
+        type: schedule_create_request_dto_1.ScheduleCreateRequestListDto,
     }),
     (0, swagger_1.ApiOkResponse)({
         description: '일정 추가 성공',
@@ -26972,7 +26976,7 @@ __decorate([
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_t = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _t : Object, typeof (_u = typeof schedule_create_request_dto_1.ScheduleCreateRequestDto !== "undefined" && schedule_create_request_dto_1.ScheduleCreateRequestDto) === "function" ? _u : Object]),
+    __metadata("design:paramtypes", [typeof (_t = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _t : Object, typeof (_u = typeof schedule_create_request_dto_1.ScheduleCreateRequestListDto !== "undefined" && schedule_create_request_dto_1.ScheduleCreateRequestListDto) === "function" ? _u : Object]),
     __metadata("design:returntype", typeof (_v = typeof Promise !== "undefined" && Promise) === "function" ? _v : Object)
 ], ScheduleController.prototype, "createSchedule", null);
 __decorate([
@@ -28701,7 +28705,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleCreateRequestDto = exports.ResourceSelectionDto = exports.ProjectSelectionDto = exports.ScheduleParticipantDto = exports.ScheduleDateRangeDto = void 0;
+exports.ScheduleCreateRequestListDto = exports.ScheduleCreateRequestDto = exports.ResourceSelectionDto = exports.ProjectSelectionDto = exports.ScheduleParticipantDto = exports.ScheduleDateRangeDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
@@ -28880,6 +28884,59 @@ __decorate([
     (0, class_transformer_1.Type)(() => ResourceSelectionDto),
     __metadata("design:type", ResourceSelectionDto)
 ], ScheduleCreateRequestDto.prototype, "resourceSelection", void 0);
+class ScheduleCreateRequestListDto {
+}
+exports.ScheduleCreateRequestListDto = ScheduleCreateRequestListDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '일정 생성 요청 목록',
+        type: [ScheduleCreateRequestDto],
+        example: [
+            {
+                datesSelection: [
+                    {
+                        startDate: new Date('2025-09-05T01:00:00Z').toISOString(),
+                        endDate: new Date('2025-09-05T02:00:00Z').toISOString(),
+                    },
+                ],
+                title: '첫 번째 일정',
+                description: '첫 번째 일정 설명',
+                location: '회의실 A',
+                notifyBeforeStart: true,
+                notificationMinutes: [10],
+                scheduleType: schedule_type_enum_1.ScheduleType.DEPARTMENT,
+                participants: [
+                    {
+                        employeeId: 'uuid-string',
+                    },
+                ],
+            },
+            {
+                datesSelection: [
+                    {
+                        startDate: new Date('2025-09-06T01:00:00Z').toISOString(),
+                        endDate: new Date('2025-09-06T02:00:00Z').toISOString(),
+                    },
+                ],
+                title: '두 번째 일정',
+                description: '두 번째 일정 설명',
+                location: '회의실 B',
+                notifyBeforeStart: true,
+                notificationMinutes: [5],
+                scheduleType: schedule_type_enum_1.ScheduleType.PERSONAL,
+                participants: [
+                    {
+                        employeeId: 'uuid-string',
+                    },
+                ],
+            },
+        ],
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => ScheduleCreateRequestDto),
+    __metadata("design:type", Array)
+], ScheduleCreateRequestListDto.prototype, "schedules", void 0);
 
 
 /***/ }),
@@ -30261,154 +30318,159 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             reservation: reservationDto,
         };
     }
-    async createSchedule(user, createScheduleDto) {
-        this.logger.log(`일정 생성 요청 - 사용자: ${user.employeeId}, 제목: ${createScheduleDto.title}`);
-        const { datesSelection, title, description, location, notifyBeforeStart, notificationMinutes, scheduleType, participants, projectSelection, resourceSelection, } = createScheduleDto;
+    async createSchedule(user, createScheduleRequestList) {
         const authResult = await this.scheduleAuthorizationService.일정_생성_권한을_확인한다(user);
         this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
-        let projectId = null;
-        let resourceInfo = null;
-        if (projectSelection) {
-            projectId = projectSelection.projectId;
-            const projectExists = await this.projectContextService.프로젝트_존재여부를_확인한다(projectId);
-            if (!projectExists) {
-                throw new common_1.BadRequestException('존재하지 않는 프로젝트입니다.');
-            }
-        }
-        if (resourceSelection) {
-            resourceInfo = await this.resourceContextService.자원정보를_조회한다(resourceSelection.resourceId);
-            if (!resourceInfo) {
-                throw new common_1.BadRequestException('존재하지 않는 자원입니다.');
-            }
-        }
-        const createRequest = {
-            title,
-            description,
-            location,
-            scheduleType,
-            participants,
-            datesSelection,
-            resourceSelection,
-            projectSelection,
-        };
-        const policyResult = await this.schedulePolicyService.다중_일정_생성이_가능한지_확인한다(createRequest);
-        this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
         const createdSchedules = [];
         const failedSchedules = [];
-        const now = new Date();
-        for (const dateRange of datesSelection) {
-            const data = {
-                title,
-                description,
-                location,
-                scheduleType,
-                notifyBeforeStart,
-                notifyMinutesBeforeStart: notificationMinutes || [],
-                participants,
-                dateRange,
-                resourceSelection,
-                projectSelection,
-            };
-            const result = {
-                success: true,
-                schedule: null,
-                reason: null,
-            };
-            const queryRunner = this.dataSource.createQueryRunner();
-            await queryRunner.connect();
-            await queryRunner.startTransaction();
+        for (const createScheduleDto of createScheduleRequestList.schedules) {
             try {
-                let reservationId = null;
-                const startDate = new Date(data.dateRange.startDate);
-                const endDate = new Date(data.dateRange.endDate);
-                if (data.resourceSelection) {
-                    const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(data.resourceSelection.resourceId, startDate, endDate);
-                    if (!isAvailable) {
-                        throw new common_1.BadRequestException('선택한 시간대에 자원이 이미 예약되어 있습니다.');
+                const { datesSelection, title, description, location, notifyBeforeStart, notificationMinutes, scheduleType, participants, projectSelection, resourceSelection, } = createScheduleDto;
+                let projectId = null;
+                let resourceInfo = null;
+                if (projectSelection) {
+                    projectId = projectSelection.projectId;
+                    const projectExists = await this.projectContextService.프로젝트_존재여부를_확인한다(projectId);
+                    if (!projectExists) {
+                        throw new common_1.BadRequestException('존재하지 않는 프로젝트입니다.');
                     }
-                    let status = reservation_type_enum_1.ReservationStatus.CONFIRMED;
-                    if (startDate < now) {
-                        status = reservation_type_enum_1.ReservationStatus.USING;
+                }
+                if (resourceSelection) {
+                    resourceInfo = await this.resourceContextService.자원정보를_조회한다(resourceSelection.resourceId);
+                    if (!resourceInfo) {
+                        throw new common_1.BadRequestException('존재하지 않는 자원입니다.');
                     }
-                    if (data.resourceSelection.resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION) {
-                        status = reservation_type_enum_1.ReservationStatus.PENDING;
-                    }
-                    const reservationData = {
-                        title: data.title,
-                        description: data.description || '',
-                        resourceId: data.resourceSelection.resourceId,
-                        resourceType: data.resourceSelection.resourceType,
-                        status: status,
-                        startDate: startDate,
-                        endDate: endDate,
+                }
+                const createRequest = {
+                    title,
+                    description,
+                    location,
+                    scheduleType,
+                    participants,
+                    datesSelection,
+                    resourceSelection,
+                    projectSelection,
+                };
+                const policyResult = await this.schedulePolicyService.다중_일정_생성이_가능한지_확인한다(createRequest);
+                this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
+                const now = new Date();
+                for (const dateRange of datesSelection) {
+                    const data = {
+                        title,
+                        description,
+                        location,
+                        scheduleType,
+                        notifyBeforeStart,
+                        notifyMinutesBeforeStart: notificationMinutes || [],
+                        participants,
+                        dateRange,
+                        resourceSelection,
+                        projectSelection,
                     };
-                    const createdReservation = await this.reservationContextService.자원예약을_생성한다(reservationData, queryRunner);
-                    reservationId = createdReservation.reservationId;
-                }
-                const scheduleData = {
-                    title: data.title,
-                    description: data.description,
-                    location: data.location,
-                    startDate: startDate,
-                    endDate: endDate,
-                    scheduleType: data.scheduleType,
-                    notifyBeforeStart: data.notifyBeforeStart || false,
-                    notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
-                    scheduleDepartment: data.scheduleType === schedule_type_enum_1.ScheduleType.DEPARTMENT ? user.department : null,
-                };
-                const createdSchedule = await this.scheduleMutationService.일정을_생성한다(scheduleData, queryRunner);
-                await this.scheduleMutationService.일정_참가자를_추가한다(createdSchedule.scheduleId, user.employeeId, 'RESERVER', queryRunner);
-                for (const participant of data.participants) {
-                    if (participant.employeeId !== user.employeeId) {
-                        await this.scheduleMutationService.일정_참가자를_추가한다(createdSchedule.scheduleId, participant.employeeId, 'PARTICIPANT', queryRunner);
+                    const result = {
+                        success: true,
+                        schedule: null,
+                        reason: null,
+                    };
+                    const queryRunner = this.dataSource.createQueryRunner();
+                    await queryRunner.connect();
+                    await queryRunner.startTransaction();
+                    try {
+                        let reservationId = null;
+                        const startDate = new Date(data.dateRange.startDate);
+                        const endDate = new Date(data.dateRange.endDate);
+                        if (data.resourceSelection) {
+                            const isAvailable = await this.reservationContextService.자원예약이_가능한지_확인한다(data.resourceSelection.resourceId, startDate, endDate);
+                            if (!isAvailable) {
+                                throw new common_1.BadRequestException('선택한 시간대에 자원이 이미 예약되어 있습니다.');
+                            }
+                            let status = reservation_type_enum_1.ReservationStatus.CONFIRMED;
+                            if (startDate < now) {
+                                status = reservation_type_enum_1.ReservationStatus.USING;
+                            }
+                            if (data.resourceSelection.resourceType === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+                                status = reservation_type_enum_1.ReservationStatus.PENDING;
+                            }
+                            const reservationData = {
+                                title: data.title,
+                                description: data.description || '',
+                                resourceId: data.resourceSelection.resourceId,
+                                resourceType: data.resourceSelection.resourceType,
+                                status: status,
+                                startDate: startDate,
+                                endDate: endDate,
+                            };
+                            const createdReservation = await this.reservationContextService.자원예약을_생성한다(reservationData, queryRunner);
+                            reservationId = createdReservation.reservationId;
+                        }
+                        const scheduleData = {
+                            title: data.title,
+                            description: data.description,
+                            location: data.location,
+                            startDate: startDate,
+                            endDate: endDate,
+                            scheduleType: data.scheduleType,
+                            notifyBeforeStart: data.notifyBeforeStart || false,
+                            notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
+                            scheduleDepartment: data.scheduleType === schedule_type_enum_1.ScheduleType.DEPARTMENT ? user.department : null,
+                        };
+                        const createdSchedule = await this.scheduleMutationService.일정을_생성한다(scheduleData, queryRunner);
+                        await this.scheduleMutationService.일정_참가자를_추가한다(createdSchedule.scheduleId, user.employeeId, 'RESERVER', queryRunner);
+                        for (const participant of data.participants) {
+                            if (participant.employeeId !== user.employeeId) {
+                                await this.scheduleMutationService.일정_참가자를_추가한다(createdSchedule.scheduleId, participant.employeeId, 'PARTICIPANT', queryRunner);
+                            }
+                        }
+                        const relationData = {
+                            scheduleId: createdSchedule.scheduleId,
+                            projectId: data.projectSelection?.projectId || null,
+                            reservationId: reservationId,
+                        };
+                        await this.scheduleMutationService.일정관계정보를_생성한다(relationData, queryRunner);
+                        await queryRunner.commitTransaction();
+                        result.success = true;
+                        result.schedule = createdSchedule;
+                    }
+                    catch (error) {
+                        await queryRunner.rollbackTransaction();
+                        result.success = false;
+                        result.reason = `일정 생성 실패: ${error.message}`;
+                    }
+                    finally {
+                        await queryRunner.release();
+                    }
+                    if (result.success) {
+                        createdSchedules.push(result.schedule);
+                    }
+                    else {
+                        failedSchedules.push({
+                            startDate: dateRange.startDate,
+                            endDate: dateRange.endDate,
+                            reason: result.reason,
+                        });
                     }
                 }
-                const relationData = {
-                    scheduleId: createdSchedule.scheduleId,
-                    projectId: data.projectSelection?.projectId || null,
-                    reservationId: reservationId,
-                };
-                await this.scheduleMutationService.일정관계정보를_생성한다(relationData, queryRunner);
-                await queryRunner.commitTransaction();
-                result.success = true;
-                result.schedule = createdSchedule;
+                if (createdSchedules.length > 0) {
+                    const { schedule, reservation, resource } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(createdSchedules[0].scheduleId, {
+                        withReservation: true,
+                        withResource: true,
+                    });
+                    const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
+                    await this.scheduleNotificationContextService.일정_생성_알림을_전송한다({ schedule, reservation, resource }, [user.employeeId, ...participants.map((participant) => participant.employeeId)], systemAdmins.map((admin) => admin.employeeId));
+                }
             }
             catch (error) {
-                await queryRunner.rollbackTransaction();
-                result.success = false;
-                result.reason = `일정 생성 실패: ${error.message}`;
-            }
-            finally {
-                await queryRunner.release();
-            }
-            if (result.success) {
-                createdSchedules.push(result.schedule);
-            }
-            else {
                 failedSchedules.push({
-                    startDate: dateRange.startDate,
-                    endDate: dateRange.endDate,
-                    reason: result.reason,
+                    startDate: createScheduleDto.datesSelection[0].startDate,
+                    endDate: createScheduleDto.datesSelection[createScheduleDto.datesSelection.length - 1].endDate,
+                    title: createScheduleDto.title,
+                    scheduleType: createScheduleDto.scheduleType,
+                    reason: error.message,
                 });
             }
         }
-        if (createdSchedules.length > 0) {
-            const { schedule, reservation, resource } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(createdSchedules[0].scheduleId, {
-                withReservation: true,
-                withResource: true,
-            });
-            const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
-            await this.scheduleNotificationContextService.일정_생성_알림을_전송한다({ schedule, reservation, resource }, [user.employeeId, ...participants.map((participant) => participant.employeeId)], systemAdmins.map((admin) => admin.employeeId));
-        }
-        const createdSchedulesDtos = createdSchedules.map((schedule) => ({
-            scheduleId: schedule.scheduleId,
-            title: schedule.title,
-            startDate: schedule.startDate.toISOString(),
-            endDate: schedule.endDate.toISOString(),
-            scheduleType: schedule.scheduleType,
-        }));
         return {
-            createdSchedules: createdSchedulesDtos,
+            createdSchedules,
             failedSchedules,
         };
     }

@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiExcludeEndpoint } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiExcludeEndpoint, ApiBody } from '@nestjs/swagger';
 import { ScheduleManagementService } from '../schedule-management.service';
 import { Employee } from '@libs/entities/employee.entity';
 import { User } from '@libs/decorators/user.decorator';
@@ -11,7 +11,7 @@ import { ResourceScheduleQueryDto } from '../dtos/resource-schedule-query.dto';
 import { ResourceScheduleResponseDto } from '../dtos/resource-schedule-response.dto';
 import { ScheduleDetailQueryDto } from '../dtos/schedule-detail-query.dto';
 import { ScheduleDetailResponseDto } from '../dtos/schedule-detail-response.dto';
-import { ScheduleCreateRequestDto } from '../dtos/schedule-create-request.dto';
+import { ScheduleCreateRequestDto, ScheduleCreateRequestListDto } from '../dtos/schedule-create-request.dto';
 import { ScheduleCreateResponseDto } from '../dtos/schedule-create-response.dto';
 import { ScheduleCancelRequestDto } from '../dtos/schedule-cancel-request.dto';
 import { ScheduleCancelResponseDto } from '../dtos/schedule-cancel-response.dto';
@@ -155,7 +155,11 @@ export class ScheduleController {
     @Post()
     @ApiOperation({
         summary: '일정 추가',
-        description: '일정을 생성합니다.',
+        description: '여러 일정을 한 번에 생성합니다.',
+    })
+    @ApiBody({
+        description: '일정 생성 요청 목록',
+        type: ScheduleCreateRequestListDto,
     })
     @ApiOkResponse({
         description: '일정 추가 성공',
@@ -163,9 +167,9 @@ export class ScheduleController {
     })
     async createSchedule(
         @User() user: Employee,
-        @Body() createScheduleDto: ScheduleCreateRequestDto,
+        @Body() createScheduleRequestList: ScheduleCreateRequestListDto,
     ): Promise<ScheduleCreateResponseDto> {
-        return this.scheduleManagementService.createSchedule(user, createScheduleDto);
+        return this.scheduleManagementService.createSchedule(user, createScheduleRequestList);
     }
 
     /**
