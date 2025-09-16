@@ -27151,6 +27151,20 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], MyScheduleParticipantDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원 이름',
+        example: '홍길동',
+    }),
+    __metadata("design:type", String)
+], MyScheduleParticipantDto.prototype, "employeeName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원 상태',
+        example: '재직중',
+    }),
+    __metadata("design:type", String)
+], MyScheduleParticipantDto.prototype, "status", void 0);
 class MyScheduleHistoryItemDto {
 }
 exports.MyScheduleHistoryItemDto = MyScheduleHistoryItemDto;
@@ -30149,6 +30163,8 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 updatedAt: schedule.updatedAt,
                 participants: participants?.map((participant) => ({
                     employeeId: participant.employeeId,
+                    employeeName: participant.employee?.name,
+                    status: participant.employee?.status,
                 })),
                 project: project
                     ? {
@@ -34583,9 +34599,23 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         if (!employee) {
             throw new common_1.BadRequestException('Employee not found');
         }
-        employee.subscriptions = [subscription];
-        const updatedEmployee = await this.domainEmployeeService.save(employee);
-        return updatedEmployee.subscriptions.length > 0;
+        try {
+            const fcmSubscribeDto = {
+                fcmToken: subscription.fcm?.token,
+            };
+            if (!fcmSubscribeDto.fcmToken) {
+                throw new common_1.BadRequestException('FCM 토큰이 필요합니다.');
+            }
+            const response = await this.employeeMicroserviceAdapter.subscribeFcm('', employee.employeeNumber, fcmSubscribeDto);
+            if (response.success) {
+                return true;
+            }
+            return false;
+        }
+        catch (error) {
+            console.log('SSO 서버 구독 실패:', error);
+            return false;
+        }
     }
     async 구독_목록을_조회한다(employeeIds) {
         const employees = await this.domainEmployeeService.findAll({

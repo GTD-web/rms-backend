@@ -242,35 +242,35 @@ export class NotificationContextService {
             throw new BadRequestException('Employee not found');
         }
 
-        employee.subscriptions = [subscription as any];
-        const updatedEmployee = await this.domainEmployeeService.save(employee);
+        // employee.subscriptions = [subscription as any];
+        // const updatedEmployee = await this.domainEmployeeService.save(employee);
 
-        return updatedEmployee.subscriptions.length > 0;
-        // try {
-        //     // SSO 서버로 FCM 토큰 구독 요청
-        //     const fcmSubscribeDto = {
-        //         fcmToken: subscription.fcm?.token,
-        //     };
+        // return updatedEmployee.subscriptions.length > 0;
+        try {
+            // SSO 서버로 FCM 토큰 구독 요청
+            const fcmSubscribeDto = {
+                fcmToken: subscription.fcm?.token,
+            };
 
-        //     if (!fcmSubscribeDto.fcmToken) {
-        //         throw new BadRequestException('FCM 토큰이 필요합니다.');
-        //     }
+            if (!fcmSubscribeDto.fcmToken) {
+                throw new BadRequestException('FCM 토큰이 필요합니다.');
+            }
 
-        //     const response = await this.employeeMicroserviceAdapter.subscribeFcm(
-        //         authorization,
-        //         employeeId,
-        //         fcmSubscribeDto,
-        //     );
+            const response = await this.employeeMicroserviceAdapter.subscribeFcm(
+                '',
+                employee.employeeNumber,
+                fcmSubscribeDto,
+            );
 
-        //     if (response.success) {
-        //         return true;
-        //     }
+            if (response.success) {
+                return true;
+            }
 
-        //     return false;
-        // } catch (error) {
-        //     console.log('SSO 서버 구독 실패:', error);
-        //     return false;
-        // }
+            return false;
+        } catch (error) {
+            console.log('SSO 서버 구독 실패:', error);
+            return false;
+        }
     }
 
     async 구독_목록을_조회한다(employeeIds: string[]): Promise<EmployeeTokensDto[]> {

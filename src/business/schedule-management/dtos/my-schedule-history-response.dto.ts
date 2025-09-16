@@ -7,6 +7,18 @@ export class MyScheduleParticipantDto {
         example: 'uuid-string',
     })
     employeeId: string;
+
+    @ApiProperty({
+        description: '직원 이름',
+        example: '홍길동',
+    })
+    employeeName: string;
+
+    @ApiProperty({
+        description: '직원 상태',
+        example: '재직중',
+    })
+    status: string;
 }
 
 export class MyScheduleHistoryItemDto {

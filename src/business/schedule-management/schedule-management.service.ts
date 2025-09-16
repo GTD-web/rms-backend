@@ -448,6 +448,8 @@ export class ScheduleManagementService {
                     updatedAt: schedule.updatedAt,
                     participants: participants?.map((participant) => ({
                         employeeId: participant.employeeId,
+                        employeeName: participant.employee?.name,
+                        status: participant.employee?.status,
                     })),
                     project: project
                         ? {
