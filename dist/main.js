@@ -23557,11 +23557,13 @@ let ReservationService = class ReservationService {
     async returnVehicle(user, reservationId, returnDto) {
         const result = await this.reservationContextService.차량을_반납한다(user, reservationId, returnDto);
         const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
-        const { resource } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
+        const { resource, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
             withReservation: true,
             withResource: true,
         });
-        await this.reservationNotificationContextService.차량반납_알림을_전송한다({ resource }, [user.employeeId]);
+        await this.reservationNotificationContextService.차량반납_알림을_전송한다({ reservation, resource }, [
+            user.employeeId,
+        ]);
         return result;
     }
 };
@@ -34865,6 +34867,9 @@ let ReservationNotificationContextService = ReservationNotificationContextServic
     }
     async 차량반납_알림을_전송한다(data, targetEmployeeIds) {
         const notificationData = {
+            reservation: {
+                reservationId: data.reservation?.reservationId,
+            },
             resource: {
                 resourceId: data.resource?.resourceId,
                 resourceName: data.resource?.name,

@@ -20,8 +20,14 @@ export class ReservationNotificationContextService {
         private readonly employeeNotificationService: DomainEmployeeNotificationService,
     ) {}
 
-    async 차량반납_알림을_전송한다(data: { resource: Resource }, targetEmployeeIds: string[]): Promise<void> {
+    async 차량반납_알림을_전송한다(
+        data: { reservation: Reservation; resource: Resource },
+        targetEmployeeIds: string[],
+    ): Promise<void> {
         const notificationData: CreateNotificationDataDto = {
+            reservation: {
+                reservationId: data.reservation?.reservationId,
+            },
             resource: {
                 resourceId: data.resource?.resourceId,
                 resourceName: data.resource?.name,
