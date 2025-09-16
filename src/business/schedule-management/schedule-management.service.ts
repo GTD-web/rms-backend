@@ -592,10 +592,14 @@ export class ScheduleManagementService {
         const authResult = await this.scheduleAuthorizationService.일정_생성_권한을_확인한다(user);
         this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
 
-        const createdSchedules = [];
-        const failedSchedules = [];
+        const allCreatedSchedules = []; // 전체 성공한 Schedule 엔티티들
+        const finalCreatedSchedules = []; // 최종 반환용 DTO 배열
+        const finalFailedSchedules = []; // 최종 반환용 실패 배열
 
         for (const createScheduleDto of createScheduleRequestList.schedules) {
+            const scheduleCreatedSchedules = []; // 이 일정에서 성공한 Schedule들
+            const scheduleFailedSchedules = []; // 이 일정에서 실패한 날짜들
+
             try {
                 const {
                     datesSelection,
@@ -779,21 +783,34 @@ export class ScheduleManagementService {
                     }
 
                     if (result.success) {
-                        createdSchedules.push(result.schedule!);
+                        scheduleCreatedSchedules.push(result.schedule!);
+                        allCreatedSchedules.push(result.schedule!);
                     } else {
-                        failedSchedules.push({
+                        scheduleFailedSchedules.push({
                             startDate: dateRange.startDate,
                             endDate: dateRange.endDate,
+                            title: title,
+                            scheduleType: scheduleType,
                             reason: result.reason!,
                         });
                     }
                 }
 
-                if (createdSchedules.length > 0) {
-                    // 5. 후처리: 여러 날짜에 일정이 생성되어도 일정 정보는 동일하기 때문에 첫 번째 일정의 정보를 사용
+                // 5. 이 일정에서 성공한 Schedule들을 DTO로 변환
+                if (scheduleCreatedSchedules.length > 0) {
+                    const createdSchedulesDtos = scheduleCreatedSchedules.map((schedule) => ({
+                        scheduleId: schedule.scheduleId,
+                        title: schedule.title,
+                        startDate: schedule.startDate.toISOString(),
+                        endDate: schedule.endDate.toISOString(),
+                        scheduleType: schedule.scheduleType,
+                    }));
+                    finalCreatedSchedules.push(...createdSchedulesDtos);
+
+                    // 6. 후처리: 이 일정의 첫 번째 Schedule 정보로 알림 전송
                     const { schedule, reservation, resource } =
                         await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
-                            createdSchedules[0].scheduleId!,
+                            scheduleCreatedSchedules[0].scheduleId!,
                             {
                                 withReservation: true,
                                 withResource: true,
@@ -806,8 +823,12 @@ export class ScheduleManagementService {
                         systemAdmins.map((admin) => admin.employeeId),
                     );
                 }
+
+                // 7. 이 일정에서 실패한 날짜들을 최종 실패 목록에 추가
+                finalFailedSchedules.push(...scheduleFailedSchedules);
             } catch (error) {
-                failedSchedules.push({
+                // 8. 일정 레벨에서 실패한 경우 (검증, 정책 체크 실패 등)
+                finalFailedSchedules.push({
                     startDate: createScheduleDto.datesSelection[0].startDate,
                     endDate: createScheduleDto.datesSelection[createScheduleDto.datesSelection.length - 1].endDate,
                     title: createScheduleDto.title,
@@ -817,9 +838,13 @@ export class ScheduleManagementService {
             }
         }
 
+        this.logger.log(
+            `일정 생성 완료 - 성공: ${finalCreatedSchedules.length}개, 실패: ${finalFailedSchedules.length}개`,
+        );
+
         return {
-            createdSchedules,
-            failedSchedules,
+            createdSchedules: finalCreatedSchedules,
+            failedSchedules: finalFailedSchedules,
         };
     }
 

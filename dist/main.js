@@ -30321,9 +30321,12 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
     async createSchedule(user, createScheduleRequestList) {
         const authResult = await this.scheduleAuthorizationService.일정_생성_권한을_확인한다(user);
         this.scheduleAuthorizationService.권한_체크_실패시_예외를_던진다(authResult);
-        const createdSchedules = [];
-        const failedSchedules = [];
+        const allCreatedSchedules = [];
+        const finalCreatedSchedules = [];
+        const finalFailedSchedules = [];
         for (const createScheduleDto of createScheduleRequestList.schedules) {
+            const scheduleCreatedSchedules = [];
+            const scheduleFailedSchedules = [];
             try {
                 const { datesSelection, title, description, location, notifyBeforeStart, notificationMinutes, scheduleType, participants, projectSelection, resourceSelection, } = createScheduleDto;
                 let projectId = null;
@@ -30440,27 +30443,39 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                         await queryRunner.release();
                     }
                     if (result.success) {
-                        createdSchedules.push(result.schedule);
+                        scheduleCreatedSchedules.push(result.schedule);
+                        allCreatedSchedules.push(result.schedule);
                     }
                     else {
-                        failedSchedules.push({
+                        scheduleFailedSchedules.push({
                             startDate: dateRange.startDate,
                             endDate: dateRange.endDate,
+                            title: title,
+                            scheduleType: scheduleType,
                             reason: result.reason,
                         });
                     }
                 }
-                if (createdSchedules.length > 0) {
-                    const { schedule, reservation, resource } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(createdSchedules[0].scheduleId, {
+                if (scheduleCreatedSchedules.length > 0) {
+                    const createdSchedulesDtos = scheduleCreatedSchedules.map((schedule) => ({
+                        scheduleId: schedule.scheduleId,
+                        title: schedule.title,
+                        startDate: schedule.startDate.toISOString(),
+                        endDate: schedule.endDate.toISOString(),
+                        scheduleType: schedule.scheduleType,
+                    }));
+                    finalCreatedSchedules.push(...createdSchedulesDtos);
+                    const { schedule, reservation, resource } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleCreatedSchedules[0].scheduleId, {
                         withReservation: true,
                         withResource: true,
                     });
                     const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
                     await this.scheduleNotificationContextService.일정_생성_알림을_전송한다({ schedule, reservation, resource }, [user.employeeId, ...participants.map((participant) => participant.employeeId)], systemAdmins.map((admin) => admin.employeeId));
                 }
+                finalFailedSchedules.push(...scheduleFailedSchedules);
             }
             catch (error) {
-                failedSchedules.push({
+                finalFailedSchedules.push({
                     startDate: createScheduleDto.datesSelection[0].startDate,
                     endDate: createScheduleDto.datesSelection[createScheduleDto.datesSelection.length - 1].endDate,
                     title: createScheduleDto.title,
@@ -30469,9 +30484,10 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 });
             }
         }
+        this.logger.log(`일정 생성 완료 - 성공: ${finalCreatedSchedules.length}개, 실패: ${finalFailedSchedules.length}개`);
         return {
-            createdSchedules,
-            failedSchedules,
+            createdSchedules: finalCreatedSchedules,
+            failedSchedules: finalFailedSchedules,
         };
     }
     async cancelSchedule(user, scheduleId, cancelDto) {
