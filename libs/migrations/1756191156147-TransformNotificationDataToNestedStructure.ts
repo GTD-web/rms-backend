@@ -17,9 +17,14 @@ export class TransformNotificationDataToNestedStructure1756191156147 implements 
                                      ("notificationData"->>'scheduleTitle') IS NOT NULL OR 
                                      ("notificationData"->>'beforeMinutes') IS NOT NULL OR
                                      ("notificationData"->>'startDate') IS NOT NULL OR
-                                     ("notificationData"->>'endDate') IS NOT NULL
+                                     ("notificationData"->>'endDate') IS NOT NULL OR
+                                     ("notificationData"->>'reservationId') IS NOT NULL
                                 THEN jsonb_build_object(
-                                    'scheduleId', COALESCE("notificationData"->>'scheduleId', ''),
+                                    'scheduleId', COALESCE(
+                                        "notificationData"->>'scheduleId',
+                                        (SELECT "scheduleId" FROM schedule_relations WHERE "reservationId" = "notificationData"->>'reservationId' LIMIT 1),
+                                        ''
+                                    ),
                                     'scheduleTitle', COALESCE("notificationData"->>'scheduleTitle', "notificationData"->>'reservationTitle', ''),
                                     'beforeMinutes', CASE 
                                         WHEN ("notificationData"->>'beforeMinutes') IS NOT NULL 
@@ -84,9 +89,24 @@ export class TransformNotificationDataToNestedStructure1756191156147 implements 
             SELECT COUNT(*) as count FROM notifications WHERE "notificationData" IS NOT NULL;
         `);
 
+        // schedule_relations에서 scheduleId를 찾아서 설정된 레코드 수 확인
+        const scheduleIdUpdatedResult = await queryRunner.query(`
+            SELECT COUNT(*) as count 
+            FROM notifications 
+            WHERE "notificationData"->>'reservationId' IS NOT NULL 
+            AND "notificationData"->'schedule'->>'scheduleId' IS NOT NULL 
+            AND "notificationData"->'schedule'->>'scheduleId' != '';
+        `);
+
         console.log(`✅ NotificationData 중첩 구조 추가 완료! 변환된 레코드 수: ${result[0]?.count || 0}개`);
         console.log(
+            `📊 schedule_relations에서 scheduleId를 찾아서 설정된 레코드 수: ${scheduleIdUpdatedResult[0]?.count || 0}개`,
+        );
+        console.log(
             '📋 새로운 구조: 기존 flat 필드 + { schedule: {...}, reservation: {...}, resource: {...}, project: {...} }',
+        );
+        console.log(
+            '🔗 개선사항: reservationId가 있는 경우 schedule_relations 테이블에서 실제 scheduleId를 조회하여 설정합니다.',
         );
     }
 
