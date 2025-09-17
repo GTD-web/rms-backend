@@ -1154,6 +1154,7 @@ export class ScheduleManagementService {
             withResource: true,
             withParticipants: true,
         });
+
         const employeeIds =
             updateScenarios.isInfoUpdate && updateResult.participantChanges
                 ? Array.from(
@@ -1168,6 +1169,8 @@ export class ScheduleManagementService {
                   )
                 : participants.map((participant) => participant.employeeId);
 
+        // 참여자 수정 시에만 알림 전송
+        updateScenarios.isInfoUpdate = updateResult.changes.includes('참여자 수정');
         await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(
             updateScenarios,
             {

@@ -365,6 +365,7 @@ export class ScheduleStateTransitionService {
                 // 참여자 변경사항이 있으면 알림 정보를 포함
                 if (infoUpdateResult.participantChanges) {
                     updateResult.participantChanges = infoUpdateResult.participantChanges;
+                    updateResult.changes.push('참여자 수정');
                 }
             }
 

@@ -30648,6 +30648,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 ...updateResult.participantChanges.newParticipants.map((participant) => participant.employeeId),
             ]))
             : participants.map((participant) => participant.employeeId);
+        updateScenarios.isInfoUpdate = updateResult.changes.includes('참여자 수정');
         await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(updateScenarios, {
             schedule: newSchedule,
             reservation,
@@ -39386,6 +39387,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
                 updateResult.changes.push('정보 수정');
                 if (infoUpdateResult.participantChanges) {
                     updateResult.participantChanges = infoUpdateResult.participantChanges;
+                    updateResult.changes.push('참여자 수정');
                 }
             }
             if (changes.resourceChanges) {
