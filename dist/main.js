@@ -38683,8 +38683,10 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         const now = new Date();
         now.setHours(0, 0, 0, 0);
         let scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, query.role, now);
-        const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, now);
-        scheduleIds = Array.from(new Set([...scheduleIds, ...belongingScheduleIds]));
+        if (query.role !== reservation_type_enum_1.ParticipantsType.RESERVER) {
+            const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, now);
+            scheduleIds = Array.from(new Set([...scheduleIds, ...belongingScheduleIds]));
+        }
         if (query.category && query.category !== 'ALL') {
             scheduleIds = await this.카테고리별_일정ID들을_조회한다(scheduleIds, query.category);
         }
