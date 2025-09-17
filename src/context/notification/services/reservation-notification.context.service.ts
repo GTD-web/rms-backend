@@ -21,10 +21,16 @@ export class ReservationNotificationContextService {
     ) {}
 
     async 차량반납_알림을_전송한다(
-        data: { reservation: Reservation; resource: Resource },
+        data: { schedule: Schedule; reservation: Reservation; resource: Resource },
         targetEmployeeIds: string[],
     ): Promise<void> {
         const notificationData: CreateNotificationDataDto = {
+            schedule: {
+                scheduleId: data.schedule?.scheduleId,
+                scheduleTitle: data.schedule?.title,
+                startDate: DateUtil.format(data.schedule?.startDate, 'YYYY-MM-DD HH:mm'),
+                endDate: DateUtil.format(data.schedule?.endDate, 'YYYY-MM-DD HH:mm'),
+            },
             reservation: {
                 reservationId: data.reservation?.reservationId,
             },

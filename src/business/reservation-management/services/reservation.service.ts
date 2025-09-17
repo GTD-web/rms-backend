@@ -358,7 +358,7 @@ export class ReservationService {
         // 예약의 스케쥴 정보를 조회한다.
         const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
         // 일정과_관계정보들을_조회한다
-        const { resource, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+        const { schedule, resource, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
             scheduleIds[0],
             {
                 withReservation: true,
@@ -366,7 +366,7 @@ export class ReservationService {
             },
         );
 
-        await this.reservationNotificationContextService.차량반납_알림을_전송한다({ reservation, resource }, [
+        await this.reservationNotificationContextService.차량반납_알림을_전송한다({ schedule, reservation, resource }, [
             user.employeeId,
         ]);
         return result;

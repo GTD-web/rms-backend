@@ -51,7 +51,10 @@ export class ScheduleNotificationContextService {
                 notificationData,
                 adminEmployeeIds,
             );
-        } else if (data.reservation?.status === ReservationStatus.CONFIRMED  || data.reservation?.status === ReservationStatus.USING) {
+        } else if (
+            data.reservation?.status === ReservationStatus.CONFIRMED ||
+            data.reservation?.status === ReservationStatus.USING
+        ) {
             await this.notificationContextService.알림_전송_프로세스를_진행한다(
                 NotificationType.RESERVATION_STATUS_CONFIRMED,
                 notificationData,

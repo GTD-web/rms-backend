@@ -130,6 +130,7 @@ export class ScheduleQueryContextService {
             withReservation?: boolean;
             withResource?: boolean;
             withParticipants?: boolean;
+            withDeletedSchedule?: boolean;
         },
     ): Promise<{
         schedule: Schedule;
@@ -140,6 +141,7 @@ export class ScheduleQueryContextService {
     }> {
         const schedule = await this.domainScheduleService.findOne({
             where: { scheduleId },
+            withDeleted: option?.withDeletedSchedule || false,
         });
         if (!schedule) {
             throw new NotFoundException('일정을 찾을 수 없습니다.');

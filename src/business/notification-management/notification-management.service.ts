@@ -55,6 +55,17 @@ export class NotificationManagementService {
         notificationData: CreateNotificationDataDto,
         notificationTarget: string[],
     ): Promise<void> {
+        /** 관리자페이지에서 보내는 알림의 경우 일정ID가 없을 수 있으므로 일정ID를 조회한다 */
+        if (!notificationData.schedule && notificationData.reservation) {
+            const schedules = await this.scheduleContextService.예약의_일정ID들을_조회한다(
+                notificationData.reservation.reservationId,
+            );
+            if (schedules.length > 0) {
+                notificationData.schedule = {
+                    scheduleId: schedules[0],
+                };
+            }
+        }
         await this.notificationContextService.알림_전송_프로세스를_진행한다(
             notificationType,
             notificationData,

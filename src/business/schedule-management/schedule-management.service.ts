@@ -523,6 +523,7 @@ export class ScheduleManagementService {
             withReservation: includeReservation,
             withResource: includeReservation,
             withParticipants: true,
+            withDeletedSchedule: true,
         });
         if (scheduleData === null) {
             throw new NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
@@ -878,10 +879,10 @@ export class ScheduleManagementService {
         const cancelResult = await this.scheduleStateTransitionService.일정을_취소한다(schedule, reservation);
 
         // 5. 후처리: 알림/감사/도메인이벤트 - 알림 삭제 시 알림 보내기 안하도록 기획 변경 2025-09-11
-        // await this.scheduleNotificationContextService.일정_취소_알림을_전송한다({ schedule, reservation, resource }, [
-        //     user.employeeId,
-        //     ...participants.map((participant) => participant.employeeId),
-        // ]);
+        await this.scheduleNotificationContextService.일정_취소_알림을_전송한다({ schedule, reservation, resource }, [
+            user.employeeId,
+            ...participants.map((participant) => participant.employeeId),
+        ]);
 
         // 6. 응답 DTO 변환
         return cancelResult;

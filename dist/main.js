@@ -22048,6 +22048,14 @@ let NotificationManagementService = class NotificationManagementService {
         await this.notificationContextService.PUSH_알림을_구독한다(employeeId, subscription);
     }
     async 알림을_전송한다(notificationType, notificationData, notificationTarget) {
+        if (!notificationData.schedule && notificationData.reservation) {
+            const schedules = await this.scheduleContextService.예약의_일정ID들을_조회한다(notificationData.reservation.reservationId);
+            if (schedules.length > 0) {
+                notificationData.schedule = {
+                    scheduleId: schedules[0],
+                };
+            }
+        }
         await this.notificationContextService.알림_전송_프로세스를_진행한다(notificationType, notificationData, notificationTarget);
     }
     async 리마인더_알림을_전송한다(notificationData, notificationTarget) {
@@ -23565,13 +23573,11 @@ let ReservationService = class ReservationService {
     async returnVehicle(user, reservationId, returnDto) {
         const result = await this.reservationContextService.차량을_반납한다(user, reservationId, returnDto);
         const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
-        const { resource, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
+        const { schedule, resource, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleIds[0], {
             withReservation: true,
             withResource: true,
         });
-        await this.reservationNotificationContextService.차량반납_알림을_전송한다({ reservation, resource }, [
-            user.employeeId,
-        ]);
+        await this.reservationNotificationContextService.차량반납_알림을_전송한다({ scheduleIds, reservation, resource }, [user.employeeId]);
         return result;
     }
 };
@@ -30283,6 +30289,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             withReservation: includeReservation,
             withResource: includeReservation,
             withParticipants: true,
+            withDeletedSchedule: true,
         });
         if (scheduleData === null) {
             throw new common_1.NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
@@ -30510,6 +30517,10 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         const policyResult = await this.schedulePolicyService.일정_취소가_가능한지_확인한다(schedule, reservation);
         this.schedulePolicyService.정책_체크_실패시_예외를_던진다(policyResult);
         const cancelResult = await this.scheduleStateTransitionService.일정을_취소한다(schedule, reservation);
+        await this.scheduleNotificationContextService.일정_취소_알림을_전송한다({ schedule, reservation, resource }, [
+            user.employeeId,
+            ...participants.map((participant) => participant.employeeId),
+        ]);
         return cancelResult;
     }
     async completeSchedule(user, scheduleId, completeDto) {
@@ -34944,6 +34955,7 @@ exports.ReservationNotificationContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const notification_context_service_1 = __webpack_require__(/*! ./notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
 const notification_type_enum_1 = __webpack_require__(/*! @libs/enums/notification-type.enum */ "./libs/enums/notification-type.enum.ts");
+const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const employee_notification_service_1 = __webpack_require__(/*! @src/domain/employee-notification/employee-notification.service */ "./src/domain/employee-notification/employee-notification.service.ts");
 let ReservationNotificationContextService = ReservationNotificationContextService_1 = class ReservationNotificationContextService {
     constructor(notificationContextService, employeeNotificationService) {
@@ -34953,6 +34965,12 @@ let ReservationNotificationContextService = ReservationNotificationContextServic
     }
     async 차량반납_알림을_전송한다(data, targetEmployeeIds) {
         const notificationData = {
+            schedule: {
+                scheduleId: data.schedule?.scheduleId,
+                scheduleTitle: data.schedule?.title,
+                startDate: date_util_1.DateUtil.format(data.schedule?.startDate, 'YYYY-MM-DD HH:mm'),
+                endDate: date_util_1.DateUtil.format(data.schedule?.endDate, 'YYYY-MM-DD HH:mm'),
+            },
             reservation: {
                 reservationId: data.reservation?.reservationId,
             },
@@ -35082,7 +35100,8 @@ let ScheduleNotificationContextService = ScheduleNotificationContextService_1 = 
             data.resource?.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
             await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_PENDING, notificationData, adminEmployeeIds);
         }
-        else if (data.reservation?.status === reservation_type_enum_1.ReservationStatus.CONFIRMED || data.reservation?.status === reservation_type_enum_1.ReservationStatus.USING) {
+        else if (data.reservation?.status === reservation_type_enum_1.ReservationStatus.CONFIRMED ||
+            data.reservation?.status === reservation_type_enum_1.ReservationStatus.USING) {
             await this.notificationContextService.알림_전송_프로세스를_진행한다(notification_type_enum_1.NotificationType.RESERVATION_STATUS_CONFIRMED, notificationData, targetEmployeeIds);
         }
     }
@@ -38140,6 +38159,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
     async 일정과_관계정보들을_조회한다(scheduleId, option) {
         const schedule = await this.domainScheduleService.findOne({
             where: { scheduleId },
+            withDeleted: option?.withDeletedSchedule || false,
         });
         if (!schedule) {
             throw new common_1.NotFoundException('일정을 찾을 수 없습니다.');
