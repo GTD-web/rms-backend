@@ -22480,7 +22480,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationListQueryDto = exports.ReservationSortOrder = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -22571,13 +22571,21 @@ __decorate([
 ], ReservationListQueryDto.prototype, "resourceId", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: '예약 상태',
+        description: '예약 상태 (복수 선택 가능)',
         enum: reservation_type_enum_1.ReservationStatus,
-        example: reservation_type_enum_1.ReservationStatus.CONFIRMED,
+        type: [reservation_type_enum_1.ReservationStatus],
+        example: [reservation_type_enum_1.ReservationStatus.CONFIRMED, reservation_type_enum_1.ReservationStatus.PENDING],
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus),
-    __metadata("design:type", typeof (_b = typeof reservation_type_enum_1.ReservationStatus !== "undefined" && reservation_type_enum_1.ReservationStatus) === "function" ? _b : Object)
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        return value ? [value] : undefined;
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsEnum)(reservation_type_enum_1.ReservationStatus, { each: true }),
+    __metadata("design:type", Array)
 ], ReservationListQueryDto.prototype, "status", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
@@ -35386,13 +35394,17 @@ let ReservationContextService = class ReservationContextService {
         else if ((startDate && !endDate) || (!startDate && endDate)) {
             throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_REQUIRED);
         }
-        if (status && !reservation_type_enum_1.ReservationStatus[status]) {
-            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
+        if (status && status.length > 0) {
+            for (const statusValue of status) {
+                if (!reservation_type_enum_1.ReservationStatus[statusValue]) {
+                    throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
+                }
+            }
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where = {};
-        if (status) {
-            where.status = status;
+        if (status && status.length > 0) {
+            where.status = (0, typeorm_2.In)(status);
         }
         if (resourceType) {
             where.resource = {

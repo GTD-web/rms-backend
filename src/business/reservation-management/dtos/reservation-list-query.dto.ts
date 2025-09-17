@@ -74,13 +74,21 @@ export class ReservationListQueryDto {
     resourceId?: string;
 
     @ApiPropertyOptional({
-        description: '예약 상태',
+        description: '예약 상태 (복수 선택 가능)',
         enum: ReservationStatus,
-        example: ReservationStatus.CONFIRMED,
+        type: [ReservationStatus],
+        example: [ReservationStatus.CONFIRMED, ReservationStatus.PENDING],
     })
     @IsOptional()
-    @IsEnum(ReservationStatus)
-    status?: ReservationStatus;
+    @Transform(({ value }) => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        return value ? [value] : undefined;
+    })
+    @IsArray()
+    @IsEnum(ReservationStatus, { each: true })
+    status?: ReservationStatus[];
 
     @ApiPropertyOptional({
         description: '정렬 순서',

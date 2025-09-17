@@ -47,7 +47,7 @@ export class ReservationContextService {
         endDate?: string,
         resourceType?: ResourceType,
         resourceId?: string,
-        status?: ReservationStatus,
+        status?: ReservationStatus[],
         sortOrder?: 'ASC' | 'DESC',
     ): Promise<Reservation[]> {
         if (startDate && endDate && startDate > endDate) {
@@ -55,14 +55,19 @@ export class ReservationContextService {
         } else if ((startDate && !endDate) || (!startDate && endDate)) {
             throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_DATE_REQUIRED);
         }
-        if (status && !ReservationStatus[status]) {
-            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
+        if (status && status.length > 0) {
+            // 배열의 각 status 값이 유효한지 검증
+            for (const statusValue of status) {
+                if (!ReservationStatus[statusValue]) {
+                    throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESOURCE.INVALID_STATUS);
+                }
+            }
         }
         const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         let where: FindOptionsWhere<Reservation> = {};
 
-        if (status) {
-            where.status = status;
+        if (status && status.length > 0) {
+            where.status = In(status);
         }
         if (resourceType) {
             where.resource = {
