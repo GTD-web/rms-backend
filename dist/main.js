@@ -23577,7 +23577,9 @@ let ReservationService = class ReservationService {
             withReservation: true,
             withResource: true,
         });
-        await this.reservationNotificationContextService.차량반납_알림을_전송한다({ scheduleIds, reservation, resource }, [user.employeeId]);
+        await this.reservationNotificationContextService.차량반납_알림을_전송한다({ schedule, reservation, resource }, [
+            user.employeeId,
+        ]);
         return result;
     }
 };
