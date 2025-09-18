@@ -22,7 +22,7 @@ export class TransformNotificationDataToNestedStructure1756191156147 implements 
                                 THEN jsonb_build_object(
                                     'scheduleId', COALESCE(
                                         "notificationData"->>'scheduleId',
-                                        (SELECT "scheduleId" FROM schedule_relations WHERE "reservationId" = "notificationData"->>'reservationId' LIMIT 1),
+                                        (SELECT "scheduleId" FROM schedule_relations WHERE "reservationId"::text = "notificationData"->>'reservationId' LIMIT 1),
                                         ''
                                     ),
                                     'scheduleTitle', COALESCE("notificationData"->>'scheduleTitle', "notificationData"->>'reservationTitle', ''),
