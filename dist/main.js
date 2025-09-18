@@ -28212,6 +28212,13 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], ProjectDto.prototype, "projectId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 이름',
+        example: '프로젝트 1',
+    }),
+    __metadata("design:type", String)
+], ProjectDto.prototype, "projectName", void 0);
 class ScheduleCalendarItemDto {
 }
 exports.ScheduleCalendarItemDto = ScheduleCalendarItemDto;

@@ -27,6 +27,12 @@ export class ProjectDto {
         example: 'uuid-string',
     })
     projectId: string;
+
+    @ApiProperty({
+        description: '프로젝트 이름',
+        example: '프로젝트 1',
+    })
+    projectName: string;
 }
 
 export class ScheduleCalendarItemDto {
