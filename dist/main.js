@@ -38242,7 +38242,8 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 .filter((relation) => relation.projectId)
                 .map((relation) => relation.projectId);
             if (projectIds.length > 0) {
-                const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet(projectIds);
+                const setProjectIds = [...new Set(projectIds)];
+                const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet(setProjectIds);
                 projectMap = new Map(projects.map((project) => [
                     project.id,
                     { projectId: project.id, projectName: project.projectName },

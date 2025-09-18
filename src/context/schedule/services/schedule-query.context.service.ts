@@ -160,14 +160,6 @@ export class ScheduleQueryContextService {
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
-
-            // 상태값 변경 확인 후 제거 필요 - 2025.09.11 김규현
-            // reservation.status =
-            //     reservation.startDate < new Date() &&
-            //     reservation.endDate > new Date() &&
-            //     reservation.status === ReservationStatus.CONFIRMED
-            //         ? ReservationStatus.USING
-            //         : reservation.status;
             resource = option?.withResource
                 ? reservation
                     ? await this.domainResourceService.findByResourceId(reservation.resourceId)
@@ -237,7 +229,8 @@ export class ScheduleQueryContextService {
                 .filter((relation) => relation.projectId)
                 .map((relation) => relation.projectId);
             if (projectIds.length > 0) {
-                const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet(projectIds);
+                const setProjectIds = [...new Set(projectIds)];
+                const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet(setProjectIds);
                 projectMap = new Map(
                     projects.map((project) => [
                         project.id,
