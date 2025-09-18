@@ -21616,6 +21616,7 @@ let EmployeeManagementService = class EmployeeManagementService {
     }
     async syncEmployees(authorization) {
         await this.employeeContextService.직원_정보를_동기화한다(authorization);
+        await this.syncSubscription();
     }
     async syncSubscription() {
         await this.employeeContextService.구독정보를_동기화한다();

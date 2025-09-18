@@ -16,7 +16,7 @@ export class EmployeeManagementService {
 
     async syncEmployees(authorization: string): Promise<void> {
         await this.employeeContextService.직원_정보를_동기화한다(authorization);
-        // await this.syncSubscription();
+        await this.syncSubscription();
     }
 
     async syncSubscription(): Promise<void> {
