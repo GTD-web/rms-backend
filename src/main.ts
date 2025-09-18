@@ -18,6 +18,7 @@ async function bootstrap() {
         origin: isProduction
             ? function (origin, callback) {
                   const whitelist = [
+                      'https://lsms.lumir.space',
                       'https://lrms.lumir.space',
                       'https://rms-backend-iota.vercel.app',
                       'https://lrms-dev.lumir.space',
