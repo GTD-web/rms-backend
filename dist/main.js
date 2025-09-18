@@ -21725,7 +21725,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotificationController = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -21734,6 +21734,7 @@ const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const business_dto_index_1 = __webpack_require__(/*! @src/business.dto.index */ "./src/business.dto.index.ts");
+const subscription_query_dto_1 = __webpack_require__(/*! ../dtos/subscription-query.dto */ "./src/business/notification-management/dtos/subscription-query.dto.ts");
 const notification_management_service_1 = __webpack_require__(/*! ../notification-management.service */ "./src/business/notification-management/notification-management.service.ts");
 let NotificationController = class NotificationController {
     constructor(notificationManagementService) {
@@ -21760,8 +21761,8 @@ let NotificationController = class NotificationController {
     async markAllAsRead(employeeId) {
         await this.notificationManagementService.모든_알림을_읽음_처리한다(employeeId);
     }
-    async findSubscription(employeeIds) {
-        return await this.notificationManagementService.구독_목록을_조회한다(employeeIds);
+    async findSubscription(query) {
+        return await this.notificationManagementService.구독_목록을_조회한다(query.employeeIds);
     }
 };
 exports.NotificationController = NotificationController;
@@ -21876,16 +21877,9 @@ __decorate([
         status: 200,
         description: '구독 정보 조회 성공',
     }),
-    (0, swagger_1.ApiQuery)({
-        name: 'employeeIds',
-        type: String,
-        isArray: true,
-        required: false,
-        description: '직원 ID 목록',
-    }),
-    __param(0, (0, common_1.Query)('employeeIds')),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Array]),
+    __metadata("design:paramtypes", [typeof (_m = typeof subscription_query_dto_1.SubscriptionQueryDto !== "undefined" && subscription_query_dto_1.SubscriptionQueryDto) === "function" ? _m : Object]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "findSubscription", null);
 exports.NotificationController = NotificationController = __decorate([
@@ -21987,6 +21981,51 @@ __decorate([
     (0, class_transformer_1.Type)(() => business_dto_index_1.PaginationMetaDto),
     __metadata("design:type", typeof (_a = typeof business_dto_index_1.PaginationMetaDto !== "undefined" && business_dto_index_1.PaginationMetaDto) === "function" ? _a : Object)
 ], NotificationListResponseDto.prototype, "meta", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/notification-management/dtos/subscription-query.dto.ts":
+/*!*****************************************************************************!*\
+  !*** ./src/business/notification-management/dtos/subscription-query.dto.ts ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionQueryDto = void 0;
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class SubscriptionQueryDto {
+}
+exports.SubscriptionQueryDto = SubscriptionQueryDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: '직원 ID 목록',
+        type: [String],
+        example: ['emp-123', 'emp-456'],
+        isArray: true,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (!value)
+            return undefined;
+        return Array.isArray(value) ? value : [value];
+    }),
+    __metadata("design:type", Array)
+], SubscriptionQueryDto.prototype, "employeeIds", void 0);
 
 
 /***/ }),

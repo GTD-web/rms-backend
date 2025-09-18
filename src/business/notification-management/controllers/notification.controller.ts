@@ -19,6 +19,7 @@ import {
     SendNotificationDto,
     PushNotificationDto,
 } from '@src/business.dto.index';
+import { SubscriptionQueryDto } from '../dtos/subscription-query.dto';
 
 // Business Service
 import { NotificationManagementService } from '../notification-management.service';
@@ -150,14 +151,7 @@ export class NotificationController {
         status: 200,
         description: '구독 정보 조회 성공',
     })
-    @ApiQuery({
-        name: 'employeeIds',
-        type: String,
-        isArray: true,
-        required: false,
-        description: '직원 ID 목록',
-    })
-    async findSubscription(@Query('employeeIds') employeeIds?: string[]) {
-        return await this.notificationManagementService.구독_목록을_조회한다(employeeIds);
+    async findSubscription(@Query() query: SubscriptionQueryDto) {
+        return await this.notificationManagementService.구독_목록을_조회한다(query.employeeIds);
     }
 }
