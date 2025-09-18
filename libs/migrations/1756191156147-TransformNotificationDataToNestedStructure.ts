@@ -21,9 +21,11 @@ export class TransformNotificationDataToNestedStructure1756191156147 implements 
                         'scheduleId', COALESCE("notificationData"->>'scheduleId', ''),
                         'scheduleTitle', COALESCE("notificationData"->>'scheduleTitle', "notificationData"->>'reservationTitle', ''),
                         'beforeMinutes', CASE 
-                            WHEN ("notificationData"->>'beforeMinutes') IS NOT NULL AND ("notificationData"->>'beforeMinutes') ~ '^[0-9]+$'
-                            THEN ("notificationData"->>'beforeMinutes')::text::int 
-                            ELSE null::int
+                            WHEN ("notificationData"->>'beforeMinutes') IS NOT NULL 
+                            AND ("notificationData"->>'beforeMinutes') != ''
+                            AND ("notificationData"->>'beforeMinutes') ~ '^[0-9]+$'
+                            THEN CAST("notificationData"->>'beforeMinutes' AS integer)
+                            ELSE null
                         END,
                         'startDate', COALESCE("notificationData"->>'startDate', "notificationData"->>'reservationDate', ''),
                         'endDate', COALESCE("notificationData"->>'endDate', "notificationData"->>'reservationDate', '')
@@ -40,11 +42,11 @@ export class TransformNotificationDataToNestedStructure1756191156147 implements 
             SET "notificationData" = jsonb_set(
                 "notificationData",
                 '{schedule,scheduleId}',
-                to_jsonb(sr."scheduleId")
+                to_jsonb(sr."scheduleId"::text)
             )
             FROM schedule_relations sr
             WHERE "notificationData"->>'reservationId' IS NOT NULL
-            AND sr."reservationId" = ("notificationData"->>'reservationId')
+            AND sr."reservationId"::text = ("notificationData"->>'reservationId')
             AND ("notificationData"->'schedule'->>'scheduleId' IS NULL OR "notificationData"->'schedule'->>'scheduleId' = '');
         `);
 
