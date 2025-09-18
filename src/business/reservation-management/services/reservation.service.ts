@@ -74,6 +74,7 @@ export class ReservationService {
             paginatedIds,
             {
                 withReservation: true,
+                withResource: true,
                 withParticipants: true,
             },
         );
@@ -105,9 +106,10 @@ export class ReservationService {
             reservationVehiclesByScheduleIdMap.set(reservationVehicle.reservationId, [reservationVehicle]);
         });
 
-        const reservationResponseDtos = scheduleDataList.map(({ schedule, reservation }) => {
+        const reservationResponseDtos = scheduleDataList.map(({ schedule, reservation, resource }) => {
             reservation.participants = participantsByScheduleId.get(schedule.scheduleId);
             reservation.reservationVehicles = reservationVehiclesByScheduleIdMap.get(reservation.reservationId) || [];
+            reservation.resource = resource;
             return new ReservationWithRelationsResponseDto({
                 ...reservation,
             });

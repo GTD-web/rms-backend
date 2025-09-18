@@ -23455,6 +23455,7 @@ let ReservationService = class ReservationService {
         const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } = this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(paginatedIds, {
             withReservation: true,
+            withResource: true,
             withParticipants: true,
         });
         const participantsByScheduleId = new Map();
@@ -23478,9 +23479,10 @@ let ReservationService = class ReservationService {
         reservationVehiclesByScheduleId.forEach((reservationVehicle) => {
             reservationVehiclesByScheduleIdMap.set(reservationVehicle.reservationId, [reservationVehicle]);
         });
-        const reservationResponseDtos = scheduleDataList.map(({ schedule, reservation }) => {
+        const reservationResponseDtos = scheduleDataList.map(({ schedule, reservation, resource }) => {
             reservation.participants = participantsByScheduleId.get(schedule.scheduleId);
             reservation.reservationVehicles = reservationVehiclesByScheduleIdMap.get(reservation.reservationId) || [];
+            reservation.resource = resource;
             return new reservation_response_dto_1.ReservationWithRelationsResponseDto({
                 ...reservation,
             });
