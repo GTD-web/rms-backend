@@ -220,19 +220,18 @@ export class ScheduleQueryContextService {
             return [];
         }
 
-        // 1. 모든 일정들을 한 번에 조회
-        const schedules = await this.domainScheduleService.findByScheduleIds(scheduleIds);
-        const scheduleMap = new Map(schedules.map((schedule) => [schedule.scheduleId, schedule]));
-        // 2. 모든 일정관계정보를 한 번에 조회
-        const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
-        const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
-        // 3. 옵션에 따른 관련 데이터 벌크 조회
-        let projectMap = new Map();
-        let reservationMap = new Map();
-        let resourceMap = new Map();
-        let participantsMap = new Map<string, ScheduleParticipantsWithEmployee[]>();
+        // ✅ 1. 관계설정을 활용하여 모든 데이터를 한 번에 조회 (최적화)
+        const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIdsWithRelations(scheduleIds, {
+            withSchedule: true,
+            withReservation: !!option?.withReservation,
+            withResource: !!(option?.withReservation && option?.withResource),
+        });
 
-        // 프로젝트 정보 조회
+        // 관계정보를 맵으로 변환
+        const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
+
+        // ✅ 2. 프로젝트 정보 조회 (외부 API이므로 기존 방식 유지)
+        let projectMap = new Map();
         if (option?.withProject) {
             const projectIds = scheduleRelations
                 .filter((relation) => relation.projectId)
@@ -247,27 +246,9 @@ export class ScheduleQueryContextService {
                 );
             }
         }
-        // 예약 정보 조회 (벌크 최적화)
-        if (option?.withReservation) {
-            const reservationIds = scheduleRelations
-                .filter((relation) => relation.reservationId)
-                .map((relation) => relation.reservationId);
-            if (reservationIds.length > 0) {
-                // 벌크 조회로 성능 최적화: 예약과 자원 정보를 한 번에 조회
-                const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
-                reservationMap = new Map(reservations.map((reservation) => [reservation.reservationId, reservation]));
 
-                // 자원 정보는 예약 조회 시 이미 relations로 가져옴 (추가 조회 불필요)
-                if (option?.withResource) {
-                    resourceMap = new Map(
-                        reservations
-                            .filter((reservation) => reservation.resource)
-                            .map((reservation) => [reservation.resource.resourceId, reservation.resource]),
-                    );
-                }
-            }
-        }
-        // 참가자 정보 조회 (벌크 최적화)
+        // ✅ 3. 참가자 정보 조회 (기존 방식 유지)
+        let participantsMap = new Map<string, ScheduleParticipantsWithEmployee[]>();
         if (option?.withParticipants) {
             // 벌크 조회로 성능 최적화: 모든 일정의 참가자를 한 번에 조회
             const allParticipants = await this.domainScheduleParticipantService.findAllByScheduleIds(scheduleIds);
@@ -298,28 +279,28 @@ export class ScheduleQueryContextService {
             participantsMap = new Map(Object.entries(participantGroups));
         }
 
-        // 4. 결과 배열 구성
+        // ✅ 4. 결과 배열 구성 (응답 형태 동일하게 유지)
         const results = [];
         for (const scheduleId of scheduleIds) {
-            const schedule = scheduleMap.get(scheduleId);
-            if (!schedule) {
+            const relation = relationMap.get(scheduleId);
+            if (!relation || !relation.schedule) {
                 continue; // 존재하지 않는 일정은 제외
             }
 
-            const relation = relationMap.get(scheduleId);
+            const schedule = relation.schedule;
             let project = null;
             let reservation = null;
             let resource = null;
             let participants = [];
 
-            if (option?.withProject && relation?.projectId) {
+            if (option?.withProject && relation.projectId) {
                 project = projectMap.get(relation.projectId) || null;
             }
 
-            if (option?.withReservation && relation?.reservationId) {
-                reservation = reservationMap.get(relation.reservationId) || null;
-                if (option?.withResource && reservation?.resourceId) {
-                    resource = resourceMap.get(reservation.resourceId) || null;
+            if (option?.withReservation && relation.reservation) {
+                reservation = relation.reservation;
+                if (option?.withResource && reservation.resource) {
+                    resource = reservation.resource;
                 }
             }
 

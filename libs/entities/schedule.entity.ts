@@ -8,6 +8,7 @@ import {
     OneToMany,
 } from 'typeorm';
 import { ScheduleParticipant } from './schedule-participant.entity';
+import { ScheduleRelation } from './schedule-relations.entity';
 import { ScheduleType, ScheduleStatus } from '@libs/enums/schedule-type.enum';
 
 @Entity('schedules')
@@ -69,4 +70,7 @@ export class Schedule {
 
     @OneToMany(() => ScheduleParticipant, (participant) => participant.schedule)
     participants: ScheduleParticipant[];
+
+    @OneToMany(() => ScheduleRelation, (relation) => relation.schedule)
+    relations: ScheduleRelation[];
 }

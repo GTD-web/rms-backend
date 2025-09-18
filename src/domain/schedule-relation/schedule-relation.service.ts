@@ -22,6 +22,32 @@ export class DomainScheduleRelationService extends BaseService<ScheduleRelation>
         });
     }
 
+    async findByScheduleIdsWithRelations(
+        scheduleIds: string[],
+        options: {
+            withSchedule?: boolean;
+            withReservation?: boolean;
+            withResource?: boolean;
+        } = {},
+    ): Promise<ScheduleRelation[]> {
+        const relations: string[] = [];
+
+        if (options.withSchedule) {
+            relations.push('schedule');
+        }
+        if (options.withReservation) {
+            relations.push('reservation');
+        }
+        if (options.withResource && options.withReservation) {
+            relations.push('reservation.resource');
+        }
+
+        return this.scheduleRelationRepository.findAll({
+            where: { scheduleId: In(scheduleIds) },
+            relations,
+        });
+    }
+
     async findByReservationIds(reservationIds: string[]): Promise<ScheduleRelation[]> {
         return this.scheduleRelationRepository.findAll({
             where: { reservationId: In(reservationIds) },

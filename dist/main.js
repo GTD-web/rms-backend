@@ -2016,6 +2016,7 @@ const resource_entity_1 = __webpack_require__(/*! ./resource.entity */ "./libs/e
 const reservation_participant_entity_1 = __webpack_require__(/*! ./reservation-participant.entity */ "./libs/entities/reservation-participant.entity.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const reservation_vehicle_entity_1 = __webpack_require__(/*! ./reservation-vehicle.entity */ "./libs/entities/reservation-vehicle.entity.ts");
+const schedule_relations_entity_1 = __webpack_require__(/*! ./schedule-relations.entity */ "./libs/entities/schedule-relations.entity.ts");
 let Reservation = class Reservation {
 };
 exports.Reservation = Reservation;
@@ -2081,6 +2082,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => reservation_vehicle_entity_1.ReservationVehicle, (reservationVehicle) => reservationVehicle.reservation),
     __metadata("design:type", Array)
 ], Reservation.prototype, "reservationVehicles", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => schedule_relations_entity_1.ScheduleRelation, (relation) => relation.reservation),
+    __metadata("design:type", Array)
+], Reservation.prototype, "scheduleRelations", void 0);
 exports.Reservation = Reservation = __decorate([
     (0, typeorm_1.Entity)('reservations')
 ], Reservation);
@@ -2415,9 +2420,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleRelation = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const schedule_entity_1 = __webpack_require__(/*! ./schedule.entity */ "./libs/entities/schedule.entity.ts");
+const reservation_entity_1 = __webpack_require__(/*! ./reservation.entity */ "./libs/entities/reservation.entity.ts");
 let ScheduleRelation = class ScheduleRelation {
 };
 exports.ScheduleRelation = ScheduleRelation;
@@ -2437,6 +2445,16 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], ScheduleRelation.prototype, "projectId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => schedule_entity_1.Schedule, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'scheduleId' }),
+    __metadata("design:type", typeof (_a = typeof schedule_entity_1.Schedule !== "undefined" && schedule_entity_1.Schedule) === "function" ? _a : Object)
+], ScheduleRelation.prototype, "schedule", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => reservation_entity_1.Reservation, { onDelete: 'SET NULL' }),
+    (0, typeorm_1.JoinColumn)({ name: 'reservationId' }),
+    __metadata("design:type", typeof (_b = typeof reservation_entity_1.Reservation !== "undefined" && reservation_entity_1.Reservation) === "function" ? _b : Object)
+], ScheduleRelation.prototype, "reservation", void 0);
 exports.ScheduleRelation = ScheduleRelation = __decorate([
     (0, typeorm_1.Entity)('schedule_relations')
 ], ScheduleRelation);
@@ -2465,6 +2483,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Schedule = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const schedule_participant_entity_1 = __webpack_require__(/*! ./schedule-participant.entity */ "./libs/entities/schedule-participant.entity.ts");
+const schedule_relations_entity_1 = __webpack_require__(/*! ./schedule-relations.entity */ "./libs/entities/schedule-relations.entity.ts");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 let Schedule = class Schedule {
 };
@@ -2543,6 +2562,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => schedule_participant_entity_1.ScheduleParticipant, (participant) => participant.schedule),
     __metadata("design:type", Array)
 ], Schedule.prototype, "participants", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => schedule_relations_entity_1.ScheduleRelation, (relation) => relation.schedule),
+    __metadata("design:type", Array)
+], Schedule.prototype, "relations", void 0);
 exports.Schedule = Schedule = __decorate([
     (0, typeorm_1.Entity)('schedules')
 ], Schedule);
@@ -4359,11 +4382,8 @@ let AuthService = class AuthService {
         this.getTokenUsecase = getTokenUsecase;
     }
     async login(loginDto) {
-        const systemAdminResult = await this.checkSystemAdminUsecase.execute(loginDto.email, loginDto.password);
-        if (systemAdminResult.success) {
-            return await this.getTokenUsecase.execute(systemAdminResult.employee);
-        }
         const ssoResponse = await this.ssoLoginUsecase.execute(loginDto.email, loginDto.password);
+        console.log('ssoResponse', ssoResponse);
         const updatedEmployee = await this.updateAuthInfoUsecase.execute(ssoResponse);
         return {
             accessToken: updatedEmployee.accessToken,
@@ -29992,12 +30012,14 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         if (scheduleIds.length === 0) {
             return { schedules: [] };
         }
+        console.time('scheduleDataList');
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(scheduleIds, {
             withReservation: true,
             withResource: true,
             withProject: true,
             withParticipants: true,
         });
+        console.timeEnd('scheduleDataList');
         let filteredScheduleDataList = scheduleDataList;
         if (query.employeeIds && query.employeeIds.length > 0) {
             filteredScheduleDataList = scheduleDataList.filter(({ participants }) => {
@@ -38208,14 +38230,13 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         if (scheduleIds.length === 0) {
             return [];
         }
-        const schedules = await this.domainScheduleService.findByScheduleIds(scheduleIds);
-        const scheduleMap = new Map(schedules.map((schedule) => [schedule.scheduleId, schedule]));
-        const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
+        const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIdsWithRelations(scheduleIds, {
+            withSchedule: true,
+            withReservation: !!option?.withReservation,
+            withResource: !!(option?.withReservation && option?.withResource),
+        });
         const relationMap = new Map(scheduleRelations.map((relation) => [relation.scheduleId, relation]));
         let projectMap = new Map();
-        let reservationMap = new Map();
-        let resourceMap = new Map();
-        let participantsMap = new Map();
         if (option?.withProject) {
             const projectIds = scheduleRelations
                 .filter((relation) => relation.projectId)
@@ -38228,20 +38249,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 ]));
             }
         }
-        if (option?.withReservation) {
-            const reservationIds = scheduleRelations
-                .filter((relation) => relation.reservationId)
-                .map((relation) => relation.reservationId);
-            if (reservationIds.length > 0) {
-                const reservations = await this.domainReservationService.findByReservationIds(reservationIds);
-                reservationMap = new Map(reservations.map((reservation) => [reservation.reservationId, reservation]));
-                if (option?.withResource) {
-                    resourceMap = new Map(reservations
-                        .filter((reservation) => reservation.resource)
-                        .map((reservation) => [reservation.resource.resourceId, reservation.resource]));
-                }
-            }
-        }
+        let participantsMap = new Map();
         if (option?.withParticipants) {
             const allParticipants = await this.domainScheduleParticipantService.findAllByScheduleIds(scheduleIds);
             const employeeIds = [
@@ -38266,22 +38274,22 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         }
         const results = [];
         for (const scheduleId of scheduleIds) {
-            const schedule = scheduleMap.get(scheduleId);
-            if (!schedule) {
+            const relation = relationMap.get(scheduleId);
+            if (!relation || !relation.schedule) {
                 continue;
             }
-            const relation = relationMap.get(scheduleId);
+            const schedule = relation.schedule;
             let project = null;
             let reservation = null;
             let resource = null;
             let participants = [];
-            if (option?.withProject && relation?.projectId) {
+            if (option?.withProject && relation.projectId) {
                 project = projectMap.get(relation.projectId) || null;
             }
-            if (option?.withReservation && relation?.reservationId) {
-                reservation = reservationMap.get(relation.reservationId) || null;
-                if (option?.withResource && reservation?.resourceId) {
-                    resource = resourceMap.get(reservation.resourceId) || null;
+            if (option?.withReservation && relation.reservation) {
+                reservation = relation.reservation;
+                if (option?.withResource && reservation.resource) {
+                    resource = reservation.resource;
                 }
             }
             if (option?.withParticipants) {
@@ -43118,6 +43126,22 @@ let DomainScheduleRelationService = class DomainScheduleRelationService extends 
     async findByScheduleIds(scheduleIds) {
         return this.scheduleRelationRepository.findAll({
             where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
+        });
+    }
+    async findByScheduleIdsWithRelations(scheduleIds, options = {}) {
+        const relations = [];
+        if (options.withSchedule) {
+            relations.push('schedule');
+        }
+        if (options.withReservation) {
+            relations.push('reservation');
+        }
+        if (options.withResource && options.withReservation) {
+            relations.push('reservation.resource');
+        }
+        return this.scheduleRelationRepository.findAll({
+            where: { scheduleId: (0, typeorm_1.In)(scheduleIds) },
+            relations,
         });
     }
     async findByReservationIds(reservationIds) {
