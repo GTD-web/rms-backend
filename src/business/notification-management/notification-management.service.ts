@@ -41,8 +41,8 @@ export class NotificationManagementService {
     /**
      * 웹 푸시 구독을 등록한다
      */
-    async 웹푸시를_구독한다(employeeId: string, subscription: PushSubscriptionDto): Promise<void> {
-        await this.notificationContextService.PUSH_알림을_구독한다(employeeId, subscription);
+    async 웹푸시를_구독한다(employeeId: string, subscription: PushSubscriptionDto): Promise<boolean> {
+        return await this.notificationContextService.PUSH_알림을_구독한다(employeeId, subscription);
     }
 
     // ==================== 알림 전송 ====================

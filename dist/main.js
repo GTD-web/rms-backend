@@ -21741,7 +21741,7 @@ let NotificationController = class NotificationController {
         this.notificationManagementService = notificationManagementService;
     }
     async subscribe(user, subscription) {
-        await this.notificationManagementService.웹푸시를_구독한다(user.employeeId, subscription);
+        return await this.notificationManagementService.웹푸시를_구독한다(user.employeeId, subscription);
     }
     async sendSuccess(body) {
         await this.notificationManagementService.푸시_알림을_직접_전송한다([body.subscription.fcm.token], body.payload);
@@ -21772,7 +21772,7 @@ __decorate([
     (0, swagger_1.ApiOkResponse)({
         status: 200,
         description: '웹 푸시 구독 성공',
-        type: business_dto_index_1.ResponseNotificationDto,
+        type: Boolean,
     }),
     __param(0, (0, user_decorator_1.User)()),
     __param(1, (0, common_1.Body)()),
@@ -22104,7 +22104,7 @@ let NotificationManagementService = class NotificationManagementService {
         return await this.notificationContextService.구독_목록을_조회한다(employeeIds);
     }
     async 웹푸시를_구독한다(employeeId, subscription) {
-        await this.notificationContextService.PUSH_알림을_구독한다(employeeId, subscription);
+        return await this.notificationContextService.PUSH_알림을_구독한다(employeeId, subscription);
     }
     async 알림을_전송한다(notificationType, notificationData, notificationTarget) {
         if (!notificationData.schedule && notificationData.reservation) {

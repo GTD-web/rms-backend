@@ -35,17 +35,17 @@ export class NotificationController {
     @ApiOkResponse({
         status: 200,
         description: '웹 푸시 구독 성공',
-        type: ResponseNotificationDto,
+        type: Boolean,
     })
     async subscribe(
         // @Req() request: Request,
         @User() user: Employee,
         @Body() subscription: PushSubscriptionDto,
-    ): Promise<void> {
+    ): Promise<boolean> {
         // const authorization = Array.isArray(request.headers.authorization)
         //     ? request.headers.authorization[0]
         //     : request.headers.authorization || '';
-        await this.notificationManagementService.웹푸시를_구독한다(user.employeeId, subscription);
+        return await this.notificationManagementService.웹푸시를_구독한다(user.employeeId, subscription);
     }
 
     @Post('subscribe/success')
