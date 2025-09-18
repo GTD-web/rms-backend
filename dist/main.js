@@ -33360,6 +33360,7 @@ let FCMAdapter = class FCMAdapter {
                     body: payload.body,
                     notificationData: JSON.stringify(payload.notificationData),
                     notificationType: payload.notificationType,
+                    icon: 'https://lsms.lumir.space/logo_192.png',
                 },
                 android: {
                     priority: 'high',
@@ -34869,7 +34870,7 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             title: payload.title,
             body: payload.body,
             link: '/plan/user/schedule-add',
-            icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+            icon: 'https://lsms.lumir.space/logo_192.png',
         };
         const responses = [];
         for (const token of tokens) {

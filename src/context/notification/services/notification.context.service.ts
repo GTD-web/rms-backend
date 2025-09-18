@@ -374,7 +374,7 @@ export class NotificationContextService {
             title: payload.title,
             body: payload.body,
             link: '/plan/user/schedule-add', // payload.link,
-            icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png', // payload.icon,
+            icon: 'https://lsms.lumir.space/logo_192.png', // payload.icon,
         };
         const responses = [];
         for (const token of tokens) {

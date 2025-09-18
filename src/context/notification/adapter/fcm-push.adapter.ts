@@ -95,6 +95,7 @@ export class FCMAdapter {
                         body: payload.body,
                         notificationData: JSON.stringify(payload.notificationData),
                         notificationType: payload.notificationType,
+                        icon: 'https://lsms.lumir.space/logo_192.png',
                     },
                     android: {
                         priority: 'high',
