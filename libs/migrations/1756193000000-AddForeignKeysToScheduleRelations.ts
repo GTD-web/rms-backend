@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddForeignKeysToScheduleRelations1756192900000 implements MigrationInterface {
-    name = 'AddForeignKeysToScheduleRelations1756192900000';
+export class AddForeignKeysToScheduleRelations1756193000000 implements MigrationInterface {
+    name = 'AddForeignKeysToScheduleRelations1756193000000';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         // ScheduleRelation과 Schedule 간의 외래키 제약조건 추가
