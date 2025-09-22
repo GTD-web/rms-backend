@@ -243,25 +243,25 @@ export class SchedulePolicyService {
             const startDate = new Date(dateRange.startDate);
             const endDate = new Date(dateRange.endDate);
 
-            // 과거 시간 체크 - 현재 시간이 속한 30분 단위 시간대부터 예약 가능
-            const current30MinStart = new Date(now);
-            const currentMinutes = current30MinStart.getMinutes();
+            // 과거 시간 체크 - 현재 시간이 속한 30분 단위 시간대부터 예약 가능 - deprecated 2025-09-22
+            // const current30MinStart = new Date(now);
+            // const currentMinutes = current30MinStart.getMinutes();
 
-            if (currentMinutes < 30) {
-                // 0~29분: 해당 시간의 정각(00분)부터 가능
-                current30MinStart.setMinutes(0, 0, 0);
-            } else {
-                // 30~59분: 해당 시간의 30분부터 가능
-                current30MinStart.setMinutes(30, 0, 0);
-            }
+            // if (currentMinutes < 30) {
+            //     // 0~29분: 해당 시간의 정각(00분)부터 가능
+            //     current30MinStart.setMinutes(0, 0, 0);
+            // } else {
+            //     // 30~59분: 해당 시간의 30분부터 가능
+            //     current30MinStart.setMinutes(30, 0, 0);
+            // }
 
-            if (startDate < current30MinStart) {
-                return {
-                    isAllowed: false,
-                    reason: '현재 30분 단위 시간대 이전으로는 일정을 생성할 수 없습니다.',
-                    reasonCode: 'PAST_30MIN_SLOT_NOT_ALLOWED',
-                };
-            }
+            // if (startDate < current30MinStart) {
+            //     return {
+            //         isAllowed: false,
+            //         reason: '현재 30분 단위 시간대 이전으로는 일정을 생성할 수 없습니다.',
+            //         reasonCode: 'PAST_30MIN_SLOT_NOT_ALLOWED',
+            //     };
+            // }
 
             // 시작/종료 시간 유효성 체크
             if (startDate >= endDate) {

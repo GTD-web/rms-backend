@@ -623,6 +623,7 @@ export class ScheduleManagementService {
         const finalCreatedSchedules = []; // 최종 반환용 DTO 배열
         const finalFailedSchedules = []; // 최종 반환용 실패 배열
 
+        const reservationIds = [];
         for (const createScheduleDto of createScheduleRequestList.schedules) {
             const scheduleCreatedSchedules = []; // 이 일정에서 성공한 Schedule들
             const scheduleFailedSchedules = []; // 이 일정에서 실패한 날짜들
@@ -745,6 +746,7 @@ export class ScheduleManagementService {
                                 queryRunner, // 🔥 QueryRunner 전달
                             );
                             reservationId = createdReservation.reservationId;
+                            reservationIds.push(createdReservation.reservationId);
                         }
 
                         // 2) 일정 생성 (QueryRunner 전달)
@@ -773,7 +775,7 @@ export class ScheduleManagementService {
                             queryRunner,
                         );
 
-                        for (const participant of data.participants) {
+                        for (const participant of data.participants || []) {
                             if (participant.employeeId !== user.employeeId) {
                                 await this.scheduleMutationService.일정_참가자를_추가한다(
                                     createdSchedule.scheduleId!,
@@ -846,7 +848,7 @@ export class ScheduleManagementService {
                     const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
                     await this.scheduleNotificationContextService.일정_생성_알림을_전송한다(
                         { schedule, reservation, resource },
-                        [user.employeeId, ...participants.map((participant) => participant.employeeId)],
+                        [user.employeeId, ...(participants?.map((participant) => participant.employeeId) || [])],
                         systemAdmins.map((admin) => admin.employeeId),
                     );
                 }
@@ -863,6 +865,12 @@ export class ScheduleManagementService {
                     reason: error.message,
                 });
             }
+        }
+
+        // 5. 후처리: 일정관련 배치 작업 처리
+        await this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();
+        if (reservationIds.length > 0) {
+            await this.reservationContextService.예약관련_배치_작업을_처리한다(reservationIds);
         }
 
         this.logger.log(

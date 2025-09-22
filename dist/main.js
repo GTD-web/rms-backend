@@ -29002,7 +29002,9 @@ __decorate([
     (0, swagger_1.ApiProperty)({
         description: '참석자 목록',
         type: [ScheduleParticipantDto],
+        required: false,
     }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     (0, class_transformer_1.Type)(() => ScheduleParticipantDto),
@@ -30489,6 +30491,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         const allCreatedSchedules = [];
         const finalCreatedSchedules = [];
         const finalFailedSchedules = [];
+        const reservationIds = [];
         for (const createScheduleDto of createScheduleRequestList.schedules) {
             const scheduleCreatedSchedules = [];
             const scheduleFailedSchedules = [];
@@ -30570,6 +30573,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                             };
                             const createdReservation = await this.reservationContextService.자원예약을_생성한다(reservationData, queryRunner);
                             reservationId = createdReservation.reservationId;
+                            reservationIds.push(createdReservation.reservationId);
                         }
                         const scheduleData = {
                             title: data.title,
@@ -30584,7 +30588,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                         };
                         const createdSchedule = await this.scheduleMutationService.일정을_생성한다(scheduleData, queryRunner);
                         await this.scheduleMutationService.일정_참가자를_추가한다(createdSchedule.scheduleId, user.employeeId, 'RESERVER', queryRunner);
-                        for (const participant of data.participants) {
+                        for (const participant of data.participants || []) {
                             if (participant.employeeId !== user.employeeId) {
                                 await this.scheduleMutationService.일정_참가자를_추가한다(createdSchedule.scheduleId, participant.employeeId, 'PARTICIPANT', queryRunner);
                             }
@@ -30635,7 +30639,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                         withResource: true,
                     });
                     const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
-                    await this.scheduleNotificationContextService.일정_생성_알림을_전송한다({ schedule, reservation, resource }, [user.employeeId, ...participants.map((participant) => participant.employeeId)], systemAdmins.map((admin) => admin.employeeId));
+                    await this.scheduleNotificationContextService.일정_생성_알림을_전송한다({ schedule, reservation, resource }, [user.employeeId, ...(participants?.map((participant) => participant.employeeId) || [])], systemAdmins.map((admin) => admin.employeeId));
                 }
                 finalFailedSchedules.push(...scheduleFailedSchedules);
             }
@@ -30648,6 +30652,10 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     reason: error.message,
                 });
             }
+        }
+        await this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();
+        if (reservationIds.length > 0) {
+            await this.reservationContextService.예약관련_배치_작업을_처리한다(reservationIds);
         }
         this.logger.log(`일정 생성 완료 - 성공: ${finalCreatedSchedules.length}개, 실패: ${finalFailedSchedules.length}개`);
         return {
@@ -38102,21 +38110,6 @@ let SchedulePolicyService = class SchedulePolicyService {
         for (const dateRange of createRequest.datesSelection) {
             const startDate = new Date(dateRange.startDate);
             const endDate = new Date(dateRange.endDate);
-            const current30MinStart = new Date(now);
-            const currentMinutes = current30MinStart.getMinutes();
-            if (currentMinutes < 30) {
-                current30MinStart.setMinutes(0, 0, 0);
-            }
-            else {
-                current30MinStart.setMinutes(30, 0, 0);
-            }
-            if (startDate < current30MinStart) {
-                return {
-                    isAllowed: false,
-                    reason: '현재 30분 단위 시간대 이전으로는 일정을 생성할 수 없습니다.',
-                    reasonCode: 'PAST_30MIN_SLOT_NOT_ALLOWED',
-                };
-            }
             if (startDate >= endDate) {
                 return {
                     isAllowed: false,

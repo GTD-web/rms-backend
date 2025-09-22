@@ -155,11 +155,13 @@ export class ScheduleCreateRequestDto {
     @ApiProperty({
         description: '참석자 목록',
         type: [ScheduleParticipantDto],
+        required: false,
     })
+    @IsOptional()
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => ScheduleParticipantDto)
-    participants: ScheduleParticipantDto[];
+    participants?: ScheduleParticipantDto[];
 
     @ApiProperty({
         description: '프로젝트 선택',
