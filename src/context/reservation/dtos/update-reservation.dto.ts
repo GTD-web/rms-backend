@@ -187,33 +187,39 @@ export class ReturnVehicleDto {
     @ApiProperty({
         type: [String],
         example: ['123e4567-e89b-12d3-a456-426614174000'],
+        required: false,
     })
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주차 위치 이미지 파일 ID') })
     @IsString({
         each: true,
         message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주차 위치 이미지 파일 ID', '문자열'),
     })
-    parkingLocationImages: string[];
+    @IsOptional()
+    parkingLocationImages?: string[];
 
     @ApiProperty({
         type: [String],
         example: ['123e4567-e89b-12d3-a456-426614174000'],
+        required: false,
     })
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('주행거리계 이미지 파일 ID') })
     @IsString({
         each: true,
         message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('주행거리계 이미지 파일 ID', '문자열'),
     })
-    odometerImages: string[];
+    @IsOptional()
+    odometerImages?: string[];
 
     @ApiProperty({
         type: [String],
         example: ['123e4567-e89b-12d3-a456-426614174000'],
+        required: false,
     })
     @IsArray({ message: ERROR_MESSAGE.VALIDATION.IS_ARRAY('차량 실내 이미지 파일 ID') })
     @IsString({
         each: true,
         message: ERROR_MESSAGE.VALIDATION.INVALID_ARRAY_ITEM_TYPE('차량 실내 이미지 파일 ID', '문자열'),
     })
-    indoorImages: string[];
+    @IsOptional()
+    indoorImages?: string[];
 }

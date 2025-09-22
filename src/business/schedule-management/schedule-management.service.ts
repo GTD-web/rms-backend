@@ -178,6 +178,7 @@ export class ScheduleManagementService {
                     startDate: schedule.startDate,
                     endDate: schedule.endDate,
                     reserverName: reserver?.employee?.name || '',
+                    scheduleType: schedule.scheduleType,
                     project: project
                         ? {
                               projectId: project.projectId,

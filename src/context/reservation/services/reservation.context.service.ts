@@ -305,16 +305,25 @@ export class ReservationContextService {
                 await this.fileContextService.파일들을_영구로_변경한다(allFileIds, queryRunner);
             }
 
+            if (
+                returnDto.parkingLocationImages.length > 0 ||
+                returnDto.odometerImages.length > 0 ||
+                returnDto.indoorImages.length > 0
+            ) {
+                await this.fileContextService.차량예약에_파일들을_연결한다(
+                    reservationVehicle.reservationVehicleId,
+                    {
+                        ...(returnDto.parkingLocationImages.length > 0 && {
+                            parkingLocationImages: returnDto.parkingLocationImages,
+                        }),
+                        ...(returnDto.odometerImages.length > 0 && { odometerImages: returnDto.odometerImages }),
+                        ...(returnDto.indoorImages.length > 0 && { indoorImages: returnDto.indoorImages }),
+                    },
+                    queryRunner,
+                );
+            }
+
             // 차량예약에 파일들을 연결
-            await this.fileContextService.차량예약에_파일들을_연결한다(
-                reservationVehicle.reservationVehicleId,
-                {
-                    parkingLocationImages: returnDto.parkingLocationImages,
-                    odometerImages: returnDto.odometerImages,
-                    indoorImages: returnDto.indoorImages,
-                },
-                queryRunner,
-            );
 
             // 파일 ID들을 filePath로 변환
             let parkingLocationFilePaths: string[] = [];
@@ -348,24 +357,26 @@ export class ReservationContextService {
                 {
                     totalMileage: returnDto.totalMileage,
                     leftMileage: returnDto.leftMileage,
-                    parkingLocationImages: parkingLocationFilePaths,
-                    odometerImages: odometerFilePaths,
-                    indoorImages: indoorFilePaths,
+                    ...(parkingLocationFilePaths.length > 0 && { parkingLocationImages: parkingLocationFilePaths }),
+                    ...(odometerFilePaths.length > 0 && { odometerImages: odometerFilePaths }),
+                    ...(indoorFilePaths.length > 0 && { indoorImages: indoorFilePaths }),
                     ...(returnDto.parkingCoordinates && { parkingCoordinates: returnDto.parkingCoordinates }),
                 },
                 { queryRunner },
             );
 
             // 차량정보에 파일들을 연결 (덮어쓰기)
-            await this.fileContextService.차량정보에_파일들을_연결한다(
-                vehicleInfoId,
-                {
-                    parkingLocationImages: returnDto.parkingLocationImages,
-                    odometerImages: returnDto.odometerImages,
-                    indoorImages: returnDto.indoorImages,
-                },
-                queryRunner,
-            );
+            if (parkingLocationFilePaths.length > 0 || odometerFilePaths.length > 0 || indoorFilePaths.length > 0) {
+                await this.fileContextService.차량정보에_파일들을_연결한다(
+                    vehicleInfoId,
+                    {
+                        ...(parkingLocationFilePaths.length > 0 && { parkingLocationImages: parkingLocationFilePaths }),
+                        ...(odometerFilePaths.length > 0 && { odometerImages: odometerFilePaths }),
+                        ...(indoorFilePaths.length > 0 && { indoorImages: indoorFilePaths }),
+                    },
+                    queryRunner,
+                );
+            }
 
             await queryRunner.commitTransaction();
             return true;

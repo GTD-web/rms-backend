@@ -67,6 +67,13 @@ export class ScheduleCalendarItemDto {
     reserverName: string;
 
     @ApiProperty({
+        description: '일정 타입',
+        example: 'COMPANY',
+        required: false,
+    })
+    scheduleType: string;
+
+    @ApiProperty({
         description: '프로젝트 정보',
         example: '프로젝트 1',
         required: false,
