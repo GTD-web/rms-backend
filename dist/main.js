@@ -30439,11 +30439,18 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             resource.images = resourceImages.images.map((image) => image.filePath);
             const typeInfo = await this.resourceContextService.자원의_타입별_상세정보를_조회한다(resource);
             if (resource.type === resource_type_enum_1.ResourceType.VEHICLE) {
-                const vehicleInfo = await this.vehicleInfoContextService.차량정보만_조회한다(resource.resourceId);
-                const { parkingLocationImages, odometerImages, indoorImages } = await this.fileContextService.차량정보_파일을_조회한다(vehicleInfo.vehicleInfoId);
-                typeInfo.parkingLocationImages = parkingLocationImages;
-                typeInfo.odometerImages = odometerImages;
-                typeInfo.indoorImages = indoorImages;
+                const reservationVehicle = await this.reservationContextService.예약_차량정보를_조회한다(reservation.reservationId);
+                if (reservationVehicle) {
+                    const { parkingLocationImages, odometerImages, indoorImages } = await this.fileContextService.차량예약_파일을_조회한다(reservationVehicle.reservationVehicleId);
+                    typeInfo.parkingLocationImages = parkingLocationImages;
+                    typeInfo.odometerImages = odometerImages;
+                    typeInfo.indoorImages = indoorImages;
+                }
+                else {
+                    typeInfo.parkingLocationImages = [];
+                    typeInfo.odometerImages = [];
+                    typeInfo.indoorImages = [];
+                }
             }
             reservationDto = schedule_detail_response_dto_1.ScheduleDetailReservationDto.fromReservationAndResource(reservation, resource, typeInfo);
         }
@@ -35986,6 +35993,12 @@ let ReservationContextService = class ReservationContextService {
     async 예약_차량_목록을_조회한다(reservationIds) {
         return await this.domainReservationVehicleService.findAll({
             where: { reservationId: (0, typeorm_2.In)(reservationIds) },
+            relations: ['vehicleInfo'],
+        });
+    }
+    async 예약_차량정보를_조회한다(reservationId) {
+        return await this.domainReservationVehicleService.findOne({
+            where: { reservationId },
             relations: ['vehicleInfo'],
         });
     }

@@ -563,12 +563,23 @@ export class ScheduleManagementService {
             resource.images = resourceImages.images.map((image) => image.filePath);
             const typeInfo = await this.resourceContextService.자원의_타입별_상세정보를_조회한다(resource);
             if (resource.type === ResourceType.VEHICLE) {
-                const vehicleInfo = await this.vehicleInfoContextService.차량정보만_조회한다(resource.resourceId);
-                const { parkingLocationImages, odometerImages, indoorImages } =
-                    await this.fileContextService.차량정보_파일을_조회한다(vehicleInfo.vehicleInfoId);
-                typeInfo.parkingLocationImages = parkingLocationImages;
-                typeInfo.odometerImages = odometerImages;
-                typeInfo.indoorImages = indoorImages;
+                // 차량 예약 정보 조회
+                const reservationVehicle = await this.reservationContextService.예약_차량정보를_조회한다(
+                    reservation.reservationId,
+                );
+                if (reservationVehicle) {
+                    // 차량 예약별 이미지 파일 조회
+                    const { parkingLocationImages, odometerImages, indoorImages } =
+                        await this.fileContextService.차량예약_파일을_조회한다(reservationVehicle.reservationVehicleId);
+                    typeInfo.parkingLocationImages = parkingLocationImages;
+                    typeInfo.odometerImages = odometerImages;
+                    typeInfo.indoorImages = indoorImages;
+                } else {
+                    // 차량 예약이 없는 경우 빈 배열로 설정
+                    typeInfo.parkingLocationImages = [];
+                    typeInfo.odometerImages = [];
+                    typeInfo.indoorImages = [];
+                }
             }
             reservationDto = ScheduleDetailReservationDto.fromReservationAndResource(reservation, resource, typeInfo);
         }

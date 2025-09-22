@@ -655,6 +655,13 @@ export class ReservationContextService {
         });
     }
 
+    async 예약_차량정보를_조회한다(reservationId: string): Promise<ReservationVehicle | null> {
+        return await this.domainReservationVehicleService.findOne({
+            where: { reservationId },
+            relations: ['vehicleInfo'],
+        });
+    }
+
     async 차량을_미사용처리한다(user: Employee, reservationId: string, remarks: string): Promise<boolean> {
         const reservation = await this.domainReservationService.findOne({
             where: { reservationId },

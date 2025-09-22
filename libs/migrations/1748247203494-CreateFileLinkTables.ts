@@ -138,37 +138,54 @@ export class CreateFileLinkTables1748247203494 implements MigrationInterface {
         `);
 
         // reservation_vehicles: vehicle_infos의 이미지 배열을 통해 파일 매핑하여 연결
+        // 각 vehicleInfoId별로 가장 최신의 reservation_vehicles만 선택
         // parkingLocationImages -> type = 'PARKING_LOCATION'
         await queryRunner.query(`
             INSERT INTO "file_reservation_vehicles" ("fileReservationVehicleId", "reservationVehicleId", "fileId", "type")
-            SELECT uuid_generate_v4(), rv."reservationVehicleId", f."fileId", 'PARKING_LOCATION'
-            FROM "reservation_vehicles" rv
-            JOIN "vehicle_infos" vi ON vi."vehicleInfoId" = rv."vehicleInfoId"
+            SELECT uuid_generate_v4(), latest_rv."reservationVehicleId", f."fileId", 'PARKING_LOCATION'
+            FROM (
+                SELECT rv."reservationVehicleId", rv."vehicleInfoId",
+                       ROW_NUMBER() OVER (PARTITION BY rv."vehicleInfoId" ORDER BY r."startDate" DESC) as rn
+                FROM "reservation_vehicles" rv
+                JOIN "reservations" r ON r."reservationId" = rv."reservationId"
+            ) latest_rv
+            JOIN "vehicle_infos" vi ON vi."vehicleInfoId" = latest_rv."vehicleInfoId"
             CROSS JOIN LATERAL jsonb_array_elements_text(vi."parkingLocationImages") AS img_path
             JOIN "files" f ON f."filePath" = img_path
-            WHERE vi."parkingLocationImages" IS NOT NULL;
+            WHERE latest_rv.rn = 1 AND vi."parkingLocationImages" IS NOT NULL;
         `);
+        g;
 
         // odometerImages -> type = 'ODOMETER'
         await queryRunner.query(`
             INSERT INTO "file_reservation_vehicles" ("fileReservationVehicleId", "reservationVehicleId", "fileId", "type")
-            SELECT uuid_generate_v4(), rv."reservationVehicleId", f."fileId", 'ODOMETER'
-            FROM "reservation_vehicles" rv
-            JOIN "vehicle_infos" vi ON vi."vehicleInfoId" = rv."vehicleInfoId"
+            SELECT uuid_generate_v4(), latest_rv."reservationVehicleId", f."fileId", 'ODOMETER'
+            FROM (
+                SELECT rv."reservationVehicleId", rv."vehicleInfoId",
+                       ROW_NUMBER() OVER (PARTITION BY rv."vehicleInfoId" ORDER BY r."startDate" DESC) as rn
+                FROM "reservation_vehicles" rv
+                JOIN "reservations" r ON r."reservationId" = rv."reservationId"
+            ) latest_rv
+            JOIN "vehicle_infos" vi ON vi."vehicleInfoId" = latest_rv."vehicleInfoId"
             CROSS JOIN LATERAL jsonb_array_elements_text(vi."odometerImages") AS img_path
             JOIN "files" f ON f."filePath" = img_path
-            WHERE vi."odometerImages" IS NOT NULL;
+            WHERE latest_rv.rn = 1 AND vi."odometerImages" IS NOT NULL;
         `);
 
         // indoorImages -> type = 'INDOOR'
         await queryRunner.query(`
             INSERT INTO "file_reservation_vehicles" ("fileReservationVehicleId", "reservationVehicleId", "fileId", "type")
-            SELECT uuid_generate_v4(), rv."reservationVehicleId", f."fileId", 'INDOOR'
-            FROM "reservation_vehicles" rv
-            JOIN "vehicle_infos" vi ON vi."vehicleInfoId" = rv."vehicleInfoId"
+            SELECT uuid_generate_v4(), latest_rv."reservationVehicleId", f."fileId", 'INDOOR'
+            FROM (
+                SELECT rv."reservationVehicleId", rv."vehicleInfoId",
+                       ROW_NUMBER() OVER (PARTITION BY rv."vehicleInfoId" ORDER BY r."startDate" DESC) as rn
+                FROM "reservation_vehicles" rv
+                JOIN "reservations" r ON r."reservationId" = rv."reservationId"
+            ) latest_rv
+            JOIN "vehicle_infos" vi ON vi."vehicleInfoId" = latest_rv."vehicleInfoId"
             CROSS JOIN LATERAL jsonb_array_elements_text(vi."indoorImages") AS img_path
             JOIN "files" f ON f."filePath" = img_path
-            WHERE vi."indoorImages" IS NOT NULL;
+            WHERE latest_rv.rn = 1 AND vi."indoorImages" IS NOT NULL;
         `);
     }
 
