@@ -124,6 +124,13 @@ export class EmployeeContextService {
     }
 
     /**
+     * 복수 직원 ID들로 직원 정보를 조회한다
+     */
+    async 복수_직원정보를_조회한다(employeeIds: string[]): Promise<Employee[]> {
+        return await this.domainEmployeeService.findByEmployeeIds(employeeIds);
+    }
+
+    /**
      * 비밀번호를 확인한다
      */
     async 비밀번호를_확인한다(employeeId: string, password: string): Promise<boolean> {

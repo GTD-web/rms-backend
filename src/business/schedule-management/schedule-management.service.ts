@@ -109,10 +109,21 @@ export class ScheduleManagementService {
         // 1. 권한: 조회는 별도 권한 체크 없음 (모든 직원이 캘린더 조회 가능)
 
         // 2. 그래프 조회: 조건에 맞는 일정 ID들 조회
+        let selectedEmployees: Employee[] = [];
+
+        if (query.mySchedule) {
+            // 내 일정만 보기
+            selectedEmployees = [user];
+        } else if (query.employeeIds && query.employeeIds.length > 0) {
+            // 특정 직원들의 일정만 조회
+            const employees = await this.employeeContextService.복수_직원정보를_조회한다(query.employeeIds);
+            selectedEmployees = employees;
+        }
+
         const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(
             query.date,
             query.category,
-            query.mySchedule ? user : undefined,
+            selectedEmployees.length > 0 ? selectedEmployees : undefined,
         );
 
         if (scheduleIds.length === 0) {
@@ -129,6 +140,7 @@ export class ScheduleManagementService {
         });
         console.timeEnd('scheduleDataList');
         // employeeIds 필터링 적용 (해당 직원이 참여하는 일정만)
+        // TODO : 부서 및 회사 일정도 추가 필요
         let filteredScheduleDataList = scheduleDataList;
         if (query.employeeIds && query.employeeIds.length > 0) {
             filteredScheduleDataList = scheduleDataList.filter(({ participants }) => {

@@ -180,6 +180,7 @@ export class TaskManagementService {
 
         for (const resource of resources) {
             for (const consumable of resource.vehicleInfo?.consumables || []) {
+                console.log(consumable.maintenances);
                 const latestMaintenance = consumable.maintenances.sort((a, b) => a.date - b.date)[0] || null;
                 if (latestMaintenance) {
                     const maintenanceRequired =

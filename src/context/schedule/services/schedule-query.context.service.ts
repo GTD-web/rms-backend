@@ -315,7 +315,7 @@ export class ScheduleQueryContextService {
     async 캘린더용_일정을_조회한다(
         date: string,
         category?: ScheduleCategoryType,
-        employee?: Employee,
+        employees?: Employee[],
     ): Promise<string[]> {
         // 1. 월별 일정 조회
         const startDateOfMonth = new Date(`${date}-01`);
@@ -327,20 +327,32 @@ export class ScheduleQueryContextService {
         const monthlySchedules = await this.domainScheduleService.findByDateRange(startDateOfMonth, endDateOfMonth);
         let scheduleIds = monthlySchedules.map((schedule) => schedule.scheduleId);
 
-        // 2. 내 일정만 보기 옵션 처리
-        if (employee) {
-            const myParticipants = await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(
-                employee.employeeId,
-                scheduleIds,
-            );
-            const myScheduleIds = myParticipants.map((participant) => participant.scheduleId);
-            const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(
-                employee.department,
-                startDateOfMonth,
-                endDateOfMonth,
-            );
-            const allScheduleIds = new Set([...myScheduleIds, ...belongingScheduleIds]);
-            scheduleIds = Array.from(allScheduleIds);
+        // 2. 특정 직원(들)의 일정 필터링
+        if (employees) {
+            const employeeArray = employees;
+            const allEmployeeScheduleIds = new Set<string>();
+
+            for (const employee of employeeArray) {
+                // 각 직원의 참여 일정 조회
+                const myParticipants = await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(
+                    employee.employeeId,
+                    scheduleIds,
+                );
+                const myScheduleIds = myParticipants.map((participant) => participant.scheduleId);
+
+                // 각 직원의 소속 일정 조회
+                const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(
+                    employee.department,
+                    startDateOfMonth,
+                    endDateOfMonth,
+                );
+
+                // 해당 직원의 모든 일정 ID를 Set에 추가
+                myScheduleIds.forEach((id) => allEmployeeScheduleIds.add(id));
+                belongingScheduleIds.forEach((id) => allEmployeeScheduleIds.add(id));
+            }
+
+            scheduleIds = Array.from(allEmployeeScheduleIds);
         }
 
         // 3. 카테고리별 필터링

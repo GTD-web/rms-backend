@@ -584,6 +584,15 @@ export class ResourceContextService {
                 'vehicleInfo.consumables',
                 'vehicleInfo.consumables.maintenances',
             ],
+            order: {
+                vehicleInfo: {
+                    consumables: {
+                        maintenances: {
+                            date: 'DESC',
+                        },
+                    },
+                },
+            },
         });
 
         return resources;

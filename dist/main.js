@@ -30057,7 +30057,15 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
     }
     async findCalendar(user, query) {
         this.logger.log(`캘린더 조회 요청 - 사용자: ${user.employeeId}, 날짜: ${query.date}, 직원필터: ${query.employeeIds?.join(',') || '없음'}`);
-        const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(query.date, query.category, query.mySchedule ? user : undefined);
+        let selectedEmployees = [];
+        if (query.mySchedule) {
+            selectedEmployees = [user];
+        }
+        else if (query.employeeIds && query.employeeIds.length > 0) {
+            const employees = await this.employeeContextService.복수_직원정보를_조회한다(query.employeeIds);
+            selectedEmployees = employees;
+        }
+        const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(query.date, query.category, selectedEmployees.length > 0 ? selectedEmployees : undefined);
         if (scheduleIds.length === 0) {
             return { schedules: [] };
         }
@@ -32083,6 +32091,7 @@ let TaskManagementService = class TaskManagementService {
         const needReplaceConsumables = [];
         for (const resource of resources) {
             for (const consumable of resource.vehicleInfo?.consumables || []) {
+                console.log(consumable.maintenances);
                 const latestMaintenance = consumable.maintenances.sort((a, b) => a.date - b.date)[0] || null;
                 if (latestMaintenance) {
                     const maintenanceRequired = resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
@@ -32292,6 +32301,9 @@ let EmployeeContextService = class EmployeeContextService {
             roles: employee.roles,
             isPushNotificationEnabled: employee.isPushNotificationEnabled,
         };
+    }
+    async 복수_직원정보를_조회한다(employeeIds) {
+        return await this.domainEmployeeService.findByEmployeeIds(employeeIds);
     }
     async 비밀번호를_확인한다(employeeId, password) {
         const employee = await this.domainEmployeeService.findByEmployeeId(employeeId);
@@ -37124,6 +37136,15 @@ let ResourceContextService = class ResourceContextService {
                 'vehicleInfo.consumables',
                 'vehicleInfo.consumables.maintenances',
             ],
+            order: {
+                vehicleInfo: {
+                    consumables: {
+                        maintenances: {
+                            date: 'DESC',
+                        },
+                    },
+                },
+            },
         });
         return resources;
     }
@@ -38356,7 +38377,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         }
         return results;
     }
-    async 캘린더용_일정을_조회한다(date, category, employee) {
+    async 캘린더용_일정을_조회한다(date, category, employees) {
         const startDateOfMonth = new Date(`${date}-01`);
         const endDateOfMonth = new Date(`${date}-01`);
         endDateOfMonth.setMonth(endDateOfMonth.getMonth() + 1);
@@ -38364,12 +38385,17 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         endDateOfMonth.setHours(23, 59, 59);
         const monthlySchedules = await this.domainScheduleService.findByDateRange(startDateOfMonth, endDateOfMonth);
         let scheduleIds = monthlySchedules.map((schedule) => schedule.scheduleId);
-        if (employee) {
-            const myParticipants = await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(employee.employeeId, scheduleIds);
-            const myScheduleIds = myParticipants.map((participant) => participant.scheduleId);
-            const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, startDateOfMonth, endDateOfMonth);
-            const allScheduleIds = new Set([...myScheduleIds, ...belongingScheduleIds]);
-            scheduleIds = Array.from(allScheduleIds);
+        if (employees) {
+            const employeeArray = employees;
+            const allEmployeeScheduleIds = new Set();
+            for (const employee of employeeArray) {
+                const myParticipants = await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(employee.employeeId, scheduleIds);
+                const myScheduleIds = myParticipants.map((participant) => participant.scheduleId);
+                const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, startDateOfMonth, endDateOfMonth);
+                myScheduleIds.forEach((id) => allEmployeeScheduleIds.add(id));
+                belongingScheduleIds.forEach((id) => allEmployeeScheduleIds.add(id));
+            }
+            scheduleIds = Array.from(allEmployeeScheduleIds);
         }
         if (category && category !== 'ALL') {
             const scheduleRelations = await this.domainScheduleRelationService.findByScheduleIds(scheduleIds);
