@@ -154,8 +154,6 @@ export class CreateFileLinkTables1748247203494 implements MigrationInterface {
             JOIN "files" f ON f."filePath" = img_path
             WHERE latest_rv.rn = 1 AND vi."parkingLocationImages" IS NOT NULL;
         `);
-        g;
-
         // odometerImages -> type = 'ODOMETER'
         await queryRunner.query(`
             INSERT INTO "file_reservation_vehicles" ("fileReservationVehicleId", "reservationVehicleId", "fileId", "type")
