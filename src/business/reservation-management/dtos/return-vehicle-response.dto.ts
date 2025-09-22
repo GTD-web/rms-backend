@@ -23,6 +23,9 @@ export class ReturnVehicleResponseDto {
 
     @ApiProperty()
     endOdometer: number;
+
+    @ApiProperty()
+    remarks: string;
 }
 
 export class ReturnVehicleDetailResponseDto extends ReturnVehicleResponseDto {

@@ -36,6 +36,7 @@ export class VehicleInfoService {
                 returnedBy: returnVehicle.returnedBy,
                 endOdometer: returnVehicle.endOdometer,
                 location: returnVehicle.location,
+                remarks: returnVehicle.remarks,
             };
         });
     }
@@ -49,6 +50,7 @@ export class VehicleInfoService {
             returnedBy: returnDetail.returnedBy,
             endOdometer: returnDetail.endOdometer,
             location: returnDetail.location,
+            remarks: returnDetail.remarks,
             parkingLocationImages: reservationVehicleFile.parkingLocationImages.map((image) => image.filePath),
             odometerImages: reservationVehicleFile.odometerImages.map((image) => image.filePath),
             indoorImages: reservationVehicleFile.indoorImages.map((image) => image.filePath),

@@ -23069,6 +23069,10 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)
 ], ReturnVehicleResponseDto.prototype, "endOdometer", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReturnVehicleResponseDto.prototype, "remarks", void 0);
 class ReturnVehicleDetailResponseDto extends ReturnVehicleResponseDto {
 }
 exports.ReturnVehicleDetailResponseDto = ReturnVehicleDetailResponseDto;
@@ -26031,6 +26035,10 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)
 ], ReturnVehicleResponseDto.prototype, "endOdometer", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ReturnVehicleResponseDto.prototype, "remarks", void 0);
 class ReturnVehicleDetailResponseDto extends ReturnVehicleResponseDto {
 }
 exports.ReturnVehicleDetailResponseDto = ReturnVehicleDetailResponseDto;
@@ -26883,6 +26891,7 @@ let VehicleInfoService = class VehicleInfoService {
                 returnedBy: returnVehicle.returnedBy,
                 endOdometer: returnVehicle.endOdometer,
                 location: returnVehicle.location,
+                remarks: returnVehicle.remarks,
             };
         });
     }
@@ -26895,6 +26904,7 @@ let VehicleInfoService = class VehicleInfoService {
             returnedBy: returnDetail.returnedBy,
             endOdometer: returnDetail.endOdometer,
             location: returnDetail.location,
+            remarks: returnDetail.remarks,
             parkingLocationImages: reservationVehicleFile.parkingLocationImages.map((image) => image.filePath),
             odometerImages: reservationVehicleFile.odometerImages.map((image) => image.filePath),
             indoorImages: reservationVehicleFile.indoorImages.map((image) => image.filePath),
