@@ -1168,9 +1168,13 @@ export class ScheduleManagementService {
         );
 
         // 5. 후처리: 시나리오별 후처리
-        if (reservation) {
-            await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
+        if (updateScenarios.isDateUpdate) {
+            await this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();
+            if (reservation) {
+                await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
+            }
         }
+
         const {
             schedule: newSchedule,
             resource,

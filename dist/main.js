@@ -30782,8 +30782,11 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 }
                 : undefined,
         });
-        if (reservation) {
-            await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
+        if (updateScenarios.isDateUpdate) {
+            await this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();
+            if (reservation) {
+                await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
+            }
         }
         const { schedule: newSchedule, resource, participants, } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
