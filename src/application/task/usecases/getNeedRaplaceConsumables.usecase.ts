@@ -26,6 +26,15 @@ export class GetNeedRaplaceConsumablesUsecase {
                 'vehicleInfo.consumables',
                 'vehicleInfo.consumables.maintenances',
             ],
+            order: {
+                vehicleInfo: {
+                    consumables: {
+                        maintenances: {
+                            date: 'DESC',
+                        },
+                    },
+                },
+            },
         });
         const needReplaceConsumable = [];
         for (const resource of resources) {
