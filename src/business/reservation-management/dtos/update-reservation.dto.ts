@@ -223,3 +223,14 @@ export class ReturnVehicleDto {
     @IsOptional()
     indoorImages?: string[];
 }
+
+// 차량 미사용처리
+export class MarkVehicleUnusedDto {
+    @ApiProperty({
+        description: '미사용 처리 사유',
+        example: '일정 취소로 인한 차량 미사용',
+    })
+    @IsString({ message: ERROR_MESSAGE.VALIDATION.IS_STRING('미사용 사유') })
+    @Length(1, 500, { message: ERROR_MESSAGE.VALIDATION.IS_LENGTH('미사용 사유', 1, 500) })
+    remarks: string;
+}

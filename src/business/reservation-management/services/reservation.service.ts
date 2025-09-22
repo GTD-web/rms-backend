@@ -5,7 +5,7 @@ import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-typ
 import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
-import { ReturnVehicleDto, UpdateReservationStatusDto } from '../dtos/update-reservation.dto';
+import { ReturnVehicleDto, UpdateReservationStatusDto, MarkVehicleUnusedDto } from '../dtos/update-reservation.dto';
 import { ReservationListQueryDto, ReservationSortOrder } from '../dtos/reservation-list-query.dto';
 import { ReservationListResponseDto } from '../dtos/reservation-list-response.dto';
 import {
@@ -371,6 +371,36 @@ export class ReservationService {
         await this.reservationNotificationContextService.차량반납_알림을_전송한다({ schedule, reservation, resource }, [
             user.employeeId,
         ]);
+        return result;
+    }
+
+    async markVehicleUnused(
+        user: Employee,
+        reservationId: string,
+        markUnusedDto: MarkVehicleUnusedDto,
+    ): Promise<boolean> {
+        const result = await this.reservationContextService.차량을_미사용처리한다(
+            user,
+            reservationId,
+            markUnusedDto.remarks,
+        );
+
+        // // 예약의 스케쥴 정보를 조회한다.
+        // const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationId);
+        // // 일정과_관계정보들을_조회한다
+        // const { schedule, resource, reservation } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(
+        //     scheduleIds[0],
+        //     {
+        //         withReservation: true,
+        //         withResource: true,
+        //     },
+        // );
+
+        // 미사용 처리 알림 전송 (필요에 따라 추가)
+        // await this.reservationNotificationContextService.차량미사용_알림을_전송한다({ schedule, reservation, resource }, [
+        //     user.employeeId,
+        // ]);
+
         return result;
     }
 }

@@ -1952,9 +1952,29 @@ __decorate([
     __metadata("design:type", Number)
 ], ReservationVehicle.prototype, "endFuelLevel", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    __metadata("design:type", Object)
+], ReservationVehicle.prototype, "location", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'jsonb',
+        nullable: true,
+        comment: '주차위치 좌표 (위도, 경도)',
+    }),
+    __metadata("design:type", Object)
+], ReservationVehicle.prototype, "parkingCoordinates", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true, comment: '비고' }),
+    __metadata("design:type", String)
+], ReservationVehicle.prototype, "remarks", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)
 ], ReservationVehicle.prototype, "isReturned", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], ReservationVehicle.prototype, "returnedBy", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp with time zone', nullable: true }),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
@@ -1969,22 +1989,6 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'vehicleInfoId' }),
     __metadata("design:type", typeof (_c = typeof vehicle_info_entity_1.VehicleInfo !== "undefined" && vehicle_info_entity_1.VehicleInfo) === "function" ? _c : Object)
 ], ReservationVehicle.prototype, "vehicleInfo", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
-    __metadata("design:type", Object)
-], ReservationVehicle.prototype, "location", void 0);
-__decorate([
-    (0, typeorm_1.Column)({
-        type: 'jsonb',
-        nullable: true,
-        comment: '주차위치 좌표 (위도, 경도)',
-    }),
-    __metadata("design:type", Object)
-], ReservationVehicle.prototype, "parkingCoordinates", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], ReservationVehicle.prototype, "returnedBy", void 0);
 exports.ReservationVehicle = ReservationVehicle = __decorate([
     (0, typeorm_1.Entity)('reservation_vehicles')
 ], ReservationVehicle);
@@ -22260,7 +22264,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -22292,6 +22296,9 @@ let ReservationController = class ReservationController {
     }
     async returnVehicle(user, reservationId, returnDto) {
         return this.reservationService.returnVehicle(user, reservationId, returnDto);
+    }
+    async markVehicleUnused(user, reservationId, markUnusedDto) {
+        return this.reservationService.markVehicleUnused(user, reservationId, markUnusedDto);
     }
 };
 exports.ReservationController = ReservationController;
@@ -22361,6 +22368,20 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_k = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _k : Object, String, typeof (_l = typeof update_reservation_dto_1.ReturnVehicleDto !== "undefined" && update_reservation_dto_1.ReturnVehicleDto) === "function" ? _l : Object]),
     __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], ReservationController.prototype, "returnVehicle", null);
+__decorate([
+    (0, common_1.Patch)(':reservationId/mark-vehicle-unused'),
+    (0, swagger_1.ApiOperation)({ summary: '차량 미사용 처리 #사용자/자원예약/미사용처리' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '차량 미사용 처리 성공',
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __param(1, (0, common_1.Param)('reservationId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_o = typeof entities_1.Employee !== "undefined" && entities_1.Employee) === "function" ? _o : Object, String, typeof (_p = typeof update_reservation_dto_1.MarkVehicleUnusedDto !== "undefined" && update_reservation_dto_1.MarkVehicleUnusedDto) === "function" ? _p : Object]),
+    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
+], ReservationController.prototype, "markVehicleUnused", null);
 exports.ReservationController = ReservationController = __decorate([
     (0, swagger_1.ApiTags)('v2 예약 '),
     (0, common_1.Controller)('v2/reservations'),
@@ -23085,7 +23106,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReturnVehicleDto = exports.UpdateReservationDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = void 0;
+exports.MarkVehicleUnusedDto = exports.ReturnVehicleDto = exports.UpdateReservationDto = exports.UpdateReservationCcReceipientDto = exports.UpdateReservationParticipantsDto = exports.UpdateReservationStatusDto = exports.UpdateReservationTimeDto = exports.UpdateReservationTitleDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
@@ -23318,6 +23339,18 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], ReturnVehicleDto.prototype, "indoorImages", void 0);
+class MarkVehicleUnusedDto {
+}
+exports.MarkVehicleUnusedDto = MarkVehicleUnusedDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '미사용 처리 사유',
+        example: '일정 취소로 인한 차량 미사용',
+    }),
+    (0, class_validator_1.IsString)({ message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_STRING('미사용 사유') }),
+    (0, class_validator_1.Length)(1, 500, { message: error_message_1.ERROR_MESSAGE.VALIDATION.IS_LENGTH('미사용 사유', 1, 500) }),
+    __metadata("design:type", String)
+], MarkVehicleUnusedDto.prototype, "remarks", void 0);
 
 
 /***/ }),
@@ -23648,6 +23681,10 @@ let ReservationService = class ReservationService {
         await this.reservationNotificationContextService.차량반납_알림을_전송한다({ schedule, reservation, resource }, [
             user.employeeId,
         ]);
+        return result;
+    }
+    async markVehicleUnused(user, reservationId, markUnusedDto) {
+        const result = await this.reservationContextService.차량을_미사용처리한다(user, reservationId, markUnusedDto.remarks);
         return result;
     }
 };
@@ -35951,6 +35988,58 @@ let ReservationContextService = class ReservationContextService {
             where: { reservationId: (0, typeorm_2.In)(reservationIds) },
             relations: ['vehicleInfo'],
         });
+    }
+    async 차량을_미사용처리한다(user, reservationId, remarks) {
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId },
+            relations: ['resource'],
+            withDeleted: true,
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+        if (reservation.resource.type !== resource_type_enum_1.ResourceType.VEHICLE) {
+            throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_RESOURCE_TYPE);
+        }
+        const allowedStatuses = [reservation_type_enum_1.ReservationStatus.CLOSING];
+        if (!allowedStatuses.includes(reservation.status)) {
+            throw new common_1.BadRequestException(`현재 상태(${reservation.status})에서는 미사용 처리할 수 없습니다.`);
+        }
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const reservationVehicle = await this.domainReservationVehicleService.findOne({
+                where: { reservationId },
+                relations: ['reservation', 'vehicleInfo'],
+            });
+            if (!reservationVehicle) {
+                throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_NOT_FOUND);
+            }
+            if (reservationVehicle.isReturned) {
+                throw new common_1.BadRequestException(error_message_1.ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_ALREADY_RETURNED);
+            }
+            await this.domainReservationService.update(reservationId, {
+                status: reservation_type_enum_1.ReservationStatus.CLOSED,
+            }, { queryRunner });
+            await this.domainReservationVehicleService.update(reservationVehicle.reservationVehicleId, {
+                endOdometer: reservationVehicle.vehicleInfo.totalMileage,
+                remarks: remarks,
+                isReturned: true,
+                returnedBy: user.employeeId,
+                returnedAt: new Date(),
+                location: reservation.resource.location,
+            }, { queryRunner });
+            await queryRunner.commitTransaction();
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return true;
     }
 };
 exports.ReservationContextService = ReservationContextService;

@@ -10,7 +10,7 @@ import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ReservationWithRelationsResponseDto, ReservationResponseDto } from '../dtos/reservation-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
-import { ReturnVehicleDto } from '../dtos/update-reservation.dto';
+import { ReturnVehicleDto, MarkVehicleUnusedDto } from '../dtos/update-reservation.dto';
 import { ReservationService } from '../services/reservation.service';
 import { UpdateReservationStatusDto } from '../dtos/update-reservation.dto';
 import { DateUtil } from '@libs/utils/date.util';
@@ -85,5 +85,19 @@ export class ReservationController {
         @Body() returnDto: ReturnVehicleDto,
     ): Promise<boolean> {
         return this.reservationService.returnVehicle(user, reservationId, returnDto);
+    }
+
+    @Patch(':reservationId/mark-vehicle-unused')
+    @ApiOperation({ summary: '차량 미사용 처리 #사용자/자원예약/미사용처리' })
+    @ApiOkResponse({
+        status: 200,
+        description: '차량 미사용 처리 성공',
+    })
+    async markVehicleUnused(
+        @User() user: Employee,
+        @Param('reservationId') reservationId: string,
+        @Body() markUnusedDto: MarkVehicleUnusedDto,
+    ): Promise<boolean> {
+        return this.reservationService.markVehicleUnused(user, reservationId, markUnusedDto);
     }
 }

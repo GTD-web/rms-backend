@@ -654,4 +654,78 @@ export class ReservationContextService {
             relations: ['vehicleInfo'],
         });
     }
+
+    async 차량을_미사용처리한다(user: Employee, reservationId: string, remarks: string): Promise<boolean> {
+        const reservation = await this.domainReservationService.findOne({
+            where: { reservationId },
+            relations: ['resource'],
+            withDeleted: true,
+        });
+
+        if (!reservation) {
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.NOT_FOUND);
+        }
+
+        if (reservation.resource.type !== ResourceType.VEHICLE) {
+            throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.INVALID_RESOURCE_TYPE);
+        }
+
+        // 미사용 처리는 여러 상태에서 가능할 수 있으므로 상태 검증을 완화하거나 조정
+        // 필요에 따라 허용 가능한 상태들을 정의
+        const allowedStatuses = [ReservationStatus.CLOSING];
+        if (!allowedStatuses.includes(reservation.status)) {
+            throw new BadRequestException(`현재 상태(${reservation.status})에서는 미사용 처리할 수 없습니다.`);
+        }
+
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            const reservationVehicle = await this.domainReservationVehicleService.findOne({
+                where: { reservationId },
+                relations: ['reservation', 'vehicleInfo'],
+            });
+
+            if (!reservationVehicle) {
+                throw new NotFoundException(ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_NOT_FOUND);
+            }
+
+            if (reservationVehicle.isReturned) {
+                throw new BadRequestException(ERROR_MESSAGE.BUSINESS.RESERVATION.VEHICLE_ALREADY_RETURNED);
+            }
+
+            // 예약 상태를 CLOSED로 업데이트
+            await this.domainReservationService.update(
+                reservationId,
+                {
+                    status: ReservationStatus.CLOSED,
+                },
+                { queryRunner },
+            );
+
+            // 차량 예약 데이터 업데이트
+            await this.domainReservationVehicleService.update(
+                reservationVehicle.reservationVehicleId,
+                {
+                    endOdometer: reservationVehicle.vehicleInfo.totalMileage, // 차량 데이터의 totalMileage
+                    remarks: remarks, // body로 들어온 미사용 사유
+                    isReturned: true,
+                    returnedBy: user.employeeId, // 요청자 정보
+                    returnedAt: new Date(), // 현재 시간
+                    location: reservation.resource.location, // 자원 데이터의 location
+                },
+                { queryRunner },
+            );
+
+            await queryRunner.commitTransaction();
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        } finally {
+            await queryRunner.release();
+        }
+
+        return true;
+    }
 }
