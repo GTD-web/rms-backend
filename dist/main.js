@@ -40358,7 +40358,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleStateTransitionService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const schedule_department_entity_1 = __webpack_require__(/*! @libs/entities/schedule-department.entity */ "./libs/entities/schedule-department.entity.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const schedule_service_1 = __webpack_require__(/*! ../../../domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
@@ -40666,13 +40665,23 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
         await this.domainScheduleRelationService.update(existingRelation.scheduleRelationId, { projectId: newProjectId }, { queryRunner });
     }
     async 부서_관계들을_일괄_업데이트한다(scheduleId, newDepartmentIds, queryRunner) {
-        const scheduleDepartmentRepository = queryRunner.manager.getRepository(schedule_department_entity_1.ScheduleDepartment);
-        await scheduleDepartmentRepository.delete({ scheduleId });
+        const existingRelations = await this.domainScheduleDepartmentService.findAll({
+            where: { scheduleId },
+            queryRunner,
+        });
+        for (const relation of existingRelations) {
+            await this.domainScheduleDepartmentService.delete(relation.scheduleDepartmentId, {
+                queryRunner,
+            });
+        }
         if (newDepartmentIds && newDepartmentIds.length > 0) {
             for (const departmentId of newDepartmentIds) {
-                await scheduleDepartmentRepository.save({
+                const createDto = {
                     scheduleId,
                     departmentId,
+                };
+                await this.domainScheduleDepartmentService.save(createDto, {
+                    queryRunner,
                 });
             }
         }

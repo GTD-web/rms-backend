@@ -3,7 +3,6 @@ import { DataSource, QueryRunner } from 'typeorm';
 import { Schedule } from '@libs/entities/schedule.entity';
 import { Reservation } from '@libs/entities/reservation.entity';
 import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
-import { ScheduleDepartment } from '@libs/entities/schedule-department.entity';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ScheduleStatus } from '@libs/enums/schedule-type.enum';
 import { DomainScheduleService } from '../../../domain/schedule/schedule.service';
@@ -518,18 +517,27 @@ export class ScheduleStateTransitionService {
         newDepartmentIds: string[],
         queryRunner: QueryRunner,
     ): Promise<void> {
-        // 트랜잭션 내에서 실행하기 위해 service 대신 repository를 직접 사용
-        const scheduleDepartmentRepository = queryRunner.manager.getRepository(ScheduleDepartment);
-
         // 1. 기존 부서 관계 모두 삭제
-        await scheduleDepartmentRepository.delete({ scheduleId });
+        const existingRelations = await this.domainScheduleDepartmentService.findAll({
+            where: { scheduleId },
+            queryRunner,
+        });
+
+        for (const relation of existingRelations) {
+            await this.domainScheduleDepartmentService.delete(relation.scheduleDepartmentId, {
+                queryRunner,
+            });
+        }
 
         // 2. 새로운 부서 관계들 생성
         if (newDepartmentIds && newDepartmentIds.length > 0) {
             for (const departmentId of newDepartmentIds) {
-                await scheduleDepartmentRepository.save({
+                const createDto = {
                     scheduleId,
                     departmentId,
+                };
+                await this.domainScheduleDepartmentService.save(createDto, {
+                    queryRunner,
                 });
             }
         }
