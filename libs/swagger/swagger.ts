@@ -1,13 +1,13 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { BaseResponseDto } from '../dtos/response.dto';
-import { PaginationData } from '../dtos/paginate-response.dto';
+import { PaginationData } from '../dtos/pagination-response.dto';
 
 export function setupSwagger(app: INestApplication, dtos: any[]) {
     const config = new DocumentBuilder()
         .setTitle('Resource Management API')
         .setDescription('Resource Management API Description')
-        .setVersion('1.0')
+        .setVersion('2.0')
         .addBearerAuth()
         .build();
 

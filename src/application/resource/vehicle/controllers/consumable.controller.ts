@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { ConsumableResponseDto } from '../dtos/vehicle-response.dto';
@@ -6,12 +6,15 @@ import { Role } from '@libs/enums/role-type.enum';
 import { Roles } from '@libs/decorators/role.decorator';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 import { ConsumableService } from '@src/application/resource/vehicle/services/consumable.service';
 
 @ApiTags('4. 차량 소모품 ')
 @Controller('v1/consumables')
 @ApiBearerAuth()
 @Roles(Role.RESOURCE_ADMIN)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class UserConsumableController {
     constructor(private readonly consumableService: ConsumableService) {}
 

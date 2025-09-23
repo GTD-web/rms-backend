@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Employee } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { CalendarResponseDto, ReservationResponseDto } from '../dtos/reservation-response.dto';
 import { ReturnVehicleDto, UpdateReservationStatusDto } from '../dtos/update-reservation.dto';
 import { ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';

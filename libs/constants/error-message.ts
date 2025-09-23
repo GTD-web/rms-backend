@@ -91,6 +91,7 @@ const BusinessErrorMessage = {
         VEHICLE_ALREADY_RETURNED: '이미 반납된 차량입니다.',
         INVALID_MILEAGE: '반납 주행거리는 이전 주행거리보다 작을 수 없습니다.',
         RESOURCE_UNAVAILABLE: '예약 가능한 자원이 아닙니다.',
+        INVALID_DATE_REQUIRED: '시작 날짜와 종료 날짜는 필수입니다.',
     },
     FILE: {
         NOT_FOUND: '요청한 파일을 찾을 수 없습니다.',

@@ -19,11 +19,14 @@ import { FileResponseDto } from '@resource/application/file/dtos/file-response.d
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { MimeType } from '@libs/enums/mime-type.enum';
 import { CreateFileDataDto } from '../dtos/create-filedata.dto';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 
 @ApiTags('0. 파일 - 공통 ')
 @Controller('v1/files')
 @ApiBearerAuth()
 @Roles(Role.USER)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class FileController {
     constructor(private readonly fileService: FileService) {}
 

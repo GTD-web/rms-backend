@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DomainReservationService } from '@src/domain/reservation/reservation.service';
-import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { LessThanOrEqual, Not, In } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
-import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
 import { FCMAdapter } from '../infrastructure/fcm-push.adapter';
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';

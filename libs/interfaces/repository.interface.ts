@@ -25,4 +25,5 @@ export interface IRepository<T extends ObjectLiteral> {
     findAll(repositoryOptions?: IRepositoryOptions<T>): Promise<T[]>;
     update(entityId: string, entity: Partial<T>, repositoryOptions?: IRepositoryOptions<T>): Promise<T>;
     delete(entityId: string, repositoryOptions?: IRepositoryOptions<T>): Promise<void>;
+    count(repositoryOptions: IRepositoryOptions<T>): Promise<number>;
 }

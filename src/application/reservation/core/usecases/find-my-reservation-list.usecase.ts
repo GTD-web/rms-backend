@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { GroupedReservationResponseDto, ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';

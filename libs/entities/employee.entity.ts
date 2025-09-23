@@ -3,8 +3,9 @@ import { EmployeeNotification } from './employee-notification.entity';
 import { ReservationParticipant } from './reservation-participant.entity';
 import { ResourceManager } from './resource-manager.entity';
 import { Role } from '@libs/enums/role-type.enum';
-import { PushSubscriptionDto } from '@src/application/notification/dtos/push-subscription.dto';
-import { ReservationSnapshot } from './reservation-snapshot.entity';
+import { PushSubscriptionDto } from '@src/business.dto.index';
+import { DepartmentEmployee } from './department-employee.entity';
+
 @Entity('employees')
 export class Employee {
     @PrimaryColumn('uuid', {
@@ -48,6 +49,9 @@ export class Employee {
     @Column({ type: 'enum', enum: Role, array: true, default: [Role.USER], comment: '사용자 역할' })
     roles: Role[];
 
+    @Column({ nullable: true, comment: '직원 상태 (재직중, 퇴사)' })
+    status: string;
+
     @OneToMany(() => ReservationParticipant, (participant) => participant.employee)
     participants: ReservationParticipant[];
 
@@ -56,4 +60,7 @@ export class Employee {
 
     @OneToMany(() => ResourceManager, (resourceManager) => resourceManager.employee)
     resourceManagers: ResourceManager[];
+
+    @OneToMany(() => DepartmentEmployee, (departmentEmployee) => departmentEmployee.employee)
+    departmentEmployees: DepartmentEmployee[];
 }

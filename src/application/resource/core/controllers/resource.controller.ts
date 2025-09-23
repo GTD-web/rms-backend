@@ -1,9 +1,11 @@
-import { Controller, Get, Body, Param, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Body, Param, Patch, Query, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { Roles } from '@libs/decorators/role.decorator';
 import { User } from '@libs/decorators/user.decorator';
 import { Role } from '@libs/enums/role-type.enum';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { Employee } from '@libs/entities';
 import {
@@ -22,6 +24,7 @@ import { ResourceService } from '@src/application/resource/core/services/resourc
 @Controller('v1/resources')
 @ApiBearerAuth()
 @Roles(Role.USER)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class UserResourceController {
     constructor(private readonly resourceService: ResourceService) {}
 

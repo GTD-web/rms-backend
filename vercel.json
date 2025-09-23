@@ -15,6 +15,10 @@
     ],
     "crons": [
         {
+            "path": "/api/v1/notifications/cron-job/send-upcoming-notification",
+            "schedule": "* * * * 1-5"
+        },
+        {
             "path": "/api/v1/reservations/cron-job/close",
             "schedule": "1 * * * *"
         },
@@ -31,12 +35,16 @@
             "schedule": "30 * * * *"
         },
         {
-            "path": "/api/v1/files/cron-job/delete-temporary-file",
-            "schedule": "0 0 * * *"
+            "path": "/api/v2/schedule/cron-job/post-processing",
+            "schedule": "0 * * * *"
         },
         {
-            "path": "/api/v1/notifications/cron-job/send-upcoming-notification",
-            "schedule": "* * * * 1-5"
+            "path": "/api/v2/schedule/cron-job/post-processing",
+            "schedule": "30 * * * *"
+        },
+        {
+            "path": "/api/v1/files/cron-job/delete-temporary-file",
+            "schedule": "0 0 * * *"
         },
         {
             "path": "/api/v1/employees/sync",

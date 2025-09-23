@@ -1,8 +1,10 @@
-import { Controller, Get, Body, Param, Patch, Query, ParseArrayPipe } from '@nestjs/common';
+import { Controller, Get, Body, Param, Patch, Query, ParseArrayPipe, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 import { CalendarResponseDto, ReservationResponseDto, UpdateReservationStatusDto } from '@resource/dtos.index';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
@@ -10,8 +12,8 @@ import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { DateUtil } from '@libs/utils/date.util';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { AdminReservationService } from '../services/admin-reservation.service';
 import { ReturnVehicleDto } from '../dtos/update-reservation.dto';
 import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
@@ -20,6 +22,7 @@ import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
 @Controller('v1/admin/reservations')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class AdminReservationController {
     constructor(private readonly adminReservationService: AdminReservationService) {}
 

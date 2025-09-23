@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Delete, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Patch, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
@@ -17,6 +19,7 @@ import {
 @Controller('v1/reservations')
 @ApiBearerAuth()
 @Roles(Role.USER)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class UserReservationSnapshotController {
     constructor(private readonly snapshotService: SnapshotService) {}
 

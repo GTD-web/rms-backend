@@ -61,9 +61,6 @@ export abstract class BaseRepository<T extends ObjectLiteral> implements IReposi
             order: repositoryOptions?.order,
             withDeleted: repositoryOptions?.withDeleted,
         });
-        if (!updated) {
-            throw new NotFoundException(`${this.repository.metadata.name} Entity with id ${entityId} not found`);
-        }
         return updated;
     }
 
@@ -72,5 +69,20 @@ export abstract class BaseRepository<T extends ObjectLiteral> implements IReposi
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
             : this.repository;
         await repository.delete(entityId);
+    }
+
+    async count(repositoryOptions: IRepositoryOptions<T>): Promise<number> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
+            : this.repository;
+        return repository.count({
+            where: repositoryOptions?.where,
+            relations: repositoryOptions?.relations,
+            select: repositoryOptions?.select,
+            order: repositoryOptions?.order,
+            skip: repositoryOptions?.skip,
+            take: repositoryOptions?.take,
+            withDeleted: repositoryOptions?.withDeleted,
+        });
     }
 }

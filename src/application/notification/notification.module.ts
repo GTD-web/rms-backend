@@ -24,7 +24,7 @@ import {
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 import { FIREBASE_CONFIG } from '@libs/configs/env.config';
-import { CronNotificationController } from './controllers/cron.notification.controller';
+// import { CronNotificationController } from './controllers/cron.notification.controller';
 import { CronNotificationService } from './services/cron-notification.service';
 import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
 import { AdminNotificationController } from './controllers/admin.notification.controller';
@@ -56,7 +56,7 @@ import { AdminNotificationController } from './controllers/admin.notification.co
         CronSendUpcomingNotificationUsecase,
         CreateReminderNotificationUsecase,
     ],
-    controllers: [NotificationController, CronNotificationController, AdminNotificationController],
+    controllers: [NotificationController, AdminNotificationController],
     exports: [NotificationService],
 })
 export class NotificationModule {}

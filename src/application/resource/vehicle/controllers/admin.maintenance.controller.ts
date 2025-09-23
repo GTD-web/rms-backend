@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Patch, Query, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { CreateMaintenanceDto } from '../dtos/create-vehicle-info.dto';
@@ -8,14 +8,17 @@ import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { MaintenanceService } from '@src/application/resource/vehicle/services/maintenance.service';
 
 @ApiTags('4. 차량 정비 이력 - 관리자 ')
 @Controller('v1/admin/maintenances')
 @ApiBearerAuth()
 @Roles(Role.SYSTEM_ADMIN)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class AdminMaintenanceController {
     constructor(private readonly maintenanceService: MaintenanceService) {}
 

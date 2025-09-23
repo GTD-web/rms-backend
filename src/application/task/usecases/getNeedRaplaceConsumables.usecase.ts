@@ -49,7 +49,7 @@ export class GetNeedRaplaceConsumablesUsecase {
                                 notificationType: NotificationType.RESOURCE_CONSUMABLE_DELAYED_REPLACING,
                                 notificationData: Raw(
                                     (alias) =>
-                                        `${alias} ->> 'resourceId' = '${resource.resourceId}' AND ${alias} ->> 'consumableName' = '${consumable.name}'`,
+                                        `${alias} -> 'resource' ->> 'resourceId' = '${resource.resourceId}' AND ${alias} -> 'resource' -> 'vehicleInfo' -> 'consumable'  ->> 'consumableName' = '${consumable.name}'`,
                                 ),
                                 createdAt: MoreThan(DateUtil.date(latestMaintenance.date).format('YYYY-MM-DD HH:mm')),
                             },

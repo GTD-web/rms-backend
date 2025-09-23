@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { Notification } from '@libs/entities/notification.entity';
 import { BaseRepository } from '@libs/repositories/base.repository';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
@@ -27,5 +27,16 @@ export class DomainNotificationRepository extends BaseRepository<Notification> {
             take: repositoryOptions?.take,
             withDeleted: repositoryOptions?.withDeleted,
         });
+    }
+
+    async bulkUpdate(
+        entityIds: string[],
+        entityData: Partial<Notification>,
+        repositoryOptions?: IRepositoryOptions<Notification>,
+    ): Promise<UpdateResult> {
+        const repository = repositoryOptions?.queryRunner
+            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
+            : this.repository;
+        return await repository.update(entityIds, entityData);
     }
 }

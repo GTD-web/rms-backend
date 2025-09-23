@@ -55,6 +55,7 @@ export class GetTaskListUsecase {
                     },
                 },
             });
+
             for (const resource of resources) {
                 for (const consumable of resource.vehicleInfo?.consumables || []) {
                     const latestMaintenance = consumable.maintenances[0] || null;

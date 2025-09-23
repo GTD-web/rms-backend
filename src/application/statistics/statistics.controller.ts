@@ -1,7 +1,9 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
 import { DateUtil } from '@libs/utils/date.util';
 import { Public } from '@libs/decorators/public.decorator';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 
 import { StatisticsService } from './statistics.service';
 import {
@@ -19,6 +21,7 @@ import {
 @ApiTags(`6. 통계 - 관리자 페이지`)
 @Controller('v1/statistics')
 // @Roles(Role.SYSTEM_ADMIN)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class StatisticsController {
     constructor(private readonly statisticsService: StatisticsService) {}
 

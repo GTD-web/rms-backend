@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { GetTaskListUsecase } from '../usecases/getTaskList.usecase';
 import { GetTaskStatusUsecase } from '../usecases/getTaskStatus.usecase';
 import { Employee } from '@libs/entities';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { GetDelayedReturnVehicleUsecase } from '../usecases/getDelayedReturnVehicles.usecase';
 import { GetNeedRaplaceConsumablesUsecase } from '../usecases/getNeedRaplaceConsumables.usecase';
 

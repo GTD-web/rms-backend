@@ -3,6 +3,7 @@ import { Resource } from './resource.entity';
 import { ReservationParticipant } from './reservation-participant.entity';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ReservationVehicle } from './reservation-vehicle.entity';
+import { ScheduleRelation } from './schedule-relations.entity';
 
 @Entity('reservations')
 export class Reservation {
@@ -53,4 +54,7 @@ export class Reservation {
 
     @OneToMany(() => ReservationVehicle, (reservationVehicle) => reservationVehicle.reservation)
     reservationVehicles: ReservationVehicle[];
+
+    @OneToMany(() => ScheduleRelation, (relation) => relation.reservation)
+    scheduleRelations: ScheduleRelation[];
 }

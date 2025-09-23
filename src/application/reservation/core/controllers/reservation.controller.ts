@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Query, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '@libs/decorators/role.decorator';
 import { Role } from '@libs/enums/role-type.enum';
@@ -7,6 +7,8 @@ import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
 import { ResourceType } from '@libs/enums/resource-type.enum';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 import {
     ReservationWithRelationsResponseDto,
     GroupedReservationResponseDto,
@@ -14,8 +16,8 @@ import {
     CreateReservationResponseDto,
     CalendarResponseDto,
 } from '../dtos/reservation-response.dto';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { UpdateReservationDto, ReturnVehicleDto, UpdateReservationTimeDto } from '../dtos/update-reservation.dto';
 import { ReservationService } from '../services/reservation.service';
 import { ReservationResponseDto } from '../dtos/reservation-response.dto';
@@ -25,6 +27,7 @@ import { ReservationQueryDto } from '../dtos/reservaion-query.dto';
 @Controller('v1/reservations')
 @ApiBearerAuth()
 @Roles(Role.USER)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class UserReservationController {
     constructor(private readonly reservationService: ReservationService) {}
 
@@ -225,26 +228,26 @@ export class UserReservationController {
         return this.reservationService.returnVehicle(user, reservationId, returnDto);
     }
 
-    @Get(':reservationId/check/extendable')
-    @ApiOperation({ summary: '예약 시간 연장 가능 여부 조회' })
-    @ApiDataResponse({
-        description: '예약 시간 연장 가능 여부 조회 성공',
-    })
-    async checkExtendable(@User() user: Employee, @Param('reservationId') reservationId: string): Promise<boolean> {
-        return this.reservationService.checkAvailablityToExtendReservation(user.employeeId, reservationId);
-    }
+    // @Get(':reservationId/check/extendable')
+    // @ApiOperation({ summary: '예약 시간 연장 가능 여부 조회' })
+    // @ApiDataResponse({
+    //     description: '예약 시간 연장 가능 여부 조회 성공',
+    // })
+    // async checkExtendable(@User() user: Employee, @Param('reservationId') reservationId: string): Promise<boolean> {
+    //     return this.reservationService.checkAvailablityToExtendReservation(user.employeeId, reservationId);
+    // }
 
-    @Patch(':reservationId/extend')
-    @ApiOperation({ summary: '예약 시간 연장' })
-    @ApiDataResponse({
-        description: '예약 시간 연장 성공',
-        type: ReservationResponseDto,
-    })
-    async extendReservation(
-        @User() user: Employee,
-        @Param('reservationId') reservationId: string,
-        @Body() extendDto: UpdateReservationTimeDto,
-    ): Promise<ReservationResponseDto> {
-        return this.reservationService.extendReservation(user.employeeId, reservationId, extendDto);
-    }
+    // @Patch(':reservationId/extend')
+    // @ApiOperation({ summary: '예약 시간 연장' })
+    // @ApiDataResponse({
+    //     description: '예약 시간 연장 성공',
+    //     type: ReservationResponseDto,
+    // })
+    // async extendReservation(
+    //     @User() user: Employee,
+    //     @Param('reservationId') reservationId: string,
+    //     @Body() extendDto: UpdateReservationTimeDto,
+    // ): Promise<ReservationResponseDto> {
+    //     return this.reservationService.extendReservation(user.employeeId, reservationId, extendDto);
+    // }
 }

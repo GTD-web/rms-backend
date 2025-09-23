@@ -9,7 +9,7 @@ import {
     ApiUnauthorizedResponse,
     getSchemaPath,
 } from '@nestjs/swagger';
-import { PaginationData, PaginationMetaDto } from '../dtos/paginate-response.dto';
+import { PaginationData, PaginationMetaDto } from '../dtos/pagination-response.dto';
 import { ErrorResponseDto, BaseResponseDto } from '../dtos/response.dto';
 import * as dto from '../dtos/response.dto';
 

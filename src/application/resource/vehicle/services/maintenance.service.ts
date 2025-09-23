@@ -3,7 +3,7 @@ import { CreateMaintenanceDto } from '../dtos/create-vehicle-info.dto';
 import { UpdateMaintenanceDto } from '../dtos/update-vehicle-info.dto';
 import { MaintenanceResponseDto } from '../dtos/vehicle-response.dto';
 import { Employee } from '@libs/entities';
-import { PaginationData } from '@libs/dtos/paginate-response.dto';
+import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { SaveMaintenanceUsecase } from '../usecases/maintenance/saveMaintenance.usecase';
 import { UpdateMaintenanceUsecase } from '../usecases/maintenance/updateMaintenance.usecase';
 import { DeleteMaintenanceUsecase } from '../usecases/maintenance/deleteMaintenance.usecase';

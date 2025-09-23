@@ -2,7 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsDateString, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { PaginationQueryDto } from '@libs/dtos/paginate-query.dto';
+import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 
 export class ResourceQueryDto extends PaginationQueryDto {
     @ApiPropertyOptional({
@@ -17,6 +17,7 @@ export class ResourceQueryDto extends PaginationQueryDto {
         description: '리소스 그룹 ID',
         example: 'ca33f67a-a9c2-4a29-b266-3d82f9aa7fe4',
     })
+    @IsOptional()
     @IsString()
     resourceGroupId: string;
 

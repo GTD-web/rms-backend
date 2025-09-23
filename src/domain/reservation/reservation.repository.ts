@@ -12,18 +12,4 @@ export class DomainReservationRepository extends BaseRepository<Reservation> {
     ) {
         super(repository);
     }
-
-    async count(repositoryOptions: IRepositoryOptions<Reservation>): Promise<number> {
-        const repository = repositoryOptions?.queryRunner
-            ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)
-            : this.repository;
-
-        return await repository.count({
-            where: repositoryOptions?.where,
-            relations: repositoryOptions?.relations,
-            select: repositoryOptions?.select,
-            order: repositoryOptions?.order,
-            withDeleted: repositoryOptions?.withDeleted,
-        });
-    }
 }

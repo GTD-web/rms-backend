@@ -18,14 +18,15 @@ export class AuthService {
 
     async login(loginDto: LoginDto) {
         // 시스템 관리자 로그인 시도
-        const systemAdminResult = await this.checkSystemAdminUsecase.execute(loginDto.email, loginDto.password);
+        // const systemAdminResult = await this.checkSystemAdminUsecase.execute(loginDto.email, loginDto.password);
 
-        if (systemAdminResult.success) {
-            // 시스템 관리자인 경우 토큰 발급
-            return await this.getTokenUsecase.execute(systemAdminResult.employee);
-        }
+        // if (systemAdminResult.success) {
+        //     // 시스템 관리자인 경우 토큰 발급
+        //     return await this.getTokenUsecase.execute(systemAdminResult.employee);
+        // }
 
         const ssoResponse = await this.ssoLoginUsecase.execute(loginDto.email, loginDto.password);
+        console.log('ssoResponse', ssoResponse);
         const updatedEmployee = await this.updateAuthInfoUsecase.execute(ssoResponse);
 
         return {

@@ -13,4 +13,9 @@ export class DomainNotificationService extends BaseService<Notification> {
     async count(repositoryOptions: IRepositoryOptions<Notification>): Promise<number> {
         return await this.notificationRepository.count(repositoryOptions);
     }
+
+    async setSentTrue(notificationIds: string[]): Promise<boolean> {
+        const result = await this.notificationRepository.bulkUpdate(notificationIds, { isSent: true });
+        return result.affected === notificationIds.length;
+    }
 }

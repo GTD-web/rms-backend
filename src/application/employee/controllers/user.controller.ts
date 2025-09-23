@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { User } from '@libs/decorators/user.decorator';
@@ -10,11 +10,14 @@ import { ChangePasswordDto } from '@resource/application/employee/dtos/change-pa
 import { UpdateNotificationSettingsDto } from '@resource/application/employee/dtos/notification-settings.dto';
 import { EmployeeService } from '../employee.service';
 import { Employee } from '@libs/entities';
+import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
+import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 
 @ApiTags('5. 유저 ')
 @Controller('v1/users')
 @ApiBearerAuth()
 @Roles(Role.USER)
+@UseInterceptors(ResponseInterceptor, ErrorInterceptor)
 export class UserUserController {
     constructor(private readonly employeeService: EmployeeService) {}
 

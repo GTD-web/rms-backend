@@ -14,10 +14,6 @@ export class DomainConsumableRepository extends BaseRepository<Consumable> {
         super(repository);
     }
 
-    async count(repositoryOptions?: IRepositoryOptions<Consumable>) {
-        return this.repository.count(repositoryOptions);
-    }
-
     async bulkCreate(consumables: Consumable[], repositoryOptions?: IRepositoryOptions<Consumable>) {
         const repository = repositoryOptions?.queryRunner
             ? repositoryOptions.queryRunner.manager.getRepository(this.repository.target)

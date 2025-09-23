@@ -58,7 +58,9 @@ export class FindReservationDetailUsecase {
 
         const notifications = await this.notificationService.findAll({
             where: {
-                notificationData: Raw((alias) => `${alias} ->> 'reservationId' = '${reservation.reservationId}'`),
+                notificationData: Raw(
+                    (alias) => `${alias} -> 'reservation' ->> 'reservationId' = '${reservation.reservationId}'`,
+                ),
                 employees: {
                     employeeId: user.employeeId,
                     isRead: false,
