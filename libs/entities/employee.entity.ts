@@ -4,6 +4,7 @@ import { ReservationParticipant } from './reservation-participant.entity';
 import { ResourceManager } from './resource-manager.entity';
 import { Role } from '@libs/enums/role-type.enum';
 import { PushSubscriptionDto } from '@src/business.dto.index';
+import { DepartmentEmployee } from './department-employee.entity';
 
 @Entity('employees')
 export class Employee {
@@ -59,4 +60,7 @@ export class Employee {
 
     @OneToMany(() => ResourceManager, (resourceManager) => resourceManager.employee)
     resourceManagers: ResourceManager[];
+
+    @OneToMany(() => DepartmentEmployee, (departmentEmployee) => departmentEmployee.employee)
+    departmentEmployees: DepartmentEmployee[];
 }

@@ -766,6 +766,7 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Department = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const department_employee_entity_1 = __webpack_require__(/*! ./department-employee.entity */ "./libs/entities/department-employee.entity.ts");
 let Department = class Department {
 };
 exports.Department = Department;
@@ -802,6 +803,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => Department, (department) => department.parentDepartment),
     __metadata("design:type", Array)
 ], Department.prototype, "childDepartments", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => department_employee_entity_1.DepartmentEmployee, (departmentEmployee) => departmentEmployee.department),
+    __metadata("design:type", Array)
+], Department.prototype, "departmentEmployees", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({ comment: '생성일' }),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
@@ -900,6 +905,7 @@ const employee_notification_entity_1 = __webpack_require__(/*! ./employee-notifi
 const reservation_participant_entity_1 = __webpack_require__(/*! ./reservation-participant.entity */ "./libs/entities/reservation-participant.entity.ts");
 const resource_manager_entity_1 = __webpack_require__(/*! ./resource-manager.entity */ "./libs/entities/resource-manager.entity.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
+const department_employee_entity_1 = __webpack_require__(/*! ./department-employee.entity */ "./libs/entities/department-employee.entity.ts");
 let Employee = class Employee {
 };
 exports.Employee = Employee;
@@ -973,6 +979,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => resource_manager_entity_1.ResourceManager, (resourceManager) => resourceManager.employee),
     __metadata("design:type", Array)
 ], Employee.prototype, "resourceManagers", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => department_employee_entity_1.DepartmentEmployee, (departmentEmployee) => departmentEmployee.employee),
+    __metadata("design:type", Array)
+], Employee.prototype, "departmentEmployees", void 0);
 exports.Employee = Employee = __decorate([
     (0, typeorm_1.Entity)('employees')
 ], Employee);
@@ -2708,6 +2718,7 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const schedule_participant_entity_1 = __webpack_require__(/*! ./schedule-participant.entity */ "./libs/entities/schedule-participant.entity.ts");
 const schedule_relations_entity_1 = __webpack_require__(/*! ./schedule-relations.entity */ "./libs/entities/schedule-relations.entity.ts");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
+const schedule_department_entity_1 = __webpack_require__(/*! ./schedule-department.entity */ "./libs/entities/schedule-department.entity.ts");
 let Schedule = class Schedule {
 };
 exports.Schedule = Schedule;
@@ -2789,6 +2800,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => schedule_relations_entity_1.ScheduleRelation, (relation) => relation.schedule),
     __metadata("design:type", Array)
 ], Schedule.prototype, "relations", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => schedule_department_entity_1.ScheduleDepartment, (department) => department.schedule),
+    __metadata("design:type", Array)
+], Schedule.prototype, "departments", void 0);
 exports.Schedule = Schedule = __decorate([
     (0, typeorm_1.Entity)('schedules')
 ], Schedule);
@@ -4217,7 +4232,10 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         this.employeeService = employeeService;
     }
     async validate(payload) {
-        const employee = await this.employeeService.findByEmployeeNumber(payload.employeeNumber);
+        const employee = await this.employeeService.findOne({
+            where: { employeeNumber: payload.employeeNumber },
+            relations: ['departmentEmployees', 'departmentEmployees.department'],
+        });
         if (!employee || employee.employeeNumber !== payload.employeeNumber) {
             throw new common_1.UnauthorizedException();
         }
@@ -20866,6 +20884,7 @@ __exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/schedul
 __exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/resource-schedule-query.dto */ "./src/business/schedule-management/dtos/resource-schedule-query.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/my-schedule-query.dto */ "./src/business/schedule-management/dtos/my-schedule-query.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/schedule-management/dtos/my-schedule-statistics-query.dto */ "./src/business/schedule-management/dtos/my-schedule-statistics-query.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./business/employee-management/dtos/department-response.dto */ "./src/business/employee-management/dtos/department-response.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/employee-management/dtos/create-employee.dto */ "./src/business/employee-management/dtos/create-employee.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/employee-management/dtos/update-employee.dto */ "./src/business/employee-management/dtos/update-employee.dto.ts"), exports);
 __exportStar(__webpack_require__(/*! ./business/employee-management/dtos/employee-response.dto */ "./src/business/employee-management/dtos/employee-response.dto.ts"), exports);
@@ -28752,6 +28771,18 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], ScheduleCalendarQueryDto.prototype, "employeeIds", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '프로젝트 ID 배열',
+        example: ['proj-001', 'proj-002', 'proj-003'],
+        required: false,
+        type: [String],
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], ScheduleCalendarQueryDto.prototype, "projectIds", void 0);
 
 
 /***/ }),
@@ -30689,7 +30720,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             const employees = await this.employeeContextService.복수_직원정보를_조회한다(query.employeeIds);
             selectedEmployees = employees;
         }
-        const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(query.date, query.category, selectedEmployees.length > 0 ? selectedEmployees : undefined);
+        const scheduleIds = await this.scheduleQueryContextService.캘린더용_일정을_조회한다(query.date, query.category, selectedEmployees.length > 0 ? selectedEmployees : undefined, query.projectIds || undefined);
         if (scheduleIds.length === 0) {
             return { schedules: [] };
         }
@@ -32994,7 +33025,10 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
         };
     }
     async 복수_직원정보를_조회한다(employeeIds) {
-        return await this.domainEmployeeService.findByEmployeeIds(employeeIds);
+        return await this.domainEmployeeService.findAll({
+            where: { employeeId: (0, typeorm_1.In)(employeeIds) },
+            relations: ['departmentEmployees', 'departmentEmployees.department'],
+        });
     }
     async 비밀번호를_확인한다(employeeId, password) {
         const employee = await this.domainEmployeeService.findByEmployeeId(employeeId);
@@ -39486,7 +39520,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         }
         return results;
     }
-    async 캘린더용_일정을_조회한다(date, category, employees) {
+    async 캘린더용_일정을_조회한다(date, category, employees, projectIds) {
         const startDateOfMonth = new Date(`${date}-01`);
         const endDateOfMonth = new Date(`${date}-01`);
         endDateOfMonth.setMonth(endDateOfMonth.getMonth() + 1);
@@ -39500,7 +39534,8 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             for (const employee of employeeArray) {
                 const myParticipants = await this.domainScheduleParticipantService.findByEmployeeIdAndScheduleIds(employee.employeeId, scheduleIds);
                 const myScheduleIds = myParticipants.map((participant) => participant.scheduleId);
-                const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, startDateOfMonth, endDateOfMonth);
+                const department = employee.departmentEmployees[0].department;
+                const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(department.id, startDateOfMonth, endDateOfMonth);
                 myScheduleIds.forEach((id) => allEmployeeScheduleIds.add(id));
                 belongingScheduleIds.forEach((id) => allEmployeeScheduleIds.add(id));
             }
@@ -39516,7 +39551,13 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                     scheduleIds = [...pureScheduleIds, ...schedulesWithoutRelation];
                     break;
                 case 'PROJECT':
-                    const projectRelations = scheduleRelations.filter((relation) => relation.projectId);
+                    const projectRelations = scheduleRelations.filter((relation) => {
+                        if (!relation.projectId)
+                            return false;
+                        if (!projectIds || projectIds.length === 0)
+                            return true;
+                        return projectIds.includes(relation.projectId);
+                    });
                     scheduleIds = projectRelations.map((r) => r.scheduleId);
                     break;
                 case 'RESOURCE':
@@ -39539,11 +39580,11 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         }
         return [...new Set(orderedScheduleIds)];
     }
-    async 직원의_소속_일정ID들을_조회한다(department, fromDate, endDate) {
+    async 직원의_소속_일정ID들을_조회한다(departmentId, fromDate, endDate) {
         const conditions = [
             {
                 scheduleType: schedule_type_enum_1.ScheduleType.DEPARTMENT,
-                scheduleDepartment: department,
+                departments: { departmentId: departmentId },
                 deletedAt: (0, typeorm_1.IsNull)(),
                 ...(fromDate && { startDate: (0, typeorm_1.MoreThanOrEqual)(fromDate) }),
                 ...(endDate && { endDate: (0, typeorm_1.LessThanOrEqual)(endDate) }),
@@ -39557,6 +39598,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         ];
         const schedules = await this.domainScheduleService.findAll({
             where: conditions,
+            relations: ['departments'],
         });
         return schedules.map((p) => p.scheduleId);
     }
@@ -39879,7 +39921,8 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         now.setHours(0, 0, 0, 0);
         let scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, query.role, now);
         if (query.role !== reservation_type_enum_1.ParticipantsType.RESERVER) {
-            const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(employee.department, now);
+            const department = employee.departmentEmployees[0].department;
+            const belongingScheduleIds = await this.직원의_소속_일정ID들을_조회한다(department.id, now);
             scheduleIds = Array.from(new Set([...scheduleIds, ...belongingScheduleIds]));
         }
         if (query.category && query.category !== 'ALL') {
@@ -41851,7 +41894,9 @@ let DomainEmployeeService = class DomainEmployeeService extends base_service_1.B
         return employee;
     }
     async findByEmployeeNumber(employeeNumber) {
-        const employee = await this.employeeRepository.findOne({ where: { employeeNumber } });
+        const employee = await this.employeeRepository.findOne({
+            where: { employeeNumber },
+        });
         return employee;
     }
 };

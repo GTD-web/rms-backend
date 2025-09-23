@@ -125,6 +125,7 @@ export class ScheduleManagementService {
             query.date,
             query.category,
             selectedEmployees.length > 0 ? selectedEmployees : undefined,
+            query.projectIds || undefined,
         );
 
         if (scheduleIds.length === 0) {

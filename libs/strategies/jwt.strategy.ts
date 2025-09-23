@@ -18,7 +18,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any) {
-        const employee = await this.employeeService.findByEmployeeNumber(payload.employeeNumber);
+        const employee = await this.employeeService.findOne({
+            where: { employeeNumber: payload.employeeNumber },
+            relations: ['departmentEmployees', 'departmentEmployees.department'],
+        });
         if (!employee || employee.employeeNumber !== payload.employeeNumber) {
             throw new UnauthorizedException();
         }

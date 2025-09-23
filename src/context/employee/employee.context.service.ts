@@ -136,7 +136,10 @@ export class EmployeeContextService {
      * 복수 직원 ID들로 직원 정보를 조회한다
      */
     async 복수_직원정보를_조회한다(employeeIds: string[]): Promise<Employee[]> {
-        return await this.domainEmployeeService.findByEmployeeIds(employeeIds);
+        return await this.domainEmployeeService.findAll({
+            where: { employeeId: In(employeeIds) },
+            relations: ['departmentEmployees', 'departmentEmployees.department'],
+        });
     }
 
     /**

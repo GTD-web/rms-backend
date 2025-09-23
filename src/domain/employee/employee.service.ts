@@ -28,7 +28,9 @@ export class DomainEmployeeService extends BaseService<Employee> {
     }
 
     async findByEmployeeNumber(employeeNumber: string): Promise<Employee> {
-        const employee = await this.employeeRepository.findOne({ where: { employeeNumber } });
+        const employee = await this.employeeRepository.findOne({
+            where: { employeeNumber },
+        });
         return employee;
     }
 }

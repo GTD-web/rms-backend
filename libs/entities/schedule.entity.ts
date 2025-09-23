@@ -10,6 +10,7 @@ import {
 import { ScheduleParticipant } from './schedule-participant.entity';
 import { ScheduleRelation } from './schedule-relations.entity';
 import { ScheduleType, ScheduleStatus } from '@libs/enums/schedule-type.enum';
+import { ScheduleDepartment } from './schedule-department.entity';
 
 @Entity('schedules')
 export class Schedule {
@@ -73,4 +74,7 @@ export class Schedule {
 
     @OneToMany(() => ScheduleRelation, (relation) => relation.schedule)
     relations: ScheduleRelation[];
+
+    @OneToMany(() => ScheduleDepartment, (department) => department.schedule)
+    departments: ScheduleDepartment[];
 }

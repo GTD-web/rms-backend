@@ -53,4 +53,15 @@ export class ScheduleCalendarQueryDto {
     @IsArray()
     @IsString({ each: true })
     employeeIds?: string[];
+
+    @ApiProperty({
+        description: '프로젝트 ID 배열',
+        example: ['proj-001', 'proj-002', 'proj-003'],
+        required: false,
+        type: [String],
+    })
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    projectIds?: string[];
 }

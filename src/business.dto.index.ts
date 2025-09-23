@@ -51,6 +51,9 @@ export * from './business/schedule-management/dtos/my-schedule-statistics-query.
 // 📋 EMPLOYEE MANAGEMENT DTOs
 // ============================================================================
 
+// 📅 Department Query DTOs
+export * from './business/employee-management/dtos/department-response.dto';
+
 // 👤 Employee CRUD DTOs
 export * from './business/employee-management/dtos/create-employee.dto';
 export * from './business/employee-management/dtos/update-employee.dto';

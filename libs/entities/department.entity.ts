@@ -8,6 +8,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
+import { DepartmentEmployee } from './department-employee.entity';
 
 @Entity('departments')
 export class Department {
@@ -37,6 +38,9 @@ export class Department {
 
     @OneToMany(() => Department, (department) => department.parentDepartment)
     childDepartments: Department[];
+
+    @OneToMany(() => DepartmentEmployee, (departmentEmployee) => departmentEmployee.department)
+    departmentEmployees: DepartmentEmployee[];
 
     @CreateDateColumn({ comment: '생성일' })
     createdAt: Date;
