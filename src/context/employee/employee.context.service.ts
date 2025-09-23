@@ -233,6 +233,152 @@ export class EmployeeContextService {
     }
 
     /**
+     * 모든 부서 목록을 조회합니다
+     */
+    async 모든_부서를_조회한다(): Promise<any[]> {
+        try {
+            const departments = await this.domainDepartmentService.findAll();
+
+            return departments.map((dept) => ({
+                id: dept.id,
+                departmentName: dept.departmentName,
+                departmentCode: dept.departmentCode,
+                type: dept.type,
+                parentDepartmentId: dept.parentDepartmentId,
+                order: dept.order,
+                createdAt: dept.createdAt,
+                updatedAt: dept.updatedAt,
+            }));
+        } catch (error) {
+            this.logger.error('부서 목록 조회 실패:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 하위 부서 목록만 조회합니다 (부모 부서가 있는 부서들)
+     */
+    async 하위_부서_목록을_조회한다(): Promise<any[]> {
+        try {
+            // parentDepartmentId가 null이 아닌 부서들만 조회
+            const departments = await this.domainDepartmentService.findAll({
+                where: {
+                    parentDepartmentId: Not(IsNull()),
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+
+            this.logger.log(`하위 부서 목록 조회 완료: ${departments.length}개 부서`);
+
+            return departments.map((dept) => ({
+                id: dept.id,
+                departmentName: dept.departmentName,
+                departmentCode: dept.departmentCode,
+                type: dept.type,
+                parentDepartmentId: dept.parentDepartmentId,
+                order: dept.order,
+                createdAt: dept.createdAt,
+                updatedAt: dept.updatedAt,
+            }));
+        } catch (error) {
+            this.logger.error('하위 부서 목록 조회 실패:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 루트 부서 목록만 조회합니다 (부모 부서가 없는 부서들)
+     */
+    async 루트_부서_목록을_조회한다(): Promise<any[]> {
+        try {
+            // parentDepartmentId가 null인 부서들만 조회
+            const departments = await this.domainDepartmentService.findAll({
+                where: {
+                    parentDepartmentId: IsNull(),
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+
+            this.logger.log(`루트 부서 목록 조회 완료: ${departments.length}개 부서`);
+
+            return departments.map((dept) => ({
+                id: dept.id,
+                departmentName: dept.departmentName,
+                departmentCode: dept.departmentCode,
+                type: dept.type,
+                parentDepartmentId: dept.parentDepartmentId,
+                order: dept.order,
+                createdAt: dept.createdAt,
+                updatedAt: dept.updatedAt,
+            }));
+        } catch (error) {
+            this.logger.error('루트 부서 목록 조회 실패:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 부서 계층구조를 트리 형태로 조회합니다
+     */
+    async 부서_계층구조를_조회한다(): Promise<any[]> {
+        try {
+            // 모든 부서 조회
+            const allDepartments = await this.모든_부서를_조회한다();
+
+            // 루트 부서들 찾기
+            const rootDepartments = allDepartments.filter((dept) => !dept.parentDepartmentId);
+
+            // 각 루트 부서에 대해 하위 부서들을 재귀적으로 연결
+            const buildHierarchy = (parentDept: any): any => {
+                const children = allDepartments
+                    .filter((dept) => dept.parentDepartmentId === parentDept.id)
+                    .map((child) => buildHierarchy(child))
+                    .sort((a, b) => a.order - b.order);
+
+                return {
+                    ...parentDept,
+                    childDepartments: children,
+                    childDepartmentCount: children.length,
+                };
+            };
+
+            const hierarchy = rootDepartments.map((root) => buildHierarchy(root)).sort((a, b) => a.order - b.order);
+
+            this.logger.log(
+                `부서 계층구조 조회 완료: 루트 ${rootDepartments.length}개, 전체 ${allDepartments.length}개 부서`,
+            );
+
+            return hierarchy;
+        } catch (error) {
+            this.logger.error('부서 계층구조 조회 실패:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 직원 목록을 부서별로 그룹핑한다 (데이터 가공만, 조회 안함)
+     */
+    private 부서별로_그룹핑한다(employees: any[]): EmplyeesByDepartmentResponseDto[] {
+        const departments = new Map<string, EmployeeResponseDto[]>();
+
+        employees.forEach((employee) => {
+            if (!departments.has(employee.department)) {
+                departments.set(employee.department, []);
+            }
+            departments.get(employee.department)?.push(employee);
+        });
+
+        return Array.from(departments.entries()).map(([department, employees]) => ({
+            department,
+            employees,
+        }));
+    }
+
+    /**
      * 외부 시스템에서 직원 정보를 조회한다
      */
     async 직원_정보를_동기화한다(authorization: string): Promise<EmplyeesByDepartmentResponseDto[]> {
@@ -414,6 +560,23 @@ export class EmployeeContextService {
      * 각 부서의 직원 배치 정보를 저장합니다
      */
     private async 직원_배치_정보를_저장한다(departments: any[]): Promise<void> {
+        try {
+            // 기존 부서-직원 관계 데이터 모두 삭제 (동기화를 위해)
+            this.logger.log('기존 부서-직원 관계 데이터 삭제 시작...');
+
+            // 모든 기존 관계 데이터를 실제로 삭제
+            const existingRelations = await this.domainDepartmentEmployeeService.findAll();
+
+            for (const relation of existingRelations) {
+                await this.domainDepartmentEmployeeService.delete(relation.id);
+            }
+
+            this.logger.log(`기존 부서-직원 관계 ${existingRelations.length}개 삭제 완료`);
+        } catch (error) {
+            this.logger.error('기존 부서-직원 관계 데이터 삭제 실패:', error);
+            throw error;
+        }
+
         // 모든 부서를 평면적으로 수집
         const allDepartments = this.모든_부서를_평면적으로_수집한다(departments);
 
@@ -505,151 +668,5 @@ export class EmployeeContextService {
                 count++;
             }
         }
-    }
-
-    /**
-     * 모든 부서 목록을 조회합니다
-     */
-    async 모든_부서를_조회한다(): Promise<any[]> {
-        try {
-            const departments = await this.domainDepartmentService.findAll();
-
-            return departments.map((dept) => ({
-                id: dept.id,
-                departmentName: dept.departmentName,
-                departmentCode: dept.departmentCode,
-                type: dept.type,
-                parentDepartmentId: dept.parentDepartmentId,
-                order: dept.order,
-                createdAt: dept.createdAt,
-                updatedAt: dept.updatedAt,
-            }));
-        } catch (error) {
-            this.logger.error('부서 목록 조회 실패:', error);
-            return [];
-        }
-    }
-
-    /**
-     * 하위 부서 목록만 조회합니다 (부모 부서가 있는 부서들)
-     */
-    async 하위_부서_목록을_조회한다(): Promise<any[]> {
-        try {
-            // parentDepartmentId가 null이 아닌 부서들만 조회
-            const departments = await this.domainDepartmentService.findAll({
-                where: {
-                    parentDepartmentId: Not(IsNull()),
-                },
-                order: {
-                    order: 'ASC',
-                },
-            });
-
-            this.logger.log(`하위 부서 목록 조회 완료: ${departments.length}개 부서`);
-
-            return departments.map((dept) => ({
-                id: dept.id,
-                departmentName: dept.departmentName,
-                departmentCode: dept.departmentCode,
-                type: dept.type,
-                parentDepartmentId: dept.parentDepartmentId,
-                order: dept.order,
-                createdAt: dept.createdAt,
-                updatedAt: dept.updatedAt,
-            }));
-        } catch (error) {
-            this.logger.error('하위 부서 목록 조회 실패:', error);
-            return [];
-        }
-    }
-
-    /**
-     * 루트 부서 목록만 조회합니다 (부모 부서가 없는 부서들)
-     */
-    async 루트_부서_목록을_조회한다(): Promise<any[]> {
-        try {
-            // parentDepartmentId가 null인 부서들만 조회
-            const departments = await this.domainDepartmentService.findAll({
-                where: {
-                    parentDepartmentId: IsNull(),
-                },
-                order: {
-                    order: 'ASC',
-                },
-            });
-
-            this.logger.log(`루트 부서 목록 조회 완료: ${departments.length}개 부서`);
-
-            return departments.map((dept) => ({
-                id: dept.id,
-                departmentName: dept.departmentName,
-                departmentCode: dept.departmentCode,
-                type: dept.type,
-                parentDepartmentId: dept.parentDepartmentId,
-                order: dept.order,
-                createdAt: dept.createdAt,
-                updatedAt: dept.updatedAt,
-            }));
-        } catch (error) {
-            this.logger.error('루트 부서 목록 조회 실패:', error);
-            return [];
-        }
-    }
-
-    /**
-     * 부서 계층구조를 트리 형태로 조회합니다
-     */
-    async 부서_계층구조를_조회한다(): Promise<any[]> {
-        try {
-            // 모든 부서 조회
-            const allDepartments = await this.모든_부서를_조회한다();
-
-            // 루트 부서들 찾기
-            const rootDepartments = allDepartments.filter((dept) => !dept.parentDepartmentId);
-
-            // 각 루트 부서에 대해 하위 부서들을 재귀적으로 연결
-            const buildHierarchy = (parentDept: any): any => {
-                const children = allDepartments
-                    .filter((dept) => dept.parentDepartmentId === parentDept.id)
-                    .map((child) => buildHierarchy(child))
-                    .sort((a, b) => a.order - b.order);
-
-                return {
-                    ...parentDept,
-                    childDepartments: children,
-                    childDepartmentCount: children.length,
-                };
-            };
-
-            const hierarchy = rootDepartments.map((root) => buildHierarchy(root)).sort((a, b) => a.order - b.order);
-
-            this.logger.log(
-                `부서 계층구조 조회 완료: 루트 ${rootDepartments.length}개, 전체 ${allDepartments.length}개 부서`,
-            );
-
-            return hierarchy;
-        } catch (error) {
-            this.logger.error('부서 계층구조 조회 실패:', error);
-            return [];
-        }
-    }
-
-    /**
-     * 직원 목록을 부서별로 그룹핑한다 (데이터 가공만, 조회 안함)
-     */
-    private 부서별로_그룹핑한다(employees: any[]): EmplyeesByDepartmentResponseDto[] {
-        const departments = new Map<string, EmployeeResponseDto[]>();
-
-        employees.forEach((employee) => {
-            if (!departments.has(employee.department)) {
-                departments.set(employee.department, []);
-            }
-            departments.get(employee.department)?.push(employee);
-        });
-
-        return Array.from(departments.entries()).map(([department, employees]) => ({
-            department,
-            employees,
-        }));
     }
 }

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateFileLinkTables1748247203494 implements MigrationInterface {
-    name = 'CreateFileLinkTables1748247203494';
+export class CreateFileLinkTables1748247203497 implements MigrationInterface {
+    name = 'CreateFileLinkTables1748247203497';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         // uuid-ossp 확장 활성화 (uuid_generate_v4() 함수 사용을 위해)

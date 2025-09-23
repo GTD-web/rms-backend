@@ -15,18 +15,9 @@ import {
 export class EmployeeManagementService {
     constructor(private readonly employeeContextService: EmployeeContextService) {}
 
-    onModuleInit() {
-        // this.syncSubscription();
-    }
-
     async syncEmployees(authorization: string): Promise<void> {
         await this.employeeContextService.전체_조직_정보를_동기화한다(authorization);
-        // await this.employeeContextService.직원_정보를_동기화한다(authorization);
-        // await this.syncSubscription();
-    }
-
-    async syncSubscription(): Promise<void> {
-        await this.employeeContextService.구독정보를_동기화한다();
+        // await this.employeeContextService.구독정보를_동기화한다();
     }
 
     async findResourceManagers(): Promise<EmplyeesByDepartmentResponseDto[]> {

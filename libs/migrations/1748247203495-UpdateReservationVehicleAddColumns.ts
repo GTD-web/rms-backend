@@ -4,10 +4,19 @@ export class UpdateReservationVehicleAddColumns1748247203495 implements Migratio
     name = 'UpdateReservationVehicleAddColumns1748247203495';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        // reservation_vehicles 테이블에 새 컬럼들 추가
         await queryRunner.query(`
             ALTER TABLE "reservation_vehicles"
             ADD COLUMN IF NOT EXISTS "location" jsonb,
-            ADD COLUMN IF NOT EXISTS "returnedBy" uuid
+            ADD COLUMN IF NOT EXISTS "returnedBy" uuid,
+            ADD COLUMN IF NOT EXISTS "remarks" varchar
+        `);
+
+        // 컬럼 코멘트 추가
+        await queryRunner.query(`
+            COMMENT ON COLUMN "reservation_vehicles"."location" IS '위치 정보';
+            COMMENT ON COLUMN "reservation_vehicles"."returnedBy" IS '반납 처리자';
+            COMMENT ON COLUMN "reservation_vehicles"."remarks" IS '비고';
         `);
 
         // FK to employees(returnedBy)
@@ -63,7 +72,8 @@ export class UpdateReservationVehicleAddColumns1748247203495 implements Migratio
         await queryRunner.query(`
             ALTER TABLE "reservation_vehicles"
             DROP COLUMN IF EXISTS "returnedBy",
-            DROP COLUMN IF EXISTS "location"
+            DROP COLUMN IF EXISTS "location",
+            DROP COLUMN IF EXISTS "remarks"
         `);
     }
 }
