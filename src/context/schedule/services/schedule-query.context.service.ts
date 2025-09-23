@@ -12,6 +12,7 @@ import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-typ
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { DomainProjectService } from '@src/domain/project/project.service';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
+import { DomainDepartmentService } from '@src/domain/department/department.service';
 import { Reservation } from '@libs/entities/reservation.entity';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ScheduleType } from '@libs/enums/schedule-type.enum';
@@ -49,6 +50,7 @@ export class ScheduleQueryContextService {
         private readonly domainReservationService: DomainReservationService,
         private readonly domainResourceService: DomainResourceService,
         private readonly domainResourceGroupService: DomainResourceGroupService,
+        private readonly domainDepartmentService: DomainDepartmentService,
     ) {}
 
     // 테스트용
@@ -127,6 +129,7 @@ export class ScheduleQueryContextService {
         scheduleId: string,
         option?: {
             withProject?: boolean;
+            withDepartment?: boolean;
             withReservation?: boolean;
             withResource?: boolean;
             withParticipants?: boolean;
@@ -135,6 +138,7 @@ export class ScheduleQueryContextService {
     ): Promise<{
         schedule: Schedule;
         project?: ProjectInfo;
+        department?: { id: string; departmentName: string };
         reservation?: Reservation;
         resource?: Resource;
         participants?: ScheduleParticipantsWithEmployee[];
@@ -148,6 +152,7 @@ export class ScheduleQueryContextService {
         }
         const scheduleRelation = await this.domainScheduleRelationService.findByScheduleId(scheduleId);
         let project = null,
+            department = null,
             reservation = null,
             resource = null;
         let participants = [];
@@ -157,6 +162,18 @@ export class ScheduleQueryContextService {
                 scheduleRelation.projectId,
             ]);
             project = projects[0] || null;
+        }
+
+        if (option?.withDepartment && scheduleRelation.departmentId) {
+            const departmentEntity = await this.domainDepartmentService.findOne({
+                where: { id: scheduleRelation.departmentId },
+            });
+            department = departmentEntity
+                ? {
+                      id: departmentEntity.id,
+                      departmentName: departmentEntity.departmentName,
+                  }
+                : null;
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
@@ -182,6 +199,7 @@ export class ScheduleQueryContextService {
         return {
             schedule,
             project,
+            department,
             reservation,
             resource,
             participants,
@@ -195,6 +213,7 @@ export class ScheduleQueryContextService {
         scheduleIds: string[],
         option?: {
             withProject?: boolean;
+            withDepartment?: boolean;
             withReservation?: boolean;
             withResource?: boolean;
             withParticipants?: boolean;
@@ -203,6 +222,7 @@ export class ScheduleQueryContextService {
         {
             schedule: Schedule;
             project?: ProjectInfo;
+            department?: { id: string; departmentName: string };
             reservation?: Reservation;
             resource?: Resource;
             participants?: ScheduleParticipantsWithEmployee[];
@@ -235,6 +255,26 @@ export class ScheduleQueryContextService {
                     projects.map((project) => [
                         project.id,
                         { projectId: project.id, projectName: project.projectName },
+                    ]),
+                );
+            }
+        }
+
+        // ✅ 2-1. 부서 정보 조회
+        let departmentMap = new Map();
+        if (option?.withDepartment) {
+            const departmentIds = scheduleRelations
+                .filter((relation) => relation.departmentId)
+                .map((relation) => relation.departmentId);
+            if (departmentIds.length > 0) {
+                const setDepartmentIds = [...new Set(departmentIds)];
+                const departments = await this.domainDepartmentService.findAll({
+                    where: { id: In(setDepartmentIds) },
+                });
+                departmentMap = new Map(
+                    departments.map((department) => [
+                        department.id,
+                        { id: department.id, departmentName: department.departmentName },
                     ]),
                 );
             }
@@ -282,12 +322,17 @@ export class ScheduleQueryContextService {
 
             const schedule = relation.schedule;
             let project = null;
+            let department = null;
             let reservation = null;
             let resource = null;
             let participants = [];
 
             if (option?.withProject && relation.projectId) {
                 project = projectMap.get(relation.projectId) || null;
+            }
+
+            if (option?.withDepartment && relation.departmentId) {
+                department = departmentMap.get(relation.departmentId) || null;
             }
 
             if (option?.withReservation && relation.reservation) {
@@ -304,6 +349,7 @@ export class ScheduleQueryContextService {
             results.push({
                 schedule,
                 project,
+                department,
                 reservation,
                 resource,
                 participants,

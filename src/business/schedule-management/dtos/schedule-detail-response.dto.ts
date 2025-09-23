@@ -38,6 +38,30 @@ export class ScheduleDetailProjectDto {
     }
 }
 
+export class ScheduleDetailDepartmentDto {
+    @ApiProperty({
+        description: '부서 ID',
+        example: 'uuid-string',
+    })
+    id: string;
+
+    @ApiProperty({
+        description: '부서 이름',
+        example: '개발팀',
+    })
+    departmentName: string;
+
+    /**
+     * 부서 상세 DTO 생성
+     */
+    static fromDepartment(department: { id: string; departmentName: string }): ScheduleDetailDepartmentDto {
+        const dto = new ScheduleDetailDepartmentDto();
+        dto.id = department.id;
+        dto.departmentName = department.departmentName;
+        return dto;
+    }
+}
+
 export class ScheduleDetailParticipantDto {
     @ApiProperty({
         description: '참가자 ID',
@@ -322,6 +346,13 @@ export class ScheduleDetailResponseDto {
         required: false,
     })
     project?: ScheduleDetailProjectDto;
+
+    @ApiProperty({
+        description: '관련 부서 정보 (옵션)',
+        type: ScheduleDetailDepartmentDto,
+        required: false,
+    })
+    department?: ScheduleDetailDepartmentDto;
 
     @ApiProperty({
         description: '관련 자원예약 정보 (옵션)',

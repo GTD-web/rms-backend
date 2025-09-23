@@ -182,6 +182,15 @@ export class ScheduleCreateRequestDto {
     @ValidateNested()
     @Type(() => ResourceSelectionDto)
     resourceSelection?: ResourceSelectionDto;
+
+    @ApiProperty({
+        description: '부서 ID',
+        example: 'uuid-string',
+        required: false,
+    })
+    @IsOptional()
+    @IsUUID()
+    departmentId?: string;
 }
 
 /**
@@ -205,6 +214,7 @@ export class ScheduleCreateRequestListDto {
                 notifyBeforeStart: true,
                 notificationMinutes: [10],
                 scheduleType: ScheduleType.DEPARTMENT,
+                departmentId: 'uuid-string',
                 participants: [
                     {
                         employeeId: 'uuid-string',
@@ -224,6 +234,7 @@ export class ScheduleCreateRequestListDto {
                 notifyBeforeStart: true,
                 notificationMinutes: [5],
                 scheduleType: ScheduleType.PERSONAL,
+                departmentId: 'uuid-string',
                 participants: [
                     {
                         employeeId: 'uuid-string',

@@ -96,6 +96,7 @@ export class ScheduleMutationContextService {
             scheduleId: relationData.scheduleId,
             projectId: relationData.projectId,
             reservationId: relationData.reservationId,
+            departmentId: relationData.departmentId,
         };
 
         // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
@@ -281,6 +282,7 @@ export class ScheduleMutationContextService {
             projectSelection?: {
                 projectId: string;
             };
+            departmentId?: string;
         },
     ): Promise<{ success: boolean; schedule?: Schedule; reason?: string }> {
         const queryRunner = this.dataSource.createQueryRunner();
@@ -365,6 +367,7 @@ export class ScheduleMutationContextService {
                 scheduleId: createdSchedule.scheduleId!,
                 projectId: data.projectSelection?.projectId || null,
                 reservationId: reservationId,
+                departmentId: data.departmentId || null,
             };
 
             await this.일정관계정보를_생성한다(relationData, queryRunner);

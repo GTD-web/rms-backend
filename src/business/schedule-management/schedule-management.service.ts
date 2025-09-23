@@ -55,6 +55,7 @@ import { ScheduleAction } from '../../context/schedule/services/schedule-authori
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import {
     ScheduleDetailProjectDto,
+    ScheduleDetailDepartmentDto,
     ScheduleDetailParticipantDto,
     ScheduleDetailReservationDto,
 } from './dtos/schedule-detail-response.dto';
@@ -535,6 +536,7 @@ export class ScheduleManagementService {
 
         const scheduleData = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withProject: includeProject,
+            withDepartment: true,
             withReservation: includeReservation,
             withResource: includeReservation,
             withParticipants: true,
@@ -543,7 +545,7 @@ export class ScheduleManagementService {
         if (scheduleData === null) {
             throw new NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
         }
-        const { schedule, project, reservation, resource, participants } = scheduleData;
+        const { schedule, project, department, reservation, resource, participants } = scheduleData;
         const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
         const regularParticipants = participants?.filter((p) => p.type !== ParticipantsType.RESERVER) || [];
 
@@ -555,6 +557,8 @@ export class ScheduleManagementService {
         const participantsDto = ScheduleDetailParticipantDto.fromParticipantsArray(regularParticipants);
 
         const projectDto = project ? ScheduleDetailProjectDto.fromProject(project) : undefined;
+
+        const departmentDto = department ? ScheduleDetailDepartmentDto.fromDepartment(department) : undefined;
 
         // 예약 정보 DTO 변환 (자원 타입별 상세 정보 포함)
         let reservationDto: ScheduleDetailReservationDto | undefined = undefined;
@@ -600,6 +604,7 @@ export class ScheduleManagementService {
             reserver: reserverDto,
             participants: participantsDto,
             project: projectDto,
+            department: departmentDto,
             reservation: reservationDto,
         };
     }
@@ -640,6 +645,7 @@ export class ScheduleManagementService {
                     participants,
                     projectSelection,
                     resourceSelection,
+                    departmentId,
                 } = createScheduleDto;
 
                 // 2. 그래프 조회: 컨텍스트에서 사전 검증 및 정보 조회 (레거시 로직 유지)
@@ -694,6 +700,7 @@ export class ScheduleManagementService {
                         dateRange,
                         resourceSelection,
                         projectSelection,
+                        departmentId,
                     };
 
                     const result = {
@@ -791,6 +798,7 @@ export class ScheduleManagementService {
                             scheduleId: createdSchedule.scheduleId!,
                             projectId: data.projectSelection?.projectId || null,
                             reservationId: reservationId,
+                            departmentId: data.departmentId || null,
                         };
 
                         await this.scheduleMutationService.일정관계정보를_생성한다(relationData, queryRunner);

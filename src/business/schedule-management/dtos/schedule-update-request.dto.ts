@@ -11,6 +11,7 @@ import {
     MaxLength,
     IsObject,
     IsEnum,
+    IsUUID,
 } from 'class-validator';
 
 export class ScheduleUpdateDateDto {
@@ -122,6 +123,15 @@ export class ScheduleUpdateInfoDto {
     @IsArray()
     @IsString({ each: true })
     participants?: string[];
+
+    @ApiProperty({
+        description: '부서 ID',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        required: false,
+    })
+    @IsOptional()
+    @IsUUID()
+    departmentId?: string;
 }
 
 export class ScheduleUpdateResourceDto {
@@ -161,6 +171,7 @@ export class ScheduleUpdateRequestDto {
             scheduleDepartment: '123e4567-e89b-12d3-a456-426614174000',
             projectId: '123e4567-e89b-12d3-a456-426614174000',
             participants: ['123e4567-e89b-12d3-a456-426614174000'],
+            departmentId: '123e4567-e89b-12d3-a456-426614174000',
         },
     })
     info?: ScheduleUpdateInfoDto;

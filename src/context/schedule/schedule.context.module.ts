@@ -15,6 +15,7 @@ import { DomainResourceModule } from '@src/domain/resource/resource.module';
 import { DomainResourceGroupModule } from '@src/domain/resource-group/resource-group.module';
 import { ReservationContextModule } from '../reservation/reservation.context.module';
 import { DomainProjectModule } from '@src/domain/project/project.module';
+import { DomainDepartmentModule } from '@src/domain/department/department.module';
 
 @Module({
     imports: [
@@ -26,6 +27,7 @@ import { DomainProjectModule } from '@src/domain/project/project.module';
         DomainResourceModule,
         DomainResourceGroupModule,
         DomainProjectModule,
+        DomainDepartmentModule,
         ReservationContextModule,
     ],
     providers: [

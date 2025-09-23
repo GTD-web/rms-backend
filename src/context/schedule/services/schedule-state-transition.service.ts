@@ -460,6 +460,11 @@ export class ScheduleStateTransitionService {
             await this.프로젝트_관계를_업데이트한다(schedule.scheduleId, infoChanges.projectId, queryRunner);
         }
 
+        // departmentId는 schedule-relations 테이블 업데이트
+        if (infoChanges.departmentId !== undefined) {
+            await this.부서_관계를_업데이트한다(schedule.scheduleId, infoChanges.departmentId, queryRunner);
+        }
+
         // 일정 정보 업데이트 (projectId 제외)
         if (Object.keys(updateData).length > 0) {
             await this.domainScheduleService.update(schedule.scheduleId, updateData, { queryRunner });
@@ -498,6 +503,24 @@ export class ScheduleStateTransitionService {
         await this.domainScheduleRelationService.update(
             existingRelation.scheduleRelationId,
             { projectId: newProjectId },
+            { queryRunner },
+        );
+    }
+
+    /**
+     * 부서 관계를 업데이트한다
+     */
+    private async 부서_관계를_업데이트한다(
+        scheduleId: string,
+        newDepartmentId: string,
+        queryRunner: QueryRunner,
+    ): Promise<void> {
+        // 기존 관계 조회
+        const existingRelation = await this.domainScheduleRelationService.findByScheduleId(scheduleId);
+
+        await this.domainScheduleRelationService.update(
+            existingRelation.scheduleRelationId,
+            { departmentId: newDepartmentId },
             { queryRunner },
         );
     }
@@ -590,6 +613,7 @@ export interface InfoChanges {
     scheduleType?: any;
     scheduleDepartment?: string;
     projectId?: string;
+    departmentId?: string;
     participants?: string[];
 }
 
