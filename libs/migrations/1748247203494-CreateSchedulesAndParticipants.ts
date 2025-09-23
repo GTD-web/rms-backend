@@ -176,7 +176,7 @@ export class CreateSchedulesAndParticipants1748247203494 implements MigrationInt
             INSERT INTO "schedules" (
                 "scheduleId", "title", "description", "startDate", "endDate",
                 "notifyBeforeStart", "notifyMinutesBeforeStart", "scheduleType", 
-                "status", "completionReason", "scheduleDepartment", "createdAt", "updatedAt"
+                "status", "completionReason", "scheduleDepartment"
             )
             SELECT 
                 r."reservationId", 
