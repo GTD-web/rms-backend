@@ -669,4 +669,94 @@ export class EmployeeContextService {
             }
         }
     }
+
+    /**
+     * 특정 부서와 하위 부서의 모든 직원 목록을 조회합니다
+     */
+    async 부서별_직원_목록을_조회한다(departmentId: string): Promise<Employee[]> {
+        try {
+            // 1. 해당 부서와 모든 하위 부서 ID 수집
+            const allDepartmentIds = await this.부서와_하위부서_ID들을_수집한다(departmentId);
+
+            this.logger.log(`부서 ${departmentId}와 하위 부서들: [${allDepartmentIds.join(', ')}]`);
+
+            // 2. 모든 부서의 직원들 조회
+            const departmentEmployees = await this.domainDepartmentEmployeeService.findAll({
+                where: {
+                    departmentId: In(allDepartmentIds), // 여러 부서 ID로 조회
+                },
+                relations: ['employee'],
+            });
+
+            // 3. 직원 정보만 추출하여 반환 (중복 제거)
+            const employeeMap = new Map();
+            departmentEmployees.forEach((de) => {
+                if (de.employee && de.employee.employeeId) {
+                    employeeMap.set(de.employee.employeeId, de.employee);
+                }
+            });
+
+            const employees = Array.from(employeeMap.values());
+
+            this.logger.log(`부서별 직원 목록 조회 완료: 부서 ${departmentId} (하위 부서 포함), ${employees.length}명`);
+            return employees;
+        } catch (error) {
+            this.logger.error(`부서별 직원 목록 조회 실패: 부서 ${departmentId}`, error);
+            return [];
+        }
+    }
+
+    /**
+     * 특정 부서와 모든 하위 부서의 ID를 재귀적으로 수집합니다
+     */
+    private async 부서와_하위부서_ID들을_수집한다(departmentId: string): Promise<string[]> {
+        const result = [departmentId]; // 자기 자신 포함
+
+        try {
+            // 모든 부서 조회
+            const allDepartments = await this.domainDepartmentService.findAll();
+
+            // 재귀적으로 하위 부서 찾기
+            const findSubDepartments = (parentId: string): string[] => {
+                const subDepartments = allDepartments.filter((dept) => dept.parentDepartmentId === parentId);
+                const subIds: string[] = [];
+
+                for (const subDept of subDepartments) {
+                    subIds.push(subDept.id);
+                    // 재귀적으로 하위 부서의 하위 부서도 찾기
+                    subIds.push(...findSubDepartments(subDept.id));
+                }
+
+                return subIds;
+            };
+
+            const subDepartmentIds = findSubDepartments(departmentId);
+            result.push(...subDepartmentIds);
+
+            return [...new Set(result)]; // 중복 제거
+        } catch (error) {
+            this.logger.error(`하위 부서 ID 수집 실패: ${departmentId}`, error);
+            return [departmentId]; // 실패 시 자기 자신만 반환
+        }
+    }
+
+    /**
+     * 재직중인 전체 직원 목록을 조회합니다
+     */
+    async 재직중인_전체_직원을_조회한다(): Promise<Employee[]> {
+        try {
+            // resignedAt이 null인 모든 직원 조회
+            const employees = await this.domainEmployeeService.findAll({
+                where: {
+                    status: '재직중',
+                },
+            });
+
+            this.logger.log(`재직중인 전체 직원 조회 완료: ${employees.length}명`);
+            return employees;
+        } catch (error) {
+            this.logger.error('재직중인 전체 직원 조회 실패:', error);
+            return [];
+        }
+    }
 }

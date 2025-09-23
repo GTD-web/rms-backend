@@ -22,5 +22,4 @@ export interface CreateScheduleRelationDto {
     scheduleId: string;
     projectId?: string;
     reservationId?: string;
-    departmentId?: string;
 }

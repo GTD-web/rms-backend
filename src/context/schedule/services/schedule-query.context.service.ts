@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException, BadRequestException } from '@nes
 import { DomainScheduleService } from '@src/domain/schedule/schedule.service';
 import { DomainScheduleParticipantService } from '@src/domain/schedule-participant/schedule-participant.service';
 import { DomainScheduleRelationService } from '@src/domain/schedule-relation/schedule-relation.service';
+import { DomainScheduleDepartmentService } from '@src/domain/schedule-department/schedule-department.service';
 
 import { Between, In, Like, MoreThanOrEqual, Not, IsNull, LessThanOrEqual } from 'typeorm';
 import { Schedule } from '@libs/entities/schedule.entity';
@@ -51,6 +52,7 @@ export class ScheduleQueryContextService {
         private readonly domainResourceService: DomainResourceService,
         private readonly domainResourceGroupService: DomainResourceGroupService,
         private readonly domainDepartmentService: DomainDepartmentService,
+        private readonly domainScheduleDepartmentService: DomainScheduleDepartmentService,
     ) {}
 
     // 테스트용
@@ -138,7 +140,7 @@ export class ScheduleQueryContextService {
     ): Promise<{
         schedule: Schedule;
         project?: ProjectInfo;
-        department?: { id: string; departmentName: string };
+        departments?: { id: string; departmentName: string }[];
         reservation?: Reservation;
         resource?: Resource;
         participants?: ScheduleParticipantsWithEmployee[];
@@ -152,7 +154,7 @@ export class ScheduleQueryContextService {
         }
         const scheduleRelation = await this.domainScheduleRelationService.findByScheduleId(scheduleId);
         let project = null,
-            department = null,
+            departments = null,
             reservation = null,
             resource = null;
         let participants = [];
@@ -164,16 +166,18 @@ export class ScheduleQueryContextService {
             project = projects[0] || null;
         }
 
-        if (option?.withDepartment && scheduleRelation.departmentId) {
-            const departmentEntity = await this.domainDepartmentService.findOne({
-                where: { id: scheduleRelation.departmentId },
-            });
-            department = departmentEntity
-                ? {
-                      id: departmentEntity.id,
-                      departmentName: departmentEntity.departmentName,
-                  }
-                : null;
+        if (option?.withDepartment) {
+            // 새로운 schedule_departments 테이블에서 부서 정보 조회
+            const scheduleDepartments =
+                await this.domainScheduleDepartmentService.findDepartmentsByScheduleId(scheduleId);
+
+            if (scheduleDepartments && scheduleDepartments.length > 0) {
+                // 모든 부서 정보를 배열로 반환
+                departments = scheduleDepartments.map((dept) => ({
+                    id: dept.departmentId,
+                    departmentName: dept.departmentName,
+                }));
+            }
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
@@ -199,7 +203,7 @@ export class ScheduleQueryContextService {
         return {
             schedule,
             project,
-            department,
+            departments,
             reservation,
             resource,
             participants,
@@ -222,7 +226,7 @@ export class ScheduleQueryContextService {
         {
             schedule: Schedule;
             project?: ProjectInfo;
-            department?: { id: string; departmentName: string };
+            departments?: { id: string; departmentName: string }[];
             reservation?: Reservation;
             resource?: Resource;
             participants?: ScheduleParticipantsWithEmployee[];
@@ -260,24 +264,26 @@ export class ScheduleQueryContextService {
             }
         }
 
-        // ✅ 2-1. 부서 정보 조회
-        let departmentMap = new Map();
+        // ✅ 2-1. 부서 정보 조회 (새로운 schedule_departments 테이블 사용)
+        const departmentMap = new Map();
         if (option?.withDepartment) {
-            const departmentIds = scheduleRelations
-                .filter((relation) => relation.departmentId)
-                .map((relation) => relation.departmentId);
-            if (departmentIds.length > 0) {
-                const setDepartmentIds = [...new Set(departmentIds)];
-                const departments = await this.domainDepartmentService.findAll({
-                    where: { id: In(setDepartmentIds) },
-                });
-                departmentMap = new Map(
-                    departments.map((department) => [
-                        department.id,
-                        { id: department.id, departmentName: department.departmentName },
-                    ]),
-                );
-            }
+            // 모든 일정의 부서 관계 조회
+            const scheduleDepartmentPromises = scheduleIds.map((scheduleId) =>
+                this.domainScheduleDepartmentService.findDepartmentsByScheduleId(scheduleId),
+            );
+            const allScheduleDepartments = await Promise.all(scheduleDepartmentPromises);
+
+            // scheduleId별로 모든 부서 정보를 배열로 맵핑
+            scheduleIds.forEach((scheduleId, index) => {
+                const scheduleDepartments = allScheduleDepartments[index];
+                if (scheduleDepartments && scheduleDepartments.length > 0) {
+                    const departments = scheduleDepartments.map((dept) => ({
+                        id: dept.departmentId,
+                        departmentName: dept.departmentName,
+                    }));
+                    departmentMap.set(scheduleId, departments);
+                }
+            });
         }
 
         // ✅ 3. 참가자 정보 조회 (기존 방식 유지)
@@ -322,7 +328,7 @@ export class ScheduleQueryContextService {
 
             const schedule = relation.schedule;
             let project = null;
-            let department = null;
+            let departments = null;
             let reservation = null;
             let resource = null;
             let participants = [];
@@ -331,8 +337,8 @@ export class ScheduleQueryContextService {
                 project = projectMap.get(relation.projectId) || null;
             }
 
-            if (option?.withDepartment && relation.departmentId) {
-                department = departmentMap.get(relation.departmentId) || null;
+            if (option?.withDepartment) {
+                departments = departmentMap.get(scheduleId) || null;
             }
 
             if (option?.withReservation && relation.reservation) {
@@ -349,7 +355,7 @@ export class ScheduleQueryContextService {
             results.push({
                 schedule,
                 project,
-                department,
+                departments,
                 reservation,
                 resource,
                 participants,

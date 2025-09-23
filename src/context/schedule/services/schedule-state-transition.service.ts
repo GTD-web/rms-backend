@@ -3,12 +3,14 @@ import { DataSource, QueryRunner } from 'typeorm';
 import { Schedule } from '@libs/entities/schedule.entity';
 import { Reservation } from '@libs/entities/reservation.entity';
 import { ScheduleParticipant } from '@libs/entities/schedule-participant.entity';
+import { ScheduleDepartment } from '@libs/entities/schedule-department.entity';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ScheduleStatus } from '@libs/enums/schedule-type.enum';
 import { DomainScheduleService } from '../../../domain/schedule/schedule.service';
 import { DomainReservationService } from '../../../domain/reservation/reservation.service';
 import { DomainScheduleRelationService } from '../../../domain/schedule-relation/schedule-relation.service';
 import { DomainScheduleParticipantService } from '../../../domain/schedule-participant/schedule-participant.service';
+import { DomainScheduleDepartmentService } from '../../../domain/schedule-department/schedule-department.service';
 import { DateUtil } from '@libs/utils/date.util';
 import { Resource } from '@libs/entities/resource.entity';
 import { ResourceType } from '@libs/enums/resource-type.enum';
@@ -58,6 +60,7 @@ export class ScheduleStateTransitionService {
         private readonly domainReservationService: DomainReservationService,
         private readonly domainScheduleRelationService: DomainScheduleRelationService,
         private readonly domainScheduleParticipantService: DomainScheduleParticipantService,
+        private readonly domainScheduleDepartmentService: DomainScheduleDepartmentService,
     ) {}
 
     async 일정을_취소한다(
@@ -460,9 +463,9 @@ export class ScheduleStateTransitionService {
             await this.프로젝트_관계를_업데이트한다(schedule.scheduleId, infoChanges.projectId, queryRunner);
         }
 
-        // departmentId는 schedule-relations 테이블 업데이트
-        if (infoChanges.departmentId !== undefined) {
-            await this.부서_관계를_업데이트한다(schedule.scheduleId, infoChanges.departmentId, queryRunner);
+        // departmentIds는 schedule_departments 테이블 일괄 업데이트
+        if (infoChanges.departmentIds !== undefined) {
+            await this.부서_관계들을_일괄_업데이트한다(schedule.scheduleId, infoChanges.departmentIds, queryRunner);
         }
 
         // 일정 정보 업데이트 (projectId 제외)
@@ -508,21 +511,28 @@ export class ScheduleStateTransitionService {
     }
 
     /**
-     * 부서 관계를 업데이트한다
+     * 부서 관계들을 일괄 업데이트한다 (새로운 schedule_departments 테이블 사용)
      */
-    private async 부서_관계를_업데이트한다(
+    private async 부서_관계들을_일괄_업데이트한다(
         scheduleId: string,
-        newDepartmentId: string,
+        newDepartmentIds: string[],
         queryRunner: QueryRunner,
     ): Promise<void> {
-        // 기존 관계 조회
-        const existingRelation = await this.domainScheduleRelationService.findByScheduleId(scheduleId);
+        // 트랜잭션 내에서 실행하기 위해 service 대신 repository를 직접 사용
+        const scheduleDepartmentRepository = queryRunner.manager.getRepository(ScheduleDepartment);
 
-        await this.domainScheduleRelationService.update(
-            existingRelation.scheduleRelationId,
-            { departmentId: newDepartmentId },
-            { queryRunner },
-        );
+        // 1. 기존 부서 관계 모두 삭제
+        await scheduleDepartmentRepository.delete({ scheduleId });
+
+        // 2. 새로운 부서 관계들 생성
+        if (newDepartmentIds && newDepartmentIds.length > 0) {
+            for (const departmentId of newDepartmentIds) {
+                await scheduleDepartmentRepository.save({
+                    scheduleId,
+                    departmentId,
+                });
+            }
+        }
     }
 
     /**
@@ -613,7 +623,7 @@ export interface InfoChanges {
     scheduleType?: any;
     scheduleDepartment?: string;
     projectId?: string;
-    departmentId?: string;
+    departmentIds?: string[];
     participants?: string[];
 }
 

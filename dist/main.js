@@ -1306,7 +1306,7 @@ exports.File = File = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DepartmentEmployee = exports.Department = exports.RequestLog = exports.ScheduleRelation = exports.ScheduleParticipant = exports.Schedule = exports.FileVehicleInfo = exports.FileResource = exports.FileReservationVehicle = exports.FileMaintenance = exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.NotificationTypeEntity = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
+exports.ScheduleDepartment = exports.DepartmentEmployee = exports.Department = exports.RequestLog = exports.ScheduleRelation = exports.ScheduleParticipant = exports.Schedule = exports.FileVehicleInfo = exports.FileResource = exports.FileReservationVehicle = exports.FileMaintenance = exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.NotificationTypeEntity = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
 const employee_entity_1 = __webpack_require__(/*! ./employee.entity */ "./libs/entities/employee.entity.ts");
 Object.defineProperty(exports, "Employee", ({ enumerable: true, get: function () { return employee_entity_1.Employee; } }));
 const resource_entity_1 = __webpack_require__(/*! ./resource.entity */ "./libs/entities/resource.entity.ts");
@@ -1368,6 +1368,8 @@ const department_entity_1 = __webpack_require__(/*! ./department.entity */ "./li
 Object.defineProperty(exports, "Department", ({ enumerable: true, get: function () { return department_entity_1.Department; } }));
 const department_employee_entity_1 = __webpack_require__(/*! ./department-employee.entity */ "./libs/entities/department-employee.entity.ts");
 Object.defineProperty(exports, "DepartmentEmployee", ({ enumerable: true, get: function () { return department_employee_entity_1.DepartmentEmployee; } }));
+const schedule_department_entity_1 = __webpack_require__(/*! ./schedule-department.entity */ "./libs/entities/schedule-department.entity.ts");
+Object.defineProperty(exports, "ScheduleDepartment", ({ enumerable: true, get: function () { return schedule_department_entity_1.ScheduleDepartment; } }));
 exports.Entities = [
     employee_entity_1.Employee,
     resource_entity_1.Resource,
@@ -1401,6 +1403,7 @@ exports.Entities = [
     request_log_entity_1.RequestLog,
     department_entity_1.Department,
     department_employee_entity_1.DepartmentEmployee,
+    schedule_department_entity_1.ScheduleDepartment,
 ];
 exports.EntitiesMap = {
     Employee: employee_entity_1.Employee,
@@ -1435,6 +1438,7 @@ exports.EntitiesMap = {
     RequestLog: request_log_entity_1.RequestLog,
     Department: department_entity_1.Department,
     DepartmentEmployee: department_employee_entity_1.DepartmentEmployee,
+    ScheduleDepartment: schedule_department_entity_1.ScheduleDepartment,
 };
 
 
@@ -2509,6 +2513,64 @@ exports.Resource = Resource = __decorate([
 
 /***/ }),
 
+/***/ "./libs/entities/schedule-department.entity.ts":
+/*!*****************************************************!*\
+  !*** ./libs/entities/schedule-department.entity.ts ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleDepartment = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const schedule_entity_1 = __webpack_require__(/*! ./schedule.entity */ "./libs/entities/schedule.entity.ts");
+const department_entity_1 = __webpack_require__(/*! ./department.entity */ "./libs/entities/department.entity.ts");
+let ScheduleDepartment = class ScheduleDepartment {
+};
+exports.ScheduleDepartment = ScheduleDepartment;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], ScheduleDepartment.prototype, "scheduleDepartmentId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], ScheduleDepartment.prototype, "scheduleId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], ScheduleDepartment.prototype, "departmentId", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], ScheduleDepartment.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => schedule_entity_1.Schedule, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'scheduleId' }),
+    __metadata("design:type", typeof (_b = typeof schedule_entity_1.Schedule !== "undefined" && schedule_entity_1.Schedule) === "function" ? _b : Object)
+], ScheduleDepartment.prototype, "schedule", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => department_entity_1.Department, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'departmentId' }),
+    __metadata("design:type", typeof (_c = typeof department_entity_1.Department !== "undefined" && department_entity_1.Department) === "function" ? _c : Object)
+], ScheduleDepartment.prototype, "department", void 0);
+exports.ScheduleDepartment = ScheduleDepartment = __decorate([
+    (0, typeorm_1.Entity)('schedule_departments')
+], ScheduleDepartment);
+
+
+/***/ }),
+
 /***/ "./libs/entities/schedule-participant.entity.ts":
 /*!******************************************************!*\
   !*** ./libs/entities/schedule-participant.entity.ts ***!
@@ -2581,13 +2643,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleRelation = void 0;
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const schedule_entity_1 = __webpack_require__(/*! ./schedule.entity */ "./libs/entities/schedule.entity.ts");
 const reservation_entity_1 = __webpack_require__(/*! ./reservation.entity */ "./libs/entities/reservation.entity.ts");
-const department_entity_1 = __webpack_require__(/*! ./department.entity */ "./libs/entities/department.entity.ts");
 let ScheduleRelation = class ScheduleRelation {
 };
 exports.ScheduleRelation = ScheduleRelation;
@@ -2608,10 +2669,6 @@ __decorate([
     __metadata("design:type", String)
 ], ScheduleRelation.prototype, "projectId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], ScheduleRelation.prototype, "departmentId", void 0);
-__decorate([
     (0, typeorm_1.ManyToOne)(() => schedule_entity_1.Schedule, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'scheduleId' }),
     __metadata("design:type", typeof (_a = typeof schedule_entity_1.Schedule !== "undefined" && schedule_entity_1.Schedule) === "function" ? _a : Object)
@@ -2621,11 +2678,6 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'reservationId' }),
     __metadata("design:type", typeof (_b = typeof reservation_entity_1.Reservation !== "undefined" && reservation_entity_1.Reservation) === "function" ? _b : Object)
 ], ScheduleRelation.prototype, "reservation", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => department_entity_1.Department, { onDelete: 'SET NULL' }),
-    (0, typeorm_1.JoinColumn)({ name: 'departmentId' }),
-    __metadata("design:type", typeof (_c = typeof department_entity_1.Department !== "undefined" && department_entity_1.Department) === "function" ? _c : Object)
-], ScheduleRelation.prototype, "department", void 0);
 exports.ScheduleRelation = ScheduleRelation = __decorate([
     (0, typeorm_1.Entity)('schedule_relations')
 ], ScheduleRelation);
@@ -29485,14 +29537,16 @@ __decorate([
 ], ScheduleCreateRequestDto.prototype, "resourceSelection", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: '부서 ID',
-        example: 'uuid-string',
+        description: '부서 ID 목록 (여러 부서 선택 가능)',
+        example: ['uuid-string-1', 'uuid-string-2'],
         required: false,
+        type: [String],
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
-    __metadata("design:type", String)
-], ScheduleCreateRequestDto.prototype, "departmentId", void 0);
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsUUID)('4', { each: true }),
+    __metadata("design:type", Array)
+], ScheduleCreateRequestDto.prototype, "departmentIds", void 0);
 class ScheduleCreateRequestListDto {
 }
 exports.ScheduleCreateRequestListDto = ScheduleCreateRequestListDto;
@@ -29514,7 +29568,7 @@ __decorate([
                 notifyBeforeStart: true,
                 notificationMinutes: [10],
                 scheduleType: schedule_type_enum_1.ScheduleType.DEPARTMENT,
-                departmentId: 'uuid-string',
+                departmentIds: ['uuid-string-1', 'uuid-string-2'],
                 participants: [
                     {
                         employeeId: 'uuid-string',
@@ -29534,7 +29588,7 @@ __decorate([
                 notifyBeforeStart: true,
                 notificationMinutes: [5],
                 scheduleType: schedule_type_enum_1.ScheduleType.PERSONAL,
-                departmentId: 'uuid-string',
+                departmentIds: ['uuid-string-1', 'uuid-string-2'],
                 participants: [
                     {
                         employeeId: 'uuid-string',
@@ -30055,12 +30109,12 @@ __decorate([
 ], ScheduleDetailResponseDto.prototype, "project", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: '관련 부서 정보 (옵션)',
-        type: ScheduleDetailDepartmentDto,
+        description: '관련 부서 정보 목록 (옵션)',
+        type: [ScheduleDetailDepartmentDto],
         required: false,
     }),
-    __metadata("design:type", ScheduleDetailDepartmentDto)
-], ScheduleDetailResponseDto.prototype, "department", void 0);
+    __metadata("design:type", Array)
+], ScheduleDetailResponseDto.prototype, "departments", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '관련 자원예약 정보 (옵션)',
@@ -30338,14 +30392,16 @@ __decorate([
 ], ScheduleUpdateInfoDto.prototype, "participants", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: '부서 ID',
-        example: '123e4567-e89b-12d3-a456-426614174000',
+        description: '부서 ID 목록 (여러 부서 선택 가능)',
+        example: ['123e4567-e89b-12d3-a456-426614174000', '456e7890-a12b-34c5-d678-901234567890'],
         required: false,
+        type: [String],
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
-    __metadata("design:type", String)
-], ScheduleUpdateInfoDto.prototype, "departmentId", void 0);
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsUUID)('4', { each: true }),
+    __metadata("design:type", Array)
+], ScheduleUpdateInfoDto.prototype, "departmentIds", void 0);
 class ScheduleUpdateResourceDto {
 }
 exports.ScheduleUpdateResourceDto = ScheduleUpdateResourceDto;
@@ -30386,7 +30442,7 @@ __decorate([
             scheduleDepartment: '123e4567-e89b-12d3-a456-426614174000',
             projectId: '123e4567-e89b-12d3-a456-426614174000',
             participants: ['123e4567-e89b-12d3-a456-426614174000'],
-            departmentId: '123e4567-e89b-12d3-a456-426614174000',
+            departmentIds: ['123e4567-e89b-12d3-a456-426614174000', '456e7890-a12b-34c5-d678-901234567890'],
         },
     }),
     __metadata("design:type", ScheduleUpdateInfoDto)
@@ -30945,13 +31001,15 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
         if (scheduleData === null) {
             throw new common_1.NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
         }
-        const { schedule, project, department, reservation, resource, participants } = scheduleData;
+        const { schedule, project, departments, reservation, resource, participants } = scheduleData;
         const reserver = participants?.find((p) => p.type === reservation_type_enum_1.ParticipantsType.RESERVER);
         const regularParticipants = participants?.filter((p) => p.type !== reservation_type_enum_1.ParticipantsType.RESERVER) || [];
         const reserverDto = reserver ? schedule_detail_response_dto_1.ScheduleDetailParticipantDto.fromParticipantWithEmployee(reserver) : undefined;
         const participantsDto = schedule_detail_response_dto_1.ScheduleDetailParticipantDto.fromParticipantsArray(regularParticipants);
         const projectDto = project ? schedule_detail_response_dto_1.ScheduleDetailProjectDto.fromProject(project) : undefined;
-        const departmentDto = department ? schedule_detail_response_dto_1.ScheduleDetailDepartmentDto.fromDepartment(department) : undefined;
+        const departmentsDto = departments && departments.length > 0
+            ? departments.map((dept) => schedule_detail_response_dto_1.ScheduleDetailDepartmentDto.fromDepartment(dept))
+            : undefined;
         let reservationDto = undefined;
         if (reservation && resource) {
             const resourceImages = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
@@ -30989,7 +31047,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             reserver: reserverDto,
             participants: participantsDto,
             project: projectDto,
-            department: departmentDto,
+            departments: departmentsDto,
             reservation: reservationDto,
         };
     }
@@ -31004,7 +31062,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             const scheduleCreatedSchedules = [];
             const scheduleFailedSchedules = [];
             try {
-                const { datesSelection, title, description, location, notifyBeforeStart, notificationMinutes, scheduleType, participants, projectSelection, resourceSelection, departmentId, } = createScheduleDto;
+                const { datesSelection, title, description, location, notifyBeforeStart, notificationMinutes, scheduleType, participants, projectSelection, resourceSelection, departmentIds, } = createScheduleDto;
                 let projectId = null;
                 let resourceInfo = null;
                 if (projectSelection) {
@@ -31045,7 +31103,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                         dateRange,
                         resourceSelection,
                         projectSelection,
-                        departmentId,
+                        departmentIds,
                     };
                     const result = {
                         success: true,
@@ -31106,9 +31164,11 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                             scheduleId: createdSchedule.scheduleId,
                             projectId: data.projectSelection?.projectId || null,
                             reservationId: reservationId,
-                            departmentId: data.departmentId || null,
                         };
                         await this.scheduleMutationService.일정관계정보를_생성한다(relationData, queryRunner);
+                        if (data.departmentIds && data.departmentIds.length > 0) {
+                            await this.scheduleMutationService.일정_부서관계들을_생성한다(createdSchedule.scheduleId, data.departmentIds, queryRunner);
+                        }
                         await queryRunner.commitTransaction();
                         result.success = true;
                         result.schedule = createdSchedule;
@@ -31148,8 +31208,9 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                         withReservation: true,
                         withResource: true,
                     });
+                    const notificationTargets = await this.일정_종류별_알림_대상을_조회한다(scheduleType, user.employeeId, participants, departmentIds);
                     const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
-                    await this.scheduleNotificationContextService.일정_생성_알림을_전송한다({ schedule, reservation, resource }, [user.employeeId, ...(participants?.map((participant) => participant.employeeId) || [])], systemAdmins.map((admin) => admin.employeeId));
+                    await this.scheduleNotificationContextService.일정_생성_알림을_전송한다({ schedule, reservation, resource }, notificationTargets, systemAdmins.map((admin) => admin.employeeId));
                 }
                 finalFailedSchedules.push(...scheduleFailedSchedules);
             }
@@ -31292,6 +31353,7 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     scheduleDepartment: updateDto.info?.scheduleType === schedule_type_enum_1.ScheduleType.DEPARTMENT ? user.department : null,
                     projectId: updateDto.info?.projectId,
                     participants: updateDto.info?.participants,
+                    departmentIds: updateDto.info?.departmentIds,
                 }
                 : undefined,
             resourceChanges: updateScenarios.isResourceUpdate
@@ -31306,17 +31368,20 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                 await this.reservationContextService.예약관련_배치_작업을_처리한다([reservation.reservationId]);
             }
         }
-        const { schedule: newSchedule, resource, participants, } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
+        const { schedule: newSchedule, departments, resource, participants, } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
             withResource: true,
             withParticipants: true,
+            withDepartment: true,
         });
-        const employeeIds = updateScenarios.isInfoUpdate && updateResult.participantChanges
-            ? Array.from(new Set([
-                ...updateResult.participantChanges.previousParticipants.map((participant) => participant.employeeId),
-                ...updateResult.participantChanges.newParticipants.map((participant) => participant.employeeId),
-            ]))
-            : participants.map((participant) => participant.employeeId);
+        const targetParticipants = updateScenarios.isInfoUpdate && updateResult.participantChanges
+            ? [
+                ...updateResult.participantChanges.previousParticipants,
+                ...updateResult.participantChanges.newParticipants,
+            ]
+            : participants;
+        const departmentIds = departments && departments.length > 0 ? departments.map((dept) => dept.id) : undefined;
+        const employeeIds = await this.일정_종류별_알림_대상을_조회한다(newSchedule.scheduleType, user.employeeId, targetParticipants, departmentIds);
         updateScenarios.isInfoUpdate = updateResult.changes.includes('참여자 수정');
         await this.scheduleNotificationContextService.일정_수정_알림을_전송한다(updateScenarios, {
             schedule: newSchedule,
@@ -31324,6 +31389,34 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
             resource,
         }, employeeIds);
         return true;
+    }
+    async 일정_종류별_알림_대상을_조회한다(scheduleType, creatorEmployeeId, participants, departmentIds) {
+        const notificationTargets = [creatorEmployeeId];
+        switch (scheduleType) {
+            case schedule_type_enum_1.ScheduleType.PERSONAL:
+                if (participants && participants.length > 0) {
+                    notificationTargets.push(...participants.map((participant) => participant.employeeId));
+                }
+                break;
+            case schedule_type_enum_1.ScheduleType.DEPARTMENT:
+                if (departmentIds && departmentIds.length > 0) {
+                    for (const departmentId of departmentIds) {
+                        const departmentEmployees = await this.employeeContextService.부서별_직원_목록을_조회한다(departmentId);
+                        notificationTargets.push(...departmentEmployees.map((emp) => emp.employeeId));
+                    }
+                }
+                break;
+            case schedule_type_enum_1.ScheduleType.COMPANY:
+                const activeEmployees = await this.employeeContextService.재직중인_전체_직원을_조회한다();
+                notificationTargets.push(...activeEmployees.map((emp) => emp.employeeId));
+                break;
+            default:
+                if (participants && participants.length > 0) {
+                    notificationTargets.push(...participants.map((participant) => participant.employeeId));
+                }
+                break;
+        }
+        return [...new Set(notificationTargets)];
     }
 };
 exports.ScheduleManagementService = ScheduleManagementService;
@@ -33292,6 +33385,68 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                 console.log('구독 정보 동기화 성공', count, employee.name, employee.employeeNumber);
                 count++;
             }
+        }
+    }
+    async 부서별_직원_목록을_조회한다(departmentId) {
+        try {
+            const allDepartmentIds = await this.부서와_하위부서_ID들을_수집한다(departmentId);
+            this.logger.log(`부서 ${departmentId}와 하위 부서들: [${allDepartmentIds.join(', ')}]`);
+            const departmentEmployees = await this.domainDepartmentEmployeeService.findAll({
+                where: {
+                    departmentId: (0, typeorm_1.In)(allDepartmentIds),
+                },
+                relations: ['employee'],
+            });
+            const employeeMap = new Map();
+            departmentEmployees.forEach((de) => {
+                if (de.employee && de.employee.employeeId) {
+                    employeeMap.set(de.employee.employeeId, de.employee);
+                }
+            });
+            const employees = Array.from(employeeMap.values());
+            this.logger.log(`부서별 직원 목록 조회 완료: 부서 ${departmentId} (하위 부서 포함), ${employees.length}명`);
+            return employees;
+        }
+        catch (error) {
+            this.logger.error(`부서별 직원 목록 조회 실패: 부서 ${departmentId}`, error);
+            return [];
+        }
+    }
+    async 부서와_하위부서_ID들을_수집한다(departmentId) {
+        const result = [departmentId];
+        try {
+            const allDepartments = await this.domainDepartmentService.findAll();
+            const findSubDepartments = (parentId) => {
+                const subDepartments = allDepartments.filter((dept) => dept.parentDepartmentId === parentId);
+                const subIds = [];
+                for (const subDept of subDepartments) {
+                    subIds.push(subDept.id);
+                    subIds.push(...findSubDepartments(subDept.id));
+                }
+                return subIds;
+            };
+            const subDepartmentIds = findSubDepartments(departmentId);
+            result.push(...subDepartmentIds);
+            return [...new Set(result)];
+        }
+        catch (error) {
+            this.logger.error(`하위 부서 ID 수집 실패: ${departmentId}`, error);
+            return [departmentId];
+        }
+    }
+    async 재직중인_전체_직원을_조회한다() {
+        try {
+            const employees = await this.domainEmployeeService.findAll({
+                where: {
+                    status: '재직중',
+                },
+            });
+            this.logger.log(`재직중인 전체 직원 조회 완료: ${employees.length}명`);
+            return employees;
+        }
+        catch (error) {
+            this.logger.error('재직중인 전체 직원 조회 실패:', error);
+            return [];
         }
     }
 };
@@ -38401,6 +38556,7 @@ const resource_group_module_1 = __webpack_require__(/*! @src/domain/resource-gro
 const reservation_context_module_1 = __webpack_require__(/*! ../reservation/reservation.context.module */ "./src/context/reservation/reservation.context.module.ts");
 const project_module_1 = __webpack_require__(/*! @src/domain/project/project.module */ "./src/domain/project/project.module.ts");
 const department_module_1 = __webpack_require__(/*! @src/domain/department/department.module */ "./src/domain/department/department.module.ts");
+const schedule_department_module_1 = __webpack_require__(/*! @src/domain/schedule-department/schedule-department.module */ "./src/domain/schedule-department/schedule-department.module.ts");
 let ScheduleContextModule = class ScheduleContextModule {
 };
 exports.ScheduleContextModule = ScheduleContextModule;
@@ -38416,6 +38572,7 @@ exports.ScheduleContextModule = ScheduleContextModule = __decorate([
             resource_group_module_1.DomainResourceGroupModule,
             project_module_1.DomainProjectModule,
             department_module_1.DomainDepartmentModule,
+            schedule_department_module_1.DomainScheduleDepartmentModule,
             reservation_context_module_1.ReservationContextModule,
         ],
         providers: [
@@ -38588,7 +38745,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var ScheduleMutationContextService_1;
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleMutationContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -38596,16 +38753,18 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const schedule_service_1 = __webpack_require__(/*! @src/domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
 const schedule_participant_service_1 = __webpack_require__(/*! @src/domain/schedule-participant/schedule-participant.service */ "./src/domain/schedule-participant/schedule-participant.service.ts");
 const schedule_relation_service_1 = __webpack_require__(/*! @src/domain/schedule-relation/schedule-relation.service */ "./src/domain/schedule-relation/schedule-relation.service.ts");
+const schedule_department_service_1 = __webpack_require__(/*! @src/domain/schedule-department/schedule-department.service */ "./src/domain/schedule-department/schedule-department.service.ts");
 const reservation_context_service_1 = __webpack_require__(/*! ../../reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 let ScheduleMutationContextService = ScheduleMutationContextService_1 = class ScheduleMutationContextService {
-    constructor(dataSource, domainScheduleService, domainScheduleParticipantService, domainScheduleRelationService, reservationContextService) {
+    constructor(dataSource, domainScheduleService, domainScheduleParticipantService, domainScheduleRelationService, domainScheduleDepartmentService, reservationContextService) {
         this.dataSource = dataSource;
         this.domainScheduleService = domainScheduleService;
         this.domainScheduleParticipantService = domainScheduleParticipantService;
         this.domainScheduleRelationService = domainScheduleRelationService;
+        this.domainScheduleDepartmentService = domainScheduleDepartmentService;
         this.reservationContextService = reservationContextService;
         this.logger = new common_1.Logger(ScheduleMutationContextService_1.name);
     }
@@ -38647,11 +38806,25 @@ let ScheduleMutationContextService = ScheduleMutationContextService_1 = class Sc
             scheduleId: relationData.scheduleId,
             projectId: relationData.projectId,
             reservationId: relationData.reservationId,
-            departmentId: relationData.departmentId,
         };
         return await this.domainScheduleRelationService.save(relationEntity, {
             queryRunner: queryRunner,
         });
+    }
+    async 일정_부서관계들을_생성한다(scheduleId, departmentIds, queryRunner) {
+        if (!departmentIds || departmentIds.length === 0) {
+            return;
+        }
+        for (const departmentId of departmentIds) {
+            const createDto = {
+                scheduleId,
+                departmentId,
+            };
+            await this.domainScheduleDepartmentService.save(createDto, {
+                queryRunner: queryRunner,
+            });
+        }
+        this.logger.log(`일정 부서 관계 생성 완료: Schedule ${scheduleId}, Departments [${departmentIds.join(', ')}]`);
     }
     async 일정_상태를_변경한다(scheduleId, status, completionReason, queryRunner) {
         const updateData = { status };
@@ -38711,9 +38884,11 @@ let ScheduleMutationContextService = ScheduleMutationContextService_1 = class Sc
                 scheduleId: createdSchedule.scheduleId,
                 projectId: data.projectSelection?.projectId || null,
                 reservationId: reservationId,
-                departmentId: data.departmentId || null,
             };
             await this.일정관계정보를_생성한다(relationData, queryRunner);
+            if (data.departmentIds && data.departmentIds.length > 0) {
+                await this.일정_부서관계들을_생성한다(createdSchedule.scheduleId, data.departmentIds, queryRunner);
+            }
             await queryRunner.commitTransaction();
             return {
                 success: true,
@@ -38735,7 +38910,7 @@ let ScheduleMutationContextService = ScheduleMutationContextService_1 = class Sc
 exports.ScheduleMutationContextService = ScheduleMutationContextService;
 exports.ScheduleMutationContextService = ScheduleMutationContextService = ScheduleMutationContextService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _b : Object, typeof (_c = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _c : Object, typeof (_d = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _d : Object, typeof (_e = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _e : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _b : Object, typeof (_c = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _c : Object, typeof (_d = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _d : Object, typeof (_e = typeof schedule_department_service_1.DomainScheduleDepartmentService !== "undefined" && schedule_department_service_1.DomainScheduleDepartmentService) === "function" ? _e : Object, typeof (_f = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _f : Object])
 ], ScheduleMutationContextService);
 
 
@@ -39095,13 +39270,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var ScheduleQueryContextService_1;
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleQueryContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const schedule_service_1 = __webpack_require__(/*! @src/domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
 const schedule_participant_service_1 = __webpack_require__(/*! @src/domain/schedule-participant/schedule-participant.service */ "./src/domain/schedule-participant/schedule-participant.service.ts");
 const schedule_relation_service_1 = __webpack_require__(/*! @src/domain/schedule-relation/schedule-relation.service */ "./src/domain/schedule-relation/schedule-relation.service.ts");
+const schedule_department_service_1 = __webpack_require__(/*! @src/domain/schedule-department/schedule-department.service */ "./src/domain/schedule-department/schedule-department.service.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
@@ -39114,7 +39290,7 @@ const resource_service_1 = __webpack_require__(/*! @src/domain/resource/resource
 const resource_group_service_1 = __webpack_require__(/*! @src/domain/resource-group/resource-group.service */ "./src/domain/resource-group/resource-group.service.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ScheduleQueryContextService = ScheduleQueryContextService_1 = class ScheduleQueryContextService {
-    constructor(domainScheduleService, domainScheduleParticipantService, domainScheduleRelationService, domainEmployeeService, domainProjectService, domainReservationService, domainResourceService, domainResourceGroupService, domainDepartmentService) {
+    constructor(domainScheduleService, domainScheduleParticipantService, domainScheduleRelationService, domainEmployeeService, domainProjectService, domainReservationService, domainResourceService, domainResourceGroupService, domainDepartmentService, domainScheduleDepartmentService) {
         this.domainScheduleService = domainScheduleService;
         this.domainScheduleParticipantService = domainScheduleParticipantService;
         this.domainScheduleRelationService = domainScheduleRelationService;
@@ -39124,6 +39300,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         this.domainResourceService = domainResourceService;
         this.domainResourceGroupService = domainResourceGroupService;
         this.domainDepartmentService = domainDepartmentService;
+        this.domainScheduleDepartmentService = domainScheduleDepartmentService;
         this.logger = new common_1.Logger(ScheduleQueryContextService_1.name);
     }
     async 다가오는_일정을_조회한다() {
@@ -39164,7 +39341,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             throw new common_1.NotFoundException('일정을 찾을 수 없습니다.');
         }
         const scheduleRelation = await this.domainScheduleRelationService.findByScheduleId(scheduleId);
-        let project = null, department = null, reservation = null, resource = null;
+        let project = null, departments = null, reservation = null, resource = null;
         let participants = [];
         if (option?.withProject && scheduleRelation.projectId) {
             const { projects, notFound } = await this.domainProjectService.getProjectsByIdsGet([
@@ -39172,16 +39349,14 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             ]);
             project = projects[0] || null;
         }
-        if (option?.withDepartment && scheduleRelation.departmentId) {
-            const departmentEntity = await this.domainDepartmentService.findOne({
-                where: { id: scheduleRelation.departmentId },
-            });
-            department = departmentEntity
-                ? {
-                    id: departmentEntity.id,
-                    departmentName: departmentEntity.departmentName,
-                }
-                : null;
+        if (option?.withDepartment) {
+            const scheduleDepartments = await this.domainScheduleDepartmentService.findDepartmentsByScheduleId(scheduleId);
+            if (scheduleDepartments && scheduleDepartments.length > 0) {
+                departments = scheduleDepartments.map((dept) => ({
+                    id: dept.departmentId,
+                    departmentName: dept.departmentName,
+                }));
+            }
         }
         if (option?.withReservation && scheduleRelation.reservationId) {
             reservation = await this.domainReservationService.findByReservationId(scheduleRelation.reservationId);
@@ -39206,7 +39381,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         return {
             schedule,
             project,
-            department,
+            departments,
             reservation,
             resource,
             participants,
@@ -39236,21 +39411,20 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
                 ]));
             }
         }
-        let departmentMap = new Map();
+        const departmentMap = new Map();
         if (option?.withDepartment) {
-            const departmentIds = scheduleRelations
-                .filter((relation) => relation.departmentId)
-                .map((relation) => relation.departmentId);
-            if (departmentIds.length > 0) {
-                const setDepartmentIds = [...new Set(departmentIds)];
-                const departments = await this.domainDepartmentService.findAll({
-                    where: { id: (0, typeorm_1.In)(setDepartmentIds) },
-                });
-                departmentMap = new Map(departments.map((department) => [
-                    department.id,
-                    { id: department.id, departmentName: department.departmentName },
-                ]));
-            }
+            const scheduleDepartmentPromises = scheduleIds.map((scheduleId) => this.domainScheduleDepartmentService.findDepartmentsByScheduleId(scheduleId));
+            const allScheduleDepartments = await Promise.all(scheduleDepartmentPromises);
+            scheduleIds.forEach((scheduleId, index) => {
+                const scheduleDepartments = allScheduleDepartments[index];
+                if (scheduleDepartments && scheduleDepartments.length > 0) {
+                    const departments = scheduleDepartments.map((dept) => ({
+                        id: dept.departmentId,
+                        departmentName: dept.departmentName,
+                    }));
+                    departmentMap.set(scheduleId, departments);
+                }
+            });
         }
         let participantsMap = new Map();
         if (option?.withParticipants) {
@@ -39283,15 +39457,15 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             }
             const schedule = relation.schedule;
             let project = null;
-            let department = null;
+            let departments = null;
             let reservation = null;
             let resource = null;
             let participants = [];
             if (option?.withProject && relation.projectId) {
                 project = projectMap.get(relation.projectId) || null;
             }
-            if (option?.withDepartment && relation.departmentId) {
-                department = departmentMap.get(relation.departmentId) || null;
+            if (option?.withDepartment) {
+                departments = departmentMap.get(scheduleId) || null;
             }
             if (option?.withReservation && relation.reservation) {
                 reservation = relation.reservation;
@@ -39305,7 +39479,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
             results.push({
                 schedule,
                 project,
-                department,
+                departments,
                 reservation,
                 resource,
                 participants,
@@ -40158,7 +40332,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
 exports.ScheduleQueryContextService = ScheduleQueryContextService;
 exports.ScheduleQueryContextService = ScheduleQueryContextService = ScheduleQueryContextService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _a : Object, typeof (_b = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _b : Object, typeof (_c = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof project_service_1.DomainProjectService !== "undefined" && project_service_1.DomainProjectService) === "function" ? _e : Object, typeof (_f = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _f : Object, typeof (_g = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _g : Object, typeof (_h = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _h : Object, typeof (_j = typeof department_service_1.DomainDepartmentService !== "undefined" && department_service_1.DomainDepartmentService) === "function" ? _j : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _a : Object, typeof (_b = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _b : Object, typeof (_c = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _c : Object, typeof (_d = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _d : Object, typeof (_e = typeof project_service_1.DomainProjectService !== "undefined" && project_service_1.DomainProjectService) === "function" ? _e : Object, typeof (_f = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _f : Object, typeof (_g = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _g : Object, typeof (_h = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _h : Object, typeof (_j = typeof department_service_1.DomainDepartmentService !== "undefined" && department_service_1.DomainDepartmentService) === "function" ? _j : Object, typeof (_k = typeof schedule_department_service_1.DomainScheduleDepartmentService !== "undefined" && schedule_department_service_1.DomainScheduleDepartmentService) === "function" ? _k : Object])
 ], ScheduleQueryContextService);
 
 
@@ -40180,26 +40354,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ScheduleStateTransitionService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const schedule_department_entity_1 = __webpack_require__(/*! @libs/entities/schedule-department.entity */ "./libs/entities/schedule-department.entity.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const schedule_type_enum_1 = __webpack_require__(/*! @libs/enums/schedule-type.enum */ "./libs/enums/schedule-type.enum.ts");
 const schedule_service_1 = __webpack_require__(/*! ../../../domain/schedule/schedule.service */ "./src/domain/schedule/schedule.service.ts");
 const reservation_service_1 = __webpack_require__(/*! ../../../domain/reservation/reservation.service */ "./src/domain/reservation/reservation.service.ts");
 const schedule_relation_service_1 = __webpack_require__(/*! ../../../domain/schedule-relation/schedule-relation.service */ "./src/domain/schedule-relation/schedule-relation.service.ts");
 const schedule_participant_service_1 = __webpack_require__(/*! ../../../domain/schedule-participant/schedule-participant.service */ "./src/domain/schedule-participant/schedule-participant.service.ts");
+const schedule_department_service_1 = __webpack_require__(/*! ../../../domain/schedule-department/schedule-department.service */ "./src/domain/schedule-department/schedule-department.service.ts");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 let ScheduleStateTransitionService = class ScheduleStateTransitionService {
-    constructor(dataSource, domainScheduleService, domainReservationService, domainScheduleRelationService, domainScheduleParticipantService) {
+    constructor(dataSource, domainScheduleService, domainReservationService, domainScheduleRelationService, domainScheduleParticipantService, domainScheduleDepartmentService) {
         this.dataSource = dataSource;
         this.domainScheduleService = domainScheduleService;
         this.domainReservationService = domainReservationService;
         this.domainScheduleRelationService = domainScheduleRelationService;
         this.domainScheduleParticipantService = domainScheduleParticipantService;
+        this.domainScheduleDepartmentService = domainScheduleDepartmentService;
     }
     async 일정을_취소한다(schedule, reservation, cancelReason, queryRunner) {
         const shouldManageTransaction = !queryRunner;
@@ -40470,8 +40647,8 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
         if (infoChanges.projectId !== undefined) {
             await this.프로젝트_관계를_업데이트한다(schedule.scheduleId, infoChanges.projectId, queryRunner);
         }
-        if (infoChanges.departmentId !== undefined) {
-            await this.부서_관계를_업데이트한다(schedule.scheduleId, infoChanges.departmentId, queryRunner);
+        if (infoChanges.departmentIds !== undefined) {
+            await this.부서_관계들을_일괄_업데이트한다(schedule.scheduleId, infoChanges.departmentIds, queryRunner);
         }
         if (Object.keys(updateData).length > 0) {
             await this.domainScheduleService.update(schedule.scheduleId, updateData, { queryRunner });
@@ -40489,9 +40666,17 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
         const existingRelation = await this.domainScheduleRelationService.findByScheduleId(scheduleId);
         await this.domainScheduleRelationService.update(existingRelation.scheduleRelationId, { projectId: newProjectId }, { queryRunner });
     }
-    async 부서_관계를_업데이트한다(scheduleId, newDepartmentId, queryRunner) {
-        const existingRelation = await this.domainScheduleRelationService.findByScheduleId(scheduleId);
-        await this.domainScheduleRelationService.update(existingRelation.scheduleRelationId, { departmentId: newDepartmentId }, { queryRunner });
+    async 부서_관계들을_일괄_업데이트한다(scheduleId, newDepartmentIds, queryRunner) {
+        const scheduleDepartmentRepository = queryRunner.manager.getRepository(schedule_department_entity_1.ScheduleDepartment);
+        await scheduleDepartmentRepository.delete({ scheduleId });
+        if (newDepartmentIds && newDepartmentIds.length > 0) {
+            for (const departmentId of newDepartmentIds) {
+                await scheduleDepartmentRepository.save({
+                    scheduleId,
+                    departmentId,
+                });
+            }
+        }
     }
     async 참여자를_업데이트한다(scheduleId, newParticipants, queryRunner) {
         const previousParticipants = await this.domainScheduleParticipantService.findByScheduleId(scheduleId);
@@ -40529,7 +40714,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
 exports.ScheduleStateTransitionService = ScheduleStateTransitionService;
 exports.ScheduleStateTransitionService = ScheduleStateTransitionService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _b : Object, typeof (_c = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _c : Object, typeof (_d = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _d : Object, typeof (_e = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _e : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof schedule_service_1.DomainScheduleService !== "undefined" && schedule_service_1.DomainScheduleService) === "function" ? _b : Object, typeof (_c = typeof reservation_service_1.DomainReservationService !== "undefined" && reservation_service_1.DomainReservationService) === "function" ? _c : Object, typeof (_d = typeof schedule_relation_service_1.DomainScheduleRelationService !== "undefined" && schedule_relation_service_1.DomainScheduleRelationService) === "function" ? _d : Object, typeof (_e = typeof schedule_participant_service_1.DomainScheduleParticipantService !== "undefined" && schedule_participant_service_1.DomainScheduleParticipantService) === "function" ? _e : Object, typeof (_f = typeof schedule_department_service_1.DomainScheduleDepartmentService !== "undefined" && schedule_department_service_1.DomainScheduleDepartmentService) === "function" ? _f : Object])
 ], ScheduleStateTransitionService);
 
 
@@ -44208,6 +44393,250 @@ exports.DomainResourceService = DomainResourceService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof resource_repository_1.DomainResourceRepository !== "undefined" && resource_repository_1.DomainResourceRepository) === "function" ? _a : Object])
 ], DomainResourceService);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule-department/schedule-department.module.ts":
+/*!**********************************************************************!*\
+  !*** ./src/domain/schedule-department/schedule-department.module.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleDepartmentModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const schedule_department_entity_1 = __webpack_require__(/*! @libs/entities/schedule-department.entity */ "./libs/entities/schedule-department.entity.ts");
+const schedule_department_repository_1 = __webpack_require__(/*! ./schedule-department.repository */ "./src/domain/schedule-department/schedule-department.repository.ts");
+const schedule_department_service_1 = __webpack_require__(/*! ./schedule-department.service */ "./src/domain/schedule-department/schedule-department.service.ts");
+let DomainScheduleDepartmentModule = class DomainScheduleDepartmentModule {
+};
+exports.DomainScheduleDepartmentModule = DomainScheduleDepartmentModule;
+exports.DomainScheduleDepartmentModule = DomainScheduleDepartmentModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([schedule_department_entity_1.ScheduleDepartment])],
+        providers: [schedule_department_repository_1.ScheduleDepartmentRepository, schedule_department_service_1.DomainScheduleDepartmentService],
+        exports: [schedule_department_service_1.DomainScheduleDepartmentService],
+    })
+], DomainScheduleDepartmentModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule-department/schedule-department.repository.ts":
+/*!**************************************************************************!*\
+  !*** ./src/domain/schedule-department/schedule-department.repository.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ScheduleDepartmentRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const schedule_department_entity_1 = __webpack_require__(/*! @libs/entities/schedule-department.entity */ "./libs/entities/schedule-department.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let ScheduleDepartmentRepository = class ScheduleDepartmentRepository extends base_repository_1.BaseRepository {
+    constructor(scheduleDepartmentRepository) {
+        super(scheduleDepartmentRepository);
+        this.scheduleDepartmentRepository = scheduleDepartmentRepository;
+    }
+    async findByScheduleId(scheduleId) {
+        return this.scheduleDepartmentRepository.find({
+            where: { scheduleId },
+            relations: ['department'],
+        });
+    }
+    async findByDepartmentId(departmentId) {
+        return this.scheduleDepartmentRepository.find({
+            where: { departmentId },
+            relations: ['schedule'],
+        });
+    }
+    async findByScheduleAndDepartment(scheduleId, departmentId) {
+        return this.scheduleDepartmentRepository.findOne({
+            where: { scheduleId, departmentId },
+            relations: ['schedule', 'department'],
+        });
+    }
+    async deleteByScheduleId(scheduleId) {
+        await this.scheduleDepartmentRepository.delete({ scheduleId });
+    }
+    async deleteByDepartmentId(departmentId) {
+        await this.scheduleDepartmentRepository.delete({ departmentId });
+    }
+};
+exports.ScheduleDepartmentRepository = ScheduleDepartmentRepository;
+exports.ScheduleDepartmentRepository = ScheduleDepartmentRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(schedule_department_entity_1.ScheduleDepartment)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], ScheduleDepartmentRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/schedule-department/schedule-department.service.ts":
+/*!***********************************************************************!*\
+  !*** ./src/domain/schedule-department/schedule-department.service.ts ***!
+  \***********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var DomainScheduleDepartmentService_1;
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainScheduleDepartmentService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+const schedule_department_repository_1 = __webpack_require__(/*! ./schedule-department.repository */ "./src/domain/schedule-department/schedule-department.repository.ts");
+let DomainScheduleDepartmentService = DomainScheduleDepartmentService_1 = class DomainScheduleDepartmentService extends base_service_1.BaseService {
+    constructor(scheduleDepartmentRepository) {
+        super(scheduleDepartmentRepository);
+        this.scheduleDepartmentRepository = scheduleDepartmentRepository;
+        this.logger = new common_1.Logger(DomainScheduleDepartmentService_1.name);
+    }
+    async createScheduleDepartment(createDto) {
+        try {
+            const existingRelation = await this.scheduleDepartmentRepository.findByScheduleAndDepartment(createDto.scheduleId, createDto.departmentId);
+            if (existingRelation) {
+                this.logger.warn(`일정-부서 관계가 이미 존재합니다: Schedule ${createDto.scheduleId}, Department ${createDto.departmentId}`);
+                return this.toResponseDto(existingRelation);
+            }
+            const scheduleDepartment = await this.create(createDto);
+            const savedRelation = await this.save(scheduleDepartment);
+            this.logger.log(`일정-부서 관계 생성 완료: Schedule ${createDto.scheduleId}, Department ${createDto.departmentId}`);
+            return this.toResponseDto(savedRelation);
+        }
+        catch (error) {
+            this.logger.error(`일정-부서 관계 생성 실패: Schedule ${createDto.scheduleId}, Department ${createDto.departmentId}`, error);
+            throw error;
+        }
+    }
+    async findDepartmentsByScheduleId(scheduleId) {
+        try {
+            const relations = await this.scheduleDepartmentRepository.findByScheduleId(scheduleId);
+            return relations.map((relation) => ({
+                scheduleDepartmentId: relation.scheduleDepartmentId,
+                scheduleId: relation.scheduleId,
+                departmentId: relation.departmentId,
+                departmentName: relation.department?.departmentName || '',
+                createdAt: relation.createdAt,
+            }));
+        }
+        catch (error) {
+            this.logger.error(`일정의 부서 관계 조회 실패: Schedule ${scheduleId}`, error);
+            throw error;
+        }
+    }
+    async findSchedulesByDepartmentId(departmentId) {
+        try {
+            const relations = await this.scheduleDepartmentRepository.findByDepartmentId(departmentId);
+            return relations.map((relation) => this.toResponseDto(relation));
+        }
+        catch (error) {
+            this.logger.error(`부서의 일정 관계 조회 실패: Department ${departmentId}`, error);
+            throw error;
+        }
+    }
+    async deleteScheduleDepartment(scheduleId, departmentId) {
+        try {
+            const relation = await this.scheduleDepartmentRepository.findByScheduleAndDepartment(scheduleId, departmentId);
+            if (!relation) {
+                throw new common_1.NotFoundException(`일정-부서 관계를 찾을 수 없습니다: Schedule ${scheduleId}, Department ${departmentId}`);
+            }
+            await this.scheduleDepartmentRepository.delete(relation.scheduleDepartmentId);
+            this.logger.log(`일정-부서 관계 삭제 완료: Schedule ${scheduleId}, Department ${departmentId}`);
+        }
+        catch (error) {
+            this.logger.error(`일정-부서 관계 삭제 실패: Schedule ${scheduleId}, Department ${departmentId}`, error);
+            throw error;
+        }
+    }
+    async deleteAllDepartmentsByScheduleId(scheduleId) {
+        try {
+            await this.scheduleDepartmentRepository.deleteByScheduleId(scheduleId);
+            this.logger.log(`일정의 모든 부서 관계 삭제 완료: Schedule ${scheduleId}`);
+        }
+        catch (error) {
+            this.logger.error(`일정의 모든 부서 관계 삭제 실패: Schedule ${scheduleId}`, error);
+            throw error;
+        }
+    }
+    async deleteAllSchedulesByDepartmentId(departmentId) {
+        try {
+            await this.scheduleDepartmentRepository.deleteByDepartmentId(departmentId);
+            this.logger.log(`부서의 모든 일정 관계 삭제 완료: Department ${departmentId}`);
+        }
+        catch (error) {
+            this.logger.error(`부서의 모든 일정 관계 삭제 실패: Department ${departmentId}`, error);
+            throw error;
+        }
+    }
+    async updateScheduleDepartments(scheduleId, departmentIds) {
+        try {
+            await this.deleteAllDepartmentsByScheduleId(scheduleId);
+            const results = [];
+            for (const departmentId of departmentIds) {
+                const relation = await this.createScheduleDepartment({
+                    scheduleId,
+                    departmentId,
+                });
+                results.push(relation);
+            }
+            this.logger.log(`일정의 부서 관계 일괄 업데이트 완료: Schedule ${scheduleId}, Departments [${departmentIds.join(', ')}]`);
+            return results;
+        }
+        catch (error) {
+            this.logger.error(`일정의 부서 관계 일괄 업데이트 실패: Schedule ${scheduleId}`, error);
+            throw error;
+        }
+    }
+    toResponseDto(scheduleDepartment) {
+        return {
+            scheduleDepartmentId: scheduleDepartment.scheduleDepartmentId,
+            scheduleId: scheduleDepartment.scheduleId,
+            departmentId: scheduleDepartment.departmentId,
+            createdAt: scheduleDepartment.createdAt,
+        };
+    }
+};
+exports.DomainScheduleDepartmentService = DomainScheduleDepartmentService;
+exports.DomainScheduleDepartmentService = DomainScheduleDepartmentService = DomainScheduleDepartmentService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof schedule_department_repository_1.ScheduleDepartmentRepository !== "undefined" && schedule_department_repository_1.ScheduleDepartmentRepository) === "function" ? _a : Object])
+], DomainScheduleDepartmentService);
 
 
 /***/ }),

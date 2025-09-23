@@ -32,6 +32,7 @@ import { ScheduleRelation } from './schedule-relations.entity';
 import { RequestLog } from './request-log.entity';
 import { Department } from './department.entity';
 import { DepartmentEmployee } from './department-employee.entity';
+import { ScheduleDepartment } from './schedule-department.entity';
 
 export const Entities = [
     Employee,
@@ -66,6 +67,7 @@ export const Entities = [
     RequestLog,
     Department,
     DepartmentEmployee,
+    ScheduleDepartment,
 ];
 
 export const EntitiesMap = {
@@ -101,6 +103,7 @@ export const EntitiesMap = {
     RequestLog,
     Department,
     DepartmentEmployee,
+    ScheduleDepartment,
 };
 
 export {
@@ -136,4 +139,5 @@ export {
     RequestLog,
     Department,
     DepartmentEmployee,
+    ScheduleDepartment,
 };

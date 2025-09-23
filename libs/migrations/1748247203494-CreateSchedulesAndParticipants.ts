@@ -124,7 +124,6 @@ export class CreateSchedulesAndParticipants1748247203494 implements MigrationInt
                 "scheduleId" uuid NOT NULL,
                 "reservationId" uuid,
                 "projectId" uuid,
-                "departmentId" uuid,
                 CONSTRAINT "PK_schedule_relations" PRIMARY KEY ("scheduleRelationId"),
                 CONSTRAINT "FK_schedule_relations_schedule" FOREIGN KEY ("scheduleId") REFERENCES "schedules"("scheduleId") ON DELETE CASCADE
             );
@@ -133,7 +132,6 @@ export class CreateSchedulesAndParticipants1748247203494 implements MigrationInt
             COMMENT ON COLUMN "schedule_relations"."scheduleId" IS '일정 ID';
             COMMENT ON COLUMN "schedule_relations"."reservationId" IS '예약 ID';
             COMMENT ON COLUMN "schedule_relations"."projectId" IS '프로젝트 ID';
-            COMMENT ON COLUMN "schedule_relations"."departmentId" IS '부서 ID';
         `);
 
         // 인덱스 생성
@@ -166,9 +164,6 @@ export class CreateSchedulesAndParticipants1748247203494 implements MigrationInt
         );
         await queryRunner.query(
             `CREATE INDEX IF NOT EXISTS "IDX_schedule_relations_projectId" ON "schedule_relations" ("projectId")`,
-        );
-        await queryRunner.query(
-            `CREATE INDEX IF NOT EXISTS "IDX_schedule_relations_departmentId" ON "schedule_relations" ("departmentId")`,
         );
 
         // backfill schedules from reservations (use reservationId as scheduleId for stable mapping)
@@ -245,7 +240,7 @@ export class CreateSchedulesAndParticipants1748247203494 implements MigrationInt
             AND "completionReason" IS NULL
         `);
 
-        // Schedule Relations에 추가 외래키 제약조건 설정 (reservations 및 departments 테이블 참조)
+        // Schedule Relations에 추가 외래키 제약조건 설정 (reservations 테이블 참조)
         await queryRunner.query(`
             ALTER TABLE "schedule_relations" 
             ADD CONSTRAINT "FK_schedule_relations_reservationId" 
@@ -254,24 +249,10 @@ export class CreateSchedulesAndParticipants1748247203494 implements MigrationInt
             ON DELETE SET NULL 
             ON UPDATE NO ACTION
         `);
-
-        await queryRunner.query(`
-            ALTER TABLE "schedule_relations" 
-            ADD CONSTRAINT "FK_schedule_relations_departmentId" 
-            FOREIGN KEY ("departmentId") 
-            REFERENCES "departments"("id") 
-            ON DELETE SET NULL 
-            ON UPDATE NO ACTION
-        `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
         // Schedule Relations 외래키 제약조건 제거
-        await queryRunner.query(`
-            ALTER TABLE "schedule_relations" 
-            DROP CONSTRAINT IF EXISTS "FK_schedule_relations_departmentId"
-        `);
-
         await queryRunner.query(`
             ALTER TABLE "schedule_relations" 
             DROP CONSTRAINT IF EXISTS "FK_schedule_relations_reservationId"
@@ -306,7 +287,6 @@ export class CreateSchedulesAndParticipants1748247203494 implements MigrationInt
             WHERE s."scheduleId" = r."reservationId";
         `);
         // 인덱스 삭제
-        await queryRunner.query(`DROP INDEX IF EXISTS "IDX_schedule_relations_departmentId"`);
         await queryRunner.query(`DROP INDEX IF EXISTS "IDX_schedule_relations_projectId"`);
         await queryRunner.query(`DROP INDEX IF EXISTS "IDX_schedule_relations_reservationId"`);
         await queryRunner.query(`DROP INDEX IF EXISTS "IDX_schedule_relations_scheduleId"`);

@@ -3,6 +3,7 @@ import { DataSource, QueryRunner } from 'typeorm';
 import { DomainScheduleService } from '@src/domain/schedule/schedule.service';
 import { DomainScheduleParticipantService } from '@src/domain/schedule-participant/schedule-participant.service';
 import { DomainScheduleRelationService } from '@src/domain/schedule-relation/schedule-relation.service';
+import { DomainScheduleDepartmentService } from '@src/domain/schedule-department/schedule-department.service';
 import { ReservationContextService } from '../../reservation/services/reservation.context.service';
 import { Employee } from '@libs/entities/employee.entity';
 import {
@@ -30,6 +31,7 @@ export class ScheduleMutationContextService {
         private readonly domainScheduleService: DomainScheduleService,
         private readonly domainScheduleParticipantService: DomainScheduleParticipantService,
         private readonly domainScheduleRelationService: DomainScheduleRelationService,
+        private readonly domainScheduleDepartmentService: DomainScheduleDepartmentService,
         private readonly reservationContextService: ReservationContextService,
     ) {}
 
@@ -96,13 +98,41 @@ export class ScheduleMutationContextService {
             scheduleId: relationData.scheduleId,
             projectId: relationData.projectId,
             reservationId: relationData.reservationId,
-            departmentId: relationData.departmentId,
         };
 
         // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
         return await this.domainScheduleRelationService.save(relationEntity, {
             queryRunner: queryRunner,
         });
+    }
+
+    /**
+     * 일정 부서 관계들을 생성합니다
+     */
+    async 일정_부서관계들을_생성한다(
+        scheduleId: string,
+        departmentIds: string[],
+        queryRunner?: QueryRunner,
+    ): Promise<void> {
+        if (!departmentIds || departmentIds.length === 0) {
+            return;
+        }
+
+        // 각 부서별로 관계 생성
+        for (const departmentId of departmentIds) {
+            const createDto = {
+                scheduleId,
+                departmentId,
+            };
+
+            // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
+            // DomainScheduleDepartmentService.save 메서드를 직접 사용
+            await this.domainScheduleDepartmentService.save(createDto, {
+                queryRunner: queryRunner,
+            });
+        }
+
+        this.logger.log(`일정 부서 관계 생성 완료: Schedule ${scheduleId}, Departments [${departmentIds.join(', ')}]`);
     }
 
     /**
@@ -282,7 +312,7 @@ export class ScheduleMutationContextService {
             projectSelection?: {
                 projectId: string;
             };
-            departmentId?: string;
+            departmentIds?: string[];
         },
     ): Promise<{ success: boolean; schedule?: Schedule; reason?: string }> {
         const queryRunner = this.dataSource.createQueryRunner();
@@ -362,15 +392,19 @@ export class ScheduleMutationContextService {
                 }
             }
 
-            // 4) 일정관계정보 생성
+            // 4) 일정관계정보 생성 (예약, 프로젝트 관계)
             const relationData = {
                 scheduleId: createdSchedule.scheduleId!,
                 projectId: data.projectSelection?.projectId || null,
                 reservationId: reservationId,
-                departmentId: data.departmentId || null,
             };
 
             await this.일정관계정보를_생성한다(relationData, queryRunner);
+
+            // 5) 부서 관계 정보 생성 (새로운 schedule_departments 테이블 사용)
+            if (data.departmentIds && data.departmentIds.length > 0) {
+                await this.일정_부서관계들을_생성한다(createdSchedule.scheduleId!, data.departmentIds, queryRunner);
+            }
 
             // 트랜잭션 커밋
             await queryRunner.commitTransaction();

@@ -125,13 +125,15 @@ export class ScheduleUpdateInfoDto {
     participants?: string[];
 
     @ApiProperty({
-        description: '부서 ID',
-        example: '123e4567-e89b-12d3-a456-426614174000',
+        description: '부서 ID 목록 (여러 부서 선택 가능)',
+        example: ['123e4567-e89b-12d3-a456-426614174000', '456e7890-a12b-34c5-d678-901234567890'],
         required: false,
+        type: [String],
     })
     @IsOptional()
-    @IsUUID()
-    departmentId?: string;
+    @IsArray()
+    @IsUUID('4', { each: true })
+    departmentIds?: string[];
 }
 
 export class ScheduleUpdateResourceDto {
@@ -171,7 +173,7 @@ export class ScheduleUpdateRequestDto {
             scheduleDepartment: '123e4567-e89b-12d3-a456-426614174000',
             projectId: '123e4567-e89b-12d3-a456-426614174000',
             participants: ['123e4567-e89b-12d3-a456-426614174000'],
-            departmentId: '123e4567-e89b-12d3-a456-426614174000',
+            departmentIds: ['123e4567-e89b-12d3-a456-426614174000', '456e7890-a12b-34c5-d678-901234567890'],
         },
     })
     info?: ScheduleUpdateInfoDto;

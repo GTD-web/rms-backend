@@ -348,11 +348,11 @@ export class ScheduleDetailResponseDto {
     project?: ScheduleDetailProjectDto;
 
     @ApiProperty({
-        description: '관련 부서 정보 (옵션)',
-        type: ScheduleDetailDepartmentDto,
+        description: '관련 부서 정보 목록 (옵션)',
+        type: [ScheduleDetailDepartmentDto],
         required: false,
     })
-    department?: ScheduleDetailDepartmentDto;
+    departments?: ScheduleDetailDepartmentDto[];
 
     @ApiProperty({
         description: '관련 자원예약 정보 (옵션)',

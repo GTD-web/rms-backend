@@ -545,7 +545,7 @@ export class ScheduleManagementService {
         if (scheduleData === null) {
             throw new NotFoundException(`일정을 찾을 수 없습니다. ID: ${scheduleId}`);
         }
-        const { schedule, project, department, reservation, resource, participants } = scheduleData;
+        const { schedule, project, departments, reservation, resource, participants } = scheduleData;
         const reserver = participants?.find((p) => p.type === ParticipantsType.RESERVER);
         const regularParticipants = participants?.filter((p) => p.type !== ParticipantsType.RESERVER) || [];
 
@@ -558,7 +558,10 @@ export class ScheduleManagementService {
 
         const projectDto = project ? ScheduleDetailProjectDto.fromProject(project) : undefined;
 
-        const departmentDto = department ? ScheduleDetailDepartmentDto.fromDepartment(department) : undefined;
+        const departmentsDto =
+            departments && departments.length > 0
+                ? departments.map((dept) => ScheduleDetailDepartmentDto.fromDepartment(dept))
+                : undefined;
 
         // 예약 정보 DTO 변환 (자원 타입별 상세 정보 포함)
         let reservationDto: ScheduleDetailReservationDto | undefined = undefined;
@@ -604,7 +607,7 @@ export class ScheduleManagementService {
             reserver: reserverDto,
             participants: participantsDto,
             project: projectDto,
-            department: departmentDto,
+            departments: departmentsDto,
             reservation: reservationDto,
         };
     }
@@ -645,7 +648,7 @@ export class ScheduleManagementService {
                     participants,
                     projectSelection,
                     resourceSelection,
-                    departmentId,
+                    departmentIds,
                 } = createScheduleDto;
 
                 // 2. 그래프 조회: 컨텍스트에서 사전 검증 및 정보 조회 (레거시 로직 유지)
@@ -700,7 +703,7 @@ export class ScheduleManagementService {
                         dateRange,
                         resourceSelection,
                         projectSelection,
-                        departmentId,
+                        departmentIds,
                     };
 
                     const result = {
@@ -793,15 +796,23 @@ export class ScheduleManagementService {
                             }
                         }
 
-                        // 4) 일정관계정보 생성
+                        // 4) 일정관계정보 생성 (예약, 프로젝트 관계)
                         const relationData = {
                             scheduleId: createdSchedule.scheduleId!,
                             projectId: data.projectSelection?.projectId || null,
                             reservationId: reservationId,
-                            departmentId: data.departmentId || null,
                         };
 
                         await this.scheduleMutationService.일정관계정보를_생성한다(relationData, queryRunner);
+
+                        // 5) 부서 관계 정보 생성 (컨텍스트 서비스 사용)
+                        if (data.departmentIds && data.departmentIds.length > 0) {
+                            await this.scheduleMutationService.일정_부서관계들을_생성한다(
+                                createdSchedule.scheduleId!,
+                                data.departmentIds,
+                                queryRunner,
+                            );
+                        }
 
                         // 트랜잭션 커밋
                         await queryRunner.commitTransaction();
@@ -853,10 +864,19 @@ export class ScheduleManagementService {
                                 withResource: true,
                             },
                         );
+
+                    // 알림 전송 대상 조회 (공통 함수 사용)
+                    const notificationTargets = await this.일정_종류별_알림_대상을_조회한다(
+                        scheduleType,
+                        user.employeeId,
+                        participants,
+                        departmentIds,
+                    );
+
                     const systemAdmins = await this.employeeContextService.시스템관리자_목록을_조회한다();
                     await this.scheduleNotificationContextService.일정_생성_알림을_전송한다(
                         { schedule, reservation, resource },
-                        [user.employeeId, ...(participants?.map((participant) => participant.employeeId) || [])],
+                        notificationTargets,
                         systemAdmins.map((admin) => admin.employeeId),
                     );
                 }
@@ -1172,6 +1192,7 @@ export class ScheduleManagementService {
                               updateDto.info?.scheduleType === ScheduleType.DEPARTMENT ? user.department : null,
                           projectId: updateDto.info?.projectId,
                           participants: updateDto.info?.participants,
+                          departmentIds: updateDto.info?.departmentIds,
                       }
                     : undefined,
 
@@ -1193,27 +1214,34 @@ export class ScheduleManagementService {
 
         const {
             schedule: newSchedule,
+            departments,
             resource,
             participants,
         } = await this.scheduleQueryContextService.일정과_관계정보들을_조회한다(scheduleId, {
             withReservation: true,
             withResource: true,
             withParticipants: true,
+            withDepartment: true,
         });
 
-        const employeeIds =
+        // 참여자 변경 여부에 따라 알림 대상 참여자 구성
+        const targetParticipants =
             updateScenarios.isInfoUpdate && updateResult.participantChanges
-                ? Array.from(
-                      new Set([
-                          ...updateResult.participantChanges.previousParticipants.map(
-                              (participant) => participant.employeeId,
-                          ),
-                          ...updateResult.participantChanges.newParticipants.map(
-                              (participant) => participant.employeeId,
-                          ),
-                      ]),
-                  )
-                : participants.map((participant) => participant.employeeId);
+                ? [
+                      ...updateResult.participantChanges.previousParticipants,
+                      ...updateResult.participantChanges.newParticipants,
+                  ]
+                : participants;
+
+        const departmentIds = departments && departments.length > 0 ? departments.map((dept) => dept.id) : undefined;
+
+        // 일정 종류별 알림 대상 조회 (공통 함수 사용)
+        const employeeIds = await this.일정_종류별_알림_대상을_조회한다(
+            newSchedule.scheduleType,
+            user.employeeId,
+            targetParticipants,
+            departmentIds,
+        );
 
         // 참여자 수정 시에만 알림 전송
         updateScenarios.isInfoUpdate = updateResult.changes.includes('참여자 수정');
@@ -1229,5 +1257,53 @@ export class ScheduleManagementService {
 
         // 6. 응답 DTO 변환
         return true;
+    }
+
+    /**
+     * 일정 종류별 알림 대상을 조회한다 (공통 함수)
+     */
+    private async 일정_종류별_알림_대상을_조회한다(
+        scheduleType: ScheduleType,
+        creatorEmployeeId: string,
+        participants?: any[],
+        departmentIds?: string[],
+    ): Promise<string[]> {
+        const notificationTargets: string[] = [creatorEmployeeId]; // 기본적으로 생성자/수정자 포함
+
+        switch (scheduleType) {
+            case ScheduleType.PERSONAL:
+                // 개인 일정: 참가자들
+                if (participants && participants.length > 0) {
+                    notificationTargets.push(...participants.map((participant) => participant.employeeId));
+                }
+                break;
+
+            case ScheduleType.DEPARTMENT:
+                // 부서 일정: 선택된 모든 부서의 구성원들 (하위 부서 포함)
+                if (departmentIds && departmentIds.length > 0) {
+                    for (const departmentId of departmentIds) {
+                        const departmentEmployees =
+                            await this.employeeContextService.부서별_직원_목록을_조회한다(departmentId);
+                        notificationTargets.push(...departmentEmployees.map((emp) => emp.employeeId));
+                    }
+                }
+                break;
+
+            case ScheduleType.COMPANY:
+                // 회사 일정: 재직중인 모든 직원
+                const activeEmployees = await this.employeeContextService.재직중인_전체_직원을_조회한다();
+                notificationTargets.push(...activeEmployees.map((emp) => emp.employeeId));
+                break;
+
+            default:
+                // 기본값: 참가자들 (PERSONAL과 동일)
+                if (participants && participants.length > 0) {
+                    notificationTargets.push(...participants.map((participant) => participant.employeeId));
+                }
+                break;
+        }
+
+        // 중복 제거
+        return [...new Set(notificationTargets)];
     }
 }

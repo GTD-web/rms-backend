@@ -184,13 +184,15 @@ export class ScheduleCreateRequestDto {
     resourceSelection?: ResourceSelectionDto;
 
     @ApiProperty({
-        description: '부서 ID',
-        example: 'uuid-string',
+        description: '부서 ID 목록 (여러 부서 선택 가능)',
+        example: ['uuid-string-1', 'uuid-string-2'],
         required: false,
+        type: [String],
     })
     @IsOptional()
-    @IsUUID()
-    departmentId?: string;
+    @IsArray()
+    @IsUUID('4', { each: true })
+    departmentIds?: string[];
 }
 
 /**
@@ -214,7 +216,7 @@ export class ScheduleCreateRequestListDto {
                 notifyBeforeStart: true,
                 notificationMinutes: [10],
                 scheduleType: ScheduleType.DEPARTMENT,
-                departmentId: 'uuid-string',
+                departmentIds: ['uuid-string-1', 'uuid-string-2'],
                 participants: [
                     {
                         employeeId: 'uuid-string',
@@ -234,7 +236,7 @@ export class ScheduleCreateRequestListDto {
                 notifyBeforeStart: true,
                 notificationMinutes: [5],
                 scheduleType: ScheduleType.PERSONAL,
-                departmentId: 'uuid-string',
+                departmentIds: ['uuid-string-1', 'uuid-string-2'],
                 participants: [
                     {
                         employeeId: 'uuid-string',
