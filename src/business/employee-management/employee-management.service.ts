@@ -5,6 +5,11 @@ import { EmplyeesByDepartmentResponseDto } from './dtos/employees-by-department-
 import { UserResponseDto } from './dtos/user-response.dto';
 import { ChangeRoleDto } from './dtos/change-role.dto';
 import { UpdateNotificationSettingsDto } from './dtos/notification-settings.dto';
+import {
+    DepartmentListResponseDto,
+    DepartmentHierarchyResponseDto,
+    DepartmentResponseDto,
+} from './dtos/department-response.dto';
 
 @Injectable()
 export class EmployeeManagementService {
@@ -15,8 +20,9 @@ export class EmployeeManagementService {
     }
 
     async syncEmployees(authorization: string): Promise<void> {
-        await this.employeeContextService.직원_정보를_동기화한다(authorization);
-        await this.syncSubscription();
+        await this.employeeContextService.전체_조직_정보를_동기화한다(authorization);
+        // await this.employeeContextService.직원_정보를_동기화한다(authorization);
+        // await this.syncSubscription();
     }
 
     async syncSubscription(): Promise<void> {
@@ -38,6 +44,61 @@ export class EmployeeManagementService {
 
     async findEmployeeList(): Promise<EmplyeesByDepartmentResponseDto[]> {
         return this.employeeContextService.직원_목록을_조회한다();
+    }
+
+    async findAllDepartments(): Promise<DepartmentListResponseDto> {
+        const departments = await this.employeeContextService.모든_부서를_조회한다();
+
+        return {
+            departments: departments,
+            totalCount: departments.length,
+        };
+    }
+
+    async findSubDepartments(): Promise<DepartmentListResponseDto> {
+        const departments = await this.employeeContextService.하위_부서_목록을_조회한다();
+
+        return {
+            departments: departments,
+            totalCount: departments.length,
+        };
+    }
+
+    async findRootDepartments(): Promise<DepartmentListResponseDto> {
+        const departments = await this.employeeContextService.루트_부서_목록을_조회한다();
+
+        return {
+            departments: departments,
+            totalCount: departments.length,
+        };
+    }
+
+    async findDepartmentHierarchy(): Promise<DepartmentHierarchyResponseDto> {
+        const hierarchy = await this.employeeContextService.부서_계층구조를_조회한다();
+
+        // 총 부서 수 계산 (재귀적으로)
+        const calculateTotalCount = (depts: any[]): number => {
+            return depts.reduce((total, dept) => {
+                return total + 1 + calculateTotalCount(dept.childDepartments || []);
+            }, 0);
+        };
+
+        // 최대 깊이 계산 (재귀적으로)
+        const calculateMaxDepth = (depts: any[], currentDepth = 0): number => {
+            if (depts.length === 0) return currentDepth;
+
+            return Math.max(...depts.map((dept) => calculateMaxDepth(dept.childDepartments || [], currentDepth + 1)));
+        };
+
+        const totalCount = calculateTotalCount(hierarchy);
+        const maxDepth = calculateMaxDepth(hierarchy);
+
+        return {
+            departments: hierarchy,
+            totalCount: totalCount,
+            rootCount: hierarchy.length,
+            maxDepth: maxDepth,
+        };
     }
 
     async findEmployeeDetail(employeeId: string): Promise<UserResponseDto> {

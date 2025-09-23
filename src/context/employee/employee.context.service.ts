@@ -1,5 +1,7 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
+import { DomainDepartmentService } from '@src/domain/department/department.service';
+import { DomainDepartmentEmployeeService } from '@src/domain/department-employee/department-employee.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { In, IsNull, Not, Raw } from 'typeorm';
 import { EmployeeResponseDto } from '@src/business/employee-management/dtos/employee-response.dto';
@@ -13,12 +15,19 @@ import * as bcrypt from 'bcrypt';
 import axios from 'axios';
 import { Employee } from '@libs/entities/employee.entity';
 import { EmployeeMicroserviceAdapter } from '@src/domain/employee/adapters/employee-microservice.adapter';
+import { DepartmentMicroserviceAdapter } from '@src/domain/department/adapters/department-microservice.adapter';
+import { DepartmentHierarchyResponseDto } from '@src/domain/department/dtos/department-response.dto';
 
 @Injectable()
 export class EmployeeContextService {
+    private readonly logger = new Logger(EmployeeContextService.name);
+
     constructor(
         private readonly domainEmployeeService: DomainEmployeeService,
         private readonly employeeMicroserviceAdapter: EmployeeMicroserviceAdapter,
+        private readonly domainDepartmentService: DomainDepartmentService,
+        private readonly domainDepartmentEmployeeService: DomainDepartmentEmployeeService,
+        private readonly departmentMicroserviceAdapter: DepartmentMicroserviceAdapter,
     ) {}
 
     async 시스템관리자_목록을_조회한다(): Promise<Employee[]> {
@@ -273,6 +282,211 @@ export class EmployeeContextService {
         return this.직원_목록을_조회한다();
     }
 
+    /**
+     * 외부 시스템에서 부서 정보를 동기화하고 직원을 배치합니다
+     */
+    async 부서_정보를_동기화한다(): Promise<DepartmentHierarchyResponseDto> {
+        try {
+            this.logger.log('외부 시스템에서 부서 및 직원 배치 정보 동기화 시작...');
+
+            // 외부 시스템에서 부서 계층구조 데이터 가져오기
+            const departmentHierarchy = await this.departmentMicroserviceAdapter.fetchDepartmentHierarchy();
+
+            // 1단계: 모든 부서를 평면적으로 수집
+            const allDepartments = this.모든_부서를_평면적으로_수집한다(departmentHierarchy.departments);
+
+            // 2단계: 부서 정보 저장 (parentDepartmentId 없이)
+            const departmentIdMapping = await this.모든_부서를_저장한다(allDepartments);
+
+            // 3단계: 부서 간 관계 설정
+            await this.부서_관계를_설정한다(allDepartments, departmentIdMapping);
+
+            this.logger.log(
+                `부서 및 직원 배치 정보 동기화 완료: 총 ${departmentHierarchy.totalDepartments}개 부서, ${departmentHierarchy.totalEmployees}명 직원`,
+            );
+
+            return departmentHierarchy;
+        } catch (error) {
+            this.logger.error('부서 및 직원 배치 정보 동기화 실패:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 계층구조를 평면적인 배열로 변환합니다
+     */
+    private 모든_부서를_평면적으로_수집한다(departments: any[]): any[] {
+        const allDepartments: any[] = [];
+
+        const collectRecursively = (depts: any[]) => {
+            for (const dept of depts) {
+                allDepartments.push(dept);
+                if (dept.childDepartments && dept.childDepartments.length > 0) {
+                    collectRecursively(dept.childDepartments);
+                }
+            }
+        };
+
+        collectRecursively(departments);
+        return allDepartments;
+    }
+
+    /**
+     * 모든 부서를 parentDepartmentId 없이 저장합니다
+     */
+    private async 모든_부서를_저장한다(allDepartments: any[]): Promise<Map<string, string>> {
+        const departmentIdMapping = new Map<string, string>(); // 외부ID -> 내부ID 매핑
+
+        for (const dept of allDepartments) {
+            try {
+                // 기존 부서 확인
+                const existingDepartment = await this.domainDepartmentService.findOne({
+                    where: { departmentCode: dept.departmentCode } as any,
+                });
+
+                let savedDepartment;
+
+                if (!existingDepartment) {
+                    // 새 부서 생성 (parentDepartmentId 없이)
+                    const departmentData = {
+                        departmentName: dept.departmentName,
+                        departmentCode: dept.departmentCode,
+                        type: dept.type,
+                        order: dept.order,
+                    };
+
+                    const createdDepartment = await this.domainDepartmentService.create(departmentData);
+                    savedDepartment = await this.domainDepartmentService.save(createdDepartment);
+
+                    this.logger.log(`새 부서 생성: ${dept.departmentName} (${dept.departmentCode})`);
+                } else {
+                    // 기존 부서 업데이트 (parentDepartmentId 제외)
+                    existingDepartment.departmentName = dept.departmentName;
+                    existingDepartment.type = dept.type;
+                    existingDepartment.order = dept.order;
+
+                    savedDepartment = await this.domainDepartmentService.save(existingDepartment);
+
+                    this.logger.log(`부서 업데이트: ${dept.departmentName} (${dept.departmentCode})`);
+                }
+
+                // 외부 ID와 내부 ID 매핑 저장
+                departmentIdMapping.set(dept.id, savedDepartment.id);
+            } catch (error) {
+                this.logger.error(`부서 저장 실패: ${dept.departmentName} (${dept.departmentCode})`, error);
+            }
+        }
+
+        return departmentIdMapping;
+    }
+
+    /**
+     * 부서 간 관계를 설정합니다
+     */
+    private async 부서_관계를_설정한다(allDepartments: any[], departmentIdMapping: Map<string, string>): Promise<void> {
+        for (const dept of allDepartments) {
+            try {
+                // 상위 부서가 있는 경우에만 관계 설정
+                if (dept.parentDepartmentId) {
+                    const internalDepartmentId = departmentIdMapping.get(dept.id);
+                    const internalParentId = departmentIdMapping.get(dept.parentDepartmentId);
+
+                    if (internalDepartmentId && internalParentId) {
+                        // 부서 업데이트 (parentDepartmentId 설정)
+                        await this.domainDepartmentService.update(internalDepartmentId, {
+                            parentDepartmentId: internalParentId,
+                        });
+
+                        this.logger.log(`부서 관계 설정: ${dept.departmentName} → 상위부서 ID: ${internalParentId}`);
+                    } else {
+                        this.logger.warn(
+                            `부서 관계 설정 실패: 매핑되지 않은 ID - 부서: ${dept.id}, 상위부서: ${dept.parentDepartmentId}`,
+                        );
+                    }
+                }
+            } catch (error) {
+                this.logger.error(`부서 관계 설정 실패: ${dept.departmentName}`, error);
+            }
+        }
+    }
+
+    /**
+     * 각 부서의 직원 배치 정보를 저장합니다
+     */
+    private async 직원_배치_정보를_저장한다(departments: any[]): Promise<void> {
+        // 모든 부서를 평면적으로 수집
+        const allDepartments = this.모든_부서를_평면적으로_수집한다(departments);
+
+        for (const dept of allDepartments) {
+            try {
+                // 부서 정보 조회
+                const department = await this.domainDepartmentService.findOne({
+                    where: { departmentCode: dept.departmentCode } as any,
+                });
+
+                if (!department) {
+                    this.logger.warn(`부서를 찾을 수 없음: ${dept.departmentCode}`);
+                    continue;
+                }
+
+                // 새로운 직원 배치
+                for (const emp of dept.employees || []) {
+                    try {
+                        // employeeNumber로 기존 직원 조회
+                        const employee = await this.domainEmployeeService.findByEmployeeNumber(emp.employeeNumber);
+
+                        if (!employee) {
+                            this.logger.warn(`직원을 찾을 수 없음: ${emp.employeeNumber} (${emp.name})`);
+                            continue;
+                        }
+
+                        // 부서-직원 관계 생성
+                        const relationData = {
+                            departmentId: department.id,
+                            employeeId: employee.employeeId,
+                            isManager: false, // 필요시 외부 데이터에서 매핑
+                            startDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD 형식
+                            isActive: true,
+                        };
+
+                        const relation = await this.domainDepartmentEmployeeService.create(relationData);
+                        await this.domainDepartmentEmployeeService.save(relation);
+
+                        this.logger.log(`직원 배치 완료: ${emp.name} (${emp.employeeNumber}) → ${dept.departmentName}`);
+                    } catch (error) {
+                        this.logger.error(`직원 배치 실패: ${emp.employeeNumber} (${emp.name})`, error);
+                    }
+                }
+            } catch (error) {
+                this.logger.error(`부서 직원 배치 실패: ${dept.departmentName}`, error);
+            }
+        }
+    }
+
+    /**
+     * 직원 정보와 부서 정보를 모두 동기화합니다
+     */
+    async 전체_조직_정보를_동기화한다(authorization: string): Promise<EmplyeesByDepartmentResponseDto[]> {
+        try {
+            this.logger.log('전체 조직 정보 동기화 시작...');
+
+            // 1. 부서 정보 동기화
+            const departmentHierarchy = await this.부서_정보를_동기화한다();
+
+            // 2. 직원 정보 동기화
+            await this.직원_정보를_동기화한다(authorization);
+
+            // 3단계: 직원 배치 정보 저장
+            await this.직원_배치_정보를_저장한다(departmentHierarchy.departments);
+
+            this.logger.log('전체 조직 정보 동기화 완료');
+            return this.직원_목록을_조회한다();
+        } catch (error) {
+            this.logger.error('전체 조직 정보 동기화 실패:', error);
+            throw error;
+        }
+    }
+
     async 구독정보를_동기화한다(): Promise<void> {
         const employees = await this.domainEmployeeService.findAll({
             where: {
@@ -290,6 +504,133 @@ export class EmployeeContextService {
                 console.log('구독 정보 동기화 성공', count, employee.name, employee.employeeNumber);
                 count++;
             }
+        }
+    }
+
+    /**
+     * 모든 부서 목록을 조회합니다
+     */
+    async 모든_부서를_조회한다(): Promise<any[]> {
+        try {
+            const departments = await this.domainDepartmentService.findAll();
+
+            return departments.map((dept) => ({
+                id: dept.id,
+                departmentName: dept.departmentName,
+                departmentCode: dept.departmentCode,
+                type: dept.type,
+                parentDepartmentId: dept.parentDepartmentId,
+                order: dept.order,
+                createdAt: dept.createdAt,
+                updatedAt: dept.updatedAt,
+            }));
+        } catch (error) {
+            this.logger.error('부서 목록 조회 실패:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 하위 부서 목록만 조회합니다 (부모 부서가 있는 부서들)
+     */
+    async 하위_부서_목록을_조회한다(): Promise<any[]> {
+        try {
+            // parentDepartmentId가 null이 아닌 부서들만 조회
+            const departments = await this.domainDepartmentService.findAll({
+                where: {
+                    parentDepartmentId: Not(IsNull()),
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+
+            this.logger.log(`하위 부서 목록 조회 완료: ${departments.length}개 부서`);
+
+            return departments.map((dept) => ({
+                id: dept.id,
+                departmentName: dept.departmentName,
+                departmentCode: dept.departmentCode,
+                type: dept.type,
+                parentDepartmentId: dept.parentDepartmentId,
+                order: dept.order,
+                createdAt: dept.createdAt,
+                updatedAt: dept.updatedAt,
+            }));
+        } catch (error) {
+            this.logger.error('하위 부서 목록 조회 실패:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 루트 부서 목록만 조회합니다 (부모 부서가 없는 부서들)
+     */
+    async 루트_부서_목록을_조회한다(): Promise<any[]> {
+        try {
+            // parentDepartmentId가 null인 부서들만 조회
+            const departments = await this.domainDepartmentService.findAll({
+                where: {
+                    parentDepartmentId: IsNull(),
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+
+            this.logger.log(`루트 부서 목록 조회 완료: ${departments.length}개 부서`);
+
+            return departments.map((dept) => ({
+                id: dept.id,
+                departmentName: dept.departmentName,
+                departmentCode: dept.departmentCode,
+                type: dept.type,
+                parentDepartmentId: dept.parentDepartmentId,
+                order: dept.order,
+                createdAt: dept.createdAt,
+                updatedAt: dept.updatedAt,
+            }));
+        } catch (error) {
+            this.logger.error('루트 부서 목록 조회 실패:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 부서 계층구조를 트리 형태로 조회합니다
+     */
+    async 부서_계층구조를_조회한다(): Promise<any[]> {
+        try {
+            // 모든 부서 조회
+            const allDepartments = await this.모든_부서를_조회한다();
+
+            // 루트 부서들 찾기
+            const rootDepartments = allDepartments.filter((dept) => !dept.parentDepartmentId);
+
+            // 각 루트 부서에 대해 하위 부서들을 재귀적으로 연결
+            const buildHierarchy = (parentDept: any): any => {
+                const children = allDepartments
+                    .filter((dept) => dept.parentDepartmentId === parentDept.id)
+                    .map((child) => buildHierarchy(child))
+                    .sort((a, b) => a.order - b.order);
+
+                return {
+                    ...parentDept,
+                    childDepartments: children,
+                    childDepartmentCount: children.length,
+                };
+            };
+
+            const hierarchy = rootDepartments.map((root) => buildHierarchy(root)).sort((a, b) => a.order - b.order);
+
+            this.logger.log(
+                `부서 계층구조 조회 완료: 루트 ${rootDepartments.length}개, 전체 ${allDepartments.length}개 부서`,
+            );
+
+            return hierarchy;
+        } catch (error) {
+            this.logger.error('부서 계층구조 조회 실패:', error);
+            return [];
         }
     }
 

@@ -668,6 +668,155 @@ exports.Consumable = Consumable = __decorate([
 
 /***/ }),
 
+/***/ "./libs/entities/department-employee.entity.ts":
+/*!*****************************************************!*\
+  !*** ./libs/entities/department-employee.entity.ts ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DepartmentEmployee = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const department_entity_1 = __webpack_require__(/*! ./department.entity */ "./libs/entities/department.entity.ts");
+const employee_entity_1 = __webpack_require__(/*! ./employee.entity */ "./libs/entities/employee.entity.ts");
+let DepartmentEmployee = class DepartmentEmployee {
+};
+exports.DepartmentEmployee = DepartmentEmployee;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], DepartmentEmployee.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '부서 ID', type: 'uuid' }),
+    __metadata("design:type", String)
+], DepartmentEmployee.prototype, "departmentId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '직원 ID', type: 'uuid' }),
+    __metadata("design:type", String)
+], DepartmentEmployee.prototype, "employeeId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '부서장 여부', default: false }),
+    __metadata("design:type", Boolean)
+], DepartmentEmployee.prototype, "isManager", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '소속 시작일', type: 'date' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], DepartmentEmployee.prototype, "startDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '소속 종료일', type: 'date', nullable: true }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], DepartmentEmployee.prototype, "endDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '활성 상태', default: true }),
+    __metadata("design:type", Boolean)
+], DepartmentEmployee.prototype, "isActive", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => department_entity_1.Department, { nullable: false }),
+    (0, typeorm_1.JoinColumn)({ name: 'departmentId' }),
+    __metadata("design:type", typeof (_c = typeof department_entity_1.Department !== "undefined" && department_entity_1.Department) === "function" ? _c : Object)
+], DepartmentEmployee.prototype, "department", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => employee_entity_1.Employee, { nullable: false }),
+    (0, typeorm_1.JoinColumn)({ name: 'employeeId' }),
+    __metadata("design:type", typeof (_d = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _d : Object)
+], DepartmentEmployee.prototype, "employee", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ comment: '생성일' }),
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+], DepartmentEmployee.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ comment: '수정일' }),
+    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
+], DepartmentEmployee.prototype, "updatedAt", void 0);
+exports.DepartmentEmployee = DepartmentEmployee = __decorate([
+    (0, typeorm_1.Entity)('department_employees')
+], DepartmentEmployee);
+
+
+/***/ }),
+
+/***/ "./libs/entities/department.entity.ts":
+/*!********************************************!*\
+  !*** ./libs/entities/department.entity.ts ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Department = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let Department = class Department {
+};
+exports.Department = Department;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], Department.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '부서명' }),
+    __metadata("design:type", String)
+], Department.prototype, "departmentName", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ unique: true, comment: '부서 코드' }),
+    __metadata("design:type", String)
+], Department.prototype, "departmentCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '유형' }),
+    __metadata("design:type", String)
+], Department.prototype, "type", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '상위 부서 ID', type: 'uuid', nullable: true }),
+    __metadata("design:type", String)
+], Department.prototype, "parentDepartmentId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ comment: '정렬 순서', default: 0 }),
+    __metadata("design:type", Number)
+], Department.prototype, "order", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Department, (department) => department.childDepartments, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'parentDepartmentId' }),
+    __metadata("design:type", Department)
+], Department.prototype, "parentDepartment", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => Department, (department) => department.parentDepartment),
+    __metadata("design:type", Array)
+], Department.prototype, "childDepartments", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ comment: '생성일' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], Department.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ comment: '수정일' }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], Department.prototype, "updatedAt", void 0);
+exports.Department = Department = __decorate([
+    (0, typeorm_1.Entity)('departments')
+], Department);
+
+
+/***/ }),
+
 /***/ "./libs/entities/employee-notification.entity.ts":
 /*!*******************************************************!*\
   !*** ./libs/entities/employee-notification.entity.ts ***!
@@ -1157,7 +1306,7 @@ exports.File = File = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RequestLog = exports.ScheduleRelation = exports.ScheduleParticipant = exports.Schedule = exports.FileVehicleInfo = exports.FileResource = exports.FileReservationVehicle = exports.FileMaintenance = exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.NotificationTypeEntity = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
+exports.DepartmentEmployee = exports.Department = exports.RequestLog = exports.ScheduleRelation = exports.ScheduleParticipant = exports.Schedule = exports.FileVehicleInfo = exports.FileResource = exports.FileReservationVehicle = exports.FileMaintenance = exports.ConsumableMaintenanceStats = exports.VehicleMaintenanceHistory = exports.ResourceUsageStats = exports.EmployeeReservationStats = exports.File = exports.EmployeeNotification = exports.NotificationTypeEntity = exports.Notification = exports.Maintenance = exports.Consumable = exports.ResourceManager = exports.ReservationParticipant = exports.ReservationSnapshot = exports.ReservationVehicle = exports.Reservation = exports.EquipmentInfo = exports.AccommodationInfo = exports.MeetingRoomInfo = exports.VehicleInfo = exports.ResourceGroup = exports.Resource = exports.Employee = exports.EntitiesMap = exports.Entities = void 0;
 const employee_entity_1 = __webpack_require__(/*! ./employee.entity */ "./libs/entities/employee.entity.ts");
 Object.defineProperty(exports, "Employee", ({ enumerable: true, get: function () { return employee_entity_1.Employee; } }));
 const resource_entity_1 = __webpack_require__(/*! ./resource.entity */ "./libs/entities/resource.entity.ts");
@@ -1215,6 +1364,10 @@ const schedule_relations_entity_1 = __webpack_require__(/*! ./schedule-relations
 Object.defineProperty(exports, "ScheduleRelation", ({ enumerable: true, get: function () { return schedule_relations_entity_1.ScheduleRelation; } }));
 const request_log_entity_1 = __webpack_require__(/*! ./request-log.entity */ "./libs/entities/request-log.entity.ts");
 Object.defineProperty(exports, "RequestLog", ({ enumerable: true, get: function () { return request_log_entity_1.RequestLog; } }));
+const department_entity_1 = __webpack_require__(/*! ./department.entity */ "./libs/entities/department.entity.ts");
+Object.defineProperty(exports, "Department", ({ enumerable: true, get: function () { return department_entity_1.Department; } }));
+const department_employee_entity_1 = __webpack_require__(/*! ./department-employee.entity */ "./libs/entities/department-employee.entity.ts");
+Object.defineProperty(exports, "DepartmentEmployee", ({ enumerable: true, get: function () { return department_employee_entity_1.DepartmentEmployee; } }));
 exports.Entities = [
     employee_entity_1.Employee,
     resource_entity_1.Resource,
@@ -1246,6 +1399,8 @@ exports.Entities = [
     schedule_relations_entity_1.ScheduleRelation,
     schedule_participant_entity_1.ScheduleParticipant,
     request_log_entity_1.RequestLog,
+    department_entity_1.Department,
+    department_employee_entity_1.DepartmentEmployee,
 ];
 exports.EntitiesMap = {
     Employee: employee_entity_1.Employee,
@@ -1278,6 +1433,8 @@ exports.EntitiesMap = {
     ScheduleParticipant: schedule_participant_entity_1.ScheduleParticipant,
     ScheduleRelation: schedule_relations_entity_1.ScheduleRelation,
     RequestLog: request_log_entity_1.RequestLog,
+    Department: department_entity_1.Department,
+    DepartmentEmployee: department_employee_entity_1.DepartmentEmployee,
 };
 
 
@@ -20749,6 +20906,106 @@ exports.AuthManagementModule = AuthManagementModule = __decorate([
 
 /***/ }),
 
+/***/ "./src/business/employee-management/controllers/department.controller.ts":
+/*!*******************************************************************************!*\
+  !*** ./src/business/employee-management/controllers/department.controller.ts ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DepartmentController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const api_responses_decorator_1 = __webpack_require__(/*! @libs/decorators/api-responses.decorator */ "./libs/decorators/api-responses.decorator.ts");
+const employee_management_service_1 = __webpack_require__(/*! ../employee-management.service */ "./src/business/employee-management/employee-management.service.ts");
+const department_response_dto_1 = __webpack_require__(/*! ../dtos/department-response.dto */ "./src/business/employee-management/dtos/department-response.dto.ts");
+let DepartmentController = class DepartmentController {
+    constructor(employeeManagementService) {
+        this.employeeManagementService = employeeManagementService;
+    }
+    async findAllDepartments() {
+        return this.employeeManagementService.findAllDepartments();
+    }
+    async findSubDepartments() {
+        return this.employeeManagementService.findSubDepartments();
+    }
+    async findRootDepartments() {
+        return this.employeeManagementService.findRootDepartments();
+    }
+    async findDepartmentHierarchy() {
+        return this.employeeManagementService.findDepartmentHierarchy();
+    }
+};
+exports.DepartmentController = DepartmentController;
+__decorate([
+    (0, common_1.Get)(''),
+    (0, swagger_1.ApiOperation)({ summary: '전체 부서 목록 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '전체 부서 목록을 성공적으로 조회했습니다.',
+        type: department_response_dto_1.DepartmentListResponseDto,
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], DepartmentController.prototype, "findAllDepartments", null);
+__decorate([
+    (0, common_1.Get)('sub-departments'),
+    (0, swagger_1.ApiOperation)({ summary: '하위 부서 목록 조회 (부모 부서가 있는 부서들)' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '하위 부서 목록을 성공적으로 조회했습니다.',
+        type: department_response_dto_1.DepartmentListResponseDto,
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], DepartmentController.prototype, "findSubDepartments", null);
+__decorate([
+    (0, common_1.Get)('root-departments'),
+    (0, swagger_1.ApiOperation)({ summary: '루트 부서 목록 조회 (최상위 부서들)' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '루트 부서 목록을 성공적으로 조회했습니다.',
+        type: department_response_dto_1.DepartmentListResponseDto,
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], DepartmentController.prototype, "findRootDepartments", null);
+__decorate([
+    (0, common_1.Get)('hierarchy'),
+    (0, swagger_1.ApiOperation)({ summary: '부서 계층구조 조회' }),
+    (0, api_responses_decorator_1.ApiDataResponse)({
+        status: 200,
+        description: '부서 계층구조를 성공적으로 조회했습니다.',
+        type: department_response_dto_1.DepartmentHierarchyResponseDto,
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], DepartmentController.prototype, "findDepartmentHierarchy", null);
+exports.DepartmentController = DepartmentController = __decorate([
+    (0, swagger_1.ApiTags)('v2 부서   '),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Controller)('v2/departments'),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_management_service_1.EmployeeManagementService !== "undefined" && employee_management_service_1.EmployeeManagementService) === "function" ? _a : Object])
+], DepartmentController);
+
+
+/***/ }),
+
 /***/ "./src/business/employee-management/controllers/employee.controller.ts":
 /*!*****************************************************************************!*\
   !*** ./src/business/employee-management/controllers/employee.controller.ts ***!
@@ -21206,6 +21463,147 @@ __decorate([
 
 /***/ }),
 
+/***/ "./src/business/employee-management/dtos/department-response.dto.ts":
+/*!**************************************************************************!*\
+  !*** ./src/business/employee-management/dtos/department-response.dto.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DepartmentHierarchyResponseDto = exports.DepartmentListResponseDto = exports.DepartmentHierarchyDto = exports.DepartmentResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class DepartmentResponseDto {
+}
+exports.DepartmentResponseDto = DepartmentResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서 ID' }),
+    __metadata("design:type", String)
+], DepartmentResponseDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서명' }),
+    __metadata("design:type", String)
+], DepartmentResponseDto.prototype, "departmentName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서 코드' }),
+    __metadata("design:type", String)
+], DepartmentResponseDto.prototype, "departmentCode", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서 유형' }),
+    __metadata("design:type", String)
+], DepartmentResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: '상위 부서 ID' }),
+    __metadata("design:type", String)
+], DepartmentResponseDto.prototype, "parentDepartmentId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '정렬 순서' }),
+    __metadata("design:type", Number)
+], DepartmentResponseDto.prototype, "order", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '생성일' }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], DepartmentResponseDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '수정일' }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], DepartmentResponseDto.prototype, "updatedAt", void 0);
+class DepartmentHierarchyDto {
+}
+exports.DepartmentHierarchyDto = DepartmentHierarchyDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서 ID' }),
+    __metadata("design:type", String)
+], DepartmentHierarchyDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서명' }),
+    __metadata("design:type", String)
+], DepartmentHierarchyDto.prototype, "departmentName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서 코드' }),
+    __metadata("design:type", String)
+], DepartmentHierarchyDto.prototype, "departmentCode", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '부서 유형' }),
+    __metadata("design:type", String)
+], DepartmentHierarchyDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: '상위 부서 ID' }),
+    __metadata("design:type", String)
+], DepartmentHierarchyDto.prototype, "parentDepartmentId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '정렬 순서' }),
+    __metadata("design:type", Number)
+], DepartmentHierarchyDto.prototype, "order", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '생성일' }),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], DepartmentHierarchyDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '수정일' }),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], DepartmentHierarchyDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '하위 부서 목록',
+        type: [DepartmentHierarchyDto],
+    }),
+    __metadata("design:type", Array)
+], DepartmentHierarchyDto.prototype, "childDepartments", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '하위 부서 수' }),
+    __metadata("design:type", Number)
+], DepartmentHierarchyDto.prototype, "childDepartmentCount", void 0);
+class DepartmentListResponseDto {
+}
+exports.DepartmentListResponseDto = DepartmentListResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '부서 목록',
+        type: [DepartmentResponseDto],
+    }),
+    __metadata("design:type", Array)
+], DepartmentListResponseDto.prototype, "departments", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '총 부서 수' }),
+    __metadata("design:type", Number)
+], DepartmentListResponseDto.prototype, "totalCount", void 0);
+class DepartmentHierarchyResponseDto {
+}
+exports.DepartmentHierarchyResponseDto = DepartmentHierarchyResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '부서 계층구조',
+        type: [DepartmentHierarchyDto],
+    }),
+    __metadata("design:type", Array)
+], DepartmentHierarchyResponseDto.prototype, "departments", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '총 부서 수' }),
+    __metadata("design:type", Number)
+], DepartmentHierarchyResponseDto.prototype, "totalCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '루트 부서 수' }),
+    __metadata("design:type", Number)
+], DepartmentHierarchyResponseDto.prototype, "rootCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '최대 깊이' }),
+    __metadata("design:type", Number)
+], DepartmentHierarchyResponseDto.prototype, "maxDepth", void 0);
+
+
+/***/ }),
+
 /***/ "./src/business/employee-management/dtos/employee-response.dto.ts":
 /*!************************************************************************!*\
   !*** ./src/business/employee-management/dtos/employee-response.dto.ts ***!
@@ -21576,13 +21974,20 @@ const user_controller_1 = __webpack_require__(/*! ./controllers/user.controller 
 const employee_management_service_1 = __webpack_require__(/*! ./employee-management.service */ "./src/business/employee-management/employee-management.service.ts");
 const employee_context_module_1 = __webpack_require__(/*! @src/context/employee/employee.context.module */ "./src/context/employee/employee.context.module.ts");
 const webhook_controller_1 = __webpack_require__(/*! ./controllers/webhook.controller */ "./src/business/employee-management/controllers/webhook.controller.ts");
+const department_controller_1 = __webpack_require__(/*! ./controllers/department.controller */ "./src/business/employee-management/controllers/department.controller.ts");
 let EmployeeManagementModule = class EmployeeManagementModule {
 };
 exports.EmployeeManagementModule = EmployeeManagementModule;
 exports.EmployeeManagementModule = EmployeeManagementModule = __decorate([
     (0, common_1.Module)({
         imports: [employee_context_module_1.EmployeeContextModule],
-        controllers: [resource_manager_controller_1.ResourceManagerController, employee_controller_1.EmployeeController, user_controller_1.UserController, webhook_controller_1.EmployeeWebhookController],
+        controllers: [
+            resource_manager_controller_1.ResourceManagerController,
+            employee_controller_1.EmployeeController,
+            user_controller_1.UserController,
+            webhook_controller_1.EmployeeWebhookController,
+            department_controller_1.DepartmentController,
+        ],
         providers: [employee_management_service_1.EmployeeManagementService],
         exports: [employee_management_service_1.EmployeeManagementService],
     })
@@ -21619,8 +22024,7 @@ let EmployeeManagementService = class EmployeeManagementService {
     onModuleInit() {
     }
     async syncEmployees(authorization) {
-        await this.employeeContextService.직원_정보를_동기화한다(authorization);
-        await this.syncSubscription();
+        await this.employeeContextService.전체_조직_정보를_동기화한다(authorization);
     }
     async syncSubscription() {
         await this.employeeContextService.구독정보를_동기화한다();
@@ -21637,6 +22041,48 @@ let EmployeeManagementService = class EmployeeManagementService {
     }
     async findEmployeeList() {
         return this.employeeContextService.직원_목록을_조회한다();
+    }
+    async findAllDepartments() {
+        const departments = await this.employeeContextService.모든_부서를_조회한다();
+        return {
+            departments: departments,
+            totalCount: departments.length,
+        };
+    }
+    async findSubDepartments() {
+        const departments = await this.employeeContextService.하위_부서_목록을_조회한다();
+        return {
+            departments: departments,
+            totalCount: departments.length,
+        };
+    }
+    async findRootDepartments() {
+        const departments = await this.employeeContextService.루트_부서_목록을_조회한다();
+        return {
+            departments: departments,
+            totalCount: departments.length,
+        };
+    }
+    async findDepartmentHierarchy() {
+        const hierarchy = await this.employeeContextService.부서_계층구조를_조회한다();
+        const calculateTotalCount = (depts) => {
+            return depts.reduce((total, dept) => {
+                return total + 1 + calculateTotalCount(dept.childDepartments || []);
+            }, 0);
+        };
+        const calculateMaxDepth = (depts, currentDepth = 0) => {
+            if (depts.length === 0)
+                return currentDepth;
+            return Math.max(...depts.map((dept) => calculateMaxDepth(dept.childDepartments || [], currentDepth + 1)));
+        };
+        const totalCount = calculateTotalCount(hierarchy);
+        const maxDepth = calculateMaxDepth(hierarchy);
+        return {
+            departments: hierarchy,
+            totalCount: totalCount,
+            rootCount: hierarchy.length,
+            maxDepth: maxDepth,
+        };
     }
     async findEmployeeDetail(employeeId) {
         return this.employeeContextService.직원_상세정보를_조회한다(employeeId);
@@ -32256,12 +32702,14 @@ exports.EmployeeContextModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_context_service_1 = __webpack_require__(/*! ./employee.context.service */ "./src/context/employee/employee.context.service.ts");
 const employee_module_1 = __webpack_require__(/*! @src/domain/employee/employee.module */ "./src/domain/employee/employee.module.ts");
+const department_module_1 = __webpack_require__(/*! @src/domain/department/department.module */ "./src/domain/department/department.module.ts");
+const department_employee_module_1 = __webpack_require__(/*! @src/domain/department-employee/department-employee.module */ "./src/domain/department-employee/department-employee.module.ts");
 let EmployeeContextModule = class EmployeeContextModule {
 };
 exports.EmployeeContextModule = EmployeeContextModule;
 exports.EmployeeContextModule = EmployeeContextModule = __decorate([
     (0, common_1.Module)({
-        imports: [employee_module_1.DomainEmployeeModule],
+        imports: [employee_module_1.DomainEmployeeModule, department_module_1.DomainDepartmentModule, department_employee_module_1.DomainDepartmentEmployeeModule],
         providers: [employee_context_service_1.EmployeeContextService],
         exports: [employee_context_service_1.EmployeeContextService],
     })
@@ -32286,21 +32734,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var EmployeeContextService_1;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
+const department_service_1 = __webpack_require__(/*! @src/domain/department/department.service */ "./src/domain/department/department.service.ts");
+const department_employee_service_1 = __webpack_require__(/*! @src/domain/department-employee/department-employee.service */ "./src/domain/department-employee/department-employee.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
 const axios_1 = __webpack_require__(/*! axios */ "axios");
 const employee_microservice_adapter_1 = __webpack_require__(/*! @src/domain/employee/adapters/employee-microservice.adapter */ "./src/domain/employee/adapters/employee-microservice.adapter.ts");
-let EmployeeContextService = class EmployeeContextService {
-    constructor(domainEmployeeService, employeeMicroserviceAdapter) {
+const department_microservice_adapter_1 = __webpack_require__(/*! @src/domain/department/adapters/department-microservice.adapter */ "./src/domain/department/adapters/department-microservice.adapter.ts");
+let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextService {
+    constructor(domainEmployeeService, employeeMicroserviceAdapter, domainDepartmentService, domainDepartmentEmployeeService, departmentMicroserviceAdapter) {
         this.domainEmployeeService = domainEmployeeService;
         this.employeeMicroserviceAdapter = employeeMicroserviceAdapter;
+        this.domainDepartmentService = domainDepartmentService;
+        this.domainDepartmentEmployeeService = domainDepartmentEmployeeService;
+        this.departmentMicroserviceAdapter = departmentMicroserviceAdapter;
+        this.logger = new common_1.Logger(EmployeeContextService_1.name);
     }
     async 시스템관리자_목록을_조회한다() {
         const systemAdmins = await this.domainEmployeeService.findAll({
@@ -32496,6 +32952,143 @@ let EmployeeContextService = class EmployeeContextService {
         }
         return this.직원_목록을_조회한다();
     }
+    async 부서_정보를_동기화한다() {
+        try {
+            this.logger.log('외부 시스템에서 부서 및 직원 배치 정보 동기화 시작...');
+            const departmentHierarchy = await this.departmentMicroserviceAdapter.fetchDepartmentHierarchy();
+            const allDepartments = this.모든_부서를_평면적으로_수집한다(departmentHierarchy.departments);
+            const departmentIdMapping = await this.모든_부서를_저장한다(allDepartments);
+            await this.부서_관계를_설정한다(allDepartments, departmentIdMapping);
+            this.logger.log(`부서 및 직원 배치 정보 동기화 완료: 총 ${departmentHierarchy.totalDepartments}개 부서, ${departmentHierarchy.totalEmployees}명 직원`);
+            return departmentHierarchy;
+        }
+        catch (error) {
+            this.logger.error('부서 및 직원 배치 정보 동기화 실패:', error);
+            throw error;
+        }
+    }
+    모든_부서를_평면적으로_수집한다(departments) {
+        const allDepartments = [];
+        const collectRecursively = (depts) => {
+            for (const dept of depts) {
+                allDepartments.push(dept);
+                if (dept.childDepartments && dept.childDepartments.length > 0) {
+                    collectRecursively(dept.childDepartments);
+                }
+            }
+        };
+        collectRecursively(departments);
+        return allDepartments;
+    }
+    async 모든_부서를_저장한다(allDepartments) {
+        const departmentIdMapping = new Map();
+        for (const dept of allDepartments) {
+            try {
+                const existingDepartment = await this.domainDepartmentService.findOne({
+                    where: { departmentCode: dept.departmentCode },
+                });
+                let savedDepartment;
+                if (!existingDepartment) {
+                    const departmentData = {
+                        departmentName: dept.departmentName,
+                        departmentCode: dept.departmentCode,
+                        type: dept.type,
+                        order: dept.order,
+                    };
+                    const createdDepartment = await this.domainDepartmentService.create(departmentData);
+                    savedDepartment = await this.domainDepartmentService.save(createdDepartment);
+                    this.logger.log(`새 부서 생성: ${dept.departmentName} (${dept.departmentCode})`);
+                }
+                else {
+                    existingDepartment.departmentName = dept.departmentName;
+                    existingDepartment.type = dept.type;
+                    existingDepartment.order = dept.order;
+                    savedDepartment = await this.domainDepartmentService.save(existingDepartment);
+                    this.logger.log(`부서 업데이트: ${dept.departmentName} (${dept.departmentCode})`);
+                }
+                departmentIdMapping.set(dept.id, savedDepartment.id);
+            }
+            catch (error) {
+                this.logger.error(`부서 저장 실패: ${dept.departmentName} (${dept.departmentCode})`, error);
+            }
+        }
+        return departmentIdMapping;
+    }
+    async 부서_관계를_설정한다(allDepartments, departmentIdMapping) {
+        for (const dept of allDepartments) {
+            try {
+                if (dept.parentDepartmentId) {
+                    const internalDepartmentId = departmentIdMapping.get(dept.id);
+                    const internalParentId = departmentIdMapping.get(dept.parentDepartmentId);
+                    if (internalDepartmentId && internalParentId) {
+                        await this.domainDepartmentService.update(internalDepartmentId, {
+                            parentDepartmentId: internalParentId,
+                        });
+                        this.logger.log(`부서 관계 설정: ${dept.departmentName} → 상위부서 ID: ${internalParentId}`);
+                    }
+                    else {
+                        this.logger.warn(`부서 관계 설정 실패: 매핑되지 않은 ID - 부서: ${dept.id}, 상위부서: ${dept.parentDepartmentId}`);
+                    }
+                }
+            }
+            catch (error) {
+                this.logger.error(`부서 관계 설정 실패: ${dept.departmentName}`, error);
+            }
+        }
+    }
+    async 직원_배치_정보를_저장한다(departments) {
+        const allDepartments = this.모든_부서를_평면적으로_수집한다(departments);
+        for (const dept of allDepartments) {
+            try {
+                const department = await this.domainDepartmentService.findOne({
+                    where: { departmentCode: dept.departmentCode },
+                });
+                if (!department) {
+                    this.logger.warn(`부서를 찾을 수 없음: ${dept.departmentCode}`);
+                    continue;
+                }
+                for (const emp of dept.employees || []) {
+                    try {
+                        const employee = await this.domainEmployeeService.findByEmployeeNumber(emp.employeeNumber);
+                        if (!employee) {
+                            this.logger.warn(`직원을 찾을 수 없음: ${emp.employeeNumber} (${emp.name})`);
+                            continue;
+                        }
+                        const relationData = {
+                            departmentId: department.id,
+                            employeeId: employee.employeeId,
+                            isManager: false,
+                            startDate: new Date().toISOString().split('T')[0],
+                            isActive: true,
+                        };
+                        const relation = await this.domainDepartmentEmployeeService.create(relationData);
+                        await this.domainDepartmentEmployeeService.save(relation);
+                        this.logger.log(`직원 배치 완료: ${emp.name} (${emp.employeeNumber}) → ${dept.departmentName}`);
+                    }
+                    catch (error) {
+                        this.logger.error(`직원 배치 실패: ${emp.employeeNumber} (${emp.name})`, error);
+                    }
+                }
+            }
+            catch (error) {
+                this.logger.error(`부서 직원 배치 실패: ${dept.departmentName}`, error);
+            }
+        }
+    }
+    async 전체_조직_정보를_동기화한다(authorization) {
+        try {
+            this.logger.log('전체 조직 정보 동기화 시작...');
+            const departmentHierarchy = await this.부서_정보를_동기화한다();
+            await this.직원_정보를_동기화한다(authorization);
+            await this.직원_배치_정보를_저장한다(departmentHierarchy.departments);
+            this.logger.log('전체 조직 정보 동기화 완료');
+            return this.직원_목록을_조회한다();
+        }
+        catch (error) {
+            this.logger.error('전체 조직 정보 동기화 실패:', error);
+            throw error;
+        }
+    }
     async 구독정보를_동기화한다() {
         const employees = await this.domainEmployeeService.findAll({
             where: {
@@ -32515,6 +33108,103 @@ let EmployeeContextService = class EmployeeContextService {
             }
         }
     }
+    async 모든_부서를_조회한다() {
+        try {
+            const departments = await this.domainDepartmentService.findAll();
+            return departments.map((dept) => ({
+                id: dept.id,
+                departmentName: dept.departmentName,
+                departmentCode: dept.departmentCode,
+                type: dept.type,
+                parentDepartmentId: dept.parentDepartmentId,
+                order: dept.order,
+                createdAt: dept.createdAt,
+                updatedAt: dept.updatedAt,
+            }));
+        }
+        catch (error) {
+            this.logger.error('부서 목록 조회 실패:', error);
+            return [];
+        }
+    }
+    async 하위_부서_목록을_조회한다() {
+        try {
+            const departments = await this.domainDepartmentService.findAll({
+                where: {
+                    parentDepartmentId: (0, typeorm_1.Not)((0, typeorm_1.IsNull)()),
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+            this.logger.log(`하위 부서 목록 조회 완료: ${departments.length}개 부서`);
+            return departments.map((dept) => ({
+                id: dept.id,
+                departmentName: dept.departmentName,
+                departmentCode: dept.departmentCode,
+                type: dept.type,
+                parentDepartmentId: dept.parentDepartmentId,
+                order: dept.order,
+                createdAt: dept.createdAt,
+                updatedAt: dept.updatedAt,
+            }));
+        }
+        catch (error) {
+            this.logger.error('하위 부서 목록 조회 실패:', error);
+            return [];
+        }
+    }
+    async 루트_부서_목록을_조회한다() {
+        try {
+            const departments = await this.domainDepartmentService.findAll({
+                where: {
+                    parentDepartmentId: (0, typeorm_1.IsNull)(),
+                },
+                order: {
+                    order: 'ASC',
+                },
+            });
+            this.logger.log(`루트 부서 목록 조회 완료: ${departments.length}개 부서`);
+            return departments.map((dept) => ({
+                id: dept.id,
+                departmentName: dept.departmentName,
+                departmentCode: dept.departmentCode,
+                type: dept.type,
+                parentDepartmentId: dept.parentDepartmentId,
+                order: dept.order,
+                createdAt: dept.createdAt,
+                updatedAt: dept.updatedAt,
+            }));
+        }
+        catch (error) {
+            this.logger.error('루트 부서 목록 조회 실패:', error);
+            return [];
+        }
+    }
+    async 부서_계층구조를_조회한다() {
+        try {
+            const allDepartments = await this.모든_부서를_조회한다();
+            const rootDepartments = allDepartments.filter((dept) => !dept.parentDepartmentId);
+            const buildHierarchy = (parentDept) => {
+                const children = allDepartments
+                    .filter((dept) => dept.parentDepartmentId === parentDept.id)
+                    .map((child) => buildHierarchy(child))
+                    .sort((a, b) => a.order - b.order);
+                return {
+                    ...parentDept,
+                    childDepartments: children,
+                    childDepartmentCount: children.length,
+                };
+            };
+            const hierarchy = rootDepartments.map((root) => buildHierarchy(root)).sort((a, b) => a.order - b.order);
+            this.logger.log(`부서 계층구조 조회 완료: 루트 ${rootDepartments.length}개, 전체 ${allDepartments.length}개 부서`);
+            return hierarchy;
+        }
+        catch (error) {
+            this.logger.error('부서 계층구조 조회 실패:', error);
+            return [];
+        }
+    }
     부서별로_그룹핑한다(employees) {
         const departments = new Map();
         employees.forEach((employee) => {
@@ -32530,9 +33220,9 @@ let EmployeeContextService = class EmployeeContextService {
     }
 };
 exports.EmployeeContextService = EmployeeContextService;
-exports.EmployeeContextService = EmployeeContextService = __decorate([
+exports.EmployeeContextService = EmployeeContextService = EmployeeContextService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object, typeof (_b = typeof employee_microservice_adapter_1.EmployeeMicroserviceAdapter !== "undefined" && employee_microservice_adapter_1.EmployeeMicroserviceAdapter) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.DomainEmployeeService !== "undefined" && employee_service_1.DomainEmployeeService) === "function" ? _a : Object, typeof (_b = typeof employee_microservice_adapter_1.EmployeeMicroserviceAdapter !== "undefined" && employee_microservice_adapter_1.EmployeeMicroserviceAdapter) === "function" ? _b : Object, typeof (_c = typeof department_service_1.DomainDepartmentService !== "undefined" && department_service_1.DomainDepartmentService) === "function" ? _c : Object, typeof (_d = typeof department_employee_service_1.DomainDepartmentEmployeeService !== "undefined" && department_employee_service_1.DomainDepartmentEmployeeService) === "function" ? _d : Object, typeof (_e = typeof department_microservice_adapter_1.DepartmentMicroserviceAdapter !== "undefined" && department_microservice_adapter_1.DepartmentMicroserviceAdapter) === "function" ? _e : Object])
 ], EmployeeContextService);
 
 
@@ -39984,6 +40674,330 @@ exports.DomainConsumableService = DomainConsumableService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof consumable_repository_1.DomainConsumableRepository !== "undefined" && consumable_repository_1.DomainConsumableRepository) === "function" ? _a : Object])
 ], DomainConsumableService);
+
+
+/***/ }),
+
+/***/ "./src/domain/department-employee/department-employee.module.ts":
+/*!**********************************************************************!*\
+  !*** ./src/domain/department-employee/department-employee.module.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainDepartmentEmployeeModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const department_employee_service_1 = __webpack_require__(/*! ./department-employee.service */ "./src/domain/department-employee/department-employee.service.ts");
+const department_employee_repository_1 = __webpack_require__(/*! ./department-employee.repository */ "./src/domain/department-employee/department-employee.repository.ts");
+const department_employee_entity_1 = __webpack_require__(/*! @libs/entities/department-employee.entity */ "./libs/entities/department-employee.entity.ts");
+let DomainDepartmentEmployeeModule = class DomainDepartmentEmployeeModule {
+};
+exports.DomainDepartmentEmployeeModule = DomainDepartmentEmployeeModule;
+exports.DomainDepartmentEmployeeModule = DomainDepartmentEmployeeModule = __decorate([
+    (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([department_employee_entity_1.DepartmentEmployee])],
+        providers: [department_employee_service_1.DomainDepartmentEmployeeService, department_employee_repository_1.DomainDepartmentEmployeeRepository],
+        exports: [department_employee_service_1.DomainDepartmentEmployeeService],
+    })
+], DomainDepartmentEmployeeModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/department-employee/department-employee.repository.ts":
+/*!**************************************************************************!*\
+  !*** ./src/domain/department-employee/department-employee.repository.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainDepartmentEmployeeRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const department_employee_entity_1 = __webpack_require__(/*! @libs/entities/department-employee.entity */ "./libs/entities/department-employee.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainDepartmentEmployeeRepository = class DomainDepartmentEmployeeRepository extends base_repository_1.BaseRepository {
+    constructor(departmentEmployeeRepository) {
+        super(departmentEmployeeRepository);
+        this.departmentEmployeeRepository = departmentEmployeeRepository;
+    }
+};
+exports.DomainDepartmentEmployeeRepository = DomainDepartmentEmployeeRepository;
+exports.DomainDepartmentEmployeeRepository = DomainDepartmentEmployeeRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(department_employee_entity_1.DepartmentEmployee)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainDepartmentEmployeeRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/department-employee/department-employee.service.ts":
+/*!***********************************************************************!*\
+  !*** ./src/domain/department-employee/department-employee.service.ts ***!
+  \***********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var DomainDepartmentEmployeeService_1;
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainDepartmentEmployeeService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const department_employee_repository_1 = __webpack_require__(/*! ./department-employee.repository */ "./src/domain/department-employee/department-employee.repository.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainDepartmentEmployeeService = DomainDepartmentEmployeeService_1 = class DomainDepartmentEmployeeService extends base_service_1.BaseService {
+    constructor(departmentEmployeeRepository) {
+        super(departmentEmployeeRepository);
+        this.departmentEmployeeRepository = departmentEmployeeRepository;
+        this.logger = new common_1.Logger(DomainDepartmentEmployeeService_1.name);
+    }
+};
+exports.DomainDepartmentEmployeeService = DomainDepartmentEmployeeService;
+exports.DomainDepartmentEmployeeService = DomainDepartmentEmployeeService = DomainDepartmentEmployeeService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof department_employee_repository_1.DomainDepartmentEmployeeRepository !== "undefined" && department_employee_repository_1.DomainDepartmentEmployeeRepository) === "function" ? _a : Object])
+], DomainDepartmentEmployeeService);
+
+
+/***/ }),
+
+/***/ "./src/domain/department/adapters/department-microservice.adapter.ts":
+/*!***************************************************************************!*\
+  !*** ./src/domain/department/adapters/department-microservice.adapter.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var DepartmentMicroserviceAdapter_1;
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DepartmentMicroserviceAdapter = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const rxjs_1 = __webpack_require__(/*! rxjs */ "rxjs");
+let DepartmentMicroserviceAdapter = DepartmentMicroserviceAdapter_1 = class DepartmentMicroserviceAdapter {
+    constructor(httpService, configService) {
+        this.httpService = httpService;
+        this.configService = configService;
+        this.logger = new common_1.Logger(DepartmentMicroserviceAdapter_1.name);
+        this.baseUrl = this.configService.get('SSO_API_URL') || 'https://lsso.vercel.app';
+    }
+    async fetchDepartmentHierarchy() {
+        try {
+            this.logger.log('외부 시스템에서 부서 계층구조 데이터를 가져오는 중...');
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService.get(`${this.baseUrl}/api/organization/departments/hierarchy`));
+            this.logger.log(`부서 계층구조 데이터 조회 완료: 총 ${response.data.totalDepartments}개 부서`);
+            return response.data;
+        }
+        catch (error) {
+            this.logger.error('부서 계층구조 데이터 조회 실패:', error);
+            throw new Error('외부 시스템에서 부서 데이터를 가져오는데 실패했습니다');
+        }
+    }
+};
+exports.DepartmentMicroserviceAdapter = DepartmentMicroserviceAdapter;
+exports.DepartmentMicroserviceAdapter = DepartmentMicroserviceAdapter = DepartmentMicroserviceAdapter_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
+], DepartmentMicroserviceAdapter);
+
+
+/***/ }),
+
+/***/ "./src/domain/department/adapters/index.ts":
+/*!*************************************************!*\
+  !*** ./src/domain/department/adapters/index.ts ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./department-microservice.adapter */ "./src/domain/department/adapters/department-microservice.adapter.ts"), exports);
+
+
+/***/ }),
+
+/***/ "./src/domain/department/department.module.ts":
+/*!****************************************************!*\
+  !*** ./src/domain/department/department.module.ts ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainDepartmentModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const department_service_1 = __webpack_require__(/*! ./department.service */ "./src/domain/department/department.service.ts");
+const department_repository_1 = __webpack_require__(/*! ./department.repository */ "./src/domain/department/department.repository.ts");
+const department_entity_1 = __webpack_require__(/*! @libs/entities/department.entity */ "./libs/entities/department.entity.ts");
+const adapters_1 = __webpack_require__(/*! ./adapters */ "./src/domain/department/adapters/index.ts");
+let DomainDepartmentModule = class DomainDepartmentModule {
+};
+exports.DomainDepartmentModule = DomainDepartmentModule;
+exports.DomainDepartmentModule = DomainDepartmentModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([department_entity_1.Department]),
+            axios_1.HttpModule.register({
+                timeout: 10000,
+                maxRedirects: 5,
+            }),
+            config_1.ConfigModule,
+        ],
+        providers: [department_service_1.DomainDepartmentService, department_repository_1.DomainDepartmentRepository, adapters_1.DepartmentMicroserviceAdapter],
+        exports: [department_service_1.DomainDepartmentService, adapters_1.DepartmentMicroserviceAdapter],
+    })
+], DomainDepartmentModule);
+
+
+/***/ }),
+
+/***/ "./src/domain/department/department.repository.ts":
+/*!********************************************************!*\
+  !*** ./src/domain/department/department.repository.ts ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainDepartmentRepository = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const department_entity_1 = __webpack_require__(/*! @libs/entities/department.entity */ "./libs/entities/department.entity.ts");
+const base_repository_1 = __webpack_require__(/*! @libs/repositories/base.repository */ "./libs/repositories/base.repository.ts");
+let DomainDepartmentRepository = class DomainDepartmentRepository extends base_repository_1.BaseRepository {
+    constructor(departmentRepository) {
+        super(departmentRepository);
+        this.departmentRepository = departmentRepository;
+    }
+};
+exports.DomainDepartmentRepository = DomainDepartmentRepository;
+exports.DomainDepartmentRepository = DomainDepartmentRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(department_entity_1.Department)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DomainDepartmentRepository);
+
+
+/***/ }),
+
+/***/ "./src/domain/department/department.service.ts":
+/*!*****************************************************!*\
+  !*** ./src/domain/department/department.service.ts ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var DomainDepartmentService_1;
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DomainDepartmentService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const department_repository_1 = __webpack_require__(/*! ./department.repository */ "./src/domain/department/department.repository.ts");
+const adapters_1 = __webpack_require__(/*! ./adapters */ "./src/domain/department/adapters/index.ts");
+const base_service_1 = __webpack_require__(/*! @libs/services/base.service */ "./libs/services/base.service.ts");
+let DomainDepartmentService = DomainDepartmentService_1 = class DomainDepartmentService extends base_service_1.BaseService {
+    constructor(departmentRepository, departmentAdapter) {
+        super(departmentRepository);
+        this.departmentRepository = departmentRepository;
+        this.departmentAdapter = departmentAdapter;
+        this.logger = new common_1.Logger(DomainDepartmentService_1.name);
+    }
+};
+exports.DomainDepartmentService = DomainDepartmentService;
+exports.DomainDepartmentService = DomainDepartmentService = DomainDepartmentService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof department_repository_1.DomainDepartmentRepository !== "undefined" && department_repository_1.DomainDepartmentRepository) === "function" ? _a : Object, typeof (_b = typeof adapters_1.DepartmentMicroserviceAdapter !== "undefined" && adapters_1.DepartmentMicroserviceAdapter) === "function" ? _b : Object])
+], DomainDepartmentService);
 
 
 /***/ }),

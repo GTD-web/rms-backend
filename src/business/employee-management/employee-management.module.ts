@@ -5,10 +5,17 @@ import { UserController } from './controllers/user.controller';
 import { EmployeeManagementService } from './employee-management.service';
 import { EmployeeContextModule } from '@src/context/employee/employee.context.module';
 import { EmployeeWebhookController } from './controllers/webhook.controller';
+import { DepartmentController } from './controllers/department.controller';
 
 @Module({
     imports: [EmployeeContextModule],
-    controllers: [ResourceManagerController, EmployeeController, UserController, EmployeeWebhookController],
+    controllers: [
+        ResourceManagerController,
+        EmployeeController,
+        UserController,
+        EmployeeWebhookController,
+        DepartmentController,
+    ],
     providers: [EmployeeManagementService],
     exports: [EmployeeManagementService],
 })
