@@ -51,70 +51,9 @@ export class CreateScheduleDepartmentsTable1748247203500 implements MigrationInt
             ON DELETE CASCADE 
             ON UPDATE NO ACTION
         `);
-
-        // 기존 schedule_relations 테이블의 departmentId 데이터를 새 테이블로 마이그레이션
-        await queryRunner.query(`
-            INSERT INTO "schedule_departments" ("scheduleId", "departmentId", "createdAt")
-            SELECT "scheduleId", "departmentId", now()
-            FROM "schedule_relations"
-            WHERE "departmentId" IS NOT NULL
-        `);
-
-        // schedule_relations 테이블에서 departmentId 컬럼 제거
-        await queryRunner.query(`
-            ALTER TABLE "schedule_relations" DROP COLUMN IF EXISTS "departmentId"
-        `);
-
-        // schedule_relations 테이블의 departmentId 인덱스 제거
-        await queryRunner.query(`
-            DROP INDEX IF EXISTS "IDX_schedule_relations_departmentId"
-        `);
-
-        // schedule_relations 테이블의 부서 관련 외래키 제거
-        await queryRunner.query(`
-            ALTER TABLE "schedule_relations" 
-            DROP CONSTRAINT IF EXISTS "FK_schedule_relations_departmentId"
-        `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        // schedule_relations 테이블에 departmentId 컬럼 다시 추가
-        await queryRunner.query(`
-            ALTER TABLE "schedule_relations" 
-            ADD COLUMN "departmentId" uuid
-        `);
-
-        // 기존 schedule_departments 데이터를 schedule_relations로 백업 (첫 번째 부서만)
-        await queryRunner.query(`
-            UPDATE "schedule_relations" 
-            SET "departmentId" = (
-                SELECT "departmentId" 
-                FROM "schedule_departments" 
-                WHERE "schedule_departments"."scheduleId" = "schedule_relations"."scheduleId" 
-                LIMIT 1
-            )
-            WHERE EXISTS (
-                SELECT 1 
-                FROM "schedule_departments" 
-                WHERE "schedule_departments"."scheduleId" = "schedule_relations"."scheduleId"
-            )
-        `);
-
-        // 외래키 제약조건 다시 추가
-        await queryRunner.query(`
-            ALTER TABLE "schedule_relations" 
-            ADD CONSTRAINT "FK_schedule_relations_departmentId" 
-            FOREIGN KEY ("departmentId") 
-            REFERENCES "departments"("id") 
-            ON DELETE SET NULL 
-            ON UPDATE NO ACTION
-        `);
-
-        // 인덱스 다시 추가
-        await queryRunner.query(`
-            CREATE INDEX "IDX_schedule_relations_departmentId" ON "schedule_relations" ("departmentId")
-        `);
-
         // schedule_departments 테이블 삭제
         await queryRunner.query(`DROP TABLE IF EXISTS "schedule_departments"`);
     }
