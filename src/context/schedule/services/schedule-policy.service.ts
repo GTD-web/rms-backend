@@ -483,7 +483,8 @@ export class SchedulePolicyService {
                 updateDto.info?.location ||
                 updateDto.info?.scheduleType ||
                 updateDto.info?.projectId ||
-                updateDto.info?.participants
+                updateDto.info?.participants ||
+                updateDto.info?.departmentIds
             ),
             isResourceUpdate: !!updateDto.resource?.resourceId,
         };

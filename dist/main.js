@@ -31151,7 +31151,6 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                             scheduleType: data.scheduleType,
                             notifyBeforeStart: data.notifyBeforeStart || false,
                             notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
-                            scheduleDepartment: data.scheduleType === schedule_type_enum_1.ScheduleType.DEPARTMENT ? user.department : null,
                         };
                         const createdSchedule = await this.scheduleMutationService.일정을_생성한다(scheduleData, queryRunner);
                         await this.scheduleMutationService.일정_참가자를_추가한다(createdSchedule.scheduleId, user.employeeId, 'RESERVER', queryRunner);
@@ -31350,7 +31349,6 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     notifyMinutesBeforeStart: updateDto.info?.notifyMinutesBeforeStart,
                     location: updateDto.info?.location,
                     scheduleType: updateDto.info?.scheduleType,
-                    scheduleDepartment: updateDto.info?.scheduleType === schedule_type_enum_1.ScheduleType.DEPARTMENT ? user.department : null,
                     projectId: updateDto.info?.projectId,
                     participants: updateDto.info?.participants,
                     departmentIds: updateDto.info?.departmentIds,
@@ -39174,7 +39172,8 @@ let SchedulePolicyService = class SchedulePolicyService {
                 updateDto.info?.location ||
                 updateDto.info?.scheduleType ||
                 updateDto.info?.projectId ||
-                updateDto.info?.participants),
+                updateDto.info?.participants ||
+                updateDto.info?.departmentIds),
             isResourceUpdate: !!updateDto.resource?.resourceId,
         };
     }

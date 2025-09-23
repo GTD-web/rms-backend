@@ -769,7 +769,7 @@ export class ScheduleManagementService {
                             scheduleType: data.scheduleType,
                             notifyBeforeStart: data.notifyBeforeStart || false,
                             notifyMinutesBeforeStart: data.notifyMinutesBeforeStart || [],
-                            scheduleDepartment: data.scheduleType === ScheduleType.DEPARTMENT ? user.department : null,
+                            // scheduleDepartment: data.scheduleType === ScheduleType.DEPARTMENT ? user.department : null,
                         };
 
                         const createdSchedule = await this.scheduleMutationService.일정을_생성한다(
@@ -1188,8 +1188,8 @@ export class ScheduleManagementService {
                           notifyMinutesBeforeStart: updateDto.info?.notifyMinutesBeforeStart,
                           location: updateDto.info?.location,
                           scheduleType: updateDto.info?.scheduleType,
-                          scheduleDepartment:
-                              updateDto.info?.scheduleType === ScheduleType.DEPARTMENT ? user.department : null,
+                          //   scheduleDepartment:
+                          //       updateDto.info?.scheduleType === ScheduleType.DEPARTMENT ? user.department : null,
                           projectId: updateDto.info?.projectId,
                           participants: updateDto.info?.participants,
                           departmentIds: updateDto.info?.departmentIds,
