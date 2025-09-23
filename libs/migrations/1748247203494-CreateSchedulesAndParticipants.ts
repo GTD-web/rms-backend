@@ -176,7 +176,7 @@ export class CreateSchedulesAndParticipants1748247203494 implements MigrationInt
             INSERT INTO "schedules" (
                 "scheduleId", "title", "description", "startDate", "endDate",
                 "notifyBeforeStart", "notifyMinutesBeforeStart", "scheduleType", 
-                "status", "completionReason", "scheduleDepartment"
+                "status", "completionReason", "scheduleDepartment", "createdAt", "updatedAt"
             )
             SELECT 
                 r."reservationId", 
@@ -194,7 +194,7 @@ export class CreateSchedulesAndParticipants1748247203494 implements MigrationInt
                     ELSE 'PENDING'::schedules_status_enum
                 END,
                 NULL, -- completionReason
-                NULL, -- scheduleDepartment
+                NULL -- scheduleDepartment
             FROM "reservations" r
             WHERE NOT EXISTS (
                 SELECT 1 FROM "schedules" s WHERE s."scheduleId" = r."reservationId"
