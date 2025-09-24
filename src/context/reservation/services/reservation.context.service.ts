@@ -329,12 +329,16 @@ export class ReservationContextService {
             let parkingLocationFilePaths: string[] = [];
             let odometerFilePaths: string[] = [];
             let indoorFilePaths: string[] = [];
+            let parkingLocationFileIds: string[] = [];
+            let odometerFileIds: string[] = [];
+            let indoorFileIds: string[] = [];
 
             if (returnDto.parkingLocationImages.length > 0) {
                 const files = await this.domainFileService.findAll({
                     where: { fileId: In(returnDto.parkingLocationImages) },
                 });
                 parkingLocationFilePaths = files.map((file) => file.filePath);
+                parkingLocationFileIds = files.map((file) => file.fileId);
             }
 
             if (returnDto.odometerImages.length > 0) {
@@ -342,6 +346,7 @@ export class ReservationContextService {
                     where: { fileId: In(returnDto.odometerImages) },
                 });
                 odometerFilePaths = files.map((file) => file.filePath);
+                odometerFileIds = files.map((file) => file.fileId);
             }
 
             if (returnDto.indoorImages.length > 0) {
@@ -349,6 +354,7 @@ export class ReservationContextService {
                     where: { fileId: In(returnDto.indoorImages) },
                 });
                 indoorFilePaths = files.map((file) => file.filePath);
+                indoorFileIds = files.map((file) => file.fileId);
             }
 
             // 차량 정보 업데이트 (filePath 및 좌표 포함)
@@ -366,13 +372,13 @@ export class ReservationContextService {
             );
 
             // 차량정보에 파일들을 연결 (덮어쓰기)
-            if (parkingLocationFilePaths.length > 0 || odometerFilePaths.length > 0 || indoorFilePaths.length > 0) {
+            if (parkingLocationFileIds.length > 0 || odometerFileIds.length > 0 || indoorFileIds.length > 0) {
                 await this.fileContextService.차량정보에_파일들을_연결한다(
                     vehicleInfoId,
                     {
-                        ...(parkingLocationFilePaths.length > 0 && { parkingLocationImages: parkingLocationFilePaths }),
-                        ...(odometerFilePaths.length > 0 && { odometerImages: odometerFilePaths }),
-                        ...(indoorFilePaths.length > 0 && { indoorImages: indoorFilePaths }),
+                        ...(parkingLocationFileIds.length > 0 && { parkingLocationImages: parkingLocationFileIds }),
+                        ...(odometerFileIds.length > 0 && { odometerImages: odometerFileIds }),
+                        ...(indoorFileIds.length > 0 && { indoorImages: indoorFileIds }),
                     },
                     queryRunner,
                 );

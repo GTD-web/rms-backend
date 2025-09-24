@@ -36739,23 +36739,29 @@ let ReservationContextService = class ReservationContextService {
             let parkingLocationFilePaths = [];
             let odometerFilePaths = [];
             let indoorFilePaths = [];
+            let parkingLocationFileIds = [];
+            let odometerFileIds = [];
+            let indoorFileIds = [];
             if (returnDto.parkingLocationImages.length > 0) {
                 const files = await this.domainFileService.findAll({
                     where: { fileId: (0, typeorm_2.In)(returnDto.parkingLocationImages) },
                 });
                 parkingLocationFilePaths = files.map((file) => file.filePath);
+                parkingLocationFileIds = files.map((file) => file.fileId);
             }
             if (returnDto.odometerImages.length > 0) {
                 const files = await this.domainFileService.findAll({
                     where: { fileId: (0, typeorm_2.In)(returnDto.odometerImages) },
                 });
                 odometerFilePaths = files.map((file) => file.filePath);
+                odometerFileIds = files.map((file) => file.fileId);
             }
             if (returnDto.indoorImages.length > 0) {
                 const files = await this.domainFileService.findAll({
                     where: { fileId: (0, typeorm_2.In)(returnDto.indoorImages) },
                 });
                 indoorFilePaths = files.map((file) => file.filePath);
+                indoorFileIds = files.map((file) => file.fileId);
             }
             await this.domainVehicleInfoService.update(vehicleInfoId, {
                 totalMileage: returnDto.totalMileage,
@@ -36765,11 +36771,11 @@ let ReservationContextService = class ReservationContextService {
                 ...(indoorFilePaths.length > 0 && { indoorImages: indoorFilePaths }),
                 ...(returnDto.parkingCoordinates && { parkingCoordinates: returnDto.parkingCoordinates }),
             }, { queryRunner });
-            if (parkingLocationFilePaths.length > 0 || odometerFilePaths.length > 0 || indoorFilePaths.length > 0) {
+            if (parkingLocationFileIds.length > 0 || odometerFileIds.length > 0 || indoorFileIds.length > 0) {
                 await this.fileContextService.차량정보에_파일들을_연결한다(vehicleInfoId, {
-                    ...(parkingLocationFilePaths.length > 0 && { parkingLocationImages: parkingLocationFilePaths }),
-                    ...(odometerFilePaths.length > 0 && { odometerImages: odometerFilePaths }),
-                    ...(indoorFilePaths.length > 0 && { indoorImages: indoorFilePaths }),
+                    ...(parkingLocationFileIds.length > 0 && { parkingLocationImages: parkingLocationFileIds }),
+                    ...(odometerFileIds.length > 0 && { odometerImages: odometerFileIds }),
+                    ...(indoorFileIds.length > 0 && { indoorImages: indoorFileIds }),
                 }, queryRunner);
             }
             await queryRunner.commitTransaction();
@@ -39927,7 +39933,6 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
     async 내_일정을_조회한다(employee, query) {
         const employeeId = employee.employeeId;
         const now = new Date();
-        now.setHours(0, 0, 0, 0);
         let scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, query.role, now);
         if (query.role !== reservation_type_enum_1.ParticipantsType.RESERVER) {
             const department = employee.departmentEmployees[0].department;
