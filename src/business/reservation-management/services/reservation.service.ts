@@ -6,18 +6,13 @@ import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { ReturnVehicleDto, UpdateReservationStatusDto, MarkVehicleUnusedDto } from '../dtos/update-reservation.dto';
-import { ReservationListQueryDto, ReservationSortOrder } from '../dtos/reservation-list-query.dto';
+import { ReservationListQueryDto } from '../dtos/reservation-list-query.dto';
 import { ReservationListResponseDto } from '../dtos/reservation-list-response.dto';
-import {
-    ReservationParticipantResponseDto,
-    ReservationResponseDto,
-    ReservationWithRelationsResponseDto,
-} from '../dtos/reservation-response.dto';
+import { ReservationResponseDto, ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
 import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
 import { ReservationNotificationContextService } from '@src/context/notification/services/reservation-notification.context.service';
 import { ScheduleQueryContextService } from '@src/context/schedule/services/schedule-query.context.service';
-import { In } from 'typeorm';
 
 @Injectable()
 export class ReservationService {

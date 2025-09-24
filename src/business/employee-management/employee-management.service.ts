@@ -1,15 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Employee } from '@libs/entities/employee.entity';
 import { EmployeeContextService } from '@src/context/employee/employee.context.service';
 import { EmplyeesByDepartmentResponseDto } from './dtos/employees-by-department-response.dto';
 import { UserResponseDto } from './dtos/user-response.dto';
 import { ChangeRoleDto } from './dtos/change-role.dto';
 import { UpdateNotificationSettingsDto } from './dtos/notification-settings.dto';
-import {
-    DepartmentListResponseDto,
-    DepartmentHierarchyResponseDto,
-    DepartmentResponseDto,
-} from './dtos/department-response.dto';
+import { DepartmentListResponseDto, DepartmentHierarchyResponseDto } from './dtos/department-response.dto';
 
 @Injectable()
 export class EmployeeManagementService {

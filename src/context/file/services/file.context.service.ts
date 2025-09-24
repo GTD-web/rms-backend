@@ -3,7 +3,7 @@ import { DomainFileService } from '@src/domain/file/file.service';
 import { DomainFileReservationVehicleService } from '@src/domain/file-reservation-vehicle/file-reservation-vehicle.service';
 import { DomainFileVehicleInfoService } from '@src/domain/file-vehicle-info/file-vehicle-info.service';
 import { DomainFileMaintenanceService } from '@src/domain/file-maintenance/file-maintenance.service';
-import { In, LessThan, Like } from 'typeorm';
+import { In, LessThan } from 'typeorm';
 import { File } from '@libs/entities/file.entity';
 import { ReservationVehicleFileResponseDto } from '../dtos';
 import { S3Service } from '../adapter/s3.service';

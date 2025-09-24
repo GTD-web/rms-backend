@@ -1,11 +1,7 @@
-import { Controller, Get, Post, Body, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@libs/guards/jwt-auth.guard';
-import { RolesGuard } from '@libs/guards/role.guard';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
 import { User } from '@libs/decorators/user.decorator';
-import { Roles } from '@libs/decorators/role.decorator';
-import { Role } from '@libs/enums/role-type.enum';
 import { UserResponseDto } from '../dtos/user-response.dto';
 import { CheckPasswordDto } from '../dtos/check-password.dto';
 import { ChangePasswordDto } from '../dtos/change-password.dto';

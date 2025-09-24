@@ -1,20 +1,14 @@
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { Controller, Get, Post, Patch, Param, Body, Query, Req, Type } from '@nestjs/common';
-import { Request } from 'express';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags, ApiOkResponse } from '@nestjs/swagger';
+import { Controller, Get, Post, Patch, Param, Body, Query } from '@nestjs/common';
 import { User } from '@libs/decorators/user.decorator';
 import { Employee } from '@libs/entities';
-import { Roles } from '@libs/decorators/role.decorator';
-import { Role } from '@libs/enums/role-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { Public } from '@libs/decorators/public.decorator';
-import { NotificationType } from '@libs/enums/notification-type.enum';
 
 // Business Layer DTOs (중앙집중식 import)
 import {
     PaginationQueryDto,
     NotificationListResponseDto,
     PushSubscriptionDto,
-    ResponseNotificationDto,
     NotificationTypeResponseDto,
     SendNotificationDto,
     PushNotificationDto,

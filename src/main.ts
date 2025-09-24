@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@resource/app.module';
 import { setupSwagger } from '@libs/swagger/swagger';
 import { ENV } from '@libs/configs/env.config';
-import * as dtos from '@resource/dtos.index';
 import * as businessDtos from './business.dto.index';
 import { JwtAuthGuard } from '@libs/guards/jwt-auth.guard';
 import { Reflector } from '@nestjs/core';
@@ -46,7 +45,7 @@ async function bootstrap() {
         fallthrough: false,
     });
 
-    setupSwagger(app, [...Object.values(dtos), ...Object.values(businessDtos)]);
+    setupSwagger(app, [...Object.values(businessDtos)]);
     await app.listen(ENV.APP_PORT || 3000);
 }
 bootstrap();

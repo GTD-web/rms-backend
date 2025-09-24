@@ -4,15 +4,14 @@ import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { PushSubscriptionDto } from '../dtos/push-subscription.dto';
 import { PushNotificationPayload } from '../dtos/send-notification.dto';
-import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api';
 import { FCMAdapter } from '../adapter/fcm-push.adapter';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 import { Notification } from '@libs/entities';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
-import { ResponseNotificationDto, NotificationDataDto } from '../dtos/response-notification.dto';
+import { ResponseNotificationDto } from '../dtos/response-notification.dto';
 import { NotificationTypeResponseDto } from '../dtos/notification-type-response.dto';
-import { DataSource, In, MoreThan, QueryRunner, Raw } from 'typeorm';
+import { DataSource, In, Raw } from 'typeorm';
 import { DomainNotificationService } from '@src/domain/notification/notification.service';
 import { DomainNotificationTypeService } from '@src/domain/notification-type/notification-type.service';
 import { DomainEmployeeNotificationService } from '@src/domain/employee-notification/employee-notification.service';
@@ -21,7 +20,6 @@ import { NotificationType } from '@libs/enums/notification-type.enum';
 import { CreateNotificationDataDto, CreateNotificationDto } from '../dtos/create-notification.dto';
 import { DateUtil } from '@libs/utils/date.util';
 import { FCMMicroserviceAdapter } from '../adapter/fcm.adapter';
-import { FcmSendResponseDto } from '../dtos/fcm-send-response.dto';
 import { EmployeeTokensDto } from '@src/domain/employee/dtos/fcm-token-response.dto';
 
 export interface NotificationData {
@@ -126,31 +124,6 @@ export class NotificationContextService {
                 hasNext: query.page * query.limit < total,
             },
         };
-    }
-
-    async 시스템_관리자들에게_알림을_발송한다() {
-        // createNotificationDataDto: CreateNotificationDataDto, // notificationType: NotificationType,
-        // // 시스템 관리자들에게 알림 발송
-        // const systemAdmins = await this.domainEmployeeService.findAll({
-        //     where: {
-        //         roles: Raw(() => `'${Role.SYSTEM_ADMIN}' = ANY("roles")`),
-        //     },
-        // });
-        // const consumable = await this.domainConsumableService.findOne({
-        //     where: { consumableId: maintenance.consumableId },
-        //     relations: ['vehicleInfo', 'vehicleInfo.resource'],
-        //     withDeleted: true,
-        // });
-        // await this.notificationService.createNotification(
-        //     NotificationType.RESOURCE_MAINTENANCE_COMPLETED,
-        //     {
-        //         resourceId: consumable.vehicleInfo.resource.resourceId,
-        //         resourceType: consumable.vehicleInfo.resource.type,
-        //         consumableName: consumable.name,
-        //         resourceName: consumable.vehicleInfo.resource.name,
-        //     },
-        //     systemAdmins.map((admin) => admin.employeeId),
-        // );
     }
 
     // ==================== 태스크 관련 메서드들 ====================

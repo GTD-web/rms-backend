@@ -1,10 +1,6 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@libs/guards/jwt-auth.guard';
-import { RolesGuard } from '@libs/guards/role.guard';
 import { ApiDataResponse } from '@libs/decorators/api-responses.decorator';
-import { Roles } from '@libs/decorators/role.decorator';
-import { Role } from '@libs/enums/role-type.enum';
 import { EmployeeManagementService } from '../employee-management.service';
 import { DepartmentListResponseDto, DepartmentHierarchyResponseDto } from '../dtos/department-response.dto';
 

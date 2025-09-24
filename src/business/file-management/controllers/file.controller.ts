@@ -12,18 +12,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { FileManagementService } from '../file-management.service';
-import {
-    ApiTags,
-    ApiBearerAuth,
-    ApiConsumes,
-    ApiBody,
-    ApiOperation,
-    ApiResponse,
-    ApiQuery,
-    ApiOkResponse,
-} from '@nestjs/swagger';
-import { Roles } from '@libs/decorators/role.decorator';
-import { Role } from '@libs/enums/role-type.enum';
+import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiOperation, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 import { FileResponseDto } from '@resource/business.dto.index';
 import { MimeType } from '@libs/enums/mime-type.enum';
 import { CreateFileDataDto } from '../dtos';

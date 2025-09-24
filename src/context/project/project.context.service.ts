@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DomainProjectService } from '@src/domain/project/project.service';
-import { GetProjectsByIdsResponseDto } from '@src/domain/project/dto/get-projects-by-ids-response.dto';
 
 @Injectable()
 export class ProjectContextService {

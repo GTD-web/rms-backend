@@ -1,12 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DomainScheduleService } from '@src/domain/schedule/schedule.service';
 import { ScheduleStatus } from '@libs/enums/schedule-type.enum';
-import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DomainReservationService } from '@src/domain/reservation/reservation.service';
-import { ReservationStatus } from '@libs/enums/reservation-type.enum';
-import { In, Not } from 'typeorm';
-import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
-import { DateUtil } from '@libs/utils/date.util';
 
 @Injectable()
 export class SchedulePostProcessingService {

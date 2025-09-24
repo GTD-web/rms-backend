@@ -4,9 +4,6 @@ import { ResourceContextService } from '@src/context/resource/services/resource.
 import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
-import { NotificationType } from '@libs/enums/notification-type.enum';
-import { DateUtil } from '@libs/utils/date.util';
-import { LessThan, MoreThan, Raw } from 'typeorm';
 import { TaskListResponseDto, TaskResponseDto } from './dtos/task-response.dto';
 import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
 import { ScheduleQueryContextService } from '@src/context/schedule/services/schedule-query.context.service';
