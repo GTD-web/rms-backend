@@ -11335,6 +11335,10 @@ __decorate([
     __metadata("design:type", Array)
 ], MaintenanceResponseDto.prototype, "images", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: [business_dto_index_1.FileResponseDto], required: false }),
+    __metadata("design:type", Array)
+], MaintenanceResponseDto.prototype, "imageFiles", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     __metadata("design:type", Number)
 ], MaintenanceResponseDto.prototype, "mileageFromLastMaintenance", void 0);
@@ -18611,6 +18615,14 @@ let FileContextService = class FileContextService {
             filePath: fm.file.filePath,
         }));
     }
+    async 정비_파일정보를_조회한다(maintenanceId) {
+        const fileMaintenances = await this.domainFileMaintenanceService.findByMaintenanceId(maintenanceId);
+        return fileMaintenances.map((fm) => ({
+            fileId: fm.file.fileId,
+            fileName: fm.file.fileName,
+            filePath: fm.file.filePath,
+        }));
+    }
 };
 exports.FileContextService = FileContextService;
 exports.FileContextService = FileContextService = __decorate([
@@ -21552,6 +21564,7 @@ let MaintenanceContextService = class MaintenanceContextService {
         if (!maintenance) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.MAINTENANCE.NOT_FOUND);
         }
+        const imageFiles = await this.fileContextService.정비_파일정보를_조회한다(maintenanceId);
         return {
             maintenanceId: maintenance.maintenanceId,
             consumableId: maintenance.consumableId,
@@ -21561,6 +21574,7 @@ let MaintenanceContextService = class MaintenanceContextService {
             mileage: maintenance.mileage,
             cost: maintenance.cost,
             images: maintenance.images || [],
+            imageFiles: imageFiles,
         };
     }
     async 정비이력을_수정한다(maintenanceId, updateMaintenanceDto) {

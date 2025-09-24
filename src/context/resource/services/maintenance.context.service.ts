@@ -200,6 +200,9 @@ export class MaintenanceContextService {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.MAINTENANCE.NOT_FOUND);
         }
 
+        // 파일 정보 조회
+        const imageFiles = await this.fileContextService.정비_파일정보를_조회한다(maintenanceId);
+
         return {
             maintenanceId: maintenance.maintenanceId,
             consumableId: maintenance.consumableId,
@@ -209,6 +212,7 @@ export class MaintenanceContextService {
             mileage: maintenance.mileage,
             cost: maintenance.cost,
             images: maintenance.images || [],
+            imageFiles: imageFiles,
         };
     }
 

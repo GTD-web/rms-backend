@@ -401,4 +401,16 @@ export class FileContextService {
             filePath: fm.file.filePath,
         }));
     }
+
+    /**
+     * 정비 파일 정보를 조회한다 (FileResponseDto 형태로)
+     */
+    async 정비_파일정보를_조회한다(maintenanceId: string): Promise<any[]> {
+        const fileMaintenances = await this.domainFileMaintenanceService.findByMaintenanceId(maintenanceId);
+        return fileMaintenances.map((fm) => ({
+            fileId: fm.file.fileId,
+            fileName: fm.file.fileName,
+            filePath: fm.file.filePath,
+        }));
+    }
 }

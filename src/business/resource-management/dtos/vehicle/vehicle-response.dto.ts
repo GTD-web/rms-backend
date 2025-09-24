@@ -26,6 +26,9 @@ export class MaintenanceResponseDto {
     @ApiProperty()
     images: string[];
 
+    @ApiProperty({ type: [FileResponseDto], required: false })
+    imageFiles?: FileResponseDto[];
+
     @ApiProperty({ required: false })
     mileageFromLastMaintenance?: number;
 
