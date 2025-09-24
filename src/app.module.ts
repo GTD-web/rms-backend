@@ -51,7 +51,7 @@ import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
         // SeedModule,
 
         /** 레거시 어플리케이션 (인터셉터 적용) */
-        LegacyApplicationModule,
+        // LegacyApplicationModule,
 
         /** 비즈니스 */
         FileManagementModule,
