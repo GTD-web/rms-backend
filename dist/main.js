@@ -39933,7 +39933,6 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
     async 내_일정을_조회한다(employee, query) {
         const employeeId = employee.employeeId;
         const now = new Date();
-        console.log('now', now, now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
         if (now.getUTCHours() < 15) {
             now.setUTCDate(now.getUTCDate() - 1);
             now.setUTCHours(15, 0, 0, 0);
@@ -39941,7 +39940,6 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
         else {
             now.setUTCHours(15, 0, 0, 0);
         }
-        console.log('now', now, now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
         let scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, query.role, now);
         if (query.role !== reservation_type_enum_1.ParticipantsType.RESERVER) {
             const department = employee.departmentEmployees[0].department;
