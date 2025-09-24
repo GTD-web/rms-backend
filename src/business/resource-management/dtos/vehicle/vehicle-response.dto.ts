@@ -26,7 +26,17 @@ export class MaintenanceResponseDto {
     @ApiProperty()
     images: string[];
 
-    @ApiProperty({ type: [FileResponseDto], required: false })
+    @ApiProperty({
+        example: [
+            {
+                fileId: '123e4567-e89b-12d3-a456-426614174000',
+                fileName: 'image.jpg',
+                filePath: 'uploads/20250226123456-image.jpg',
+            },
+        ],
+        type: [FileResponseDto],
+        required: false,
+    })
     imageFiles?: FileResponseDto[];
 
     @ApiProperty({ required: false })

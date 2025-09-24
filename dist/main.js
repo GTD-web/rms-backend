@@ -11335,7 +11335,17 @@ __decorate([
     __metadata("design:type", Array)
 ], MaintenanceResponseDto.prototype, "images", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: [business_dto_index_1.FileResponseDto], required: false }),
+    (0, swagger_1.ApiProperty)({
+        example: [
+            {
+                fileId: '123e4567-e89b-12d3-a456-426614174000',
+                fileName: 'image.jpg',
+                filePath: 'uploads/20250226123456-image.jpg',
+            },
+        ],
+        type: [business_dto_index_1.FileResponseDto],
+        required: false,
+    }),
     __metadata("design:type", Array)
 ], MaintenanceResponseDto.prototype, "imageFiles", void 0);
 __decorate([
