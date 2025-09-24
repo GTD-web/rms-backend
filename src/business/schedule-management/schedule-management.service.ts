@@ -68,6 +68,7 @@ import { EmployeeContextService } from '@src/context/employee/employee.context.s
 import { ScheduleNotificationContextService } from '@src/context/notification/services/schedule-notification.context.service';
 import { MyScheduleHistoryQueryDto } from './dtos/my-schedule-history-query.dto';
 import { MyScheduleHistoryResponseDto } from './dtos/my-schedule-history-response.dto';
+import { createSimpleScheduleTestData } from './test-data/schedule-test-data';
 
 @Injectable()
 export class ScheduleManagementService {
@@ -82,7 +83,6 @@ export class ScheduleManagementService {
         private readonly fileContextService: FileContextService,
         private readonly employeeContextService: EmployeeContextService,
         private readonly scheduleNotificationContextService: ScheduleNotificationContextService,
-
         private readonly scheduleAuthorizationService: ScheduleAuthorizationService,
         private readonly schedulePolicyService: SchedulePolicyService,
         private readonly scheduleQueryContextService: ScheduleQueryContextService,
@@ -90,6 +90,23 @@ export class ScheduleManagementService {
         private readonly scheduleStateTransitionService: ScheduleStateTransitionService,
         private readonly schedulePostProcessingService: SchedulePostProcessingService,
     ) {}
+
+    /** 승훈프로님 구현용 프로젝트 테스트 데이터 - 2025-09-24 생성함
+    async onModuleInit(): Promise<void> {
+        const reserverEmployee = { employeeId: '5c3dc7a9-19b3-4efa-8902-df256358edda' } as Employee;
+        const participantEmployeeIds = ['5c3dc7a9-19b3-4efa-8902-df256358edda', 'bbdceadf-c782-4cf2-8852-6c812afef9a3'];
+        const meetingRoomResourceId = 'f2d08c06-c793-435f-8603-f203025f921a';
+        const projectIds = await this.projectContextService.프로젝트들을_조회한다();
+        console.log(projectIds);
+        const scheduleTestData = createSimpleScheduleTestData(
+            projectIds,
+            reserverEmployee.employeeId,
+            participantEmployeeIds,
+            meetingRoomResourceId,
+        );
+        this.createSchedule(reserverEmployee, scheduleTestData);
+    }
+    */
 
     async postProcessingSchedules(): Promise<void> {
         return this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();

@@ -10,8 +10,6 @@ import { DomainFileResourceModule } from '@src/domain/file-resource/file-resourc
 import { DomainFileVehicleInfoModule } from '@src/domain/file-vehicle-info/file-vehicle-info.module';
 import { FileContextService } from './services/file.context.service';
 import { S3Service } from './adapter/s3.service';
-import { FileController } from './controllers/file.controller';
-import { CronFileController } from './controllers/cron.file.controller';
 
 // Context Services
 
@@ -39,7 +37,7 @@ import { CronFileController } from './controllers/cron.file.controller';
         DomainFileResourceModule,
         DomainFileVehicleInfoModule,
     ],
-    controllers: [FileController, CronFileController],
+    controllers: [],
     providers: [
         // Context Services
         FileContextService,

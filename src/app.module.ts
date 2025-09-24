@@ -18,7 +18,7 @@ import { Entities } from '@libs/entities';
 // import { SeedModule } from './modules/seed/seed.module';
 
 import { LegacyApplicationModule } from './legacy-application.module';
-import { FileContextModule } from './context/file/file.context.module';
+import { FileManagementModule } from './business/file-management/file-management.module';
 import { ResourceManagementModule } from './business/resource-management/resource-management.module';
 import { ReservationManagementModule } from './business/reservation-management/reservation-management.module';
 import { ScheduleManagementModule } from './business/schedule-management/schedule-management.module';
@@ -54,7 +54,7 @@ import { RequestInterceptor } from '@libs/interceptors/request.interceptor';
         LegacyApplicationModule,
 
         /** 비즈니스 */
-        FileContextModule,
+        FileManagementModule,
         ResourceManagementModule,
         ReservationManagementModule,
         ScheduleManagementModule,

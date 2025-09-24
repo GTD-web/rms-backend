@@ -4482,7 +4482,7 @@ const env_config_1 = __webpack_require__(/*! @libs/configs/env.config */ "./libs
 const jwt_config_1 = __webpack_require__(/*! @libs/configs/jwt.config */ "./libs/configs/jwt.config.ts");
 const entities_1 = __webpack_require__(/*! @libs/entities */ "./libs/entities/index.ts");
 const legacy_application_module_1 = __webpack_require__(/*! ./legacy-application.module */ "./src/legacy-application.module.ts");
-const file_context_module_1 = __webpack_require__(/*! ./context/file/file.context.module */ "./src/context/file/file.context.module.ts");
+const file_management_module_1 = __webpack_require__(/*! ./business/file-management/file-management.module */ "./src/business/file-management/file-management.module.ts");
 const resource_management_module_1 = __webpack_require__(/*! ./business/resource-management/resource-management.module */ "./src/business/resource-management/resource-management.module.ts");
 const reservation_management_module_1 = __webpack_require__(/*! ./business/reservation-management/reservation-management.module */ "./src/business/reservation-management/reservation-management.module.ts");
 const schedule_management_module_1 = __webpack_require__(/*! ./business/schedule-management/schedule-management.module */ "./src/business/schedule-management/schedule-management.module.ts");
@@ -4515,7 +4515,7 @@ exports.AppModule = AppModule = __decorate([
             }),
             typeorm_1.TypeOrmModule.forFeature(entities_1.Entities),
             legacy_application_module_1.LegacyApplicationModule,
-            file_context_module_1.FileContextModule,
+            file_management_module_1.FileManagementModule,
             resource_management_module_1.ResourceManagementModule,
             reservation_management_module_1.ReservationManagementModule,
             schedule_management_module_1.ScheduleManagementModule,
@@ -22193,6 +22193,428 @@ exports.EmployeeManagementService = EmployeeManagementService = __decorate([
 
 /***/ }),
 
+/***/ "./src/business/file-management/controllers/cron.file.controller.ts":
+/*!**************************************************************************!*\
+  !*** ./src/business/file-management/controllers/cron.file.controller.ts ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CronFileController = void 0;
+const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const file_management_service_1 = __webpack_require__(/*! ../file-management.service */ "./src/business/file-management/file-management.service.ts");
+let CronFileController = class CronFileController {
+    constructor(fileManagementService) {
+        this.fileManagementService = fileManagementService;
+    }
+    async deleteTemporaryFile() {
+        return this.fileManagementService.deleteTemporaryFiles();
+    }
+};
+exports.CronFileController = CronFileController;
+__decorate([
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, common_1.Get)('cron-job/delete-temporary-file'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CronFileController.prototype, "deleteTemporaryFile", null);
+exports.CronFileController = CronFileController = __decorate([
+    (0, swagger_1.ApiTags)('v2 파일 관리'),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Controller)('v2/files'),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_management_service_1.FileManagementService !== "undefined" && file_management_service_1.FileManagementService) === "function" ? _a : Object])
+], CronFileController);
+
+
+/***/ }),
+
+/***/ "./src/business/file-management/controllers/file.controller.ts":
+/*!*********************************************************************!*\
+  !*** ./src/business/file-management/controllers/file.controller.ts ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
+const file_management_service_1 = __webpack_require__(/*! ../file-management.service */ "./src/business/file-management/file-management.service.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const business_dto_index_1 = __webpack_require__(/*! @resource/business.dto.index */ "./src/business.dto.index.ts");
+const mime_type_enum_1 = __webpack_require__(/*! @libs/enums/mime-type.enum */ "./libs/enums/mime-type.enum.ts");
+const dtos_1 = __webpack_require__(/*! ../dtos */ "./src/business/file-management/dtos/index.ts");
+let FileController = class FileController {
+    constructor(fileManagementService) {
+        this.fileManagementService = fileManagementService;
+    }
+    async uploadFile(file) {
+        return this.fileManagementService.uploadFile(file);
+    }
+    async uploadMultipleFiles(files) {
+        return this.fileManagementService.uploadMultipleFiles(files);
+    }
+    async deleteMultipleFiles(fileIds) {
+        await this.fileManagementService.deleteMultipleFiles(fileIds);
+    }
+    async getPresignedUrl(mime) {
+        return this.fileManagementService.getPresignedUrl(mime);
+    }
+    async createFileData(createFileDataDto) {
+        return this.fileManagementService.createFileData(createFileDataDto);
+    }
+    async deleteFile(fileId) {
+        await this.fileManagementService.deleteFile(fileId);
+    }
+};
+exports.FileController = FileController;
+__decorate([
+    (0, common_1.Post)('upload'),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiOperation)({ summary: '파일 업로드' }),
+    (0, swagger_1.ApiOkResponse)({ status: 200, description: '파일 업로드 성공', type: business_dto_index_1.FileResponseDto }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof Express !== "undefined" && (_b = Express.Multer) !== void 0 && _b.File) === "function" ? _c : Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "uploadFile", null);
+__decorate([
+    (0, common_1.Post)('upload/multiple'),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                files: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary',
+                    },
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiOperation)({ summary: '여러 파일 업로드' }),
+    (0, swagger_1.ApiOkResponse)({ status: 200, description: '여러 파일 업로드 성공', type: [business_dto_index_1.FileResponseDto] }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files', 10)),
+    __param(0, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "uploadMultipleFiles", null);
+__decorate([
+    (0, common_1.Delete)('multiple'),
+    (0, swagger_1.ApiOperation)({ summary: '여러 파일 삭제' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                fileIds: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                    },
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiOkResponse)({ status: 200, description: '여러 파일 삭제 성공' }),
+    __param(0, (0, common_1.Body)('fileIds')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "deleteMultipleFiles", null);
+__decorate([
+    (0, common_1.Get)('presigned-url'),
+    (0, swagger_1.ApiOperation)({ summary: 'Presigned URL 생성' }),
+    (0, swagger_1.ApiOkResponse)({ status: 200, description: 'Presigned URL 생성 성공' }),
+    (0, swagger_1.ApiQuery)({ name: 'mime', enum: mime_type_enum_1.MimeType, example: mime_type_enum_1.MimeType.IMAGE_PNG, required: true }),
+    __param(0, (0, common_1.Query)('mime')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof mime_type_enum_1.MimeType !== "undefined" && mime_type_enum_1.MimeType) === "function" ? _d : Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "getPresignedUrl", null);
+__decorate([
+    (0, common_1.Post)('data'),
+    (0, swagger_1.ApiOperation)({ summary: '파일 데이터 생성' }),
+    (0, swagger_1.ApiOkResponse)({ status: 200, description: '파일 데이터 생성 성공', type: business_dto_index_1.FileResponseDto }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof dtos_1.CreateFileDataDto !== "undefined" && dtos_1.CreateFileDataDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "createFileData", null);
+__decorate([
+    (0, common_1.Delete)(':fileId'),
+    (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
+    (0, swagger_1.ApiOkResponse)({ status: 200, description: '파일 삭제 성공' }),
+    __param(0, (0, common_1.Param)('fileId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "deleteFile", null);
+exports.FileController = FileController = __decorate([
+    (0, swagger_1.ApiTags)('v2 파일 관리'),
+    (0, common_1.Controller)('v2/files'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_management_service_1.FileManagementService !== "undefined" && file_management_service_1.FileManagementService) === "function" ? _a : Object])
+], FileController);
+
+
+/***/ }),
+
+/***/ "./src/business/file-management/dtos/create-filedata.dto.ts":
+/*!******************************************************************!*\
+  !*** ./src/business/file-management/dtos/create-filedata.dto.ts ***!
+  \******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateFileDataDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class CreateFileDataDto {
+}
+exports.CreateFileDataDto = CreateFileDataDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '파일 경로' }),
+    __metadata("design:type", String)
+], CreateFileDataDto.prototype, "filePath", void 0);
+
+
+/***/ }),
+
+/***/ "./src/business/file-management/dtos/index.ts":
+/*!****************************************************!*\
+  !*** ./src/business/file-management/dtos/index.ts ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./create-filedata.dto */ "./src/business/file-management/dtos/create-filedata.dto.ts"), exports);
+
+
+/***/ }),
+
+/***/ "./src/business/file-management/file-management.module.ts":
+/*!****************************************************************!*\
+  !*** ./src/business/file-management/file-management.module.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileManagementModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_context_module_1 = __webpack_require__(/*! @src/context/file/file.context.module */ "./src/context/file/file.context.module.ts");
+const file_management_service_1 = __webpack_require__(/*! ./file-management.service */ "./src/business/file-management/file-management.service.ts");
+const file_controller_1 = __webpack_require__(/*! ./controllers/file.controller */ "./src/business/file-management/controllers/file.controller.ts");
+const cron_file_controller_1 = __webpack_require__(/*! ./controllers/cron.file.controller */ "./src/business/file-management/controllers/cron.file.controller.ts");
+let FileManagementModule = class FileManagementModule {
+};
+exports.FileManagementModule = FileManagementModule;
+exports.FileManagementModule = FileManagementModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            file_context_module_1.FileContextModule,
+        ],
+        controllers: [file_controller_1.FileController, cron_file_controller_1.CronFileController],
+        providers: [file_management_service_1.FileManagementService],
+        exports: [file_management_service_1.FileManagementService],
+    })
+], FileManagementModule);
+
+
+/***/ }),
+
+/***/ "./src/business/file-management/file-management.service.ts":
+/*!*****************************************************************!*\
+  !*** ./src/business/file-management/file-management.service.ts ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var FileManagementService_1;
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileManagementService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const file_context_service_1 = __webpack_require__(/*! @src/context/file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
+let FileManagementService = FileManagementService_1 = class FileManagementService {
+    constructor(fileContextService) {
+        this.fileContextService = fileContextService;
+        this.logger = new common_1.Logger(FileManagementService_1.name);
+    }
+    async uploadFile(file) {
+        this.logger.log(`파일 업로드 시작: ${file.originalname}`);
+        try {
+            const result = await this.fileContextService.파일을_업로드한다(file);
+            this.logger.log(`파일 업로드 완료: ${result.fileId}`);
+            return result;
+        }
+        catch (error) {
+            this.logger.error(`파일 업로드 실패: ${file.originalname}`, error);
+            throw error;
+        }
+    }
+    async uploadMultipleFiles(files) {
+        this.logger.log(`다중 파일 업로드 시작: ${files.length}개 파일`);
+        try {
+            const result = await this.fileContextService.다중_파일을_업로드한다(files);
+            this.logger.log(`다중 파일 업로드 완료: ${result.length}개 파일`);
+            return result;
+        }
+        catch (error) {
+            this.logger.error(`다중 파일 업로드 실패`, error);
+            throw error;
+        }
+    }
+    async deleteFile(fileId) {
+        this.logger.log(`파일 삭제 시작: ${fileId}`);
+        try {
+            await this.fileContextService.파일을_삭제한다(fileId);
+            this.logger.log(`파일 삭제 완료: ${fileId}`);
+        }
+        catch (error) {
+            this.logger.error(`파일 삭제 실패: ${fileId}`, error);
+            throw error;
+        }
+    }
+    async deleteMultipleFiles(fileIds) {
+        this.logger.log(`다중 파일 삭제 시작: ${fileIds.length}개 파일`);
+        try {
+            await this.fileContextService.다중_파일을_삭제한다(fileIds);
+            this.logger.log(`다중 파일 삭제 완료: ${fileIds.length}개 파일`);
+        }
+        catch (error) {
+            this.logger.error(`다중 파일 삭제 실패`, error);
+            throw error;
+        }
+    }
+    async getPresignedUrl(mime) {
+        this.logger.log(`Presigned URL 생성 시작: ${mime}`);
+        try {
+            const result = await this.fileContextService.프리사인드_URL을_생성한다(mime);
+            this.logger.log(`Presigned URL 생성 완료`);
+            return result;
+        }
+        catch (error) {
+            this.logger.error(`Presigned URL 생성 실패: ${mime}`, error);
+            throw error;
+        }
+    }
+    async createFileData(createFileDataDto) {
+        this.logger.log(`파일 데이터 생성 시작`);
+        try {
+            const result = await this.fileContextService.파일_데이터를_생성한다(createFileDataDto);
+            this.logger.log(`파일 데이터 생성 완료: ${result.fileId}`);
+            return result;
+        }
+        catch (error) {
+            this.logger.error(`파일 데이터 생성 실패`, error);
+            throw error;
+        }
+    }
+    async deleteTemporaryFiles() {
+        this.logger.log(`임시 파일들 삭제 시작`);
+        try {
+            const result = await this.fileContextService.임시_파일들을_삭제한다();
+            this.logger.log(`임시 파일들 삭제 완료`);
+            return result;
+        }
+        catch (error) {
+            this.logger.error(`임시 파일들 삭제 실패`, error);
+            throw error;
+        }
+    }
+};
+exports.FileManagementService = FileManagementService;
+exports.FileManagementService = FileManagementService = FileManagementService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _a : Object])
+], FileManagementService);
+
+
+/***/ }),
+
 /***/ "./src/business/notification-management/controllers/cron.notification.controller.ts":
 /*!******************************************************************************************!*\
   !*** ./src/business/notification-management/controllers/cron.notification.controller.ts ***!
@@ -33614,215 +34036,6 @@ exports.S3Service = S3Service = __decorate([
 
 /***/ }),
 
-/***/ "./src/context/file/controllers/cron.file.controller.ts":
-/*!**************************************************************!*\
-  !*** ./src/context/file/controllers/cron.file.controller.ts ***!
-  \**************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CronFileController = void 0;
-const public_decorator_1 = __webpack_require__(/*! @libs/decorators/public.decorator */ "./libs/decorators/public.decorator.ts");
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const file_context_service_1 = __webpack_require__(/*! ../services/file.context.service */ "./src/context/file/services/file.context.service.ts");
-let CronFileController = class CronFileController {
-    constructor(fileContextService) {
-        this.fileContextService = fileContextService;
-    }
-    async deleteTemporaryFile() {
-        return this.fileContextService.임시_파일들을_삭제한다();
-    }
-};
-exports.CronFileController = CronFileController;
-__decorate([
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, common_1.Get)('cron-job/delete-temporary-file'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], CronFileController.prototype, "deleteTemporaryFile", null);
-exports.CronFileController = CronFileController = __decorate([
-    (0, swagger_1.ApiTags)('v2 파일 '),
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Controller)('v2/files'),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _a : Object])
-], CronFileController);
-
-
-/***/ }),
-
-/***/ "./src/context/file/controllers/file.controller.ts":
-/*!*********************************************************!*\
-  !*** ./src/context/file/controllers/file.controller.ts ***!
-  \*********************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FileController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const platform_express_1 = __webpack_require__(/*! @nestjs/platform-express */ "@nestjs/platform-express");
-const file_context_service_1 = __webpack_require__(/*! ../services/file.context.service */ "./src/context/file/services/file.context.service.ts");
-const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
-const business_dto_index_1 = __webpack_require__(/*! @resource/business.dto.index */ "./src/business.dto.index.ts");
-const mime_type_enum_1 = __webpack_require__(/*! @libs/enums/mime-type.enum */ "./libs/enums/mime-type.enum.ts");
-const create_filedata_dto_1 = __webpack_require__(/*! ../dtos/create-filedata.dto */ "./src/context/file/dtos/create-filedata.dto.ts");
-let FileController = class FileController {
-    constructor(fileContextService) {
-        this.fileContextService = fileContextService;
-    }
-    async uploadFile(file) {
-        return this.fileContextService.파일을_업로드한다(file);
-    }
-    async uploadMultipleFiles(files) {
-        return this.fileContextService.다중_파일을_업로드한다(files);
-    }
-    async deleteMultipleFiles(fileIds) {
-        await this.fileContextService.다중_파일을_삭제한다(fileIds);
-    }
-    async getPresignedUrl(mime) {
-        return this.fileContextService.프리사인드_URL을_생성한다(mime);
-    }
-    async createFileData(createFileDataDto) {
-        return this.fileContextService.파일_데이터를_생성한다(createFileDataDto);
-    }
-    async deleteFile(fileId) {
-        await this.fileContextService.파일을_삭제한다(fileId);
-    }
-};
-exports.FileController = FileController;
-__decorate([
-    (0, common_1.Post)('upload'),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                file: {
-                    type: 'string',
-                    format: 'binary',
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiOperation)({ summary: '파일 업로드' }),
-    (0, swagger_1.ApiOkResponse)({ status: 200, description: '파일 업로드 성공', type: business_dto_index_1.FileResponseDto }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    __param(0, (0, common_1.UploadedFile)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof Express !== "undefined" && (_b = Express.Multer) !== void 0 && _b.File) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
-], FileController.prototype, "uploadFile", null);
-__decorate([
-    (0, common_1.Post)('upload/multiple'),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                files: {
-                    type: 'array',
-                    items: {
-                        type: 'string',
-                        format: 'binary',
-                    },
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiOperation)({ summary: '여러 파일 업로드' }),
-    (0, swagger_1.ApiOkResponse)({ status: 200, description: '여러 파일 업로드 성공', type: [business_dto_index_1.FileResponseDto] }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files', 10)),
-    __param(0, (0, common_1.UploadedFiles)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Array]),
-    __metadata("design:returntype", Promise)
-], FileController.prototype, "uploadMultipleFiles", null);
-__decorate([
-    (0, common_1.Delete)('multiple'),
-    (0, swagger_1.ApiOperation)({ summary: '여러 파일 삭제' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                fileIds: {
-                    type: 'array',
-                    items: {
-                        type: 'string',
-                    },
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiOkResponse)({ status: 200, description: '여러 파일 삭제 성공' }),
-    __param(0, (0, common_1.Body)('fileIds')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Array]),
-    __metadata("design:returntype", Promise)
-], FileController.prototype, "deleteMultipleFiles", null);
-__decorate([
-    (0, common_1.Get)('presigned-url'),
-    (0, swagger_1.ApiOperation)({ summary: 'Presigned URL 생성' }),
-    (0, swagger_1.ApiOkResponse)({ status: 200, description: 'Presigned URL 생성 성공' }),
-    (0, swagger_1.ApiQuery)({ name: 'mime', enum: mime_type_enum_1.MimeType, example: mime_type_enum_1.MimeType.IMAGE_PNG, required: true }),
-    __param(0, (0, common_1.Query)('mime')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof mime_type_enum_1.MimeType !== "undefined" && mime_type_enum_1.MimeType) === "function" ? _d : Object]),
-    __metadata("design:returntype", Promise)
-], FileController.prototype, "getPresignedUrl", null);
-__decorate([
-    (0, common_1.Post)('data'),
-    (0, swagger_1.ApiOperation)({ summary: '파일 데이터 생성' }),
-    (0, swagger_1.ApiOkResponse)({ status: 200, description: '파일 데이터 생성 성공', type: business_dto_index_1.FileResponseDto }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof create_filedata_dto_1.CreateFileDataDto !== "undefined" && create_filedata_dto_1.CreateFileDataDto) === "function" ? _e : Object]),
-    __metadata("design:returntype", Promise)
-], FileController.prototype, "createFileData", null);
-__decorate([
-    (0, common_1.Delete)(':fileId'),
-    (0, swagger_1.ApiOperation)({ summary: '파일 삭제' }),
-    (0, swagger_1.ApiOkResponse)({ status: 200, description: '파일 삭제 성공' }),
-    __param(0, (0, common_1.Param)('fileId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], FileController.prototype, "deleteFile", null);
-exports.FileController = FileController = __decorate([
-    (0, swagger_1.ApiTags)('v2 파일 '),
-    (0, common_1.Controller)('v2/files'),
-    (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _a : Object])
-], FileController);
-
-
-/***/ }),
-
 /***/ "./src/context/file/dtos/create-filedata.dto.ts":
 /*!******************************************************!*\
   !*** ./src/context/file/dtos/create-filedata.dto.ts ***!
@@ -33983,8 +34196,6 @@ const file_resource_module_1 = __webpack_require__(/*! @src/domain/file-resource
 const file_vehicle_info_module_1 = __webpack_require__(/*! @src/domain/file-vehicle-info/file-vehicle-info.module */ "./src/domain/file-vehicle-info/file-vehicle-info.module.ts");
 const file_context_service_1 = __webpack_require__(/*! ./services/file.context.service */ "./src/context/file/services/file.context.service.ts");
 const s3_service_1 = __webpack_require__(/*! ./adapter/s3.service */ "./src/context/file/adapter/s3.service.ts");
-const file_controller_1 = __webpack_require__(/*! ./controllers/file.controller */ "./src/context/file/controllers/file.controller.ts");
-const cron_file_controller_1 = __webpack_require__(/*! ./controllers/cron.file.controller */ "./src/context/file/controllers/cron.file.controller.ts");
 let FileContextModule = class FileContextModule {
 };
 exports.FileContextModule = FileContextModule;
@@ -33998,7 +34209,7 @@ exports.FileContextModule = FileContextModule = __decorate([
             file_resource_module_1.DomainFileResourceModule,
             file_vehicle_info_module_1.DomainFileVehicleInfoModule,
         ],
-        controllers: [file_controller_1.FileController, cron_file_controller_1.CronFileController],
+        controllers: [],
         providers: [
             file_context_service_1.FileContextService,
             s3_service_1.S3Service,
@@ -36372,12 +36583,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProjectContextModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const project_context_service_1 = __webpack_require__(/*! ./project.context.service */ "./src/context/project/project.context.service.ts");
+const project_module_1 = __webpack_require__(/*! @src/domain/project/project.module */ "./src/domain/project/project.module.ts");
 let ProjectContextModule = class ProjectContextModule {
 };
 exports.ProjectContextModule = ProjectContextModule;
 exports.ProjectContextModule = ProjectContextModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
+        imports: [project_module_1.DomainProjectModule],
         providers: [project_context_service_1.ProjectContextService],
         exports: [project_context_service_1.ProjectContextService],
     })
@@ -36399,21 +36611,33 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var ProjectContextService_1;
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProjectContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const project_service_1 = __webpack_require__(/*! @src/domain/project/project.service */ "./src/domain/project/project.service.ts");
 let ProjectContextService = ProjectContextService_1 = class ProjectContextService {
-    constructor() {
+    constructor(domainProjectService) {
+        this.domainProjectService = domainProjectService;
         this.logger = new common_1.Logger(ProjectContextService_1.name);
     }
     async 프로젝트_존재여부를_확인한다(projectId) {
-        return true;
+        const response = await this.domainProjectService.getProjectsByIdsGet([projectId]);
+        return response.projects.length > 0;
+    }
+    async 프로젝트들을_조회한다() {
+        const response = await this.domainProjectService.getProjectHierarchy();
+        return response.projectHierarchy.map((project) => project.id);
     }
 };
 exports.ProjectContextService = ProjectContextService;
 exports.ProjectContextService = ProjectContextService = ProjectContextService_1 = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof project_service_1.DomainProjectService !== "undefined" && project_service_1.DomainProjectService) === "function" ? _a : Object])
 ], ProjectContextService);
 
 
