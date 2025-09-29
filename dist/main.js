@@ -4273,11 +4273,13 @@ function setupSwagger(app, dtos) {
     const document = swagger_1.SwaggerModule.createDocument(app, config, {
         extraModels: [response_dto_1.BaseResponseDto, pagination_response_dto_1.PaginationData, ...dtos],
     });
+    const customJsUrl = `${process.env.APP_URL}${process.env.NODE_ENV !== 'local' ? '' : '/public'}/swagger-custom.js`;
     swagger_1.SwaggerModule.setup('api-docs', app, document, {
         jsonDocumentUrl: '/api-docs-json',
         customJs: [
             'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
+            customJsUrl,
         ],
         customCssUrl: [
             'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',

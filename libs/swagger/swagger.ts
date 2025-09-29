@@ -14,12 +14,14 @@ export function setupSwagger(app: INestApplication, dtos: any[]) {
     const document = SwaggerModule.createDocument(app, config, {
         extraModels: [BaseResponseDto, PaginationData, ...dtos],
     });
+    const customJsUrl = `${process.env.APP_URL}${process.env.NODE_ENV !== 'local' ? '' : '/public'}/swagger-custom.js`; // 커스텀 JS 파일 추가
 
     SwaggerModule.setup('api-docs', app, document, {
         jsonDocumentUrl: '/api-docs-json',
         customJs: [
             'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
+            customJsUrl,
         ],
         customCssUrl: [
             'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
