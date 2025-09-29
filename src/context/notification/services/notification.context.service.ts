@@ -372,7 +372,6 @@ export class NotificationContextService {
         }
         const { oldTokens, newTokens } = this._토큰을_디바이스_타입별로_분류한다(employeeTokens);
 
-        // TODO 알림 테스트
         // 실제 알림 전송
         await this.알림을_전송한다(oldTokens, {
             title: notification.title,
@@ -381,12 +380,12 @@ export class NotificationContextService {
             notificationData: notification.notificationData,
         });
 
-        await this.알림을_전송한다_new(newTokens, {
-            title: notification.title,
-            body: notification.body,
-            notificationType: notification.notificationType,
-            notificationData: notification.notificationData,
-        });
+        // await this.알림을_전송한다_new(newTokens, {
+        //     title: notification.title,
+        //     body: notification.body,
+        //     notificationType: notification.notificationType,
+        //     notificationData: notification.notificationData,
+        // });
         // 알림 전송 후 전송상태 업데이트
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }

@@ -11392,6 +11392,10 @@ __decorate([
     __metadata("design:type", Boolean)
 ], ConsumableResponseDto.prototype, "notifyReplacementCycle", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: '교체 필요 여부 (거리 기반 계산)', required: false }),
+    __metadata("design:type", Boolean)
+], ConsumableResponseDto.prototype, "isReplacementRequired", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: [MaintenanceResponseDto], required: false }),
     __metadata("design:type", Array)
 ], ConsumableResponseDto.prototype, "maintenances", void 0);
@@ -19985,12 +19989,6 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             notificationType: notification.notificationType,
             notificationData: notification.notificationData,
         });
-        await this.알림을_전송한다_new(newTokens, {
-            title: notification.title,
-            body: notification.body,
-            notificationType: notification.notificationType,
-            notificationData: notification.notificationData,
-        });
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }
     _토큰을_디바이스_타입별로_분류한다(employeeTokens) {
@@ -21284,19 +21282,39 @@ let ConsumableContextService = class ConsumableContextService {
         };
     }
     async 차량별_소모품목록을_조회한다(vehicleInfoId) {
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { vehicleInfoId },
+        });
+        if (!vehicleInfo) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        }
         const consumables = await this.domainConsumableService.findAll({
             where: { vehicleInfoId },
             relations: ['maintenances'],
             order: { name: 'ASC' },
         });
-        return consumables.map((consumable) => ({
-            consumableId: consumable.consumableId,
-            vehicleInfoId: consumable.vehicleInfoId,
-            name: consumable.name,
-            replaceCycle: consumable.replaceCycle,
-            notifyReplacementCycle: consumable.notifyReplacementCycle,
-            maintenances: consumable.maintenances,
-        }));
+        return consumables.map((consumable) => {
+            let isReplacementRequired = false;
+            if (consumable.maintenances && consumable.maintenances.length > 0) {
+                const latestMaintenance = consumable.maintenances.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+                const mileageSinceLastMaintenance = vehicleInfo.totalMileage - Number(latestMaintenance.mileage);
+                isReplacementRequired = mileageSinceLastMaintenance > consumable.replaceCycle;
+            }
+            else {
+                const initMileage = consumable.initMileage || 0;
+                const mileageSinceInit = vehicleInfo.totalMileage - initMileage;
+                isReplacementRequired = mileageSinceInit > consumable.replaceCycle;
+            }
+            return {
+                consumableId: consumable.consumableId,
+                vehicleInfoId: consumable.vehicleInfoId,
+                name: consumable.name,
+                replaceCycle: consumable.replaceCycle,
+                notifyReplacementCycle: consumable.notifyReplacementCycle,
+                isReplacementRequired,
+                maintenances: consumable.maintenances,
+            };
+        });
     }
     async 소모품을_조회한다(consumableId) {
         const consumable = await this.domainConsumableService.findOne({
@@ -21306,12 +21324,30 @@ let ConsumableContextService = class ConsumableContextService {
         if (!consumable) {
             throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.CONSUMABLE.NOT_FOUND);
         }
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { vehicleInfoId: consumable.vehicleInfoId },
+        });
+        if (!vehicleInfo) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        }
+        let isReplacementRequired = false;
+        if (consumable.maintenances && consumable.maintenances.length > 0) {
+            const latestMaintenance = consumable.maintenances.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+            const mileageSinceLastMaintenance = vehicleInfo.totalMileage - Number(latestMaintenance.mileage);
+            isReplacementRequired = mileageSinceLastMaintenance > consumable.replaceCycle;
+        }
+        else {
+            const initMileage = consumable.initMileage || 0;
+            const mileageSinceInit = vehicleInfo.totalMileage - initMileage;
+            isReplacementRequired = mileageSinceInit > consumable.replaceCycle;
+        }
         return {
             consumableId: consumable.consumableId,
             vehicleInfoId: consumable.vehicleInfoId,
             name: consumable.name,
             replaceCycle: consumable.replaceCycle,
             notifyReplacementCycle: consumable.notifyReplacementCycle,
+            isReplacementRequired,
             maintenances: consumable.maintenances,
         };
     }
@@ -21334,12 +21370,30 @@ let ConsumableContextService = class ConsumableContextService {
             where: { consumableId },
             relations: ['maintenances'],
         });
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { vehicleInfoId: updatedConsumable.vehicleInfoId },
+        });
+        if (!vehicleInfo) {
+            throw new common_1.NotFoundException(error_message_1.ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        }
+        let isReplacementRequired = false;
+        if (updatedConsumable.maintenances && updatedConsumable.maintenances.length > 0) {
+            const latestMaintenance = updatedConsumable.maintenances.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+            const mileageSinceLastMaintenance = vehicleInfo.totalMileage - Number(latestMaintenance.mileage);
+            isReplacementRequired = mileageSinceLastMaintenance > updatedConsumable.replaceCycle;
+        }
+        else {
+            const initMileage = updatedConsumable.initMileage || 0;
+            const mileageSinceInit = vehicleInfo.totalMileage - initMileage;
+            isReplacementRequired = mileageSinceInit > updatedConsumable.replaceCycle;
+        }
         return {
             consumableId: updatedConsumable.consumableId,
             vehicleInfoId: updatedConsumable.vehicleInfoId,
             name: updatedConsumable.name,
             replaceCycle: updatedConsumable.replaceCycle,
             notifyReplacementCycle: updatedConsumable.notifyReplacementCycle,
+            isReplacementRequired,
             maintenances: updatedConsumable.maintenances,
         };
     }

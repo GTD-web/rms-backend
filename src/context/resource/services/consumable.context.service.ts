@@ -52,20 +52,52 @@ export class ConsumableContextService {
     }
 
     async 차량별_소모품목록을_조회한다(vehicleInfoId: string): Promise<ConsumableResponseDto[]> {
+        // 차량 정보 조회 (총 주행거리 필요)
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { vehicleInfoId },
+        });
+
+        if (!vehicleInfo) {
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        }
+
         const consumables = await this.domainConsumableService.findAll({
             where: { vehicleInfoId },
             relations: ['maintenances'],
             order: { name: 'ASC' },
         });
 
-        return consumables.map((consumable) => ({
-            consumableId: consumable.consumableId,
-            vehicleInfoId: consumable.vehicleInfoId,
-            name: consumable.name,
-            replaceCycle: consumable.replaceCycle,
-            notifyReplacementCycle: consumable.notifyReplacementCycle,
-            maintenances: consumable.maintenances,
-        }));
+        return consumables.map((consumable) => {
+            // 교체 필요 여부 계산
+            let isReplacementRequired = false;
+
+            if (consumable.maintenances && consumable.maintenances.length > 0) {
+                // 가장 최근 정비 이력 찾기 (날짜 기준 내림차순 정렬 후 첫 번째)
+                const latestMaintenance = consumable.maintenances.sort(
+                    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+                )[0];
+
+                // 현재 총 주행거리 - 마지막 정비 시 주행거리 > 교체 주기
+                const mileageSinceLastMaintenance = vehicleInfo.totalMileage - Number(latestMaintenance.mileage);
+                isReplacementRequired = mileageSinceLastMaintenance > consumable.replaceCycle;
+            } else {
+                // 정비 이력이 없으면 초기 주행거리 기준으로 계산
+                // 초기 주행거리가 있다면 사용, 없으면 0으로 처리
+                const initMileage = consumable.initMileage || 0;
+                const mileageSinceInit = vehicleInfo.totalMileage - initMileage;
+                isReplacementRequired = mileageSinceInit > consumable.replaceCycle;
+            }
+
+            return {
+                consumableId: consumable.consumableId,
+                vehicleInfoId: consumable.vehicleInfoId,
+                name: consumable.name,
+                replaceCycle: consumable.replaceCycle,
+                notifyReplacementCycle: consumable.notifyReplacementCycle,
+                isReplacementRequired,
+                maintenances: consumable.maintenances,
+            };
+        });
     }
 
     async 소모품을_조회한다(consumableId: string): Promise<ConsumableResponseDto> {
@@ -78,12 +110,41 @@ export class ConsumableContextService {
             throw new NotFoundException(ERROR_MESSAGE.BUSINESS.CONSUMABLE.NOT_FOUND);
         }
 
+        // 차량 정보 조회 (총 주행거리 필요)
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { vehicleInfoId: consumable.vehicleInfoId },
+        });
+
+        if (!vehicleInfo) {
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        }
+
+        // 교체 필요 여부 계산
+        let isReplacementRequired = false;
+
+        if (consumable.maintenances && consumable.maintenances.length > 0) {
+            // 가장 최근 정비 이력 찾기 (날짜 기준 내림차순 정렬 후 첫 번째)
+            const latestMaintenance = consumable.maintenances.sort(
+                (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+            )[0];
+
+            // 현재 총 주행거리 - 마지막 정비 시 주행거리 > 교체 주기
+            const mileageSinceLastMaintenance = vehicleInfo.totalMileage - Number(latestMaintenance.mileage);
+            isReplacementRequired = mileageSinceLastMaintenance > consumable.replaceCycle;
+        } else {
+            // 정비 이력이 없으면 초기 주행거리 기준으로 계산
+            const initMileage = consumable.initMileage || 0;
+            const mileageSinceInit = vehicleInfo.totalMileage - initMileage;
+            isReplacementRequired = mileageSinceInit > consumable.replaceCycle;
+        }
+
         return {
             consumableId: consumable.consumableId,
             vehicleInfoId: consumable.vehicleInfoId,
             name: consumable.name,
             replaceCycle: consumable.replaceCycle,
             notifyReplacementCycle: consumable.notifyReplacementCycle,
+            isReplacementRequired,
             maintenances: consumable.maintenances,
         };
     }
@@ -120,12 +181,41 @@ export class ConsumableContextService {
             relations: ['maintenances'],
         });
 
+        // 차량 정보 조회 (총 주행거리 필요)
+        const vehicleInfo = await this.domainVehicleInfoService.findOne({
+            where: { vehicleInfoId: updatedConsumable.vehicleInfoId },
+        });
+
+        if (!vehicleInfo) {
+            throw new NotFoundException(ERROR_MESSAGE.BUSINESS.VEHICLE_INFO.NOT_FOUND);
+        }
+
+        // 교체 필요 여부 계산
+        let isReplacementRequired = false;
+
+        if (updatedConsumable.maintenances && updatedConsumable.maintenances.length > 0) {
+            // 가장 최근 정비 이력 찾기 (날짜 기준 내림차순 정렬 후 첫 번째)
+            const latestMaintenance = updatedConsumable.maintenances.sort(
+                (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+            )[0];
+
+            // 현재 총 주행거리 - 마지막 정비 시 주행거리 > 교체 주기
+            const mileageSinceLastMaintenance = vehicleInfo.totalMileage - Number(latestMaintenance.mileage);
+            isReplacementRequired = mileageSinceLastMaintenance > updatedConsumable.replaceCycle;
+        } else {
+            // 정비 이력이 없으면 초기 주행거리 기준으로 계산
+            const initMileage = updatedConsumable.initMileage || 0;
+            const mileageSinceInit = vehicleInfo.totalMileage - initMileage;
+            isReplacementRequired = mileageSinceInit > updatedConsumable.replaceCycle;
+        }
+
         return {
             consumableId: updatedConsumable.consumableId,
             vehicleInfoId: updatedConsumable.vehicleInfoId,
             name: updatedConsumable.name,
             replaceCycle: updatedConsumable.replaceCycle,
             notifyReplacementCycle: updatedConsumable.notifyReplacementCycle,
+            isReplacementRequired,
             maintenances: updatedConsumable.maintenances,
         };
     }
