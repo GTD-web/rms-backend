@@ -29892,16 +29892,6 @@ module.exports = require("typeorm");
 
 /***/ }),
 
-/***/ "fs":
-/*!*********************!*\
-  !*** external "fs" ***!
-  \*********************/
-/***/ ((module) => {
-
-module.exports = require("fs");
-
-/***/ }),
-
 /***/ "path":
 /*!***********************!*\
   !*** external "path" ***!
@@ -29958,7 +29948,6 @@ const core_2 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const path_1 = __webpack_require__(/*! path */ "path");
 const role_guard_1 = __webpack_require__(/*! @libs/guards/role.guard */ "./libs/guards/role.guard.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const fs = __webpack_require__(/*! fs */ "fs");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const isProduction = process.env.NODE_ENV === 'production';
@@ -29988,7 +29977,6 @@ async function bootstrap() {
     app.useGlobalGuards(new jwt_auth_guard_1.JwtAuthGuard(app.get(core_2.Reflector)), new role_guard_1.RolesGuard(app.get(core_2.Reflector)));
     app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
     const uploadPath = (0, path_1.join)(__dirname, '..', 'public');
-    console.log('STATIC_ROOT=', uploadPath, 'files=', fs.existsSync(uploadPath) ? fs.readdirSync(uploadPath) : 'N/A');
     app.useStaticAssets(uploadPath, {
         prefix: '/static',
     });

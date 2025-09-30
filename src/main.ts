@@ -41,8 +41,6 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
     const uploadPath = join(__dirname, '..', 'public');
-    console.log('STATIC_ROOT=', uploadPath, 'files=', fs.existsSync(uploadPath) ? fs.readdirSync(uploadPath) : 'N/A');
-
     app.useStaticAssets(uploadPath, {
         prefix: '/static',
     });

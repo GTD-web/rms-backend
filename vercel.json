@@ -11,7 +11,7 @@
         }
     ],
     "routes": [
-        { "src": "/static/(.*)", "dest": "dist/main.js" },
+        { "src": "/public/(.*)", "dest": "dist/main.js" },
         {
             "src": "/(.*)",
             "dest": "dist/main.js",
