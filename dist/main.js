@@ -10433,9 +10433,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MyManagementResourcesResponseDto = exports.ResourceTypeGroupDto = exports.ResourceGroupWithResourcesDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = exports.CreateResourceResponseDto = void 0;
+exports.MyManagementResourcesResponseDto = exports.ManagementResourceTypeGroupDto = exports.ManagementResourceGroupDto = exports.ManagementResourceResponseDto = exports.ResourceTypeGroupDto = exports.ResourceGroupWithResourcesDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = exports.CreateResourceResponseDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const vehicle_response_dto_1 = __webpack_require__(/*! ../vehicle/vehicle-response.dto */ "./src/business/resource-management/dtos/vehicle/vehicle-response.dto.ts");
 const accommodation_info_response_dto_1 = __webpack_require__(/*! ../accommodation/accommodation-info-response.dto */ "./src/business/resource-management/dtos/accommodation/accommodation-info-response.dto.ts");
@@ -10496,7 +10496,7 @@ __decorate([
     __metadata("design:type", String)
 ], ResourceGroupResponseDto.prototype, "description", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, required: false }),
     __metadata("design:type", typeof (_c = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _c : Object)
 ], ResourceGroupResponseDto.prototype, "type", void 0);
 __decorate([
@@ -10699,7 +10699,7 @@ class ResourceTypeGroupDto {
 }
 exports.ResourceTypeGroupDto = ResourceTypeGroupDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, description: '자원 타입' }),
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, description: '자원 타입', required: false }),
     __metadata("design:type", typeof (_j = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _j : Object)
 ], ResourceTypeGroupDto.prototype, "type", void 0);
 __decorate([
@@ -10718,13 +10718,123 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], ResourceTypeGroupDto.prototype, "ungroupedResources", void 0);
+class ManagementResourceResponseDto {
+    constructor(resource) {
+        this.resourceId = resource?.resourceId;
+        this.resourceGroupId = resource?.resourceGroupId;
+        this.name = resource?.name;
+        this.type = resource?.type;
+        this.order = resource?.order;
+        if (resource?.type === resource_type_enum_1.ResourceType.VEHICLE) {
+            if (resource?.isReplacementRequired !== undefined) {
+                this.isReplacementRequired = resource.isReplacementRequired;
+            }
+            if (resource?.replacementRequiredConsumables !== undefined) {
+                this.replacementRequiredConsumables = resource.replacementRequiredConsumables;
+            }
+        }
+    }
+}
+exports.ManagementResourceResponseDto = ManagementResourceResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ManagementResourceResponseDto.prototype, "resourceId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ManagementResourceResponseDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagementResourceResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    __metadata("design:type", typeof (_k = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _k : Object)
+], ManagementResourceResponseDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ManagementResourceResponseDto.prototype, "order", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '교체가 필요한 소모품이 있는지 여부 (차량 타입만 해당)',
+        required: false,
+    }),
+    __metadata("design:type", Boolean)
+], ManagementResourceResponseDto.prototype, "isReplacementRequired", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '교체가 필요한 소모품 이름들 (차량 타입만 해당)',
+        type: [String],
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ManagementResourceResponseDto.prototype, "replacementRequiredConsumables", void 0);
+class ManagementResourceGroupDto {
+}
+exports.ManagementResourceGroupDto = ManagementResourceGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ManagementResourceGroupDto.prototype, "resourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagementResourceGroupDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ManagementResourceGroupDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType }),
+    __metadata("design:type", typeof (_l = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _l : Object)
+], ManagementResourceGroupDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], ManagementResourceGroupDto.prototype, "order", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    __metadata("design:type", String)
+], ManagementResourceGroupDto.prototype, "parentResourceGroupId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [ManagementResourceResponseDto],
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ManagementResourceGroupDto.prototype, "resources", void 0);
+class ManagementResourceTypeGroupDto {
+}
+exports.ManagementResourceTypeGroupDto = ManagementResourceTypeGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, description: '자원 타입' }),
+    __metadata("design:type", typeof (_m = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _m : Object)
+], ManagementResourceTypeGroupDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [ManagementResourceGroupDto],
+        description: '해당 타입의 그룹 목록',
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ManagementResourceTypeGroupDto.prototype, "groups", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [ManagementResourceResponseDto],
+        description: '그룹이 없는 자원들',
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ManagementResourceTypeGroupDto.prototype, "ungroupedResources", void 0);
 class MyManagementResourcesResponseDto {
 }
 exports.MyManagementResourcesResponseDto = MyManagementResourcesResponseDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        type: [ResourceTypeGroupDto],
-        description: '타입별로 분류된 자원 그룹들',
+        type: [ManagementResourceTypeGroupDto],
+        description: '타입별로 분류된 자원 그룹들 (확장 정보 포함)',
     }),
     __metadata("design:type", Array)
 ], MyManagementResourcesResponseDto.prototype, "resourcesByType", void 0);
@@ -11772,18 +11882,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const resource_type_enum_1 = __webpack_require__(/*! @libs/enums/resource-type.enum */ "./libs/enums/resource-type.enum.ts");
 const resource_context_service_1 = __webpack_require__(/*! @src/context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
 const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
+const consumable_context_service_1 = __webpack_require__(/*! @src/context/resource/services/consumable.context.service */ "./src/context/resource/services/consumable.context.service.ts");
 const available_time_response_dto_1 = __webpack_require__(/*! ../dtos/resource/available-time-response.dto */ "./src/business/resource-management/dtos/resource/available-time-response.dto.ts");
 let ResourceService = class ResourceService {
-    constructor(resourceContextService, reservationContextService) {
+    constructor(resourceContextService, reservationContextService, consumableContextService) {
         this.resourceContextService = resourceContextService;
         this.reservationContextService = reservationContextService;
+        this.consumableContextService = consumableContextService;
     }
     async createResourceWithInfos(createResourceInfo) {
         return this.resourceContextService.자원과_상세정보를_생성한다(createResourceInfo);
@@ -11992,7 +12104,7 @@ let ResourceService = class ResourceService {
 exports.ResourceService = ResourceService;
 exports.ResourceService = ResourceService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof consumable_context_service_1.ConsumableContextService !== "undefined" && consumable_context_service_1.ConsumableContextService) === "function" ? _c : Object])
 ], ResourceService);
 
 
@@ -17307,22 +17419,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TaskManagementService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const resource_context_service_1 = __webpack_require__(/*! @src/context/resource/services/resource.context.service */ "./src/context/resource/services/resource.context.service.ts");
 const notification_context_service_1 = __webpack_require__(/*! @src/context/notification/services/notification.context.service */ "./src/context/notification/services/notification.context.service.ts");
+const consumable_context_service_1 = __webpack_require__(/*! @src/context/resource/services/consumable.context.service */ "./src/context/resource/services/consumable.context.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const reservation_context_service_1 = __webpack_require__(/*! @src/context/reservation/services/reservation.context.service */ "./src/context/reservation/services/reservation.context.service.ts");
 const schedule_query_context_service_1 = __webpack_require__(/*! @src/context/schedule/services/schedule-query.context.service */ "./src/context/schedule/services/schedule-query.context.service.ts");
 let TaskManagementService = class TaskManagementService {
-    constructor(resourceContextService, reservationContextService, notificationContextService, scheduleQueryContextService) {
+    constructor(resourceContextService, reservationContextService, notificationContextService, scheduleQueryContextService, consumableContextService) {
         this.resourceContextService = resourceContextService;
         this.reservationContextService = reservationContextService;
         this.notificationContextService = notificationContextService;
         this.scheduleQueryContextService = scheduleQueryContextService;
+        this.consumableContextService = consumableContextService;
     }
     async getTaskList(user, type) {
         let delayedReturnTasks = [];
@@ -17423,33 +17537,29 @@ let TaskManagementService = class TaskManagementService {
         const resources = await this.resourceContextService.소모품정보와_함께_모든자원을_조회한다();
         const needReplaceConsumables = [];
         for (const resource of resources) {
-            for (const consumable of resource.vehicleInfo?.consumables || []) {
-                console.log(consumable.maintenances);
-                const latestMaintenance = consumable.maintenances.sort((a, b) => a.date - b.date)[0] || null;
-                if (latestMaintenance) {
-                    const maintenanceRequired = resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
-                    if (maintenanceRequired) {
-                        const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(resource.resourceId, consumable.name);
-                        needReplaceConsumables.push({
-                            type: '소모품교체',
-                            title: `${consumable.name} 교체 필요`,
-                            reservationId: null,
-                            resourceId: resource.resourceId,
-                            resourceName: resource.name,
-                            consumableId: consumable.consumableId,
-                            consumableName: consumable.name,
-                            startDate: null,
-                            endDate: null,
-                            manager: {
-                                employeeId: resource.resourceManagers[0].employee.employeeId,
-                                name: resource.resourceManagers[0].employee.name,
-                                employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
-                                department: resource.resourceManagers[0].employee.department,
-                                position: resource.resourceManagers[0].employee.position,
-                            },
-                            notifications: notifications,
-                        });
-                    }
+            const consumableResults = await this.consumableContextService.차량_소모품들의_교체필요여부를_계산한다(resource.vehicleInfo);
+            for (const { consumable, isReplacementRequired } of consumableResults) {
+                if (isReplacementRequired) {
+                    const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(resource.resourceId, consumable.name);
+                    needReplaceConsumables.push({
+                        type: '소모품교체',
+                        title: `${consumable.name} 교체 필요`,
+                        reservationId: null,
+                        resourceId: resource.resourceId,
+                        resourceName: resource.name,
+                        consumableId: consumable.consumableId,
+                        consumableName: consumable.name,
+                        startDate: null,
+                        endDate: null,
+                        manager: {
+                            employeeId: resource.resourceManagers[0].employee.employeeId,
+                            name: resource.resourceManagers[0].employee.name,
+                            employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
+                            department: resource.resourceManagers[0].employee.department,
+                            position: resource.resourceManagers[0].employee.position,
+                        },
+                        notifications: notifications,
+                    });
                 }
             }
         }
@@ -17459,23 +17569,20 @@ let TaskManagementService = class TaskManagementService {
         const resources = await this.resourceContextService.관리자별_자원을_소모품정보와_함께_조회한다(user.employeeId, isSystemAdmin);
         const needReplaceConsumables = [];
         for (const resource of resources) {
-            for (const consumable of resource.vehicleInfo?.consumables || []) {
-                const latestMaintenance = consumable.maintenances.sort((a, b) => a.date - b.date)[0] || null;
-                if (latestMaintenance) {
-                    const maintenanceRequired = resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
-                    if (maintenanceRequired) {
-                        needReplaceConsumables.push({
-                            type: '소모품교체',
-                            title: `${consumable.name} 교체 필요`,
-                            reservationId: null,
-                            resourceId: resource.resourceId,
-                            resourceName: resource.name,
-                            consumableId: consumable.consumableId,
-                            consumableName: consumable.name,
-                            startDate: null,
-                            endDate: null,
-                        });
-                    }
+            const consumableResults = await this.consumableContextService.차량_소모품들의_교체필요여부를_계산한다(resource.vehicleInfo);
+            for (const { consumable, isReplacementRequired } of consumableResults) {
+                if (isReplacementRequired) {
+                    needReplaceConsumables.push({
+                        type: '소모품교체',
+                        title: `${consumable.name} 교체 필요`,
+                        reservationId: null,
+                        resourceId: resource.resourceId,
+                        resourceName: resource.name,
+                        consumableId: consumable.consumableId,
+                        consumableName: consumable.name,
+                        startDate: null,
+                        endDate: null,
+                    });
                 }
             }
         }
@@ -17485,7 +17592,7 @@ let TaskManagementService = class TaskManagementService {
 exports.TaskManagementService = TaskManagementService;
 exports.TaskManagementService = TaskManagementService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _c : Object, typeof (_d = typeof schedule_query_context_service_1.ScheduleQueryContextService !== "undefined" && schedule_query_context_service_1.ScheduleQueryContextService) === "function" ? _d : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_context_service_1.ResourceContextService !== "undefined" && resource_context_service_1.ResourceContextService) === "function" ? _a : Object, typeof (_b = typeof reservation_context_service_1.ReservationContextService !== "undefined" && reservation_context_service_1.ReservationContextService) === "function" ? _b : Object, typeof (_c = typeof notification_context_service_1.NotificationContextService !== "undefined" && notification_context_service_1.NotificationContextService) === "function" ? _c : Object, typeof (_d = typeof schedule_query_context_service_1.ScheduleQueryContextService !== "undefined" && schedule_query_context_service_1.ScheduleQueryContextService) === "function" ? _d : Object, typeof (_e = typeof consumable_context_service_1.ConsumableContextService !== "undefined" && consumable_context_service_1.ConsumableContextService) === "function" ? _e : Object])
 ], TaskManagementService);
 
 
@@ -21481,6 +21588,29 @@ let ConsumableContextService = class ConsumableContextService {
         }
         await this.domainConsumableService.delete(consumableId);
     }
+    async 소모품_교체필요여부를_계산한다(consumable, totalMileage) {
+        if (consumable.maintenances && consumable.maintenances.length > 0) {
+            const latestMaintenance = consumable.maintenances.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+            const mileageSinceLastMaintenance = totalMileage - Number(latestMaintenance.mileage);
+            return mileageSinceLastMaintenance > consumable.replaceCycle;
+        }
+        else {
+            const initMileage = consumable.initMileage || 0;
+            const mileageSinceInit = totalMileage - initMileage;
+            return mileageSinceInit > consumable.replaceCycle;
+        }
+    }
+    async 차량_소모품들의_교체필요여부를_계산한다(vehicleInfo) {
+        const results = [];
+        for (const consumable of vehicleInfo?.consumables || []) {
+            const isReplacementRequired = await this.소모품_교체필요여부를_계산한다(consumable, vehicleInfo.totalMileage);
+            results.push({
+                consumable,
+                isReplacementRequired,
+            });
+        }
+        return results;
+    }
 };
 exports.ConsumableContextService = ConsumableContextService;
 exports.ConsumableContextService = ConsumableContextService = __decorate([
@@ -22007,7 +22137,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceContextService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -22023,11 +22153,12 @@ const accommodation_info_service_1 = __webpack_require__(/*! @src/domain/accommo
 const equipment_info_service_1 = __webpack_require__(/*! @src/domain/equipment-info/equipment-info.service */ "./src/domain/equipment-info/equipment-info.service.ts");
 const file_service_1 = __webpack_require__(/*! @src/domain/file/file.service */ "./src/domain/file/file.service.ts");
 const file_context_service_1 = __webpack_require__(/*! ../../file/services/file.context.service */ "./src/context/file/services/file.context.service.ts");
+const consumable_context_service_1 = __webpack_require__(/*! ./consumable.context.service */ "./src/context/resource/services/consumable.context.service.ts");
 const resource_response_dto_1 = __webpack_require__(/*! @src/business/resource-management/dtos/resource/resource-response.dto */ "./src/business/resource-management/dtos/resource/resource-response.dto.ts");
 const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 const consumable_service_1 = __webpack_require__(/*! @src/domain/consumable/consumable.service */ "./src/domain/consumable/consumable.service.ts");
 let ResourceContextService = class ResourceContextService {
-    constructor(domainResourceService, domainResourceGroupService, domainResourceManagerService, domainVehicleInfoService, domainMeetingRoomInfoService, domainAccommodationInfoService, domainEquipmentInfoService, domainConsumableService, domainFileService, fileContextService, dataSource) {
+    constructor(domainResourceService, domainResourceGroupService, domainResourceManagerService, domainVehicleInfoService, domainMeetingRoomInfoService, domainAccommodationInfoService, domainEquipmentInfoService, domainConsumableService, domainFileService, fileContextService, consumableContextService, dataSource) {
         this.domainResourceService = domainResourceService;
         this.domainResourceGroupService = domainResourceGroupService;
         this.domainResourceManagerService = domainResourceManagerService;
@@ -22038,6 +22169,7 @@ let ResourceContextService = class ResourceContextService {
         this.domainConsumableService = domainConsumableService;
         this.domainFileService = domainFileService;
         this.fileContextService = fileContextService;
+        this.consumableContextService = consumableContextService;
         this.dataSource = dataSource;
     }
     async 자원_목록을_조회한다(type) {
@@ -22540,23 +22672,107 @@ let ResourceContextService = class ResourceContextService {
     async 내가_관리하는_자원목록을_조회한다(employeeId) {
         const resources = await this.domainResourceService.findAll({
             where: { resourceManagers: { employeeId: employeeId } },
-            relations: [
-                'resourceManagers',
-                'resourceManagers.employee',
-                'resourceGroup',
-                'vehicleInfo',
-                'meetingRoomInfo',
-                'accommodationInfo',
-                'equipmentInfo',
-            ],
+            select: {
+                resourceId: true,
+                resourceGroupId: true,
+                name: true,
+                type: true,
+                order: true,
+            },
             order: { order: 'ASC' },
         });
-        const resourcesWithFiles = await Promise.all(resources.map(async (resource) => {
-            const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
-            resource.images = resourceFiles.images.map((file) => file.filePath);
+        const resourcesByType = resources.reduce((acc, resource) => {
+            if (!acc[resource.type]) {
+                acc[resource.type] = [];
+            }
+            acc[resource.type].push(resource);
+            return acc;
+        }, {});
+        const [vehicleInfos, meetingRoomInfos, accommodationInfos, equipmentInfos] = await Promise.all([
+            resourcesByType[resource_type_enum_1.ResourceType.VEHICLE]?.length > 0
+                ? this.domainVehicleInfoService.findAll({
+                    where: {
+                        resourceId: (0, typeorm_1.In)(resourcesByType[resource_type_enum_1.ResourceType.VEHICLE].map((r) => r.resourceId)),
+                    },
+                })
+                : [],
+            resourcesByType[resource_type_enum_1.ResourceType.MEETING_ROOM]?.length > 0
+                ? this.domainMeetingRoomInfoService.findAll({
+                    where: {
+                        resourceId: (0, typeorm_1.In)(resourcesByType[resource_type_enum_1.ResourceType.MEETING_ROOM].map((r) => r.resourceId)),
+                    },
+                })
+                : [],
+            resourcesByType[resource_type_enum_1.ResourceType.ACCOMMODATION]?.length > 0
+                ? this.domainAccommodationInfoService.findAll({
+                    where: {
+                        resourceId: (0, typeorm_1.In)(resourcesByType[resource_type_enum_1.ResourceType.ACCOMMODATION].map((r) => r.resourceId)),
+                    },
+                })
+                : [],
+            resourcesByType[resource_type_enum_1.ResourceType.EQUIPMENT]?.length > 0
+                ? this.domainEquipmentInfoService.findAll({
+                    where: {
+                        resourceId: (0, typeorm_1.In)(resourcesByType[resource_type_enum_1.ResourceType.EQUIPMENT].map((r) => r.resourceId)),
+                    },
+                })
+                : [],
+        ]);
+        let allConsumables = [];
+        if (vehicleInfos.length > 0) {
+            allConsumables = await this.domainConsumableService.findAll({
+                where: {
+                    vehicleInfoId: (0, typeorm_1.In)(vehicleInfos.map((v) => v.vehicleInfoId)),
+                },
+                relations: ['maintenances'],
+                order: { name: 'ASC' },
+            });
+        }
+        const resourcesWithAdditionalInfo = await Promise.all(resources.map(async (resource) => {
+            if (resource.type === resource_type_enum_1.ResourceType.VEHICLE) {
+                const vehicleInfo = vehicleInfos.find((v) => v.resourceId === resource.resourceId);
+                if (vehicleInfo) {
+                    const vehicleConsumables = allConsumables.filter((c) => c.vehicleInfoId === vehicleInfo.vehicleInfoId);
+                    if (vehicleConsumables.length > 0) {
+                        vehicleInfo.consumables = vehicleConsumables;
+                        const consumableResults = await this.consumableContextService.차량_소모품들의_교체필요여부를_계산한다(vehicleInfo);
+                        const replacementRequiredConsumables = consumableResults
+                            .filter((result) => result.isReplacementRequired)
+                            .map((result) => result.consumable.name);
+                        resource['isReplacementRequired'] = replacementRequiredConsumables.length > 0;
+                        resource['replacementRequiredConsumables'] = replacementRequiredConsumables;
+                    }
+                    else {
+                        resource['isReplacementRequired'] = false;
+                        resource['replacementRequiredConsumables'] = [];
+                    }
+                }
+                else {
+                    resource['isReplacementRequired'] = false;
+                    resource['replacementRequiredConsumables'] = [];
+                }
+            }
+            else if (resource.type === resource_type_enum_1.ResourceType.MEETING_ROOM) {
+                const meetingRoomInfo = meetingRoomInfos.find((m) => m.resourceId === resource.resourceId);
+                if (meetingRoomInfo) {
+                    resource.meetingRoomInfo = meetingRoomInfo;
+                }
+            }
+            else if (resource.type === resource_type_enum_1.ResourceType.ACCOMMODATION) {
+                const accommodationInfo = accommodationInfos.find((a) => a.resourceId === resource.resourceId);
+                if (accommodationInfo) {
+                    resource.accommodationInfo = accommodationInfo;
+                }
+            }
+            else if (resource.type === resource_type_enum_1.ResourceType.EQUIPMENT) {
+                const equipmentInfo = equipmentInfos.find((e) => e.resourceId === resource.resourceId);
+                if (equipmentInfo) {
+                    resource.equipmentInfo = equipmentInfo;
+                }
+            }
             return resource;
         }));
-        return resourcesWithFiles.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
+        return resourcesWithAdditionalInfo.map((resource) => new resource_response_dto_1.ManagementResourceResponseDto(resource));
     }
     async 자원들을_그룹별로_분류한다(resources) {
         const groupedResources = {};
@@ -22574,6 +22790,13 @@ let ResourceContextService = class ResourceContextService {
         const groupIds = Object.keys(groupedResources).filter((id) => id !== 'NO_GROUP');
         const resourceGroups = await this.domainResourceGroupService.findAll({
             where: { resourceGroupId: (0, typeorm_1.In)(groupIds) },
+            select: {
+                resourceGroupId: true,
+                title: true,
+                type: true,
+                order: true,
+                parentResourceGroupId: true,
+            },
         });
         for (const [groupId, resources] of Object.entries(groupedResources)) {
             if (groupId === 'NO_GROUP') {
@@ -22650,7 +22873,7 @@ let ResourceContextService = class ResourceContextService {
 exports.ResourceContextService = ResourceContextService;
 exports.ResourceContextService = ResourceContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _g : Object, typeof (_h = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _h : Object, typeof (_j = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _j : Object, typeof (_k = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _k : Object, typeof (_l = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _l : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof resource_service_1.DomainResourceService !== "undefined" && resource_service_1.DomainResourceService) === "function" ? _a : Object, typeof (_b = typeof resource_group_service_1.DomainResourceGroupService !== "undefined" && resource_group_service_1.DomainResourceGroupService) === "function" ? _b : Object, typeof (_c = typeof resource_manager_service_1.DomainResourceManagerService !== "undefined" && resource_manager_service_1.DomainResourceManagerService) === "function" ? _c : Object, typeof (_d = typeof vehicle_info_service_1.DomainVehicleInfoService !== "undefined" && vehicle_info_service_1.DomainVehicleInfoService) === "function" ? _d : Object, typeof (_e = typeof meeting_room_info_service_1.DomainMeetingRoomInfoService !== "undefined" && meeting_room_info_service_1.DomainMeetingRoomInfoService) === "function" ? _e : Object, typeof (_f = typeof accommodation_info_service_1.DomainAccommodationInfoService !== "undefined" && accommodation_info_service_1.DomainAccommodationInfoService) === "function" ? _f : Object, typeof (_g = typeof equipment_info_service_1.DomainEquipmentInfoService !== "undefined" && equipment_info_service_1.DomainEquipmentInfoService) === "function" ? _g : Object, typeof (_h = typeof consumable_service_1.DomainConsumableService !== "undefined" && consumable_service_1.DomainConsumableService) === "function" ? _h : Object, typeof (_j = typeof file_service_1.DomainFileService !== "undefined" && file_service_1.DomainFileService) === "function" ? _j : Object, typeof (_k = typeof file_context_service_1.FileContextService !== "undefined" && file_context_service_1.FileContextService) === "function" ? _k : Object, typeof (_l = typeof consumable_context_service_1.ConsumableContextService !== "undefined" && consumable_context_service_1.ConsumableContextService) === "function" ? _l : Object, typeof (_m = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _m : Object])
 ], ResourceContextService);
 
 

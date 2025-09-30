@@ -45,8 +45,8 @@ export class ResourceGroupResponseDto {
     @ApiProperty({ required: false })
     description?: string;
 
-    @ApiProperty({ enum: ResourceType })
-    type: ResourceType;
+    @ApiProperty({ enum: ResourceType, required: false })
+    type?: ResourceType;
 
     @ApiProperty()
     order: number;
@@ -212,8 +212,8 @@ export class ResourceGroupWithResourcesDto extends ResourceGroupResponseDto {
 }
 
 export class ResourceTypeGroupDto {
-    @ApiProperty({ enum: ResourceType, description: '자원 타입' })
-    type: ResourceType;
+    @ApiProperty({ enum: ResourceType, description: '자원 타입', required: false })
+    type?: ResourceType;
 
     @ApiProperty({
         type: [ResourceGroupWithResourcesDto],
@@ -230,10 +230,149 @@ export class ResourceTypeGroupDto {
     ungroupedResources?: ResourceResponseDto[];
 }
 
+export class ManagementResourceResponseDto {
+    constructor(resource?: any) {
+        // 기본 자원 정보
+        this.resourceId = resource?.resourceId;
+        this.resourceGroupId = resource?.resourceGroupId;
+        this.name = resource?.name;
+        this.type = resource?.type;
+        this.order = resource?.order;
+
+        // // 타입별 상세 정보 설정
+        // if (resource?.vehicleInfo) {
+        //     this.vehicleInfo = resource.vehicleInfo;
+        //     this.typeInfo = resource.vehicleInfo as unknown as VehicleInfoResponseDto;
+        // }
+        // if (resource?.meetingRoomInfo) {
+        //     this.meetingRoomInfo = resource.meetingRoomInfo;
+        //     this.typeInfo = resource.meetingRoomInfo as unknown as MeetingRoomInfoResponseDto;
+        // }
+        // if (resource?.accommodationInfo) {
+        //     this.accommodationInfo = resource.accommodationInfo;
+        //     this.typeInfo = resource.accommodationInfo as unknown as AccommodationInfoResponseDto;
+        // }
+        // if (resource?.equipmentInfo) {
+        //     this.equipmentInfo = resource.equipmentInfo;
+        //     this.typeInfo = resource.equipmentInfo as unknown as EquipmentInfoResponseDto;
+        // }
+
+        // 타입별 확장 정보 설정
+        if (resource?.type === ResourceType.VEHICLE) {
+            // 차량 타입의 경우 정비 관련 정보 추가
+            if (resource?.isReplacementRequired !== undefined) {
+                this.isReplacementRequired = resource.isReplacementRequired;
+            }
+            if (resource?.replacementRequiredConsumables !== undefined) {
+                this.replacementRequiredConsumables = resource.replacementRequiredConsumables;
+            }
+        }
+        // 향후 다른 타입들의 확장 정보도 여기에 추가 가능
+    }
+
+    @ApiProperty({ required: false })
+    resourceId?: string;
+
+    @ApiProperty({ required: false })
+    resourceGroupId?: string;
+
+    @ApiProperty()
+    name: string;
+
+    @ApiProperty({ enum: ResourceType })
+    type?: ResourceType;
+
+    @ApiProperty()
+    order: number;
+
+    // @ApiProperty({
+    //     required: false,
+    //     oneOf: [
+    //         { $ref: getSchemaPath(VehicleInfoResponseDto) },
+    //         { $ref: getSchemaPath(MeetingRoomInfoResponseDto) },
+    //         { $ref: getSchemaPath(AccommodationInfoResponseDto) },
+    //         { $ref: getSchemaPath(EquipmentInfoResponseDto) },
+    //     ],
+    // })
+    // typeInfo?:
+    //     | VehicleInfoResponseDto
+    //     | MeetingRoomInfoResponseDto
+    //     | AccommodationInfoResponseDto
+    //     | EquipmentInfoResponseDto;
+
+    // // 실제 타입별 정보들 (내부 사용, Swagger에 노출되지 않음)
+    // vehicleInfo?: any;
+    // meetingRoomInfo?: any;
+    // accommodationInfo?: any;
+    // equipmentInfo?: any;
+
+    // 차량 타입 전용 필드들
+    @ApiProperty({
+        description: '교체가 필요한 소모품이 있는지 여부 (차량 타입만 해당)',
+        required: false,
+    })
+    isReplacementRequired?: boolean;
+
+    @ApiProperty({
+        description: '교체가 필요한 소모품 이름들 (차량 타입만 해당)',
+        type: [String],
+        required: false,
+    })
+    replacementRequiredConsumables?: string[];
+
+    // 향후 다른 타입들의 확장 필드들도 여기에 추가 가능
+    // 예: 회의실 예약 관련 정보, 숙박시설 체크인/아웃 정보 등
+}
+
+export class ManagementResourceGroupDto {
+    @ApiProperty({ required: false })
+    resourceGroupId?: string;
+
+    @ApiProperty()
+    title: string;
+
+    @ApiProperty({ required: false })
+    description?: string;
+
+    @ApiProperty({ enum: ResourceType })
+    type: ResourceType;
+
+    @ApiProperty()
+    order: number;
+
+    @ApiProperty({ required: false })
+    parentResourceGroupId?: string;
+
+    @ApiProperty({
+        type: [ManagementResourceResponseDto],
+        required: false,
+    })
+    resources?: ManagementResourceResponseDto[];
+}
+
+export class ManagementResourceTypeGroupDto {
+    @ApiProperty({ enum: ResourceType, description: '자원 타입' })
+    type: ResourceType;
+
+    @ApiProperty({
+        type: [ManagementResourceGroupDto],
+        description: '해당 타입의 그룹 목록',
+        required: false,
+    })
+    groups?: ManagementResourceGroupDto[];
+
+    @ApiProperty({
+        type: [ManagementResourceResponseDto],
+        description: '그룹이 없는 자원들',
+        required: false,
+    })
+    ungroupedResources?: ManagementResourceResponseDto[];
+}
+
 export class MyManagementResourcesResponseDto {
     @ApiProperty({
-        type: [ResourceTypeGroupDto],
-        description: '타입별로 분류된 자원 그룹들',
+        type: [ManagementResourceTypeGroupDto],
+        description: '타입별로 분류된 자원 그룹들 (확장 정보 포함)',
     })
-    resourcesByType: ResourceTypeGroupDto[];
+    resourcesByType: ManagementResourceTypeGroupDto[];
 }

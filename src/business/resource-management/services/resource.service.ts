@@ -5,6 +5,7 @@ import { Employee } from '@libs/entities';
 // Context Services
 import { ResourceContextService } from '@src/context/resource/services/resource.context.service';
 import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
+import { ConsumableContextService } from '@src/context/resource/services/consumable.context.service';
 
 // DTOs
 import {
@@ -28,6 +29,7 @@ export class ResourceService {
     constructor(
         private readonly resourceContextService: ResourceContextService,
         private readonly reservationContextService: ReservationContextService,
+        private readonly consumableContextService: ConsumableContextService,
     ) {}
     // Admin Resource Controller
     async createResourceWithInfos(createResourceInfo: CreateResourceInfoDto): Promise<CreateResourceResponseDto> {

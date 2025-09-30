@@ -3,15 +3,10 @@
     "builds": [
         {
             "src": "dist/main.js",
-            "use": "@vercel/node",
-            "config": {
-                "includeFiles": ["src/**", "libs/**", "public/**", "dist/**"],
-                "maxLambdaSize": "50mb"
-            }
+            "use": "@vercel/node"
         }
     ],
     "routes": [
-        { "src": "/public/(.*)", "dest": "dist/main.js" },
         {
             "src": "/(.*)",
             "dest": "dist/main.js",

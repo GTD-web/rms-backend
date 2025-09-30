@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Employee } from '@libs/entities';
 import { ResourceContextService } from '@src/context/resource/services/resource.context.service';
 import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
+import { ConsumableContextService } from '@src/context/resource/services/consumable.context.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { TaskListResponseDto, TaskResponseDto } from './dtos/task-response.dto';
@@ -15,6 +16,7 @@ export class TaskManagementService {
         private readonly reservationContextService: ReservationContextService,
         private readonly notificationContextService: NotificationContextService,
         private readonly scheduleQueryContextService: ScheduleQueryContextService,
+        private readonly consumableContextService: ConsumableContextService,
     ) {}
 
     /**
@@ -169,48 +171,46 @@ export class TaskManagementService {
     /**
      * 교체 필요한 모든 소모품을 조회한다 (관리자용)
      */
-    private async 교체필요한_모든_소모품을_조회한다() {
+    private async 교체필요한_모든_소모품을_조회한다(): Promise<TaskResponseDto[]> {
         // 모든 자원의 소모품 상태 조회
         const resources = await this.resourceContextService.소모품정보와_함께_모든자원을_조회한다();
 
         const needReplaceConsumables = [];
 
         for (const resource of resources) {
-            for (const consumable of resource.vehicleInfo?.consumables || []) {
-                console.log(consumable.maintenances);
-                const latestMaintenance = consumable.maintenances.sort((a, b) => a.date - b.date)[0] || null;
-                if (latestMaintenance) {
-                    const maintenanceRequired =
-                        resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
+            // 차량의 모든 소모품에 대해 교체 필요 여부 계산
+            const consumableResults = await this.consumableContextService.차량_소모품들의_교체필요여부를_계산한다(
+                resource.vehicleInfo,
+            );
 
-                    if (maintenanceRequired) {
-                        // 해당 소모품에 대한 알림 조회
-                        const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(
-                            resource.resourceId,
-                            consumable.name,
-                            // latestMaintenance.date,
-                        );
+            for (const { consumable, isReplacementRequired } of consumableResults) {
+                if (isReplacementRequired) {
+                    // 해당 소모품에 대한 알림 조회
+                    const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(
+                        resource.resourceId,
+                        consumable.name,
+                        // latestMaintenance.date,
+                    );
 
-                        needReplaceConsumables.push({
-                            type: '소모품교체',
-                            title: `${consumable.name} 교체 필요`,
-                            reservationId: null,
-                            resourceId: resource.resourceId,
-                            resourceName: resource.name,
-                            consumableId: consumable.consumableId,
-                            consumableName: consumable.name,
-                            startDate: null,
-                            endDate: null,
-                            manager: {
-                                employeeId: resource.resourceManagers[0].employee.employeeId,
-                                name: resource.resourceManagers[0].employee.name,
-                                employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
-                                department: resource.resourceManagers[0].employee.department,
-                                position: resource.resourceManagers[0].employee.position,
-                            },
-                            notifications: notifications,
-                        });
-                    }
+                    needReplaceConsumables.push({
+                        type: '소모품교체',
+                        title: `${consumable.name} 교체 필요`,
+                        reservationId: null,
+                        resourceId: resource.resourceId,
+                        resourceName: resource.name,
+                        consumableId: consumable.consumableId,
+                        consumableName: consumable.name,
+                        startDate: null,
+                        endDate: null,
+                        manager: {
+                            employeeId: resource.resourceManagers[0].employee.employeeId,
+                            name: resource.resourceManagers[0].employee.name,
+                            employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
+                            department: resource.resourceManagers[0].employee.department,
+                            position: resource.resourceManagers[0].employee.position,
+                        },
+                        notifications: notifications,
+                    });
                 }
             }
         }
@@ -221,7 +221,7 @@ export class TaskManagementService {
     /**
      * 교체 필요한 소모품을 조회한다 (사용자별)
      */
-    private async 교체필요한_소모품을_조회한다(user: Employee, isSystemAdmin: boolean) {
+    private async 교체필요한_소모품을_조회한다(user: Employee, isSystemAdmin: boolean): Promise<TaskResponseDto[]> {
         const resources = await this.resourceContextService.관리자별_자원을_소모품정보와_함께_조회한다(
             user.employeeId,
             isSystemAdmin,
@@ -230,26 +230,24 @@ export class TaskManagementService {
         const needReplaceConsumables = [];
 
         for (const resource of resources) {
-            for (const consumable of resource.vehicleInfo?.consumables || []) {
-                const latestMaintenance = consumable.maintenances.sort((a, b) => a.date - b.date)[0] || null;
+            // 차량의 모든 소모품에 대해 교체 필요 여부 계산
+            const consumableResults = await this.consumableContextService.차량_소모품들의_교체필요여부를_계산한다(
+                resource.vehicleInfo,
+            );
 
-                if (latestMaintenance) {
-                    const maintenanceRequired =
-                        resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
-
-                    if (maintenanceRequired) {
-                        needReplaceConsumables.push({
-                            type: '소모품교체',
-                            title: `${consumable.name} 교체 필요`,
-                            reservationId: null,
-                            resourceId: resource.resourceId,
-                            resourceName: resource.name,
-                            consumableId: consumable.consumableId,
-                            consumableName: consumable.name,
-                            startDate: null,
-                            endDate: null,
-                        });
-                    }
+            for (const { consumable, isReplacementRequired } of consumableResults) {
+                if (isReplacementRequired) {
+                    needReplaceConsumables.push({
+                        type: '소모품교체',
+                        title: `${consumable.name} 교체 필요`,
+                        reservationId: null,
+                        resourceId: resource.resourceId,
+                        resourceName: resource.name,
+                        consumableId: consumable.consumableId,
+                        consumableName: consumable.name,
+                        startDate: null,
+                        endDate: null,
+                    });
                 }
             }
         }

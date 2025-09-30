@@ -15,6 +15,7 @@ import { DomainAccommodationInfoService } from '@src/domain/accommodation-info/a
 import { DomainEquipmentInfoService } from '@src/domain/equipment-info/equipment-info.service';
 import { DomainFileService } from '@src/domain/file/file.service';
 import { FileContextService } from '../../file/services/file.context.service';
+import { ConsumableContextService } from './consumable.context.service';
 
 // DTOs
 import {
@@ -23,6 +24,9 @@ import {
     MyManagementResourcesResponseDto,
     ResourceTypeGroupDto,
     ResourceGroupWithResourcesDto,
+    ManagementResourceResponseDto,
+    ManagementResourceTypeGroupDto,
+    ManagementResourceGroupDto,
 } from '@src/business/resource-management/dtos/resource/resource-response.dto';
 import { CreateResourceInfoDto } from '@src/business/resource-management/dtos/resource/create-resource.dto';
 import {
@@ -51,6 +55,7 @@ export class ResourceContextService {
         private readonly domainConsumableService: DomainConsumableService,
         private readonly domainFileService: DomainFileService,
         private readonly fileContextService: FileContextService,
+        private readonly consumableContextService: ConsumableContextService,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -757,38 +762,152 @@ export class ResourceContextService {
     /**
      * 내가 관리하는 자원목록을 조회한다
      */
-    async 내가_관리하는_자원목록을_조회한다(employeeId: string): Promise<ResourceResponseDto[]> {
+    async 내가_관리하는_자원목록을_조회한다(employeeId: string): Promise<ManagementResourceResponseDto[]> {
+        // 기본 자원 정보만 조회 (relations 최소화)
         const resources = await this.domainResourceService.findAll({
             where: { resourceManagers: { employeeId: employeeId } },
-            relations: [
-                'resourceManagers',
-                'resourceManagers.employee',
-                'resourceGroup',
-                'vehicleInfo',
-                'meetingRoomInfo',
-                'accommodationInfo',
-                'equipmentInfo',
-            ],
+            // relations: ['resourceGroup'],
+            select: {
+                resourceId: true,
+                resourceGroupId: true,
+                name: true,
+                type: true,
+                order: true,
+            },
             order: { order: 'ASC' },
         });
 
-        // 각 자원에 대해 파일 정보 추가
-        const resourcesWithFiles = await Promise.all(
+        // 타입별로 자원 그룹화 (성능 최적화)
+        const resourcesByType = resources.reduce(
+            (acc, resource) => {
+                if (!acc[resource.type]) {
+                    acc[resource.type] = [];
+                }
+                acc[resource.type].push(resource);
+                return acc;
+            },
+            {} as Record<ResourceType, any[]>,
+        );
+
+        // 타입별로 일괄 조회
+        const [vehicleInfos, meetingRoomInfos, accommodationInfos, equipmentInfos] = await Promise.all([
+            // 차량 정보 일괄 조회
+            resourcesByType[ResourceType.VEHICLE]?.length > 0
+                ? this.domainVehicleInfoService.findAll({
+                      where: {
+                          resourceId: In(resourcesByType[ResourceType.VEHICLE].map((r) => r.resourceId)),
+                      },
+                  })
+                : [],
+            // 회의실 정보 일괄 조회
+            resourcesByType[ResourceType.MEETING_ROOM]?.length > 0
+                ? this.domainMeetingRoomInfoService.findAll({
+                      where: {
+                          resourceId: In(resourcesByType[ResourceType.MEETING_ROOM].map((r) => r.resourceId)),
+                      },
+                  })
+                : [],
+            // 숙박시설 정보 일괄 조회
+            resourcesByType[ResourceType.ACCOMMODATION]?.length > 0
+                ? this.domainAccommodationInfoService.findAll({
+                      where: {
+                          resourceId: In(resourcesByType[ResourceType.ACCOMMODATION].map((r) => r.resourceId)),
+                      },
+                  })
+                : [],
+            // 장비 정보 일괄 조회
+            resourcesByType[ResourceType.EQUIPMENT]?.length > 0
+                ? this.domainEquipmentInfoService.findAll({
+                      where: {
+                          resourceId: In(resourcesByType[ResourceType.EQUIPMENT].map((r) => r.resourceId)),
+                      },
+                  })
+                : [],
+        ]);
+
+        // 소모품 정보 일괄 조회 (차량이 있는 경우에만)
+        let allConsumables = [];
+        if (vehicleInfos.length > 0) {
+            allConsumables = await this.domainConsumableService.findAll({
+                where: {
+                    vehicleInfoId: In(vehicleInfos.map((v) => v.vehicleInfoId)),
+                },
+                relations: ['maintenances'],
+                order: { name: 'ASC' },
+            });
+        }
+
+        // 각 자원에 대해 매핑 및 추가 정보 처리
+        const resourcesWithAdditionalInfo = await Promise.all(
             resources.map(async (resource) => {
-                const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
-                resource.images = resourceFiles.images.map((file) => file.filePath);
+                // 타입별 정보 매핑
+                if (resource.type === ResourceType.VEHICLE) {
+                    const vehicleInfo = vehicleInfos.find((v) => v.resourceId === resource.resourceId);
+                    if (vehicleInfo) {
+                        // resource.vehicleInfo = vehicleInfo;
+
+                        // 해당 차량의 소모품 찾기
+                        const vehicleConsumables = allConsumables.filter(
+                            (c) => c.vehicleInfoId === vehicleInfo.vehicleInfoId,
+                        );
+
+                        if (vehicleConsumables.length > 0) {
+                            // 소모품 교체 필요 여부 계산
+                            vehicleInfo.consumables = vehicleConsumables;
+                            const consumableResults =
+                                await this.consumableContextService.차량_소모품들의_교체필요여부를_계산한다(
+                                    vehicleInfo,
+                                );
+
+                            // 교체 필요한 소모품 이름들만 추출
+                            const replacementRequiredConsumables = consumableResults
+                                .filter((result) => result.isReplacementRequired)
+                                .map((result) => result.consumable.name);
+
+                            // resource 레벨에 계산 결과만 저장
+                            resource['isReplacementRequired'] = replacementRequiredConsumables.length > 0;
+                            resource['replacementRequiredConsumables'] = replacementRequiredConsumables;
+                        } else {
+                            // 차량이지만 소모품이 없는 경우
+                            resource['isReplacementRequired'] = false;
+                            resource['replacementRequiredConsumables'] = [];
+                        }
+                    } else {
+                        // 차량이지만 vehicleInfo가 없는 경우
+                        resource['isReplacementRequired'] = false;
+                        resource['replacementRequiredConsumables'] = [];
+                    }
+                } else if (resource.type === ResourceType.MEETING_ROOM) {
+                    const meetingRoomInfo = meetingRoomInfos.find((m) => m.resourceId === resource.resourceId);
+                    if (meetingRoomInfo) {
+                        resource.meetingRoomInfo = meetingRoomInfo;
+                    }
+                } else if (resource.type === ResourceType.ACCOMMODATION) {
+                    const accommodationInfo = accommodationInfos.find((a) => a.resourceId === resource.resourceId);
+                    if (accommodationInfo) {
+                        resource.accommodationInfo = accommodationInfo;
+                    }
+                } else if (resource.type === ResourceType.EQUIPMENT) {
+                    const equipmentInfo = equipmentInfos.find((e) => e.resourceId === resource.resourceId);
+                    if (equipmentInfo) {
+                        resource.equipmentInfo = equipmentInfo;
+                    }
+                }
+
                 return resource;
             }),
         );
 
-        return resourcesWithFiles.map((resource) => new ResourceResponseDto(resource));
+        return resourcesWithAdditionalInfo.map((resource) => new ManagementResourceResponseDto(resource));
     }
 
     /**
      * 자원들을 그룹별로 분류한다
      */
-    async 자원들을_그룹별로_분류한다(resources: ResourceResponseDto[]): Promise<Record<string, ResourceResponseDto[]>> {
-        const groupedResources: Record<string, ResourceResponseDto[]> = {};
+    async 자원들을_그룹별로_분류한다(
+        resources: ManagementResourceResponseDto[],
+    ): Promise<Record<string, ManagementResourceResponseDto[]>> {
+        const groupedResources: Record<string, ManagementResourceResponseDto[]> = {};
 
         for (const resource of resources) {
             const groupId = resource.resourceGroupId || 'NO_GROUP';
@@ -807,9 +926,9 @@ export class ResourceContextService {
      * 그룹들을 그룹타입별로 분류한다
      */
     async 그룹들을_그룹타입별로_분류한다(
-        groupedResources: Record<string, ResourceResponseDto[]>,
-    ): Promise<Record<string, Record<string, ResourceResponseDto[]>>> {
-        const typeGroupedResources: Record<string, Record<string, ResourceResponseDto[]>> = {};
+        groupedResources: Record<string, ManagementResourceResponseDto[]>,
+    ): Promise<Record<string, Record<string, ManagementResourceResponseDto[]>>> {
+        const typeGroupedResources: Record<string, Record<string, ManagementResourceResponseDto[]>> = {};
 
         // 그룹 ID들을 수집
         const groupIds = Object.keys(groupedResources).filter((id) => id !== 'NO_GROUP');
@@ -817,6 +936,13 @@ export class ResourceContextService {
         // 그룹 정보들을 조회
         const resourceGroups = await this.domainResourceGroupService.findAll({
             where: { resourceGroupId: In(groupIds) },
+            select: {
+                resourceGroupId: true,
+                title: true,
+                type: true,
+                order: true,
+                parentResourceGroupId: true,
+            },
         });
 
         // 각 그룹에 대해 타입별로 분류
@@ -849,13 +975,13 @@ export class ResourceContextService {
      * 타입그룹을 계층구조로 변환한다
      */
     async 타입그룹_계층구조로_변환한다(
-        typeGroupedResources: Record<string, Record<string, ResourceResponseDto[]>>,
+        typeGroupedResources: Record<string, Record<string, ManagementResourceResponseDto[]>>,
     ): Promise<MyManagementResourcesResponseDto> {
-        const resourcesByType: ResourceTypeGroupDto[] = [];
+        const resourcesByType: ManagementResourceTypeGroupDto[] = [];
 
         for (const [resourceType, groupsByType] of Object.entries(typeGroupedResources)) {
-            const groups: ResourceGroupWithResourcesDto[] = [];
-            let ungroupedResources: ResourceResponseDto[] = [];
+            const groups: ManagementResourceGroupDto[] = [];
+            let ungroupedResources: ManagementResourceResponseDto[] = [];
 
             // 그룹별로 처리
             for (const [groupId, resources] of Object.entries(groupsByType)) {
@@ -868,7 +994,7 @@ export class ResourceContextService {
                     });
 
                     if (resourceGroup) {
-                        const groupWithResources: ResourceGroupWithResourcesDto = {
+                        const groupWithResources: ManagementResourceGroupDto = {
                             resourceGroupId: resourceGroup.resourceGroupId,
                             title: resourceGroup.title,
                             description: resourceGroup.description,
@@ -886,7 +1012,7 @@ export class ResourceContextService {
             // 그룹들을 order 순으로 정렬
             groups.sort((a, b) => a.order - b.order);
 
-            const typeGroup: ResourceTypeGroupDto = {
+            const typeGroup: ManagementResourceTypeGroupDto = {
                 type: resourceType as ResourceType,
                 groups: groups.length > 0 ? groups : undefined,
                 ungroupedResources: ungroupedResources.length > 0 ? ungroupedResources : undefined,

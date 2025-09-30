@@ -237,4 +237,51 @@ export class ConsumableContextService {
 
         await this.domainConsumableService.delete(consumableId);
     }
+
+    /**
+     * 소모품의 교체 필요 여부를 계산한다
+     */
+    async 소모품_교체필요여부를_계산한다(consumable: any, totalMileage: number): Promise<boolean> {
+        if (consumable.maintenances && consumable.maintenances.length > 0) {
+            // 가장 최근 정비 이력 찾기 (날짜 기준 내림차순 정렬 후 첫 번째)
+            const latestMaintenance = consumable.maintenances.sort(
+                (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+            )[0];
+
+            // 현재 총 주행거리 - 마지막 정비 시 주행거리 > 교체 주기
+            const mileageSinceLastMaintenance = totalMileage - Number(latestMaintenance.mileage);
+            return mileageSinceLastMaintenance > consumable.replaceCycle;
+        } else {
+            // 정비 이력이 없으면 초기 주행거리 기준으로 계산
+            const initMileage = consumable.initMileage || 0;
+            const mileageSinceInit = totalMileage - initMileage;
+            return mileageSinceInit > consumable.replaceCycle;
+        }
+    }
+
+    /**
+     * 차량의 모든 소모품에 대해 교체 필요 여부를 계산한다
+     */
+    async 차량_소모품들의_교체필요여부를_계산한다(vehicleInfo: any): Promise<
+        Array<{
+            consumable: any;
+            isReplacementRequired: boolean;
+        }>
+    > {
+        const results = [];
+
+        for (const consumable of vehicleInfo?.consumables || []) {
+            const isReplacementRequired = await this.소모품_교체필요여부를_계산한다(
+                consumable,
+                vehicleInfo.totalMileage,
+            );
+
+            results.push({
+                consumable,
+                isReplacementRequired,
+            });
+        }
+
+        return results;
+    }
 }
