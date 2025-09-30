@@ -202,3 +202,38 @@ export class ResourceGroupWithResourcesAndReservationsResponseDto extends Resour
     })
     resources?: ResourceWithReservationsResponseDto[];
 }
+
+export class ResourceGroupWithResourcesDto extends ResourceGroupResponseDto {
+    @ApiProperty({
+        type: [ResourceResponseDto],
+        required: false,
+    })
+    resources?: ResourceResponseDto[];
+}
+
+export class ResourceTypeGroupDto {
+    @ApiProperty({ enum: ResourceType, description: '자원 타입' })
+    type: ResourceType;
+
+    @ApiProperty({
+        type: [ResourceGroupWithResourcesDto],
+        description: '해당 타입의 그룹 목록',
+        required: false,
+    })
+    groups?: ResourceGroupWithResourcesDto[];
+
+    @ApiProperty({
+        type: [ResourceResponseDto],
+        description: '그룹이 없는 자원들',
+        required: false,
+    })
+    ungroupedResources?: ResourceResponseDto[];
+}
+
+export class MyManagementResourcesResponseDto {
+    @ApiProperty({
+        type: [ResourceTypeGroupDto],
+        description: '타입별로 분류된 자원 그룹들',
+    })
+    resourcesByType: ResourceTypeGroupDto[];
+}

@@ -8918,7 +8918,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResourceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -8933,6 +8933,8 @@ const resource_query_dto_1 = __webpack_require__(/*! ../../dtos/resource/resourc
 const check_availability_dto_1 = __webpack_require__(/*! ../../dtos/resource/check-availability.dto */ "./src/business/resource-management/dtos/resource/check-availability.dto.ts");
 const resource_month_availability_query_dto_1 = __webpack_require__(/*! ../../dtos/resource/resource-month-availability-query.dto */ "./src/business/resource-management/dtos/resource/resource-month-availability-query.dto.ts");
 const resource_month_availability_response_dto_1 = __webpack_require__(/*! ../../dtos/resource/resource-month-availability-response.dto */ "./src/business/resource-management/dtos/resource/resource-month-availability-response.dto.ts");
+const employee_entity_1 = __webpack_require__(/*! @libs/entities/employee.entity */ "./libs/entities/employee.entity.ts");
+const user_decorator_1 = __webpack_require__(/*! @libs/decorators/user.decorator */ "./libs/decorators/user.decorator.ts");
 let ResourceController = class ResourceController {
     constructor(resourceService) {
         this.resourceService = resourceService;
@@ -8942,6 +8944,9 @@ let ResourceController = class ResourceController {
     }
     async findAll(type) {
         return this.resourceService.findResources(type);
+    }
+    async findMyManagementResources(user) {
+        return this.resourceService.findMyManagementResources(user.employeeId);
     }
     async findAvailableTime(query) {
         return this.resourceService.findAvailableTime(query);
@@ -9000,6 +9005,19 @@ __decorate([
     __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], ResourceController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('my-managemanment'),
+    (0, swagger_1.ApiOperation)({ summary: '내 관리 자원 목록 조회 #관리자/자원관리/자원리스트' }),
+    (0, swagger_1.ApiOkResponse)({
+        status: 200,
+        description: '내 관리 자원 목록을 성공적으로 조회했습니다.',
+        type: resource_response_dto_1.MyManagementResourcesResponseDto,
+    }),
+    __param(0, (0, user_decorator_1.User)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof employee_entity_1.Employee !== "undefined" && employee_entity_1.Employee) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], ResourceController.prototype, "findMyManagementResources", null);
+__decorate([
     (0, common_1.Get)('availability'),
     (0, swagger_1.ApiOperation)({
         summary: '예약 가능 시간 조회 #사용자/예약 생성 페이지',
@@ -9036,8 +9054,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof resource_query_dto_1.ResourceQueryDto !== "undefined" && resource_query_dto_1.ResourceQueryDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [typeof (_h = typeof resource_query_dto_1.ResourceQueryDto !== "undefined" && resource_query_dto_1.ResourceQueryDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], ResourceController.prototype, "findAvailableTime", null);
 __decorate([
     (0, common_1.Get)('check-availability'),
@@ -9048,8 +9066,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof check_availability_dto_1.CheckAvailabilityQueryDto !== "undefined" && check_availability_dto_1.CheckAvailabilityQueryDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:paramtypes", [typeof (_k = typeof check_availability_dto_1.CheckAvailabilityQueryDto !== "undefined" && check_availability_dto_1.CheckAvailabilityQueryDto) === "function" ? _k : Object]),
+    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], ResourceController.prototype, "checkAvailability", null);
 __decorate([
     (0, common_1.Get)('check-availability/month'),
@@ -9060,8 +9078,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof resource_month_availability_query_dto_1.ResourceMonthAvailabilityQueryDto !== "undefined" && resource_month_availability_query_dto_1.ResourceMonthAvailabilityQueryDto) === "function" ? _k : Object]),
-    __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
+    __metadata("design:paramtypes", [typeof (_m = typeof resource_month_availability_query_dto_1.ResourceMonthAvailabilityQueryDto !== "undefined" && resource_month_availability_query_dto_1.ResourceMonthAvailabilityQueryDto) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
 ], ResourceController.prototype, "checkAvailabilityMonth", null);
 __decorate([
     (0, common_1.Get)(':resourceId'),
@@ -9074,7 +9092,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+    __metadata("design:returntype", typeof (_p = typeof Promise !== "undefined" && Promise) === "function" ? _p : Object)
 ], ResourceController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)('resource-group/:resourceGroupId'),
@@ -9087,7 +9105,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceGroupId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
 ], ResourceController.prototype, "findResourcesByResourceGroupId", null);
 __decorate([
     (0, common_1.Patch)('order'),
@@ -9098,8 +9116,8 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_p = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _p : Object]),
-    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
+    __metadata("design:paramtypes", [typeof (_r = typeof update_resource_dto_1.UpdateResourceOrdersDto !== "undefined" && update_resource_dto_1.UpdateResourceOrdersDto) === "function" ? _r : Object]),
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
 ], ResourceController.prototype, "reorder", null);
 __decorate([
     (0, common_1.Patch)(':resourceId'),
@@ -9112,8 +9130,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_r = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _r : Object]),
-    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
+    __metadata("design:paramtypes", [String, typeof (_t = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _t : Object]),
+    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
 ], ResourceController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':resourceId/availability'),
@@ -9126,8 +9144,8 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_t = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _t : Object]),
-    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
+    __metadata("design:paramtypes", [String, typeof (_v = typeof update_resource_dto_1.UpdateResourceInfoDto !== "undefined" && update_resource_dto_1.UpdateResourceInfoDto) === "function" ? _v : Object]),
+    __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
 ], ResourceController.prototype, "updateAvailability", null);
 __decorate([
     (0, common_1.Delete)(':resourceId'),
@@ -9139,7 +9157,7 @@ __decorate([
     __param(0, (0, common_1.Param)('resourceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", typeof (_v = typeof Promise !== "undefined" && Promise) === "function" ? _v : Object)
+    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
 ], ResourceController.prototype, "remove", null);
 exports.ResourceController = ResourceController = __decorate([
     (0, swagger_1.ApiTags)('v2 자원'),
@@ -10413,9 +10431,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = exports.CreateResourceResponseDto = void 0;
+exports.MyManagementResourcesResponseDto = exports.ResourceTypeGroupDto = exports.ResourceGroupWithResourcesDto = exports.ResourceGroupWithResourcesAndReservationsResponseDto = exports.ResourceGroupWithResourcesResponseDto = exports.ChildResourceGroupResponseDto = exports.ResourceWithReservationsResponseDto = exports.ResourceSelectResponseDto = exports.ResourceResponseDto = exports.ResourceGroupResponseDto = exports.ResourceManagerResponseDto = exports.CreateResourceResponseDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const vehicle_response_dto_1 = __webpack_require__(/*! ../vehicle/vehicle-response.dto */ "./src/business/resource-management/dtos/vehicle/vehicle-response.dto.ts");
 const accommodation_info_response_dto_1 = __webpack_require__(/*! ../accommodation/accommodation-info-response.dto */ "./src/business/resource-management/dtos/accommodation/accommodation-info-response.dto.ts");
@@ -10665,6 +10683,49 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], ResourceGroupWithResourcesAndReservationsResponseDto.prototype, "resources", void 0);
+class ResourceGroupWithResourcesDto extends ResourceGroupResponseDto {
+}
+exports.ResourceGroupWithResourcesDto = ResourceGroupWithResourcesDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [ResourceResponseDto],
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ResourceGroupWithResourcesDto.prototype, "resources", void 0);
+class ResourceTypeGroupDto {
+}
+exports.ResourceTypeGroupDto = ResourceTypeGroupDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: resource_type_enum_1.ResourceType, description: '자원 타입' }),
+    __metadata("design:type", typeof (_j = typeof resource_type_enum_1.ResourceType !== "undefined" && resource_type_enum_1.ResourceType) === "function" ? _j : Object)
+], ResourceTypeGroupDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [ResourceGroupWithResourcesDto],
+        description: '해당 타입의 그룹 목록',
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ResourceTypeGroupDto.prototype, "groups", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [ResourceResponseDto],
+        description: '그룹이 없는 자원들',
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ResourceTypeGroupDto.prototype, "ungroupedResources", void 0);
+class MyManagementResourcesResponseDto {
+}
+exports.MyManagementResourcesResponseDto = MyManagementResourcesResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [ResourceTypeGroupDto],
+        description: '타입별로 분류된 자원 그룹들',
+    }),
+    __metadata("design:type", Array)
+], MyManagementResourcesResponseDto.prototype, "resourcesByType", void 0);
 
 
 /***/ }),
@@ -11730,6 +11791,12 @@ let ResourceService = class ResourceService {
     }
     async findResourcesByResourceGroupId(resourceGroupId) {
         return this.resourceContextService.그룹별_자원_목록을_조회한다(resourceGroupId);
+    }
+    async findMyManagementResources(employeeId) {
+        const myResources = await this.resourceContextService.내가_관리하는_자원목록을_조회한다(employeeId);
+        const groupedResources = await this.resourceContextService.자원들을_그룹별로_분류한다(myResources);
+        const typeGroupedResources = await this.resourceContextService.그룹들을_그룹타입별로_분류한다(groupedResources);
+        return this.resourceContextService.타입그룹_계층구조로_변환한다(typeGroupedResources);
     }
     async findResourceDetailForAdmin(resourceId) {
         return this.resourceContextService.자원_상세정보를_조회한다(resourceId);
@@ -22467,6 +22534,115 @@ let ResourceContextService = class ResourceContextService {
             relations: ['reservations'],
         });
         return !!resource;
+    }
+    async 내가_관리하는_자원목록을_조회한다(employeeId) {
+        const resources = await this.domainResourceService.findAll({
+            where: { resourceManagers: { employeeId: employeeId } },
+            relations: [
+                'resourceManagers',
+                'resourceManagers.employee',
+                'resourceGroup',
+                'vehicleInfo',
+                'meetingRoomInfo',
+                'accommodationInfo',
+                'equipmentInfo',
+            ],
+            order: { order: 'ASC' },
+        });
+        const resourcesWithFiles = await Promise.all(resources.map(async (resource) => {
+            const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
+            resource.images = resourceFiles.images.map((file) => file.filePath);
+            return resource;
+        }));
+        return resourcesWithFiles.map((resource) => new resource_response_dto_1.ResourceResponseDto(resource));
+    }
+    async 자원들을_그룹별로_분류한다(resources) {
+        const groupedResources = {};
+        for (const resource of resources) {
+            const groupId = resource.resourceGroupId || 'NO_GROUP';
+            if (!groupedResources[groupId]) {
+                groupedResources[groupId] = [];
+            }
+            groupedResources[groupId].push(resource);
+        }
+        return groupedResources;
+    }
+    async 그룹들을_그룹타입별로_분류한다(groupedResources) {
+        const typeGroupedResources = {};
+        const groupIds = Object.keys(groupedResources).filter((id) => id !== 'NO_GROUP');
+        const resourceGroups = await this.domainResourceGroupService.findAll({
+            where: { resourceGroupId: (0, typeorm_1.In)(groupIds) },
+        });
+        for (const [groupId, resources] of Object.entries(groupedResources)) {
+            if (groupId === 'NO_GROUP') {
+                for (const resource of resources) {
+                    const resourceType = resource.type;
+                    if (!typeGroupedResources[resourceType]) {
+                        typeGroupedResources[resourceType] = {};
+                    }
+                    typeGroupedResources[resourceType]['NO_GROUP'] = resources.filter((r) => r.type === resourceType);
+                }
+            }
+            else {
+                const resourceGroup = resourceGroups.find((group) => group.resourceGroupId === groupId);
+                const groupType = resourceGroup?.type || resource_type_enum_1.ResourceType.VEHICLE;
+                if (!typeGroupedResources[groupType]) {
+                    typeGroupedResources[groupType] = {};
+                }
+                typeGroupedResources[groupType][groupId] = resources;
+            }
+        }
+        return typeGroupedResources;
+    }
+    async 타입그룹_계층구조로_변환한다(typeGroupedResources) {
+        const resourcesByType = [];
+        for (const [resourceType, groupsByType] of Object.entries(typeGroupedResources)) {
+            const groups = [];
+            let ungroupedResources = [];
+            for (const [groupId, resources] of Object.entries(groupsByType)) {
+                if (groupId === 'NO_GROUP') {
+                    ungroupedResources = resources;
+                }
+                else {
+                    const resourceGroup = await this.domainResourceGroupService.findOne({
+                        where: { resourceGroupId: groupId },
+                    });
+                    if (resourceGroup) {
+                        const groupWithResources = {
+                            resourceGroupId: resourceGroup.resourceGroupId,
+                            title: resourceGroup.title,
+                            description: resourceGroup.description,
+                            type: resourceGroup.type,
+                            order: resourceGroup.order,
+                            parentResourceGroupId: resourceGroup.parentResourceGroupId,
+                            resources: resources,
+                        };
+                        groups.push(groupWithResources);
+                    }
+                }
+            }
+            groups.sort((a, b) => a.order - b.order);
+            const typeGroup = {
+                type: resourceType,
+                groups: groups.length > 0 ? groups : undefined,
+                ungroupedResources: ungroupedResources.length > 0 ? ungroupedResources : undefined,
+            };
+            resourcesByType.push(typeGroup);
+        }
+        const typeOrder = [
+            resource_type_enum_1.ResourceType.VEHICLE,
+            resource_type_enum_1.ResourceType.MEETING_ROOM,
+            resource_type_enum_1.ResourceType.ACCOMMODATION,
+            resource_type_enum_1.ResourceType.EQUIPMENT,
+        ];
+        resourcesByType.sort((a, b) => {
+            const indexA = typeOrder.indexOf(a.type);
+            const indexB = typeOrder.indexOf(b.type);
+            return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+        });
+        return {
+            resourcesByType,
+        };
     }
 };
 exports.ResourceContextService = ResourceContextService;

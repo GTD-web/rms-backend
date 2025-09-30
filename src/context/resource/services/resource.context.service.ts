@@ -20,6 +20,9 @@ import { FileContextService } from '../../file/services/file.context.service';
 import {
     ResourceResponseDto,
     CreateResourceResponseDto,
+    MyManagementResourcesResponseDto,
+    ResourceTypeGroupDto,
+    ResourceGroupWithResourcesDto,
 } from '@src/business/resource-management/dtos/resource/resource-response.dto';
 import { CreateResourceInfoDto } from '@src/business/resource-management/dtos/resource/create-resource.dto';
 import {
@@ -749,5 +752,164 @@ export class ResourceContextService {
         });
 
         return !!resource;
+    }
+
+    /**
+     * 내가 관리하는 자원목록을 조회한다
+     */
+    async 내가_관리하는_자원목록을_조회한다(employeeId: string): Promise<ResourceResponseDto[]> {
+        const resources = await this.domainResourceService.findAll({
+            where: { resourceManagers: { employeeId: employeeId } },
+            relations: [
+                'resourceManagers',
+                'resourceManagers.employee',
+                'resourceGroup',
+                'vehicleInfo',
+                'meetingRoomInfo',
+                'accommodationInfo',
+                'equipmentInfo',
+            ],
+            order: { order: 'ASC' },
+        });
+
+        // 각 자원에 대해 파일 정보 추가
+        const resourcesWithFiles = await Promise.all(
+            resources.map(async (resource) => {
+                const resourceFiles = await this.fileContextService.자원_파일을_조회한다(resource.resourceId);
+                resource.images = resourceFiles.images.map((file) => file.filePath);
+                return resource;
+            }),
+        );
+
+        return resourcesWithFiles.map((resource) => new ResourceResponseDto(resource));
+    }
+
+    /**
+     * 자원들을 그룹별로 분류한다
+     */
+    async 자원들을_그룹별로_분류한다(resources: ResourceResponseDto[]): Promise<Record<string, ResourceResponseDto[]>> {
+        const groupedResources: Record<string, ResourceResponseDto[]> = {};
+
+        for (const resource of resources) {
+            const groupId = resource.resourceGroupId || 'NO_GROUP';
+
+            if (!groupedResources[groupId]) {
+                groupedResources[groupId] = [];
+            }
+
+            groupedResources[groupId].push(resource);
+        }
+
+        return groupedResources;
+    }
+
+    /**
+     * 그룹들을 그룹타입별로 분류한다
+     */
+    async 그룹들을_그룹타입별로_분류한다(
+        groupedResources: Record<string, ResourceResponseDto[]>,
+    ): Promise<Record<string, Record<string, ResourceResponseDto[]>>> {
+        const typeGroupedResources: Record<string, Record<string, ResourceResponseDto[]>> = {};
+
+        // 그룹 ID들을 수집
+        const groupIds = Object.keys(groupedResources).filter((id) => id !== 'NO_GROUP');
+
+        // 그룹 정보들을 조회
+        const resourceGroups = await this.domainResourceGroupService.findAll({
+            where: { resourceGroupId: In(groupIds) },
+        });
+
+        // 각 그룹에 대해 타입별로 분류
+        for (const [groupId, resources] of Object.entries(groupedResources)) {
+            if (groupId === 'NO_GROUP') {
+                // 그룹이 없는 자원들은 개별 타입으로 처리
+                for (const resource of resources) {
+                    const resourceType = resource.type;
+                    if (!typeGroupedResources[resourceType]) {
+                        typeGroupedResources[resourceType] = {};
+                    }
+                    typeGroupedResources[resourceType]['NO_GROUP'] = resources.filter((r) => r.type === resourceType);
+                }
+            } else {
+                const resourceGroup = resourceGroups.find((group) => group.resourceGroupId === groupId);
+                const groupType = resourceGroup?.type || ResourceType.VEHICLE;
+
+                if (!typeGroupedResources[groupType]) {
+                    typeGroupedResources[groupType] = {};
+                }
+
+                typeGroupedResources[groupType][groupId] = resources;
+            }
+        }
+
+        return typeGroupedResources;
+    }
+
+    /**
+     * 타입그룹을 계층구조로 변환한다
+     */
+    async 타입그룹_계층구조로_변환한다(
+        typeGroupedResources: Record<string, Record<string, ResourceResponseDto[]>>,
+    ): Promise<MyManagementResourcesResponseDto> {
+        const resourcesByType: ResourceTypeGroupDto[] = [];
+
+        for (const [resourceType, groupsByType] of Object.entries(typeGroupedResources)) {
+            const groups: ResourceGroupWithResourcesDto[] = [];
+            let ungroupedResources: ResourceResponseDto[] = [];
+
+            // 그룹별로 처리
+            for (const [groupId, resources] of Object.entries(groupsByType)) {
+                if (groupId === 'NO_GROUP') {
+                    ungroupedResources = resources;
+                } else {
+                    // 그룹 정보 조회
+                    const resourceGroup = await this.domainResourceGroupService.findOne({
+                        where: { resourceGroupId: groupId },
+                    });
+
+                    if (resourceGroup) {
+                        const groupWithResources: ResourceGroupWithResourcesDto = {
+                            resourceGroupId: resourceGroup.resourceGroupId,
+                            title: resourceGroup.title,
+                            description: resourceGroup.description,
+                            type: resourceGroup.type,
+                            order: resourceGroup.order,
+                            parentResourceGroupId: resourceGroup.parentResourceGroupId,
+                            resources: resources,
+                        };
+
+                        groups.push(groupWithResources);
+                    }
+                }
+            }
+
+            // 그룹들을 order 순으로 정렬
+            groups.sort((a, b) => a.order - b.order);
+
+            const typeGroup: ResourceTypeGroupDto = {
+                type: resourceType as ResourceType,
+                groups: groups.length > 0 ? groups : undefined,
+                ungroupedResources: ungroupedResources.length > 0 ? ungroupedResources : undefined,
+            };
+
+            resourcesByType.push(typeGroup);
+        }
+
+        // 타입별로 정렬 (VEHICLE, MEETING_ROOM, ACCOMMODATION, EQUIPMENT 순)
+        const typeOrder = [
+            ResourceType.VEHICLE,
+            ResourceType.MEETING_ROOM,
+            ResourceType.ACCOMMODATION,
+            ResourceType.EQUIPMENT,
+        ];
+        resourcesByType.sort((a, b) => {
+            const indexA = typeOrder.indexOf(a.type);
+            const indexB = typeOrder.indexOf(b.type);
+            return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+        });
+
+        return {
+            resourcesByType,
+        };
     }
 }
