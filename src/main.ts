@@ -9,6 +9,7 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { RolesGuard } from '@libs/guards/role.guard';
 import { ValidationPipe } from '@nestjs/common';
+import * as fs from 'fs';
 // RequestInterceptor는 AppModule에서 APP_INTERCEPTOR로 등록됨
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -40,6 +41,8 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
     const uploadPath = join(__dirname, '..', 'public');
+    console.log('STATIC_ROOT=', uploadPath, 'files=', fs.existsSync(uploadPath) ? fs.readdirSync(uploadPath) : 'N/A');
+
     app.useStaticAssets(uploadPath, {
         prefix: '/static',
     });
