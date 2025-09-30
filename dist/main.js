@@ -8558,12 +8558,12 @@ let ReservationService = class ReservationService {
         const reservationIds = basicReservations.map((item) => item.reservationId);
         const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationIds);
         const filteredScheduleIds = await this.scheduleQueryContextService.키워드로_일정ID들을_조회한다(scheduleIds, keyword);
-        const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } = this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);
-        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(paginatedIds, {
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(filteredScheduleIds, {
             withReservation: true,
             withResource: true,
             withParticipants: true,
         });
+        const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } = this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(scheduleDataList.map((item) => item.schedule.scheduleId), page, limit);
         const participantsByScheduleId = new Map();
         scheduleDataList.forEach((scheduleData) => {
             if (scheduleData.participants) {
