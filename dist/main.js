@@ -4273,7 +4273,7 @@ function setupSwagger(app, dtos) {
     const document = swagger_1.SwaggerModule.createDocument(app, config, {
         extraModels: [response_dto_1.BaseResponseDto, pagination_response_dto_1.PaginationData, ...dtos],
     });
-    const customJsUrl = `${process.env.APP_URL}${process.env.NODE_ENV !== 'local' ? '' : '/public'}/swagger-custom.js`;
+    const customJsUrl = `${process.env.APP_URL}${process.env.NODE_ENV !== 'local' ? '' : '/static'}/swagger-custom.js`;
     swagger_1.SwaggerModule.setup('api-docs', app, document, {
         jsonDocumentUrl: '/api-docs-json',
         customJs: [
@@ -8557,13 +8557,15 @@ let ReservationService = class ReservationService {
         }
         const reservationIds = basicReservations.map((item) => item.reservationId);
         const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationIds);
+        console.log(scheduleIds);
         const filteredScheduleIds = await this.scheduleQueryContextService.키워드로_일정ID들을_조회한다(scheduleIds, keyword);
-        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(filteredScheduleIds, {
+        console.log(filteredScheduleIds);
+        const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } = this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);
+        const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(paginatedIds, {
             withReservation: true,
             withResource: true,
             withParticipants: true,
         });
-        const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } = this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(scheduleDataList.map((item) => item.schedule.scheduleId), page, limit);
         const participantsByScheduleId = new Map();
         scheduleDataList.forEach((scheduleData) => {
             if (scheduleData.participants) {
@@ -23870,6 +23872,7 @@ let ScheduleQueryContextService = ScheduleQueryContextService_1 = class Schedule
     async 예약의_일정ID들을_조회한다(reservationId) {
         const reservationIds = Array.isArray(reservationId) ? reservationId : [reservationId];
         const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds(reservationIds);
+        console.log(scheduleRelations);
         const orderedScheduleIds = [];
         for (const resId of reservationIds) {
             const relatedScheduleIds = scheduleRelations
@@ -29277,7 +29280,13 @@ let DomainScheduleRelationService = class DomainScheduleRelationService extends 
     }
     async findByReservationIds(reservationIds) {
         return this.scheduleRelationRepository.findAll({
-            where: { reservationId: (0, typeorm_1.In)(reservationIds) },
+            where: {
+                reservationId: (0, typeorm_1.In)(reservationIds),
+                schedule: {
+                    deletedAt: (0, typeorm_1.IsNull)(),
+                },
+            },
+            withDeleted: true,
         });
     }
 };

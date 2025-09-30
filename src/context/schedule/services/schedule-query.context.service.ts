@@ -455,7 +455,7 @@ export class ScheduleQueryContextService {
         const reservationIds = Array.isArray(reservationId) ? reservationId : [reservationId];
 
         const scheduleRelations = await this.domainScheduleRelationService.findByReservationIds(reservationIds);
-
+        console.log(scheduleRelations);
         // reservationId 순서를 유지하면서 scheduleId들을 정렬
         const orderedScheduleIds: string[] = [];
 

@@ -55,29 +55,26 @@ export class ReservationService {
 
         // 3. 각 예약별로 schedule ID 조회
         const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationIds);
-
+        console.log(scheduleIds);
         // 4. 키워드 검색 적용
         const filteredScheduleIds = await this.scheduleQueryContextService.키워드로_일정ID들을_조회한다(
             scheduleIds,
             keyword,
         );
-
+        console.log(filteredScheduleIds);
+        // 5. 페이지네이션 적용
+        const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } =
+            this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);
         // 5. schedule과 participants 정보를 벌크로 조회
         const scheduleDataList = await this.scheduleQueryContextService.복수_일정과_관계정보들을_조회한다(
-            filteredScheduleIds,
+            paginatedIds,
             {
                 withReservation: true,
                 withResource: true,
                 withParticipants: true,
             },
         );
-        // 5. 페이지네이션 적용
-        const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } =
-            this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(
-                scheduleDataList.map((item) => item.schedule.scheduleId),
-                page,
-                limit,
-            );
+
         // 6. schedule ID별로 participants 매핑
         const participantsByScheduleId = new Map<string, any[]>();
         scheduleDataList.forEach((scheduleData) => {
