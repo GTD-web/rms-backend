@@ -29969,7 +29969,7 @@ async function bootstrap() {
     app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
     const uploadPath = (0, path_1.join)(__dirname, '..', 'public');
     app.useStaticAssets(uploadPath, {
-        prefix: '/public',
+        prefix: '/static',
     });
     (0, swagger_1.setupSwagger)(app, [...Object.values(businessDtos)]);
     await app.listen(env_config_1.ENV.APP_PORT || 3000);

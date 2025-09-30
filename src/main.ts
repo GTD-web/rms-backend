@@ -41,7 +41,7 @@ async function bootstrap() {
     // 파일 업로드 설정
     const uploadPath = join(__dirname, '..', 'public');
     app.useStaticAssets(uploadPath, {
-        prefix: '/public',
+        prefix: '/static',
     });
 
     setupSwagger(app, [...Object.values(businessDtos)]);
