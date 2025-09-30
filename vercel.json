@@ -11,13 +11,7 @@
         }
     ],
     "routes": [
-        {
-            "src": "/static/(.*)",
-            "dest": "/public/$1",
-            "headers": {
-                "Cache-Control": "public, max-age=86400"
-            }
-        },
+        { "src": "/static/(.*)", "dest": "dist/main.js" },
         {
             "src": "/(.*)",
             "dest": "dist/main.js",
