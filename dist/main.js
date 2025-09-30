@@ -29967,11 +29967,9 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
     app.useGlobalGuards(new jwt_auth_guard_1.JwtAuthGuard(app.get(core_2.Reflector)), new role_guard_1.RolesGuard(app.get(core_2.Reflector)));
     app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
-    const uploadPath = (0, path_1.join)(process.cwd(), 'public');
+    const uploadPath = (0, path_1.join)(__dirname, '..', 'public');
     app.useStaticAssets(uploadPath, {
         prefix: '/public',
-        index: false,
-        fallthrough: false,
     });
     (0, swagger_1.setupSwagger)(app, [...Object.values(businessDtos)]);
     await app.listen(env_config_1.ENV.APP_PORT || 3000);

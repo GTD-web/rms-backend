@@ -39,11 +39,9 @@ async function bootstrap() {
     // 전역 인터셉터는 AppModule에서 APP_INTERCEPTOR로 등록됨
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
-    const uploadPath = join(process.cwd(), 'public');
+    const uploadPath = join(__dirname, '..', 'public');
     app.useStaticAssets(uploadPath, {
         prefix: '/public',
-        index: false,
-        fallthrough: false,
     });
 
     setupSwagger(app, [...Object.values(businessDtos)]);
