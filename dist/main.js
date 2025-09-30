@@ -7370,7 +7370,7 @@ __decorate([
         summary: '예약 리스트 조회 #관리자/예약관리',
     }),
     (0, swagger_1.ApiOkResponse)({
-        description: '예약 리스트 조회 성공',
+        description: '예약 리스트 조회 성공.',
         type: reservation_list_response_dto_1.ReservationListResponseDto,
     }),
     __param(0, (0, common_1.Query)()),

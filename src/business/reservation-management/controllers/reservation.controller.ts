@@ -22,7 +22,7 @@ export class ReservationController {
         summary: '예약 리스트 조회 #관리자/예약관리',
     })
     @ApiOkResponse({
-        description: '예약 리스트 조회 성공',
+        description: '예약 리스트 조회 성공.',
         type: ReservationListResponseDto,
     })
     async findReservationList(@Query() query: ReservationListQueryDto): Promise<ReservationListResponseDto> {
