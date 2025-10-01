@@ -215,9 +215,15 @@ export class TaskManagementService {
                         },
                         notifications: notifications,
                         // 직전 정비시 주행거리
-                        lastMaintenanceMileage: consumable.maintenances[0].mileage,
+                        lastMaintenanceMileage:
+                            consumable.maintenances && consumable.maintenances.length > 0
+                                ? consumable.maintenances[0].mileage
+                                : consumable.initMileage,
                         // 직전 정비 날짜
-                        lastMaintenanceDate: consumable.maintenances[0].date,
+                        lastMaintenanceDate:
+                            consumable.maintenances && consumable.maintenances.length > 0
+                                ? consumable.maintenances[0].date
+                                : null,
                         // 총 주행거리
                         totalMileage: resource.vehicleInfo.totalMileage,
                     });
