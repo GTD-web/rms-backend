@@ -17439,6 +17439,7 @@ let TaskManagementService = class TaskManagementService {
         this.consumableContextService = consumableContextService;
     }
     async getTaskList(user, type) {
+        console.log(type);
         let delayedReturnTasks = [];
         let consumableReplaceTasks = [];
         if (type === '차량반납지연' || type === '전체') {
@@ -17470,6 +17471,7 @@ let TaskManagementService = class TaskManagementService {
                     endDate: reservation.endDate,
                 };
             });
+            console.log(delayedReturnTasks);
         }
         if (type === '소모품교체' || type === '전체') {
             const isResourceAdmin = user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN);
@@ -17497,7 +17499,8 @@ let TaskManagementService = class TaskManagementService {
         };
     }
     async getAdminTaskList(type) {
-        if (type === '차량반납지연') {
+        const results = [];
+        if (type === '차량반납지연' || type === '전체') {
             const basicDelayedVehicles = await this.reservationContextService.모든_지연반납_차량을_조회한다();
             const enhancedTasks = await Promise.all(basicDelayedVehicles.map(async (task) => {
                 const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(task.reservationId);
@@ -17524,14 +17527,13 @@ let TaskManagementService = class TaskManagementService {
                     manager,
                 };
             }));
-            return enhancedTasks;
+            results.push(...enhancedTasks);
         }
-        else if (type === '소모품교체') {
-            return this.교체필요한_모든_소모품을_조회한다();
+        if (type === '소모품교체' || type === '전체') {
+            const consumableTasks = await this.교체필요한_모든_소모품을_조회한다();
+            results.push(...consumableTasks);
         }
-        else {
-            return [];
-        }
+        return results;
     }
     async 교체필요한_모든_소모품을_조회한다() {
         const resources = await this.resourceContextService.소모품정보와_함께_모든자원을_조회한다();

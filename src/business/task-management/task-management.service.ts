@@ -23,6 +23,7 @@ export class TaskManagementService {
      * 사용자의 작업 목록을 조회한다
      */
     async getTaskList(user: Employee, type?: string): Promise<TaskListResponseDto> {
+        console.log(type);
         let delayedReturnTasks = [];
         let consumableReplaceTasks = [];
 
@@ -76,6 +77,7 @@ export class TaskManagementService {
                         endDate: reservation.endDate,
                     };
                 });
+            console.log(delayedReturnTasks);
         }
         if (type === '소모품교체' || type === '전체') {
             const isResourceAdmin = user.roles.includes(Role.RESOURCE_ADMIN);
@@ -112,7 +114,9 @@ export class TaskManagementService {
      * 관리자용 작업 목록을 조회한다
      */
     async getAdminTaskList(type?: string): Promise<TaskResponseDto[]> {
-        if (type === '차량반납지연') {
+        const results = [];
+
+        if (type === '차량반납지연' || type === '전체') {
             // 1. 기본 지연반납 차량 목록 조회
             const basicDelayedVehicles = await this.reservationContextService.모든_지연반납_차량을_조회한다();
 
@@ -160,12 +164,15 @@ export class TaskManagementService {
                 }),
             );
 
-            return enhancedTasks;
-        } else if (type === '소모품교체') {
-            return this.교체필요한_모든_소모품을_조회한다();
-        } else {
-            return [];
+            results.push(...enhancedTasks);
         }
+
+        if (type === '소모품교체' || type === '전체') {
+            const consumableTasks = await this.교체필요한_모든_소모품을_조회한다();
+            results.push(...consumableTasks);
+        }
+
+        return results;
     }
 
     /**
