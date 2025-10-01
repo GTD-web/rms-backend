@@ -214,6 +214,12 @@ export class TaskManagementService {
                             position: resource.resourceManagers[0].employee.position,
                         },
                         notifications: notifications,
+                        // 직전 정비시 주행거리
+                        lastMaintenanceMileage: consumable.maintenances[0].mileage,
+                        // 직전 정비 날짜
+                        lastMaintenanceDate: consumable.maintenances[0].date,
+                        // 총 주행거리
+                        totalMileage: resource.vehicleInfo.totalMileage,
                     });
                 }
             }

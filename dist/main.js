@@ -17558,6 +17558,9 @@ let TaskManagementService = class TaskManagementService {
                             position: resource.resourceManagers[0].employee.position,
                         },
                         notifications: notifications,
+                        lastMaintenanceMileage: consumable.maintenances[0].mileage,
+                        lastMaintenanceDate: consumable.maintenances[0].date,
+                        totalMileage: resource.vehicleInfo.totalMileage,
                     });
                 }
             }
