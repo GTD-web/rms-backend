@@ -17439,7 +17439,6 @@ let TaskManagementService = class TaskManagementService {
         this.consumableContextService = consumableContextService;
     }
     async getTaskList(user, type) {
-        console.log(type);
         let delayedReturnTasks = [];
         let consumableReplaceTasks = [];
         if (type === '차량반납지연' || type === '전체') {
@@ -17449,7 +17448,6 @@ let TaskManagementService = class TaskManagementService {
                 withResource: true,
             });
             const now = new Date();
-            console.log(scheduleRelations);
             const potentialDelayedReservations = scheduleRelations
                 .filter(({ reservation }) => reservation && reservation.status === reservation_type_enum_1.ReservationStatus.CLOSING)
                 .map(({ reservation, resource }) => ({ reservation, resource }));
@@ -17471,7 +17469,6 @@ let TaskManagementService = class TaskManagementService {
                     endDate: reservation.endDate,
                 };
             });
-            console.log(delayedReturnTasks);
         }
         if (type === '소모품교체' || type === '전체') {
             const isResourceAdmin = user.roles.includes(role_type_enum_1.Role.RESOURCE_ADMIN);

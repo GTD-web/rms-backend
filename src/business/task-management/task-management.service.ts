@@ -23,7 +23,6 @@ export class TaskManagementService {
      * 사용자의 작업 목록을 조회한다
      */
     async getTaskList(user: Employee, type?: string): Promise<TaskListResponseDto> {
-        console.log(type);
         let delayedReturnTasks = [];
         let consumableReplaceTasks = [];
 
@@ -42,7 +41,6 @@ export class TaskManagementService {
             );
             // 메모리에서 지연반납 조건 체크
             const now = new Date();
-            console.log(scheduleRelations);
             const potentialDelayedReservations = scheduleRelations
                 .filter(({ reservation }) => reservation && reservation.status === ReservationStatus.CLOSING)
                 .map(({ reservation, resource }) => ({ reservation, resource }));
@@ -77,7 +75,6 @@ export class TaskManagementService {
                         endDate: reservation.endDate,
                     };
                 });
-            console.log(delayedReturnTasks);
         }
         if (type === '소모품교체' || type === '전체') {
             const isResourceAdmin = user.roles.includes(Role.RESOURCE_ADMIN);
