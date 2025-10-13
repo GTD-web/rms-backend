@@ -25231,7 +25231,7 @@ let ScheduleStateTransitionService = class ScheduleStateTransitionService {
             await this.domainScheduleService.update(schedule.scheduleId, updateData, { queryRunner });
             Object.assign(schedule, updateData);
         }
-        if (infoChanges.participants && infoChanges.participants.length > 0) {
+        if (infoChanges.participants && Array.isArray(infoChanges.participants)) {
             participantChanges = await this.참여자를_업데이트한다(schedule.scheduleId, infoChanges.participants, queryRunner);
         }
         return {
