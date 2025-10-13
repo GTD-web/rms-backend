@@ -69,19 +69,29 @@ export class ScheduleMutationContextService {
         type: string,
         queryRunner?: QueryRunner,
     ): Promise<void> {
-        const participantDto: CreateScheduleParticipantDto = {
-            scheduleId,
+        /**
+         * 참가자 중복 체크
+         * 도메인 수준에서 중복을 체크하는 함수을 만들고 컨텍스트 수준에서 체크와 저장하는 함수를 모두 사용해서 컨텍스트 함수를 작성한다.
+         */
+        const isParticipant = await this.domainScheduleParticipantService.checkParticipantByScheduleIdAndType(
             employeeId,
-            type,
-        };
+            scheduleId,
+            type as ParticipantsType,
+        );
+
+        if (isParticipant) {
+            return;
+        }
 
         const participantEntity = {
-            scheduleId: participantDto.scheduleId,
-            employeeId: participantDto.employeeId,
-            type: participantDto.type as ParticipantsType,
+            scheduleId: scheduleId,
+            employeeId: employeeId,
+            type: type as ParticipantsType,
         };
 
-        // 도메인 서비스를 사용하여 트랜잭션 내에서 생성
+        /**
+         * 도메인 서비스를 사용하여 트랜잭션 내에서 생성
+         */
         await this.domainScheduleParticipantService.save(participantEntity, {
             queryRunner: queryRunner,
         });

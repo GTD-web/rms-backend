@@ -47,4 +47,15 @@ export class DomainScheduleParticipantService extends BaseService<SchedulePartic
         });
         return reserver !== null;
     }
+
+    async checkParticipantByScheduleIdAndType(
+        employeeId: string,
+        scheduleId: string,
+        type: ParticipantsType,
+    ): Promise<boolean> {
+        const participant = await this.scheduleParticipantRepository.findOne({
+            where: { scheduleId, employeeId, type },
+        });
+        return participant !== null;
+    }
 }

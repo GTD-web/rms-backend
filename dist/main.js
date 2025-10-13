@@ -23351,15 +23351,14 @@ let ScheduleMutationContextService = ScheduleMutationContextService_1 = class Sc
         return savedSchedule;
     }
     async 일정_참가자를_추가한다(scheduleId, employeeId, type, queryRunner) {
-        const participantDto = {
-            scheduleId,
-            employeeId,
-            type,
-        };
+        const isParticipant = await this.domainScheduleParticipantService.checkParticipantByScheduleIdAndType(employeeId, scheduleId, type);
+        if (isParticipant) {
+            return;
+        }
         const participantEntity = {
-            scheduleId: participantDto.scheduleId,
-            employeeId: participantDto.employeeId,
-            type: participantDto.type,
+            scheduleId: scheduleId,
+            employeeId: employeeId,
+            type: type,
         };
         await this.domainScheduleParticipantService.save(participantEntity, {
             queryRunner: queryRunner,
@@ -29366,6 +29365,12 @@ let DomainScheduleParticipantService = class DomainScheduleParticipantService ex
             where: { scheduleId, employeeId, type: reservation_type_enum_1.ParticipantsType.RESERVER },
         });
         return reserver !== null;
+    }
+    async checkParticipantByScheduleIdAndType(employeeId, scheduleId, type) {
+        const participant = await this.scheduleParticipantRepository.findOne({
+            where: { scheduleId, employeeId, type },
+        });
+        return participant !== null;
     }
 };
 exports.DomainScheduleParticipantService = DomainScheduleParticipantService;
