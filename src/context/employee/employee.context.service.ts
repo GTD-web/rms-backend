@@ -10,7 +10,7 @@ import { UserResponseDto } from '@src/business/employee-management/dtos/user-res
 import { ChangeRoleDto } from '@src/business/employee-management/dtos/change-role.dto';
 import { UpdateNotificationSettingsDto } from '@src/business/employee-management/dtos/notification-settings.dto';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import axios from 'axios';
 import { Employee } from '@libs/entities/employee.entity';
 import { EmployeeMicroserviceAdapter } from '@src/domain/employee/adapters/employee-microservice.adapter';

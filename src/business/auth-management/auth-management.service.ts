@@ -7,7 +7,8 @@ import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { Role } from '@libs/enums/role-type.enum';
 import { LoginDto, SsoResponseDto, LoginResponseDto } from './dtos';
 import axios from 'axios';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
+import { LoginResponse, SSOClient } from '@lumir-company/sso-sdk';
 
 /**
  * 인증 관리 비즈니스 서비스
@@ -26,8 +27,18 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthManagementService {
     private readonly logger = new Logger(AuthManagementService.name);
+    private readonly ssoClient: SSOClient;
 
-    constructor(private readonly employeeService: DomainEmployeeService) {}
+    constructor(private readonly employeeService: DomainEmployeeService) {
+        const ssoClient = new SSOClient({
+            clientId: process.env.SSO_CLIENT_ID,
+            clientSecret: process.env.SSO_CLIENT_SECRET,
+            baseUrl: process.env.SSO_API_URL,
+        });
+
+        this.ssoClient = ssoClient;
+        this.ssoClient.initialize();
+    }
 
     /**
      * 로그인 처리
@@ -35,15 +46,35 @@ export class AuthManagementService {
      * @returns 로그인 결과 (토큰 및 사용자 정보)
      */
     async login(loginDto: LoginDto): Promise<LoginResponseDto> {
+        console.log('SSO 시스템 이름', this.ssoClient.getSystemName());
         this.logger.log(`로그인 시도: ${loginDto.email}`);
 
         try {
             // SSO 로그인 처리
-            const ssoResponse = await this.ssoLogin(loginDto.email, loginDto.password);
+            const ssoResponse: LoginResponse = await this.ssoClient.sso.login(loginDto.email, loginDto.password);
+
             this.logger.log(`SSO 로그인 성공: ${loginDto.email}`);
 
             // 직원 정보 업데이트
-            const updatedEmployee = await this.updateAuthInfo(ssoResponse);
+            const updatedEmployee = await this.updateAuthInfo({
+                tokenType: ssoResponse.tokenType,
+                accessToken: ssoResponse.accessToken,
+                expiresAt: new Date(ssoResponse.expiresAt),
+                refreshToken: ssoResponse.refreshToken,
+                refreshTokenExpiresAt: new Date(ssoResponse.refreshTokenExpiresAt),
+                name: ssoResponse.name,
+                email: ssoResponse.email,
+                password: await bcrypt.hash(loginDto.password, 10),
+                employeeNumber: ssoResponse.employeeNumber,
+                phoneNumber: ssoResponse.phoneNumber,
+                dateOfBirth: new Date(ssoResponse.dateOfBirth),
+                gender: ssoResponse.gender,
+                hireDate: new Date(ssoResponse.hireDate),
+                status: ssoResponse.status,
+                department: ssoResponse.department,
+                position: ssoResponse.position,
+                rank: ssoResponse.rank,
+            });
             this.logger.log(`직원 정보 업데이트 완료: ${updatedEmployee.employeeId}`);
 
             return {

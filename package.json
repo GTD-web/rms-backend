@@ -30,6 +30,7 @@
     "dependencies": {
         "@aws-sdk/client-s3": "^3.828.0",
         "@aws-sdk/s3-request-presigner": "^3.828.0",
+        "@lumir-company/sso-sdk": "0.1.2",
         "@nestjs/axios": "^3.1.3",
         "@nestjs/common": "^10.4.19",
         "@nestjs/config": "^3.3.0",
@@ -48,7 +49,7 @@
         "@types/multer": "^1.4.13",
         "@types/web-push": "^3.6.4",
         "axios": "^1.10.0",
-        "bcrypt": "^5.1.1",
+        "bcryptjs": "^3.0.2",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.2",
         "cron": "4.1.0",
@@ -120,5 +121,15 @@
             "^@resource/(.*)$": "<rootDir>/src/$1",
             "^@libs/(.*)$": "<rootDir>/libs/$1"
         }
+    },
+    "pnpm": {
+        "ignoredBuiltDependencies": [
+            "@firebase/util",
+            "@nestjs/core",
+            "bcrypt",
+            "cpu-features",
+            "protobufjs",
+            "ssh2"
+        ]
     }
 }
