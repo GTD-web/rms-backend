@@ -958,23 +958,17 @@ export class ScheduleQueryContextService {
     }> {
         const employeeId = employee.employeeId;
         const now = new Date();
-        // console.log(
-        //     new Date().getUTCDate(),
-        //     new Date().getUTCHours(),
-        //     new Date().getUTCMinutes(),
-        //     new Date().getUTCSeconds(),
-        // );
-        // const now = new Date('2025-09-24T00:00:00.000Z');
-        // console.log('now', now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-        // const now2 = new Date('2025-09-23T23:55:59.000Z');
+        /** UTC 기준 15시 이전일 경우 전날 15시로 설정
+         * 15시 이후일 경우 15시로 설정
+         * 이렇게 해야 해당 날짜의 00시 부터 시작하는 일정을 조회할 수 있음
+         */
+        if (now.getUTCHours() < 15) {
+            now.setUTCDate(now.getUTCDate() - 1);
+            now.setUTCHours(15, 0, 0, 0);
+        } else {
+            now.setUTCHours(15, 0, 0, 0);
+        }
 
-        // // const now = new Date();
-        // console.log('now2', now2.getUTCDate(), now2.getUTCHours(), now2.getUTCMinutes(), now2.getUTCSeconds());
-
-        // now.setHours(0, 0, 0, 0);
-        // console.log('now', now);
-        // now2.setHours(0, 0, 0, 0);
-        // console.log('now2', now2);
         // 1. 기본 일정 ID 조회 (역할 조건 포함)
         let scheduleIds = await this.직원의_역할별_일정ID들을_조회한다(employeeId, query.role, now);
         if (query.role !== ParticipantsType.RESERVER) {
