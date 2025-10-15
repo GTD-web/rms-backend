@@ -23,6 +23,7 @@ async function bootstrap() {
                       'https://lrms.lumir.space',
                       'https://rms-backend-iota.vercel.app',
                       'https://lrms-dev.lumir.space',
+                      'https://lrim.lumir.space',
                       'http://localhost:3002',
                   ];
                   if (!isProduction || !origin || whitelist.includes(origin)) {
