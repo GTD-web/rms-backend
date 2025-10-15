@@ -2,7 +2,7 @@ import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SsoResponseDto } from '@resource/application/auth/dto/sso-response.dto';
 import axios from 'axios';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class SsoLoginUsecase {

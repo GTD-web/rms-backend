@@ -5159,7 +5159,7 @@ exports.SsoLoginUsecase = void 0;
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const axios_1 = __webpack_require__(/*! axios */ "axios");
-const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const bcrypt = __webpack_require__(/*! bcryptjs */ "bcryptjs");
 let SsoLoginUsecase = class SsoLoginUsecase {
     constructor() { }
     async execute(email, password) {
@@ -5216,7 +5216,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CheckSystemAdminUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const bcrypt = __webpack_require__(/*! bcryptjs */ "bcryptjs");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
@@ -5342,7 +5342,7 @@ exports.ValidateUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
-const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const bcrypt = __webpack_require__(/*! bcryptjs */ "bcryptjs");
 const date_util_1 = __webpack_require__(/*! @libs/utils/date.util */ "./libs/utils/date.util.ts");
 let ValidateUsecase = class ValidateUsecase {
     constructor(employeeService) {
@@ -6390,7 +6390,7 @@ exports.ChangePasswordUsecase = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! @src/domain/employee/employee.service */ "./src/domain/employee/employee.service.ts");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
-const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const bcrypt = __webpack_require__(/*! bcryptjs */ "bcryptjs");
 const axios_1 = __webpack_require__(/*! axios */ "axios");
 let ChangePasswordUsecase = class ChangePasswordUsecase {
     constructor(employeeService) {
@@ -32940,7 +32940,7 @@ const department_employee_service_1 = __webpack_require__(/*! @src/domain/depart
 const role_type_enum_1 = __webpack_require__(/*! @libs/enums/role-type.enum */ "./libs/enums/role-type.enum.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const error_message_1 = __webpack_require__(/*! @libs/constants/error-message */ "./libs/constants/error-message.ts");
-const bcrypt = __webpack_require__(/*! bcrypt */ "bcrypt");
+const bcrypt = __webpack_require__(/*! bcryptjs */ "bcryptjs");
 const axios_1 = __webpack_require__(/*! axios */ "axios");
 const employee_microservice_adapter_1 = __webpack_require__(/*! @src/domain/employee/adapters/employee-microservice.adapter */ "./src/domain/employee/adapters/employee-microservice.adapter.ts");
 const department_microservice_adapter_1 = __webpack_require__(/*! @src/domain/department/adapters/department-microservice.adapter */ "./src/domain/department/adapters/department-microservice.adapter.ts");
@@ -45696,13 +45696,13 @@ module.exports = require("axios");
 
 /***/ }),
 
-/***/ "bcrypt":
-/*!*************************!*\
-  !*** external "bcrypt" ***!
-  \*************************/
+/***/ "bcryptjs":
+/*!***************************!*\
+  !*** external "bcryptjs" ***!
+  \***************************/
 /***/ ((module) => {
 
-module.exports = require("bcrypt");
+module.exports = require("bcryptjs");
 
 /***/ }),
 
@@ -45914,6 +45914,7 @@ async function bootstrap() {
                     'https://lrms.lumir.space',
                     'https://rms-backend-iota.vercel.app',
                     'https://lrms-dev.lumir.space',
+                    'https://lrim.lumir.space',
                     'http://localhost:3002',
                 ];
                 if (!isProduction || !origin || whitelist.includes(origin)) {

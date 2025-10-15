@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DomainEmployeeService } from '@src/domain/employee/employee.service';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import axios from 'axios';
 
 @Injectable()
