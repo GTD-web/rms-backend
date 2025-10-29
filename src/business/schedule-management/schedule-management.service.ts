@@ -202,6 +202,14 @@ export class ScheduleManagementService {
                             : null,
                     hasUnreadNotification: notificationInfo.hasUnreadNotification,
                     notificationId: notificationInfo.notificationId,
+                    participants:
+                        participants?.map((participant) => ({
+                            participantId: participant.participantId,
+                            type: participant.type,
+                            employeeId: participant.employee?.employeeId,
+                            employeeName: participant.employee?.name,
+                            department: participant.employee?.department,
+                        })) || [],
                 };
             },
         );

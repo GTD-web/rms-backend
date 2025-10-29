@@ -13569,10 +13569,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ScheduleCalendarResponseDto = exports.ProjectGroupDto = exports.CalendarResourceGroupDto = exports.EmployeeGroupDto = exports.DateGroupDto = exports.ScheduleCalendarItemDto = exports.ProjectDto = exports.ReservationDto = void 0;
+exports.ScheduleCalendarResponseDto = exports.ProjectGroupDto = exports.CalendarResourceGroupDto = exports.EmployeeGroupDto = exports.DateGroupDto = exports.ScheduleCalendarItemDto = exports.ParticipantDto = exports.ProjectDto = exports.ReservationDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const reservation_type_enum_1 = __webpack_require__(/*! @libs/enums/reservation-type.enum */ "./libs/enums/reservation-type.enum.ts");
 class ReservationDto {
 }
 exports.ReservationDto = ReservationDto;
@@ -13614,6 +13615,48 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], ProjectDto.prototype, "projectName", void 0);
+class ParticipantDto {
+}
+exports.ParticipantDto = ParticipantDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참가자 ID',
+        example: 'uuid-string',
+    }),
+    __metadata("design:type", String)
+], ParticipantDto.prototype, "participantId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참가자 타입',
+        example: 'RESERVER',
+        enum: reservation_type_enum_1.ParticipantsType,
+    }),
+    __metadata("design:type", typeof (_a = typeof reservation_type_enum_1.ParticipantsType !== "undefined" && reservation_type_enum_1.ParticipantsType) === "function" ? _a : Object)
+], ParticipantDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원 ID',
+        example: 'uuid-string',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], ParticipantDto.prototype, "employeeId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '직원 이름',
+        example: '홍길동',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], ParticipantDto.prototype, "employeeName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '부서명',
+        example: '개발팀',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], ParticipantDto.prototype, "department", void 0);
 class ScheduleCalendarItemDto {
 }
 exports.ScheduleCalendarItemDto = ScheduleCalendarItemDto;
@@ -13636,14 +13679,14 @@ __decorate([
         description: '시작 날짜 및 시간',
         example: '2024-01-15T09:00:00Z',
     }),
-    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], ScheduleCalendarItemDto.prototype, "startDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: '종료 날짜 및 시간',
         example: '2024-01-15T10:00:00Z',
     }),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
 ], ScheduleCalendarItemDto.prototype, "endDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
@@ -13692,6 +13735,14 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], ScheduleCalendarItemDto.prototype, "notificationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: '참가자 목록',
+        type: [ParticipantDto],
+        required: false,
+    }),
+    __metadata("design:type", Array)
+], ScheduleCalendarItemDto.prototype, "participants", void 0);
 class DateGroupDto {
 }
 exports.DateGroupDto = DateGroupDto;
@@ -15536,6 +15587,13 @@ let ScheduleManagementService = ScheduleManagementService_1 = class ScheduleMana
                     : null,
                 hasUnreadNotification: notificationInfo.hasUnreadNotification,
                 notificationId: notificationInfo.notificationId,
+                participants: participants?.map((participant) => ({
+                    participantId: participant.participantId,
+                    type: participant.type,
+                    employeeId: participant.employee?.employeeId,
+                    employeeName: participant.employee?.name,
+                    department: participant.employee?.department,
+                })) || [],
             };
         });
         const groupedData = this.groupScheduleData(scheduleCalendarItems, filteredScheduleDataList);
