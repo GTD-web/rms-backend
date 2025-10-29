@@ -477,7 +477,7 @@ export class ScheduleStateTransitionService {
         }
 
         // 참여자 업데이트 (별도 처리)
-        if (infoChanges.participants && infoChanges.participants.length > 0) {
+        if (infoChanges.participants && Array.isArray(infoChanges.participants)) {
             participantChanges = await this.참여자를_업데이트한다(
                 schedule.scheduleId,
                 infoChanges.participants,

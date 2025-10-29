@@ -11,7 +11,6 @@ import { ConfigModule } from '@nestjs/config';
 import { FIREBASE_CONFIG } from '@libs/configs/env.config';
 import { DomainReservationModule } from '@src/domain/reservation/reservation.module';
 import { FCMAdapter } from './adapter/fcm-push.adapter';
-import { CronNotificationContextService } from './services/cron-notification.context.service';
 import { ScheduleNotificationContextService } from './services/schedule-notification.context.service';
 import { ReservationNotificationContextService } from './services/reservation-notification.context.service';
 import { ResourceNotificationContextService } from './services/resource-notification.context.service';
@@ -47,7 +46,6 @@ import { HttpModule } from '@nestjs/axios';
     controllers: [], // 컨트롤러들은 Business layer로 이전됨
     providers: [
         NotificationContextService,
-        CronNotificationContextService,
         ScheduleNotificationContextService,
         ReservationNotificationContextService,
         ResourceNotificationContextService,
@@ -56,7 +54,6 @@ import { HttpModule } from '@nestjs/axios';
     ],
     exports: [
         NotificationContextService,
-        CronNotificationContextService,
         ScheduleNotificationContextService,
         ReservationNotificationContextService,
         ResourceNotificationContextService,

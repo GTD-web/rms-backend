@@ -7,13 +7,13 @@ import { DomainReservationVehicleService } from '@src/domain/reservation-vehicle
 import { DomainVehicleInfoService } from '@src/domain/vehicle-info/vehicle-info.service';
 import { DomainFileService } from '@src/domain/file/file.service';
 import { FileContextService } from '../../file/services/file.context.service';
-import { DataSource, MoreThanOrEqual, QueryRunner } from 'typeorm';
+import { DataSource, QueryRunner } from 'typeorm';
 import { Employee, Reservation, ReservationVehicle } from '@libs/entities';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { ReservationStatus, ParticipantsType } from '@libs/enums/reservation-type.enum';
+import { ReservationStatus } from '@libs/enums/reservation-type.enum';
 import { ERROR_MESSAGE } from '@libs/constants/error-message';
 import { DateUtil } from '@libs/utils/date.util';
 import { In, Raw, FindOptionsWhere, Between, MoreThan, LessThan, LessThanOrEqual, Not } from 'typeorm';

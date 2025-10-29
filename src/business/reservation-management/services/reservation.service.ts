@@ -6,18 +6,13 @@ import { DateUtil } from '@libs/utils/date.util';
 import { PaginationQueryDto } from '@libs/dtos/pagination-query.dto';
 import { PaginationData } from '@libs/dtos/pagination-response.dto';
 import { ReturnVehicleDto, UpdateReservationStatusDto, MarkVehicleUnusedDto } from '../dtos/update-reservation.dto';
-import { ReservationListQueryDto, ReservationSortOrder } from '../dtos/reservation-list-query.dto';
+import { ReservationListQueryDto } from '../dtos/reservation-list-query.dto';
 import { ReservationListResponseDto } from '../dtos/reservation-list-response.dto';
-import {
-    ReservationParticipantResponseDto,
-    ReservationResponseDto,
-    ReservationWithRelationsResponseDto,
-} from '../dtos/reservation-response.dto';
+import { ReservationResponseDto, ReservationWithRelationsResponseDto } from '../dtos/reservation-response.dto';
 import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
 import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
 import { ReservationNotificationContextService } from '@src/context/notification/services/reservation-notification.context.service';
 import { ScheduleQueryContextService } from '@src/context/schedule/services/schedule-query.context.service';
-import { In } from 'typeorm';
 
 @Injectable()
 export class ReservationService {
@@ -60,12 +55,13 @@ export class ReservationService {
 
         // 3. 각 예약별로 schedule ID 조회
         const scheduleIds = await this.scheduleQueryContextService.예약의_일정ID들을_조회한다(reservationIds);
-
+        console.log(scheduleIds);
         // 4. 키워드 검색 적용
         const filteredScheduleIds = await this.scheduleQueryContextService.키워드로_일정ID들을_조회한다(
             scheduleIds,
             keyword,
         );
+        console.log(filteredScheduleIds);
         // 5. 페이지네이션 적용
         const { paginatedIds, totalCount, filteredCount, totalPages, hasNext, hasPrevious } =
             this.scheduleQueryContextService.페이지네이션_일정ID들을_계산한다(filteredScheduleIds, page, limit);

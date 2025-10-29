@@ -2,7 +2,11 @@ import { Controller, Get, Post, Delete, Body, Param, Patch, Query } from '@nestj
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 
 import { ResourceType } from '@libs/enums/resource-type.enum';
-import { CreateResourceResponseDto, ResourceResponseDto } from '../../dtos/resource/resource-response.dto';
+import {
+    CreateResourceResponseDto,
+    ResourceResponseDto,
+    MyManagementResourcesResponseDto,
+} from '../../dtos/resource/resource-response.dto';
 import { CreateResourceInfoDto } from '../../dtos/resource/create-resource.dto';
 import { UpdateResourceInfoDto, UpdateResourceOrdersDto } from '../../dtos/resource/update-resource.dto';
 import { ResourceService } from '../../services/resource.service';
@@ -11,6 +15,8 @@ import { ResourceQueryDto } from '../../dtos/resource/resource-query.dto';
 import { CheckAvailabilityQueryDto } from '../../dtos/resource/check-availability.dto';
 import { ResourceMonthAvailabilityQueryDto } from '../../dtos/resource/resource-month-availability-query.dto';
 import { ResourceMonthAvailabilityResponseDto } from '../../dtos/resource/resource-month-availability-response.dto';
+import { Employee } from '@libs/entities/employee.entity';
+import { User } from '@libs/decorators/user.decorator';
 
 @ApiTags('v2 자원')
 @Controller('v2/resources')
@@ -39,6 +45,17 @@ export class ResourceController {
     @ApiQuery({ name: 'type', enum: ResourceType })
     async findAll(@Query('type') type: ResourceType): Promise<ResourceResponseDto[]> {
         return this.resourceService.findResources(type);
+    }
+
+    @Get('my-managemanment')
+    @ApiOperation({ summary: '내 관리 자원 목록 조회 #관리자/자원관리/자원리스트' })
+    @ApiOkResponse({
+        status: 200,
+        description: '내 관리 자원 목록을 성공적으로 조회했습니다.',
+        type: MyManagementResourcesResponseDto,
+    })
+    async findMyManagementResources(@User() user: Employee): Promise<MyManagementResourcesResponseDto> {
+        return this.resourceService.findMyManagementResources(user.employeeId);
     }
 
     @Get('availability')

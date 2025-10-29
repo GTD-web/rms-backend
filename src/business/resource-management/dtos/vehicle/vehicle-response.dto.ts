@@ -26,6 +26,19 @@ export class MaintenanceResponseDto {
     @ApiProperty()
     images: string[];
 
+    @ApiProperty({
+        example: [
+            {
+                fileId: '123e4567-e89b-12d3-a456-426614174000',
+                fileName: 'image.jpg',
+                filePath: 'uploads/20250226123456-image.jpg',
+            },
+        ],
+        type: [FileResponseDto],
+        required: false,
+    })
+    imageFiles?: FileResponseDto[];
+
     @ApiProperty({ required: false })
     mileageFromLastMaintenance?: number;
 
@@ -57,6 +70,9 @@ export class ConsumableResponseDto {
 
     @ApiProperty({ description: '소모품 교체 알림 주기' })
     notifyReplacementCycle: boolean;
+
+    @ApiProperty({ description: '교체 필요 여부 (거리 기반 계산)', required: false })
+    isReplacementRequired?: boolean;
 
     @ApiProperty({ type: [MaintenanceResponseDto], required: false })
     maintenances?: MaintenanceResponseDto[];

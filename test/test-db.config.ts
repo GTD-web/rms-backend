@@ -2,18 +2,8 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Entities } from '@libs/entities';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { DataSource } from 'typeorm';
-import {
-    employeesSeedData,
-    resourceGroupsSeedData,
-    resourcesSeedData,
-    subResourceGroupsSeedData,
-} from '../src/mockdata.seed';
-import { Employee } from '@libs/entities/employee.entity';
-import { ResourceGroup } from '@libs/entities/resource-group.entity';
-import { User } from '@libs/entities/user.entity';
-import { Resource } from '@libs/entities/resource.entity';
-import * as bcrypt from 'bcrypt';
-import { ResourceType } from '@libs/enums/resource-type.enum';
+
+import * as bcrypt from 'bcryptjs';
 
 const containers = new Map<string, StartedPostgreSqlContainer>();
 const dataSources = new Map<string, DataSource>();

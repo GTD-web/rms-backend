@@ -1,9 +1,7 @@
-import { Controller, Get, Post, Body, UseInterceptors, Headers, Req } from '@nestjs/common';
+import { Controller, Get, UseInterceptors, Req } from '@nestjs/common';
 import { EmployeeManagementService } from '../employee-management.service';
-import { ApiBearerAuth, ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { Public } from '@libs/decorators/public.decorator';
-import { Throttle } from '@nestjs/throttler/dist/throttler.decorator';
-import { MMSEmployeeResponseDto } from '@resource/application/employee/dtos/mms-employee-response.dto';
 import { ResponseInterceptor } from '@libs/interceptors/response.interceptor';
 import { ErrorInterceptor } from '@libs/interceptors/error.interceptor';
 

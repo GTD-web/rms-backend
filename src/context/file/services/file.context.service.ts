@@ -3,7 +3,7 @@ import { DomainFileService } from '@src/domain/file/file.service';
 import { DomainFileReservationVehicleService } from '@src/domain/file-reservation-vehicle/file-reservation-vehicle.service';
 import { DomainFileVehicleInfoService } from '@src/domain/file-vehicle-info/file-vehicle-info.service';
 import { DomainFileMaintenanceService } from '@src/domain/file-maintenance/file-maintenance.service';
-import { In, LessThan, Like } from 'typeorm';
+import { In, LessThan } from 'typeorm';
 import { File } from '@libs/entities/file.entity';
 import { ReservationVehicleFileResponseDto } from '../dtos';
 import { S3Service } from '../adapter/s3.service';
@@ -398,6 +398,18 @@ export class FileContextService {
     async 정비_파일을_조회한다(maintenanceId: string): Promise<{ filePath: string }[]> {
         const fileMaintenances = await this.domainFileMaintenanceService.findByMaintenanceId(maintenanceId);
         return fileMaintenances.map((fm) => ({
+            filePath: fm.file.filePath,
+        }));
+    }
+
+    /**
+     * 정비 파일 정보를 조회한다 (FileResponseDto 형태로)
+     */
+    async 정비_파일정보를_조회한다(maintenanceId: string): Promise<any[]> {
+        const fileMaintenances = await this.domainFileMaintenanceService.findByMaintenanceId(maintenanceId);
+        return fileMaintenances.map((fm) => ({
+            fileId: fm.file.fileId,
+            fileName: fm.file.fileName,
             filePath: fm.file.filePath,
         }));
     }

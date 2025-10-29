@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Query, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiExcludeEndpoint, ApiBody } from '@nestjs/swagger';
 import { ScheduleManagementService } from '../schedule-management.service';
 import { Employee } from '@libs/entities/employee.entity';
@@ -11,16 +11,10 @@ import { ResourceScheduleQueryDto } from '../dtos/resource-schedule-query.dto';
 import { ResourceScheduleResponseDto } from '../dtos/resource-schedule-response.dto';
 import { ScheduleDetailQueryDto } from '../dtos/schedule-detail-query.dto';
 import { ScheduleDetailResponseDto } from '../dtos/schedule-detail-response.dto';
-import { ScheduleCreateRequestDto, ScheduleCreateRequestListDto } from '../dtos/schedule-create-request.dto';
+import { ScheduleCreateRequestListDto } from '../dtos/schedule-create-request.dto';
 import { ScheduleCreateResponseDto } from '../dtos/schedule-create-response.dto';
-import { ScheduleCancelRequestDto } from '../dtos/schedule-cancel-request.dto';
-import { ScheduleCancelResponseDto } from '../dtos/schedule-cancel-response.dto';
-import { ScheduleCompleteRequestDto } from '../dtos/schedule-complete-request.dto';
-import { ScheduleCompleteResponseDto } from '../dtos/schedule-complete-response.dto';
-import { ScheduleExtendRequestDto } from '../dtos/schedule-extend-request.dto';
 import { ScheduleExtendResponseDto } from '../dtos/schedule-extend-response.dto';
 import { ScheduleUpdateRequestDto } from '../dtos/schedule-update-request.dto';
-import { ScheduleUpdateResponseDto } from '../dtos/schedule-update-response.dto';
 import { MyScheduleHistoryQueryDto } from '../dtos/my-schedule-history-query.dto';
 import { MyScheduleHistoryResponseDto } from '../dtos/my-schedule-history-response.dto';
 

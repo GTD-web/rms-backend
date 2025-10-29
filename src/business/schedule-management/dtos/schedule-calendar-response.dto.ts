@@ -35,6 +35,42 @@ export class ProjectDto {
     projectName: string;
 }
 
+export class ParticipantDto {
+    @ApiProperty({
+        description: '참가자 ID',
+        example: 'uuid-string',
+    })
+    participantId: string;
+
+    @ApiProperty({
+        description: '참가자 타입',
+        example: 'RESERVER',
+        enum: ParticipantsType,
+    })
+    type: ParticipantsType;
+
+    @ApiProperty({
+        description: '직원 ID',
+        example: 'uuid-string',
+        required: false,
+    })
+    employeeId?: string;
+
+    @ApiProperty({
+        description: '직원 이름',
+        example: '홍길동',
+        required: false,
+    })
+    employeeName?: string;
+
+    @ApiProperty({
+        description: '부서명',
+        example: '개발팀',
+        required: false,
+    })
+    department?: string;
+}
+
 export class ScheduleCalendarItemDto {
     @ApiProperty({
         description: '일정 ID',
@@ -100,6 +136,13 @@ export class ScheduleCalendarItemDto {
         required: false,
     })
     notificationId?: string;
+
+    @ApiProperty({
+        description: '참가자 목록',
+        type: [ParticipantDto],
+        required: false,
+    })
+    participants?: ParticipantDto[];
 }
 
 export class DateGroupDto {

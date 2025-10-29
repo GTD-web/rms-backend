@@ -2,11 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Employee } from '@libs/entities';
 import { ResourceContextService } from '@src/context/resource/services/resource.context.service';
 import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
+import { ConsumableContextService } from '@src/context/resource/services/consumable.context.service';
 import { Role } from '@libs/enums/role-type.enum';
 import { ParticipantsType, ReservationStatus } from '@libs/enums/reservation-type.enum';
-import { NotificationType } from '@libs/enums/notification-type.enum';
-import { DateUtil } from '@libs/utils/date.util';
-import { LessThan, MoreThan, Raw } from 'typeorm';
 import { TaskListResponseDto, TaskResponseDto } from './dtos/task-response.dto';
 import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
 import { ScheduleQueryContextService } from '@src/context/schedule/services/schedule-query.context.service';
@@ -18,6 +16,7 @@ export class TaskManagementService {
         private readonly reservationContextService: ReservationContextService,
         private readonly notificationContextService: NotificationContextService,
         private readonly scheduleQueryContextService: ScheduleQueryContextService,
+        private readonly consumableContextService: ConsumableContextService,
     ) {}
 
     /**
@@ -42,7 +41,6 @@ export class TaskManagementService {
             );
             // 메모리에서 지연반납 조건 체크
             const now = new Date();
-            console.log(scheduleRelations);
             const potentialDelayedReservations = scheduleRelations
                 .filter(({ reservation }) => reservation && reservation.status === ReservationStatus.CLOSING)
                 .map(({ reservation, resource }) => ({ reservation, resource }));
@@ -113,7 +111,9 @@ export class TaskManagementService {
      * 관리자용 작업 목록을 조회한다
      */
     async getAdminTaskList(type?: string): Promise<TaskResponseDto[]> {
-        if (type === '차량반납지연') {
+        const results = [];
+
+        if (type === '차량반납지연' || type === '전체') {
             // 1. 기본 지연반납 차량 목록 조회
             const basicDelayedVehicles = await this.reservationContextService.모든_지연반납_차량을_조회한다();
 
@@ -161,59 +161,72 @@ export class TaskManagementService {
                 }),
             );
 
-            return enhancedTasks;
-        } else if (type === '소모품교체') {
-            return this.교체필요한_모든_소모품을_조회한다();
-        } else {
-            return [];
+            results.push(...enhancedTasks);
         }
+
+        if (type === '소모품교체' || type === '전체') {
+            const consumableTasks = await this.교체필요한_모든_소모품을_조회한다();
+            results.push(...consumableTasks);
+        }
+
+        return results;
     }
 
     /**
      * 교체 필요한 모든 소모품을 조회한다 (관리자용)
      */
-    private async 교체필요한_모든_소모품을_조회한다() {
+    private async 교체필요한_모든_소모품을_조회한다(): Promise<TaskResponseDto[]> {
         // 모든 자원의 소모품 상태 조회
         const resources = await this.resourceContextService.소모품정보와_함께_모든자원을_조회한다();
 
         const needReplaceConsumables = [];
 
         for (const resource of resources) {
-            for (const consumable of resource.vehicleInfo?.consumables || []) {
-                console.log(consumable.maintenances);
-                const latestMaintenance = consumable.maintenances.sort((a, b) => a.date - b.date)[0] || null;
-                if (latestMaintenance) {
-                    const maintenanceRequired =
-                        resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
+            // 차량의 모든 소모품에 대해 교체 필요 여부 계산
+            const consumableResults = await this.consumableContextService.차량_소모품들의_교체필요여부를_계산한다(
+                resource.vehicleInfo,
+            );
 
-                    if (maintenanceRequired) {
-                        // 해당 소모품에 대한 알림 조회
-                        const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(
-                            resource.resourceId,
-                            consumable.name,
-                            // latestMaintenance.date,
-                        );
+            for (const { consumable, isReplacementRequired } of consumableResults) {
+                if (isReplacementRequired) {
+                    // 해당 소모품에 대한 알림 조회
+                    const notifications = await this.notificationContextService.소모품교체_알림을_조회한다(
+                        resource.resourceId,
+                        consumable.name,
+                        // latestMaintenance.date,
+                    );
 
-                        needReplaceConsumables.push({
-                            type: '소모품교체',
-                            title: `${consumable.name} 교체 필요`,
-                            reservationId: null,
-                            resourceId: resource.resourceId,
-                            resourceName: resource.name,
-                            consumableId: consumable.consumableId,
-                            consumableName: consumable.name,
-                            startDate: null,
-                            endDate: null,
-                            manager: {
-                                employeeId: resource.resourceManagers[0].employee.employeeId,
-                                name: resource.resourceManagers[0].employee.name,
-                                employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
-                                department: resource.resourceManagers[0].employee.department,
-                                position: resource.resourceManagers[0].employee.position,
-                            },
-                            notifications: notifications,
-                        });
-                    }
+                    needReplaceConsumables.push({
+                        type: '소모품교체',
+                        title: `${consumable.name} 교체 필요`,
+                        reservationId: null,
+                        resourceId: resource.resourceId,
+                        resourceName: resource.name,
+                        consumableId: consumable.consumableId,
+                        consumableName: consumable.name,
+                        startDate: null,
+                        endDate: null,
+                        manager: {
+                            employeeId: resource.resourceManagers[0].employee.employeeId,
+                            name: resource.resourceManagers[0].employee.name,
+                            employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
+                            department: resource.resourceManagers[0].employee.department,
+                            position: resource.resourceManagers[0].employee.position,
+                        },
+                        notifications: notifications,
+                        // 직전 정비시 주행거리
+                        lastMaintenanceMileage:
+                            consumable.maintenances && consumable.maintenances.length > 0
+                                ? consumable.maintenances[0].mileage
+                                : consumable.initMileage,
+                        // 직전 정비 날짜
+                        lastMaintenanceDate:
+                            consumable.maintenances && consumable.maintenances.length > 0
+                                ? consumable.maintenances[0].date
+                                : null,
+                        // 총 주행거리
+                        totalMileage: resource.vehicleInfo.totalMileage,
+                    });
                 }
             }
         }
@@ -224,7 +237,7 @@ export class TaskManagementService {
     /**
      * 교체 필요한 소모품을 조회한다 (사용자별)
      */
-    private async 교체필요한_소모품을_조회한다(user: Employee, isSystemAdmin: boolean) {
+    private async 교체필요한_소모품을_조회한다(user: Employee, isSystemAdmin: boolean): Promise<TaskResponseDto[]> {
         const resources = await this.resourceContextService.관리자별_자원을_소모품정보와_함께_조회한다(
             user.employeeId,
             isSystemAdmin,
@@ -233,26 +246,24 @@ export class TaskManagementService {
         const needReplaceConsumables = [];
 
         for (const resource of resources) {
-            for (const consumable of resource.vehicleInfo?.consumables || []) {
-                const latestMaintenance = consumable.maintenances.sort((a, b) => a.date - b.date)[0] || null;
+            // 차량의 모든 소모품에 대해 교체 필요 여부 계산
+            const consumableResults = await this.consumableContextService.차량_소모품들의_교체필요여부를_계산한다(
+                resource.vehicleInfo,
+            );
 
-                if (latestMaintenance) {
-                    const maintenanceRequired =
-                        resource.vehicleInfo.totalMileage - Number(latestMaintenance.mileage) > consumable.replaceCycle;
-
-                    if (maintenanceRequired) {
-                        needReplaceConsumables.push({
-                            type: '소모품교체',
-                            title: `${consumable.name} 교체 필요`,
-                            reservationId: null,
-                            resourceId: resource.resourceId,
-                            resourceName: resource.name,
-                            consumableId: consumable.consumableId,
-                            consumableName: consumable.name,
-                            startDate: null,
-                            endDate: null,
-                        });
-                    }
+            for (const { consumable, isReplacementRequired } of consumableResults) {
+                if (isReplacementRequired) {
+                    needReplaceConsumables.push({
+                        type: '소모품교체',
+                        title: `${consumable.name} 교체 필요`,
+                        reservationId: null,
+                        resourceId: resource.resourceId,
+                        resourceName: resource.name,
+                        consumableId: consumable.consumableId,
+                        consumableName: consumable.name,
+                        startDate: null,
+                        endDate: null,
+                    });
                 }
             }
         }

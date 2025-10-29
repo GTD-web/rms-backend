@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { NotificationContextService } from '@src/context/notification/services/notification.context.service';
-import { CronNotificationContextService } from '@src/context/notification/services/cron-notification.context.service';
 import { NotificationType } from '@libs/enums/notification-type.enum';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { ScheduleQueryContextService } from '@src/context/schedule/services/schedule-query.context.service';
@@ -28,7 +27,6 @@ import { EmployeeTokensDto } from '@src/domain/employee/dtos/fcm-token-response.
 export class NotificationManagementService {
     constructor(
         private readonly notificationContextService: NotificationContextService,
-        private readonly cronNotificationContextService: CronNotificationContextService,
         private readonly scheduleContextService: ScheduleQueryContextService,
     ) {}
 

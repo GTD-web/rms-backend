@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@resource/app.module';
 import { setupSwagger } from '@libs/swagger/swagger';
 import { ENV } from '@libs/configs/env.config';
-import * as dtos from '@resource/dtos.index';
 import * as businessDtos from './business.dto.index';
 import { JwtAuthGuard } from '@libs/guards/jwt-auth.guard';
 import { Reflector } from '@nestjs/core';
@@ -10,6 +9,7 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { RolesGuard } from '@libs/guards/role.guard';
 import { ValidationPipe } from '@nestjs/common';
+import * as fs from 'fs';
 // RequestInterceptor는 AppModule에서 APP_INTERCEPTOR로 등록됨
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -18,6 +18,7 @@ async function bootstrap() {
         origin: isProduction
             ? function (origin, callback) {
                   const whitelist = [
+                      'https://portal.lumir.space',
                       'https://lsms.lumir.space',
                       'https://lrms.lumir.space',
                       'https://rms-backend-iota.vercel.app',
@@ -40,14 +41,12 @@ async function bootstrap() {
     // 전역 인터셉터는 AppModule에서 APP_INTERCEPTOR로 등록됨
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     // 파일 업로드 설정
-    const uploadPath = join(process.cwd(), 'public');
+    const uploadPath = join(__dirname, '..', 'public');
     app.useStaticAssets(uploadPath, {
-        prefix: '/public',
-        index: false,
-        fallthrough: false,
+        prefix: '/static',
     });
 
-    setupSwagger(app, [...Object.values(dtos), ...Object.values(businessDtos)]);
+    setupSwagger(app, [...Object.values(businessDtos)]);
     await app.listen(ENV.APP_PORT || 3000);
 }
 bootstrap();

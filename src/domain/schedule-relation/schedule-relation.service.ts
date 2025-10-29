@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DomainScheduleRelationRepository } from './schedule-relation.repository';
 import { BaseService } from '@libs/services/base.service';
 import { ScheduleRelation } from '@libs/entities/schedule-relations.entity';
-import { In, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { In, IsNull, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
 
 @Injectable()
 export class DomainScheduleRelationService extends BaseService<ScheduleRelation> {
@@ -50,7 +50,13 @@ export class DomainScheduleRelationService extends BaseService<ScheduleRelation>
 
     async findByReservationIds(reservationIds: string[]): Promise<ScheduleRelation[]> {
         return this.scheduleRelationRepository.findAll({
-            where: { reservationId: In(reservationIds) },
+            where: {
+                reservationId: In(reservationIds),
+                schedule: {
+                    deletedAt: IsNull(),
+                },
+            },
+            withDeleted: true,
         });
     }
 }

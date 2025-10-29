@@ -10,24 +10,20 @@ import { Employee } from '@libs/entities/employee.entity';
 // 기존 DTO들 import
 import { ScheduleCalendarQueryDto } from './dtos/schedule-calendar-query.dto';
 import { ScheduleCalendarResponseDto } from './dtos/schedule-calendar-response.dto';
-import { MyScheduleQueryDto, ScheduleCategoryType } from './dtos/my-schedule-query.dto';
+import { MyScheduleQueryDto } from './dtos/my-schedule-query.dto';
 import { MyScheduleResponseDto } from './dtos/my-schedule-response.dto';
 import { ResourceScheduleQueryDto } from './dtos/resource-schedule-query.dto';
 import { ResourceScheduleResponseDto } from './dtos/resource-schedule-response.dto';
 import { ScheduleDetailQueryDto } from './dtos/schedule-detail-query.dto';
 import { ScheduleDetailResponseDto } from './dtos/schedule-detail-response.dto';
-import { ScheduleCreateRequestDto, ScheduleCreateRequestListDto } from './dtos/schedule-create-request.dto';
+import { ScheduleCreateRequestListDto } from './dtos/schedule-create-request.dto';
 import { ScheduleCreateResponseDto } from './dtos/schedule-create-response.dto';
 
 // 새로운 일정 관리 DTO들 import
 import { ScheduleCancelRequestDto } from './dtos/schedule-cancel-request.dto';
-import { ScheduleCancelResponseDto } from './dtos/schedule-cancel-response.dto';
 import { ScheduleCompleteRequestDto } from './dtos/schedule-complete-request.dto';
-import { ScheduleCompleteResponseDto } from './dtos/schedule-complete-response.dto';
-import { ScheduleExtendRequestDto } from './dtos/schedule-extend-request.dto';
 import { ScheduleExtendResponseDto } from './dtos/schedule-extend-response.dto';
 import { ScheduleUpdateRequestDto } from './dtos/schedule-update-request.dto';
-import { ScheduleUpdateResponseDto } from './dtos/schedule-update-response.dto';
 
 // Context Services
 import { ScheduleQueryContextService } from '../../context/schedule/services/schedule-query.context.service';
@@ -36,19 +32,13 @@ import { ReservationContextService } from '../../context/reservation/services/re
 import { ResourceContextService } from '../../context/resource/services/resource.context.service';
 import { ProjectContextService } from '../../context/project/project.context.service';
 import { VehicleInfoContextService } from '../../context/resource/services/vehicle-info.context.service';
-import { MeetingRoomInfoContextService } from '../../context/resource/services/meeting-room-info.context.service';
-import { AccommodationInfoContextService } from '../../context/resource/services/accommodation-info.context.service';
-import { EquipmentInfoContextService } from '../../context/resource/services/equipment-info.context.service';
+
 import { FileContextService } from '../../context/file/services/file.context.service';
 
 // 새로운 Policy/Authorization Services (컨텍스트로 이동)
 import { ScheduleAuthorizationService } from '../../context/schedule/services/schedule-authorization.service';
-import { SchedulePolicyService, UpdateScenarios } from '../../context/schedule/services/schedule-policy.service';
-import {
-    ScheduleStateTransitionService,
-    ScheduleUpdateChanges,
-    ScheduleUpdateResult,
-} from '../../context/schedule/services/schedule-state-transition.service';
+import { SchedulePolicyService } from '../../context/schedule/services/schedule-policy.service';
+import { ScheduleStateTransitionService } from '../../context/schedule/services/schedule-state-transition.service';
 import { ScheduleMutationContextService } from '../../context/schedule/services/schedule-mutation.context.service';
 import { SchedulePostProcessingService } from '../../context/schedule/services/schedule-post-processing.service';
 import { ScheduleAction } from '../../context/schedule/services/schedule-authorization.service';
@@ -62,7 +52,6 @@ import {
 import { ResourceGroupDto } from './dtos/resource-schedule-response.dto';
 import { ResourceType } from '@libs/enums/resource-type.enum';
 import { DataSource } from 'typeorm';
-import { Reservation, Schedule } from '@libs/entities';
 import { ScheduleType } from '@libs/enums/schedule-type.enum';
 import { EmployeeContextService } from '@src/context/employee/employee.context.service';
 import { ScheduleNotificationContextService } from '@src/context/notification/services/schedule-notification.context.service';
@@ -82,7 +71,6 @@ export class ScheduleManagementService {
         private readonly fileContextService: FileContextService,
         private readonly employeeContextService: EmployeeContextService,
         private readonly scheduleNotificationContextService: ScheduleNotificationContextService,
-
         private readonly scheduleAuthorizationService: ScheduleAuthorizationService,
         private readonly schedulePolicyService: SchedulePolicyService,
         private readonly scheduleQueryContextService: ScheduleQueryContextService,
@@ -90,6 +78,23 @@ export class ScheduleManagementService {
         private readonly scheduleStateTransitionService: ScheduleStateTransitionService,
         private readonly schedulePostProcessingService: SchedulePostProcessingService,
     ) {}
+
+    /** 승훈프로님 구현용 프로젝트 테스트 데이터 - 2025-09-24 생성함
+    async onModuleInit(): Promise<void> {
+        const reserverEmployee = { employeeId: '5c3dc7a9-19b3-4efa-8902-df256358edda' } as Employee;
+        const participantEmployeeIds = ['5c3dc7a9-19b3-4efa-8902-df256358edda', 'bbdceadf-c782-4cf2-8852-6c812afef9a3'];
+        const meetingRoomResourceId = 'f2d08c06-c793-435f-8603-f203025f921a';
+        const projectIds = await this.projectContextService.프로젝트들을_조회한다();
+        console.log(projectIds);
+        const scheduleTestData = createSimpleScheduleTestData(
+            projectIds,
+            reserverEmployee.employeeId,
+            participantEmployeeIds,
+            meetingRoomResourceId,
+        );
+        this.createSchedule(reserverEmployee, scheduleTestData);
+    }
+    */
 
     async postProcessingSchedules(): Promise<void> {
         return this.schedulePostProcessingService.일정관련_배치_작업을_처리한다();
@@ -197,6 +202,14 @@ export class ScheduleManagementService {
                             : null,
                     hasUnreadNotification: notificationInfo.hasUnreadNotification,
                     notificationId: notificationInfo.notificationId,
+                    participants:
+                        participants?.map((participant) => ({
+                            participantId: participant.participantId,
+                            type: participant.type,
+                            employeeId: participant.employee?.employeeId,
+                            employeeName: participant.employee?.name,
+                            department: participant.employee?.department,
+                        })) || [],
                 };
             },
         );

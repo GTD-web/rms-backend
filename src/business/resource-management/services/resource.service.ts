@@ -5,12 +5,14 @@ import { Employee } from '@libs/entities';
 // Context Services
 import { ResourceContextService } from '@src/context/resource/services/resource.context.service';
 import { ReservationContextService } from '@src/context/reservation/services/reservation.context.service';
+import { ConsumableContextService } from '@src/context/resource/services/consumable.context.service';
 
 // DTOs
 import {
     ResourceResponseDto,
     ResourceGroupWithResourcesAndReservationsResponseDto,
     CreateResourceResponseDto,
+    MyManagementResourcesResponseDto,
 } from '../dtos/resource/resource-response.dto';
 import { ResourceAvailabilityDto, TimeSlotDto } from '../dtos/resource/available-time-response.dto';
 import { ResourceQueryDto } from '../dtos/resource/resource-query.dto';
@@ -27,6 +29,7 @@ export class ResourceService {
     constructor(
         private readonly resourceContextService: ResourceContextService,
         private readonly reservationContextService: ReservationContextService,
+        private readonly consumableContextService: ConsumableContextService,
     ) {}
     // Admin Resource Controller
     async createResourceWithInfos(createResourceInfo: CreateResourceInfoDto): Promise<CreateResourceResponseDto> {
@@ -39,6 +42,21 @@ export class ResourceService {
 
     async findResourcesByResourceGroupId(resourceGroupId: string): Promise<ResourceResponseDto[]> {
         return this.resourceContextService.그룹별_자원_목록을_조회한다(resourceGroupId);
+    }
+
+    // 내가 자원관리자인 자원들의 목록을 그룹별로 조회
+    async findMyManagementResources(employeeId: string): Promise<MyManagementResourcesResponseDto> {
+        // 내가 관리하는 자원목록을 조회한다.
+        const myResources = await this.resourceContextService.내가_관리하는_자원목록을_조회한다(employeeId);
+
+        // 자원들의 그룹별로 자원을 분류한다.
+        const groupedResources = await this.resourceContextService.자원들을_그룹별로_분류한다(myResources);
+
+        // 자원들의 그룹타입별로 그룹을 분류한다.
+        const typeGroupedResources = await this.resourceContextService.그룹들을_그룹타입별로_분류한다(groupedResources);
+
+        // 계층 구조로 변환하여 반환
+        return this.resourceContextService.타입그룹_계층구조로_변환한다(typeGroupedResources);
     }
 
     async findResourceDetailForAdmin(resourceId: string): Promise<ResourceResponseDto> {
