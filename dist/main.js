@@ -19082,7 +19082,10 @@ let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAda
         this.httpService = httpService;
         this.configService = configService;
         this.logger = new common_1.Logger(FCMMicroserviceAdapter_1.name);
-        this.fcmServiceUrl = this.configService.get('FCM_API_URL') || 'https://lumir-erp.vercel.app';
+        this.fcmServiceUrl =
+            this.configService.get('FCM_API_URL') ||
+                'https://lumir-notification-server-git-fcm-lumir-tech7s-projects.vercel.app';
+        console.log(this.fcmServiceUrl);
     }
     getHeaders(authorization) {
         const headers = {
@@ -19093,54 +19096,78 @@ let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAda
         }
         return headers;
     }
-    async sendNotification(token, payload, authorization) {
+    async sendNotification(employeeTokens, payload, sender, authorization) {
         try {
-            if (!token) {
-                throw new common_1.BadRequestException('FCM token is missing');
+            if (!employeeTokens || employeeTokens.length === 0) {
+                this.logger.warn('포털 알림 전송: 직원 토큰 목록이 없습니다.');
+                return {
+                    success: false,
+                    message: '포털 알림 전송 실패',
+                    error: '직원 토큰 목록이 없습니다.',
+                };
             }
-            this.logger.log(`FCM 단일 알림 전송 요청: token=${token.substring(0, 20)}...`);
+            const recipients = employeeTokens
+                .filter((emp) => emp.tokens && emp.tokens.length > 0)
+                .map((emp) => ({
+                employeeNumber: emp.employeeNumber,
+                tokens: emp.tokens.map((token) => token.fcmToken),
+            }));
+            if (recipients.length === 0) {
+                this.logger.warn('포털 알림 전송: 전송할 FCM 토큰이 없습니다.');
+                return {
+                    success: false,
+                    message: '포털 알림 전송 실패',
+                    error: '전송할 FCM 토큰이 없습니다.',
+                };
+            }
+            const totalTokens = recipients.reduce((sum, recipient) => sum + recipient.tokens.length, 0);
+            this.logger.log(`포털 알림 전송 요청: 수신자 ${recipients.length}명, 총 ${totalTokens}개 토큰`);
             const requestDto = {
-                token,
                 title: payload.title,
-                body: payload.body,
-                link: payload.link,
-                icon: payload.icon,
+                content: payload.body,
+                recipients,
+                sourceSystem: 'portal',
+                linkUrl: payload.linkUrl,
+                metadata: {
+                    icon: payload.icon || 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+                    notificationType: payload.notificationType,
+                    notificationData: payload.notificationData,
+                },
             };
-            const url = `${this.fcmServiceUrl}/api/fcm/test-send`;
+            const url = `${this.fcmServiceUrl}/api/portal/notifications/send`;
+            console.log(url);
             const response = await (0, rxjs_1.firstValueFrom)(this.httpService
-                .post(url, requestDto, {})
+                .post(url, requestDto, {
+                headers: this.getHeaders(authorization),
+            })
                 .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
-                this.logger.error(`FCM 단일 알림 전송 실패: ${error.message}`, error.stack);
-                let errorMessage = 'FCM 알림 전송 중 오류가 발생했습니다.';
-                let errorCode = 'UNKNOWN_ERROR';
+                this.logger.error(`포털 알림 전송 실패: ${error.message}`, error.stack);
+                let errorMessage = '포털 알림 전송 중 오류가 발생했습니다.';
                 if (error.response?.status === 400) {
-                    errorMessage = 'FCM 토큰 형식이 올바르지 않습니다.';
-                    errorCode = 'INVALID_TOKEN';
+                    errorMessage = '요청 데이터 형식이 올바르지 않습니다.';
                 }
                 else if (error.response?.status === 404) {
-                    errorMessage = 'FCM 서비스를 찾을 수 없습니다.';
-                    errorCode = 'SERVICE_NOT_FOUND';
+                    errorMessage = '알림 서비스를 찾을 수 없습니다.';
+                }
+                else if (error.response?.status === 500) {
+                    errorMessage = '알림 서버 내부 오류가 발생했습니다.';
                 }
                 return (0, rxjs_1.of)({
                     success: false,
-                    message: 'failed',
-                    errorMessage,
-                    errorCode,
-                    messageId: null,
+                    message: '포털 알림 전송 실패',
+                    error: errorMessage,
                 });
             })));
-            console.log(response);
-            this.logger.log(`FCM 단일 알림 전송 성공`);
+            this.logger.log(`포털 알림 전송 완료: ${response.success ? '성공' : '실패'} - ${response.message}`);
             return response;
         }
         catch (error) {
-            this.logger.error(`FCM 단일 알림 전송 중 예외 발생: ${error.message}`, error.stack);
+            const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+            this.logger.error(`포털 알림 전송 중 예외 발생: ${errorMessage}`, error instanceof Error ? error.stack : undefined);
             return {
                 success: false,
-                message: 'failed',
-                errorMessage: error.message,
-                errorCode: error.code,
-                messageId: error.messageId,
+                message: '포털 알림 전송 실패',
+                error: errorMessage,
             };
         }
     }
@@ -20231,19 +20258,6 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
     async 알림을_전송한다(tokens, payload) {
         return await this.fcmAdapter.sendBulkNotification(tokens, payload);
     }
-    async 알림을_전송한다_new(tokens, payload) {
-        const notificationPayload = {
-            title: payload.title,
-            body: payload.body,
-            link: '/plan/user/schedule-add',
-            icon: 'https://lsms.lumir.space/logo_192.png',
-        };
-        const responses = [];
-        for (const token of tokens) {
-            responses.push(await this.fcmMicroserviceAdapter.sendNotification(token, notificationPayload));
-        }
-        return responses;
-    }
     async 알림_전송_프로세스를_진행한다(notificationType, notificationData, targetEmployeeIds) {
         const notificationContent = await this.알림_내용을_생성한다(notificationType, notificationData);
         const notification = await this.알림을_저장한다(notificationContent, targetEmployeeIds);
@@ -20258,6 +20272,23 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             notificationType: notification.notificationType,
             notificationData: notification.notificationData,
         });
+        const prodEmployeeTokens = employeeTokens
+            .map((emp) => ({
+            ...emp,
+            tokens: emp.tokens.filter((token) => token.deviceType === 'prod'),
+        }))
+            .filter((emp) => emp.tokens.length > 0);
+        if (prodEmployeeTokens.length > 0) {
+            const notificationPayload = {
+                title: notification.title,
+                body: notification.body,
+                linkUrl: '/plan/user/schedule-add',
+                icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+                notificationType: notification.notificationType,
+                notificationData: notification.notificationData,
+            };
+            this.fcmMicroserviceAdapter.sendNotification(prodEmployeeTokens, notificationPayload);
+        }
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }
     _토큰을_디바이스_타입별로_분류한다(employeeTokens) {

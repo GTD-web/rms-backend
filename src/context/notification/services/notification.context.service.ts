@@ -342,20 +342,6 @@ export class NotificationContextService {
         return await this.fcmAdapter.sendBulkNotification(tokens, payload);
     }
 
-    async 알림을_전송한다_new(tokens: string[], payload: PushNotificationPayload): Promise<any> {
-        const notificationPayload = {
-            title: payload.title,
-            body: payload.body,
-            link: '/plan/user/schedule-add', // payload.link,
-            icon: 'https://lsms.lumir.space/logo_192.png', // payload.icon,
-        };
-        const responses = [];
-        for (const token of tokens) {
-            responses.push(await this.fcmMicroserviceAdapter.sendNotification(token, notificationPayload));
-        }
-        return responses;
-    }
-
     async 알림_전송_프로세스를_진행한다(
         notificationType: NotificationType,
         notificationData: CreateNotificationDataDto,
@@ -380,12 +366,26 @@ export class NotificationContextService {
             notificationData: notification.notificationData,
         });
 
-        // await this.알림을_전송한다_new(newTokens, {
-        //     title: notification.title,
-        //     body: notification.body,
-        //     notificationType: notification.notificationType,
-        //     notificationData: notification.notificationData,
-        // });
+        // 포털 알림 전송 (FCM) - deviceType이 'prod'인 토큰만 필터링
+        const prodEmployeeTokens = employeeTokens
+            .map((emp) => ({
+                ...emp,
+                tokens: emp.tokens.filter((token) => token.deviceType === 'prod'),
+            }))
+            .filter((emp) => emp.tokens.length > 0); // 토큰이 있는 직원만 남김
+
+        if (prodEmployeeTokens.length > 0) {
+            const notificationPayload = {
+                title: notification.title,
+                body: notification.body,
+                linkUrl: '/plan/user/schedule-add', // TODO: 알림 타입별로 적절한 링크 설정
+                icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+                notificationType: notification.notificationType,
+                notificationData: notification.notificationData,
+            };
+            this.fcmMicroserviceAdapter.sendNotification(prodEmployeeTokens, notificationPayload);
+        }
+
         // 알림 전송 후 전송상태 업데이트
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }
