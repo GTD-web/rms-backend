@@ -9,6 +9,8 @@ import {
     EmployeesResponseDto,
     FcmSubscribeRequestDto,
     FcmSubscribeResponseDto,
+    DeleteFcmTokensRequestDto,
+    DeleteFcmTokensResponseDto,
 } from '../dtos';
 import { EmployeeTokensDto, FcmTokenResponseDto } from '../dtos/fcm-token-response.dto';
 
@@ -467,6 +469,54 @@ export class EmployeeMicroserviceAdapter {
             return response;
         } catch (error) {
             this.logger.error(`FCM 토큰 일괄 조회 중 예외 발생: ${error.message}`, error.stack);
+            throw error;
+        }
+    }
+
+    /**
+     * 여러 직원의 여러 FCM 토큰 일괄 제거
+     * @param authorization 요청에서 전달받은 Authorization 헤더
+     * @param requestDto 직원별 토큰 정보 배열
+     * @returns 삭제 결과
+     */
+    async deleteFcmTokens(
+        authorization: string,
+        requestDto: DeleteFcmTokensRequestDto,
+    ): Promise<DeleteFcmTokensResponseDto> {
+        console.log('deleteFcmTokens', requestDto);
+        try {
+            const totalTokens = requestDto.employees.reduce((sum, emp) => sum + emp.fcmTokens.length, 0);
+            this.logger.log(`FCM 토큰 일괄 제거 요청: ${requestDto.employees.length}명, 총 ${totalTokens}개 토큰`);
+
+            const url = `${this.employeeServiceUrl}/api/fcm/tokens`;
+
+            const response = await firstValueFrom(
+                this.httpService
+                    .delete<DeleteFcmTokensResponseDto>(url, {
+                        headers: this.getHeaders(authorization),
+                        data: {
+                            employees: requestDto.employees,
+                        },
+                    })
+                    .pipe(
+                        map((res) => res.data),
+                        catchError((error: AxiosError) => {
+                            this.logger.error(`FCM 토큰 일괄 제거 실패: ${error.message}`, error.stack);
+
+                            if (error.response?.status === 400) {
+                                const errorData = error.response.data as any;
+                                throw new BadRequestException(errorData?.message || '잘못된 요청 형식입니다.');
+                            }
+
+                            throw new BadRequestException('FCM 토큰 일괄 제거 중 오류가 발생했습니다.');
+                        }),
+                    ),
+            );
+
+            this.logger.log(`FCM 토큰 일괄 제거 완료: 성공 ${response.successCount}개, 실패 ${response.failCount}개`);
+            return response;
+        } catch (error) {
+            this.logger.error(`FCM 토큰 일괄 제거 중 예외 발생: ${error.message}`, error.stack);
             throw error;
         }
     }

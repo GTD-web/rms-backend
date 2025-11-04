@@ -19028,7 +19028,6 @@ let FCMAdapter = class FCMAdapter {
                 },
             })
                 .then((response) => {
-                console.log('FCM send successful.', response);
                 return response;
             });
             return response;
@@ -19135,7 +19134,6 @@ let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAda
                 },
             };
             const url = `${this.fcmServiceUrl}/api/portal/notifications/send`;
-            console.log(url);
             const response = await (0, rxjs_1.firstValueFrom)(this.httpService
                 .post(url, requestDto, {
                 headers: this.getHeaders(authorization),
@@ -20256,7 +20254,20 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         return notification;
     }
     async 알림을_전송한다(tokens, payload) {
-        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
+        const response = await this.fcmAdapter.sendBulkNotification(tokens, payload);
+        console.log('FCM send successful.', response.responses.length);
+        console.log('알림 전송 - tokens length', tokens.length);
+        response.responses.forEach((r, index) => {
+            if (!r.success) {
+                console.log('token: ' + tokens[index]);
+                console.log('error: ' + r.error);
+            }
+            else {
+                console.log('token: ' + tokens[index]);
+                console.log('success');
+            }
+        });
+        return response;
     }
     async 알림_전송_프로세스를_진행한다(notificationType, notificationData, targetEmployeeIds) {
         const notificationContent = await this.알림_내용을_생성한다(notificationType, notificationData);
@@ -20266,12 +20277,35 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             return;
         }
         const { oldTokens, newTokens } = this._토큰을_디바이스_타입별로_분류한다(employeeTokens);
-        await this.알림을_전송한다(oldTokens, {
+        const oldTokenStrings = oldTokens.map((t) => t.token);
+        const oldTokensResponse = await this.알림을_전송한다(oldTokenStrings, {
             title: notification.title,
             body: notification.body,
             notificationType: notification.notificationType,
             notificationData: notification.notificationData,
         });
+        const failedTokens = {};
+        oldTokensResponse.responses.forEach((r, index) => {
+            const tokenInfo = oldTokens[index];
+            if (!r.success) {
+                console.log('token: ' + tokenInfo.token);
+                console.log('employeeId: ' + tokenInfo.employeeId);
+                console.log('employeeNumber: ' + tokenInfo.employeeNumber);
+                console.log('error: ' + r.error);
+                if (!failedTokens[tokenInfo.employeeNumber]) {
+                    failedTokens[tokenInfo.employeeNumber] = [];
+                }
+                failedTokens[tokenInfo.employeeNumber].push(tokenInfo.token);
+            }
+        });
+        if (Object.keys(failedTokens).length > 0) {
+            this.employeeMicroserviceAdapter.deleteFcmTokens('', {
+                employees: Object.entries(failedTokens).map(([employeeNumber, tokens]) => ({
+                    employeeNumber,
+                    fcmTokens: tokens,
+                })),
+            });
+        }
         const prodEmployeeTokens = employeeTokens
             .map((emp) => ({
             ...emp,
@@ -20296,11 +20330,16 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         const newTokens = [];
         for (const employeeToken of employeeTokens) {
             for (const token of employeeToken.tokens) {
+                const tokenWithEmployee = {
+                    token: token.fcmToken,
+                    employeeId: employeeToken.employeeId,
+                    employeeNumber: employeeToken.employeeNumber,
+                };
                 if (token.deviceType === 'prod-old') {
-                    oldTokens.push(token.fcmToken);
+                    oldTokens.push(tokenWithEmployee);
                 }
                 else if (token.deviceType === 'prod') {
-                    newTokens.push(token.fcmToken);
+                    newTokens.push(tokenWithEmployee);
                 }
             }
             console.log('employee', employeeToken.employeeNumber);
@@ -26378,6 +26417,35 @@ let EmployeeMicroserviceAdapter = EmployeeMicroserviceAdapter_1 = class Employee
         }
         catch (error) {
             this.logger.error(`FCM 토큰 일괄 조회 중 예외 발생: ${error.message}`, error.stack);
+            throw error;
+        }
+    }
+    async deleteFcmTokens(authorization, requestDto) {
+        console.log('deleteFcmTokens', requestDto);
+        try {
+            const totalTokens = requestDto.employees.reduce((sum, emp) => sum + emp.fcmTokens.length, 0);
+            this.logger.log(`FCM 토큰 일괄 제거 요청: ${requestDto.employees.length}명, 총 ${totalTokens}개 토큰`);
+            const url = `${this.employeeServiceUrl}/api/fcm/tokens`;
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService
+                .delete(url, {
+                headers: this.getHeaders(authorization),
+                data: {
+                    employees: requestDto.employees,
+                },
+            })
+                .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
+                this.logger.error(`FCM 토큰 일괄 제거 실패: ${error.message}`, error.stack);
+                if (error.response?.status === 400) {
+                    const errorData = error.response.data;
+                    throw new common_1.BadRequestException(errorData?.message || '잘못된 요청 형식입니다.');
+                }
+                throw new common_1.BadRequestException('FCM 토큰 일괄 제거 중 오류가 발생했습니다.');
+            })));
+            this.logger.log(`FCM 토큰 일괄 제거 완료: 성공 ${response.successCount}개, 실패 ${response.failCount}개`);
+            return response;
+        }
+        catch (error) {
+            this.logger.error(`FCM 토큰 일괄 제거 중 예외 발생: ${error.message}`, error.stack);
             throw error;
         }
     }

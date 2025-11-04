@@ -117,7 +117,7 @@ export class FCMMicroserviceAdapter {
 
             // 알림 서버에 한번만 요청 전송
             const url = `${this.fcmServiceUrl}/api/portal/notifications/send`;
-            console.log(url);
+
             const response = await firstValueFrom(
                 this.httpService
                     .post<PortalNotificationResponseDto>(url, requestDto, {
