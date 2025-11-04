@@ -106,7 +106,7 @@ export class FCMMicroserviceAdapter {
                 title: payload.title,
                 content: payload.body,
                 recipients,
-                sourceSystem: 'portal',
+                sourceSystem: 'SMS',
                 linkUrl: payload.linkUrl,
                 metadata: {
                     icon: payload.icon || 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
