@@ -21,6 +21,8 @@ import { CreateNotificationDataDto, CreateNotificationDto } from '../dtos/create
 import { DateUtil } from '@libs/utils/date.util';
 import { FCMMicroserviceAdapter } from '../adapter/fcm.adapter';
 import { EmployeeTokensDto } from '@src/domain/employee/dtos/fcm-token-response.dto';
+import { BatchResponse } from 'firebase-admin/lib/messaging';
+import { DeleteFcmTokenItemDto } from '@src/domain/employee/dtos/fcm-delete-tokens-request.dto';
 
 export interface NotificationData {
     schedule: {
@@ -338,22 +340,21 @@ export class NotificationContextService {
         return notification;
     }
 
-    async 알림을_전송한다(tokens: string[], payload: PushNotificationPayload): Promise<any> {
-        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
-    }
+    async 알림을_전송한다(tokens: string[], payload: PushNotificationPayload): Promise<BatchResponse> {
+        const response = await this.fcmAdapter.sendBulkNotification(tokens, payload);
+        console.log('FCM send successful.', response.responses.length);
+        console.log('알림 전송 - tokens length', tokens.length);
 
-    async 알림을_전송한다_new(tokens: string[], payload: PushNotificationPayload): Promise<any> {
-        const notificationPayload = {
-            title: payload.title,
-            body: payload.body,
-            link: '/plan/user/schedule-add', // payload.link,
-            icon: 'https://lsms.lumir.space/logo_192.png', // payload.icon,
-        };
-        const responses = [];
-        for (const token of tokens) {
-            responses.push(await this.fcmMicroserviceAdapter.sendNotification(token, notificationPayload));
-        }
-        return responses;
+        response.responses.forEach((r, index) => {
+            if (!r.success) {
+                console.log('token: ' + tokens[index]);
+                console.log('error: ' + r.error);
+            } else {
+                console.log('token: ' + tokens[index]);
+                console.log('success');
+            }
+        });
+        return response;
     }
 
     async 알림_전송_프로세스를_진행한다(
@@ -370,22 +371,63 @@ export class NotificationContextService {
         if (employeeTokens.length === 0) {
             return;
         }
+
+        // 직원정보와 맵핑을 변수에 저장한채로 알림전송 후 나오는 응답을 기반으로 오류가난 토큰의경우 해당 직원정보와 지우려는 토큰을 전달하여 삭제처리
         const { oldTokens, newTokens } = this._토큰을_디바이스_타입별로_분류한다(employeeTokens);
 
-        // 실제 알림 전송
-        await this.알림을_전송한다(oldTokens, {
+        // 실제 알림 전송 (토큰 배열만 추출하여 전송)
+        const oldTokenStrings = oldTokens.map((t) => t.token);
+        const oldTokensResponse = await this.알림을_전송한다(oldTokenStrings, {
             title: notification.title,
             body: notification.body,
             notificationType: notification.notificationType,
             notificationData: notification.notificationData,
         });
 
-        // await this.알림을_전송한다_new(newTokens, {
-        //     title: notification.title,
-        //     body: notification.body,
-        //     notificationType: notification.notificationType,
-        //     notificationData: notification.notificationData,
-        // });
+        const failedTokens: Record<string, string[]> = {};
+        // 응답 처리: 실패한 토큰의 경우 직원 정보와 함께 확인 가능
+        oldTokensResponse.responses.forEach((r, index) => {
+            const tokenInfo = oldTokens[index];
+            if (!r.success) {
+                console.log('token: ' + tokenInfo.token);
+                console.log('employeeId: ' + tokenInfo.employeeId);
+                console.log('employeeNumber: ' + tokenInfo.employeeNumber);
+                console.log('error: ' + r.error);
+                if (!failedTokens[tokenInfo.employeeNumber]) {
+                    failedTokens[tokenInfo.employeeNumber] = [];
+                }
+                failedTokens[tokenInfo.employeeNumber].push(tokenInfo.token);
+                // 실패한 토큰 삭제 처리 - tokenInfo.employeeNumber와 tokenInfo.token을 사용하여 삭제
+            }
+        });
+        if (Object.keys(failedTokens).length > 0) {
+            this.employeeMicroserviceAdapter.deleteFcmTokens('', {
+                employees: Object.entries(failedTokens).map(([employeeNumber, tokens]) => ({
+                    employeeNumber,
+                    fcmTokens: tokens,
+                })),
+            });
+        }
+        // 포털 알림 전송 (FCM) - deviceType이 'prod'인 토큰만 필터링
+        const prodEmployeeTokens = employeeTokens
+            .map((emp) => ({
+                ...emp,
+                tokens: emp.tokens.filter((token) => token.deviceType === 'prod'),
+            }))
+            .filter((emp) => emp.tokens.length > 0); // 토큰이 있는 직원만 남김
+
+        if (prodEmployeeTokens.length > 0) {
+            const notificationPayload = {
+                title: notification.title,
+                body: notification.body,
+                linkUrl: '/plan/user/schedule-add', // TODO: 알림 타입별로 적절한 링크 설정
+                icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+                notificationType: notification.notificationType,
+                notificationData: notification.notificationData,
+            };
+            this.fcmMicroserviceAdapter.sendNotification(prodEmployeeTokens, notificationPayload);
+        }
+
         // 알림 전송 후 전송상태 업데이트
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }
@@ -394,21 +436,28 @@ export class NotificationContextService {
 
     /**
      * 직원 토큰 배열에서 디바이스 타입별로 FCM 토큰을 분류한다
+     * 토큰과 직원 정보를 함께 저장하여 알림 전송 후 실패한 토큰을 직원별로 구분할 수 있도록 함
      */
     private _토큰을_디바이스_타입별로_분류한다(employeeTokens: EmployeeTokensDto[]): {
-        oldTokens: string[];
-        newTokens: string[];
+        oldTokens: Array<{ token: string; employeeId: string; employeeNumber: string }>;
+        newTokens: Array<{ token: string; employeeId: string; employeeNumber: string }>;
     } {
-        const oldTokens = [];
-        const newTokens = [];
+        const oldTokens: Array<{ token: string; employeeId: string; employeeNumber: string }> = [];
+        const newTokens: Array<{ token: string; employeeId: string; employeeNumber: string }> = [];
 
         for (const employeeToken of employeeTokens) {
             // 단일 루프로 최적화: tokens 배열을 한 번만 순회
             for (const token of employeeToken.tokens) {
+                const tokenWithEmployee = {
+                    token: token.fcmToken,
+                    employeeId: employeeToken.employeeId,
+                    employeeNumber: employeeToken.employeeNumber,
+                };
+
                 if (token.deviceType === 'prod-old') {
-                    oldTokens.push(token.fcmToken);
+                    oldTokens.push(tokenWithEmployee);
                 } else if (token.deviceType === 'prod') {
-                    newTokens.push(token.fcmToken);
+                    newTokens.push(tokenWithEmployee);
                 }
             }
             console.log('employee', employeeToken.employeeNumber);

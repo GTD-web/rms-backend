@@ -28,16 +28,36 @@ import { LoginResponse, SSOClient } from '@lumir-company/sso-sdk';
 export class AuthManagementService {
     private readonly logger = new Logger(AuthManagementService.name);
     private readonly ssoClient: SSOClient;
+    private initializationPromise: Promise<void> | null = null;
 
     constructor(private readonly employeeService: DomainEmployeeService) {
-        const ssoClient = new SSOClient({
+        this.ssoClient = new SSOClient({
             clientId: process.env.SSO_CLIENT_ID,
             clientSecret: process.env.SSO_CLIENT_SECRET,
             baseUrl: process.env.SSO_API_URL,
         });
+    }
 
-        this.ssoClient = ssoClient;
-        this.ssoClient.initialize();
+    /**
+     * SSO 클라이언트 초기화 (Lazy initialization)
+     * Promise를 캐싱하여 여러 요청이 동시에 들어와도 한 번만 초기화
+     */
+    private async ensureInitialized(): Promise<void> {
+        if (!this.initializationPromise) {
+            this.initializationPromise = (async () => {
+                try {
+                    this.logger.log('SSO 클라이언트 초기화 시작');
+                    await this.ssoClient.initialize();
+                    this.logger.log('SSO 클라이언트 초기화 완료');
+                } catch (error) {
+                    this.logger.error('SSO 클라이언트 초기화 실패', error);
+                    // 실패 시 Promise를 null로 리셋하여 재시도 가능하도록
+                    this.initializationPromise = null;
+                    throw error;
+                }
+            })();
+        }
+        return this.initializationPromise;
     }
 
     /**
@@ -46,6 +66,8 @@ export class AuthManagementService {
      * @returns 로그인 결과 (토큰 및 사용자 정보)
      */
     async login(loginDto: LoginDto): Promise<LoginResponseDto> {
+        await this.ensureInitialized();
+
         console.log('SSO 시스템 이름', this.ssoClient.getSystemName());
         this.logger.log(`로그인 시도: ${loginDto.email}`);
 

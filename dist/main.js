@@ -4737,15 +4737,32 @@ let AuthManagementService = AuthManagementService_1 = class AuthManagementServic
     constructor(employeeService) {
         this.employeeService = employeeService;
         this.logger = new common_1.Logger(AuthManagementService_1.name);
-        const ssoClient = new sso_sdk_1.SSOClient({
+        this.initializationPromise = null;
+        this.ssoClient = new sso_sdk_1.SSOClient({
             clientId: process.env.SSO_CLIENT_ID,
             clientSecret: process.env.SSO_CLIENT_SECRET,
             baseUrl: process.env.SSO_API_URL,
         });
-        this.ssoClient = ssoClient;
-        this.ssoClient.initialize();
+    }
+    async ensureInitialized() {
+        if (!this.initializationPromise) {
+            this.initializationPromise = (async () => {
+                try {
+                    this.logger.log('SSO 클라이언트 초기화 시작');
+                    await this.ssoClient.initialize();
+                    this.logger.log('SSO 클라이언트 초기화 완료');
+                }
+                catch (error) {
+                    this.logger.error('SSO 클라이언트 초기화 실패', error);
+                    this.initializationPromise = null;
+                    throw error;
+                }
+            })();
+        }
+        return this.initializationPromise;
     }
     async login(loginDto) {
+        await this.ensureInitialized();
         console.log('SSO 시스템 이름', this.ssoClient.getSystemName());
         this.logger.log(`로그인 시도: ${loginDto.email}`);
         try {
@@ -19028,7 +19045,6 @@ let FCMAdapter = class FCMAdapter {
                 },
             })
                 .then((response) => {
-                console.log('FCM send successful.', response);
                 return response;
             });
             return response;
@@ -19082,7 +19098,10 @@ let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAda
         this.httpService = httpService;
         this.configService = configService;
         this.logger = new common_1.Logger(FCMMicroserviceAdapter_1.name);
-        this.fcmServiceUrl = this.configService.get('FCM_API_URL') || 'https://lumir-erp.vercel.app';
+        this.fcmServiceUrl =
+            this.configService.get('FCM_API_URL') ||
+                'https://lumir-notification-server-git-fcm-lumir-tech7s-projects.vercel.app';
+        console.log(this.fcmServiceUrl);
     }
     getHeaders(authorization) {
         const headers = {
@@ -19093,54 +19112,77 @@ let FCMMicroserviceAdapter = FCMMicroserviceAdapter_1 = class FCMMicroserviceAda
         }
         return headers;
     }
-    async sendNotification(token, payload, authorization) {
+    async sendNotification(employeeTokens, payload, sender, authorization) {
         try {
-            if (!token) {
-                throw new common_1.BadRequestException('FCM token is missing');
+            if (!employeeTokens || employeeTokens.length === 0) {
+                this.logger.warn('포털 알림 전송: 직원 토큰 목록이 없습니다.');
+                return {
+                    success: false,
+                    message: '포털 알림 전송 실패',
+                    error: '직원 토큰 목록이 없습니다.',
+                };
             }
-            this.logger.log(`FCM 단일 알림 전송 요청: token=${token.substring(0, 20)}...`);
+            const recipients = employeeTokens
+                .filter((emp) => emp.tokens && emp.tokens.length > 0)
+                .map((emp) => ({
+                employeeNumber: emp.employeeNumber,
+                tokens: emp.tokens.map((token) => token.fcmToken),
+            }));
+            if (recipients.length === 0) {
+                this.logger.warn('포털 알림 전송: 전송할 FCM 토큰이 없습니다.');
+                return {
+                    success: false,
+                    message: '포털 알림 전송 실패',
+                    error: '전송할 FCM 토큰이 없습니다.',
+                };
+            }
+            const totalTokens = recipients.reduce((sum, recipient) => sum + recipient.tokens.length, 0);
+            this.logger.log(`포털 알림 전송 요청: 수신자 ${recipients.length}명, 총 ${totalTokens}개 토큰`);
             const requestDto = {
-                token,
                 title: payload.title,
-                body: payload.body,
-                link: payload.link,
-                icon: payload.icon,
+                content: payload.body,
+                recipients,
+                sourceSystem: 'SMS',
+                linkUrl: payload.linkUrl,
+                metadata: {
+                    icon: payload.icon || 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+                    notificationType: payload.notificationType,
+                    notificationData: payload.notificationData,
+                },
             };
-            const url = `${this.fcmServiceUrl}/api/fcm/test-send`;
+            const url = `${this.fcmServiceUrl}/api/portal/notifications/send`;
             const response = await (0, rxjs_1.firstValueFrom)(this.httpService
-                .post(url, requestDto, {})
+                .post(url, requestDto, {
+                headers: this.getHeaders(authorization),
+            })
                 .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
-                this.logger.error(`FCM 단일 알림 전송 실패: ${error.message}`, error.stack);
-                let errorMessage = 'FCM 알림 전송 중 오류가 발생했습니다.';
-                let errorCode = 'UNKNOWN_ERROR';
+                this.logger.error(`포털 알림 전송 실패: ${error.message}`, error.stack);
+                let errorMessage = '포털 알림 전송 중 오류가 발생했습니다.';
                 if (error.response?.status === 400) {
-                    errorMessage = 'FCM 토큰 형식이 올바르지 않습니다.';
-                    errorCode = 'INVALID_TOKEN';
+                    errorMessage = '요청 데이터 형식이 올바르지 않습니다.';
                 }
                 else if (error.response?.status === 404) {
-                    errorMessage = 'FCM 서비스를 찾을 수 없습니다.';
-                    errorCode = 'SERVICE_NOT_FOUND';
+                    errorMessage = '알림 서비스를 찾을 수 없습니다.';
+                }
+                else if (error.response?.status === 500) {
+                    errorMessage = '알림 서버 내부 오류가 발생했습니다.';
                 }
                 return (0, rxjs_1.of)({
                     success: false,
-                    message: 'failed',
-                    errorMessage,
-                    errorCode,
-                    messageId: null,
+                    message: '포털 알림 전송 실패',
+                    error: errorMessage,
                 });
             })));
-            console.log(response);
-            this.logger.log(`FCM 단일 알림 전송 성공`);
+            this.logger.log(`포털 알림 전송 완료: ${response.success ? '성공' : '실패'} - ${response.message}`);
             return response;
         }
         catch (error) {
-            this.logger.error(`FCM 단일 알림 전송 중 예외 발생: ${error.message}`, error.stack);
+            const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+            this.logger.error(`포털 알림 전송 중 예외 발생: ${errorMessage}`, error instanceof Error ? error.stack : undefined);
             return {
                 success: false,
-                message: 'failed',
-                errorMessage: error.message,
-                errorCode: error.code,
-                messageId: error.messageId,
+                message: '포털 알림 전송 실패',
+                error: errorMessage,
             };
         }
     }
@@ -20229,20 +20271,20 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         return notification;
     }
     async 알림을_전송한다(tokens, payload) {
-        return await this.fcmAdapter.sendBulkNotification(tokens, payload);
-    }
-    async 알림을_전송한다_new(tokens, payload) {
-        const notificationPayload = {
-            title: payload.title,
-            body: payload.body,
-            link: '/plan/user/schedule-add',
-            icon: 'https://lsms.lumir.space/logo_192.png',
-        };
-        const responses = [];
-        for (const token of tokens) {
-            responses.push(await this.fcmMicroserviceAdapter.sendNotification(token, notificationPayload));
-        }
-        return responses;
+        const response = await this.fcmAdapter.sendBulkNotification(tokens, payload);
+        console.log('FCM send successful.', response.responses.length);
+        console.log('알림 전송 - tokens length', tokens.length);
+        response.responses.forEach((r, index) => {
+            if (!r.success) {
+                console.log('token: ' + tokens[index]);
+                console.log('error: ' + r.error);
+            }
+            else {
+                console.log('token: ' + tokens[index]);
+                console.log('success');
+            }
+        });
+        return response;
     }
     async 알림_전송_프로세스를_진행한다(notificationType, notificationData, targetEmployeeIds) {
         const notificationContent = await this.알림_내용을_생성한다(notificationType, notificationData);
@@ -20252,12 +20294,52 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
             return;
         }
         const { oldTokens, newTokens } = this._토큰을_디바이스_타입별로_분류한다(employeeTokens);
-        await this.알림을_전송한다(oldTokens, {
+        const oldTokenStrings = oldTokens.map((t) => t.token);
+        const oldTokensResponse = await this.알림을_전송한다(oldTokenStrings, {
             title: notification.title,
             body: notification.body,
             notificationType: notification.notificationType,
             notificationData: notification.notificationData,
         });
+        const failedTokens = {};
+        oldTokensResponse.responses.forEach((r, index) => {
+            const tokenInfo = oldTokens[index];
+            if (!r.success) {
+                console.log('token: ' + tokenInfo.token);
+                console.log('employeeId: ' + tokenInfo.employeeId);
+                console.log('employeeNumber: ' + tokenInfo.employeeNumber);
+                console.log('error: ' + r.error);
+                if (!failedTokens[tokenInfo.employeeNumber]) {
+                    failedTokens[tokenInfo.employeeNumber] = [];
+                }
+                failedTokens[tokenInfo.employeeNumber].push(tokenInfo.token);
+            }
+        });
+        if (Object.keys(failedTokens).length > 0) {
+            this.employeeMicroserviceAdapter.deleteFcmTokens('', {
+                employees: Object.entries(failedTokens).map(([employeeNumber, tokens]) => ({
+                    employeeNumber,
+                    fcmTokens: tokens,
+                })),
+            });
+        }
+        const prodEmployeeTokens = employeeTokens
+            .map((emp) => ({
+            ...emp,
+            tokens: emp.tokens.filter((token) => token.deviceType === 'prod'),
+        }))
+            .filter((emp) => emp.tokens.length > 0);
+        if (prodEmployeeTokens.length > 0) {
+            const notificationPayload = {
+                title: notification.title,
+                body: notification.body,
+                linkUrl: '/plan/user/schedule-add',
+                icon: 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+                notificationType: notification.notificationType,
+                notificationData: notification.notificationData,
+            };
+            this.fcmMicroserviceAdapter.sendNotification(prodEmployeeTokens, notificationPayload);
+        }
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }
     _토큰을_디바이스_타입별로_분류한다(employeeTokens) {
@@ -20265,11 +20347,16 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         const newTokens = [];
         for (const employeeToken of employeeTokens) {
             for (const token of employeeToken.tokens) {
+                const tokenWithEmployee = {
+                    token: token.fcmToken,
+                    employeeId: employeeToken.employeeId,
+                    employeeNumber: employeeToken.employeeNumber,
+                };
                 if (token.deviceType === 'prod-old') {
-                    oldTokens.push(token.fcmToken);
+                    oldTokens.push(tokenWithEmployee);
                 }
                 else if (token.deviceType === 'prod') {
-                    newTokens.push(token.fcmToken);
+                    newTokens.push(tokenWithEmployee);
                 }
             }
             console.log('employee', employeeToken.employeeNumber);
@@ -26347,6 +26434,35 @@ let EmployeeMicroserviceAdapter = EmployeeMicroserviceAdapter_1 = class Employee
         }
         catch (error) {
             this.logger.error(`FCM 토큰 일괄 조회 중 예외 발생: ${error.message}`, error.stack);
+            throw error;
+        }
+    }
+    async deleteFcmTokens(authorization, requestDto) {
+        console.log('deleteFcmTokens', requestDto);
+        try {
+            const totalTokens = requestDto.employees.reduce((sum, emp) => sum + emp.fcmTokens.length, 0);
+            this.logger.log(`FCM 토큰 일괄 제거 요청: ${requestDto.employees.length}명, 총 ${totalTokens}개 토큰`);
+            const url = `${this.employeeServiceUrl}/api/fcm/tokens`;
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService
+                .delete(url, {
+                headers: this.getHeaders(authorization),
+                data: {
+                    employees: requestDto.employees,
+                },
+            })
+                .pipe((0, rxjs_1.map)((res) => res.data), (0, rxjs_1.catchError)((error) => {
+                this.logger.error(`FCM 토큰 일괄 제거 실패: ${error.message}`, error.stack);
+                if (error.response?.status === 400) {
+                    const errorData = error.response.data;
+                    throw new common_1.BadRequestException(errorData?.message || '잘못된 요청 형식입니다.');
+                }
+                throw new common_1.BadRequestException('FCM 토큰 일괄 제거 중 오류가 발생했습니다.');
+            })));
+            this.logger.log(`FCM 토큰 일괄 제거 완료: 성공 ${response.successCount}개, 실패 ${response.failCount}개`);
+            return response;
+        }
+        catch (error) {
+            this.logger.error(`FCM 토큰 일괄 제거 중 예외 발생: ${error.message}`, error.stack);
             throw error;
         }
     }

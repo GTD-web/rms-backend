@@ -5,6 +5,14 @@ import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { AxiosError } from 'axios';
 import { FcmSendRequestDto } from '../dtos/fcm-send-request.dto';
 import { FcmSendResponseDto, FcmBulkSendResponseDto } from '../dtos/fcm-send-response.dto';
+import {
+    SendPortalNotificationDto,
+    PortalNotificationResponseDto,
+    RecipientDto,
+} from '../dtos/portal-notification.dto';
+import { EmployeeTokensDto } from '@src/domain/employee/dtos/fcm-token-response.dto';
+import { NotificationType } from '@libs/enums/notification-type.enum';
+import { NotificationData } from '@libs/entities/notification.entity';
 
 @Injectable()
 export class FCMMicroserviceAdapter {
@@ -16,7 +24,10 @@ export class FCMMicroserviceAdapter {
         private readonly configService: ConfigService,
     ) {
         // 환경변수에서 FCM API URL 가져오기
-        this.fcmServiceUrl = this.configService.get<string>('FCM_API_URL') || 'https://lumir-erp.vercel.app';
+        this.fcmServiceUrl =
+            this.configService.get<string>('FCM_API_URL') ||
+            'https://lumir-notification-server-git-fcm-lumir-tech7s-projects.vercel.app';
+        console.log(this.fcmServiceUrl);
     }
 
     /**
@@ -37,77 +48,119 @@ export class FCMMicroserviceAdapter {
     }
 
     /**
-     * 단일 FCM 알림 전송
-     * @param token FCM 토큰
-     * @param payload 알림 내용
+     * 포털 알림 전송 (다중 수신자 지원)
+     * 비동기적으로 처리되며, 에러 발생 시 로그만 남기고 예외를 던지지 않습니다.
+     * @param employeeTokens 직원 토큰 정보 배열
+     * @param payload 알림 페이로드 (title, body, linkUrl 등)
+     * @param sender 발신자 사번 (employeeNumber, 선택, 시스템 전송 시 미사용)
      * @param authorization Authorization 헤더 (선택)
-     * @returns 전송 결과
+     * @returns 전송 결과 (Promise, await 없이 호출 가능)
      */
     async sendNotification(
-        token: string,
-        payload: { title: string; body: string; link: string; icon: string },
+        employeeTokens: EmployeeTokensDto[],
+        payload: {
+            title: string;
+            body: string;
+            linkUrl?: string;
+            icon?: string;
+            notificationType?: NotificationType;
+            notificationData?: NotificationData;
+        },
+        sender?: string,
         authorization?: string,
-    ): Promise<FcmSendResponseDto> {
+    ): Promise<PortalNotificationResponseDto> {
         try {
-            if (!token) {
-                throw new BadRequestException('FCM token is missing');
+            if (!employeeTokens || employeeTokens.length === 0) {
+                this.logger.warn('포털 알림 전송: 직원 토큰 목록이 없습니다.');
+                return {
+                    success: false,
+                    message: '포털 알림 전송 실패',
+                    error: '직원 토큰 목록이 없습니다.',
+                };
             }
 
-            this.logger.log(`FCM 단일 알림 전송 요청: token=${token.substring(0, 20)}...`);
+            // EmployeeTokensDto[]를 RecipientDto[]로 변환
+            const recipients: RecipientDto[] = employeeTokens
+                .filter((emp) => emp.tokens && emp.tokens.length > 0)
+                .map((emp) => ({
+                    employeeNumber: emp.employeeNumber,
+                    tokens: emp.tokens.map((token) => token.fcmToken),
+                }));
 
-            const requestDto: FcmSendRequestDto = {
-                token,
+            if (recipients.length === 0) {
+                this.logger.warn('포털 알림 전송: 전송할 FCM 토큰이 없습니다.');
+                return {
+                    success: false,
+                    message: '포털 알림 전송 실패',
+                    error: '전송할 FCM 토큰이 없습니다.',
+                };
+            }
+
+            // 총 토큰 수 계산
+            const totalTokens = recipients.reduce((sum, recipient) => sum + recipient.tokens.length, 0);
+
+            this.logger.log(`포털 알림 전송 요청: 수신자 ${recipients.length}명, 총 ${totalTokens}개 토큰`);
+
+            // SendPortalNotificationDto 생성 (시스템에서 보내는 경우 sender 제외)
+            const requestDto: SendPortalNotificationDto = {
                 title: payload.title,
-                body: payload.body,
-                link: payload.link,
-                icon: payload.icon,
+                content: payload.body,
+                recipients,
+                sourceSystem: 'SMS',
+                linkUrl: payload.linkUrl,
+                metadata: {
+                    icon: payload.icon || 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
+                    notificationType: payload.notificationType,
+                    notificationData: payload.notificationData,
+                },
             };
 
-            const url = `${this.fcmServiceUrl}/api/fcm/test-send`;
+            // 알림 서버에 한번만 요청 전송
+            const url = `${this.fcmServiceUrl}/api/portal/notifications/send`;
+
             const response = await firstValueFrom(
                 this.httpService
-                    .post<FcmSendResponseDto>(url, requestDto, {
-                        // headers: this.getHeaders(authorization),
+                    .post<PortalNotificationResponseDto>(url, requestDto, {
+                        headers: this.getHeaders(authorization),
                     })
                     .pipe(
                         map((res) => res.data),
                         catchError((error: AxiosError) => {
-                            this.logger.error(`FCM 단일 알림 전송 실패: ${error.message}`, error.stack);
+                            this.logger.error(`포털 알림 전송 실패: ${error.message}`, error.stack);
 
-                            let errorMessage = 'FCM 알림 전송 중 오류가 발생했습니다.';
-                            let errorCode = 'UNKNOWN_ERROR';
+                            let errorMessage = '포털 알림 전송 중 오류가 발생했습니다.';
 
                             if (error.response?.status === 400) {
-                                errorMessage = 'FCM 토큰 형식이 올바르지 않습니다.';
-                                errorCode = 'INVALID_TOKEN';
+                                errorMessage = '요청 데이터 형식이 올바르지 않습니다.';
                             } else if (error.response?.status === 404) {
-                                errorMessage = 'FCM 서비스를 찾을 수 없습니다.';
-                                errorCode = 'SERVICE_NOT_FOUND';
+                                errorMessage = '알림 서비스를 찾을 수 없습니다.';
+                            } else if (error.response?.status === 500) {
+                                errorMessage = '알림 서버 내부 오류가 발생했습니다.';
                             }
 
-                            // 예외를 던지는 대신 에러 객체를 리턴
                             return of({
                                 success: false,
-                                message: 'failed',
-                                errorMessage,
-                                errorCode,
-                                messageId: null,
+                                message: '포털 알림 전송 실패',
+                                error: errorMessage,
                             });
                         }),
                     ),
             );
-            console.log(response);
 
-            this.logger.log(`FCM 단일 알림 전송 성공`);
+            this.logger.log(`포털 알림 전송 완료: ${response.success ? '성공' : '실패'} - ${response.message}`);
+
             return response;
         } catch (error) {
-            this.logger.error(`FCM 단일 알림 전송 중 예외 발생: ${error.message}`, error.stack);
+            const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+            this.logger.error(
+                `포털 알림 전송 중 예외 발생: ${errorMessage}`,
+                error instanceof Error ? error.stack : undefined,
+            );
+
             return {
                 success: false,
-                message: 'failed',
-                errorMessage: error.message,
-                errorCode: error.code,
-                messageId: error.messageId,
+                message: '포털 알림 전송 실패',
+                error: errorMessage,
             };
         }
     }

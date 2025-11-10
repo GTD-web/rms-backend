@@ -102,7 +102,6 @@ export class FCMAdapter {
                     },
                 })
                 .then((response) => {
-                    console.log('FCM send successful.', response);
                     return response;
                 });
 
