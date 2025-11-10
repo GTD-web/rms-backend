@@ -4737,15 +4737,32 @@ let AuthManagementService = AuthManagementService_1 = class AuthManagementServic
     constructor(employeeService) {
         this.employeeService = employeeService;
         this.logger = new common_1.Logger(AuthManagementService_1.name);
-        const ssoClient = new sso_sdk_1.SSOClient({
+        this.initializationPromise = null;
+        this.ssoClient = new sso_sdk_1.SSOClient({
             clientId: process.env.SSO_CLIENT_ID,
             clientSecret: process.env.SSO_CLIENT_SECRET,
             baseUrl: process.env.SSO_API_URL,
         });
-        this.ssoClient = ssoClient;
-        this.ssoClient.initialize();
+    }
+    async ensureInitialized() {
+        if (!this.initializationPromise) {
+            this.initializationPromise = (async () => {
+                try {
+                    this.logger.log('SSO 클라이언트 초기화 시작');
+                    await this.ssoClient.initialize();
+                    this.logger.log('SSO 클라이언트 초기화 완료');
+                }
+                catch (error) {
+                    this.logger.error('SSO 클라이언트 초기화 실패', error);
+                    this.initializationPromise = null;
+                    throw error;
+                }
+            })();
+        }
+        return this.initializationPromise;
     }
     async login(loginDto) {
+        await this.ensureInitialized();
         console.log('SSO 시스템 이름', this.ssoClient.getSystemName());
         this.logger.log(`로그인 시도: ${loginDto.email}`);
         try {
