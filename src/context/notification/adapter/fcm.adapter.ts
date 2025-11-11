@@ -106,7 +106,7 @@ export class FCMMicroserviceAdapter {
                 title: payload.title,
                 content: payload.body,
                 recipients,
-                sourceSystem: 'SMS',
+                sourceSystem: process.env.NODE_ENV === 'production' ? 'RMS-PROD' : 'RMS-DEV',
                 linkUrl: payload.linkUrl,
                 metadata: {
                     icon: payload.icon || 'https://lumir-erp.vercel.app/%EC%82%BC%EC%A1%B1%EC%98%A4_black.png',
