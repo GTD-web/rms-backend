@@ -94,7 +94,7 @@ export class AuthManagementService {
                 hireDate: new Date(ssoResponse.hireDate),
                 status: ssoResponse.status,
                 department: ssoResponse.department,
-                position: ssoResponse.position,
+                position: ssoResponse.rank,
                 rank: ssoResponse.rank,
             });
             this.logger.log(`직원 정보 업데이트 완료: ${updatedEmployee.employeeId}`);
