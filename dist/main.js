@@ -6267,7 +6267,6 @@ let EmployeeManagementService = class EmployeeManagementService {
         this.employeeContextService = employeeContextService;
     }
     async syncEmployees(authorization) {
-        await this.employeeContextService.전체_조직_정보를_동기화한다(authorization);
     }
     async findResourceManagers() {
         return this.employeeContextService.자원관리자_목록을_조회한다();
@@ -18045,11 +18044,12 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
         const { employees, total } = await this.employeeMicroserviceAdapter.getAllEmployees(authorization);
         for (const employee of employees) {
             const existingEmployee = await this.domainEmployeeService.findByEmployeeNumber(employee.employeeNumber);
-            console.log('update employee', employee);
             if (employee.status === '퇴사') {
                 if (existingEmployee) {
                     await this.domainEmployeeService.update(existingEmployee.employeeId, {
-                        department: employee.department.departmentCode,
+                        department: employee.department
+                            ? employee.department.departmentCode
+                            : existingEmployee.department,
                         position: employee.rank.rankName,
                         status: employee.status,
                     });
@@ -18067,7 +18067,6 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                     await this.domainEmployeeService.save(existingEmployee);
                 }
                 else {
-                    console.log('create employee', employee);
                     const employeeData = {
                         employeeNumber: employee.employeeNumber,
                         name: employee.name,

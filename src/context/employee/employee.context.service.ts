@@ -387,12 +387,13 @@ export class EmployeeContextService {
         const { employees, total } = await this.employeeMicroserviceAdapter.getAllEmployees(authorization);
         for (const employee of employees) {
             const existingEmployee = await this.domainEmployeeService.findByEmployeeNumber(employee.employeeNumber);
-            console.log('update employee', employee);
 
             if (employee.status === '퇴사') {
                 if (existingEmployee) {
                     await this.domainEmployeeService.update(existingEmployee.employeeId, {
-                        department: employee.department.departmentCode,
+                        department: employee.department
+                            ? employee.department.departmentCode
+                            : existingEmployee.department,
                         position: employee.rank.rankName,
                         status: employee.status,
                     });
@@ -410,7 +411,6 @@ export class EmployeeContextService {
                     existingEmployee.status = employee.status;
                     await this.domainEmployeeService.save(existingEmployee);
                 } else {
-                    console.log('create employee', employee);
                     const employeeData = {
                         employeeNumber: employee.employeeNumber,
                         name: employee.name,
