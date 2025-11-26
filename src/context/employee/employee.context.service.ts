@@ -121,6 +121,7 @@ export class EmployeeContextService {
 
         return {
             employeeId: employee.employeeId,
+            employeeNumber: employee.employeeNumber,
             email: employee.email,
             mobile: employee.mobile,
             name: employee.name,

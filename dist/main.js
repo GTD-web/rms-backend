@@ -6153,6 +6153,12 @@ __decorate([
 ], UserResponseDto.prototype, "employeeId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        example: '24020',
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "employeeNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         example: 'test@lumir.space',
     }),
     __metadata("design:type", String)
@@ -17850,6 +17856,7 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
         }
         return {
             employeeId: employee.employeeId,
+            employeeNumber: employee.employeeNumber,
             email: employee.email,
             mobile: employee.mobile,
             name: employee.name,
@@ -20292,42 +20299,58 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         if (employeeTokens.length === 0) {
             return;
         }
-        const { oldTokens, newTokens } = this._토큰을_디바이스_타입별로_분류한다(employeeTokens);
-        const oldTokenStrings = oldTokens.map((t) => t.token);
-        const oldTokensResponse = await this.알림을_전송한다(oldTokenStrings, {
-            title: notification.title,
-            body: notification.body,
-            notificationType: notification.notificationType,
-            notificationData: notification.notificationData,
-        });
-        const failedTokens = {};
-        oldTokensResponse.responses.forEach((r, index) => {
-            const tokenInfo = oldTokens[index];
-            if (!r.success) {
-                console.log('token: ' + tokenInfo.token);
-                console.log('employeeId: ' + tokenInfo.employeeId);
-                console.log('employeeNumber: ' + tokenInfo.employeeNumber);
-                console.log('error: ' + r.error);
-                if (!failedTokens[tokenInfo.employeeNumber]) {
-                    failedTokens[tokenInfo.employeeNumber] = [];
-                }
-                failedTokens[tokenInfo.employeeNumber].push(tokenInfo.token);
+        const { LSMSTokens, PORTALTokens } = this._토큰을_디바이스_타입별로_분류한다(employeeTokens);
+        console.log('LSMSTokens', LSMSTokens);
+        console.log('PORTALTokens', PORTALTokens);
+        const ENV = () => {
+            if (process.env.NODE_ENV === 'production') {
+                return 'prod';
             }
-        });
-        if (Object.keys(failedTokens).length > 0) {
-            this.employeeMicroserviceAdapter.deleteFcmTokens('', {
-                employees: Object.entries(failedTokens).map(([employeeNumber, tokens]) => ({
-                    employeeNumber,
-                    fcmTokens: tokens,
-                })),
+            else if (process.env.NODE_ENV === 'development') {
+                return 'dev';
+            }
+            else {
+                return 'test';
+            }
+        };
+        const LSMSTokensWithEmployee = LSMSTokens.flatMap((emp) => emp.tokens
+            .filter((token) => token.deviceType.includes(ENV()) || token.deviceType === 'prod-old')
+            .map((token) => ({
+            fcmToken: token.fcmToken,
+            employeeId: emp.employeeId,
+            employeeNumber: emp.employeeNumber,
+        })));
+        const LSMSTokenStrings = LSMSTokensWithEmployee.map((t) => t.fcmToken);
+        if (LSMSTokenStrings.length > 0) {
+            const LSMSTokensResponse = await this.알림을_전송한다(LSMSTokenStrings, {
+                title: notification.title,
+                body: notification.body,
+                notificationType: notification.notificationType,
+                notificationData: notification.notificationData,
             });
+            const failedTokens = {};
+            LSMSTokensResponse.responses.forEach((r, index) => {
+                const tokenInfo = LSMSTokensWithEmployee[index];
+                if (!r.success) {
+                    if (!failedTokens[tokenInfo.employeeNumber]) {
+                        failedTokens[tokenInfo.employeeNumber] = [];
+                    }
+                    failedTokens[tokenInfo.employeeNumber].push(tokenInfo.fcmToken);
+                }
+            });
+            if (Object.keys(failedTokens).length > 0) {
+                this.employeeMicroserviceAdapter.deleteFcmTokens('', {
+                    employees: Object.entries(failedTokens).map(([employeeNumber, tokens]) => ({
+                        employeeNumber,
+                        fcmTokens: tokens,
+                    })),
+                });
+            }
         }
-        const prodEmployeeTokens = employeeTokens
-            .map((emp) => ({
+        const prodEmployeeTokens = PORTALTokens.map((emp) => ({
             ...emp,
-            tokens: emp.tokens.filter((token) => token.deviceType === 'prod'),
-        }))
-            .filter((emp) => emp.tokens.length > 0);
+            tokens: emp.tokens.filter((token) => token.deviceType.includes(ENV()) || token.deviceType === 'prod'),
+        })).filter((emp) => emp.tokens.length > 0);
         if (prodEmployeeTokens.length > 0) {
             const notificationPayload = {
                 title: notification.title,
@@ -20342,27 +20365,19 @@ let NotificationContextService = NotificationContextService_1 = class Notificati
         await this.domainNotificationService.setSentTrue([notification.notificationId]);
     }
     _토큰을_디바이스_타입별로_분류한다(employeeTokens) {
-        const oldTokens = [];
-        const newTokens = [];
-        for (const employeeToken of employeeTokens) {
-            for (const token of employeeToken.tokens) {
-                const tokenWithEmployee = {
-                    token: token.fcmToken,
-                    employeeId: employeeToken.employeeId,
-                    employeeNumber: employeeToken.employeeNumber,
-                };
-                if (token.deviceType === 'prod-old') {
-                    oldTokens.push(tokenWithEmployee);
-                }
-                else if (token.deviceType === 'prod') {
-                    newTokens.push(tokenWithEmployee);
-                }
+        const LSMSTokens = [];
+        const PORTALTokens = [];
+        for (const employee of employeeTokens) {
+            const lsmsTokens = employee.tokens.filter((token) => token.deviceType.includes('lsms') || token.deviceType === 'prod-old');
+            const portalTokens = employee.tokens.filter((token) => token.deviceType.includes('portal') || token.deviceType === 'prod');
+            if (lsmsTokens.length > 0) {
+                LSMSTokens.push({ ...employee, tokens: lsmsTokens });
             }
-            console.log('employee', employeeToken.employeeNumber);
-            console.log('oldTokens', oldTokens);
-            console.log('newTokens', newTokens);
+            if (portalTokens.length > 0) {
+                PORTALTokens.push({ ...employee, tokens: portalTokens });
+            }
         }
-        return { oldTokens, newTokens };
+        return { LSMSTokens, PORTALTokens };
     }
     _템플릿_변수를_치환한다(template, data) {
         let result = template;

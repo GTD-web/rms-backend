@@ -7,6 +7,11 @@ export class UserResponseDto {
     employeeId: string;
 
     @ApiProperty({
+        example: '24020',
+    })
+    employeeNumber: string;
+
+    @ApiProperty({
         example: 'test@lumir.space',
     })
     email: string;
