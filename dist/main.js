@@ -28167,8 +28167,7 @@ let ProjectMicroserviceAdapter = ProjectMicroserviceAdapter_1 = class ProjectMic
         this.httpService = httpService;
         this.configService = configService;
         this.logger = new common_1.Logger(ProjectMicroserviceAdapter_1.name);
-        this.projectServiceUrl =
-            this.configService.get('PROJECT_API_URL') || 'https://lpms-backend.vercel.app/';
+        this.projectServiceUrl = this.configService.get('PROJECT_API_URL') || 'https://lpms-backend.vercel.app';
     }
     getHeaders(authorization) {
         const headers = {
