@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { DomainScheduleRepository } from './schedule.repository';
 import { BaseService } from '@libs/services/base.service';
 import { Schedule } from '@libs/entities/schedule.entity';
-import { MoreThanOrEqual, LessThanOrEqual, Between, In, Raw, LessThan, MoreThan } from 'typeorm';
+import { MoreThanOrEqual, LessThanOrEqual, Between, In, Raw, LessThan, MoreThan, DeepPartial } from 'typeorm';
 import { DateUtil } from '@libs/utils/date.util';
 import { ScheduleStatus } from '@libs/enums/schedule-type.enum';
 import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
@@ -11,6 +11,40 @@ import { IRepositoryOptions } from '@libs/interfaces/repository.interface';
 export class DomainScheduleService extends BaseService<Schedule> {
     constructor(private readonly scheduleRepository: DomainScheduleRepository) {
         super(scheduleRepository);
+    }
+
+    async save(entity: DeepPartial<Schedule>, options?: IRepositoryOptions<Schedule>): Promise<Schedule> {
+        const schedule = entity as Schedule;
+        if (schedule.endDate) {
+            // endDate의 시간이 15시(UTC)인 경우 (KST 00:00:00), 1초를 빼서 전날로 유지
+            if (
+                schedule.endDate.getUTCHours() === 15 &&
+                schedule.endDate.getUTCMinutes() === 0 &&
+                schedule.endDate.getUTCSeconds() === 0
+            ) {
+                schedule.endDate.setSeconds(schedule.endDate.getSeconds() - 1);
+            }
+        }
+        return this.scheduleRepository.save(entity, options);
+    }
+
+    async update(
+        entityId: string,
+        entity: Partial<Schedule>,
+        options?: IRepositoryOptions<Schedule>,
+    ): Promise<Schedule> {
+        const schedule = entity as Schedule;
+        if (schedule.endDate) {
+            // endDate의 시간이 15시(UTC)인 경우 (KST 00:00:00), 1초를 빼서 전날로 유지
+            if (
+                schedule.endDate.getUTCHours() === 15 &&
+                schedule.endDate.getUTCMinutes() === 0 &&
+                schedule.endDate.getUTCSeconds() === 0
+            ) {
+                schedule.endDate.setSeconds(schedule.endDate.getSeconds() - 1);
+            }
+        }
+        return this.scheduleRepository.update(entityId, entity, options);
     }
 
     async findByScheduleId(scheduleId: string): Promise<Schedule> {

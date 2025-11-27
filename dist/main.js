@@ -28873,6 +28873,28 @@ let DomainReservationService = class DomainReservationService extends base_servi
         super(reservationRepository);
         this.reservationRepository = reservationRepository;
     }
+    async save(entity, options) {
+        const reservation = entity;
+        if (reservation.endDate) {
+            if (reservation.endDate.getUTCHours() === 15 &&
+                reservation.endDate.getUTCMinutes() === 0 &&
+                reservation.endDate.getUTCSeconds() === 0) {
+                reservation.endDate.setSeconds(reservation.endDate.getSeconds() - 1);
+            }
+        }
+        return this.reservationRepository.save(entity, options);
+    }
+    async update(entityId, entity, options) {
+        const reservation = entity;
+        if (reservation.endDate) {
+            if (reservation.endDate.getUTCHours() === 15 &&
+                reservation.endDate.getUTCMinutes() === 0 &&
+                reservation.endDate.getUTCSeconds() === 0) {
+                reservation.endDate.setSeconds(reservation.endDate.getSeconds() - 1);
+            }
+        }
+        return this.reservationRepository.update(entityId, entity, options);
+    }
     async findByReservationId(reservationId) {
         return this.reservationRepository.findOne({
             where: { reservationId },
@@ -29966,6 +29988,28 @@ let DomainScheduleService = class DomainScheduleService extends base_service_1.B
     constructor(scheduleRepository) {
         super(scheduleRepository);
         this.scheduleRepository = scheduleRepository;
+    }
+    async save(entity, options) {
+        const schedule = entity;
+        if (schedule.endDate) {
+            if (schedule.endDate.getUTCHours() === 15 &&
+                schedule.endDate.getUTCMinutes() === 0 &&
+                schedule.endDate.getUTCSeconds() === 0) {
+                schedule.endDate.setSeconds(schedule.endDate.getSeconds() - 1);
+            }
+        }
+        return this.scheduleRepository.save(entity, options);
+    }
+    async update(entityId, entity, options) {
+        const schedule = entity;
+        if (schedule.endDate) {
+            if (schedule.endDate.getUTCHours() === 15 &&
+                schedule.endDate.getUTCMinutes() === 0 &&
+                schedule.endDate.getUTCSeconds() === 0) {
+                schedule.endDate.setSeconds(schedule.endDate.getSeconds() - 1);
+            }
+        }
+        return this.scheduleRepository.update(entityId, entity, options);
     }
     async findByScheduleId(scheduleId) {
         return this.scheduleRepository.findOne({
