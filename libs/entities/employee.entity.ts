@@ -22,8 +22,14 @@ export class Employee {
     @Column()
     department: string;
 
-    @Column()
+    @Column({ comment: '직급 (레거시, rank와 동일한 값)' })
     position: string;
+
+    @Column({ nullable: true, comment: '직급' })
+    rank: string;
+
+    @Column({ nullable: true, comment: '직위' })
+    positionTitle: string;
 
     @Column({ nullable: true })
     email: string;

@@ -54,6 +54,8 @@ export class EmployeeContextService {
                 employeeNumber: true,
                 department: true,
                 position: true,
+                rank: true,
+                positionTitle: true,
                 status: true,
             },
         });
@@ -76,6 +78,8 @@ export class EmployeeContextService {
                 employeeNumber: true,
                 department: true,
                 position: true,
+                rank: true,
+                positionTitle: true,
                 roles: true,
             },
         });
@@ -103,6 +107,8 @@ export class EmployeeContextService {
                 employeeNumber: true,
                 department: true,
                 position: true,
+                rank: true,
+                positionTitle: true,
                 status: true,
             },
         });
@@ -127,6 +133,8 @@ export class EmployeeContextService {
             name: employee.name,
             department: employee.department,
             position: employee.position,
+            rank: employee.rank,
+            positionTitle: employee.positionTitle,
             roles: employee.roles,
             isPushNotificationEnabled: employee.isPushNotificationEnabled,
         };
@@ -395,7 +403,9 @@ export class EmployeeContextService {
                         department: employee.department
                             ? employee.department.departmentCode
                             : existingEmployee.department,
-                        position: employee.rank.rankName,
+                        position: employee.rank?.rankName || null,
+                        rank: employee.rank?.rankName || null,
+                        positionTitle: employee.position?.positionTitle || null,
                         status: employee.status,
                     });
                 }
@@ -407,7 +417,9 @@ export class EmployeeContextService {
                     existingEmployee.name = employee.name;
                     existingEmployee.employeeNumber = employee.employeeNumber;
                     existingEmployee.department = employee.department.departmentCode;
-                    existingEmployee.position = employee.rank.rankName;
+                    existingEmployee.position = employee.rank?.rankName || null;
+                    existingEmployee.rank = employee.rank?.rankName || null;
+                    existingEmployee.positionTitle = employee.position?.positionTitle || null;
                     existingEmployee.mobile = employee.phoneNumber;
                     existingEmployee.status = employee.status;
                     await this.domainEmployeeService.save(existingEmployee);
@@ -417,7 +429,9 @@ export class EmployeeContextService {
                         name: employee.name,
                         email: employee.email,
                         department: employee.department.departmentCode,
-                        position: employee.rank.rankName,
+                        position: employee.rank?.rankName || null,
+                        rank: employee.rank?.rankName || null,
+                        positionTitle: employee.position?.positionTitle || null,
                         mobile: employee.phoneNumber,
                         status: employee.status,
                     };

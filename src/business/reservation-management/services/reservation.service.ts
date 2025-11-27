@@ -89,6 +89,8 @@ export class ReservationService {
                             employeeNumber: participant.employee.employeeNumber,
                             department: participant.employee.department,
                             position: participant.employee.position,
+                            rank: participant.employee.rank,
+                            positionTitle: participant.employee.positionTitle,
                         },
                     })),
                 );
@@ -183,6 +185,8 @@ export class ReservationService {
                               employeeNumber: participant.employee.employeeNumber,
                               department: participant.employee.department,
                               position: participant.employee.position,
+                              rank: participant.employee.rank,
+                              positionTitle: participant.employee.positionTitle,
                           }
                         : undefined,
                     reservation: reservation,
@@ -244,6 +248,8 @@ export class ReservationService {
                           employeeNumber: participant.employee.employeeNumber,
                           department: participant.employee.department,
                           position: participant.employee.position,
+                          rank: participant.employee.rank,
+                          positionTitle: participant.employee.positionTitle,
                       }
                     : undefined,
                 reservation: basicReservation,

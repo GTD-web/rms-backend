@@ -37,6 +37,16 @@ export class UserResponseDto {
     position: string;
 
     @ApiProperty({
+        example: '대표이사',
+    })
+    rank: string;
+
+    @ApiProperty({
+        example: '대표이사',
+    })
+    positionTitle: string;
+
+    @ApiProperty({
         example: ['USER', 'RESOURCE_ADMIN', 'SYSTEM_ADMIN'],
     })
     roles: string[];

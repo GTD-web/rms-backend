@@ -149,6 +149,8 @@ export class TaskManagementService {
                                     employeeNumber: reserver.employee.employeeNumber,
                                     department: reserver.employee.department,
                                     position: reserver.employee.position,
+                                    rank: reserver.employee.rank,
+                                    positionTitle: reserver.employee.positionTitle,
                                 };
                             }
                         }
@@ -212,6 +214,8 @@ export class TaskManagementService {
                             employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
                             department: resource.resourceManagers[0].employee.department,
                             position: resource.resourceManagers[0].employee.position,
+                            rank: resource.resourceManagers[0].employee.rank,
+                            positionTitle: resource.resourceManagers[0].employee.positionTitle,
                         },
                         notifications: notifications,
                         // 직전 정비시 주행거리
