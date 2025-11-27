@@ -5297,6 +5297,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeController = void 0;
@@ -5309,21 +5312,23 @@ let EmployeeController = class EmployeeController {
     constructor(employeeManagementService) {
         this.employeeManagementService = employeeManagementService;
     }
-    async findAllEmplyeesByDepartment() {
-        return this.employeeManagementService.findEmployeeList();
+    async findAllEmplyeesByDepartment(useHiddenInFilter) {
+        return this.employeeManagementService.findEmployeeList(useHiddenInFilter);
     }
 };
 exports.EmployeeController = EmployeeController;
 __decorate([
     (0, common_1.Get)('department'),
     (0, swagger_1.ApiOperation)({ summary: '부서별 직원 목록 조회 #사용자/참석자설정/모달' }),
+    (0, swagger_1.ApiQuery)({ name: 'useHiddenInFilter', description: '필터링 조건에서 숨기기 여부', required: false }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
         description: '부서별 직원 목록을 성공적으로 조회했습니다.',
         type: [employees_by_department_response_dto_1.EmplyeesByDepartmentResponseDto],
     }),
+    __param(0, (0, common_1.Query)('useHiddenInFilter')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Boolean]),
     __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
 ], EmployeeController.prototype, "findAllEmplyeesByDepartment", null);
 exports.EmployeeController = EmployeeController = __decorate([
@@ -6345,8 +6350,8 @@ let EmployeeManagementService = class EmployeeManagementService {
         await this.employeeContextService.직원_역할을_변경한다(changeRoleDto);
         return { success: true };
     }
-    async findEmployeeList() {
-        const employeesByDepartment = await this.employeeContextService.직원_목록을_조회한다();
+    async findEmployeeList(useHiddenInFilter) {
+        const employeesByDepartment = await this.employeeContextService.직원_목록을_조회한다(useHiddenInFilter);
         return this.부서_계층구조_순서로_정렬한다(employeesByDepartment);
     }
     async findAllDepartments() {
@@ -17942,12 +17947,13 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
         }));
         return this.부서별로_그룹핑한다(candidatesWithRole);
     }
-    async 직원_목록을_조회한다() {
+    async 직원_목록을_조회한다(useHiddenInFilter = false) {
+        const isHiddenInFilter = useHiddenInFilter ? { isHiddenInFilter: false } : {};
         const employees = await this.domainEmployeeService.findAll({
             where: {
                 department: (0, typeorm_1.Not)((0, typeorm_1.In)(['관리자'])),
                 status: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사'])),
-                isHiddenInFilter: false,
+                ...isHiddenInFilter,
             },
             select: {
                 employeeId: true,

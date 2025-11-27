@@ -95,12 +95,13 @@ export class EmployeeContextService {
     /**
      * 직원 목록을 부서별로 조회한다
      */
-    async 직원_목록을_조회한다(): Promise<EmplyeesByDepartmentResponseDto[]> {
+    async 직원_목록을_조회한다(useHiddenInFilter: boolean = false): Promise<EmplyeesByDepartmentResponseDto[]> {
+        const isHiddenInFilter = useHiddenInFilter ? { isHiddenInFilter: false } : {};
         const employees = await this.domainEmployeeService.findAll({
             where: {
                 department: Not(In(['관리자'])),
                 status: Not(In(['퇴사'])),
-                isHiddenInFilter: false,
+                ...isHiddenInFilter,
             },
             select: {
                 employeeId: true,
