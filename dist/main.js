@@ -976,6 +976,10 @@ __decorate([
     __metadata("design:type", String)
 ], Employee.prototype, "status", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: false, comment: '필터링 조건에서 숨기기 여부' }),
+    __metadata("design:type", Boolean)
+], Employee.prototype, "isHiddenInFilter", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => reservation_participant_entity_1.ReservationParticipant, (participant) => participant.employee),
     __metadata("design:type", Array)
 ], Employee.prototype, "participants", void 0);
@@ -5293,6 +5297,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeController = void 0;
@@ -5305,21 +5312,23 @@ let EmployeeController = class EmployeeController {
     constructor(employeeManagementService) {
         this.employeeManagementService = employeeManagementService;
     }
-    async findAllEmplyeesByDepartment() {
-        return this.employeeManagementService.findEmployeeList();
+    async findAllEmplyeesByDepartment(useHiddenInFilter) {
+        return this.employeeManagementService.findEmployeeList(useHiddenInFilter);
     }
 };
 exports.EmployeeController = EmployeeController;
 __decorate([
     (0, common_1.Get)('department'),
     (0, swagger_1.ApiOperation)({ summary: '부서별 직원 목록 조회 #사용자/참석자설정/모달' }),
+    (0, swagger_1.ApiQuery)({ name: 'useHiddenInFilter', description: '필터링 조건에서 숨기기 여부', required: false }),
     (0, api_responses_decorator_1.ApiDataResponse)({
         status: 200,
         description: '부서별 직원 목록을 성공적으로 조회했습니다.',
         type: [employees_by_department_response_dto_1.EmplyeesByDepartmentResponseDto],
     }),
+    __param(0, (0, common_1.Query)('useHiddenInFilter')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Boolean]),
     __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
 ], EmployeeController.prototype, "findAllEmplyeesByDepartment", null);
 exports.EmployeeController = EmployeeController = __decorate([
@@ -5546,17 +5555,25 @@ let EmployeeWebhookController = class EmployeeWebhookController {
     constructor(employeeManagementService) {
         this.employeeManagementService = employeeManagementService;
     }
-    async syncEmployees(req) {
+    async syncEmployees(req, execute = false) {
         const authorization = req.headers['authorization'];
-        return await this.employeeManagementService.syncEmployees(authorization);
+        if (execute) {
+            return await this.employeeManagementService.syncEmployees(authorization);
+        }
+        return {
+            message: 'execute 파라미터가 없습니다.',
+        };
     }
 };
 exports.EmployeeWebhookController = EmployeeWebhookController;
 __decorate([
     (0, common_1.Get)('sync'),
+    (0, swagger_1.ApiOperation)({ summary: '직원 동기화' }),
+    (0, swagger_1.ApiQuery)({ name: 'execute', description: '동기화 실행 여부', required: false }),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('execute')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof Request !== "undefined" && Request) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof Request !== "undefined" && Request) === "function" ? _b : Object, Boolean]),
     __metadata("design:returntype", Promise)
 ], EmployeeWebhookController.prototype, "syncEmployees", null);
 exports.EmployeeWebhookController = EmployeeWebhookController = __decorate([
@@ -6333,8 +6350,8 @@ let EmployeeManagementService = class EmployeeManagementService {
         await this.employeeContextService.직원_역할을_변경한다(changeRoleDto);
         return { success: true };
     }
-    async findEmployeeList() {
-        const employeesByDepartment = await this.employeeContextService.직원_목록을_조회한다();
+    async findEmployeeList(useHiddenInFilter) {
+        const employeesByDepartment = await this.employeeContextService.직원_목록을_조회한다(useHiddenInFilter);
         return this.부서_계층구조_순서로_정렬한다(employeesByDepartment);
     }
     async findAllDepartments() {
@@ -17930,11 +17947,13 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
         }));
         return this.부서별로_그룹핑한다(candidatesWithRole);
     }
-    async 직원_목록을_조회한다() {
+    async 직원_목록을_조회한다(useHiddenInFilter = false) {
+        const isHiddenInFilter = useHiddenInFilter ? { isHiddenInFilter: false } : {};
         const employees = await this.domainEmployeeService.findAll({
             where: {
                 department: (0, typeorm_1.Not)((0, typeorm_1.In)(['관리자'])),
                 status: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사'])),
+                ...isHiddenInFilter,
             },
             select: {
                 employeeId: true,
@@ -28873,6 +28892,28 @@ let DomainReservationService = class DomainReservationService extends base_servi
         super(reservationRepository);
         this.reservationRepository = reservationRepository;
     }
+    async save(entity, options) {
+        const reservation = entity;
+        if (reservation.endDate) {
+            if (reservation.endDate.getUTCHours() === 15 &&
+                reservation.endDate.getUTCMinutes() === 0 &&
+                reservation.endDate.getUTCSeconds() === 0) {
+                reservation.endDate.setSeconds(reservation.endDate.getSeconds() - 1);
+            }
+        }
+        return this.reservationRepository.save(entity, options);
+    }
+    async update(entityId, entity, options) {
+        const reservation = entity;
+        if (reservation.endDate) {
+            if (reservation.endDate.getUTCHours() === 15 &&
+                reservation.endDate.getUTCMinutes() === 0 &&
+                reservation.endDate.getUTCSeconds() === 0) {
+                reservation.endDate.setSeconds(reservation.endDate.getSeconds() - 1);
+            }
+        }
+        return this.reservationRepository.update(entityId, entity, options);
+    }
     async findByReservationId(reservationId) {
         return this.reservationRepository.findOne({
             where: { reservationId },
@@ -29966,6 +30007,28 @@ let DomainScheduleService = class DomainScheduleService extends base_service_1.B
     constructor(scheduleRepository) {
         super(scheduleRepository);
         this.scheduleRepository = scheduleRepository;
+    }
+    async save(entity, options) {
+        const schedule = entity;
+        if (schedule.endDate) {
+            if (schedule.endDate.getUTCHours() === 15 &&
+                schedule.endDate.getUTCMinutes() === 0 &&
+                schedule.endDate.getUTCSeconds() === 0) {
+                schedule.endDate.setSeconds(schedule.endDate.getSeconds() - 1);
+            }
+        }
+        return this.scheduleRepository.save(entity, options);
+    }
+    async update(entityId, entity, options) {
+        const schedule = entity;
+        if (schedule.endDate) {
+            if (schedule.endDate.getUTCHours() === 15 &&
+                schedule.endDate.getUTCMinutes() === 0 &&
+                schedule.endDate.getUTCSeconds() === 0) {
+                schedule.endDate.setSeconds(schedule.endDate.getSeconds() - 1);
+            }
+        }
+        return this.scheduleRepository.update(entityId, entity, options);
     }
     async findByScheduleId(scheduleId) {
         return this.scheduleRepository.findOne({

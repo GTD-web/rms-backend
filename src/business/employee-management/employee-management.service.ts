@@ -30,8 +30,8 @@ export class EmployeeManagementService {
         return { success: true };
     }
 
-    async findEmployeeList(): Promise<EmplyeesByDepartmentResponseDto[]> {
-        const employeesByDepartment = await this.employeeContextService.직원_목록을_조회한다();
+    async findEmployeeList(useHiddenInFilter?: boolean): Promise<EmplyeesByDepartmentResponseDto[]> {
+        const employeesByDepartment = await this.employeeContextService.직원_목록을_조회한다(useHiddenInFilter);
         return this.부서_계층구조_순서로_정렬한다(employeesByDepartment);
     }
 
