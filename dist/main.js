@@ -6275,17 +6275,20 @@ let EmployeeManagementService = class EmployeeManagementService {
     async syncEmployees(authorization) {
     }
     async findResourceManagers() {
-        return this.employeeContextService.자원관리자_목록을_조회한다();
+        const employeesByDepartment = await this.employeeContextService.자원관리자_목록을_조회한다();
+        return this.부서_계층구조_순서로_정렬한다(employeesByDepartment);
     }
     async findManagerCandidates() {
-        return this.employeeContextService.관리자_후보_목록을_조회한다();
+        const employeesByDepartment = await this.employeeContextService.관리자_후보_목록을_조회한다();
+        return this.부서_계층구조_순서로_정렬한다(employeesByDepartment);
     }
     async changeRole(changeRoleDto) {
         await this.employeeContextService.직원_역할을_변경한다(changeRoleDto);
         return { success: true };
     }
     async findEmployeeList() {
-        return this.employeeContextService.직원_목록을_조회한다();
+        const employeesByDepartment = await this.employeeContextService.직원_목록을_조회한다();
+        return this.부서_계층구조_순서로_정렬한다(employeesByDepartment);
     }
     async findAllDepartments() {
         const departments = await this.employeeContextService.모든_부서를_조회한다();
@@ -6342,6 +6345,32 @@ let EmployeeManagementService = class EmployeeManagementService {
     }
     async changeNotificationSettings(employeeId, updateDto) {
         return this.employeeContextService.알림설정을_변경한다(employeeId, updateDto);
+    }
+    async 부서_계층구조_순서로_정렬한다(employeesByDepartment) {
+        const departmentHierarchy = await this.employeeContextService.부서_계층구조를_조회한다();
+        const employeesByDepartmentMap = new Map();
+        employeesByDepartment.forEach((item) => {
+            employeesByDepartmentMap.set(item.department, item);
+        });
+        const sortedResult = [];
+        const traverseHierarchy = (departments) => {
+            for (const dept of departments) {
+                const employeesInDept = employeesByDepartmentMap.get(dept.departmentCode);
+                if (employeesInDept) {
+                    sortedResult.push(employeesInDept);
+                }
+                if (dept.childDepartments && dept.childDepartments.length > 0) {
+                    traverseHierarchy(dept.childDepartments);
+                }
+            }
+        };
+        traverseHierarchy(departmentHierarchy);
+        employeesByDepartment.forEach((item) => {
+            if (!sortedResult.find((sorted) => sorted.department === item.department)) {
+                sortedResult.push(item);
+            }
+        });
+        return sortedResult;
     }
 };
 exports.EmployeeManagementService = EmployeeManagementService;
