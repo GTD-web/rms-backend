@@ -100,6 +100,7 @@ export class EmployeeContextService {
             where: {
                 department: Not(In(['관리자'])),
                 status: Not(In(['퇴사'])),
+                isHiddenInFilter: false,
             },
             select: {
                 employeeId: true,

@@ -976,6 +976,10 @@ __decorate([
     __metadata("design:type", String)
 ], Employee.prototype, "status", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: false, comment: '필터링 조건에서 숨기기 여부' }),
+    __metadata("design:type", Boolean)
+], Employee.prototype, "isHiddenInFilter", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => reservation_participant_entity_1.ReservationParticipant, (participant) => participant.employee),
     __metadata("design:type", Array)
 ], Employee.prototype, "participants", void 0);
@@ -5546,17 +5550,25 @@ let EmployeeWebhookController = class EmployeeWebhookController {
     constructor(employeeManagementService) {
         this.employeeManagementService = employeeManagementService;
     }
-    async syncEmployees(req) {
+    async syncEmployees(req, execute = false) {
         const authorization = req.headers['authorization'];
-        return await this.employeeManagementService.syncEmployees(authorization);
+        if (execute) {
+            return await this.employeeManagementService.syncEmployees(authorization);
+        }
+        return {
+            message: 'execute 파라미터가 없습니다.',
+        };
     }
 };
 exports.EmployeeWebhookController = EmployeeWebhookController;
 __decorate([
     (0, common_1.Get)('sync'),
+    (0, swagger_1.ApiOperation)({ summary: '직원 동기화' }),
+    (0, swagger_1.ApiQuery)({ name: 'execute', description: '동기화 실행 여부', required: false }),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('execute')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof Request !== "undefined" && Request) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof Request !== "undefined" && Request) === "function" ? _b : Object, Boolean]),
     __metadata("design:returntype", Promise)
 ], EmployeeWebhookController.prototype, "syncEmployees", null);
 exports.EmployeeWebhookController = EmployeeWebhookController = __decorate([
@@ -17935,6 +17947,7 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
             where: {
                 department: (0, typeorm_1.Not)((0, typeorm_1.In)(['관리자'])),
                 status: (0, typeorm_1.Not)((0, typeorm_1.In)(['퇴사'])),
+                isHiddenInFilter: false,
             },
             select: {
                 employeeId: true,

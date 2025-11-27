@@ -58,6 +58,9 @@ export class Employee {
     @Column({ nullable: true, comment: '직원 상태 (재직중, 퇴사)' })
     status: string;
 
+    @Column({ default: false, comment: '필터링 조건에서 숨기기 여부' })
+    isHiddenInFilter: boolean;
+
     @OneToMany(() => ReservationParticipant, (participant) => participant.employee)
     participants: ReservationParticipant[];
 
