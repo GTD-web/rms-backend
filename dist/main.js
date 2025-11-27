@@ -928,9 +928,17 @@ __decorate([
     __metadata("design:type", String)
 ], Employee.prototype, "department", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ comment: '직급 (레거시, rank와 동일한 값)' }),
     __metadata("design:type", String)
 ], Employee.prototype, "position", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true, comment: '직급' }),
+    __metadata("design:type", String)
+], Employee.prototype, "rank", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true, comment: '직위' }),
+    __metadata("design:type", String)
+], Employee.prototype, "positionTitle", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
@@ -4784,7 +4792,7 @@ let AuthManagementService = AuthManagementService_1 = class AuthManagementServic
                 hireDate: new Date(ssoResponse.hireDate),
                 status: ssoResponse.status,
                 department: ssoResponse.department,
-                position: ssoResponse.rank,
+                position: ssoResponse.position,
                 rank: ssoResponse.rank,
             });
             this.logger.log(`직원 정보 업데이트 완료: ${updatedEmployee.employeeId}`);
@@ -4794,6 +4802,8 @@ let AuthManagementService = AuthManagementService_1 = class AuthManagementServic
                 name: updatedEmployee.name,
                 department: updatedEmployee.department,
                 position: updatedEmployee.position,
+                rank: updatedEmployee.rank,
+                positionTitle: updatedEmployee.positionTitle,
                 roles: updatedEmployee.roles,
             };
         }
@@ -4839,7 +4849,9 @@ let AuthManagementService = AuthManagementService_1 = class AuthManagementServic
                 name: ssoResponse.name,
                 email: ssoResponse.email,
                 department: ssoResponse.department,
-                position: ssoResponse.position,
+                position: ssoResponse.rank,
+                rank: ssoResponse.rank,
+                positionTitle: ssoResponse.position,
                 mobile: ssoResponse.phoneNumber,
                 accessToken: ssoResponse.accessToken,
                 expiredAt: date_util_1.DateUtil.format(ssoResponse.expiresAt, 'YYYY-MM-DD HH:mm:ss'),
@@ -4852,7 +4864,9 @@ let AuthManagementService = AuthManagementService_1 = class AuthManagementServic
         employee.accessToken = ssoResponse.accessToken;
         employee.expiredAt = date_util_1.DateUtil.format(ssoResponse.expiresAt);
         employee.department = ssoResponse.department;
-        employee.position = ssoResponse.position;
+        employee.position = ssoResponse.rank;
+        employee.rank = ssoResponse.rank;
+        employee.positionTitle = ssoResponse.position;
         return await this.employeeService.save(employee);
     }
 };
@@ -5005,6 +5019,18 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], LoginResponseDto.prototype, "position", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '대표이사',
+    }),
+    __metadata("design:type", String)
+], LoginResponseDto.prototype, "rank", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '대표이사',
+    }),
+    __metadata("design:type", String)
+], LoginResponseDto.prototype, "positionTitle", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: ['USER', 'RESOURCE_ADMIN', 'SYSTEM_ADMIN'],
@@ -5891,6 +5917,14 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], EmployeeResponseDto.prototype, "position", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], EmployeeResponseDto.prototype, "rank", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], EmployeeResponseDto.prototype, "positionTitle", void 0);
 
 
 /***/ }),
@@ -6189,6 +6223,18 @@ __decorate([
 ], UserResponseDto.prototype, "position", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        example: '대표이사',
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "rank", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '대표이사',
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "positionTitle", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         example: ['USER', 'RESOURCE_ADMIN', 'SYSTEM_ADMIN'],
     }),
     __metadata("design:type", Array)
@@ -6273,6 +6319,7 @@ let EmployeeManagementService = class EmployeeManagementService {
         this.employeeContextService = employeeContextService;
     }
     async syncEmployees(authorization) {
+        await this.employeeContextService.전체_조직_정보를_동기화한다(authorization);
     }
     async findResourceManagers() {
         const employeesByDepartment = await this.employeeContextService.자원관리자_목록을_조회한다();
@@ -8655,6 +8702,8 @@ let ReservationService = class ReservationService {
                         employeeNumber: participant.employee.employeeNumber,
                         department: participant.employee.department,
                         position: participant.employee.position,
+                        rank: participant.employee.rank,
+                        positionTitle: participant.employee.positionTitle,
                     },
                 })));
             }
@@ -8725,6 +8774,8 @@ let ReservationService = class ReservationService {
                             employeeNumber: participant.employee.employeeNumber,
                             department: participant.employee.department,
                             position: participant.employee.position,
+                            rank: participant.employee.rank,
+                            positionTitle: participant.employee.positionTitle,
                         }
                         : undefined,
                     reservation: reservation,
@@ -8770,6 +8821,8 @@ let ReservationService = class ReservationService {
                         employeeNumber: participant.employee.employeeNumber,
                         department: participant.employee.department,
                         position: participant.employee.position,
+                        rank: participant.employee.rank,
+                        positionTitle: participant.employee.positionTitle,
                     }
                     : undefined,
                 reservation: basicReservation,
@@ -17391,6 +17444,14 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], ManagerResponseDto.prototype, "position", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "rank", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], ManagerResponseDto.prototype, "positionTitle", void 0);
 class TaskResponseDto {
 }
 exports.TaskResponseDto = TaskResponseDto;
@@ -17651,6 +17712,8 @@ let TaskManagementService = class TaskManagementService {
                                 employeeNumber: reserver.employee.employeeNumber,
                                 department: reserver.employee.department,
                                 position: reserver.employee.position,
+                                rank: reserver.employee.rank,
+                                positionTitle: reserver.employee.positionTitle,
                             };
                         }
                     }
@@ -17692,6 +17755,8 @@ let TaskManagementService = class TaskManagementService {
                             employeeNumber: resource.resourceManagers[0].employee.employeeNumber,
                             department: resource.resourceManagers[0].employee.department,
                             position: resource.resourceManagers[0].employee.position,
+                            rank: resource.resourceManagers[0].employee.rank,
+                            positionTitle: resource.resourceManagers[0].employee.positionTitle,
                         },
                         notifications: notifications,
                         lastMaintenanceMileage: consumable.maintenances && consumable.maintenances.length > 0
@@ -17835,6 +17900,8 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                 employeeNumber: true,
                 department: true,
                 position: true,
+                rank: true,
+                positionTitle: true,
                 status: true,
             },
         });
@@ -17852,6 +17919,8 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                 employeeNumber: true,
                 department: true,
                 position: true,
+                rank: true,
+                positionTitle: true,
                 roles: true,
             },
         });
@@ -17873,6 +17942,8 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                 employeeNumber: true,
                 department: true,
                 position: true,
+                rank: true,
+                positionTitle: true,
                 status: true,
             },
         });
@@ -17891,6 +17962,8 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
             name: employee.name,
             department: employee.department,
             position: employee.position,
+            rank: employee.rank,
+            positionTitle: employee.positionTitle,
             roles: employee.roles,
             isPushNotificationEnabled: employee.isPushNotificationEnabled,
         };
@@ -18086,7 +18159,9 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                         department: employee.department
                             ? employee.department.departmentCode
                             : existingEmployee.department,
-                        position: employee.rank.rankName,
+                        position: employee.rank?.rankName || null,
+                        rank: employee.rank?.rankName || null,
+                        positionTitle: employee.position?.positionTitle || null,
                         status: employee.status,
                     });
                 }
@@ -18097,7 +18172,9 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                     existingEmployee.name = employee.name;
                     existingEmployee.employeeNumber = employee.employeeNumber;
                     existingEmployee.department = employee.department.departmentCode;
-                    existingEmployee.position = employee.rank.rankName;
+                    existingEmployee.position = employee.rank?.rankName || null;
+                    existingEmployee.rank = employee.rank?.rankName || null;
+                    existingEmployee.positionTitle = employee.position?.positionTitle || null;
                     existingEmployee.mobile = employee.phoneNumber;
                     existingEmployee.status = employee.status;
                     await this.domainEmployeeService.save(existingEmployee);
@@ -18108,7 +18185,9 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                         name: employee.name,
                         email: employee.email,
                         department: employee.department.departmentCode,
-                        position: employee.rank.rankName,
+                        position: employee.rank?.rankName || null,
+                        rank: employee.rank?.rankName || null,
+                        positionTitle: employee.position?.positionTitle || null,
                         mobile: employee.phoneNumber,
                         status: employee.status,
                     };
@@ -28088,8 +28167,7 @@ let ProjectMicroserviceAdapter = ProjectMicroserviceAdapter_1 = class ProjectMic
         this.httpService = httpService;
         this.configService = configService;
         this.logger = new common_1.Logger(ProjectMicroserviceAdapter_1.name);
-        this.projectServiceUrl =
-            this.configService.get('PROJECT_API_URL') || 'https://lpms-backend.vercel.app/';
+        this.projectServiceUrl = this.configService.get('PROJECT_API_URL') || 'https://lpms-backend.vercel.app';
     }
     getHeaders(authorization) {
         const headers = {

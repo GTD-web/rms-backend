@@ -17,6 +17,12 @@ export class ManagerResponseDto {
 
     @ApiProperty()
     position: string;
+
+    @ApiProperty()
+    rank: string;
+
+    @ApiProperty()
+    positionTitle: string;
 }
 
 export class TaskResponseDto {

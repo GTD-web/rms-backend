@@ -94,7 +94,7 @@ export class AuthManagementService {
                 hireDate: new Date(ssoResponse.hireDate),
                 status: ssoResponse.status,
                 department: ssoResponse.department,
-                position: ssoResponse.rank,
+                position: ssoResponse.position,
                 rank: ssoResponse.rank,
             });
             this.logger.log(`직원 정보 업데이트 완료: ${updatedEmployee.employeeId}`);
@@ -105,6 +105,8 @@ export class AuthManagementService {
                 name: updatedEmployee.name,
                 department: updatedEmployee.department,
                 position: updatedEmployee.position,
+                rank: updatedEmployee.rank,
+                positionTitle: updatedEmployee.positionTitle,
                 roles: updatedEmployee.roles,
             };
         } catch (error) {
@@ -170,7 +172,9 @@ export class AuthManagementService {
                 name: ssoResponse.name,
                 email: ssoResponse.email,
                 department: ssoResponse.department,
-                position: ssoResponse.position,
+                position: ssoResponse.rank,
+                rank: ssoResponse.rank,
+                positionTitle: ssoResponse.position,
                 mobile: ssoResponse.phoneNumber,
                 accessToken: ssoResponse.accessToken,
                 expiredAt: DateUtil.format(ssoResponse.expiresAt, 'YYYY-MM-DD HH:mm:ss'),
@@ -185,7 +189,9 @@ export class AuthManagementService {
         employee.accessToken = ssoResponse.accessToken;
         employee.expiredAt = DateUtil.format(ssoResponse.expiresAt);
         employee.department = ssoResponse.department;
-        employee.position = ssoResponse.position;
+        employee.position = ssoResponse.rank;
+        employee.rank = ssoResponse.rank;
+        employee.positionTitle = ssoResponse.position;
 
         return await this.employeeService.save(employee);
     }

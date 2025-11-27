@@ -25,8 +25,7 @@ export class ProjectMicroserviceAdapter {
         private readonly configService: ConfigService,
     ) {
         // 환경변수에서 프로젝트 API URL과 직원 API URL 가져오기
-        this.projectServiceUrl =
-            this.configService.get<string>('PROJECT_API_URL') || 'https://lpms-backend.vercel.app/';
+        this.projectServiceUrl = this.configService.get<string>('PROJECT_API_URL') || 'https://lpms-backend.vercel.app';
     }
 
     /**

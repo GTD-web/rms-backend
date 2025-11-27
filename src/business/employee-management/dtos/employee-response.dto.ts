@@ -15,4 +15,10 @@ export class EmployeeResponseDto {
 
     @ApiProperty()
     position: string;
+
+    @ApiProperty()
+    rank: string;
+
+    @ApiProperty()
+    positionTitle: string;
 }
