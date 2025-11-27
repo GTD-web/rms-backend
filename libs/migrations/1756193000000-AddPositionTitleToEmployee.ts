@@ -13,6 +13,12 @@ export class AddPositionTitleToEmployee1756193000000 implements MigrationInterfa
             COMMENT ON COLUMN "employees"."positionTitle" IS '직위'
         `);
 
+        // rank 컬럼 추가
+        await queryRunner.query(`
+            ALTER TABLE "employees" 
+            ADD COLUMN "rank" character varying
+        `);
+
         // rank 컬럼에 코멘트 추가
         await queryRunner.query(`
             COMMENT ON COLUMN "employees"."rank" IS '직급'
@@ -29,6 +35,12 @@ export class AddPositionTitleToEmployee1756193000000 implements MigrationInterfa
         await queryRunner.query(`
             ALTER TABLE "employees" 
             DROP COLUMN "positionTitle"
+        `);
+
+        // employees 테이블에서 rank 컬럼 삭제
+        await queryRunner.query(`
+            ALTER TABLE "employees" 
+            DROP COLUMN "rank"
         `);
     }
 }
