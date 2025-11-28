@@ -135,7 +135,8 @@ export class EmployeeManagementService {
         const traverseHierarchy = (departments: any[]) => {
             for (const dept of departments) {
                 // 해당 부서에 직원이 있으면 결과에 추가
-                const employeesInDept = employeesByDepartmentMap.get(dept.departmentCode);
+
+                const employeesInDept = employeesByDepartmentMap.get(dept.departmentName);
                 if (employeesInDept) {
                     sortedResult.push(employeesInDept);
                 }

@@ -6419,7 +6419,7 @@ let EmployeeManagementService = class EmployeeManagementService {
         const sortedResult = [];
         const traverseHierarchy = (departments) => {
             for (const dept of departments) {
-                const employeesInDept = employeesByDepartmentMap.get(dept.departmentCode);
+                const employeesInDept = employeesByDepartmentMap.get(dept.departmentName);
                 if (employeesInDept) {
                     sortedResult.push(employeesInDept);
                 }
@@ -18176,7 +18176,7 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                 if (existingEmployee) {
                     await this.domainEmployeeService.update(existingEmployee.employeeId, {
                         department: employee.department
-                            ? employee.department.departmentCode
+                            ? employee.department.departmentName
                             : existingEmployee.department,
                         position: employee.rank?.rankName || null,
                         rank: employee.rank?.rankName || null,
@@ -18190,7 +18190,7 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                 if (existingEmployee) {
                     existingEmployee.name = employee.name;
                     existingEmployee.employeeNumber = employee.employeeNumber;
-                    existingEmployee.department = employee.department.departmentCode;
+                    existingEmployee.department = employee.department.departmentName;
                     existingEmployee.position = employee.rank?.rankName || null;
                     existingEmployee.rank = employee.rank?.rankName || null;
                     existingEmployee.positionTitle = employee.position?.positionTitle || null;
@@ -18203,7 +18203,7 @@ let EmployeeContextService = EmployeeContextService_1 = class EmployeeContextSer
                         employeeNumber: employee.employeeNumber,
                         name: employee.name,
                         email: employee.email,
-                        department: employee.department.departmentCode,
+                        department: employee.department.departmentName,
                         position: employee.rank?.rankName || null,
                         rank: employee.rank?.rankName || null,
                         positionTitle: employee.position?.positionTitle || null,
